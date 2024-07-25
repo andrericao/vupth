@@ -1,26 +1,29 @@
 import { ThemeProvider } from "styled-components/native";
+import { StatusBar } from "react-native";
 import { NativeBaseProvider } from "native-base";
+
+import { useFonts, Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
+
+import { THEME }from "@theme/index";
 
 import { Services } from "@screens/Services";
 
-import theme from "@theme/dark_theme";
-import { StatusBar } from "react-native";
 import { Loading } from "@components/Loading";
 
 export default function App() {
 
-  //const fontsLoaded = useFonts({ Robo })
+  const fontsLoaded = useFonts({ Roboto_400Regular, Roboto_700Bold });
+
   return (
     <NativeBaseProvider>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider theme={ THEME }>
         <StatusBar
-          barStyle="light-content" 
+          barStyle="dark-content" 
           backgroundColor="transparent"
           translucent
           />
 
-          <Loading />
-        <Services />
+          {fontsLoaded ? <Services /> : <Loading /> }
       </ThemeProvider>
     </NativeBaseProvider>
   );

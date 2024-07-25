@@ -1,9 +1,11 @@
-import { Spinner } from "native-base";
+import { Spinner, Center } from "native-base";
 
 
 
 export function Loading(){
 	return(
-		<Spinner />
+		<Center flex={1}>
+			<Spinner size="lg" />
+		</Center>
 	);
 }
