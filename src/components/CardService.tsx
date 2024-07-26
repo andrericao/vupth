@@ -1,12 +1,11 @@
-import { Box } from "native-base";
+import { Box } from "@gluestack-ui/themed";
 
 export function CardService(){
 	return(
-		<Box bg="light.200" 
+		<Box bg="$light200" 
 		width={180}
 		height={210}
-		borderRadius="12px"
-		mb={6}
+		borderRadius={12}
 		/>
 	);
 }

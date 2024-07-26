@@ -1,26 +1,32 @@
-import { Input as NB_Input, Box, Center } from "native-base";
+import {
+  Input as GluestackInput,
+  InputField,
+  InputSlot,
+  InputIcon,
+  SearchIcon,
+} from "@gluestack-ui/themed";
+import { ComponentProps } from "react";
 
-export function Input() {
+type Props = ComponentProps<typeof InputField>;
+
+export function Input({ ...rest }: Props) {
   return (
-    <Center flex={1}>
-      <Box px={3}>
-        <NB_Input 
-				width="100%" 
-				bg="gray.700"
-				h={60}
-				px={4}
-				size="md"
-				borderWidth={0}
-				color="light.300"
-				fontFamily="body"
-				placeholder="pesquise loja ou serviço"
-				_focus={{
-					bg: "gray.700",
-					borderWidth: 2,
-					borderColor: "green.500"
-				}}
-				/>
-      </Box>
-    </Center>
+    <GluestackInput
+      bg="$light200"
+      h="$14"
+      px="$4"
+      borderWidth="$0"
+      borderRadius="$md"
+    >
+      <InputSlot>
+        <InputIcon as={SearchIcon} color="$esmeral700"/>
+      </InputSlot>
+      <InputField
+        color="$trueGray700"
+        fontFamily="$body"
+        placeholderTextColor="$trueGray400"
+        {...rest}
+      />
+    </GluestackInput>
   );
 }
