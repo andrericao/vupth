@@ -1,27 +1,37 @@
-import { Center, VStack } from "@gluestack-ui/themed";
+import { useState } from "react";
+import { FlatList } from "react-native";
+
+import { VStack, Box, Text } from "@gluestack-ui/themed";
 
 import { Input } from "@components/Input";
+import { Header } from "@components/Header";
 import { CardService } from "@components/CardService";
 
-import Logo from "@assets/waiting-room.svg";
-import { Image } from "react-native-svg";
-
 export function Services() {
+  const [services, setServices] = useState([
+    "Barbearia",
+    "Salão Beleza",
+    "Sobrancelha",
+  ]);
+
   return (
-    <VStack flex={1} px={10} py={15}>
-      <Center >
-        <Logo height={50} width={50} />
-      </Center>
-      <Center mt="$10">
+    <VStack flex={1} px={15} py={60}>
+        <Header />
+
+      <Box mt={50}>
         <Input placeholder="Escreva aqui" />
 
-        <Center mt="$48" flex={3} flexDirection="row" flexWrap="wrap" gap={12}>
-          <CardService />
-          <CardService />
-          <CardService />
-          <CardService />
-        </Center>
-      </Center>
+        <Box mt="$40">
+          <FlatList
+            data={services}
+            keyExtractor={(item) => item}
+            renderItem={() => <CardService />}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        </Box>
+      </Box>
+
     </VStack>
   );
 }

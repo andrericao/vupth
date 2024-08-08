@@ -12,19 +12,20 @@ type Props = ComponentProps<typeof InputField>;
 export function Input({ ...rest }: Props) {
   return (
     <GluestackInput
-      bg="$light200"
       h="$14"
       px="$4"
-      borderWidth="$0"
+      borderWidth="$1"
+      borderColor="$success500"
       borderRadius="$md"
+      variant="outline"
+      $focus-borderWidth="$2"
     >
       <InputSlot>
-        <InputIcon as={SearchIcon} color="$esmeral700"/>
+        <InputIcon as={SearchIcon} color="$emerald900"/>
       </InputSlot>
       <InputField
-        color="$trueGray700"
+        color="$success950"
         fontFamily="$body"
-        placeholderTextColor="$trueGray400"
         {...rest}
       />
     </GluestackInput>
