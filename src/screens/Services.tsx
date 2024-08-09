@@ -30,7 +30,7 @@ export function Services() {
             keyExtractor={(item) => item}
             renderItem={() => <CardService />}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={{ paddingBottom: 200 }}
           />
         </Box>
       </Box>

@@ -12,9 +12,7 @@ export function Shops() {
     "Barbearia",
     "Salão Beleza",
     "Sobrancelha",
-    "Barbearia",
-    "Salão Beleza",
-    "Sobrancelha",
+    "Manicure",
   ]);
 
   return (
@@ -30,7 +28,7 @@ export function Shops() {
             keyExtractor={(item) => item}
             renderItem={() => <CardShop />}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={{ paddingBottom: 200 }}
           />
         </Box>
       </Box>
