@@ -7,7 +7,7 @@ import {
   Center,
 } from "@gluestack-ui/themed";
 
-import Logo from "@assets/people-waiting.svg";
+import Logo from "@assets/vupth-logo/people-waiting.svg";
 
 type Props = {
   showBackButton?: boolean;

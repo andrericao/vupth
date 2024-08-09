@@ -6,7 +6,8 @@ import { Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { config } from "./config/gluestack-ui.config";
 
-import { Services } from "@screens/Services";
+//import { Services } from "@screens/Services";
+import { Shops } from "@screens/Shops";
 
 import { Loading } from "@components/Loading";
 
@@ -21,7 +22,7 @@ export default function App() {
         translucent
       />
 
-      {fontsLoaded ? <Services /> : <Loading />}
+      {fontsLoaded ? <Shops /> : <Loading />}
     </GluestackUIProvider>
   );
 }

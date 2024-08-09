@@ -1,13 +1,12 @@
 import {
-  ImageBackground,
   TouchableOpacity,
   TouchableOpacityProps,
 } from "react-native";
 
 import {
   Box,
+  ImageBackground,
   Heading,
-  Center,
   Link,
   LinkText,
   Icon,
@@ -15,16 +14,16 @@ import {
   Button,
 } from "@gluestack-ui/themed";
 
-import Barbearia from "@assets/sobrancelha.png";
+import Barbearia from "@assets/card-service/barbearia.png";
 
 type Props = TouchableOpacityProps;
 
 export function CardService({ ...rest }: Props) {
   return (
     <TouchableOpacity {...rest}>
-      <Box mb="$5">
+      <Box mb="$5" borderRadius={12} overflow="hidden">
         <ImageBackground
-          borderRadius={12}
+          
           source={Barbearia}
           resizeMode="cover"
         >
