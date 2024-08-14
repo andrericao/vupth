@@ -23,7 +23,7 @@ export function CardShop({ ...rest }: Props) {
         h={120}
         flexDirection="row"
         borderRadius={12}
-        bg="$light50"
+        bg="$light100"
         overflow="hidden"
       >
         <Box w={180} h="$full">
@@ -31,7 +31,7 @@ export function CardShop({ ...rest }: Props) {
             flex={1}
             source={ShopLogo}
             resizeMode="cover"
-          ></ImageBackground>
+          />
         </Box>
         <Box
           px={12}

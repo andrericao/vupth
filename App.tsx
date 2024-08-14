@@ -7,7 +7,8 @@ import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { config } from "./config/gluestack-ui.config";
 
 //import { Services } from "@screens/Services";
-import { Shops } from "@screens/Shops";
+import { ListShops } from "@screens/ListShops";
+import { InsideShop } from "@screens/InsideShop";
 
 import { Loading } from "@components/Loading";
 
@@ -22,7 +23,7 @@ export default function App() {
         translucent
       />
 
-      {fontsLoaded ? <Shops /> : <Loading />}
+      {fontsLoaded ? <InsideShop /> : <Loading />}
     </GluestackUIProvider>
   );
 }

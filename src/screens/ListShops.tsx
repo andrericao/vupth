@@ -7,7 +7,7 @@ import { Input } from "@components/Input";
 import { Header } from "@components/Header";
 import { CardShop } from "@components/CardShop";
 
-export function Shops() {
+export function ListShops() {
   const [shops, setSshops] = useState([
     "Barbearia",
     "Salão Beleza",
