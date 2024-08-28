@@ -16,7 +16,7 @@ export function CardProfessional({ ...rest }: Props ) {
   return (
     <Box {...rest}
       justifyContent="center"
-      bg="$light100"
+      bg="$light200"
       m={15}
       h={120}
       borderRadius={54}

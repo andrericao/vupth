@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlatList } from "react-native"
+import { FlatList } from "react-native";
 
 import { VStack, Heading, Box } from "@gluestack-ui/themed";
 

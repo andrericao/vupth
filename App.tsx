@@ -2,13 +2,12 @@ import { StatusBar } from "react-native";
 
 import { useFonts } from "expo-font";
 import { Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
-
 import { GluestackUIProvider } from "@gluestack-ui/themed";
+
 import { config } from "./config/gluestack-ui.config";
 
-//import { Services } from "@screens/Services";
-import { ListShops } from "@screens/ListShops";
-import { InsideShop } from "@screens/InsideShop";
+
+import { Routes } from "@routes/index";
 
 import { Loading } from "@components/Loading";
 
@@ -23,7 +22,7 @@ export default function App() {
         translucent
       />
 
-      {fontsLoaded ? <InsideShop /> : <Loading />}
+      {fontsLoaded ? <Routes /> : <Loading />}
     </GluestackUIProvider>
   );
 }
