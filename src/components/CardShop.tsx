@@ -23,7 +23,7 @@ export function CardShop({ ...rest }: Props) {
         h={120}
         flexDirection="row"
         borderRadius={12}
-        bg="$light200"
+        bg="$gray500"
         overflow="hidden"
       >
         <Box w={180} h="$full">

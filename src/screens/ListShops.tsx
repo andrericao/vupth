@@ -1,43 +1,52 @@
 import { useState } from "react";
-import { FlatList } from "react-native";
+import { FlatList, SectionList } from "react-native";
 
-import { VStack, HStack, Box, Text } from "@gluestack-ui/themed";
+import { VStack, Box, Text, Image } from "@gluestack-ui/themed";
+import { useRoute } from "@react-navigation/native";
 
 import { Input } from "@components/Input";
 import { Header } from "@components/Header";
 import { CardShop } from "@components/CardShop";
-import { useRoute } from "@react-navigation/native";
+import { FilterService } from "@components/FilterService";
+
+import { SHOPS, SERVICES } from "@utils/data";
 
 type RouteParams = {
-  service: string
-}
+  service: string;
+};
 
 export function ListShops() {
-  const [shops, setSshops] = useState([
-    "Barbearia",
-    "Salão Beleza",
-    "Sobrancelha",
-    "Manicure",
-  ]);
-
   const route = useRoute();
   const { service } = route.params as RouteParams;
 
   return (
     <VStack flex={1} px={15} py={60}>
-        <Header showBackButton/>
+      <Header showBackButton />
+      <Box mt="$6" justifyContent="space-between">
+        <FlatList
+          data={SHOPS}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <FilterService
+              key={item.id}
+              serviceMenu={item.serviceMenu}
+              iconService={item.iconService}
+              isActive={item.serviceMenu === service}
+            />
+          )}
+          contentContainerStyle={{
+            gap: 27
+          }}
+          horizontal
+        />
+      </Box>
 
-        <HStack mt={50}>
-          <Text>{service}</Text>
-          <Text>Babearia</Text>
-        </HStack>
-
-      <Box mt={50}>
-        <Input placeholder="Escreva aqui" />
+      <Box mt={20}>
+        <Input placeholder={`Buscar em ${service}`} />
 
         <Box mt="$40">
           <FlatList
-            data={shops}
+            data={SERVICES}
             keyExtractor={(item) => item}
             renderItem={() => <CardShop />}
             showsVerticalScrollIndicator={false}
@@ -45,7 +54,6 @@ export function ListShops() {
           />
         </Box>
       </Box>
-
     </VStack>
   );
 }

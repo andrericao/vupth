@@ -12,8 +12,7 @@ import {
   Box,
   ImageBackground,
   Heading,
-  Link,
-  LinkText,
+  Text,
   Icon,
   ChevronRightIcon,
   Button,
@@ -26,10 +25,9 @@ type Props = TouchableOpacityProps & {
 
 export function CardService({ service, photoBackground, ...rest }: Props) {
   const navigation = useNavigation();
-  const [serviceName, setServiceName] = useState('');
+  const [serviceName, setServiceName] = useState("");
 
   function handleService(service: string) {
-    
     navigation.navigate("listShops", { service });
     console.log(service);
   }
@@ -47,18 +45,16 @@ export function CardService({ service, photoBackground, ...rest }: Props) {
               h="$10"
               w="$32"
               borderRadius={18}
-              bg="$success50"
+              bg="$success100"
             >
-              <Link flexDirection="row" alignItems="center" gap={3}>
-                <LinkText
-                  textDecorationLine="none"
-                  color="$success950"
-                  fontFamily="$body"
-                >
-                  Ver mais
-                </LinkText>
-                <Icon as={ChevronRightIcon} size="md" />
-              </Link>
+              <Text
+                textDecorationLine="none"
+                color="$success950"
+                fontFamily="$body"
+              >
+                Ver mais
+              </Text>
+              <Icon as={ChevronRightIcon} size="md" ml={3} mt={4} />
             </Button>
           </Box>
         </ImageBackground>
