@@ -10,14 +10,26 @@ import { CardShop } from "@components/CardShop";
 import { FilterService } from "@components/FilterService";
 
 import { SHOPS, SERVICES } from "@utils/data";
+import { shopsGetAll } from "@storage/shops/shopsGetAll";
 
 type RouteParams = {
   service: string;
 };
 
 export function ListShops() {
+
+  const [listShops, setListShops] = useState<string[]>([]);
   const route = useRoute();
   const { service } = route.params as RouteParams;
+
+  async function fetchShops() {
+    try {
+      const data = await shopsGetAll();
+      setListShops(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <VStack flex={1} px={15} py={60}>
@@ -35,7 +47,7 @@ export function ListShops() {
             />
           )}
           contentContainerStyle={{
-            gap: 27
+            gap: 27,
           }}
           horizontal
         />
