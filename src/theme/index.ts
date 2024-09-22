@@ -13,7 +13,8 @@ export const THEME = {
 
 		green: {
 			300: "#9BEC00",
-			500: "#00B37E",
+			500: "#00B37E", 
+			600: "#151e1b", // isactive-bg
 			700: "#639339",
 		},
 

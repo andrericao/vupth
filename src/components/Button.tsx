@@ -1,4 +1,26 @@
-import { ImageBackground } from "react-native";
+import { Button as GluestackButton, Text } from "@gluestack-ui/themed";
+import { ComponentProps } from "react";
+
+type Props = ComponentProps<typeof GluestackButton> & {
+  title: string;
+  isLoading?: boolean;
+}
+
+export function Button({title, isLoading = false, ...rest}: Props){
+  return(
+    <GluestackButton
+      w="$full"
+      h="$14"
+      bg="$green500"
+      $active-bg="$green800"
+      { ...rest }>
+
+      <Text>{title}</Text>
+    </GluestackButton>
+  );
+}
+
+/*import { ImageBackground } from "react-native";
 
 import {
   Center,
@@ -12,7 +34,7 @@ import {
 
 import Barbearia from "@assets/sobrancelha.png";
 
-export function Button() {
+export function Button1() {
   return (
     <Box overflow="hidden"  borderRadius={12}>
       <ImageBackground source={Barbearia} resizeMode="cover">
@@ -38,3 +60,4 @@ export function Button() {
     </Box>
   );
 }
+*/

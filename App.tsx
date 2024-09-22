@@ -6,7 +6,6 @@ import { GluestackUIProvider } from "@gluestack-ui/themed";
 
 import { config } from "./config/gluestack-ui.config";
 
-
 import { Routes } from "@routes/index";
 
 import { Loading } from "@components/Loading";
