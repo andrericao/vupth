@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { FlatList, SectionList } from "react-native";
+import { FlatList } from "react-native";
 
-import { VStack, Box, Text, Image } from "@gluestack-ui/themed";
+import { VStack, Box } from "@gluestack-ui/themed";
 import { useRoute } from "@react-navigation/native";
 
 import { Input } from "@components/Input";
@@ -9,11 +9,14 @@ import { Header } from "@components/Header";
 import { CardShop } from "@components/CardShop";
 import { FilterService } from "@components/FilterService";
 
-import { SHOPS, SERVICES } from "@utils/data";
+import { SERVICES } from "@utils/servicesData";
+import { SHOPS } from "@utils/shopsData";
+
 import { shopsGetAll } from "@storage/shops/shopsGetAll";
 
 type RouteParams = {
   service: string;
+  shop: string
 };
 
 export function ListShops() {
@@ -36,7 +39,7 @@ export function ListShops() {
       <Header showBackButton />
       <Box mt="$6" justifyContent="space-between">
         <FlatList
-          data={SHOPS}
+          data={SERVICES}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <FilterService
@@ -58,9 +61,15 @@ export function ListShops() {
 
         <Box mt="$40">
           <FlatList
-            data={SERVICES}
-            keyExtractor={(item) => item}
-            renderItem={() => <CardShop />}
+            data={SHOPS}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <CardShop
+              key={item.id}
+              shopName={item.nameShop}
+              reviews={item.reviews}
+              photoShop={item.photoShop}
+              serviceName={service}
+            />}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 200 }}
           />

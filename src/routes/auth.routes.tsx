@@ -34,6 +34,7 @@ export function AuthRoutes() {
       <Screen name="insideShop" component={InsideShop} />
 
       <Screen name="listShops" component={ListShops} />
+
     </Navigator>
   );
 }

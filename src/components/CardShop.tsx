@@ -1,4 +1,6 @@
-import { TouchableOpacity, TouchableOpacityProps } from "react-native";
+import { TouchableOpacity, TouchableOpacityProps, ImageSourcePropType } from "react-native";
+
+import { useNavigation } from "@react-navigation/native";
 
 import ShopLogo from "@assets/shop-logo/salao-beleza.jpg";
 
@@ -7,17 +9,34 @@ import {
   Text,
   ImageBackground,
   Heading,
-  Link,
   Icon,
   ChevronRightIcon,
   StarIcon,
+  Button,
+  Pressable,
 } from "@gluestack-ui/themed";
 
-type Props = TouchableOpacityProps;
+type Props = TouchableOpacityProps & {
+  shopName: string;
+  reviews: number;
+  photoShop: ImageSourcePropType;
+  serviceName: string;
+}
 
-export function CardShop({ ...rest }: Props) {
+export function CardShop({shopName, reviews, photoShop, serviceName,...rest }: Props) {
+
+  const navigation = useNavigation();
+
+  function handleInsideShop(shop: string) {
+    navigation.navigate("insideShop", { shopName });
+    console.log(shop);
+  }
+
   return (
     <TouchableOpacity {...rest}>
+      <Pressable
+        onPress={() => handleInsideShop(shopName)}
+      >
       <Box
         mb="$5"
         h={120}
@@ -27,11 +46,7 @@ export function CardShop({ ...rest }: Props) {
         overflow="hidden"
       >
         <Box w={180} h="$full">
-          <ImageBackground
-            flex={1}
-            source={ShopLogo}
-            resizeMode="cover"
-          />
+          <ImageBackground flex={1} source={photoShop} resizeMode="cover" />
         </Box>
         <Box
           px={12}
@@ -41,19 +56,29 @@ export function CardShop({ ...rest }: Props) {
         >
           <Box justifyContent="center">
             <Heading fontFamily="$heading" fontSize="$xl" color="$black">
-              Nome Loja
+              {shopName}
             </Heading>
             <Text fontFamily="$body">Tempo Estimado: 01h40</Text>
             <Box gap={9} mt={12} flexDirection="row" alignItems="center">
-              <Icon color="$yellow300" fill="$yellow300" as={StarIcon} size="xl" />
-              <Text alignItems="center" fontFamily="$body" fontSize="$xl">4.5</Text>
+              <Icon
+                color="$yellow300"
+                fill="$yellow300"
+                as={StarIcon}
+                size="xl"
+              />
+              <Text alignItems="center" fontFamily="$body" fontSize="$xl">
+                {reviews}
+              </Text>
             </Box>
           </Box>
-          <Link flexDirection="row" alignItems="center">
+          <Box flexDirection="row" alignItems="center">
+          <Button bg="$transparent" alignItems="center">
             <Icon as={ChevronRightIcon} size="xl" />
-          </Link>
+          </Button>
+          </Box>
         </Box>
       </Box>
+      </Pressable>
     </TouchableOpacity>
   );
 }

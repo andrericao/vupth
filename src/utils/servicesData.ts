@@ -1,4 +1,4 @@
-const SHOPS = [
+const SERVICES = [
 	{
 		id: "01",
 		serviceMenu: "Barbearia",
@@ -27,6 +27,4 @@ const SHOPS = [
 	},
 ];
 
-const SERVICES = SHOPS.map(( item ) => item.serviceMenu );
-
-export { SHOPS, SERVICES };
+export { SERVICES };
