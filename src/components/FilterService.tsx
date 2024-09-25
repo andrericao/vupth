@@ -1,10 +1,11 @@
-import { TouchableOpacityProps, ImageSourcePropType } from "react-native";
+import { ComponentProps } from "react";
+import { ImageSourcePropType } from "react-native";
 
-import { Box, Text, Image } from "@gluestack-ui/themed";
+import { Button, Box, Text, Image } from "@gluestack-ui/themed";
 
-type Props = TouchableOpacityProps & {
+type Props = ComponentProps<typeof Button> & {
   serviceMenu: string;
-  isActive?: boolean;
+  isActive: boolean;
   iconService: ImageSourcePropType;
 };
 
@@ -15,26 +16,32 @@ export function FilterService({
   ...rest
 }: Props) {
   return (
-    <Box alignItems="center">
+    <Button
+      bg="$transparent"
+      alignItems="center"
+      flexWrap="wrap"
+      height={90}
+      width={140}
+      {...rest}
+    >
       <Box
-        bg={isActive ? "$success100" : "$gray500"}
+        borderRadius={15}
         padding={6}
         alignItems="center"
         w="$24"
-        borderRadius={15}
-        {...rest}
+        bg={isActive ? "$success100" : "$gray500"}
+        sx={{
+          ":active": {
+            bg: "$success100",
+          },
+        }}
       >
-        <Image
-          width={36}
-          height={36}
-          source={iconService}
-          alt="barber_icon"
-        />
+        <Image width={36} height={36} source={iconService} alt="barber_icon" />
       </Box>
 
-      <Text fontFamily={isActive ? "$heading" : "$body"} color="$black">
+      <Text color="$black" fontFamily={isActive ? "$heading" : "$body"}>
         {serviceMenu}
       </Text>
-    </Box>
+    </Button>
   );
 }

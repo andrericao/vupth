@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { FlatList } from "react-native";
 
-import { VStack, Box } from "@gluestack-ui/themed";
-import { useRoute } from "@react-navigation/native";
+import { VStack, Box, MenuItem } from "@gluestack-ui/themed";
+import { useRoute, useNavigation } from "@react-navigation/native";
 
 import { Input } from "@components/Input";
 import { Header } from "@components/Header";
@@ -21,9 +21,21 @@ type RouteParams = {
 
 export function ListShops() {
 
-  const [listShops, setListShops] = useState<string[]>([]);
   const route = useRoute();
   const { service } = route.params as RouteParams;
+
+  const [servicoSelected, setServicoSelected] = useState(service);
+  const [listShops, setListShops] = useState<string[]>([]);
+
+  const [shop, setShop] = useState("");
+
+  const navigation = useNavigation();
+
+  function handleService(service: string) {
+    console.log(service);
+    return navigation.navigate("listShops", { service });
+    
+  }
 
   async function fetchShops() {
     try {
@@ -34,30 +46,37 @@ export function ListShops() {
     }
   }
 
+/*
+  function handleListShops(){
+
+    const listShopFilter = SHOPS.filter((service) => SERVICES.serviceMenu === service);
+    return console.log(listShopFilter);
+  }
+    */
+    
+
   return (
     <VStack flex={1} px={15} py={60}>
       <Header showBackButton />
-      <Box mt="$6" justifyContent="space-between">
+      <Box mt="$6">
         <FlatList
           data={SERVICES}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <FilterService
-              key={item.id}
               serviceMenu={item.serviceMenu}
               iconService={item.iconService}
-              isActive={item.serviceMenu === service}
+              isActive={servicoSelected === item.serviceMenu}
+              onPress={() => setServicoSelected(item.serviceMenu)}
             />
-          )}
-          contentContainerStyle={{
-            gap: 27,
-          }}
+          )} 
           horizontal
+          showsHorizontalScrollIndicator={false}
         />
       </Box>
 
       <Box mt={20}>
-        <Input placeholder={`Buscar em ${service}`} />
+        <Input placeholder={`Buscar em ${servicoSelected}`} />
 
         <Box mt="$40">
           <FlatList
@@ -68,7 +87,7 @@ export function ListShops() {
               shopName={item.nameShop}
               reviews={item.reviews}
               photoShop={item.photoShop}
-              serviceName={service}
+              serviceName={servicoSelected}
             />}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 200 }}
