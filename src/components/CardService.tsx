@@ -1,12 +1,12 @@
 import { useState } from "react";
 
+import { useNavigation } from "@react-navigation/native";
+
 import {
   ImageSourcePropType,
   TouchableOpacity,
   TouchableOpacityProps,
 } from "react-native";
-
-import { useNavigation } from "@react-navigation/native";
 
 import {
   Box,
@@ -25,7 +25,6 @@ type Props = TouchableOpacityProps & {
 
 export function CardService({ service, photoBackground, ...rest }: Props) {
   const navigation = useNavigation();
-  const [serviceName, setServiceName] = useState("");
 
   function handleService(service: string) {
     navigation.navigate("listShops", { service });

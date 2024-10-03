@@ -25,25 +25,23 @@ export function Services() {
         <Text color="$blue700">Cadastro</Text>
       </Button>
 
-      <Box mt={50}>
+      <Box mt="$6" mb={200}>
         <Input placeholder="Pesquise o serviço desejado" />
-
-        <Box mt="$40">
-          <FlatList
-            data={SERVICES}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <CardService
-                key={item.id}
-                service={item.serviceMenu}
-                photoBackground={item.photoBackground}
-              />
-            )}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 200 }}
-          />
-        </Box>
       </Box>
+
+      <FlatList
+        data={SERVICES}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <CardService
+            key={item.id}
+            service={item.serviceMenu}
+            photoBackground={item.photoBackground}
+          />
+        )}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 200 }}
+      />
     </VStack>
   );
 }

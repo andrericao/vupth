@@ -1,6 +1,6 @@
 import { Box, ImageBackground } from "@gluestack-ui/themed";
 
-import ShopLogo from "@assets/shop-logo/salao-beleza.jpg";
+import ShopLogo from "@assets/shop-logo/beauty-salon-1.jpg";
 
 export function ImageBanner(){
 	return(

@@ -8,6 +8,7 @@ import { ListShops } from "@screens/ListShops";
 import { InsideShop } from "@screens/InsideShop";
 import { Login } from "@screens/Login";
 import { SingUp } from "@screens/SingUp";
+import { OutraList } from "@screens/OutraList";
 
 type AuthRoutes = {
   insideShop: undefined;

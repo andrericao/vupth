@@ -21,7 +21,7 @@ const SERVICES = [
 	},
 	{
 		id: "04",
-		serviceMenu: "Salão Beleza",
+		serviceMenu: "Salão de Beleza",
 		iconService: require("@assets/services-icon/scissors-comb.png"),
 		photoBackground: require("@assets/card-service/beauty-salon.png")
 	},
