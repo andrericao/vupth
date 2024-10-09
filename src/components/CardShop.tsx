@@ -1,3 +1,5 @@
+import { useNavigation } from "@react-navigation/native";
+
 import {
   TouchableOpacity,
   TouchableOpacityProps,
@@ -15,6 +17,7 @@ import {
   Button,
   VStack,
 } from "@gluestack-ui/themed";
+import { ImageBanner } from "./ImageBanner";
 
 export type CardShopProps = {
   id: string;
@@ -29,8 +32,17 @@ type Props = TouchableOpacityProps & {
 };
 
 export function CardShop({ data, ...rest }: Props) {
+  const navigation = useNavigation();
+
+  function handleShop(shop: string) {
+    navigation.navigate("insideShop", { shop });
+    console.log(shop);
+  }
   return (
-    <TouchableOpacity {...rest}>
+    <TouchableOpacity 
+      onPress={() => handleShop(data.shopName)} 
+      {...rest}
+    >
       <VStack mt="$9">
         <Box          
           h={120}

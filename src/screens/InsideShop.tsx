@@ -1,19 +1,36 @@
-import { useState } from "react";
-import { FlatList } from "react-native";
+import { useState, useEffect } from "react";
+
+import { ImageSourcePropType } from "react-native";
+
+import { useRoute } from "@react-navigation/native";
 
 import { VStack, Heading, Box } from "@gluestack-ui/themed";
 
 import { ImageBanner } from "@components/ImageBanner";
-import { CardProfessional } from "@components/CardProfessional";
+import { CardProfProps } from "@components/CardProf";
+import { Profs } from "@components/Profs";
+
+import { PROFS } from "@utils/profsData";
+import { SHOPS } from "@utils/shopsData";
+import { CardShopProps } from "@components/CardShop";
+
+type RouteParams = {
+  shop: string;
+  //imageBanner: ImageSourcePropType;
+};
 
 export function InsideShop() {
+  const route = useRoute();
+  const { shop } = route.params as RouteParams;
 
-	const [professionalList, setProfessionalList] = useState([
-		"Barbeiro 1",
-		"Barbeiro 2",
-		"Barbeiro 3",
-		"Barbeiro 4"
-	])
+  const [profs, setProfs] = useState<CardProfProps[]>([]);
+
+  useEffect(() => {
+    const profsFiltered = PROFS.filter(
+      (prof) => prof.shopName === shop
+    ) as CardProfProps[];
+    setProfs(profsFiltered);
+  }, []);
 
   return (
     <VStack>
@@ -25,17 +42,11 @@ export function InsideShop() {
         gap={9}
         justifyContent="space-between"
       >
-        <Heading fontFamily="$heading">Funcionários 5</Heading>
+        <Heading fontFamily="$heading">Funcionários {profs.length}</Heading>
         <Heading fontFamily="$heading">Filtrar </Heading>
       </Box>
 
-			<FlatList 
-				data={professionalList}
-				keyExtractor={(item) => item}
-				renderItem={() => <CardProfessional p={15} />}
-				showsVerticalScrollIndicator={false}
-				contentContainerStyle={{ paddingBottom: 200 }}
-			/>
+      <Profs data={profs}/>
     </VStack>
   );
 }

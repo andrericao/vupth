@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { FlatList } from "react-native";
 
-import { VStack, Box } from "@gluestack-ui/themed";
 import { useRoute } from "@react-navigation/native";
+import { VStack, Box } from "@gluestack-ui/themed";
 
 import { Input } from "@components/Input";
 import { Header } from "@components/Header";
@@ -40,7 +40,7 @@ export function ListShops() {
 
   useEffect(() => {
     const shopsFiltered = SHOPS.filter(
-      (shop) => shop.serviceName === serviceSelected,
+      (shop) => shop.serviceName === serviceSelected
     ) as CardShopProps[];
     setShops(shopsFiltered);
   }, [serviceSelected]);

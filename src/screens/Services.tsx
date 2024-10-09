@@ -11,17 +11,13 @@ import { CardService } from "@components/CardService";
 import { SERVICES } from "@utils/servicesData";
 
 export function Services() {
-  const navigation = useNavigation();
-
-  function handleSingUp() {
-    navigation.navigate("singUp");
-  }
+  const { navigate } = useNavigation();
 
   return (
     <VStack flex={1} px={15} py={60}>
       <Header />
 
-      <Button bg="$transparent" onPress={handleSingUp}>
+      <Button bg="$transparent" onPress={() => navigate("singUp")}>
         <Text color="$blue700">Cadastro</Text>
       </Button>
 
@@ -34,9 +30,7 @@ export function Services() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <CardService
-            key={item.id}
-            service={item.serviceMenu}
-            photoBackground={item.photoBackground}
+            data={item}
           />
         )}
         showsVerticalScrollIndicator={false}

@@ -1,16 +1,20 @@
 import { Box, ImageBackground } from "@gluestack-ui/themed";
 
-import ShopLogo from "@assets/shop-logo/beauty-salon-1.jpg";
+import { ImageSourcePropType } from "react-native";
 
-export function ImageBanner(){
+type Props = {
+	data: ImageSourcePropType;
+}
+
+export function ImageBanner({ data, ...rest }: Props){
 	return(
-		<Box 
+		<Box {...rest}
 			h={300}
 			w="$full"
 		>
 			<ImageBackground
 				flex={1}
-				source={ShopLogo}
+				source={data}
 				resizeMode="cover" />
 		</Box>
 	);

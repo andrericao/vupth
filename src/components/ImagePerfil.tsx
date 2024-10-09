@@ -1,8 +1,12 @@
+import { ImageSourcePropType } from "react-native";
+
 import { Box, ImageBackground } from "@gluestack-ui/themed";
 
-import PerfilPhoto from "@assets/perfil-photo/nathalia_yellow.jpg"
+type Props = {
+	data: ImageSourcePropType
+}
 
-export function ImagePerfil(){
+export function ImagePerfil({ data }: Props){
 	return(
 		<Box
 			h={81}
@@ -10,8 +14,8 @@ export function ImagePerfil(){
 		>
 			<ImageBackground 
 				flex={1}
+				source={data}
 				resizeMode="cover"
-				source={PerfilPhoto}
 				overflow="hidden"
 				borderRadius={50}
 			/>

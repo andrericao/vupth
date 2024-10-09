@@ -1,5 +1,5 @@
 import { FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+
 import { VStack } from '@gluestack-ui/themed';
 
 import { CardShop, CardShopProps } from './CardShop';
@@ -9,10 +9,9 @@ type Props = {
 }
 
 export function Shops({ data }: Props) {
-  const { navigate } = useNavigation();
 
   return (
-    <VStack flex={1} >
+    <VStack flex={1}>
 
       <FlatList
         data={data}
@@ -20,7 +19,6 @@ export function Shops({ data }: Props) {
         renderItem={({ item }) => (
                 <CardShop 
                   data={item}
-                  onPress={() => navigate('insideShop', { id: item.shopName })} 
                 />
               )}
         showsVerticalScrollIndicator={false}

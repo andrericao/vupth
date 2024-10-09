@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import { useNavigation } from "@react-navigation/native";
 
 import {
@@ -18,12 +16,16 @@ import {
   Button,
 } from "@gluestack-ui/themed";
 
-type Props = TouchableOpacityProps & {
-  service: string;
+export type CardServiceProps = {
+  serviceMenu: string;
   photoBackground: ImageSourcePropType;
 };
 
-export function CardService({ service, photoBackground, ...rest }: Props) {
+type Props = TouchableOpacityProps & {
+  data: CardServiceProps;
+};
+
+export function CardService({ data, ...rest }: Props) {
   const navigation = useNavigation();
 
   function handleService(service: string) {
@@ -34,13 +36,13 @@ export function CardService({ service, photoBackground, ...rest }: Props) {
   return (
     <TouchableOpacity {...rest}>
       <Box mb="$5" borderRadius={12} overflow="hidden">
-        <ImageBackground source={photoBackground} resizeMode="cover">
+        <ImageBackground source={data.photoBackground} resizeMode="cover">
           <Box py="$6" pl="$5" h={180} justifyContent="space-between">
             <Heading fontFamily="$heading" fontSize="$3xl" color="$white">
-              {service}
+              {data.serviceMenu}
             </Heading>
             <Button
-              onPress={() => handleService(service)}
+              onPress={() => handleService(data.serviceMenu)}
               h="$10"
               w="$32"
               borderRadius={18}
