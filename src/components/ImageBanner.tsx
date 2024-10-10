@@ -15,7 +15,9 @@ export function ImageBanner({ data, ...rest }: Props){
 			<ImageBackground
 				flex={1}
 				source={data}
-				resizeMode="cover" />
+				resizeMode="stretch"
+				/>
+				
 		</Box>
 	);
 }

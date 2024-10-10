@@ -8,33 +8,44 @@ import { VStack, Heading, Box } from "@gluestack-ui/themed";
 
 import { ImageBanner } from "@components/ImageBanner";
 import { CardProfProps } from "@components/CardProf";
+import { CardShopProps } from "@components/CardShop";
 import { Profs } from "@components/Profs";
 
 import { PROFS } from "@utils/profsData";
 import { SHOPS } from "@utils/shopsData";
-import { CardShopProps } from "@components/CardShop";
 
 type RouteParams = {
   shop: string;
-  //imageBanner: ImageSourcePropType;
+  imageShop: ImageSourcePropType;
 };
 
 export function InsideShop() {
   const route = useRoute();
-  const { shop } = route.params as RouteParams;
+  const { shop, imageShop } = route.params as RouteParams;
 
   const [profs, setProfs] = useState<CardProfProps[]>([]);
+  const [bannerShop, setBannerShop] = useState<CardShopProps[]>([]);
+
+  const filterImage = () => {
+    const shopSelected = SHOPS.filter(
+      (shopName) => shopName.shopName === shop) as CardShopProps[];
+      setBannerShop(shopSelected);
+  }
 
   useEffect(() => {
     const profsFiltered = PROFS.filter(
       (prof) => prof.shopName === shop
     ) as CardProfProps[];
     setProfs(profsFiltered);
+    filterImage();
   }, []);
+
+  console.log(shop)
+  console.log(imageShop)
 
   return (
     <VStack>
-      <ImageBanner />
+      <ImageBanner data={imageShop} />
       <Box
         px={15}
         flexDirection="row"

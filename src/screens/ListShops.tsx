@@ -45,8 +45,6 @@ export function ListShops() {
     setShops(shopsFiltered);
   }, [serviceSelected]);
 
-  //console.info(shops[1].shopName);
-
   return (
     <VStack flex={1} px={15} py={60}>
       <Header showBackButton />
