@@ -1,18 +1,39 @@
+import { useNavigation } from "@react-navigation/native";
+
 import { useState, useEffect } from "react";
 
 import { ImageSourcePropType } from "react-native";
 
+import { Question } from "phosphor-react-native";
+
 import { useRoute } from "@react-navigation/native";
 
-import { VStack, Heading, Box } from "@gluestack-ui/themed";
+import {
+  Button as ModalButton,
+  ModalContent,
+  VStack,
+  Heading,
+  Box,
+  Text,
+  Center,
+  Link,
+  ModalBody,
+  ModalFooter,
+  ButtonText,
+  Modal,
+  ModalCloseButton,
+  ModalBackdrop,
+  ModalHeader,
+  Icon,
+  CloseIcon
+} from "@gluestack-ui/themed";
 
+import { Button } from "@components/Button";
 import { ImageBanner } from "@components/ImageBanner";
 import { CardProfProps } from "@components/CardProf";
-import { CardShopProps } from "@components/CardShop";
 import { Profs } from "@components/Profs";
 
 import { PROFS } from "@utils/profsData";
-import { SHOPS } from "@utils/shopsData";
 
 type RouteParams = {
   shop: string;
@@ -20,33 +41,34 @@ type RouteParams = {
 };
 
 export function InsideShop() {
+  const navigation = useNavigation();
+
   const route = useRoute();
   const { shop, imageShop } = route.params as RouteParams;
 
   const [profs, setProfs] = useState<CardProfProps[]>([]);
-  const [bannerShop, setBannerShop] = useState<CardShopProps[]>([]);
-
-  const filterImage = () => {
-    const shopSelected = SHOPS.filter(
-      (shopName) => shopName.shopName === shop) as CardShopProps[];
-      setBannerShop(shopSelected);
-  }
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const profsFiltered = PROFS.filter(
-      (prof) => prof.shopName === shop
+      (prof) => prof.shopName === shop,
     ) as CardProfProps[];
     setProfs(profsFiltered);
-    filterImage();
   }, []);
 
-  console.log(shop)
-  console.log(imageShop)
-
   return (
-    <VStack>
+    <VStack flex={1} px={15} pt={60} pb={45}>
       <ImageBanner data={imageShop} />
+
+      <Heading textAlign="center" fontSize="$4xl" fontFamily="$heading">
+        Nome da Loja
+      </Heading>
+      <Center mt={15}>
+        <Text>Tempo Estimado: 01:30</Text>
+      </Center>
+
       <Box
+        mt={36}
         px={15}
         flexDirection="row"
         my={15}
@@ -57,7 +79,61 @@ export function InsideShop() {
         <Heading fontFamily="$heading">Filtrar </Heading>
       </Box>
 
-      <Profs data={profs}/>
+      <Profs data={profs} />
+      <Box flexDirection="row" justifyContent="flex-end" pb={6} pr={12}>
+        <Link onPress={() => setShowModal(true)}>
+          <Question color="#00B37E" size={21} />
+        </Link>
+      </Box>
+      <Modal
+        isOpen={showModal}
+        onClose={() => {
+          setShowModal(false);
+        }}
+        size="md"
+      >
+        <ModalBackdrop />
+        <ModalContent>
+          <ModalHeader>
+            <Heading size="xl">
+              Fila sem preferência:
+            </Heading>
+            <ModalCloseButton>
+              <Icon
+                as={CloseIcon}
+                size="xl"
+              />
+            </ModalCloseButton>
+          </ModalHeader>
+          <ModalBody>
+            <Text size="xl">
+              Você será adicionado(a) à fila do funcionário com menor tempo estimado de espera!
+            </Text>
+            <Text> </Text>
+            <Text size="md">OBS: É tempo descrito abaixo do nome da loja</Text>
+          </ModalBody>
+          <ModalFooter gap={15}>
+            <ModalButton
+              variant="outline"
+              action="negative"
+              onPress={() => {
+                setShowModal(false);
+              }}
+            >
+              <ButtonText>Cancelar</ButtonText>
+            </ModalButton>
+            <ModalButton
+            bg="$green500"
+              onPress={() => {
+                setShowModal(false);
+              }}
+            >
+              <ButtonText>Entrar na Fila</ButtonText>
+            </ModalButton>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Button title="Entrar na fila sem preferência" />
     </VStack>
   );
 }

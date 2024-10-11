@@ -44,7 +44,7 @@ export function CardProf({ data, ...rest }: Props) {
           <Box alignItems="flex-start">
             <Heading fontFamily="$heading">{data.profName}</Heading>
             <Text fontFamily="$body">
-              Estimativa de Fila: {data.estimatedTime}
+              Tempo estimado de espera: {data.estimatedTime}
             </Text>
             <Box gap={9} mt={6} flexDirection="row" alignItems="center">
               <Icon
