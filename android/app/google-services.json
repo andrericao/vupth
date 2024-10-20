@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "637753175454",
+    "project_id": "vupth-app",
+    "storage_bucket": "vupth-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637753175454:android:98fbdfb99222648b913a8f",
+        "android_client_info": {
+          "package_name": "com.vupth"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5Ms6QrQzIoZGivhuIddtOItwWqFG5-QE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
