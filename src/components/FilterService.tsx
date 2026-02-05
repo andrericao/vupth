@@ -4,9 +4,9 @@ import { ImageSourcePropType } from "react-native";
 import { Button, Box, Text, Image } from "@gluestack-ui/themed";
 
 type Props = ComponentProps<typeof Button> & {
-  serviceMenu?: string;
+  serviceMenu: string;
   isActive: boolean;
-  iconService?: ImageSourcePropType;
+  iconService: ImageSourcePropType;
 };
 
 export function FilterService({

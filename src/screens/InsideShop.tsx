@@ -25,10 +25,9 @@ import {
   ModalBackdrop,
   ModalHeader,
   Icon,
-  CloseIcon,
+  CloseIcon
 } from "@gluestack-ui/themed";
 
-import { FilterService } from "@components/FilterService";
 import { Button } from "@components/Button";
 import { ImageBanner } from "@components/ImageBanner";
 import { CardProfProps } from "@components/CardProf";
@@ -76,10 +75,8 @@ export function InsideShop() {
         gap={9}
         justifyContent="space-between"
       >
-        <FilterService serviceMenu="Valores" isActive />
-        <FilterService serviceMenu="Funcionários" isActive={false} />
-        <Heading fontFamily="$heading">Valores </Heading>
         <Heading fontFamily="$heading">Funcionários {profs.length}</Heading>
+        <Heading fontFamily="$heading">Filtrar </Heading>
       </Box>
 
       <Profs data={profs} />
@@ -98,15 +95,19 @@ export function InsideShop() {
         <ModalBackdrop />
         <ModalContent>
           <ModalHeader>
-            <Heading size="xl">Fila sem preferência:</Heading>
+            <Heading size="xl">
+              Fila sem preferência:
+            </Heading>
             <ModalCloseButton>
-              <Icon as={CloseIcon} size="xl" />
+              <Icon
+                as={CloseIcon}
+                size="xl"
+              />
             </ModalCloseButton>
           </ModalHeader>
           <ModalBody>
             <Text size="xl">
-              Você será adicionado(a) à fila do funcionário com menor tempo
-              estimado de espera!
+              Você será adicionado(a) à fila do funcionário com menor tempo estimado de espera!
             </Text>
             <Text> </Text>
             <Text size="md">OBS: É tempo descrito abaixo do nome da loja</Text>
@@ -122,7 +123,7 @@ export function InsideShop() {
               <ButtonText>Cancelar</ButtonText>
             </ModalButton>
             <ModalButton
-              bg="$green500"
+            bg="$green500"
               onPress={() => {
                 setShowModal(false);
               }}
