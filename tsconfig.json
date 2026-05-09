@@ -3,6 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": "./",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@assets/*": [
         "./src/assets/*"
@@ -24,6 +25,9 @@
       ],
       "@utils/*": [
         "./src/utils/*"
+      ],
+      "@domain/*": [
+        "./src/domain/*"
       ]
     }
   }
