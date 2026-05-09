@@ -3,38 +3,32 @@ import {
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
 
-import { Services } from "@screens/Services";
-import { ListShops } from "@screens/ListShops";
-import { InsideShop } from "@screens/InsideShop";
+import { Home } from "@screens/Home";
+import { EstablishmentDetail } from "@screens/EstablishmentDetail";
 import { Login } from "@screens/Login";
-import { SingUp } from "@screens/SingUp";
+import { SignUp } from "@screens/SignUp";
+import { QueueStatus } from "@screens/QueueStatus";
 
-type AuthRoutes = {
-  insideShop: undefined;
-  listShops: undefined;
-  services: undefined;
-  login: undefined;
-  singUp: undefined;
+export type AppRoutes = {
+  home: undefined;
+  establishmentDetail: { establishmentId: string };
+  login: { redirectTo?: string; establishmentId?: string; professionalId?: string };
+  signUp: { redirectTo?: string; establishmentId?: string; professionalId?: string };
+  queueStatus: { professionalId: string; establishmentId: string };
 };
 
-export type AuthNavigatorRoutesProps = NativeStackNavigationProp<AuthRoutes>;
+export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutes>;
 
-const { Navigator, Screen } = createNativeStackNavigator<AuthRoutes>();
+const { Navigator, Screen } = createNativeStackNavigator<AppRoutes>();
 
 export function AuthRoutes() {
   return (
     <Navigator screenOptions={{ headerShown: false }}>
-      
+      <Screen name="home" component={Home} />
+      <Screen name="establishmentDetail" component={EstablishmentDetail} />
       <Screen name="login" component={Login} />
-
-      <Screen name="singUp" component={SingUp} />
-
-      <Screen name="services" component={Services} />
-
-      <Screen name="insideShop" component={InsideShop} />
-
-      <Screen name="listShops" component={ListShops} />
-
+      <Screen name="signUp" component={SignUp} />
+      <Screen name="queueStatus" component={QueueStatus} />
     </Navigator>
   );
 }

@@ -1,50 +1,104 @@
-import { useNavigation } from "@react-navigation/native";
+import { useState } from "react";
+import { Alert } from "react-native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { Text, Center, VStack, ScrollView } from "@gluestack-ui/themed";
 
-import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
-
+import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
-import { Button as Button2 } from "@components/Button";
+import { Button } from "@components/Button";
 import { Header } from "@components/Header";
+import { validateLogin } from "@domain/auth/validateAuth";
+import { setAuthenticated } from "@domain/auth/authState";
+
+type RouteParams = {
+  redirectTo?: string;
+  establishmentId?: string;
+  professionalId?: string;
+};
 
 export function Login() {
-  const navigation = useNavigation<AuthNavigatorRoutesProps>();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  function handleSingUp() {
-    navigation.navigate("singUp");
+  const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const route = useRoute();
+  const params = (route.params as RouteParams) ?? {};
+
+  function handleLogin() {
+    const result = validateLogin(email, password);
+
+    if (!result.isValid) {
+      setErrors(result.errors);
+      return;
+    }
+
+    setErrors({});
+    // TODO: integrar com backend POST /auth/login
+    setAuthenticated(true);
+
+    if (params.redirectTo === "queueStatus" && params.establishmentId && params.professionalId) {
+      navigation.navigate("queueStatus", {
+        establishmentId: params.establishmentId,
+        professionalId: params.professionalId,
+      });
+    } else {
+      navigation.navigate("home");
+    }
+  }
+
+  function handleSignUp() {
+    navigation.navigate("signUp", {
+      redirectTo: params.redirectTo,
+      establishmentId: params.establishmentId,
+      professionalId: params.professionalId,
+    });
   }
 
   return (
-    <ScrollView 
+    <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-
       <VStack flex={1} px={15} py={60}>
-        <Header />
+        <Header showBackButton />
 
-        <Center gap="$6" mt={250}>
+        <Center gap="$6" mt={200}>
           <Text fontFamily="$heading" fontSize="$3xl">
             Acessar a conta
           </Text>
 
-          <Input2
-            keyboardType="email-address"
-            autoCapitalize="none"
-            placeholder="E-mail"
-          />
+          <VStack w="$full" gap="$1">
+            <Input2
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholder="E-mail"
+              value={email}
+              onChangeText={(text: string) => { setEmail(text); setErrors({}); }}
+            />
+            {errors.email && <Text color="$red500" size="xs">{errors.email}</Text>}
+          </VStack>
 
-          <Input2 secureTextEntry placeholder="Senha" />
-          <Button2 title="Entrar" />
+          <VStack w="$full" gap="$1">
+            <Input2
+              secureTextEntry
+              placeholder="Senha"
+              value={password}
+              onChangeText={(text: string) => { setPassword(text); setErrors({}); }}
+            />
+            {errors.password && <Text color="$red500" size="xs">{errors.password}</Text>}
+          </VStack>
+
+          <Button title="Entrar" onPress={handleLogin} />
         </Center>
 
-        <Center mt={250} flex={1} justifyContent="flex-end">
+        <Center mt={200} flex={1} justifyContent="flex-end">
           <Text>Criar conta</Text>
-          <Button2
+          <Button
             variant="outline"
             mt="$3"
             title="Cadastrar"
-            onPress={handleSingUp}
+            onPress={handleSignUp}
           />
         </Center>
       </VStack>
