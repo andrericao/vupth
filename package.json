@@ -17,7 +17,8 @@
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@gluestack-ui/.*|@gluestack-style/.*|@legendapp/.*|phosphor-react-native)"
     ],
     "testPathIgnorePatterns": [
-      "<rootDir>/src/__tests__/__mocks__/"
+      "<rootDir>/src/__tests__/__mocks__/",
+      "<rootDir>/src/__tests__/mocks/"
     ],
     "moduleNameMapper": {
       "^@assets/(.*)$": "<rootDir>/src/assets/$1",
@@ -66,6 +67,7 @@
     "@types/react": "~19.1.10",
     "jest": "^29.7.0",
     "jest-expo": "^55.0.17",
+    "msw": "^2.14.5",
     "react-native-svg-transformer": "^1.5.0",
     "typescript": "~5.9.2"
   },
