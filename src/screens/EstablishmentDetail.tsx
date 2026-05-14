@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { FlatList, TouchableOpacity } from "react-native";
+import { FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   VStack,
@@ -15,12 +14,10 @@ import {
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
-import { Establishment } from "@domain/establishment/types";
 import { ProfessionalWithQueue } from "@domain/professional/types";
-import { MOCK_ESTABLISHMENTS } from "@domain/establishment/mockData";
-import { MOCK_PROFESSIONALS } from "@domain/professional/mockData";
 import { formatWaitTime } from "@domain/queue/types";
-import { isAuthenticated } from "@domain/auth/authState";
+import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
+import { useAuthStore } from "@stores/authStore";
 
 type RouteParams = {
   establishmentId: string;
@@ -100,19 +97,12 @@ export function EstablishmentDetail() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { establishmentId } = route.params as RouteParams;
 
-  const [establishment, setEstablishment] = useState<Establishment | null>(null);
-  const [professionals, setProfessionals] = useState<ProfessionalWithQueue[]>([]);
-
-  useEffect(() => {
-    const found = MOCK_ESTABLISHMENTS.find((e) => e.id === establishmentId);
-    setEstablishment(found ?? null);
-
-    const profs = MOCK_PROFESSIONALS[establishmentId] ?? [];
-    setProfessionals(profs);
-  }, [establishmentId]);
+  const { data: establishment, isLoading, isError } = useEstablishment(establishmentId);
+  const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   function handleJoinQueue(professionalId: string) {
-    if (!isAuthenticated()) {
+    if (!isAuthenticated) {
       navigation.navigate("login", {
         redirectTo: "queueStatus",
         establishmentId,
@@ -137,7 +127,15 @@ export function EstablishmentDetail() {
     handleJoinQueue(shortest.id);
   }
 
-  if (!establishment) {
+  if (isLoading) {
+    return (
+      <Center flex={1}>
+        <ActivityIndicator size="large" color="#22C55E" />
+      </Center>
+    );
+  }
+
+  if (isError || !establishment) {
     return (
       <Center flex={1}>
         <Text>Estabelecimento não encontrado</Text>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlatList, TouchableOpacity } from "react-native";
+import { FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@gluestack-ui/themed";
 
@@ -7,7 +7,7 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
-import { MOCK_ESTABLISHMENTS } from "@domain/establishment/mockData";
+import { useEstablishments } from "@hooks/useEstablishments";
 
 const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   BARBER: "Barbearia",
@@ -81,8 +81,9 @@ export function Home() {
   const [selectedFilter, setSelectedFilter] = useState<ServiceType | "ALL">("ALL");
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const { data: establishments = [], isLoading, isError } = useEstablishments();
 
-  const filteredEstablishments = MOCK_ESTABLISHMENTS.filter((e) => {
+  const filteredEstablishments = establishments.filter((e) => {
     const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
     const matchesFilter = selectedFilter === "ALL" || e.serviceType === selectedFilter;
     return matchesSearch && matchesFilter;
@@ -139,23 +140,34 @@ export function Home() {
         />
       </Box>
 
-      <FlatList
-        data={filteredEstablishments}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20 }}
-        renderItem={({ item }) => (
-          <EstablishmentCard
-            establishment={item}
-            onPress={() => handleEstablishmentPress(item)}
-          />
-        )}
-        ListEmptyComponent={
-          <Center mt="$10">
-            <Text color="$gray300">Nenhum estabelecimento encontrado</Text>
-          </Center>
-        }
-      />
+      {isLoading ? (
+        <Center mt="$10">
+          <ActivityIndicator size="large" color="#22C55E" />
+          <Text color="$gray300" mt="$2">Carregando...</Text>
+        </Center>
+      ) : isError ? (
+        <Center mt="$10">
+          <Text color="$red500">Erro ao carregar estabelecimentos</Text>
+        </Center>
+      ) : (
+        <FlatList
+          data={filteredEstablishments}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          renderItem={({ item }) => (
+            <EstablishmentCard
+              establishment={item}
+              onPress={() => handleEstablishmentPress(item)}
+            />
+          )}
+          ListEmptyComponent={
+            <Center mt="$10">
+              <Text color="$gray300">Nenhum estabelecimento encontrado</Text>
+            </Center>
+          }
+        />
+      )}
     </VStack>
   );
 }

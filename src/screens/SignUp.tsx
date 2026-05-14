@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Alert } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, Text, Center, VStack } from "@gluestack-ui/themed";
 
@@ -7,7 +8,7 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { validateSignUp } from "@domain/auth/validateAuth";
-import { setAuthenticated } from "@domain/auth/authState";
+import { useAuthStore } from "@stores/authStore";
 
 type RouteParams = {
   redirectTo?: string;
@@ -20,12 +21,15 @@ export function SignUp() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const params = (route.params as RouteParams) ?? {};
+  const register = useAuthStore((s) => s.register);
+  const login = useAuthStore((s) => s.login);
 
-  function handleSignUp() {
+  async function handleSignUp() {
     const result = validateSignUp(email, password, confirmPassword);
 
     if (!result.isValid) {
@@ -34,16 +38,25 @@ export function SignUp() {
     }
 
     setErrors({});
-    // TODO: integrar com backend POST /auth/register + auto-login
-    setAuthenticated(true);
+    setIsSubmitting(true);
 
-    if (params.redirectTo === "queueStatus" && params.establishmentId && params.professionalId) {
-      navigation.navigate("queueStatus", {
-        establishmentId: params.establishmentId,
-        professionalId: params.professionalId,
-      });
-    } else {
-      navigation.navigate("home");
+    try {
+      await register(email, password);
+      await login(email, password);
+
+      if (params.redirectTo === "queueStatus" && params.establishmentId && params.professionalId) {
+        navigation.navigate("queueStatus", {
+          establishmentId: params.establishmentId,
+          professionalId: params.professionalId,
+        });
+      } else {
+        navigation.navigate("home");
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Erro ao cadastrar";
+      Alert.alert("Erro", message);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -99,7 +112,7 @@ export function SignUp() {
             {errors.confirmPassword && <Text color="$red500" size="xs">{errors.confirmPassword}</Text>}
           </VStack>
 
-          <Button title="Cadastrar" onPress={handleSignUp} />
+          <Button title={isSubmitting ? "Cadastrando..." : "Cadastrar"} onPress={handleSignUp} />
         </Center>
 
         <Center mt={180} flex={1} justifyContent="flex-end">

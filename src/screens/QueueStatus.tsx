@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
-import { Alert } from "react-native";
+import { useState } from "react";
+import { Alert, ActivityIndicator } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
 
-import { AppNavigatorRoutesProps } from "@routes/app.routes";
+import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
-import { QueuePosition, canCancelAttendance, formatWaitTime } from "@domain/queue/types";
-import { MOCK_QUEUE_POSITION } from "@domain/queue/mockData";
-import { MOCK_PROFESSIONALS } from "@domain/professional/mockData";
-import { MOCK_ESTABLISHMENTS } from "@domain/establishment/mockData";
+import { canCancelAttendance, formatWaitTime } from "@domain/queue/types";
+import { useQueuePosition } from "@hooks/useQueue";
+import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
+import { useAuthStore } from "@stores/authStore";
+import { attendanceService } from "@services/attendanceService";
 
 type RouteParams = {
   professionalId: string;
@@ -21,26 +22,13 @@ export function QueueStatus() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { professionalId, establishmentId } = route.params as RouteParams;
 
-  const [queuePosition, setQueuePosition] = useState<QueuePosition | null>(null);
+  const { data: queueData, isLoading: isLoadingQueue } = useQueuePosition(professionalId);
+  const { data: establishment } = useEstablishment(establishmentId);
+  const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
+  const accessToken = useAuthStore((s) => s.accessToken);
 
-  useEffect(() => {
-    // Simula dados da fila baseado nos mocks
-    const establishment = MOCK_ESTABLISHMENTS.find((e) => e.id === establishmentId);
-    const professionals = MOCK_PROFESSIONALS[establishmentId] ?? [];
-    const professional = professionals.find((p) => p.id === professionalId);
-
-    if (professional && establishment) {
-      const position = professional.attendancesInQueue.length + 1;
-      setQueuePosition({
-        attendanceId: `mock-${Date.now()}`,
-        position,
-        estimatedWaitMinutes: position * 15,
-        professionalName: professional.name,
-        establishmentName: establishment.name,
-        status: "SCHEDULED",
-      });
-    }
-  }, [professionalId, establishmentId]);
+  const professional = professionals.find((p) => p.id === professionalId);
+  const [attendanceId, setAttendanceId] = useState<string | null>(null);
 
   function handleCancel() {
     Alert.alert(
@@ -51,8 +39,12 @@ export function QueueStatus() {
         {
           text: "Sim, sair",
           style: "destructive",
-          onPress: () => {
-            // TODO: integrar com backend PUT /attendances/{id}/cancel
+          onPress: async () => {
+            try {
+              if (attendanceId && accessToken) {
+                await attendanceService.cancel(attendanceId, accessToken);
+              }
+            } catch {}
             navigation.navigate("home");
           },
         },
@@ -64,15 +56,19 @@ export function QueueStatus() {
     navigation.navigate("home");
   }
 
-  if (!queuePosition) {
+  if (isLoadingQueue) {
     return (
       <Center flex={1}>
-        <Text>Carregando...</Text>
+        <ActivityIndicator size="large" color="#22C55E" />
+        <Text mt="$2">Carregando fila...</Text>
       </Center>
     );
   }
 
-  const canCancel = canCancelAttendance(queuePosition.status);
+  const position = queueData?.position ?? 0;
+  const estimatedWait = queueData?.estimatedWaitMinutes ?? 0;
+  const status = "SCHEDULED" as const;
+  const canCancel = canCancelAttendance(status);
 
   return (
     <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
@@ -102,7 +98,7 @@ export function QueueStatus() {
             color="$green500"
             testID="queue-position"
           >
-            {queuePosition.position}º
+            {position}º
           </Heading>
 
           <Box
@@ -117,7 +113,7 @@ export function QueueStatus() {
               Estabelecimento
             </Text>
             <Text size="sm" fontFamily="$heading">
-              {queuePosition.establishmentName}
+              {establishment?.name ?? "..."}
             </Text>
           </HStack>
 
@@ -126,7 +122,7 @@ export function QueueStatus() {
               Profissional
             </Text>
             <Text size="sm" fontFamily="$heading">
-              {queuePosition.professionalName}
+              {professional?.name ?? "..."}
             </Text>
           </HStack>
 
@@ -135,7 +131,7 @@ export function QueueStatus() {
               Tempo estimado
             </Text>
             <Text size="sm" fontFamily="$heading" color="$green500">
-              {formatWaitTime(queuePosition.estimatedWaitMinutes)}
+              {formatWaitTime(estimatedWait)}
             </Text>
           </HStack>
 
@@ -144,7 +140,7 @@ export function QueueStatus() {
               Status
             </Text>
             <Text size="sm" fontFamily="$heading">
-              {queuePosition.status === "SCHEDULED" ? "Agendado" : queuePosition.status}
+              {status === "SCHEDULED" ? "Agendado" : status}
             </Text>
           </HStack>
         </Box>
