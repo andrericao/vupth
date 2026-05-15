@@ -71,7 +71,7 @@ describe('EstablishmentDetail - Lógica', () => {
     it('Nail Designer deve estar fechado', () => {
       const nailSalon = MOCK_ESTABLISHMENTS.find((e) => e.id === '3');
       expect(nailSalon).toBeDefined();
-      expect(nailSalon!.isOpen).toBe(false);
+      expect(nailSalon!.open_status).toBe('CLOSED');
     });
 
     it('não deve ter profissionais quando fechado (mock)', () => {

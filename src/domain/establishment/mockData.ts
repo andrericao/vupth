@@ -4,8 +4,10 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
   {
     id: '1',
     name: 'Barbearia Top',
-    serviceType: 'BARBER',
-    isOpen: true,
+    ownerId: 'owner-1',
+    urlImage: null,
+    open_status: 'OPEN',
+    status: 'ACTIVE',
     address: {
       street: 'Rua das Flores',
       number: '123',
@@ -14,7 +16,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01001000',
     },
-    serviceItems: [
+    services: [
       {
         id: 's1',
         serviceItemType: 'CORTE_MAQUINA',
@@ -34,8 +36,10 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
   {
     id: '2',
     name: 'Salão Beleza Pura',
-    serviceType: 'BEAUTY_SALON',
-    isOpen: true,
+    ownerId: 'owner-1',
+    urlImage: null,
+    open_status: 'OPEN',
+    status: 'ACTIVE',
     address: {
       street: 'Av. Paulista',
       number: '456',
@@ -44,7 +48,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01310100',
     },
-    serviceItems: [
+    services: [
       {
         id: 's3',
         serviceItemType: 'CORTE_FEMININO',
@@ -57,8 +61,10 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
   {
     id: '3',
     name: 'Nail Designer',
-    serviceType: 'NAIL_SALON',
-    isOpen: false,
+    ownerId: 'owner-2',
+    urlImage: null,
+    open_status: 'CLOSED',
+    status: 'ACTIVE',
     address: {
       street: 'Rua Augusta',
       number: '789',
@@ -67,7 +73,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01305000',
     },
-    serviceItems: [
+    services: [
       {
         id: 's4',
         serviceItemType: 'MANICURE',
@@ -87,8 +93,10 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
   {
     id: '4',
     name: 'Barbearia do João',
-    serviceType: 'BARBER',
-    isOpen: true,
+    ownerId: 'owner-3',
+    urlImage: null,
+    open_status: 'OPEN',
+    status: 'ACTIVE',
     address: {
       street: 'Rua Vergueiro',
       number: '321',
@@ -97,7 +105,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01504000',
     },
-    serviceItems: [
+    services: [
       {
         id: 's6',
         serviceItemType: 'CORTE_TESOURA',

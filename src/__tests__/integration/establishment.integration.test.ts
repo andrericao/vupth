@@ -8,18 +8,22 @@ describe('Establishment Integration', () => {
         {
           id: 'est-1',
           name: 'Barbearia Top',
-          serviceType: 'BARBER',
-          isOpen: true,
-          serviceItems: [
+          ownerId: 'owner-1',
+          urlImage: null,
+          open_status: 'OPEN',
+          status: 'ACTIVE',
+          services: [
             { id: 's1', serviceItemType: 'CORTE_MAQUINA', customName: 'Corte Degradê', price: 35.0, estimatedMinutes: 30 },
           ],
         },
         {
           id: 'est-2',
           name: 'Salão Beleza Pura',
-          serviceType: 'BEAUTY_SALON',
-          isOpen: true,
-          serviceItems: [],
+          ownerId: 'owner-1',
+          urlImage: null,
+          open_status: 'OPEN',
+          status: 'ACTIVE',
+          services: [],
         },
       ]);
 
@@ -28,9 +32,9 @@ describe('Establishment Integration', () => {
       expect(response.status).toBe(200);
       expect(response.data).toHaveLength(2);
       expect(response.data[0].name).toBe('Barbearia Top');
-      expect(response.data[0].serviceItems).toHaveLength(1);
+      expect(response.data[0].services).toHaveLength(1);
       expect(response.data[1].name).toBe('Salão Beleza Pura');
-      expect(response.data[1].serviceItems).toHaveLength(0);
+      expect(response.data[1].services).toHaveLength(0);
     });
 
     it('deve retornar lista vazia quando não há estabelecimentos', async () => {
@@ -48,9 +52,11 @@ describe('Establishment Integration', () => {
       mock.onGet('/establishment/id/est-1').reply(200, {
         id: 'est-1',
         name: 'Barbearia Top',
-        serviceType: 'BARBER',
-        isOpen: true,
-        serviceItems: [
+        ownerId: 'owner-1',
+        urlImage: null,
+        open_status: 'OPEN',
+        status: 'ACTIVE',
+        services: [
           { id: 's1', serviceItemType: 'CORTE_MAQUINA', customName: 'Corte Degradê', price: 35.0, estimatedMinutes: 30 },
         ],
       });
@@ -60,8 +66,8 @@ describe('Establishment Integration', () => {
       expect(response.status).toBe(200);
       expect(response.data.id).toBe('est-1');
       expect(response.data.name).toBe('Barbearia Top');
-      expect(response.data.serviceType).toBe('BARBER');
-      expect(response.data.serviceItems[0].price).toBe(35.0);
+      expect(response.data.open_status).toBe('OPEN');
+      expect(response.data.services[0].price).toBe(35.0);
     });
 
     it('deve retornar 404 para ID inexistente', async () => {

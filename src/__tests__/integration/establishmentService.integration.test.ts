@@ -4,7 +4,7 @@ import { establishmentService } from '../../services/establishmentService';
 describe('EstablishmentService', () => {
   it('getAll deve retornar lista de estabelecimentos', async () => {
     mock.onGet('/establishment').reply(200, [
-      { id: 'est-1', name: 'Barbearia Top', serviceType: 'BARBER', isOpen: true, serviceItems: [] },
+      { id: 'est-1', name: 'Barbearia Top', ownerId: 'owner-1', urlImage: null, open_status: 'OPEN', status: 'ACTIVE', services: [] },
     ]);
 
     const response = await establishmentService.getAll();
@@ -17,9 +17,11 @@ describe('EstablishmentService', () => {
     mock.onGet('/establishment/id/est-1').reply(200, {
       id: 'est-1',
       name: 'Barbearia Top',
-      serviceType: 'BARBER',
-      isOpen: true,
-      serviceItems: [],
+      ownerId: 'owner-1',
+      urlImage: null,
+      open_status: 'OPEN',
+      status: 'ACTIVE',
+      services: [],
     });
 
     const response = await establishmentService.getById('est-1');

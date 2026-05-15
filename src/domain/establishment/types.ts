@@ -1,4 +1,6 @@
-export type ServiceType = 'BARBER' | 'BEAUTY_SALON' | 'NAIL_SALON' | 'SPA' | 'CLINIC';
+export type OpenStatus = 'OPEN' | 'CLOSED';
+
+export type EstablishmentStatus = 'ACTIVE' | 'INACTIVE';
 
 export type ServiceItemType =
   | 'CORTE_MAQUINA'
@@ -31,8 +33,10 @@ export interface Address {
 export interface Establishment {
   id: string;
   name: string;
-  serviceType: ServiceType;
-  isOpen: boolean;
+  ownerId: string;
+  urlImage: string | null;
+  open_status: OpenStatus;
+  status: EstablishmentStatus;
+  services: ServiceItem[];
   address?: Address;
-  serviceItems: ServiceItem[];
 }

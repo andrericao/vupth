@@ -51,7 +51,7 @@ function ProfessionalCard({
           </VStack>
           <VStack alignItems="flex-end">
             <Text size="sm" fontFamily="$heading" color="$green500">
-              {professional.attendancesInQueue.length} na fila
+              {professional.attendancesInQueue?.length ?? 0} na fila
             </Text>
             <Text size="xs" color="$gray300">
               ~{formatWaitTime(professional.estimatedWaitMinutes)}
@@ -158,13 +158,13 @@ export function EstablishmentDetail() {
         </Heading>
         <HStack mt="$2" gap="$2" alignItems="center">
           <Badge
-            bg={establishment.isOpen ? "$green500" : "$gray400"}
+            bg={establishment.open_status === "OPEN" ? "$green500" : "$gray400"}
             borderRadius="$full"
             px="$3"
             py="$1"
           >
             <BadgeText color="$white" size="xs">
-              {establishment.isOpen ? "Aberto" : "Fechado"}
+              {establishment.open_status === "OPEN" ? "Aberto" : "Fechado"}
             </BadgeText>
           </Badge>
           <Text size="sm" color="$gray300">
@@ -173,12 +173,12 @@ export function EstablishmentDetail() {
         </HStack>
       </Center>
 
-      {establishment.serviceItems.length > 0 && (
+      {(establishment.services?.length ?? 0) > 0 && (
         <Box mt="$4">
           <Heading size="sm" fontFamily="$heading" mb="$2">
             Serviços
           </Heading>
-          {establishment.serviceItems.map((item) => (
+          {establishment.services!.map((item) => (
             <ServiceItemRow
               key={item.id}
               name={item.customName}
@@ -210,7 +210,7 @@ export function EstablishmentDetail() {
         }
       />
 
-      {establishment.isOpen && professionals.length > 0 && (
+      {establishment.open_status === "OPEN" && professionals.length > 0 && (
         <Button
           title="Entrar na fila (menor espera)"
           onPress={handleJoinShortestQueue}

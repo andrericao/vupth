@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const localIp = process.env.EXPO_PUBLIC_API_LOCAL_IP || "localhost";
+
 const BASE_URLS: Record<string, string> = {
-	local: "http://localhost:8080",
+	local: `http://${localIp}:8080`,
 	dev: "https://vupth-backend-ia.onrender.com",
 	prod: "https://vupth-backend-ia-production.up.railway.app",
 };

@@ -6,24 +6,16 @@ import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@g
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
-import { Establishment, ServiceType } from "@domain/establishment/types";
+import { Establishment } from "@domain/establishment/types";
 import { useEstablishments } from "@hooks/useEstablishments";
+import { useAuthStore } from "@stores/authStore";
 
-const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
-  BARBER: "Barbearia",
-  BEAUTY_SALON: "Salão",
-  NAIL_SALON: "Manicure",
-  SPA: "Spa",
-  CLINIC: "Clínica",
-};
+type StatusFilter = "ALL" | "OPEN" | "CLOSED";
 
-const SERVICE_FILTERS: { key: ServiceType | "ALL"; label: string }[] = [
+const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
   { key: "ALL", label: "Todos" },
-  { key: "BARBER", label: "Barbearia" },
-  { key: "BEAUTY_SALON", label: "Salão" },
-  { key: "NAIL_SALON", label: "Manicure" },
-  { key: "SPA", label: "Spa" },
-  { key: "CLINIC", label: "Clínica" },
+  { key: "OPEN", label: "Abertos" },
+  { key: "CLOSED", label: "Fechados" },
 ];
 
 function EstablishmentCard({
@@ -33,6 +25,8 @@ function EstablishmentCard({
   establishment: Establishment;
   onPress: () => void;
 }) {
+  const isOpen = establishment.open_status === "OPEN";
+
   return (
     <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>
       <Box
@@ -41,33 +35,30 @@ function EstablishmentCard({
         mb="$3"
         borderRadius="$lg"
         borderWidth="$1"
-        borderColor={establishment.isOpen ? "$green500" : "$gray400"}
+        borderColor={isOpen ? "$green500" : "$gray400"}
       >
         <HStack justifyContent="space-between" alignItems="center">
           <VStack flex={1}>
             <Heading size="md" fontFamily="$heading">
               {establishment.name}
             </Heading>
-            <Text size="sm" color="$gray300" mt="$1">
-              {SERVICE_TYPE_LABELS[establishment.serviceType]}
-            </Text>
             {establishment.address && (
               <Text size="xs" color="$gray400" mt="$1">
                 {establishment.address.neighborhood}, {establishment.address.city}
               </Text>
             )}
             <Text size="xs" color="$gray300" mt="$1">
-              {establishment.serviceItems.length} serviço(s)
+              {establishment.services?.length ?? 0} serviço(s)
             </Text>
           </VStack>
           <Badge
-            bg={establishment.isOpen ? "$green500" : "$gray400"}
+            bg={isOpen ? "$green500" : "$gray400"}
             borderRadius="$full"
             px="$3"
             py="$1"
           >
             <BadgeText color="$white" size="xs">
-              {establishment.isOpen ? "Aberto" : "Fechado"}
+              {isOpen ? "Aberto" : "Fechado"}
             </BadgeText>
           </Badge>
         </HStack>
@@ -78,14 +69,16 @@ function EstablishmentCard({
 
 export function Home() {
   const [search, setSearch] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState<ServiceType | "ALL">("ALL");
+  const [selectedFilter, setSelectedFilter] = useState<StatusFilter>("ALL");
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { data: establishments = [], isLoading, isError } = useEstablishments();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const logout = useAuthStore((s) => s.logout);
 
   const filteredEstablishments = establishments.filter((e) => {
     const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = selectedFilter === "ALL" || e.serviceType === selectedFilter;
+    const matchesFilter = selectedFilter === "ALL" || e.open_status === selectedFilter;
     return matchesSearch && matchesFilter;
   });
 
@@ -96,6 +89,23 @@ export function Home() {
   return (
     <VStack flex={1} px={15} pt={60} bg="$gray700">
       <Header />
+
+      {isAuthenticated ? (
+        <HStack justifyContent="flex-end" mt="$2">
+          <TouchableOpacity onPress={() => logout()}>
+            <Text size="sm" color="$red500" fontFamily="$heading">Sair</Text>
+          </TouchableOpacity>
+        </HStack>
+      ) : (
+        <HStack justifyContent="flex-end" gap="$3" mt="$2">
+          <TouchableOpacity onPress={() => navigation.navigate("login", {})}>
+            <Text size="sm" color="$green500" fontFamily="$heading">Entrar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
+            <Text size="sm" color="$green500" fontFamily="$heading">Cadastrar</Text>
+          </TouchableOpacity>
+        </HStack>
+      )}
 
       <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$2">
         Estabelecimentos
@@ -109,7 +119,7 @@ export function Home() {
 
       <Box mt="$3" mb="$2">
         <FlatList
-          data={SERVICE_FILTERS}
+          data={STATUS_FILTERS}
           keyExtractor={(item) => item.key}
           horizontal
           showsHorizontalScrollIndicator={false}
