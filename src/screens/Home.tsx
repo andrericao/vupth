@@ -6,16 +6,25 @@ import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@g
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
-import { Establishment } from "@domain/establishment/types";
+import { Establishment, ServiceType } from "@domain/establishment/types";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
 
-type StatusFilter = "ALL" | "OPEN" | "CLOSED";
+const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
+  BARBER: "Barbearia",
+  BEAUTY_SALON: "Salão",
+  NAIL_SALON: "Manicure",
+  SPA: "Spa",
+  CLINIC: "Clínica",
+};
 
-const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
+const SERVICE_FILTERS: { key: ServiceType | "ALL"; label: string }[] = [
   { key: "ALL", label: "Todos" },
-  { key: "OPEN", label: "Abertos" },
-  { key: "CLOSED", label: "Fechados" },
+  { key: "BARBER", label: "Barbearia" },
+  { key: "BEAUTY_SALON", label: "Salão" },
+  { key: "NAIL_SALON", label: "Manicure" },
+  { key: "SPA", label: "Spa" },
+  { key: "CLINIC", label: "Clínica" },
 ];
 
 function EstablishmentCard({
@@ -42,6 +51,11 @@ function EstablishmentCard({
             <Heading size="md" fontFamily="$heading">
               {establishment.name}
             </Heading>
+            {establishment.serviceType && (
+              <Text size="sm" color="$gray300" mt="$1">
+                {SERVICE_TYPE_LABELS[establishment.serviceType]}
+              </Text>
+            )}
             {establishment.address && (
               <Text size="xs" color="$gray400" mt="$1">
                 {establishment.address.neighborhood}, {establishment.address.city}
@@ -69,17 +83,20 @@ function EstablishmentCard({
 
 export function Home() {
   const [search, setSearch] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState<StatusFilter>("ALL");
+  const [selectedFilter, setSelectedFilter] = useState<ServiceType | "ALL">("ALL");
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { data: establishments = [], isLoading, isError } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
 
+  const isSearching = search.trim().length > 0;
+
   const filteredEstablishments = establishments.filter((e) => {
     const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = selectedFilter === "ALL" || e.open_status === selectedFilter;
-    return matchesSearch && matchesFilter;
+    const matchesFilter = selectedFilter === "ALL" || e.serviceType === selectedFilter;
+    const matchesOpen = isSearching || e.open_status === "OPEN";
+    return matchesSearch && matchesFilter && matchesOpen;
   });
 
   function handleEstablishmentPress(establishment: Establishment) {
@@ -119,7 +136,7 @@ export function Home() {
 
       <Box mt="$3" mb="$2">
         <FlatList
-          data={STATUS_FILTERS}
+          data={SERVICE_FILTERS}
           keyExtractor={(item) => item.key}
           horizontal
           showsHorizontalScrollIndicator={false}

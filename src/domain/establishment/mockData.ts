@@ -6,6 +6,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     name: 'Barbearia Top',
     ownerId: 'owner-1',
     urlImage: null,
+    serviceType: 'BARBER',
     open_status: 'OPEN',
     status: 'ACTIVE',
     address: {
@@ -38,6 +39,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     name: 'Salão Beleza Pura',
     ownerId: 'owner-1',
     urlImage: null,
+    serviceType: 'BEAUTY_SALON',
     open_status: 'OPEN',
     status: 'ACTIVE',
     address: {
@@ -63,6 +65,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     name: 'Nail Designer',
     ownerId: 'owner-2',
     urlImage: null,
+    serviceType: 'NAIL_SALON',
     open_status: 'CLOSED',
     status: 'ACTIVE',
     address: {
@@ -95,6 +98,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
     name: 'Barbearia do João',
     ownerId: 'owner-3',
     urlImage: null,
+    serviceType: 'BARBER',
     open_status: 'OPEN',
     status: 'ACTIVE',
     address: {

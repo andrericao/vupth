@@ -1,3 +1,5 @@
+export type ServiceType = 'BARBER' | 'BEAUTY_SALON' | 'NAIL_SALON' | 'SPA' | 'CLINIC';
+
 export type OpenStatus = 'OPEN' | 'CLOSED';
 
 export type EstablishmentStatus = 'ACTIVE' | 'INACTIVE';
@@ -35,6 +37,7 @@ export interface Establishment {
   name: string;
   ownerId: string;
   urlImage: string | null;
+  serviceType?: ServiceType;
   open_status: OpenStatus;
   status: EstablishmentStatus;
   services: ServiceItem[];
