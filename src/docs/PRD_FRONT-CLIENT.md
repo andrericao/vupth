@@ -401,10 +401,14 @@ src/screens/
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 5 | Interceptor 401 → refresh → retry | Partner ja tem, cliente nao | Pendente |
-| 6 | Usar `wait-time` endpoint para polling | Retorna posicao detalhada com `estimatedWaitingTime` | Pendente |
-| 7 | Tela de selecao de servicos | Antes de entrar na fila, selecionar quais servicos quer | Pendente |
-| 8 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
+| 5 | Editar nome | Tela dentro de Settings → `PATCH /profile/general-infos { first_name, last_name }` | Pendente |
+| 6 | Editar e-mail | Tela dentro de Settings → `PATCH /profile/update-email/me { email }` (retorna novos tokens) | Pendente |
+| 7 | Editar senha | Tela dentro de Settings → `PATCH /profile/update-password/me { password }` (retorna novos tokens) | Pendente |
+| 8 | Editar endereco | Tela dentro de Settings → `POST /users/me/addresses` (criar) / `PATCH /users/me/addresses/{id}` (atualizar) | Pendente |
+| 9 | Interceptor 401 → refresh → retry | Partner ja tem, cliente nao | Pendente |
+| 10 | Usar `wait-time` endpoint para polling | Retorna posicao detalhada com `estimatedWaitingTime` | Pendente |
+| 11 | Tela de selecao de servicos | Antes de entrar na fila, selecionar quais servicos quer | Pendente |
+| 12 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
 
 ### Baixa prioridade
 

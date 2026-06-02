@@ -15,12 +15,12 @@ import { Queue, Clock, CaretRight } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
-import { useQueueStore } from "@stores/queueStore";
+import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { formatWaitTime } from "@domain/queue/types";
 
 export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const activeQueue = useQueueStore((s) => s.activeQueue);
+  const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
 
   function handleGoToQueue() {
     if (!activeQueue) return;
@@ -50,11 +50,11 @@ export function Attendances() {
             EM ANDAMENTO
           </Text>
 
-          {activeQueue ? (
+          {isInQueue && activeQueue ? (
             <TouchableOpacity onPress={handleGoToQueue}>
-              <Box bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor="$green500">
+              <Box bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor={color}>
                 <HStack alignItems="center" gap="$3">
-                  <Queue size={24} color="#22C55E" />
+                  <Queue size={24} color={color} />
                   <VStack flex={1}>
                     <Text fontFamily="$heading" size="sm">
                       {activeQueue.establishmentName}
@@ -63,8 +63,8 @@ export function Attendances() {
                       {activeQueue.professionalName}
                     </Text>
                   </VStack>
-                  <Badge bg="$green500" borderRadius="$full" px="$3" py="$1">
-                    <BadgeText color="$white" size="xs">Na fila</BadgeText>
+                  <Badge bg={color} borderRadius="$full" px="$3" py="$1">
+                    <BadgeText color="$white" size="xs">~{formatWaitTime(remaining)}</BadgeText>
                   </Badge>
                   <CaretRight size={18} color="#9CA3AF" />
                 </HStack>

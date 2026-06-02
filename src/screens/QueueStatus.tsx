@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, ActivityIndicator } from "react-native";
+import { Alert } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
 
@@ -7,15 +7,23 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { canCancelAttendance, formatWaitTime } from "@domain/queue/types";
-import { useQueuePosition } from "@hooks/useQueue";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
-import { attendanceService } from "@services/attendanceService";
 import { useQueueStore } from "@stores/queueStore";
+import { attendanceService } from "@services/attendanceService";
+import { useQueueCountdown } from "@hooks/useQueueCountdown";
 
 type RouteParams = {
   professionalId: string;
   establishmentId: string;
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  SCHEDULED: "Aguardando",
+  IN_PROGRESS: "Em atendimento",
+  PAUSED: "Pausado",
+  FINISHED: "Concluído",
+  CANCELLED: "Cancelado",
 };
 
 export function QueueStatus() {
@@ -23,14 +31,23 @@ export function QueueStatus() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { professionalId, establishmentId } = route.params as RouteParams;
 
-  const { data: queueData, isLoading: isLoadingQueue } = useQueuePosition(professionalId);
   const { data: establishment } = useEstablishment(establishmentId);
   const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
   const accessToken = useAuthStore((s) => s.accessToken);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
+  const { remaining, color, isInQueue, isBeingAttended, activeQueue } = useQueueCountdown();
 
   const professional = professionals.find((p) => p.id === professionalId);
-  const [attendanceId, setAttendanceId] = useState<string | null>(null);
+  const [attendanceId] = useState<string | null>(activeQueue?.attendanceId ?? null);
+
+  const status = activeQueue?.status ?? "SCHEDULED";
+  const canCancel = canCancelAttendance(status);
+
+  const borderColor = isInQueue ? color : "#22C55E";
+  const timeColor = isInQueue ? color : "#22C55E";
+  const timeLabel = remaining <= 0 && isInQueue
+    ? "Aguardando chamada"
+    : formatWaitTime(remaining);
 
   function handleCancel() {
     Alert.alert(
@@ -55,31 +72,13 @@ export function QueueStatus() {
     );
   }
 
-  function handleGoHome() {
-    navigation.navigate("home");
-  }
-
-  if (isLoadingQueue) {
-    return (
-      <Center flex={1}>
-        <ActivityIndicator size="large" color="#22C55E" />
-        <Text mt="$2">Carregando fila...</Text>
-      </Center>
-    );
-  }
-
-  const position = queueData?.position ?? 0;
-  const estimatedWait = queueData?.estimatedWaitMinutes ?? 0;
-  const status = "SCHEDULED" as const;
-  const canCancel = canCancelAttendance(status);
-
   return (
     <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
       <Header />
 
       <Center flex={1}>
         <Heading fontFamily="$heading" fontSize="$2xl" textAlign="center">
-          Você está na fila!
+          {isBeingAttended ? "Em atendimento!" : "Você está na fila!"}
         </Heading>
 
         <Box
@@ -88,62 +87,47 @@ export function QueueStatus() {
           mt="$6"
           borderRadius="$xl"
           borderWidth="$2"
-          borderColor="$green500"
+          borderColor={borderColor}
           w="$full"
           alignItems="center"
         >
-          <Text size="sm" color="$gray300">
-            Sua posição
-          </Text>
+          <Text size="sm" color="$gray300">Sua posição</Text>
           <Heading
             fontFamily="$heading"
             fontSize="$6xl"
-            color="$green500"
+            color={borderColor}
             testID="queue-position"
           >
-            {position}º
+            {isBeingAttended ? "—" : "0º"}
           </Heading>
 
-          <Box
-            w="$full"
-            h="$px"
-            bg="$gray500"
-            my="$4"
-          />
+          <Box w="$full" h="$px" bg="$gray500" my="$4" />
 
           <HStack w="$full" justifyContent="space-between" mb="$3">
-            <Text size="sm" color="$gray300">
-              Estabelecimento
-            </Text>
+            <Text size="sm" color="$gray300">Estabelecimento</Text>
             <Text size="sm" fontFamily="$heading">
-              {establishment?.name ?? "..."}
+              {establishment?.name ?? activeQueue?.establishmentName ?? "..."}
             </Text>
           </HStack>
 
           <HStack w="$full" justifyContent="space-between" mb="$3">
-            <Text size="sm" color="$gray300">
-              Profissional
-            </Text>
+            <Text size="sm" color="$gray300">Profissional</Text>
             <Text size="sm" fontFamily="$heading">
-              {professional?.name ?? "..."}
+              {professional?.name ?? activeQueue?.professionalName ?? "..."}
             </Text>
           </HStack>
 
           <HStack w="$full" justifyContent="space-between" mb="$3">
-            <Text size="sm" color="$gray300">
-              Tempo estimado
-            </Text>
-            <Text size="sm" fontFamily="$heading" color="$green500">
-              {formatWaitTime(estimatedWait)}
+            <Text size="sm" color="$gray300">Tempo estimado</Text>
+            <Text size="sm" fontFamily="$heading" color={timeColor}>
+              {timeLabel}
             </Text>
           </HStack>
 
           <HStack w="$full" justifyContent="space-between">
-            <Text size="sm" color="$gray300">
-              Status
-            </Text>
+            <Text size="sm" color="$gray300">Status</Text>
             <Text size="sm" fontFamily="$heading">
-              {status === "SCHEDULED" ? "Agendado" : status}
+              {STATUS_LABELS[status] ?? status}
             </Text>
           </HStack>
         </Box>
@@ -161,7 +145,7 @@ export function QueueStatus() {
             onPress={handleCancel}
           />
         )}
-        <Button title="Voltar ao início" onPress={handleGoHome} />
+        <Button title="Voltar ao início" onPress={() => navigation.navigate("home")} />
       </VStack>
     </VStack>
   );

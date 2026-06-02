@@ -5,7 +5,7 @@ name: Multi-client - 3 clientes na fila + cancelamento
 
 - assertVisible: "Estabelecimentos"
 
-# Logout se logado (icone perfil → Sair da conta)
+# Logout se logado
 - runFlow:
     when:
       visible:
@@ -40,16 +40,14 @@ name: Multi-client - 3 clientes na fila + cancelamento
     visible: "Estabelecimentos"
     timeout: 60000
 
-# Entrar na fila
+# Buscar e entrar — NÃO limpar busca antes de clicar
 - tapOn:
     text: "Buscar estabelecimento..."
 - inputText: "Corte Real"
-- assertVisible: "Corte Real"
-- eraseText: 20
-- hideKeyboard
-- tapOn:
-    text: "Corte Real.*"
-    index: 0
+- extendedWaitUntil:
+    visible: "Barbearia"
+    timeout: 30000
+- tapOn: "Barbearia"
 - extendedWaitUntil:
     visible: "Entrar na fila (menor espera)"
     timeout: 30000
@@ -95,11 +93,10 @@ name: Multi-client - 3 clientes na fila + cancelamento
 - tapOn:
     text: "Buscar estabelecimento..."
 - inputText: "Corte Real"
-- eraseText: 20
-- hideKeyboard
-- tapOn:
-    text: "Corte Real.*"
-    index: 0
+- extendedWaitUntil:
+    visible: "Barbearia"
+    timeout: 30000
+- tapOn: "Barbearia"
 - extendedWaitUntil:
     visible: "Entrar na fila (menor espera)"
     timeout: 30000
@@ -141,11 +138,10 @@ name: Multi-client - 3 clientes na fila + cancelamento
 - tapOn:
     text: "Buscar estabelecimento..."
 - inputText: "Corte Real"
-- eraseText: 20
-- hideKeyboard
-- tapOn:
-    text: "Corte Real.*"
-    index: 0
+- extendedWaitUntil:
+    visible: "Barbearia"
+    timeout: 30000
+- tapOn: "Barbearia"
 - extendedWaitUntil:
     visible: "Entrar na fila (menor espera)"
     timeout: 30000

@@ -13,6 +13,9 @@ const sampleQueue = {
   professionalName: 'Carlos',
   establishmentId: 'est-1',
   establishmentName: 'Barbearia Top',
+  enteredAt: Date.now(),
+  estimatedMinutes: 30,
+  status: 'SCHEDULED' as const,
 };
 
 describe('QueueStore', () => {
@@ -69,6 +72,21 @@ describe('QueueStore', () => {
 
     await useQueueStore.getState().restoreQueue();
 
+    const { activeQueue } = useQueueStore.getState();
+    expect(activeQueue).toBeNull();
+  });
+
+  it('updateQueue deve atualizar campos parcialmente', async () => {
+    await useQueueStore.getState().joinQueue(sampleQueue);
+    await useQueueStore.getState().updateQueue({ estimatedMinutes: 15 });
+
+    const { activeQueue } = useQueueStore.getState();
+    expect(activeQueue?.estimatedMinutes).toBe(15);
+    expect(activeQueue?.professionalName).toBe('Carlos');
+  });
+
+  it('updateQueue sem fila ativa nao deve fazer nada', async () => {
+    await useQueueStore.getState().updateQueue({ estimatedMinutes: 15 });
     const { activeQueue } = useQueueStore.getState();
     expect(activeQueue).toBeNull();
   });

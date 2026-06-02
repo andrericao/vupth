@@ -9,8 +9,7 @@ import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
-import { useQueueStore } from "@stores/queueStore";
-import { useQueuePosition } from "@hooks/useQueue";
+import { useQueueCountdown, URGENCY_COLORS } from "@hooks/useQueueCountdown";
 import { formatWaitTime } from "@domain/queue/types";
 import { UserCircle, Queue } from "phosphor-react-native";
 
@@ -95,8 +94,7 @@ export function Home() {
   const { data: establishments = [], isLoading, isError } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
-  const activeQueue = useQueueStore((s) => s.activeQueue);
-  const { data: queueData } = useQueuePosition(activeQueue?.professionalId ?? "");
+  const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
 
   const isSearching = search.trim().length > 0;
 
@@ -132,18 +130,18 @@ export function Home() {
         </HStack>
       )}
 
-      {activeQueue && (
+      {isInQueue && activeQueue && (
         <TouchableOpacity
           onPress={() => navigation.navigate("queueStatus", {
             professionalId: activeQueue.professionalId,
             establishmentId: activeQueue.establishmentId,
           })}
         >
-          <Box bg="$green500" p="$3" mt="$2" borderRadius="$lg">
+          <Box bg={color} p="$3" mt="$2" borderRadius="$lg">
             <HStack alignItems="center" gap="$2">
               <Queue size={20} color="#FFFFFF" />
               <Text color="$white" fontFamily="$heading" size="sm" flex={1}>
-                Em fila ~{formatWaitTime(queueData?.estimatedWaitMinutes ?? 0)}
+                Em fila ~{formatWaitTime(remaining)}
               </Text>
               <Text color="$white" size="xs">
                 {activeQueue.establishmentName}

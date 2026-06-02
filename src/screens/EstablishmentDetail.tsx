@@ -90,6 +90,9 @@ export function EstablishmentDetail() {
       professionalName: prof?.name ?? "",
       establishmentId,
       establishmentName: establishment?.name ?? "",
+      enteredAt: Date.now(),
+      estimatedMinutes: prof?.estimated_wait_minutes ?? 0,
+      status: "SCHEDULED",
     });
 
     navigation.navigate("queueStatus", {
