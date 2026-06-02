@@ -13,36 +13,35 @@ describe('Professional Domain', () => {
           expect(p.id).toBeTruthy();
           expect(p.name).toBeTruthy();
           expect(p.specialty).toBeTruthy();
-          expect(typeof p.isAvailable).toBe('boolean');
-          expect(typeof p.estimatedWaitMinutes).toBe('number');
-          expect(Array.isArray(p.attendancesInQueue)).toBe(true);
+          expect(typeof p.is_available).toBe('boolean');
+          expect(typeof p.estimated_wait_minutes).toBe('number');
+          expect(Array.isArray(p.waiting_list)).toBe(true);
+          expect(typeof p.queue_count).toBe('number');
         });
       });
     });
 
-    it('estimatedWaitMinutes deve ser >= 0', () => {
+    it('estimated_wait_minutes deve ser >= 0', () => {
       Object.values(MOCK_PROFESSIONALS).forEach((profs) => {
         profs.forEach((p) => {
-          expect(p.estimatedWaitMinutes).toBeGreaterThanOrEqual(0);
+          expect(p.estimated_wait_minutes).toBeGreaterThanOrEqual(0);
         });
       });
     });
 
-    it('posições na fila devem ser sequenciais a partir de 1', () => {
+    it('queue_count deve corresponder ao tamanho da waiting_list', () => {
       Object.values(MOCK_PROFESSIONALS).forEach((profs) => {
         profs.forEach((p) => {
-          p.attendancesInQueue.forEach((a, index) => {
-            expect(a.position).toBe(index + 1);
-          });
+          expect(p.queue_count).toBe(p.waiting_list.length);
         });
       });
     });
 
-    it('profissional sem fila deve ter estimatedWaitMinutes = 0', () => {
+    it('profissional sem fila deve ter estimated_wait_minutes = 0', () => {
       Object.values(MOCK_PROFESSIONALS).forEach((profs) => {
         profs.forEach((p) => {
-          if (p.attendancesInQueue.length === 0) {
-            expect(p.estimatedWaitMinutes).toBe(0);
+          if (p.waiting_list.length === 0) {
+            expect(p.estimated_wait_minutes).toBe(0);
           }
         });
       });
@@ -53,10 +52,10 @@ describe('Professional Domain', () => {
     it('deve encontrar o profissional com menor espera no estabelecimento 1', () => {
       const profs = MOCK_PROFESSIONALS['1'];
       const shortest = profs.reduce((prev, curr) =>
-        curr.estimatedWaitMinutes < prev.estimatedWaitMinutes ? curr : prev
+        curr.estimated_wait_minutes < prev.estimated_wait_minutes ? curr : prev
       );
       expect(shortest.name).toBe('Carlos Silva');
-      expect(shortest.estimatedWaitMinutes).toBe(15);
+      expect(shortest.estimated_wait_minutes).toBe(15);
     });
   });
 });

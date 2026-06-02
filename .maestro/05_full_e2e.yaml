@@ -1,0 +1,100 @@
+appId: host.exp.exponent
+name: E2E completo - cadastro, login e check-in
+---
+# Gerar email único para esta execução
+- evalScript: ${output.testEmail = 'e2e_' + Date.now() + '@teste.com'}
+
+- assertVisible: "Estabelecimentos"
+
+# Logout se estiver logado
+- runFlow:
+    when:
+      visible: "Sair"
+    commands:
+      - tapOn: "Sair"
+
+# 1. Cadastrar novo usuário
+- tapOn: "Cadastrar"
+- assertVisible: "Criar Conta"
+
+- tapOn:
+    text: "E-mail"
+- inputText: "${output.testEmail}"
+
+- tapOn:
+    text: "Senha"
+    index: 0
+- inputText: "Teste@123"
+
+- tapOn:
+    text: "Confirmar senha"
+- inputText: "Teste@123"
+
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Cadastrar"
+    direction: DOWN
+- tapOn: "Cadastrar"
+
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 60000
+
+# Confirmar que logou automaticamente e fazer logout
+- assertVisible: "Sair"
+- tapOn: "Sair"
+
+# 2. Login com as mesmas credenciais
+- assertVisible: "Entrar"
+- tapOn: "Entrar"
+- assertVisible: "Acessar a conta"
+
+- tapOn:
+    text: "E-mail"
+- inputText: "${output.testEmail}"
+
+- tapOn:
+    text: "Senha"
+- inputText: "Teste@123"
+
+- hideKeyboard
+- tapOn: "Entrar"
+
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 60000
+
+- assertVisible: "Sair"
+
+# 3. Buscar estabelecimento
+- tapOn:
+    text: "Buscar estabelecimento..."
+- inputText: "Corte Real"
+- assertVisible: "Corte Real"
+
+# 4. Abrir detalhe
+- eraseText: 20
+- hideKeyboard
+
+- tapOn:
+    text: "Corte Real.*"
+    index: 0
+
+- assertVisible:
+    text: "Profissionais.*"
+
+# 5. Check-in (só se houver profissionais)
+- runFlow:
+    when:
+      visible: "Entrar na fila (menor espera)"
+    commands:
+      - tapOn: "Entrar na fila (menor espera)"
+      - extendedWaitUntil:
+          visible: "Você está na fila!"
+          timeout: 10000
+      - assertVisible: "Sua posição"
+      - tapOn: "Sair da fila"
+      - tapOn: "Sim, sair"
+      - extendedWaitUntil:
+          visible: "Estabelecimentos"
+          timeout: 5000

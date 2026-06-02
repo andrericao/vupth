@@ -5,13 +5,13 @@ import { isAuthenticated, setAuthenticated } from '@domain/auth/authState';
 
 function findShortestQueue(professionals: ProfessionalWithQueue[]): ProfessionalWithQueue {
   return professionals.reduce((prev, curr) =>
-    curr.estimatedWaitMinutes < prev.estimatedWaitMinutes ? curr : prev
+    (curr.estimated_wait_minutes ?? 0) < (prev.estimated_wait_minutes ?? 0) ? curr : prev
   );
 }
 
 function getMinWait(professionals: ProfessionalWithQueue[]): number {
   if (professionals.length === 0) return 0;
-  return Math.min(...professionals.map((p) => p.estimatedWaitMinutes));
+  return Math.min(...professionals.map((p) => p.estimated_wait_minutes ?? 0));
 }
 
 describe('EstablishmentDetail - Lógica', () => {
@@ -20,7 +20,7 @@ describe('EstablishmentDetail - Lógica', () => {
       const profs = MOCK_PROFESSIONALS['1'];
       const shortest = findShortestQueue(profs);
       expect(shortest.id).toBe('p1');
-      expect(shortest.estimatedWaitMinutes).toBe(15);
+      expect(shortest.estimated_wait_minutes).toBe(15);
     });
 
     it('deve retornar o único profissional quando há só um', () => {

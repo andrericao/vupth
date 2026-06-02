@@ -12,7 +12,7 @@ const env = (process.env.EXPO_PUBLIC_API_ENV || "local") as keyof typeof BASE_UR
 
 export const api = axios.create({
 	baseURL: BASE_URLS[env],
-	timeout: env === "local" ? 10000 : 30000,
+	timeout: env === "local" ? 10000 : 60000,
 	headers: {
 		"Content-Type": "application/json",
 	},

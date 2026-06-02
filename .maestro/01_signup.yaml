@@ -1,0 +1,34 @@
+appId: host.exp.exponent
+name: Cadastro de usuário
+---
+- launchApp
+- openLink: "exp://192.168.0.16:8081"
+
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 15000
+
+- tapOn: "Cadastrar"
+
+- assertVisible: "Criar Conta"
+
+- tapOn:
+    text: "E-mail"
+- inputText: "e2e_${Date.now()}@teste.com"
+
+- tapOn:
+    text: "Senha"
+    index: 0
+- inputText: "Teste@123"
+
+- tapOn:
+    text: "Confirmar senha"
+- inputText: "Teste@123"
+
+- tapOn: "Cadastrar"
+
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 10000
+
+- assertVisible: "Sair"

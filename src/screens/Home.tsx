@@ -9,10 +9,15 @@ import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
+import { useQueueStore } from "@stores/queueStore";
+import { useQueuePosition } from "@hooks/useQueue";
+import { formatWaitTime } from "@domain/queue/types";
+import { UserCircle, Queue } from "phosphor-react-native";
 
 const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   BARBER: "Barbearia",
   BEAUTY_SALON: "Salão",
+  EYEBROW: "Sobrancelha",
   NAIL_SALON: "Manicure",
   SPA: "Spa",
   CLINIC: "Clínica",
@@ -22,6 +27,7 @@ const SERVICE_FILTERS: { key: ServiceType | "ALL"; label: string }[] = [
   { key: "ALL", label: "Todos" },
   { key: "BARBER", label: "Barbearia" },
   { key: "BEAUTY_SALON", label: "Salão" },
+  { key: "EYEBROW", label: "Sobrancelha" },
   { key: "NAIL_SALON", label: "Manicure" },
   { key: "SPA", label: "Spa" },
   { key: "CLINIC", label: "Clínica" },
@@ -89,6 +95,8 @@ export function Home() {
   const { data: establishments = [], isLoading, isError } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
+  const activeQueue = useQueueStore((s) => s.activeQueue);
+  const { data: queueData } = useQueuePosition(activeQueue?.professionalId ?? "");
 
   const isSearching = search.trim().length > 0;
 
@@ -109,8 +117,8 @@ export function Home() {
 
       {isAuthenticated ? (
         <HStack justifyContent="flex-end" mt="$2">
-          <TouchableOpacity onPress={() => logout()}>
-            <Text size="sm" color="$red500" fontFamily="$heading">Sair</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
+            <UserCircle size={32} color="#22C55E" weight="fill" />
           </TouchableOpacity>
         </HStack>
       ) : (
@@ -122,6 +130,27 @@ export function Home() {
             <Text size="sm" color="$green500" fontFamily="$heading">Cadastrar</Text>
           </TouchableOpacity>
         </HStack>
+      )}
+
+      {activeQueue && (
+        <TouchableOpacity
+          onPress={() => navigation.navigate("queueStatus", {
+            professionalId: activeQueue.professionalId,
+            establishmentId: activeQueue.establishmentId,
+          })}
+        >
+          <Box bg="$green500" p="$3" mt="$2" borderRadius="$lg">
+            <HStack alignItems="center" gap="$2">
+              <Queue size={20} color="#FFFFFF" />
+              <Text color="$white" fontFamily="$heading" size="sm" flex={1}>
+                Em fila ~{formatWaitTime(queueData?.estimatedWaitMinutes ?? 0)}
+              </Text>
+              <Text color="$white" size="xs">
+                {activeQueue.establishmentName}
+              </Text>
+            </HStack>
+          </Box>
+        </TouchableOpacity>
       )}
 
       <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$2">

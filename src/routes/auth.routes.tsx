@@ -8,6 +8,9 @@ import { EstablishmentDetail } from "@screens/EstablishmentDetail";
 import { Login } from "@screens/Login";
 import { SignUp } from "@screens/SignUp";
 import { QueueStatus } from "@screens/QueueStatus";
+import { Profile } from "@screens/Profile";
+import { Attendances } from "@screens/Attendances";
+import { Settings } from "@screens/Settings";
 
 export type AppRoutes = {
   home: undefined;
@@ -15,6 +18,9 @@ export type AppRoutes = {
   login: { redirectTo?: string; establishmentId?: string; professionalId?: string };
   signUp: { redirectTo?: string; establishmentId?: string; professionalId?: string };
   queueStatus: { professionalId: string; establishmentId: string };
+  profile: undefined;
+  attendances: undefined;
+  settings: undefined;
 };
 
 export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutes>;
@@ -29,6 +35,9 @@ export function AuthRoutes() {
       <Screen name="login" component={Login} />
       <Screen name="signUp" component={SignUp} />
       <Screen name="queueStatus" component={QueueStatus} />
+      <Screen name="profile" component={Profile} />
+      <Screen name="attendances" component={Attendances} />
+      <Screen name="settings" component={Settings} />
     </Navigator>
   );
 }

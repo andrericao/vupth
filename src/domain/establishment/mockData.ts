@@ -17,22 +17,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01001000',
     },
-    services: [
-      {
-        id: 's1',
-        serviceItemType: 'CORTE_MAQUINA',
-        customName: 'Corte Degradê',
-        price: 35.0,
-        estimatedMinutes: 30,
-      },
-      {
-        id: 's2',
-        serviceItemType: 'BARBA',
-        customName: 'Barba Completa',
-        price: 25.0,
-        estimatedMinutes: 20,
-      },
-    ],
+    services: ['BARBER'],
   },
   {
     id: '2',
@@ -50,15 +35,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01310100',
     },
-    services: [
-      {
-        id: 's3',
-        serviceItemType: 'CORTE_FEMININO',
-        customName: 'Corte Feminino',
-        price: 80.0,
-        estimatedMinutes: 45,
-      },
-    ],
+    services: ['BEAUTY_SALON'],
   },
   {
     id: '3',
@@ -76,22 +53,7 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01305000',
     },
-    services: [
-      {
-        id: 's4',
-        serviceItemType: 'MANICURE',
-        customName: 'Manicure Gel',
-        price: 60.0,
-        estimatedMinutes: 50,
-      },
-      {
-        id: 's5',
-        serviceItemType: 'PEDICURE',
-        customName: 'Pedicure Completa',
-        price: 55.0,
-        estimatedMinutes: 40,
-      },
-    ],
+    services: ['NAIL_SALON'],
   },
   {
     id: '4',
@@ -109,14 +71,6 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01504000',
     },
-    services: [
-      {
-        id: 's6',
-        serviceItemType: 'CORTE_TESOURA',
-        customName: 'Corte Social',
-        price: 40.0,
-        estimatedMinutes: 35,
-      },
-    ],
+    services: ['BARBER'],
   },
 ];

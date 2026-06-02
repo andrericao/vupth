@@ -1,21 +1,37 @@
-export type Specialty = 'BARBER' | 'HAIRDRESSER' | 'NAIL_TECH' | 'MASSEUSE' | 'ESTHETICIAN';
-
 export interface Professional {
   id: string;
   name: string;
-  specialty: Specialty;
-  isAvailable: boolean;
-  establishmentId?: string;
+  specialty: string;
+  is_available: boolean;
+  current_attendance: AttendanceInQueue | null;
+  establishment_id?: string;
+  establishment_name?: string;
 }
 
 export interface ProfessionalWithQueue extends Professional {
-  attendancesInQueue: QueueAttendance[];
-  estimatedWaitMinutes: number;
+  waiting_list: AttendanceInQueue[];
+  queue_count: number;
+  estimated_wait_minutes: number;
 }
 
-export interface QueueAttendance {
+export interface AttendanceInQueue {
   id: string;
-  clientName?: string;
-  position: number;
-  estimatedWaitMinutes: number;
+  establishmentId: string;
+  establishmentName: string;
+  professionalId: string;
+  professionalName: string;
+  clientId: string;
+  clientName: string;
+  services: AttendanceServiceItem[];
+  status: string;
+  totalValue: number;
+  scheduledTime: string;
+  estimatedMinutes: number;
+  durationInMinutes: number | null;
+}
+
+export interface AttendanceServiceItem {
+  id: string;
+  customName: string;
+  estimatedMinutes: number;
 }

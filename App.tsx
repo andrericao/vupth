@@ -12,15 +12,18 @@ import { Routes } from "@routes/index";
 
 import { Loading } from "@components/Loading";
 import { useAuthStore } from "@stores/authStore";
+import { useQueueStore } from "@stores/queueStore";
 
 const queryClient = new QueryClient();
 
 export default function App() {
   const [fontsLoaded] = useFonts({ Roboto_400Regular, Roboto_700Bold });
   const restoreSession = useAuthStore((s) => s.restoreSession);
+  const restoreQueue = useQueueStore((s) => s.restoreQueue);
 
   useEffect(() => {
     restoreSession();
+    restoreQueue();
   }, []);
 
   return (

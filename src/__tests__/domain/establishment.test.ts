@@ -11,17 +11,16 @@ describe('Establishment Domain', () => {
         expect(e.id).toBeTruthy();
         expect(e.name).toBeTruthy();
         expect(e.ownerId).toBeTruthy();
-        expect(['OPEN', 'CLOSED']).toContain(e.open_status);
-        expect(['ACTIVE', 'INACTIVE']).toContain(e.status);
+        expect(['OPEN', 'CLOSED', 'TEMPORARILY_CLOSED']).toContain(e.open_status);
+        expect(['ACTIVE', 'INACTIVE', 'TEMPORARY_CLOSED']).toContain(e.status);
         expect(Array.isArray(e.services)).toBe(true);
       });
     });
 
-    it('cada service deve ter preço positivo e duração positiva', () => {
+    it('services deve ser array de strings', () => {
       MOCK_ESTABLISHMENTS.forEach((e) => {
         e.services.forEach((item) => {
-          expect(item.price).toBeGreaterThan(0);
-          expect(item.estimatedMinutes).toBeGreaterThan(0);
+          expect(typeof item).toBe('string');
         });
       });
     });

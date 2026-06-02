@@ -11,6 +11,7 @@ import { useQueuePosition } from "@hooks/useQueue";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
 import { attendanceService } from "@services/attendanceService";
+import { useQueueStore } from "@stores/queueStore";
 
 type RouteParams = {
   professionalId: string;
@@ -26,6 +27,7 @@ export function QueueStatus() {
   const { data: establishment } = useEstablishment(establishmentId);
   const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
   const accessToken = useAuthStore((s) => s.accessToken);
+  const leaveQueue = useQueueStore((s) => s.leaveQueue);
 
   const professional = professionals.find((p) => p.id === professionalId);
   const [attendanceId, setAttendanceId] = useState<string | null>(null);
@@ -45,6 +47,7 @@ export function QueueStatus() {
                 await attendanceService.cancel(attendanceId, accessToken);
               }
             } catch {}
+            await leaveQueue();
             navigation.navigate("home");
           },
         },

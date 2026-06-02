@@ -91,7 +91,7 @@ export function Login() {
 
           <VStack w="$full" gap="$1">
             <Input2
-              secureTextEntry
+              isPassword
               placeholder="Senha"
               value={password}
               onChangeText={(text: string) => { setPassword(text); setErrors({}); }}

@@ -1,0 +1,162 @@
+appId: host.exp.exponent
+name: Multi-client - 3 clientes na fila + cancelamento
+---
+- evalScript: ${output.suffix = Date.now().toString().slice(-5)}
+
+- assertVisible: "Estabelecimentos"
+
+# Logout se logado (icone perfil → Sair da conta)
+- runFlow:
+    when:
+      visible:
+        id: "profile-icon"
+    commands:
+      - tapOn:
+          id: "profile-icon"
+      - tapOn: "Sair da conta"
+      - extendedWaitUntil:
+          visible: "Cadastrar"
+          timeout: 5000
+
+# === CLIENTE 1 ===
+- tapOn: "Cadastrar"
+- assertVisible: "Criar Conta"
+- tapOn:
+    text: "E-mail"
+- inputText: "cli1_${output.suffix}@teste.com"
+- tapOn:
+    text: "Senha"
+    index: 0
+- inputText: "Teste@123"
+- tapOn:
+    text: "Confirmar senha"
+- inputText: "Teste@123"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Cadastrar"
+    direction: DOWN
+- tapOn: "Cadastrar"
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 60000
+
+# Entrar na fila
+- tapOn:
+    text: "Buscar estabelecimento..."
+- inputText: "Corte Real"
+- assertVisible: "Corte Real"
+- eraseText: 20
+- hideKeyboard
+- tapOn:
+    text: "Corte Real.*"
+    index: 0
+- extendedWaitUntil:
+    visible: "Entrar na fila (menor espera)"
+    timeout: 30000
+- tapOn: "Entrar na fila (menor espera)"
+- extendedWaitUntil:
+    visible: "Você está na fila!"
+    timeout: 60000
+- assertVisible: "Sua posição"
+- tapOn: "Voltar ao início"
+- assertVisible: "Estabelecimentos"
+- assertVisible:
+    text: "Em fila.*"
+
+# Logout cliente 1
+- tapOn:
+    id: "profile-icon"
+- tapOn: "Sair da conta"
+- extendedWaitUntil:
+    visible: "Cadastrar"
+    timeout: 5000
+
+# === CLIENTE 2 ===
+- tapOn: "Cadastrar"
+- tapOn:
+    text: "E-mail"
+- inputText: "cli2_${output.suffix}@teste.com"
+- tapOn:
+    text: "Senha"
+    index: 0
+- inputText: "Teste@123"
+- tapOn:
+    text: "Confirmar senha"
+- inputText: "Teste@123"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Cadastrar"
+    direction: DOWN
+- tapOn: "Cadastrar"
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 60000
+
+- tapOn:
+    text: "Buscar estabelecimento..."
+- inputText: "Corte Real"
+- eraseText: 20
+- hideKeyboard
+- tapOn:
+    text: "Corte Real.*"
+    index: 0
+- extendedWaitUntil:
+    visible: "Entrar na fila (menor espera)"
+    timeout: 30000
+- tapOn: "Entrar na fila (menor espera)"
+- extendedWaitUntil:
+    visible: "Você está na fila!"
+    timeout: 60000
+- tapOn: "Voltar ao início"
+
+# Logout cliente 2
+- tapOn:
+    id: "profile-icon"
+- tapOn: "Sair da conta"
+- extendedWaitUntil:
+    visible: "Cadastrar"
+    timeout: 5000
+
+# === CLIENTE 3 — entra e CANCELA ===
+- tapOn: "Cadastrar"
+- tapOn:
+    text: "E-mail"
+- inputText: "cli3_${output.suffix}@teste.com"
+- tapOn:
+    text: "Senha"
+    index: 0
+- inputText: "Teste@123"
+- tapOn:
+    text: "Confirmar senha"
+- inputText: "Teste@123"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Cadastrar"
+    direction: DOWN
+- tapOn: "Cadastrar"
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 60000
+
+- tapOn:
+    text: "Buscar estabelecimento..."
+- inputText: "Corte Real"
+- eraseText: 20
+- hideKeyboard
+- tapOn:
+    text: "Corte Real.*"
+    index: 0
+- extendedWaitUntil:
+    visible: "Entrar na fila (menor espera)"
+    timeout: 30000
+- tapOn: "Entrar na fila (menor espera)"
+- extendedWaitUntil:
+    visible: "Você está na fila!"
+    timeout: 60000
+
+# CANCELAMENTO
+- tapOn: "Sair da fila"
+- tapOn: "Sim, sair"
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 5000

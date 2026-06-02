@@ -2,6 +2,18 @@ import { api } from './api';
 import { Establishment } from '@domain/establishment/types';
 import { ProfessionalWithQueue } from '@domain/professional/types';
 
+export interface EstablishmentWithProfessionals {
+  id: string;
+  name: string;
+  url_image: string | null;
+  services: string[];
+  owner_id: string;
+  open_status: string;
+  total_in_queue: number;
+  available_professionals: number;
+  professionals: ProfessionalWithQueue[];
+}
+
 export const establishmentService = {
   getAll() {
     return api.get<Establishment[]>('/establishment');
@@ -12,7 +24,7 @@ export const establishmentService = {
   },
 
   getProfessionalsWithQueue(establishmentId: string) {
-    return api.get<ProfessionalWithQueue[]>(
+    return api.get<EstablishmentWithProfessionals>(
       `/establishment/id/${establishmentId}/professionals-with-queue`,
     );
   },

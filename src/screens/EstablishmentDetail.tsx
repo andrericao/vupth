@@ -18,6 +18,7 @@ import { ProfessionalWithQueue } from "@domain/professional/types";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
+import { useQueueStore } from "@stores/queueStore";
 
 type RouteParams = {
   establishmentId: string;
@@ -51,44 +52,15 @@ function ProfessionalCard({
           </VStack>
           <VStack alignItems="flex-end">
             <Text size="sm" fontFamily="$heading" color="$green500">
-              {professional.attendancesInQueue?.length ?? 0} na fila
+              {professional.queue_count ?? 0} na fila
             </Text>
             <Text size="xs" color="$gray300">
-              ~{formatWaitTime(professional.estimatedWaitMinutes)}
+              ~{formatWaitTime(professional.estimated_wait_minutes ?? 0)}
             </Text>
           </VStack>
         </HStack>
       </Box>
     </TouchableOpacity>
-  );
-}
-
-function ServiceItemRow({
-  name,
-  price,
-  duration,
-}: {
-  name: string;
-  price: number;
-  duration: number;
-}) {
-  return (
-    <HStack
-      justifyContent="space-between"
-      py="$2"
-      borderBottomWidth="$1"
-      borderBottomColor="$gray500"
-    >
-      <Text size="sm" flex={1}>
-        {name}
-      </Text>
-      <Text size="sm" color="$green500" fontFamily="$heading" mr="$4">
-        R$ {price.toFixed(2)}
-      </Text>
-      <Text size="xs" color="$gray300">
-        {duration} min
-      </Text>
-    </HStack>
   );
 }
 
@@ -100,6 +72,7 @@ export function EstablishmentDetail() {
   const { data: establishment, isLoading, isError } = useEstablishment(establishmentId);
   const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const joinQueue = useQueueStore((s) => s.joinQueue);
 
   function handleJoinQueue(professionalId: string) {
     if (!isAuthenticated) {
@@ -111,6 +84,14 @@ export function EstablishmentDetail() {
       return;
     }
 
+    const prof = professionals.find((p) => p.id === professionalId);
+    joinQueue({
+      professionalId,
+      professionalName: prof?.name ?? "",
+      establishmentId,
+      establishmentName: establishment?.name ?? "",
+    });
+
     navigation.navigate("queueStatus", {
       professionalId,
       establishmentId,
@@ -121,7 +102,7 @@ export function EstablishmentDetail() {
     if (professionals.length === 0) return;
 
     const shortest = professionals.reduce((prev, curr) =>
-      curr.estimatedWaitMinutes < prev.estimatedWaitMinutes ? curr : prev
+      (curr.estimated_wait_minutes ?? 0) < (prev.estimated_wait_minutes ?? 0) ? curr : prev
     );
 
     handleJoinQueue(shortest.id);
@@ -145,7 +126,7 @@ export function EstablishmentDetail() {
 
   const minWait =
     professionals.length > 0
-      ? Math.min(...professionals.map((p) => p.estimatedWaitMinutes))
+      ? Math.min(...professionals.map((p) => p.estimated_wait_minutes ?? 0))
       : 0;
 
   return (
@@ -173,24 +154,8 @@ export function EstablishmentDetail() {
         </HStack>
       </Center>
 
-      {(establishment.services?.length ?? 0) > 0 && (
-        <Box mt="$4">
-          <Heading size="sm" fontFamily="$heading" mb="$2">
-            Serviços
-          </Heading>
-          {establishment.services!.map((item) => (
-            <ServiceItemRow
-              key={item.id}
-              name={item.customName}
-              price={item.price}
-              duration={item.estimatedMinutes}
-            />
-          ))}
-        </Box>
-      )}
-
       <Heading size="sm" fontFamily="$heading" mt="$4" mb="$2">
-        Profissionais ({professionals.length})
+        Profissionais: {professionals.length}
       </Heading>
 
       <FlatList
