@@ -43,11 +43,13 @@ name: Multi-client - 3 clientes na fila + cancelamento
 # Buscar e entrar — NÃO limpar busca antes de clicar
 - tapOn:
     text: "Buscar estabelecimento..."
+- eraseText: 30
 - inputText: "Corte Real"
+- hideKeyboard
 - extendedWaitUntil:
-    visible: "Barbearia"
+    visible: "Corte Real 97616"
     timeout: 30000
-- tapOn: "Barbearia"
+- tapOn: "Corte Real 97616"
 - extendedWaitUntil:
     visible: "Entrar na fila (menor espera)"
     timeout: 30000
@@ -92,11 +94,13 @@ name: Multi-client - 3 clientes na fila + cancelamento
 
 - tapOn:
     text: "Buscar estabelecimento..."
+- eraseText: 30
 - inputText: "Corte Real"
+- hideKeyboard
 - extendedWaitUntil:
-    visible: "Barbearia"
+    visible: "Corte Real 97616"
     timeout: 30000
-- tapOn: "Barbearia"
+- tapOn: "Corte Real 97616"
 - extendedWaitUntil:
     visible: "Entrar na fila (menor espera)"
     timeout: 30000
@@ -137,11 +141,13 @@ name: Multi-client - 3 clientes na fila + cancelamento
 
 - tapOn:
     text: "Buscar estabelecimento..."
+- eraseText: 30
 - inputText: "Corte Real"
+- hideKeyboard
 - extendedWaitUntil:
-    visible: "Barbearia"
+    visible: "Corte Real 97616"
     timeout: 30000
-- tapOn: "Barbearia"
+- tapOn: "Corte Real 97616"
 - extendedWaitUntil:
     visible: "Entrar na fila (menor espera)"
     timeout: 30000

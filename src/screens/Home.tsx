@@ -113,22 +113,17 @@ export function Home() {
     <VStack flex={1} px={15} pt={60} bg="$gray700">
       <Header />
 
-      {isAuthenticated ? (
-        <HStack justifyContent="flex-end" mt="$2">
+      <HStack justifyContent="flex-end" mt="$2">
+        {isAuthenticated ? (
           <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
             <UserCircle size={32} color="#22C55E" weight="fill" />
           </TouchableOpacity>
-        </HStack>
-      ) : (
-        <HStack justifyContent="flex-end" gap="$3" mt="$2">
-          <TouchableOpacity onPress={() => navigation.navigate("login", {})}>
-            <Text size="sm" color="$green500" fontFamily="$heading">Entrar</Text>
-          </TouchableOpacity>
+        ) : (
           <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
             <Text size="sm" color="$green500" fontFamily="$heading">Cadastrar</Text>
           </TouchableOpacity>
-        </HStack>
-      )}
+        )}
+      </HStack>
 
       {isInQueue && activeQueue && (
         <TouchableOpacity
