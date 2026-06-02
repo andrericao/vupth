@@ -92,7 +92,7 @@ name: E2E completo - cadastro, login e check-in
       - extendedWaitUntil:
           visible: "Você está na fila!"
           timeout: 10000
-      - assertVisible: "Sua posição"
+      - assertVisible: "Tempo estimado"
       - tapOn: "Sair da fila"
       - tapOn: "Sim, sair"
       - extendedWaitUntil:

@@ -136,7 +136,7 @@ export function Home() {
             <HStack alignItems="center" gap="$2">
               <Queue size={20} color="#FFFFFF" />
               <Text color="$white" fontFamily="$heading" size="sm" flex={1}>
-                Em fila ~{formatWaitTime(remaining)}
+                Em fila {formatWaitTime(remaining)}
               </Text>
               <Text color="$white" size="xs">
                 {activeQueue.establishmentName}

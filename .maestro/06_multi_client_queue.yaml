@@ -57,7 +57,7 @@ name: Multi-client - 3 clientes na fila + cancelamento
 - extendedWaitUntil:
     visible: "Você está na fila!"
     timeout: 60000
-- assertVisible: "Sua posição"
+- assertVisible: "Tempo estimado"
 - tapOn: "Voltar ao início"
 - assertVisible: "Estabelecimentos"
 - assertVisible:

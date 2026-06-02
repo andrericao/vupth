@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
+import { Info } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
@@ -47,7 +48,7 @@ export function QueueStatus() {
   const timeColor = isInQueue ? color : "#22C55E";
   const timeLabel = remaining <= 0 && isInQueue
     ? "Aguardando chamada"
-    : formatWaitTime(remaining);
+    : formatWaitTime(remaining).replace('~', '');
 
   function handleCancel() {
     Alert.alert(
@@ -91,14 +92,24 @@ export function QueueStatus() {
           w="$full"
           alignItems="center"
         >
-          <Text size="sm" color="$gray300">Sua posição</Text>
+          <HStack alignItems="center" gap="$1">
+            <Text size="sm" color="$gray300">Tempo estimado</Text>
+            <TouchableOpacity
+              onPress={() => Alert.alert(
+                "Tempo estimado",
+                "Este tempo é uma estimativa baseada nos atendimentos anteriores. O tempo real pode variar dependendo do profissional e dos serviços escolhidos."
+              )}
+            >
+              <Info size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+          </HStack>
           <Heading
             fontFamily="$heading"
-            fontSize="$6xl"
-            color={borderColor}
-            testID="queue-position"
+            fontSize="$4xl"
+            color={timeColor}
+            testID="queue-time"
           >
-            {isBeingAttended ? "—" : "0º"}
+            {timeLabel}
           </Heading>
 
           <Box w="$full" h="$px" bg="$gray500" my="$4" />
@@ -114,13 +125,6 @@ export function QueueStatus() {
             <Text size="sm" color="$gray300">Profissional</Text>
             <Text size="sm" fontFamily="$heading">
               {professional?.name ?? activeQueue?.professionalName ?? "..."}
-            </Text>
-          </HStack>
-
-          <HStack w="$full" justifyContent="space-between" mb="$3">
-            <Text size="sm" color="$gray300">Tempo estimado</Text>
-            <Text size="sm" fontFamily="$heading" color={timeColor}>
-              {timeLabel}
             </Text>
           </HStack>
 

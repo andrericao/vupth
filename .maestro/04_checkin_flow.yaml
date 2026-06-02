@@ -42,7 +42,7 @@ name: Fluxo completo - check-in digital
     visible: "Você está na fila!"
     timeout: 10000
 
-- assertVisible: "Sua posição"
+- assertVisible: "Tempo estimado"
 - assertVisible: "Tempo estimado"
 - assertVisible: "Status"
 

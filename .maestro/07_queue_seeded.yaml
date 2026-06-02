@@ -52,7 +52,7 @@ env:
 - extendedWaitUntil:
     visible: "Você está na fila!"
     timeout: 60000
-- assertVisible: "Sua posição"
+- assertVisible: "Tempo estimado"
 - tapOn: "Voltar ao início"
 - assertVisible:
     text: "Em fila.*"
