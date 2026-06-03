@@ -6,10 +6,11 @@
 >
 > **App:** React Native 0.81 + Expo SDK 54, Gluestack UI v1, React Navigation native-stack
 > **State:** Zustand v5 + Axios + TanStack Query v5 + Expo SecureStore
-> **Testes unitarios/integracao:** 117 passando (Jest 29 + axios-mock-adapter)
+> **Testes unitarios/integracao:** 131 passando em 16 suites (Jest 29 + axios-mock-adapter)
 > **Testes E2E:** Maestro v2.5.1 no celular fisico (Moto G54 via USB)
+> **CI/CD:** GitHub Actions — lint (ESLint + eslint-config-expo), typecheck (tsc --noEmit), test (jest --ci --coverage)
 >
-> **Ultima atualizacao:** 2026-05-30
+> **Ultima atualizacao:** 2026-06-03
 
 ---
 
@@ -67,12 +68,21 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 | `/attendances` | POST | QueueStatus | Implementado | 2 |
 | `/attendances/{id}/cancel` | PUT | QueueStatus | Implementado | 2 |
 | `/client-queue/{profId}/queue` | GET | QueueStatus | Implementado | 1 |
-| `/client-queue/{id}/wait-time` | GET | — | **NAO IMPLEMENTADO** | — |
+| `/client-queue/{id}/wait-time` | GET | QueueStatus (polling) | Implementado | 2 |
 | `/professional/{id}/service-items` | GET | — | **NAO IMPLEMENTADO** | — |
 | `/attendances/{id}/leave-queue` | DELETE | — | **NAO IMPLEMENTADO** | — |
-| `/attendances/client/{clientId}` | GET | Attendances | **NAO EXISTE NO BACKEND** | — |
-| `/profile/general-infos` | PATCH | — | **FUTURO** | — |
-| `/users/me/addresses` | POST | — | **FUTURO** | — |
+| `/attendances/client/me` | GET | Attendances | **NAO IMPLEMENTADO** | — |
+| `/profile/general-infos` | PATCH | Settings | **NAO IMPLEMENTADO** | — |
+| `/profile/update-email/me` | PATCH | Settings | **NAO IMPLEMENTADO** | — |
+| `/profile/update-password/me` | PATCH | Settings | **NAO IMPLEMENTADO** | — |
+| `/profile/delete/me` | DELETE | Settings | **NAO IMPLEMENTADO** | — |
+| `/users/me/addresses` | POST | Settings | **NAO IMPLEMENTADO** | — |
+| `/users/me/addresses/{id}` | PATCH | Settings | **NAO IMPLEMENTADO** | — |
+| `/users/me/addresses` | GET | Settings | **NAO IMPLEMENTADO** | — |
+| `/users/me/addresses/main` | GET | Settings | **NAO IMPLEMENTADO** | — |
+| `/users/me/addresses/{id}/main` | PATCH | Settings | **NAO IMPLEMENTADO** | — |
+| `/users/me/addresses/{id}` | DELETE | Settings | **NAO IMPLEMENTADO** | — |
+| `/establishment/{id}/owner` | PATCH | — | **FUTURO (partner)** | — |
 
 ---
 
@@ -99,7 +109,7 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 - Login so e exigido ao clicar "Entrar na fila"
 - Se nao autenticado, redireciona para Login com `redirectTo` params
 - Apos login/cadastro, volta para o fluxo de fila automaticamente
-- Polling da fila a cada 15 segundos via TanStack Query `refetchInterval`
+- Polling adaptativo da fila via `useQueueCountdown`: >60min=10min, >10min=5min, <10min=1min
 
 ---
 
@@ -111,7 +121,7 @@ src/screens/
   EstablishmentDetail.tsx   — Profissionais + entrar na fila (salva no queueStore)
   Login.tsx                 — Email + senha + toggle visibilidade
   SignUp.tsx                — Email + senha + confirmar + regras visuais + toggle
-  QueueStatus.tsx           — Posicao, tempo estimado, cancelar (limpa queueStore), voltar
+  QueueStatus.tsx           — Tempo estimado (countdown), info tooltip, criar attendance, cancelar, voltar
   Profile.tsx               — Menu: Atendimentos + Configuracoes + Sair da conta
   Attendances.tsx           — Secao "Em andamento" (fila ativa) + "Realizados" (placeholder)
   Settings.tsx              — Nome, E-mail, Senha, Endereco (placeholder onPress)
@@ -130,9 +140,12 @@ src/screens/
 - Botao "Entrar na fila (menor espera)" — condicional: so aparece se OPEN e profissionais > 0
 
 ### QueueStatus.tsx
-- Posicao na fila, estabelecimento, profissional, tempo estimado, status
+- Cria attendance (POST /attendances) ao entrar na tela
+- Tempo estimado com countdown local (cores de urgencia: amarelo >10min, vermelho <=10min)
+- Icone de info com tooltip explicando a estimativa
+- Estabelecimento, profissional, status (SCHEDULED/IN_PROGRESS/PAUSED/FINISHED/CANCELLED)
+- Polling adaptativo via `useQueueCountdown` (GET /client-queue/{id}/wait-time)
 - Botao "Sair da fila" (so SCHEDULED) e "Voltar ao inicio"
-- **Problema atual:** nao cria o attendance antes de mostrar a tela — vai direto para QueueStatus sem chamar POST /attendances
 
 ---
 
@@ -158,7 +171,14 @@ src/screens/
 - `useProfessionalsWithQueue(id)` — GET /establishment/id/{id}/professionals-with-queue
 
 ### useQueue.ts (TanStack Query)
-- `useQueuePosition(professionalId)` — GET /client-queue/{profId}/queue (refetch 15s)
+- `useQueueInfo(professionalId, establishmentId, accessToken)` — GET /client-queue/{profId}/queue?establishmentId= (staleTime 30s)
+- `useWaitTime(attendanceId, clientId, accessToken)` — GET /client-queue/{attendanceId}/wait-time?clientId= (staleTime 30s)
+
+### useQueueCountdown.ts (countdown local + polling adaptativo)
+- Countdown local recalculado a cada 30s
+- Polling adaptativo do wait-time: >60min=10min, >10min=5min, <10min=1min
+- Urgency levels: `normal` (amarelo #F59E0B), `urgent` (vermelho #EF4444)
+- Retorna: `remaining`, `urgency`, `color`, `isInQueue`, `isBeingAttended`, `isPaused`, `isFinished`
 
 ---
 
@@ -254,8 +274,8 @@ src/screens/
 |---|-------------|---------|------|
 | 1 | **`services` no GET /establishment** | Backend retorna `string[]` (ex: `["BARBER"]`). Frontend espera `ServiceItem[]` (objetos com id, price, etc.) | Frontend deve tratar `services` como `string[]` na listagem. ServiceItems vem via `GET /professional/{id}/service-items` |
 | 2 | **`professionals-with-queue` response** | Backend retorna estrutura diferente: `professionals[].waiting_list[]` com campos `clientId`, `clientName`, `services`, `totalValue`, etc. Frontend espera `attendancesInQueue[]` com campos `position`, `estimatedWaitMinutes` | Ajustar tipo `ProfessionalWithQueue` para refletir contrato real: `waiting_list`, `queue_count`, `estimated_wait_minutes`, `current_attendance` |
-| 3 | **QueueStatus nao cria attendance** | Tela QueueStatus recebe `professionalId` e `establishmentId` mas nao chama `POST /attendances` — vai direto para polling | Adicionar chamada `POST /attendances` ao entrar na tela, salvar `attendanceId` no state |
-| 4 | **`client-queue` endpoint errado** | Frontend chama `GET /client-queue/{profId}/queue` sem `?establishmentId=`. Backend espera query param | Adicionar `establishmentId` como query param |
+| ~~3~~ | ~~QueueStatus nao cria attendance~~ | ~~Corrigido: QueueStatus agora chama POST /attendances ao entrar~~ | **FEITO** (2026-06-03) |
+| ~~4~~ | ~~`client-queue` endpoint errado~~ | ~~Corrigido: getQueue envia establishmentId como query param~~ | **FEITO** (2026-06-03) |
 | 5 | **ServiceItemType desalinhado** | Frontend tem 8 valores, 2 nao existem no backend (`CORTE_FEMININO`, `MASSAGEM`). Backend tem 25 valores | Alinhar com os 25 valores do backend |
 | 6 | **ServiceType falta EYEBROW** | Backend tem `EYEBROW`, frontend nao | Adicionar ao tipo e ao filtro da Home |
 
@@ -266,7 +286,7 @@ src/screens/
 | 7 | **OpenStatus falta TEMPORARILY_CLOSED** | Backend suporta 3 estados, frontend so 2 | Adicionar e tratar como "Fechado" na UI |
 | 8 | **Specialty e String livre** | Backend aceita qualquer string, frontend usa enum fixo | Mudar para `string` no tipo, mostrar o valor que vier |
 | 9 | **Login response tem campos extras** | Backend retorna `first_name`, `last_name`, `phone`, `birth_date`, `gender`, `profile_image_url`, `modified_fields` | Ignorar por agora, usar quando tiver tela de perfil |
-| 10 | **`wait-time` endpoint nao usado** | Backend tem `GET /client-queue/{attendanceId}/wait-time?clientId=` que retorna posicao detalhada | Usar este endpoint em vez de `/queue` para polling |
+| ~~10~~ | ~~`wait-time` endpoint nao usado~~ | ~~Corrigido: useQueueCountdown usa GET /client-queue/{attendanceId}/wait-time com polling adaptativo~~ | **FEITO** (2026-06-03) |
 | 11 | **`leave-queue` nao implementado** | Backend tem `DELETE /attendances/{id}/leave-queue` alem de `PUT /cancel` | Avaliar qual usar no cancelamento |
 
 ---
@@ -331,7 +351,7 @@ src/screens/
 
 ## 10. Testes Unitarios e Integracao
 
-### Resumo: 124 testes em 16 suites
+### Resumo: 131 testes em 16 suites
 
 | Suite | Testes | Tipo |
 |-------|--------|------|
@@ -346,11 +366,11 @@ src/screens/
 | auth.integration.test.ts | 14 | Integracao (endpoints) |
 | establishment.integration.test.ts | 5 | Integracao |
 | attendance.integration.test.ts | 4 | Integracao |
-| queue.integration.test.ts | 3 | Integracao |
+| queue.integration.test.ts | 4 | Integracao |
 | authService.integration.test.ts | 7 | Integracao (services) |
 | establishmentService.integration.test.ts | 5 | Integracao |
 | attendanceService.integration.test.ts | 4 | Integracao |
-| queueService.integration.test.ts | 5 | Integracao |
+| queueService.integration.test.ts | 5 | Integracao (services) |
 
 ### Ferramentas
 - **jest-expo@55** + jest@29
@@ -389,54 +409,55 @@ src/screens/
 
 ## 12. Pendente de Implementacao
 
-### Pendente no Backend (solicitar implementacao)
-
-| # | Item | Descricao | Contrato esperado |
-|---|------|-----------|-------------------|
-| 1 | **`GET /attendances/client/{clientId}`** | Listar atendimentos do cliente (historico + em andamento). Necessario para a tela Attendances funcionar. | **Request:** `GET /attendances/client/{clientId}?status=FINISHED,CANCELED` (ou sem filtro para todos). **Response:** `[ { id, establishmentName, professionalName, serviceItems[], status, scheduledTime, startTime, endTime, durationInMinutes, totalValue } ]`. Ordenar por `scheduledTime DESC`. |
-| 2 | **Query no AttendanceRepository** | `findByClientIdAndStatusIn(UUID clientId, List<AttendanceStatus> statuses)` — hoje todas as queries sao por professional/establishment, nenhuma por client. | Filtros uteis: por status (SCHEDULED, IN_PROGRESS, FINISHED, CANCELED), por periodo (opcional). |
-| 3 | **Attendance ativo do cliente** | Endpoint ou filtro para saber se o cliente tem attendance SCHEDULED ou IN_PROGRESS ativo (para o banner na Home e restauracao da fila ao abrir o app). | Pode ser `GET /attendances/client/{clientId}?status=SCHEDULED,IN_PROGRESS` retornando lista (vazia se nao tiver). |
-
 ### Alta prioridade
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 1 | Implementar `POST /attendances` no QueueStatus | Criar attendance ao entrar na fila, nao so mostrar posicao | Pendente |
-| 2 | Corrigir `queueService.getPosition` | Adicionar `establishmentId` como query param | Pendente |
-| 3 | Remover Alert de debug do SignUp | Mostra URL/Status — era para diagnostico | Pendente |
-| 4 | CI/CD | GitHub Actions para testes automaticos (jest + lint) | Pendente |
+| ~~1~~ | ~~POST /attendances no QueueStatus~~ | ~~Criar attendance ao entrar na fila~~ | **FEITO** (2026-06-03) |
+| ~~2~~ | ~~getQueue com establishmentId~~ | ~~Adicionar query param~~ | **FEITO** (2026-06-03) |
+| ~~3~~ | ~~Remover Alert de debug do SignUp~~ | ~~Era para diagnostico~~ | **FEITO** (sessao anterior) |
+| ~~4~~ | ~~CI/CD~~ | ~~GitHub Actions: lint + typecheck + jest~~ | **FEITO** (2026-06-03) |
+| ~~5~~ | ~~Usar wait-time endpoint para polling~~ | ~~useQueueCountdown com polling adaptativo~~ | **FEITO** (2026-06-03) |
 
-### Media prioridade
+### Media prioridade — Perfil e Settings
+
+| # | Item | Endpoint backend | Request | Response | Status |
+|---|------|-----------------|---------|----------|--------|
+| 6 | Editar dados simples (nome, telefone, data nasc., genero, foto) | `PATCH /profile/general-infos` | `{ first_name, last_name, phone, birth_date, gender, profile_image_url }` (todos opcionais) | `UserProfileResponse` (perfil atualizado + `modified_fields[]`) | Pendente |
+| 7 | Editar e-mail | `PATCH /profile/update-email/me` | `{ email }` | `UserProfileGeneralInfosAndToken` (perfil + novos tokens) — **atualizar authStore** | Pendente |
+| 8 | Editar senha | `PATCH /profile/update-password/me` | `{ password }` | `UserProfileGeneralInfosAndToken` (perfil + novos tokens) — **atualizar authStore** | Pendente |
+| 9 | Deletar conta | `DELETE /profile/delete/me` | — | 200 OK (body vazio) — **logout + limpar stores** | Pendente |
+| 10 | Endereco (CRUD completo) | `POST /users/me/addresses`, `PATCH /{id}`, `GET /`, `GET /main`, `PATCH /{id}/main`, `DELETE /{id}` | `AddressRequest { street, number, complement?, neighborhood, city, state, zipCode (8 digitos), reference?, latitude?, longitude? }` | `UserAddressAndGeneralInfosResponse` | Pendente |
+| 11 | Interceptor 401 → refresh → retry | Interceptor Axios | Partner ja tem, cliente nao | — | Pendente |
+
+### Media prioridade — Funcionalidades
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 5 | Editar nome | Tela dentro de Settings → `PATCH /profile/general-infos { first_name, last_name }` | Pendente |
-| 6 | Editar e-mail | Tela dentro de Settings → `PATCH /profile/update-email/me { email }` (retorna novos tokens) | Pendente |
-| 7 | Editar senha | Tela dentro de Settings → `PATCH /profile/update-password/me { password }` (retorna novos tokens) | Pendente |
-| 8 | Editar endereco | Tela dentro de Settings → `POST /users/me/addresses` (criar) / `PATCH /users/me/addresses/{id}` (atualizar) | Pendente |
-| 9 | Interceptor 401 → refresh → retry | Partner ja tem, cliente nao | Pendente |
-| 10 | Usar `wait-time` endpoint para polling | Retorna posicao detalhada com `estimatedWaitingTime` | Pendente |
-| 11 | Tela de selecao de servicos | Antes de entrar na fila, selecionar quais servicos quer | Pendente |
-| 12 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
+| 12 | Tela de selecao de servicos | Antes de entrar na fila, selecionar quais servicos. Endpoint: `GET /professional/{id}/service-items` | Pendente |
+| 13 | Tela Attendances — historico real | Consumir `GET /attendances/client/me` (filtros: status, dateFrom, dateTo). ClientId extraido do JWT | Pendente |
+| 14 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
+
+### Nota — Transferencia de proprietario (OWNER)
+
+O backend tem `PATCH /establishment/{id}/owner` que transfere ownership para outro profissional (`{ newOwnerId: "uuid" }`). Este endpoint e de **OWNER** e sera consumido pelo **app partner**, nao pelo client.
 
 ### Baixa prioridade
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 9 | Editar perfil dentro de Settings | PATCH /profile/general-infos, update-email, update-password | Pendente |
-| 10 | Endereco do usuario | POST /users/me/addresses | Pendente |
-| 11 | Busca por bairro/cidade | Depende de establishments terem endereco cadastrado | Pendente |
-| 12 | Testes de componente/tela | React Native Testing Library | Pendente |
-| 13 | Guest na fila | POST /professional-queue/add-quest-attendance (sem login) | Pendente |
+| 15 | Busca por bairro/cidade | Depende de establishments terem endereco cadastrado | Pendente |
+| 16 | Testes de componente/tela | React Native Testing Library | Pendente |
+| 17 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
 
-### Deploy (apos CI/CD passar)
+### Deploy (CI/CD ja configurado)
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 14 | Configurar EAS Build | Criar `eas.json`, adicionar `package` no `app.json`, configurar ambientes (dev/prod) | Pendente |
-| 15 | Gerar APK (Android) | `eas build --platform android --profile preview` para APK de teste | Pendente |
-| 16 | Gerar AAB (Play Store) | `eas build --platform android --profile production` para publicacao | Futuro |
-| 17 | Publicar na Play Store | EAS Submit ou upload manual do AAB | Futuro |
+| 18 | Configurar EAS Build | Criar `eas.json`, adicionar `package` no `app.json`, configurar ambientes (dev/prod) | Pendente |
+| 19 | Gerar APK (Android) | `eas build --platform android --profile preview` para APK de teste | Pendente |
+| 20 | Gerar AAB (Play Store) | `eas build --platform android --profile production` para publicacao | Futuro |
+| 21 | Publicar na Play Store | EAS Submit ou upload manual do AAB | Futuro |
 
 ### Concluidos
 
@@ -457,3 +478,8 @@ src/screens/
 | ~~13~~ | queueStore + banner fila ativa na Home + icone perfil | 2026-06-01 |
 | ~~14~~ | staleTime nos hooks (60s establishments, 30s professionals) | 2026-06-01 |
 | ~~15~~ | Maestro flow multi-client com cancelamento (06) | 2026-06-01 |
+| ~~16~~ | QueueStatus cria attendance (POST /attendances) ao entrar | 2026-06-03 |
+| ~~17~~ | getQueue envia establishmentId como query param | 2026-06-03 |
+| ~~18~~ | useQueueCountdown com polling adaptativo + wait-time endpoint | 2026-06-03 |
+| ~~19~~ | Remover Alert de debug do SignUp | 2026-06-03 |
+| ~~20~~ | CI/CD GitHub Actions (ESLint + TypeScript check + Jest) | 2026-06-03 |
