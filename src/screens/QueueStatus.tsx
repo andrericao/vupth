@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Alert, TouchableOpacity } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
 import { Info } from "phosphor-react-native";
@@ -36,11 +36,43 @@ export function QueueStatus() {
   const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
   const accessToken = useAuthStore((s) => s.accessToken);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
+  const updateQueue = useQueueStore((s) => s.updateQueue);
   const { remaining, color, isInQueue, isBeingAttended, activeQueue } = useQueueCountdown();
 
   const professional = professionals.find((p) => p.id === professionalId);
-  const [attendanceId] = useState<string | null>(activeQueue?.attendanceId ?? null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (activeQueue?.attendanceId || !accessToken) return;
+
+    let cancelled = false;
+
+    async function createAttendance() {
+      setIsCreating(true);
+      try {
+        const { data } = await attendanceService.create(
+          { professionalId, establishmentId, serviceItemIds: [] },
+          accessToken!,
+        );
+        if (!cancelled) {
+          await updateQueue({ attendanceId: data.id });
+        }
+      } catch (error: any) {
+        if (!cancelled) {
+          const msg = error.response?.data?.message || error.message || "Erro ao entrar na fila";
+          setCreateError(msg);
+        }
+      } finally {
+        if (!cancelled) setIsCreating(false);
+      }
+    }
+
+    createAttendance();
+    return () => { cancelled = true; };
+  }, []);
+
+  const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";
   const canCancel = canCancelAttendance(status);
 
@@ -70,6 +102,36 @@ export function QueueStatus() {
           },
         },
       ]
+    );
+  }
+
+  if (isCreating) {
+    return (
+      <Center flex={1} bg="$gray700">
+        <ActivityIndicator size="large" color="#22C55E" />
+        <Text mt="$2" color="$gray300">Entrando na fila...</Text>
+      </Center>
+    );
+  }
+
+  if (createError) {
+    return (
+      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
+        <Header />
+        <Center flex={1}>
+          <Text color="$red500" fontSize="$lg" fontFamily="$heading" textAlign="center">
+            {createError}
+          </Text>
+          <Button
+            title="Voltar"
+            mt="$4"
+            onPress={() => {
+              leaveQueue();
+              navigation.goBack();
+            }}
+          />
+        </Center>
+      </VStack>
     );
   }
 

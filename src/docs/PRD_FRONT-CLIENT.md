@@ -70,6 +70,7 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 | `/client-queue/{id}/wait-time` | GET | — | **NAO IMPLEMENTADO** | — |
 | `/professional/{id}/service-items` | GET | — | **NAO IMPLEMENTADO** | — |
 | `/attendances/{id}/leave-queue` | DELETE | — | **NAO IMPLEMENTADO** | — |
+| `/attendances/client/{clientId}` | GET | Attendances | **NAO EXISTE NO BACKEND** | — |
 | `/profile/general-infos` | PATCH | — | **FUTURO** | — |
 | `/users/me/addresses` | POST | — | **FUTURO** | — |
 
@@ -387,6 +388,14 @@ src/screens/
 ---
 
 ## 12. Pendente de Implementacao
+
+### Pendente no Backend (solicitar implementacao)
+
+| # | Item | Descricao | Contrato esperado |
+|---|------|-----------|-------------------|
+| 1 | **`GET /attendances/client/{clientId}`** | Listar atendimentos do cliente (historico + em andamento). Necessario para a tela Attendances funcionar. | **Request:** `GET /attendances/client/{clientId}?status=FINISHED,CANCELED` (ou sem filtro para todos). **Response:** `[ { id, establishmentName, professionalName, serviceItems[], status, scheduledTime, startTime, endTime, durationInMinutes, totalValue } ]`. Ordenar por `scheduledTime DESC`. |
+| 2 | **Query no AttendanceRepository** | `findByClientIdAndStatusIn(UUID clientId, List<AttendanceStatus> statuses)` — hoje todas as queries sao por professional/establishment, nenhuma por client. | Filtros uteis: por status (SCHEDULED, IN_PROGRESS, FINISHED, CANCELED), por periodo (opcional). |
+| 3 | **Attendance ativo do cliente** | Endpoint ou filtro para saber se o cliente tem attendance SCHEDULED ou IN_PROGRESS ativo (para o banner na Home e restauracao da fila ao abrir o app). | Pode ser `GET /attendances/client/{clientId}?status=SCHEDULED,IN_PROGRESS` retornando lista (vazia se nao tiver). |
 
 ### Alta prioridade
 

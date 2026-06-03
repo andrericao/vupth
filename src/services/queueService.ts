@@ -1,12 +1,45 @@
 import { api } from './api';
 
-export interface QueuePositionResponse {
+export interface QueueResponse {
+  professionalId: string;
+  professionalName: string;
+  establishmentId: string;
+  establishmentName: string;
+  size: number;
+  totalEstimatedMinutes: number;
+  totalElapsedMinutes: number;
+  totalRemainingMinutes: number;
+}
+
+export interface WaitTimeResponse {
+  attendanceId: string;
+  clientId: string;
   position: number;
-  estimatedWaitMinutes: number;
+  totalQueueSize: number;
+  totalEstimatedMinutes: number;
+  totalRemainingMinutes: number;
+  estimatedWaitingTime: number;
+  startTime: string;
 }
 
 export const queueService = {
-  getPosition(professionalId: string) {
-    return api.get<QueuePositionResponse>(`/client-queue/${professionalId}/queue`);
+  getQueue(professionalId: string, establishmentId: string, accessToken: string) {
+    return api.get<QueueResponse>(
+      `/client-queue/${professionalId}/queue`,
+      {
+        params: { establishmentId },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
+  },
+
+  getWaitTime(attendanceId: string, clientId: string, accessToken: string) {
+    return api.get<WaitTimeResponse>(
+      `/client-queue/${attendanceId}/wait-time`,
+      {
+        params: { clientId },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    );
   },
 };

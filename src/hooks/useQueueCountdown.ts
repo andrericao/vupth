@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQueueStore, ActiveQueue } from '@stores/queueStore';
+import { useAuthStore } from '@stores/authStore';
 import { queueService } from '@services/queueService';
 
-export type UrgencyLevel = 'normal' | 'warning' | 'urgent';
+export type UrgencyLevel = 'normal' | 'urgent';
 
 export const URGENCY_COLORS = {
   normal: '#F59E0B',
-  warning: '#EF4444',
   urgent: '#EF4444',
 } as const;
 
@@ -31,9 +31,12 @@ export function useQueueCountdown() {
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const user = useAuthStore((s) => s.user);
 
   const [remaining, setRemaining] = useState(0);
   const [urgency, setUrgency] = useState<UrgencyLevel>('normal');
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const recalculate = useCallback(() => {
     if (!activeQueue) return;
@@ -42,7 +45,6 @@ export function useQueueCountdown() {
     setUrgency(getUrgency(r, activeQueue.status));
   }, [activeQueue]);
 
-  // Countdown local — atualiza a cada 30s
   useEffect(() => {
     if (!activeQueue) return;
     recalculate();
@@ -50,28 +52,39 @@ export function useQueueCountdown() {
     return () => clearInterval(timer);
   }, [activeQueue, recalculate]);
 
-  // Polling adaptativo — sync com backend
   useEffect(() => {
-    if (!activeQueue) return;
-
-    const r = getRemainingMinutes(activeQueue);
-    const interval = getPollingInterval(r);
+    if (!activeQueue || !accessToken) return;
 
     const poll = async () => {
       try {
-        const { data } = await queueService.getPosition(activeQueue.professionalId);
-        if (data.estimatedWaitMinutes !== undefined) {
+        if (activeQueue.attendanceId && user?.id) {
+          const { data } = await queueService.getWaitTime(
+            activeQueue.attendanceId,
+            user.id,
+            accessToken,
+          );
           updateQueue({
-            estimatedMinutes: data.estimatedWaitMinutes,
+            estimatedMinutes: data.estimatedWaitingTime,
             enteredAt: Date.now(),
           });
+
+          if (data.totalRemainingMinutes <= 0) {
+            updateQueue({ status: 'SCHEDULED' });
+          }
         }
       } catch {}
     };
 
-    const timer = setInterval(poll, interval);
-    return () => clearInterval(timer);
-  }, [activeQueue?.professionalId, remaining > 60, remaining > 10]);
+    const r = getRemainingMinutes(activeQueue);
+    const interval = getPollingInterval(r);
+
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(poll, interval);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [activeQueue?.attendanceId, accessToken, remaining > 60, remaining > 10]);
 
   const color = activeQueue ? URGENCY_COLORS[urgency] : URGENCY_COLORS.normal;
 
