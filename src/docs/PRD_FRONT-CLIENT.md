@@ -413,73 +413,58 @@ src/screens/
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| ~~1~~ | ~~POST /attendances no QueueStatus~~ | ~~Criar attendance ao entrar na fila~~ | **FEITO** (2026-06-03) |
-| ~~2~~ | ~~getQueue com establishmentId~~ | ~~Adicionar query param~~ | **FEITO** (2026-06-03) |
-| ~~3~~ | ~~Remover Alert de debug do SignUp~~ | ~~Era para diagnostico~~ | **FEITO** (sessao anterior) |
-| ~~4~~ | ~~CI/CD~~ | ~~GitHub Actions: lint + typecheck + jest~~ | **FEITO** (2026-06-03) |
-| ~~5~~ | ~~Usar wait-time endpoint para polling~~ | ~~useQueueCountdown com polling adaptativo~~ | **FEITO** (2026-06-03) |
-
-### Media prioridade — Perfil e Settings
-
-| # | Item | Endpoint backend | Request | Response | Status |
-|---|------|-----------------|---------|----------|--------|
-| 6 | Editar dados simples (nome, telefone, data nasc., genero, foto) | `PATCH /profile/general-infos` | `{ first_name, last_name, phone, birth_date, gender, profile_image_url }` (todos opcionais) | `UserProfileResponse` (perfil atualizado + `modified_fields[]`) | Pendente |
-| 7 | Editar e-mail | `PATCH /profile/update-email/me` | `{ email }` | `UserProfileGeneralInfosAndToken` (perfil + novos tokens) — **atualizar authStore** | Pendente |
-| 8 | Editar senha | `PATCH /profile/update-password/me` | `{ password }` | `UserProfileGeneralInfosAndToken` (perfil + novos tokens) — **atualizar authStore** | Pendente |
-| 9 | Deletar conta | `DELETE /profile/delete/me` | — | 200 OK (body vazio) — **logout + limpar stores** | Pendente |
-| 10 | Endereco (CRUD completo) | `POST /users/me/addresses`, `PATCH /{id}`, `GET /`, `GET /main`, `PATCH /{id}/main`, `DELETE /{id}` | `AddressRequest { street, number, complement?, neighborhood, city, state, zipCode (8 digitos), reference?, latitude?, longitude? }` | `UserAddressAndGeneralInfosResponse` | Pendente |
-| 11 | Interceptor 401 → refresh → retry | Interceptor Axios | Partner ja tem, cliente nao | — | Pendente |
+| 1 | Interceptor 401 → refresh → retry | Interceptor Axios — partner ja tem, cliente nao | Pendente |
+| 2 | Tela Attendances — historico real | Consumir `GET /attendances/client/me` (filtros: status, dateFrom, dateTo). ClientId extraido do JWT | Pendente |
+| 3 | Visualizacao do atendimento atual | Cliente ve detalhes do atendimento IN_PROGRESS (profissional, servicos, tempo decorrido). Dados vem do `GET /client-queue/{attendanceId}/wait-time` + `GET /attendances/{id}` | Pendente |
+| 4 | Corrigir 5 erros TypeScript pre-existentes | CardProf, CardService, CardShop, Services, establishmentService test | Pendente |
 
 ### Media prioridade — Funcionalidades
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 12 | Tela de selecao de servicos | Antes de entrar na fila, selecionar quais servicos. Endpoint: `GET /professional/{id}/service-items` | Pendente |
-| 13 | Tela Attendances — historico real | Consumir `GET /attendances/client/me` (filtros: status, dateFrom, dateTo). ClientId extraido do JWT | Pendente |
-| 14 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
-
-### Nota — Transferencia de proprietario (OWNER)
-
-O backend tem `PATCH /establishment/{id}/owner` que transfere ownership para outro profissional (`{ newOwnerId: "uuid" }`). Este endpoint e de **OWNER** e sera consumido pelo **app partner**, nao pelo client.
+| 5 | Tela de selecao de servicos | Antes de entrar na fila, selecionar quais servicos. Endpoint: `GET /professional/{id}/service-items` | Pendente |
+| 6 | Visualizacao de fila para cliente | Qualquer cliente ve a fila de um profissional (lista de attendances). Endpoint: `GET /client-queue/{profId}/queue?establishmentId=` — campo `attendancesInQueue[]` ja retornado | Pendente |
+| 7 | Usar `DELETE /attendances/{id}/leave-queue` | Backend tem endpoint separado para sair da fila (alem de PUT /cancel). Avaliar qual usar em cada contexto | Pendente |
+| 8 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
 
 ### Baixa prioridade
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 15 | Busca por bairro/cidade | Depende de establishments terem endereco cadastrado | Pendente |
-| 16 | Testes de componente/tela | React Native Testing Library | Pendente |
-| 17 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
+| 9 | Trocar lugar na fila | Endpoint pendente no backend (`ClientServiceImpl:138`). Frontend consumira quando pronto | Aguarda backend |
+| 10 | Busca por bairro/cidade | Depende de establishments terem endereco cadastrado | Pendente |
+| 11 | Testes de componente/tela | React Native Testing Library | Pendente |
+| 12 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
+
+### Nota — Transferencia de proprietario (OWNER)
+
+O backend tem `PATCH /establishment/{id}/owner` que transfere ownership para outro profissional (`{ newOwnerId: "uuid" }`). Este endpoint e de **OWNER** e sera consumido pelo **app partner**, nao pelo client.
 
 ### Deploy (CI/CD ja configurado)
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 18 | Configurar EAS Build | Criar `eas.json`, adicionar `package` no `app.json`, configurar ambientes (dev/prod) | Pendente |
-| 19 | Gerar APK (Android) | `eas build --platform android --profile preview` para APK de teste | Pendente |
-| 20 | Gerar AAB (Play Store) | `eas build --platform android --profile production` para publicacao | Futuro |
-| 21 | Publicar na Play Store | EAS Submit ou upload manual do AAB | Futuro |
+| 13 | Configurar EAS Build | Criar `eas.json`, adicionar `package` no `app.json`, configurar ambientes (dev/prod) | Pendente |
+| 14 | Gerar APK (Android) | `eas build --platform android --profile preview` para APK de teste | Pendente |
+| 15 | Gerar AAB (Play Store) | `eas build --platform android --profile production` para publicacao | Futuro |
+| 16 | Publicar na Play Store | EAS Submit ou upload manual do AAB | Futuro |
 
 ### Concluidos
 
 | # | Item | Data |
 |---|------|------|
-| ~~1~~ | Alinhar `ServiceItemType` com 25 valores do backend | 2026-05-30 |
-| ~~2~~ | Adicionar `EYEBROW` ao `ServiceType` + filtro na Home | 2026-05-30 |
-| ~~3~~ | Adicionar `TEMPORARILY_CLOSED` ao `OpenStatus` | 2026-05-30 |
-| ~~4~~ | Corrigir `services` para `string[]` no tipo `Establishment` | 2026-05-30 |
-| ~~5~~ | Alinhar `ProfessionalWithQueue` com backend (`waiting_list`, `queue_count`, etc.) | 2026-05-30 |
-| ~~6~~ | Mudar `Specialty` de enum para string livre | 2026-05-30 |
-| ~~7~~ | Criar PRD_FRONT-CLIENT.md | 2026-05-30 |
-| ~~8~~ | Maestro E2E configurado (5 flows) | 2026-05-16 |
-| ~~9~~ | Validacao de senha com regras visuais + toggle visibilidade | 2026-05-16 |
-| ~~10~~ | Tela Profile (menu: Atendimentos + Configuracoes + Sair) | 2026-06-01 |
-| ~~11~~ | Tela Attendances (em andamento + realizados placeholder) | 2026-06-01 |
-| ~~12~~ | Tela Settings (nome, email, senha, endereco placeholder) | 2026-06-01 |
-| ~~13~~ | queueStore + banner fila ativa na Home + icone perfil | 2026-06-01 |
-| ~~14~~ | staleTime nos hooks (60s establishments, 30s professionals) | 2026-06-01 |
-| ~~15~~ | Maestro flow multi-client com cancelamento (06) | 2026-06-01 |
-| ~~16~~ | QueueStatus cria attendance (POST /attendances) ao entrar | 2026-06-03 |
-| ~~17~~ | getQueue envia establishmentId como query param | 2026-06-03 |
-| ~~18~~ | useQueueCountdown com polling adaptativo + wait-time endpoint | 2026-06-03 |
-| ~~19~~ | Remover Alert de debug do SignUp | 2026-06-03 |
-| ~~20~~ | CI/CD GitHub Actions (ESLint + TypeScript check + Jest) | 2026-06-03 |
+| ~~1~~ | Alinhar tipos com backend (ServiceItemType 25 valores, EYEBROW, TEMPORARILY_CLOSED, Specialty string) | 2026-05-30 |
+| ~~2~~ | Corrigir `services` para `string[]`, `ProfessionalWithQueue` com campos reais | 2026-05-30 |
+| ~~3~~ | PRD_FRONT-CLIENT.md criado | 2026-05-30 |
+| ~~4~~ | Maestro E2E (6 flows) + validacao de senha com regras visuais | 2026-05-16 |
+| ~~5~~ | Telas Profile, Attendances (placeholder), Settings (placeholder) | 2026-06-01 |
+| ~~6~~ | queueStore + banner fila ativa na Home + icone perfil + staleTime | 2026-06-01 |
+| ~~7~~ | POST /attendances no QueueStatus + getQueue com establishmentId | 2026-06-03 |
+| ~~8~~ | useQueueCountdown com polling adaptativo + wait-time endpoint | 2026-06-03 |
+| ~~9~~ | CI/CD GitHub Actions (ESLint + TypeScript check + Jest) | 2026-06-03 |
+| ~~10~~ | Tela EditProfile (PATCH /profile/general-infos) — nome, telefone, nasc., genero | 2026-06-03 |
+| ~~11~~ | Tela EditEmail (PATCH /profile/update-email/me) — atualiza tokens | 2026-06-03 |
+| ~~12~~ | Tela EditPassword (PATCH /profile/update-password/me) — regras visuais + tokens | 2026-06-03 |
+| ~~13~~ | Deletar conta (DELETE /profile/delete/me) no Settings | 2026-06-03 |
+| ~~14~~ | Tela EditAddress — CRUD completo (6 endpoints /users/me/addresses) | 2026-06-03 |
+| ~~15~~ | profileService + addressService + testes de integracao | 2026-06-03 |
