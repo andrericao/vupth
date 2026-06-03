@@ -7,6 +7,12 @@ interface AuthUser {
   id: string;
   email: string;
   roles: string[];
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
+  birth_date?: string | null;
+  gender?: string | null;
+  profile_image_url?: string | null;
 }
 
 interface AuthState {
@@ -21,6 +27,8 @@ interface AuthState {
   logout: () => Promise<void>;
   refreshTokens: () => Promise<void>;
   restoreSession: () => Promise<void>;
+  updateUser: (partial: Partial<AuthUser>) => Promise<void>;
+  updateTokensAndUser: (tokens: { access_token: string; refresh_token: string }, user: Partial<AuthUser>) => Promise<void>;
 }
 
 const TOKEN_KEY = 'vupth_access_token';
@@ -86,6 +94,28 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
+    });
+  },
+
+  updateUser: async (partial) => {
+    const { user } = get();
+    if (!user) return;
+    const updated = { ...user, ...partial };
+    await SecureStore.setItemAsync(USER_KEY, JSON.stringify(updated));
+    set({ user: updated });
+  },
+
+  updateTokensAndUser: async (tokens, userPartial) => {
+    const { user } = get();
+    if (!user) return;
+    const updated = { ...user, ...userPartial };
+    await SecureStore.setItemAsync(TOKEN_KEY, tokens.access_token);
+    await SecureStore.setItemAsync(REFRESH_KEY, tokens.refresh_token);
+    await SecureStore.setItemAsync(USER_KEY, JSON.stringify(updated));
+    set({
+      user: updated,
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
     });
   },
 

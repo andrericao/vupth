@@ -11,6 +11,10 @@ import { QueueStatus } from "@screens/QueueStatus";
 import { Profile } from "@screens/Profile";
 import { Attendances } from "@screens/Attendances";
 import { Settings } from "@screens/Settings";
+import { EditProfile } from "@screens/EditProfile";
+import { EditEmail } from "@screens/EditEmail";
+import { EditPassword } from "@screens/EditPassword";
+import { EditAddress } from "@screens/EditAddress";
 
 export type AppRoutes = {
   home: undefined;
@@ -21,6 +25,10 @@ export type AppRoutes = {
   profile: undefined;
   attendances: undefined;
   settings: undefined;
+  editProfile: undefined;
+  editEmail: undefined;
+  editPassword: undefined;
+  editAddress: undefined;
 };
 
 export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutes>;
@@ -38,6 +46,10 @@ export function AuthRoutes() {
       <Screen name="profile" component={Profile} />
       <Screen name="attendances" component={Attendances} />
       <Screen name="settings" component={Settings} />
+      <Screen name="editProfile" component={EditProfile} />
+      <Screen name="editEmail" component={EditEmail} />
+      <Screen name="editPassword" component={EditPassword} />
+      <Screen name="editAddress" component={EditAddress} />
     </Navigator>
   );
 }
