@@ -1,7 +1,5 @@
 import { FlatList } from "react-native";
 
-import { PROFS } from "@utils/profsData";
-
 import { CardProf, CardProfProps } from "./CardProf";
 
 type Props = {

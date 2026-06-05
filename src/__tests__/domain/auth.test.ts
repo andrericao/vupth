@@ -1,4 +1,4 @@
-import { validateLogin, validateSignUp, getPasswordRules, isPasswordStrong } from '@domain/auth/validateAuth';
+import { validateLogin, validateSignUp, getPasswordRules } from '@domain/auth/validateAuth';
 import { isAuthenticated, setAuthenticated } from '@domain/auth/authState';
 
 describe('Auth Domain', () => {

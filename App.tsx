@@ -24,7 +24,7 @@ export default function App() {
   useEffect(() => {
     restoreSession();
     restoreQueue();
-  }, []);
+  }, [restoreSession, restoreQueue]);
 
   return (
     <QueryClientProvider client={queryClient}>

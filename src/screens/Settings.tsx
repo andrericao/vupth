@@ -12,7 +12,6 @@ import {
   EnvelopeSimple,
   Lock,
   MapPin,
-  Trash,
   CaretRight,
 } from "phosphor-react-native";
 

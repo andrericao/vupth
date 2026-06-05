@@ -1,4 +1,4 @@
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, ImageSourcePropType } from "react-native";
 
 import { useNavigation } from "@react-navigation/native";
 
@@ -8,8 +8,6 @@ import {
   ChevronLeftIcon,
   Icon,
 } from "@gluestack-ui/themed";
-
-import { ImageSourcePropType } from "react-native";
 
 type Props = {
   data: ImageSourcePropType;

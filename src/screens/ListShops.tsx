@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { FlatList } from "react-native";
 
 import { useRoute } from "@react-navigation/native";
@@ -13,11 +13,8 @@ import { CardShopProps } from "@components/CardShop";
 import { SERVICES } from "@utils/servicesData";
 import { SHOPS } from "@utils/shopsData";
 
-// import { shopsGetAll } from "@storage/shops/shopsGetAll";
-
 type RouteParams = {
   service: string;
-  shop: string;
 };
 
 export function ListShops() {
@@ -25,25 +22,11 @@ export function ListShops() {
   const { service } = route.params as RouteParams;
 
   const [serviceSelected, setServicoSelected] = useState(service);
-  const [shops, setShops] = useState<CardShopProps[]>([]);
 
-  /*
-  async function fetchShops() {
-    try {
-      const data = await shopsGetAll();
-      setListShops(data);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-    */
-
-  useEffect(() => {
-    const shopsFiltered = SHOPS.filter(
-      (shop) => shop.serviceName === serviceSelected
-    ) as CardShopProps[];
-    setShops(shopsFiltered);
-  }, [serviceSelected]);
+  const shops = useMemo(
+    () => SHOPS.filter((s) => s.serviceName === serviceSelected) as CardShopProps[],
+    [serviceSelected],
+  );
 
   return (
     <VStack flex={1} px={15} py={60}>

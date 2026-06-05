@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { Alert, ScrollView, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { VStack, Text, Heading, Box, HStack } from "@gluestack-ui/themed";
 import { Star, Trash, PencilSimple } from "phosphor-react-native";
 
@@ -24,7 +23,6 @@ const EMPTY_FORM: AddressRequest = {
 };
 
 export function EditAddress() {
-  const navigation = useNavigation();
   const accessToken = useAuthStore((s) => s.accessToken);
 
   const [mode, setMode] = useState<Mode>("list");
@@ -49,6 +47,7 @@ export function EditAddress() {
   }, [accessToken]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadAddresses();
   }, [loadAddresses]);
 

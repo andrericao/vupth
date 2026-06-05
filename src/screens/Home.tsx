@@ -9,7 +9,7 @@ import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
-import { useQueueCountdown, URGENCY_COLORS } from "@hooks/useQueueCountdown";
+import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { formatWaitTime } from "@domain/queue/types";
 import { UserCircle, Queue } from "phosphor-react-native";
 
@@ -93,7 +93,6 @@ export function Home() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { data: establishments = [], isLoading, isError } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const logout = useAuthStore((s) => s.logout);
   const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
 
   const isSearching = search.trim().length > 0;

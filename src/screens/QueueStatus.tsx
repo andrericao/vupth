@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
@@ -42,9 +42,11 @@ export function QueueStatus() {
   const professional = professionals.find((p) => p.id === professionalId);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const didCreate = useRef(false);
 
   useEffect(() => {
-    if (activeQueue?.attendanceId || !accessToken) return;
+    if (didCreate.current || activeQueue?.attendanceId || !accessToken) return;
+    didCreate.current = true;
 
     let cancelled = false;
 
@@ -70,7 +72,7 @@ export function QueueStatus() {
 
     createAttendance();
     return () => { cancelled = true; };
-  }, []);
+  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";

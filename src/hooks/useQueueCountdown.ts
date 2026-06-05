@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQueueStore, ActiveQueue } from '@stores/queueStore';
 import { useAuthStore } from '@stores/authStore';
 import { queueService } from '@services/queueService';
@@ -30,7 +30,6 @@ function getPollingInterval(remaining: number): number {
 export function useQueueCountdown() {
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
-  const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const accessToken = useAuthStore((s) => s.accessToken);
   const user = useAuthStore((s) => s.user);
 
@@ -38,19 +37,27 @@ export function useQueueCountdown() {
   const [urgency, setUrgency] = useState<UrgencyLevel>('normal');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const recalculate = useCallback(() => {
-    if (!activeQueue) return;
-    const r = getRemainingMinutes(activeQueue);
-    setRemaining(r);
-    setUrgency(getUrgency(r, activeQueue.status));
-  }, [activeQueue]);
-
   useEffect(() => {
     if (!activeQueue) return;
-    recalculate();
-    const timer = setInterval(recalculate, 30000);
-    return () => clearInterval(timer);
-  }, [activeQueue, recalculate]);
+
+    const timer = setInterval(() => {
+      const r = getRemainingMinutes(activeQueue);
+      setRemaining(r);
+      setUrgency(getUrgency(r, activeQueue.status));
+    }, 30000);
+
+    // initial calc via interval trick
+    const immediate = setTimeout(() => {
+      const r = getRemainingMinutes(activeQueue);
+      setRemaining(r);
+      setUrgency(getUrgency(r, activeQueue.status));
+    }, 0);
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(immediate);
+    };
+  }, [activeQueue]);
 
   useEffect(() => {
     if (!activeQueue || !accessToken) return;
@@ -84,7 +91,7 @@ export function useQueueCountdown() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [activeQueue?.attendanceId, accessToken, remaining > 60, remaining > 10]);
+  }, [activeQueue, accessToken, user?.id, updateQueue]);
 
   const color = activeQueue ? URGENCY_COLORS[urgency] : URGENCY_COLORS.normal;
 

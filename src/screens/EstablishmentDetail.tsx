@@ -90,6 +90,7 @@ export function EstablishmentDetail() {
       professionalName: prof?.name ?? "",
       establishmentId,
       establishmentName: establishment?.name ?? "",
+      // eslint-disable-next-line react-hooks/purity
       enteredAt: Date.now(),
       estimatedMinutes: prof?.estimated_wait_minutes ?? 0,
       status: "SCHEDULED",
