@@ -10,7 +10,7 @@
 > **Testes E2E:** Maestro v2.5.1 no celular fisico (Moto G54 via USB)
 > **CI/CD:** GitHub Actions — lint (ESLint + eslint-config-expo), typecheck (tsc --noEmit), test (jest --ci --coverage)
 >
-> **Ultima atualizacao:** 2026-06-03
+> **Ultima atualizacao:** 2026-06-05
 
 ---
 
@@ -417,24 +417,101 @@ src/screens/
 | 2 | Tela Attendances — historico real | Consumir `GET /attendances/client/me` (filtros: status, dateFrom, dateTo). ClientId extraido do JWT | Pendente |
 | 3 | Visualizacao do atendimento atual | Cliente ve detalhes do atendimento IN_PROGRESS (profissional, servicos, tempo decorrido). Dados vem do `GET /client-queue/{attendanceId}/wait-time` + `GET /attendances/{id}` | Pendente |
 | 4 | Corrigir 5 erros TypeScript pre-existentes | CardProf, CardService, CardShop, Services, establishmentService test | Pendente |
+| 5 | Selecao de servicos obrigatoria | Cliente NAO deve entrar na fila sem selecionar servicos. Tela de selecao antes de confirmar. Endpoint: `GET /professional/{id}/service-items` | Pendente |
 
 ### Media prioridade — Funcionalidades
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 5 | Tela de selecao de servicos | Antes de entrar na fila, selecionar quais servicos. Endpoint: `GET /professional/{id}/service-items` | Pendente |
 | 6 | Visualizacao de fila para cliente | Qualquer cliente ve a fila de um profissional (lista de attendances). Endpoint: `GET /client-queue/{profId}/queue?establishmentId=` — campo `attendancesInQueue[]` ja retornado | Pendente |
 | 7 | Usar `DELETE /attendances/{id}/leave-queue` | Backend tem endpoint separado para sair da fila (alem de PUT /cancel). Avaliar qual usar em cada contexto | Pendente |
 | 8 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
+| 9 | Busca "Pra ontem" | Botao que busca o profissional com menor tempo de espera mais proximo do cliente. Ordena por tempo estimado ASC | Pendente |
+
+### Regras de negocio — Multa por cancelamento
+
+> **Requer backend:** endpoints de multa, saldo pendente e cobranca no proximo atendimento.
+
+**Regra:** Se o cliente cancelar um atendimento com tempo estimado <= 60 minutos para ser atendido, sera cobrada multa de **R$ 3,00** no proximo atendimento.
+
+**Detalhes:**
+- A multa e vinculada ao **profissional** do atendimento cancelado, nao ao estabelecimento
+- Se cancelou com barbeiro A e depois agenda com manicure B: cobra servico da manicure + R$ 3,00 de multa (que vai para o barbeiro A)
+- Valores separados na cobranca: valor do servico + valor da(s) multa(s) pendente(s)
+- **Popup de confirmacao obrigatorio** antes de cancelar, informando que havera multa se aplicavel
+- No menu do usuario (Profile), adicionar link para **"Multas pendentes"** com icone, listando multas abertas
+
+**Distribuicao do valor da multa (apos subtrair taxa de 4% do intermediador):**
+- Se profissional != proprietario: dividido entre **profissional + proprietario + plataforma** (3 partes)
+- Se profissional == proprietario: dividido entre **profissional + plataforma** (2 partes)
+
+**Frontend (app client):**
+- Tela de multas pendentes acessivel via Profile
+- Popup de cancelamento mostra aviso de multa quando tempo <= 60min
+- Na tela de pagamento do proximo atendimento, mostrar multas pendentes somadas ao valor
+
+### Regras de negocio — Encaixe na fila
+
+> **Requer backend:** endpoints de solicitacao de encaixe, aceite pelo profissional, calculo de redistribuicao de tempo.
+
+**Regra:** Cliente pode solicitar **encaixe** na fila, pagando valor adicional. O profissional decide se aceita e em qual posicao inserir.
+
+**Valor do encaixe:**
+- Padrao: **R$ 3,00** ou **10% do valor do servico** (o que for maior, para servicos > R$ 30,00)
+- Profissional pode negociar valor diferente
+
+**Fluxo:**
+1. Cliente solicita encaixe informando horario desejado (ex: "quero cortar em 2 horas")
+2. Profissional recebe notificacao no app partner
+3. Profissional decide a posicao de insercao (ex: 5a posicao)
+4. App calcula automaticamente a redistribuicao de tempo para os clientes posteriores
+5. Formulario mostra ao profissional: tempo necessario + quanto sera adicionado por atendimento
+6. Profissional confirma ou ajusta
+
+**Calculo de redistribuicao de tempo:**
+- Tempo extra total e dividido **proporcionalmente** entre os atendimentos posteriores ao encaixe
+- Exemplo: encaixe na posicao 5, com 4 clientes depois → sugere ~7,5 min a mais por servico
+- Se o atendimento cruza intervalo de refeicao, pode adiantar/atrasar o intervalo em ate 15 min
+- **Regra critica:** o tempo medio de atendimento do profissional NAO deve ser afetado. Os minutos extras aparecem progressivamente — o cliente imediatamente apos o encaixe absorve mais, os seguintes menos
+- Clientes abaixo da posicao do encaixe mantem seus tempos originais
+
+**Distribuicao do valor de encaixe (apos taxa de 4%):**
+- Sempre dividido entre **profissional + plataforma** (2 partes), independente de ser tambem proprietario
+
+**Frontend (app client):**
+- Botao "Solicitar encaixe" visivel na tela de fila quando ha espera
+- Formulario: horario desejado + valor oferecido (pre-preenchido com padrao)
+- Status da solicitacao: PENDENTE → ACEITO/RECUSADO
+- Se aceito: mostra nova posicao e tempo estimado atualizado
+
+### Regras de negocio — Agenda e manifestacao de interesse
+
+> **Requer backend:** endpoints de agenda do profissional e manifestacao de interesse.
+
+**Regra:** O profissional pode abrir agenda da semana. Clientes podem manifestar interesse em entrar na fila em um dia especifico. O profissional confirma antes de adicionar a fila.
+
+**Fluxo:**
+1. Profissional abre agenda da semana no app partner (dias e horarios disponiveis)
+2. Cliente ve agenda aberta no app client
+3. Cliente manifesta interesse em um dia (ex: quinta-feira)
+4. Profissional ve lista de interessados em ordem de chegada
+5. Profissional confirma/edita/reordena os clientes antes de expor a fila publica
+6. Apos confirmacao, o cliente e adicionado a fila do dia escolhido
+
+**Frontend (app client):**
+- Na tela do profissional, aba "Agenda" mostrando dias disponiveis da semana
+- Botao "Quero cortar nesse dia" para manifestar interesse
+- Status da manifestacao: PENDENTE → CONFIRMADO/RECUSADO
+- Lista de interessados (posicao do cliente na ordem de chegada, sem ver outros nomes)
 
 ### Baixa prioridade
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 9 | Trocar lugar na fila | Endpoint pendente no backend (`ClientServiceImpl:138`). Frontend consumira quando pronto | Aguarda backend |
-| 10 | Busca por bairro/cidade | Depende de establishments terem endereco cadastrado | Pendente |
-| 11 | Testes de componente/tela | React Native Testing Library | Pendente |
-| 12 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
+| 10 | Trocar lugar na fila | Endpoint pendente no backend (`ClientServiceImpl:138`). Frontend consumira quando pronto | Aguarda backend |
+| 11 | Busca por bairro/cidade | Depende de establishments terem endereco cadastrado | Pendente |
+| 12 | Testes de componente/tela | React Native Testing Library | Pendente |
+| 13 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
 
 ### Nota — Transferencia de proprietario (OWNER)
 
