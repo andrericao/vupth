@@ -6,11 +6,11 @@
 >
 > **App:** React Native 0.81 + Expo SDK 54, Gluestack UI v1, React Navigation native-stack
 > **State:** Zustand v5 + Axios + TanStack Query v5 + Expo SecureStore
-> **Testes unitarios/integracao:** 131 passando em 16 suites (Jest 29 + axios-mock-adapter)
+> **Testes unitarios/integracao:** 144 passando em 18 suites (Jest 29 + axios-mock-adapter)
 > **Testes E2E:** Maestro v2.5.1 no celular fisico (Moto G54 via USB)
-> **CI/CD:** GitHub Actions — lint (ESLint + eslint-config-expo), typecheck (tsc --noEmit), test (jest --ci --coverage)
+> **CI/CD:** GitHub Actions — lint (ESLint v9 flat config + eslint-config-expo), typecheck (tsc --noEmit), test (jest --ci --coverage) — 0 erros/0 warnings
 >
-> **Ultima atualizacao:** 2026-06-05
+> **Ultima atualizacao:** 2026-06-08
 
 ---
 
@@ -72,16 +72,16 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 | `/professional/{id}/service-items` | GET | — | **NAO IMPLEMENTADO** | — |
 | `/attendances/{id}/leave-queue` | DELETE | — | **NAO IMPLEMENTADO** | — |
 | `/attendances/client/me` | GET | Attendances | **NAO IMPLEMENTADO** | — |
-| `/profile/general-infos` | PATCH | Settings | **NAO IMPLEMENTADO** | — |
-| `/profile/update-email/me` | PATCH | Settings | **NAO IMPLEMENTADO** | — |
-| `/profile/update-password/me` | PATCH | Settings | **NAO IMPLEMENTADO** | — |
-| `/profile/delete/me` | DELETE | Settings | **NAO IMPLEMENTADO** | — |
-| `/users/me/addresses` | POST | Settings | **NAO IMPLEMENTADO** | — |
-| `/users/me/addresses/{id}` | PATCH | Settings | **NAO IMPLEMENTADO** | — |
-| `/users/me/addresses` | GET | Settings | **NAO IMPLEMENTADO** | — |
-| `/users/me/addresses/main` | GET | Settings | **NAO IMPLEMENTADO** | — |
-| `/users/me/addresses/{id}/main` | PATCH | Settings | **NAO IMPLEMENTADO** | — |
-| `/users/me/addresses/{id}` | DELETE | Settings | **NAO IMPLEMENTADO** | — |
+| `/profile/general-infos` | PATCH | EditProfile | Implementado | 5 |
+| `/profile/update-email/me` | PATCH | EditEmail | Implementado | 5 |
+| `/profile/update-password/me` | PATCH | EditPassword | Implementado | 5 |
+| `/profile/delete/me` | DELETE | Settings | Implementado | 5 |
+| `/users/me/addresses` | POST | EditAddress | Implementado | 7 |
+| `/users/me/addresses/{id}` | PATCH | EditAddress | Implementado | 7 |
+| `/users/me/addresses` | GET | EditAddress | Implementado | 7 |
+| `/users/me/addresses/main` | GET | EditAddress | Implementado | 7 |
+| `/users/me/addresses/{id}/main` | PATCH | EditAddress | Implementado | 7 |
+| `/users/me/addresses/{id}` | DELETE | EditAddress | Implementado | 7 |
 | `/establishment/{id}/owner` | PATCH | — | **FUTURO (partner)** | — |
 
 ---
@@ -117,14 +117,18 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 
 ```
 src/screens/
-  Home.tsx                  — Lista + busca + filtro por tipo + icone perfil + banner fila ativa
+  Home.tsx                  — Lista + busca + filtro por tipo + icone perfil + banner fila ativa + pull-to-refresh
   EstablishmentDetail.tsx   — Profissionais + entrar na fila (salva no queueStore)
   Login.tsx                 — Email + senha + toggle visibilidade
   SignUp.tsx                — Email + senha + confirmar + regras visuais + toggle
   QueueStatus.tsx           — Tempo estimado (countdown), info tooltip, criar attendance, cancelar, voltar
   Profile.tsx               — Menu: Atendimentos + Configuracoes + Sair da conta
   Attendances.tsx           — Secao "Em andamento" (fila ativa) + "Realizados" (placeholder)
-  Settings.tsx              — Nome, E-mail, Senha, Endereco (placeholder onPress)
+  Settings.tsx              — Nome, E-mail, Senha, Endereco, Deletar conta
+  EditProfile.tsx           — Nome, sobrenome, telefone, data nasc., genero (PATCH /profile/general-infos)
+  EditEmail.tsx             — Troca email + atualiza tokens (PATCH /profile/update-email/me)
+  EditPassword.tsx          — Nova senha + regras visuais + atualiza tokens (PATCH /profile/update-password/me)
+  EditAddress.tsx           — CRUD completo de enderecos (lista, criar, editar, remover, definir principal)
 ```
 
 ### Home.tsx
@@ -132,6 +136,7 @@ src/screens/
 - Busca por nome (case insensitive, parcial)
 - Cards com nome, tipo, bairro/cidade, quantidade de servicos, badge aberto/fechado
 - Botoes Entrar/Cadastrar (nao autenticado) ou Sair (autenticado)
+- **Pull-to-refresh** para atualizar lista de estabelecimentos
 
 ### EstablishmentDetail.tsx
 - Nome, badge aberto/fechado, espera minima
@@ -157,6 +162,8 @@ src/screens/
 - `logout()` — POST /auth/logout → limpa SecureStore
 - `refreshTokens()` — POST /auth/refresh → atualiza tokens
 - `restoreSession()` — carrega tokens salvos ao abrir app
+- `updateUser(partial)` — atualiza dados do usuario no store e SecureStore
+- `updateTokensAndUser(tokens, userPartial)` — atualiza tokens + dados (usado por EditEmail/EditPassword)
 - **SecureStore keys:** `vupth_access_token`, `vupth_refresh_token`, `vupth_user`
 
 ### queueStore.ts (Zustand + SecureStore)
@@ -342,16 +349,20 @@ src/screens/
 }
 ```
 
-### Interceptor Axios
-- O frontend **nao tem** interceptor de refresh automatico (partner tem)
-- Refresh e chamado manualmente via `authStore.refreshTokens()`
-- **TODO:** Implementar interceptor 401 → refresh → retry
+### Interceptor Axios (api.ts)
+- **Request interceptor:** injeta `Bearer <token>` automaticamente em requests autenticadas
+- **Rotas publicas** (`/establishment`, `/auth/`) nao recebem token
+- **Response interceptor 401:** ao receber 401, tenta refresh automatico com refresh_token
+  - Se refresh ok: atualiza SecureStore + authStore, retenta request original
+  - Se multiplas requests falham ao mesmo tempo: enfileira e resolve todas apos refresh
+  - Se refresh falha: limpa sessao (logout automatico)
+- **Timeout:** 90s para dev/prod (Render cold start), 10s para local
 
 ---
 
 ## 10. Testes Unitarios e Integracao
 
-### Resumo: 131 testes em 16 suites
+### Resumo: 144 testes em 18 suites
 
 | Suite | Testes | Tipo |
 |-------|--------|------|
@@ -371,9 +382,11 @@ src/screens/
 | establishmentService.integration.test.ts | 5 | Integracao |
 | attendanceService.integration.test.ts | 4 | Integracao |
 | queueService.integration.test.ts | 5 | Integracao (services) |
+| profileService.integration.test.ts | 5 | Integracao (profile CRUD) |
+| addressService.integration.test.ts | 7 | Integracao (address CRUD) |
 
 ### Ferramentas
-- **jest-expo@55** + jest@29
+- **jest-expo@54** + jest@29
 - **axios-mock-adapter** para simular respostas da API
 - MSW v2 instalado mas incompativel com jest-expo (nao usado)
 - `testPathIgnorePatterns`: __mocks__/, mocks/, integration/setup.ts
@@ -413,11 +426,10 @@ src/screens/
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 1 | Interceptor 401 → refresh → retry | Interceptor Axios — partner ja tem, cliente nao | Pendente |
+| 1 | ~~Interceptor 401 → refresh → retry~~ | Implementado em api.ts — auto-token, refresh, fila de requests, logout automatico | **FEITO** |
 | 2 | Tela Attendances — historico real | Consumir `GET /attendances/client/me` (filtros: status, dateFrom, dateTo). ClientId extraido do JWT | Pendente |
 | 3 | Visualizacao do atendimento atual | Cliente ve detalhes do atendimento IN_PROGRESS (profissional, servicos, tempo decorrido). Dados vem do `GET /client-queue/{attendanceId}/wait-time` + `GET /attendances/{id}` | Pendente |
-| 4 | Corrigir 5 erros TypeScript pre-existentes | CardProf, CardService, CardShop, Services, establishmentService test | Pendente |
-| 5 | Selecao de servicos obrigatoria | Cliente NAO deve entrar na fila sem selecionar servicos. Tela de selecao antes de confirmar. Endpoint: `GET /professional/{id}/service-items` | Pendente |
+| 4 | Selecao de servicos obrigatoria | Cliente NAO deve entrar na fila sem selecionar servicos. Tela de selecao antes de confirmar. Endpoint: `GET /professional/{id}/service-items` | Pendente |
 
 ### Media prioridade — Funcionalidades
 

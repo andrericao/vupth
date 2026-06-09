@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { StatusBar } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
 import { useFonts } from "expo-font";
 import { Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
@@ -29,11 +29,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <GluestackUIProvider config={config}>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor="transparent"
-          translucent
-        />
+        <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
 
         {fontsLoaded ? <Routes /> : <Loading />}
       </GluestackUIProvider>

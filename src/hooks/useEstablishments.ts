@@ -6,6 +6,8 @@ export function useEstablishments() {
     queryKey: ['establishments'],
     queryFn: () => establishmentService.getAll().then((res) => res.data),
     staleTime: 60000,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(3000 * (attempt + 1), 10000),
   });
 }
 

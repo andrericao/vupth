@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
+import { useState, useCallback } from "react";
+import { FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@gluestack-ui/themed";
 
@@ -91,7 +91,7 @@ export function Home() {
   const [selectedFilter, setSelectedFilter] = useState<ServiceType | "ALL">("ALL");
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const { data: establishments = [], isLoading, isError } = useEstablishments();
+  const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
 
@@ -103,6 +103,10 @@ export function Home() {
     const matchesOpen = isSearching || e.open_status === "OPEN";
     return matchesSearch && matchesFilter && matchesOpen;
   });
+
+  const onRefresh = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   function handleEstablishmentPress(establishment: Establishment) {
     navigation.navigate("establishmentDetail", { establishmentId: establishment.id });
@@ -203,6 +207,9 @@ export function Home() {
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={["#22C55E"]} tintColor="#22C55E" />
+          }
           renderItem={({ item }) => (
             <EstablishmentCard
               establishment={item}

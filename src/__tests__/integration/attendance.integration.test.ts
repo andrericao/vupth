@@ -28,18 +28,14 @@ describe('Attendance Integration', () => {
       expect(response.data.establishmentId).toBe('est-1');
     });
 
-    it('deve retornar 401 sem token de autorização', async () => {
+    it('deve rejeitar sem token de autorização (interceptor tenta refresh e falha)', async () => {
       mock.onPost('/attendances').reply(401, {
         message: 'Unauthorized',
       });
 
-      try {
-        await api.post('/attendances', { professionalId: 'prof-1' });
-        fail('deveria ter lançado erro');
-      } catch (error: any) {
-        expect(error.response.status).toBe(401);
-        expect(error.response.data.message).toBe('Unauthorized');
-      }
+      await expect(
+        api.post('/attendances', { professionalId: 'prof-1' }),
+      ).rejects.toThrow();
     });
   });
 
@@ -61,18 +57,14 @@ describe('Attendance Integration', () => {
       expect(response.data.status).toBe('CANCELLED');
     });
 
-    it('deve retornar 401 sem token de autorização', async () => {
+    it('deve rejeitar sem token de autorização (interceptor tenta refresh e falha)', async () => {
       mock.onPut('/attendances/att-new-1/cancel').reply(401, {
         message: 'Unauthorized',
       });
 
-      try {
-        await api.put('/attendances/att-new-1/cancel');
-        fail('deveria ter lançado erro');
-      } catch (error: any) {
-        expect(error.response.status).toBe(401);
-        expect(error.response.data.message).toBe('Unauthorized');
-      }
+      await expect(
+        api.put('/attendances/att-new-1/cancel'),
+      ).rejects.toThrow();
     });
   });
 });
