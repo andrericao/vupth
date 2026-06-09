@@ -132,7 +132,11 @@ export function Home() {
         <TouchableOpacity
           onPress={() => navigation.navigate("queueStatus", {
             professionalId: activeQueue.professionalId,
+            professionalName: activeQueue.professionalName,
             establishmentId: activeQueue.establishmentId,
+            establishmentName: activeQueue.establishmentName,
+            estimatedWaitMinutes: activeQueue.estimatedMinutes,
+            serviceItemIds: [],
           })}
         >
           <Box bg={color} p="$3" mt="$2" borderRadius="$lg">

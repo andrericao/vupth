@@ -1,5 +1,6 @@
+import { useState, useCallback } from "react";
 import { Alert, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import {
   VStack,
   Text,
@@ -20,6 +21,7 @@ import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
+import { addressService, AddressResponse } from "@services/addressService";
 
 function MenuItem({
   icon,
@@ -62,7 +64,21 @@ export function Settings() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const logout = useAuthStore((s) => s.logout);
 
+  const [mainAddress, setMainAddress] = useState<AddressResponse | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!accessToken) return;
+      addressService.getMain(accessToken)
+        .then(({ data }) => setMainAddress(data))
+        .catch(() => setMainAddress(null));
+    }, [accessToken]),
+  );
+
   const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "Não informado";
+  const displayAddress = mainAddress
+    ? `${mainAddress.street}, ${mainAddress.number} — ${mainAddress.neighborhood}`
+    : "Não informado";
 
   function handleDeleteAccount() {
     Alert.alert(
@@ -120,7 +136,7 @@ export function Settings() {
         <MenuItem
           icon={<MapPin size={22} color="#22C55E" />}
           label="Endereço"
-          value="Não informado"
+          value={displayAddress}
           onPress={() => navigation.navigate("editAddress")}
         />
       </Box>

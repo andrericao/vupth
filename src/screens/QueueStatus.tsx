@@ -8,7 +8,6 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { canCancelAttendance, formatWaitTime } from "@domain/queue/types";
-import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { attendanceService } from "@services/attendanceService";
@@ -16,7 +15,11 @@ import { useQueueCountdown } from "@hooks/useQueueCountdown";
 
 type RouteParams = {
   professionalId: string;
+  professionalName: string;
   establishmentId: string;
+  establishmentName: string;
+  estimatedWaitMinutes: number;
+  serviceItemIds: string[];
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -30,16 +33,19 @@ const STATUS_LABELS: Record<string, string> = {
 export function QueueStatus() {
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const { professionalId, establishmentId } = route.params as RouteParams;
+  const {
+    professionalId,
+    professionalName: paramProfName,
+    establishmentId,
+    establishmentName: paramEstName,
+    serviceItemIds,
+  } = route.params as RouteParams;
 
-  const { data: establishment } = useEstablishment(establishmentId);
-  const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
   const accessToken = useAuthStore((s) => s.accessToken);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
   const { remaining, color, isInQueue, isBeingAttended, activeQueue } = useQueueCountdown();
 
-  const professional = professionals.find((p) => p.id === professionalId);
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const didCreate = useRef(false);
@@ -48,13 +54,24 @@ export function QueueStatus() {
     if (didCreate.current || activeQueue?.attendanceId || !accessToken) return;
     didCreate.current = true;
 
+    const joinQueue = useQueueStore.getState().joinQueue;
+    joinQueue({
+      professionalId,
+      professionalName: paramProfName,
+      establishmentId,
+      establishmentName: paramEstName,
+      enteredAt: Date.now(),
+      estimatedMinutes: (route.params as RouteParams).estimatedWaitMinutes ?? 0,
+      status: "SCHEDULED",
+    });
+
     let cancelled = false;
 
     async function createAttendance() {
       setIsCreating(true);
       try {
         const { data } = await attendanceService.create(
-          { professionalId, establishmentId, serviceItemIds: [] },
+          { professionalId, establishmentId, serviceItemIds },
           accessToken!,
         );
         if (!cancelled) {
@@ -181,14 +198,14 @@ export function QueueStatus() {
           <HStack w="$full" justifyContent="space-between" mb="$3">
             <Text size="sm" color="$gray300">Estabelecimento</Text>
             <Text size="sm" fontFamily="$heading">
-              {establishment?.name ?? activeQueue?.establishmentName ?? "..."}
+              {activeQueue?.establishmentName ?? paramEstName ?? "..."}
             </Text>
           </HStack>
 
           <HStack w="$full" justifyContent="space-between" mb="$3">
             <Text size="sm" color="$gray300">Profissional</Text>
             <Text size="sm" fontFamily="$heading">
-              {professional?.name ?? activeQueue?.professionalName ?? "..."}
+              {activeQueue?.professionalName ?? paramProfName ?? "..."}
             </Text>
           </HStack>
 

@@ -35,3 +35,11 @@ export interface AttendanceServiceItem {
   customName: string;
   estimatedMinutes: number;
 }
+
+export interface ServiceItemResponse {
+  id: string;
+  serviceItemType: string;
+  customName: string;
+  price: number;
+  weeklyAverageDurationInMinutes: number | null;
+}

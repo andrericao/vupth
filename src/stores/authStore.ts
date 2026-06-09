@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { authService } from '../services/authService';
+import { registerAuthStore } from '../services/api';
 import { useQueueStore } from './queueStore';
 
 interface AuthUser {
@@ -141,3 +142,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 }));
+
+registerAuthStore((state) => useAuthStore.setState(state));

@@ -1,6 +1,6 @@
 import { api } from './api';
 import { Establishment } from '@domain/establishment/types';
-import { ProfessionalWithQueue } from '@domain/professional/types';
+import { ProfessionalWithQueue, ServiceItemResponse } from '@domain/professional/types';
 
 export interface EstablishmentWithProfessionals {
   id: string;
@@ -26,6 +26,12 @@ export const establishmentService = {
   getProfessionalsWithQueue(establishmentId: string) {
     return api.get<EstablishmentWithProfessionals>(
       `/establishment/id/${establishmentId}/professionals-with-queue`,
+    );
+  },
+
+  getServiceItemsByProfessional(professionalId: string) {
+    return api.get<ServiceItemResponse[]>(
+      `/professional-queue/${professionalId}/service-items`,
     );
   },
 };

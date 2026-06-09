@@ -15,13 +15,28 @@ import { EditProfile } from "@screens/EditProfile";
 import { EditEmail } from "@screens/EditEmail";
 import { EditPassword } from "@screens/EditPassword";
 import { EditAddress } from "@screens/EditAddress";
+import { ServiceSelection } from "@screens/ServiceSelection";
 
 export type AppRoutes = {
   home: undefined;
   establishmentDetail: { establishmentId: string };
   login: { redirectTo?: string; establishmentId?: string; professionalId?: string };
   signUp: { redirectTo?: string; establishmentId?: string; professionalId?: string };
-  queueStatus: { professionalId: string; establishmentId: string };
+  serviceSelection: {
+    professionalId: string;
+    professionalName: string;
+    establishmentId: string;
+    establishmentName: string;
+    estimatedWaitMinutes: number;
+  };
+  queueStatus: {
+    professionalId: string;
+    professionalName: string;
+    establishmentId: string;
+    establishmentName: string;
+    estimatedWaitMinutes: number;
+    serviceItemIds: string[];
+  };
   profile: undefined;
   attendances: undefined;
   settings: undefined;
@@ -42,6 +57,7 @@ export function AuthRoutes() {
       <Screen name="establishmentDetail" component={EstablishmentDetail} />
       <Screen name="login" component={Login} />
       <Screen name="signUp" component={SignUp} />
+      <Screen name="serviceSelection" component={ServiceSelection} />
       <Screen name="queueStatus" component={QueueStatus} />
       <Screen name="profile" component={Profile} />
       <Screen name="attendances" component={Attendances} />

@@ -14,12 +14,20 @@ const env = (process.env.EXPO_PUBLIC_API_ENV || "local") as keyof typeof BASE_UR
 
 const TOKEN_KEY = "vupth_access_token";
 const REFRESH_KEY = "vupth_refresh_token";
+const USER_KEY = "vupth_user";
 
-const PUBLIC_PATHS = ["/establishment", "/auth/"];
+const PUBLIC_PATHS = ["/establishment", "/auth/", "/professional-queue/"];
 
 function isPublicPath(url: string | undefined): boolean {
 	if (!url) return false;
 	return PUBLIC_PATHS.some((p) => url.startsWith(p));
+}
+
+type AuthStoreSetter = (state: Record<string, unknown>) => void;
+let _setAuthState: AuthStoreSetter | null = null;
+
+export function registerAuthStore(setter: AuthStoreSetter) {
+	_setAuthState = setter;
 }
 
 export const api = axios.create({
@@ -87,8 +95,7 @@ api.interceptors.response.use(
 			await SecureStore.setItemAsync(TOKEN_KEY, data.access_token);
 			await SecureStore.setItemAsync(REFRESH_KEY, data.refresh_token);
 
-			const { useAuthStore } = require("../stores/authStore");
-			useAuthStore.setState({
+			_setAuthState?.({
 				accessToken: data.access_token,
 				refreshToken: data.refresh_token,
 			});
@@ -102,10 +109,9 @@ api.interceptors.response.use(
 
 			await SecureStore.deleteItemAsync(TOKEN_KEY);
 			await SecureStore.deleteItemAsync(REFRESH_KEY);
-			await SecureStore.deleteItemAsync("vupth_user");
+			await SecureStore.deleteItemAsync(USER_KEY);
 
-			const { useAuthStore } = require("../stores/authStore");
-			useAuthStore.setState({
+			_setAuthState?.({
 				user: null,
 				accessToken: null,
 				refreshToken: null,

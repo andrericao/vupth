@@ -18,7 +18,6 @@ import { ProfessionalWithQueue } from "@domain/professional/types";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
-import { useQueueStore } from "@stores/queueStore";
 
 type RouteParams = {
   establishmentId: string;
@@ -72,44 +71,36 @@ export function EstablishmentDetail() {
   const { data: establishment, isLoading, isError } = useEstablishment(establishmentId);
   const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const joinQueue = useQueueStore((s) => s.joinQueue);
 
-  function handleJoinQueue(professionalId: string) {
+  function handleSelectProfessional(professionalId: string) {
+    const prof = professionals.find((p) => p.id === professionalId);
+
     if (!isAuthenticated) {
       navigation.navigate("login", {
-        redirectTo: "queueStatus",
+        redirectTo: "serviceSelection",
         establishmentId,
         professionalId,
       });
       return;
     }
 
-    const prof = professionals.find((p) => p.id === professionalId);
-    joinQueue({
+    navigation.navigate("serviceSelection", {
       professionalId,
       professionalName: prof?.name ?? "",
       establishmentId,
       establishmentName: establishment?.name ?? "",
-      // eslint-disable-next-line react-hooks/purity
-      enteredAt: Date.now(),
-      estimatedMinutes: prof?.estimated_wait_minutes ?? 0,
-      status: "SCHEDULED",
-    });
-
-    navigation.navigate("queueStatus", {
-      professionalId,
-      establishmentId,
+      estimatedWaitMinutes: prof?.estimated_wait_minutes ?? 0,
     });
   }
 
-  function handleJoinShortestQueue() {
+  function handleSelectShortestQueue() {
     if (professionals.length === 0) return;
 
     const shortest = professionals.reduce((prev, curr) =>
       (curr.estimated_wait_minutes ?? 0) < (prev.estimated_wait_minutes ?? 0) ? curr : prev
     );
 
-    handleJoinQueue(shortest.id);
+    handleSelectProfessional(shortest.id);
   }
 
   if (isLoading) {
@@ -169,7 +160,7 @@ export function EstablishmentDetail() {
         renderItem={({ item }) => (
           <ProfessionalCard
             professional={item}
-            onPress={() => handleJoinQueue(item.id)}
+            onPress={() => handleSelectProfessional(item.id)}
           />
         )}
         ListEmptyComponent={
@@ -182,7 +173,7 @@ export function EstablishmentDetail() {
       {establishment.open_status === "OPEN" && professionals.length > 0 && (
         <Button
           title="Entrar na fila (menor espera)"
-          onPress={handleJoinShortestQueue}
+          onPress={handleSelectShortestQueue}
           mt="$3"
         />
       )}
