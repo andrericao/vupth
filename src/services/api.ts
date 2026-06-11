@@ -16,7 +16,7 @@ const TOKEN_KEY = "vupth_access_token";
 const REFRESH_KEY = "vupth_refresh_token";
 const USER_KEY = "vupth_user";
 
-const PUBLIC_PATHS = ["/establishment", "/auth/", "/professional-queue/"];
+const PUBLIC_PATHS = ["/establishment", "/auth/", "/professional/"];
 
 function isPublicPath(url: string | undefined): boolean {
 	if (!url) return false;

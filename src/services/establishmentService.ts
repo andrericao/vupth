@@ -31,7 +31,7 @@ export const establishmentService = {
 
   getServiceItemsByProfessional(professionalId: string) {
     return api.get<ServiceItemResponse[]>(
-      `/professional-queue/${professionalId}/service-items`,
+      `/professional/${professionalId}/service-items`,
     );
   },
 };

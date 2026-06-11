@@ -69,7 +69,7 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 | `/attendances/{id}/cancel` | PUT | QueueStatus | Implementado | 2 |
 | `/client-queue/{profId}/queue` | GET | QueueStatus | Implementado | 1 |
 | `/client-queue/{id}/wait-time` | GET | QueueStatus (polling) | Implementado | 2 |
-| `/professional-queue/{id}/service-items` | GET | ServiceSelection | Implementado | — |
+| `/professional/{id}/service-items` | GET | ServiceSelection | Implementado | — |
 | `/attendances/{id}/leave-queue` | DELETE | — | **NAO IMPLEMENTADO** | — |
 | `/attendances/client/me` | GET | Attendances | **NAO IMPLEMENTADO** | — |
 | `/profile/general-infos` | PATCH | EditProfile | Implementado | 5 |
