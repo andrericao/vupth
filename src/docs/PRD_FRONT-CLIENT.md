@@ -69,7 +69,7 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 | `/attendances/{id}/cancel` | PUT | QueueStatus | Implementado | 2 |
 | `/client-queue/{profId}/queue` | GET | QueueStatus | Implementado | 1 |
 | `/client-queue/{id}/wait-time` | GET | QueueStatus (polling) | Implementado | 2 |
-| `/professional/{id}/service-items` | GET | — | **NAO IMPLEMENTADO** | — |
+| `/professional-queue/{id}/service-items` | GET | ServiceSelection | Implementado | — |
 | `/attendances/{id}/leave-queue` | DELETE | — | **NAO IMPLEMENTADO** | — |
 | `/attendances/client/me` | GET | Attendances | **NAO IMPLEMENTADO** | — |
 | `/profile/general-infos` | PATCH | EditProfile | Implementado | 5 |
@@ -429,7 +429,7 @@ src/screens/
 | 1 | ~~Interceptor 401 → refresh → retry~~ | Implementado em api.ts — auto-token, refresh, fila de requests, logout automatico | **FEITO** |
 | 2 | Tela Attendances — historico real | Consumir `GET /attendances/client/me` (filtros: status, dateFrom, dateTo). ClientId extraido do JWT | Pendente |
 | 3 | Visualizacao do atendimento atual | Cliente ve detalhes do atendimento IN_PROGRESS (profissional, servicos, tempo decorrido). Dados vem do `GET /client-queue/{attendanceId}/wait-time` + `GET /attendances/{id}` | Pendente |
-| 4 | Selecao de servicos obrigatoria | Cliente NAO deve entrar na fila sem selecionar servicos. Tela de selecao antes de confirmar. Endpoint: `GET /professional/{id}/service-items` | Pendente |
+| 4 | ~~Selecao de servicos obrigatoria~~ | Implementado: ServiceSelection.tsx — lista servicos, multi-selecao, preco, confirmar antes de entrar na fila. Endpoint: `GET /professional-queue/{id}/service-items` | **FEITO** |
 
 ### Media prioridade — Funcionalidades
 
