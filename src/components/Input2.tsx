@@ -1,16 +1,19 @@
 import { ComponentProps, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Input as GluestackInput2, InputField, HStack } from "@gluestack-ui/themed";
-import { Eye, EyeSlash } from "phosphor-react-native";
+import { Eye, EyeSlash, MagnifyingGlass, XCircle } from "phosphor-react-native";
 
 type Props = ComponentProps<typeof InputField> & {
   isPassword?: boolean;
+  showSearchIcon?: boolean;
+  onClear?: () => void;
 };
 
-export function Input2({ isPassword = false, secureTextEntry, ...rest }: Props) {
+export function Input2({ isPassword = false, showSearchIcon = false, onClear, secureTextEntry, value, ...rest }: Props) {
   const [visible, setVisible] = useState(false);
 
   const isSecure = isPassword ? !visible : secureTextEntry;
+  const hasValue = typeof value === "string" && value.length > 0;
 
   return (
     <GluestackInput2
@@ -28,6 +31,7 @@ export function Input2({ isPassword = false, secureTextEntry, ...rest }: Props) 
           fontFamily="$body"
           secureTextEntry={isSecure}
           flex={1}
+          value={value}
           {...rest}
         />
         {isPassword && (
@@ -37,6 +41,14 @@ export function Input2({ isPassword = false, secureTextEntry, ...rest }: Props) 
             ) : (
               <EyeSlash size={22} color="#6B7280" />
             )}
+          </TouchableOpacity>
+        )}
+        {showSearchIcon && !hasValue && (
+          <MagnifyingGlass size={20} color="#9CA3AF" />
+        )}
+        {showSearchIcon && hasValue && onClear && (
+          <TouchableOpacity onPress={onClear} hitSlop={8}>
+            <XCircle size={22} color="#9CA3AF" weight="fill" />
           </TouchableOpacity>
         )}
       </HStack>

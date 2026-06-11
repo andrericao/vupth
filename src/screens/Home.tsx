@@ -56,9 +56,11 @@ function EstablishmentCard({
             <Heading size="md" fontFamily="$heading">
               {establishment.name}
             </Heading>
-            {establishment.serviceType && (
+            {establishment.services?.length > 0 && (
               <Text size="sm" color="$gray300" mt="$1">
-                {SERVICE_TYPE_LABELS[establishment.serviceType]}
+                {establishment.services
+                  .map((s) => SERVICE_TYPE_LABELS[s as ServiceType] ?? s)
+                  .join(", ")}
               </Text>
             )}
             {establishment.address && (
@@ -66,9 +68,6 @@ function EstablishmentCard({
                 {establishment.address.neighborhood}, {establishment.address.city}
               </Text>
             )}
-            <Text size="xs" color="$gray300" mt="$1">
-              {establishment.services?.length ?? 0} serviço(s)
-            </Text>
           </VStack>
           <Badge
             bg={isOpen ? "$green500" : "$gray400"}
@@ -161,6 +160,8 @@ export function Home() {
         placeholder="Buscar estabelecimento..."
         value={search}
         onChangeText={setSearch}
+        showSearchIcon
+        onClear={() => setSearch("")}
       />
 
       <Box mt="$3" mb="$2">
