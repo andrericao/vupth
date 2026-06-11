@@ -71,7 +71,7 @@ export function QueueStatus() {
       setIsCreating(true);
       try {
         const { data } = await attendanceService.create(
-          { professionalId, establishmentId, serviceItemIds },
+          { professionalId, establishmentId, serviceItemIds, scheduledTime: new Date().toISOString() },
           accessToken!,
         );
         if (!cancelled) {

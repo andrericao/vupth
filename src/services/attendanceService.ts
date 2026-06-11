@@ -4,6 +4,7 @@ export interface CreateAttendanceRequest {
   professionalId: string;
   establishmentId: string;
   serviceItemIds: string[];
+  scheduledTime?: string;
 }
 
 export interface AttendanceResponse {
