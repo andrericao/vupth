@@ -439,6 +439,14 @@ src/screens/
 | 7 | Usar `DELETE /attendances/{id}/leave-queue` | Backend tem endpoint separado para sair da fila (alem de PUT /cancel). Avaliar qual usar em cada contexto | Pendente |
 | 8 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
 | 9 | Busca "Pra ontem" | Botao que busca o profissional com menor tempo de espera mais proximo do cliente. Ordena por tempo estimado ASC | Pendente |
+| 10 | Calendario para pedir entrada na fila | Cliente escolhe o dia em um calendario para solicitar entrada na fila do profissional. Ver secao "Agenda e manifestacao de interesse" | Pendente |
+
+### Correcoes de UX e ajustes pendentes
+
+| # | Item | Descricao | Status |
+|---|------|-----------|--------|
+| 1 | Botao voltar nunca pode fazer logout | O botao voltar (header verde + botao do sistema Android) **nunca** pode desconectar o usuario. Causa raiz: `auth.routes.tsx` tem um unico stack com `login`/`signUp` + telas autenticadas juntos — voltar da Home cai no Login. Corrigir separando em stacks condicionais por `isAuthenticated` (ou `navigation.reset` apos login). Logout so por acao explicita no Settings/Profile | Pendente |
+| 2 | ~~Endereco deve ter complemento~~ | Ja implementado: backend (`complement` String opcional em `/users/me/addresses`), `addressService.ts` (campo tipado) e `EditAddress.tsx` (input "Complemento", carregamento e exibicao na lista). Tem teste de integracao | **FEITO** |
 
 ### Regras de negocio — Multa por cancelamento
 
@@ -512,6 +520,7 @@ src/screens/
 
 **Frontend (app client):**
 - Na tela do profissional, aba "Agenda" mostrando dias disponiveis da semana
+- **Calendario** para o cliente visualizar os dias com agenda aberta e pedir para entrar na fila no dia escolhido
 - Botao "Quero cortar nesse dia" para manifestar interesse
 - Status da manifestacao: PENDENTE → CONFIRMADO/RECUSADO
 - Lista de interessados (posicao do cliente na ordem de chegada, sem ver outros nomes)
