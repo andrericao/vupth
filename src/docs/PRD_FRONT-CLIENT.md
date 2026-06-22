@@ -445,7 +445,7 @@ src/screens/
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 1 | Botao voltar nunca pode fazer logout | O botao voltar (header verde + botao do sistema Android) **nunca** pode desconectar o usuario. Causa raiz: `auth.routes.tsx` tem um unico stack com `login`/`signUp` + telas autenticadas juntos — voltar da Home cai no Login. Corrigir separando em stacks condicionais por `isAuthenticated` (ou `navigation.reset` apos login). Logout so por acao explicita no Settings/Profile | Pendente |
+| 1 | ~~Botao voltar nunca pode fazer logout~~ | Resolvido alinhando com o padrao do front-partner (`router.replace`). No client (react-navigation): login/cadastro com sucesso usam `navigation.replace`/`reset` em vez de `navigate` (Login.tsx, SignUp.tsx) — Login sai do historico. Logout (Profile) e deletar conta (Settings) usam `navigation.reset` para `home` — limpa as telas autenticadas. Voltar nunca mais cai no Login nem desconecta | **FEITO** |
 | 2 | ~~Endereco deve ter complemento~~ | Ja implementado: backend (`complement` String opcional em `/users/me/addresses`), `addressService.ts` (campo tipado) e `EditAddress.tsx` (input "Complemento", carregamento e exibicao na lista). Tem teste de integracao | **FEITO** |
 
 ### Regras de negocio — Multa por cancelamento
@@ -533,6 +533,7 @@ src/screens/
 | 11 | Busca por bairro/cidade | Depende de establishments terem endereco cadastrado | Pendente |
 | 12 | Testes de componente/tela | React Native Testing Library | Pendente |
 | 13 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
+| 14 | Countdown resiliente offline | O countdown ja roda a partir do relogio do device (`useQueueCountdown` calcula `estimatedMinutes - (Date.now() - enteredAt)`), so o polling depende de internet. Falta polish: detectar conexao (`@react-native-community/netinfo`), pausar polling offline e re-sincronizar ao reconectar, mostrar badge "offline / atualizado ha X min" para o usuario nao ficar cego, e manter `activeQueue` persistido (ja em SecureStore) entre reinicios offline. A cada reconexao a aferição melhora; sem internet o numero continua descontando localmente | Pendente |
 
 ### Nota — Transferencia de proprietario (OWNER)
 

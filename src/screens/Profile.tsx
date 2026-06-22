@@ -54,7 +54,7 @@ export function Profile() {
 
   async function handleLogout() {
     await logout();
-    navigation.navigate("home");
+    navigation.reset({ index: 0, routes: [{ name: "home" }] });
   }
 
   return (

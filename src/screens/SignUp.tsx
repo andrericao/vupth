@@ -51,12 +51,12 @@ export function SignUp() {
       await login(email, password);
 
       if (params.redirectTo === "queueStatus" && params.establishmentId && params.professionalId) {
-        navigation.navigate("queueStatus", {
+        navigation.replace("queueStatus", {
           establishmentId: params.establishmentId,
           professionalId: params.professionalId,
         });
       } else {
-        navigation.navigate("home");
+        navigation.reset({ index: 0, routes: [{ name: "home" }] });
       }
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Erro ao cadastrar";
