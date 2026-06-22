@@ -39,6 +39,7 @@ export function QueueStatus() {
     establishmentId,
     establishmentName: paramEstName,
     serviceItemIds,
+    estimatedWaitMinutes,
   } = route.params as RouteParams;
 
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -61,7 +62,7 @@ export function QueueStatus() {
       establishmentId,
       establishmentName: paramEstName,
       enteredAt: Date.now(),
-      estimatedMinutes: (route.params as RouteParams).estimatedWaitMinutes ?? 0,
+      estimatedMinutes: estimatedWaitMinutes ?? 0,
       status: "SCHEDULED",
     });
 
@@ -89,7 +90,7 @@ export function QueueStatus() {
 
     createAttendance();
     return () => { cancelled = true; };
-  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue]);
+  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";
