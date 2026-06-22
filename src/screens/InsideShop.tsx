@@ -1,12 +1,7 @@
-import { useNavigation } from "@react-navigation/native";
-
-import { useState, useEffect } from "react";
-
+import { useMemo, useState } from "react";
 import { ImageSourcePropType } from "react-native";
-
-import { Question } from "phosphor-react-native";
-
 import { useRoute } from "@react-navigation/native";
+import { Question } from "phosphor-react-native";
 
 import {
   Button as ModalButton,
@@ -41,20 +36,14 @@ type RouteParams = {
 };
 
 export function InsideShop() {
-  const navigation = useNavigation();
-
   const route = useRoute();
   const { shop, imageShop } = route.params as RouteParams;
 
-  const [profs, setProfs] = useState<CardProfProps[]>([]);
+  const profs = useMemo(
+    () => PROFS.filter((p) => p.shopName === shop) as CardProfProps[],
+    [shop],
+  );
   const [showModal, setShowModal] = useState(false);
-
-  useEffect(() => {
-    const profsFiltered = PROFS.filter(
-      (prof) => prof.shopName === shop,
-    ) as CardProfProps[];
-    setProfs(profsFiltered);
-  }, []);
 
   return (
     <VStack flex={1} px={15} pt={60} pb={45}>

@@ -3,6 +3,24 @@ export type ValidationResult = {
   errors: Record<string, string>;
 };
 
+export type PasswordRule = {
+  label: string;
+  passed: boolean;
+};
+
+export function getPasswordRules(password: string): PasswordRule[] {
+  return [
+    { label: 'Mínimo de 6 caracteres', passed: password.length >= 6 },
+    { label: 'Letra maiúscula', passed: /[A-Z]/.test(password) },
+    { label: 'Letra minúscula', passed: /[a-z]/.test(password) },
+    { label: 'Caractere especial (!@#$...)', passed: /[^A-Za-z0-9]/.test(password) },
+  ];
+}
+
+export function isPasswordStrong(password: string): boolean {
+  return getPasswordRules(password).every((r) => r.passed);
+}
+
 export function validateLogin(email: string, password: string): ValidationResult {
   const errors: Record<string, string> = {};
 
@@ -14,8 +32,6 @@ export function validateLogin(email: string, password: string): ValidationResult
 
   if (!password) {
     errors.password = 'Senha é obrigatória';
-  } else if (password.length < 6) {
-    errors.password = 'Senha deve ter pelo menos 6 caracteres';
   }
 
   return { isValid: Object.keys(errors).length === 0, errors };
@@ -36,8 +52,8 @@ export function validateSignUp(
 
   if (!password) {
     errors.password = 'Senha é obrigatória';
-  } else if (password.length < 6) {
-    errors.password = 'Senha deve ter pelo menos 6 caracteres';
+  } else if (!isPasswordStrong(password)) {
+    errors.password = 'Senha não atende os requisitos';
   }
 
   if (!confirmPassword) {

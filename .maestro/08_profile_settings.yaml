@@ -1,0 +1,79 @@
+appId: host.exp.exponent
+name: Perfil e Configuracoes - editar dados, email, senha, endereco
+---
+# Pre-condicao: app aberto e logado (usar apos 02_login ou 05_full_e2e)
+
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 15000
+
+# Login se nao estiver logado
+- runFlow:
+    when:
+      visible: "Entrar"
+    commands:
+      - tapOn: "Entrar"
+      - tapOn:
+          text: "E-mail"
+      - inputText: "cliente1@email.com"
+      - tapOn:
+          text: "Senha"
+      - inputText: "123456"
+      - hideKeyboard
+      - tapOn: "Entrar"
+      - extendedWaitUntil:
+          visible: "Estabelecimentos"
+          timeout: 60000
+
+# 1. Abrir perfil
+- tapOn:
+    id: "profile-icon"
+- assertVisible: "Atendimentos"
+- assertVisible: "Configurações"
+
+# 2. Ir para Configuracoes
+- tapOn: "Configurações"
+- assertVisible: "Configurações"
+- assertVisible: "Nome"
+- assertVisible: "E-mail"
+- assertVisible: "Senha"
+- assertVisible: "Endereço"
+
+# 3. Testar tela Editar Perfil
+- tapOn: "Nome"
+- assertVisible: "Editar Perfil"
+- assertVisible: "Sobrenome"
+- assertVisible: "Telefone"
+- assertVisible: "Data de nascimento"
+- assertVisible: "Gênero"
+- back
+
+# 4. Testar tela Editar Email
+- tapOn: "E-mail"
+- assertVisible: "Alterar E-mail"
+- assertVisible: "E-mail atual"
+- assertVisible: "Novo e-mail"
+- back
+
+# 5. Testar tela Editar Senha
+- tapOn: "Senha"
+- assertVisible: "Alterar Senha"
+- assertVisible: "Nova senha"
+- assertVisible: "Confirmar nova senha"
+- back
+
+# 6. Testar tela Endereco
+- tapOn: "Endereço"
+- assertVisible: "Endereços"
+- assertVisible: "Adicionar endereço"
+- back
+
+# 7. Verificar botao Deletar conta existe
+- assertVisible: "Deletar conta"
+
+# Voltar para Home
+- back
+- back
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 5000

@@ -1,0 +1,36 @@
+appId: host.exp.exponent
+name: Busca e filtro de estabelecimentos
+---
+- launchApp
+- openLink: "exp://192.168.0.16:8081"
+
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 15000
+
+# Filtrar por tipo Barbearia
+- tapOn:
+    id: "filter-BARBER"
+- assertVisible: "Barbearia"
+
+# Voltar para Todos
+- tapOn:
+    id: "filter-ALL"
+
+# Buscar por nome
+- tapOn:
+    text: "Buscar estabelecimento..."
+- inputText: "Barbearia"
+
+- assertVisible: "Barbearia"
+
+# Limpar busca
+- eraseText: 20
+- hideKeyboard
+
+# Abrir detalhe de um estabelecimento
+- tapOn: "Barbearia do Ricardo"
+
+- assertVisible: "Serviços"
+- assertVisible:
+    text: "Profissionais.*"

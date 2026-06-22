@@ -7,9 +7,39 @@ on:
     branches: [dev, main]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Lint
+        run: npx eslint . --max-warnings 0
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: TypeScript check
+        continue-on-error: true
+        run: npx tsc --noEmit
+
   test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 

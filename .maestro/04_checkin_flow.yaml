@@ -1,0 +1,52 @@
+appId: host.exp.exponent
+name: Fluxo completo - check-in digital
+---
+- launchApp
+- openLink: "exp://192.168.0.16:8081"
+
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 15000
+
+# Login primeiro
+- tapOn: "Entrar"
+- assertVisible: "Acessar a conta"
+
+- tapOn:
+    text: "E-mail"
+- inputText: "cliente1@email.com"
+
+- tapOn:
+    text: "Senha"
+- inputText: "123456"
+
+- tapOn: "Entrar"
+
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 10000
+
+# Selecionar estabelecimento aberto
+- tapOn:
+    id: "establishment-1"
+
+- assertVisible: "Serviços"
+- assertVisible:
+    text: "Profissionais.*"
+
+# Entrar na fila pelo botão menor espera
+- tapOn: "Entrar na fila (menor espera)"
+
+# Verificar tela de fila
+- extendedWaitUntil:
+    visible: "Você está na fila!"
+    timeout: 10000
+
+- assertVisible: "Tempo estimado"
+- assertVisible: "Tempo estimado"
+- assertVisible: "Status"
+
+# Voltar ao início
+- tapOn: "Voltar ao início"
+
+- assertVisible: "Estabelecimentos"

@@ -1,21 +1,43 @@
-export type ServiceType = 'BARBER' | 'BEAUTY_SALON' | 'NAIL_SALON' | 'SPA' | 'CLINIC';
+export type ServiceType = 'BARBER' | 'BEAUTY_SALON' | 'EYEBROW' | 'NAIL_SALON' | 'SPA' | 'CLINIC';
+
+export type OpenStatus = 'OPEN' | 'CLOSED' | 'TEMPORARILY_CLOSED';
+
+export type EstablishmentStatus = 'ACTIVE' | 'INACTIVE' | 'TEMPORARY_CLOSED';
 
 export type ServiceItemType =
   | 'CORTE_MAQUINA'
   | 'CORTE_TESOURA'
   | 'BARBA'
-  | 'CORTE_FEMININO'
+  | 'SOBRANCELHA'
+  | 'PINTURA'
+  | 'HENNA_SOBRANCELHA'
+  | 'MICROPIGMENTACAO_SOBRANCELHA'
+  | 'BROW_LAMINATION'
+  | 'TINTURA_SOBRANCELHA'
+  | 'RECORTE_PONTAS'
+  | 'ESCOVA'
+  | 'HIDRATACAO'
+  | 'PROGRESSIVA'
   | 'MANICURE'
   | 'PEDICURE'
-  | 'MASSAGEM'
-  | 'DEPILACAO';
+  | 'UNHAS_GEL'
+  | 'NAIL_ART'
+  | 'MASSAGEM_RELAXANTE'
+  | 'MASSAGEM_MODELADORA'
+  | 'LIMPEZA_PELE'
+  | 'DEPILACAO'
+  | 'DRENAGEM'
+  | 'PEELING'
+  | 'BOTOX'
+  | 'MICROAGULHAMENTO';
 
 export interface ServiceItem {
   id: string;
   serviceItemType: ServiceItemType;
   customName: string;
   price: number;
-  estimatedMinutes: number;
+  estimatedMinutes?: number;
+  weeklyAverageDurationInMinutes?: number | null;
 }
 
 export interface Address {
@@ -26,13 +48,25 @@ export interface Address {
   city: string;
   state: string;
   zipCode: string;
+  reference?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface Establishment {
   id: string;
   name: string;
-  serviceType: ServiceType;
-  isOpen: boolean;
+  ownerId: string;
+  urlImage: string | null;
+  serviceType?: ServiceType;
+  open_status: OpenStatus;
+  status: EstablishmentStatus;
+  services: string[];
   address?: Address;
-  serviceItems: ServiceItem[];
+}
+
+export interface EstablishmentDetail extends Omit<Establishment, 'services'> {
+  services: string[];
+  total_in_queue?: number;
+  available_professionals?: number;
 }

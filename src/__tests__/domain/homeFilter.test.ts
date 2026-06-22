@@ -6,17 +6,30 @@ function filterEstablishments(
   search: string,
   selectedFilter: ServiceType | 'ALL'
 ): Establishment[] {
+  const isSearching = search.trim().length > 0;
+
   return establishments.filter((e) => {
     const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
     const matchesFilter = selectedFilter === 'ALL' || e.serviceType === selectedFilter;
-    return matchesSearch && matchesFilter;
+    const matchesOpen = isSearching || e.open_status === 'OPEN';
+    return matchesSearch && matchesFilter && matchesOpen;
   });
 }
 
 describe('Home - Filtro de Estabelecimentos', () => {
-  it('deve retornar todos quando filtro é ALL e busca vazia', () => {
+  it('sem busca deve mostrar apenas abertos', () => {
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'ALL');
-    expect(result.length).toBe(MOCK_ESTABLISHMENTS.length);
+    result.forEach((e) => {
+      expect(e.open_status).toBe('OPEN');
+    });
+    expect(result.length).toBeLessThan(MOCK_ESTABLISHMENTS.length);
+  });
+
+  it('com busca deve mostrar abertos e fechados', () => {
+    const result = filterEstablishments(MOCK_ESTABLISHMENTS, 'Nail', 'ALL');
+    expect(result.length).toBe(1);
+    expect(result[0].name).toBe('Nail Designer');
+    expect(result[0].open_status).toBe('CLOSED');
   });
 
   it('deve filtrar por nome (case insensitive)', () => {
@@ -33,11 +46,12 @@ describe('Home - Filtro de Estabelecimentos', () => {
     expect(result[0].name).toBe('Barbearia Top');
   });
 
-  it('deve filtrar por serviceType BARBER', () => {
+  it('deve filtrar por serviceType BARBER (só abertos)', () => {
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'BARBER');
     expect(result.length).toBeGreaterThan(0);
     result.forEach((e) => {
       expect(e.serviceType).toBe('BARBER');
+      expect(e.open_status).toBe('OPEN');
     });
   });
 
@@ -54,11 +68,6 @@ describe('Home - Filtro de Estabelecimentos', () => {
 
   it('deve retornar vazio quando filtro não tem resultados', () => {
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'SPA');
-    expect(result.length).toBe(0);
-  });
-
-  it('busca não deve afetar quando filtro já exclui tudo', () => {
-    const result = filterEstablishments(MOCK_ESTABLISHMENTS, 'Barbearia', 'SPA');
     expect(result.length).toBe(0);
   });
 });

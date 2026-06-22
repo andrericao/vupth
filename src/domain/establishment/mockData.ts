@@ -4,8 +4,11 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
   {
     id: '1',
     name: 'Barbearia Top',
+    ownerId: 'owner-1',
+    urlImage: null,
     serviceType: 'BARBER',
-    isOpen: true,
+    open_status: 'OPEN',
+    status: 'ACTIVE',
     address: {
       street: 'Rua das Flores',
       number: '123',
@@ -14,28 +17,16 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01001000',
     },
-    serviceItems: [
-      {
-        id: 's1',
-        serviceItemType: 'CORTE_MAQUINA',
-        customName: 'Corte Degradê',
-        price: 35.0,
-        estimatedMinutes: 30,
-      },
-      {
-        id: 's2',
-        serviceItemType: 'BARBA',
-        customName: 'Barba Completa',
-        price: 25.0,
-        estimatedMinutes: 20,
-      },
-    ],
+    services: ['BARBER'],
   },
   {
     id: '2',
     name: 'Salão Beleza Pura',
+    ownerId: 'owner-1',
+    urlImage: null,
     serviceType: 'BEAUTY_SALON',
-    isOpen: true,
+    open_status: 'OPEN',
+    status: 'ACTIVE',
     address: {
       street: 'Av. Paulista',
       number: '456',
@@ -44,21 +35,16 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01310100',
     },
-    serviceItems: [
-      {
-        id: 's3',
-        serviceItemType: 'CORTE_FEMININO',
-        customName: 'Corte Feminino',
-        price: 80.0,
-        estimatedMinutes: 45,
-      },
-    ],
+    services: ['BEAUTY_SALON'],
   },
   {
     id: '3',
     name: 'Nail Designer',
+    ownerId: 'owner-2',
+    urlImage: null,
     serviceType: 'NAIL_SALON',
-    isOpen: false,
+    open_status: 'CLOSED',
+    status: 'ACTIVE',
     address: {
       street: 'Rua Augusta',
       number: '789',
@@ -67,28 +53,16 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01305000',
     },
-    serviceItems: [
-      {
-        id: 's4',
-        serviceItemType: 'MANICURE',
-        customName: 'Manicure Gel',
-        price: 60.0,
-        estimatedMinutes: 50,
-      },
-      {
-        id: 's5',
-        serviceItemType: 'PEDICURE',
-        customName: 'Pedicure Completa',
-        price: 55.0,
-        estimatedMinutes: 40,
-      },
-    ],
+    services: ['NAIL_SALON'],
   },
   {
     id: '4',
     name: 'Barbearia do João',
+    ownerId: 'owner-3',
+    urlImage: null,
     serviceType: 'BARBER',
-    isOpen: true,
+    open_status: 'OPEN',
+    status: 'ACTIVE',
     address: {
       street: 'Rua Vergueiro',
       number: '321',
@@ -97,14 +71,6 @@ export const MOCK_ESTABLISHMENTS: Establishment[] = [
       state: 'SP',
       zipCode: '01504000',
     },
-    serviceItems: [
-      {
-        id: 's6',
-        serviceItemType: 'CORTE_TESOURA',
-        customName: 'Corte Social',
-        price: 40.0,
-        estimatedMinutes: 35,
-      },
-    ],
+    services: ['BARBER'],
   },
 ];

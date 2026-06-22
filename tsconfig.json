@@ -3,7 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "baseUrl": "./",
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "paths": {
       "@assets/*": [
         "./src/assets/*"
@@ -28,6 +28,15 @@
       ],
       "@domain/*": [
         "./src/domain/*"
+      ],
+      "@services/*": [
+        "./src/services/*"
+      ],
+      "@stores/*": [
+        "./src/stores/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
       ]
     }
   }

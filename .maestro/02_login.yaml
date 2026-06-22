@@ -1,0 +1,29 @@
+appId: host.exp.exponent
+name: Login de usuário
+---
+- launchApp
+- openLink: "exp://192.168.0.16:8081"
+
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 15000
+
+- tapOn: "Entrar"
+
+- assertVisible: "Acessar a conta"
+
+- tapOn:
+    text: "E-mail"
+- inputText: "cliente1@email.com"
+
+- tapOn:
+    text: "Senha"
+- inputText: "123456"
+
+- tapOn: "Entrar"
+
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 10000
+
+- assertVisible: "Sair"

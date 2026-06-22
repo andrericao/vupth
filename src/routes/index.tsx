@@ -5,14 +5,18 @@ import { AuthRoutes } from "./auth.routes";
 import { gluestackUIConfig } from "config/gluestack-ui.config";
 import { Box } from "@gluestack-ui/themed";
 
+const theme = {
+	...DefaultTheme,
+	colors: {
+		...DefaultTheme.colors,
+		background: gluestackUIConfig.tokens.colors.white,
+	},
+};
+
 export function Routes(){
-
-	const theme = DefaultTheme;
-	theme.colors.background = gluestackUIConfig.tokens.colors.white;
-
 	return(
 		<Box flex={1} bg="$white">
-		<NavigationContainer>
+		<NavigationContainer theme={theme}>
 			<AuthRoutes />
 		</NavigationContainer>
 		</Box>

@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { FlatList, TouchableOpacity } from "react-native";
+import { FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   VStack,
@@ -15,12 +14,10 @@ import {
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
-import { Establishment } from "@domain/establishment/types";
 import { ProfessionalWithQueue } from "@domain/professional/types";
-import { MOCK_ESTABLISHMENTS } from "@domain/establishment/mockData";
-import { MOCK_PROFESSIONALS } from "@domain/professional/mockData";
 import { formatWaitTime } from "@domain/queue/types";
-import { isAuthenticated } from "@domain/auth/authState";
+import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
+import { useAuthStore } from "@stores/authStore";
 
 type RouteParams = {
   establishmentId: string;
@@ -54,10 +51,10 @@ function ProfessionalCard({
           </VStack>
           <VStack alignItems="flex-end">
             <Text size="sm" fontFamily="$heading" color="$green500">
-              {professional.attendancesInQueue.length} na fila
+              {professional.queue_count ?? 0} na fila
             </Text>
             <Text size="xs" color="$gray300">
-              ~{formatWaitTime(professional.estimatedWaitMinutes)}
+              ~{formatWaitTime(professional.estimated_wait_minutes ?? 0)}
             </Text>
           </VStack>
         </HStack>
@@ -66,78 +63,55 @@ function ProfessionalCard({
   );
 }
 
-function ServiceItemRow({
-  name,
-  price,
-  duration,
-}: {
-  name: string;
-  price: number;
-  duration: number;
-}) {
-  return (
-    <HStack
-      justifyContent="space-between"
-      py="$2"
-      borderBottomWidth="$1"
-      borderBottomColor="$gray500"
-    >
-      <Text size="sm" flex={1}>
-        {name}
-      </Text>
-      <Text size="sm" color="$green500" fontFamily="$heading" mr="$4">
-        R$ {price.toFixed(2)}
-      </Text>
-      <Text size="xs" color="$gray300">
-        {duration} min
-      </Text>
-    </HStack>
-  );
-}
-
 export function EstablishmentDetail() {
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { establishmentId } = route.params as RouteParams;
 
-  const [establishment, setEstablishment] = useState<Establishment | null>(null);
-  const [professionals, setProfessionals] = useState<ProfessionalWithQueue[]>([]);
+  const { data: establishment, isLoading, isError } = useEstablishment(establishmentId);
+  const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
-  useEffect(() => {
-    const found = MOCK_ESTABLISHMENTS.find((e) => e.id === establishmentId);
-    setEstablishment(found ?? null);
+  function handleSelectProfessional(professionalId: string) {
+    const prof = professionals.find((p) => p.id === professionalId);
 
-    const profs = MOCK_PROFESSIONALS[establishmentId] ?? [];
-    setProfessionals(profs);
-  }, [establishmentId]);
-
-  function handleJoinQueue(professionalId: string) {
-    if (!isAuthenticated()) {
+    if (!isAuthenticated) {
       navigation.navigate("login", {
-        redirectTo: "queueStatus",
+        redirectTo: "serviceSelection",
         establishmentId,
         professionalId,
       });
       return;
     }
 
-    navigation.navigate("queueStatus", {
+    navigation.navigate("serviceSelection", {
       professionalId,
+      professionalName: prof?.name ?? "",
       establishmentId,
+      establishmentName: establishment?.name ?? "",
+      estimatedWaitMinutes: prof?.estimated_wait_minutes ?? 0,
     });
   }
 
-  function handleJoinShortestQueue() {
+  function handleSelectShortestQueue() {
     if (professionals.length === 0) return;
 
     const shortest = professionals.reduce((prev, curr) =>
-      curr.estimatedWaitMinutes < prev.estimatedWaitMinutes ? curr : prev
+      (curr.estimated_wait_minutes ?? 0) < (prev.estimated_wait_minutes ?? 0) ? curr : prev
     );
 
-    handleJoinQueue(shortest.id);
+    handleSelectProfessional(shortest.id);
   }
 
-  if (!establishment) {
+  if (isLoading) {
+    return (
+      <Center flex={1}>
+        <ActivityIndicator size="large" color="#22C55E" />
+      </Center>
+    );
+  }
+
+  if (isError || !establishment) {
     return (
       <Center flex={1}>
         <Text>Estabelecimento não encontrado</Text>
@@ -147,7 +121,7 @@ export function EstablishmentDetail() {
 
   const minWait =
     professionals.length > 0
-      ? Math.min(...professionals.map((p) => p.estimatedWaitMinutes))
+      ? Math.min(...professionals.map((p) => p.estimated_wait_minutes ?? 0))
       : 0;
 
   return (
@@ -160,13 +134,13 @@ export function EstablishmentDetail() {
         </Heading>
         <HStack mt="$2" gap="$2" alignItems="center">
           <Badge
-            bg={establishment.isOpen ? "$green500" : "$gray400"}
+            bg={establishment.open_status === "OPEN" ? "$green500" : "$gray400"}
             borderRadius="$full"
             px="$3"
             py="$1"
           >
             <BadgeText color="$white" size="xs">
-              {establishment.isOpen ? "Aberto" : "Fechado"}
+              {establishment.open_status === "OPEN" ? "Aberto" : "Fechado"}
             </BadgeText>
           </Badge>
           <Text size="sm" color="$gray300">
@@ -175,24 +149,8 @@ export function EstablishmentDetail() {
         </HStack>
       </Center>
 
-      {establishment.serviceItems.length > 0 && (
-        <Box mt="$4">
-          <Heading size="sm" fontFamily="$heading" mb="$2">
-            Serviços
-          </Heading>
-          {establishment.serviceItems.map((item) => (
-            <ServiceItemRow
-              key={item.id}
-              name={item.customName}
-              price={item.price}
-              duration={item.estimatedMinutes}
-            />
-          ))}
-        </Box>
-      )}
-
       <Heading size="sm" fontFamily="$heading" mt="$4" mb="$2">
-        Profissionais ({professionals.length})
+        Profissionais: {professionals.length}
       </Heading>
 
       <FlatList
@@ -202,7 +160,7 @@ export function EstablishmentDetail() {
         renderItem={({ item }) => (
           <ProfessionalCard
             professional={item}
-            onPress={() => handleJoinQueue(item.id)}
+            onPress={() => handleSelectProfessional(item.id)}
           />
         )}
         ListEmptyComponent={
@@ -212,10 +170,10 @@ export function EstablishmentDetail() {
         }
       />
 
-      {establishment.isOpen && professionals.length > 0 && (
+      {establishment.open_status === "OPEN" && professionals.length > 0 && (
         <Button
           title="Entrar na fila (menor espera)"
-          onPress={handleJoinShortestQueue}
+          onPress={handleSelectShortestQueue}
           mt="$3"
         />
       )}

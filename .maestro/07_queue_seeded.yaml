@@ -1,0 +1,146 @@
+appId: host.exp.exponent
+name: Fila com clientes pre-seedados (sem cadastro)
+env:
+  SUFFIX: "TROCAR_PELO_SUFIXO_DO_SEED"
+---
+- assertVisible: "Estabelecimentos"
+
+# Logout se logado
+- runFlow:
+    when:
+      visible:
+        id: "profile-icon"
+    commands:
+      - tapOn:
+          id: "profile-icon"
+      - tapOn: "Sair da conta"
+      - extendedWaitUntil:
+          visible: "Cadastrar"
+          timeout: 5000
+
+# === CLIENTE 1 — login e entra na fila ===
+- tapOn: "Cadastrar"
+- assertVisible: "Já é cadastrado?"
+- tapOn: "Login"
+- assertVisible: "Acessar a conta"
+
+- tapOn:
+    text: "E-mail"
+- inputText: "cli1_${SUFFIX}@teste.com"
+- tapOn:
+    text: "Senha"
+- inputText: "Teste@123"
+- hideKeyboard
+- tapOn: "Entrar"
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 60000
+
+- tapOn:
+    text: "Buscar estabelecimento..."
+- eraseText: 30
+- inputText: "Corte Real"
+- hideKeyboard
+- extendedWaitUntil:
+    visible: "Corte Real 97616"
+    timeout: 30000
+- tapOn: "Corte Real 97616"
+- extendedWaitUntil:
+    visible: "Entrar na fila (menor espera)"
+    timeout: 30000
+- tapOn: "Entrar na fila (menor espera)"
+- extendedWaitUntil:
+    visible: "Você está na fila!"
+    timeout: 60000
+- assertVisible: "Tempo estimado"
+- tapOn: "Voltar ao início"
+- assertVisible:
+    text: "Em fila.*"
+
+# Logout
+- tapOn:
+    id: "profile-icon"
+- tapOn: "Sair da conta"
+- extendedWaitUntil:
+    visible: "Cadastrar"
+    timeout: 5000
+
+# === CLIENTE 2 — login e entra na fila ===
+- tapOn: "Cadastrar"
+- tapOn: "Login"
+- tapOn:
+    text: "E-mail"
+- inputText: "cli2_${SUFFIX}@teste.com"
+- tapOn:
+    text: "Senha"
+- inputText: "Teste@123"
+- hideKeyboard
+- tapOn: "Entrar"
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 60000
+
+- tapOn:
+    text: "Buscar estabelecimento..."
+- eraseText: 30
+- inputText: "Corte Real"
+- hideKeyboard
+- extendedWaitUntil:
+    visible: "Corte Real 97616"
+    timeout: 30000
+- tapOn: "Corte Real 97616"
+- extendedWaitUntil:
+    visible: "Entrar na fila (menor espera)"
+    timeout: 30000
+- tapOn: "Entrar na fila (menor espera)"
+- extendedWaitUntil:
+    visible: "Você está na fila!"
+    timeout: 60000
+- tapOn: "Voltar ao início"
+
+# Logout
+- tapOn:
+    id: "profile-icon"
+- tapOn: "Sair da conta"
+- extendedWaitUntil:
+    visible: "Cadastrar"
+    timeout: 5000
+
+# === CLIENTE 3 — login, entra e CANCELA ===
+- tapOn: "Cadastrar"
+- tapOn: "Login"
+- tapOn:
+    text: "E-mail"
+- inputText: "cli3_${SUFFIX}@teste.com"
+- tapOn:
+    text: "Senha"
+- inputText: "Teste@123"
+- hideKeyboard
+- tapOn: "Entrar"
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 60000
+
+- tapOn:
+    text: "Buscar estabelecimento..."
+- eraseText: 30
+- inputText: "Corte Real"
+- hideKeyboard
+- extendedWaitUntil:
+    visible: "Corte Real 97616"
+    timeout: 30000
+- tapOn: "Corte Real 97616"
+- extendedWaitUntil:
+    visible: "Entrar na fila (menor espera)"
+    timeout: 30000
+- tapOn: "Entrar na fila (menor espera)"
+- extendedWaitUntil:
+    visible: "Você está na fila!"
+    timeout: 60000
+
+# CANCELAMENTO
+- tapOn: "Sair da fila"
+- tapOn: "Sim, sair"
+- extendedWaitUntil:
+    visible: "Estabelecimentos"
+    timeout: 5000
