@@ -439,6 +439,14 @@ src/screens/
 | 7 | Usar `DELETE /attendances/{id}/leave-queue` | Backend tem endpoint separado para sair da fila (alem de PUT /cancel). Avaliar qual usar em cada contexto | Pendente |
 | 8 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
 | 9 | Busca "Pra ontem" | Botao que busca o profissional com menor tempo de espera mais proximo do cliente. Ordena por tempo estimado ASC | Pendente |
+| 10 | Calendario para pedir entrada na fila | Cliente escolhe o dia em um calendario para solicitar entrada na fila do profissional. Ver secao "Agenda e manifestacao de interesse" | Pendente |
+
+### Correcoes de UX e ajustes pendentes
+
+| # | Item | Descricao | Status |
+|---|------|-----------|--------|
+| 1 | ~~Botao voltar nunca pode fazer logout~~ | Resolvido alinhando com o padrao do front-partner (`router.replace`). No client (react-navigation): login/cadastro com sucesso usam `navigation.replace`/`reset` em vez de `navigate` (Login.tsx, SignUp.tsx) — Login sai do historico. Logout (Profile) e deletar conta (Settings) usam `navigation.reset` para `home` — limpa as telas autenticadas. Voltar nunca mais cai no Login nem desconecta | **FEITO** |
+| 2 | ~~Endereco deve ter complemento~~ | Ja implementado: backend (`complement` String opcional em `/users/me/addresses`), `addressService.ts` (campo tipado) e `EditAddress.tsx` (input "Complemento", carregamento e exibicao na lista). Tem teste de integracao | **FEITO** |
 
 ### Regras de negocio — Multa por cancelamento
 
@@ -512,6 +520,7 @@ src/screens/
 
 **Frontend (app client):**
 - Na tela do profissional, aba "Agenda" mostrando dias disponiveis da semana
+- **Calendario** para o cliente visualizar os dias com agenda aberta e pedir para entrar na fila no dia escolhido
 - Botao "Quero cortar nesse dia" para manifestar interesse
 - Status da manifestacao: PENDENTE → CONFIRMADO/RECUSADO
 - Lista de interessados (posicao do cliente na ordem de chegada, sem ver outros nomes)
@@ -524,6 +533,7 @@ src/screens/
 | 11 | Busca por bairro/cidade | Depende de establishments terem endereco cadastrado | Pendente |
 | 12 | Testes de componente/tela | React Native Testing Library | Pendente |
 | 13 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
+| 14 | Countdown resiliente offline | O countdown ja roda a partir do relogio do device (`useQueueCountdown` calcula `estimatedMinutes - (Date.now() - enteredAt)`), so o polling depende de internet. Falta polish: detectar conexao (`@react-native-community/netinfo`), pausar polling offline e re-sincronizar ao reconectar, mostrar badge "offline / atualizado ha X min" para o usuario nao ficar cego, e manter `activeQueue` persistido (ja em SecureStore) entre reinicios offline. A cada reconexao a aferição melhora; sem internet o numero continua descontando localmente | Pendente |
 
 ### Nota — Transferencia de proprietario (OWNER)
 

@@ -36,6 +36,3 @@ ios/
 
 # typescript
 *.tsbuildinfo
-
-# docs (PRDs confidenciais)
-src/docs/
