@@ -36,3 +36,6 @@ ios/
 
 # typescript
 *.tsbuildinfo
+
+# test coverage
+coverage/
