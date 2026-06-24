@@ -112,7 +112,7 @@ export function Home() {
   }
 
   return (
-    <VStack flex={1} px={15} pt={60} bg="$gray700">
+    <VStack flex={1} px={15} pt={60} bg="$green100">
       <Header />
 
       <HStack justifyContent="flex-end" mt="$2">
