@@ -17,6 +17,7 @@ import { Button } from "@components/Button";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
+import { useQueueSocket } from "@hooks/useQueueSocket";
 import { useAuthStore } from "@stores/authStore";
 
 type RouteParams = {
@@ -71,6 +72,9 @@ export function EstablishmentDetail() {
   const { data: establishment, isLoading, isError } = useEstablishment(establishmentId);
   const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  // Tempo real: atualiza a fila via WebSocket; o polling vira fallback (backend 18b)
+  useQueueSocket(establishmentId);
 
   function handleSelectProfessional(professionalId: string) {
     const prof = professionals.find((p) => p.id === professionalId);

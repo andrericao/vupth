@@ -12,6 +12,7 @@ import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { attendanceService } from "@services/attendanceService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
+import { useQueueNotifications } from "@hooks/useQueueNotifications";
 
 type RouteParams = {
   professionalId: string;
@@ -46,6 +47,9 @@ export function QueueStatus() {
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
   const { remaining, color, isInQueue, isBeingAttended, activeQueue } = useQueueCountdown();
+
+  // Notificacao pessoal "é a sua vez" via WebSocket enquanto ha fila ativa (backend 18b)
+  useQueueNotifications(!!activeQueue);
 
   const [isCreating, setIsCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);

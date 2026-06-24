@@ -12,6 +12,14 @@ const BASE_URLS: Record<string, string> = {
 
 const env = (process.env.EXPO_PUBLIC_API_ENV || "local") as keyof typeof BASE_URLS;
 
+// WebSocket (STOMP) — deriva ws(s) do baseURL HTTP. `/ws/websocket` e o transporte
+// raw do SockJS (o handshake nativo do RN nao usa a lib SockJS).
+export function deriveWsUrl(baseUrl: string): string {
+	return `${baseUrl.replace(/^http/, "ws")}/ws/websocket`;
+}
+
+export const WS_URL = deriveWsUrl(BASE_URLS[env]);
+
 const TOKEN_KEY = "vupth_access_token";
 const REFRESH_KEY = "vupth_refresh_token";
 const USER_KEY = "vupth_user";
