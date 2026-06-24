@@ -200,7 +200,7 @@ src/screens/
 | NAIL_SALON | NAIL_SALON | ✅ Alinhado |
 | SPA | SPA | ✅ Alinhado |
 | CLINIC | CLINIC | ✅ Alinhado |
-| — | **EYEBROW** | ❌ **FALTA no frontend** |
+| EYEBROW | EYEBROW | ✅ Alinhado |
 
 ### OpenStatus
 
@@ -208,7 +208,7 @@ src/screens/
 |----------|---------|--------|
 | OPEN | OPEN | ✅ Alinhado |
 | CLOSED | CLOSED | ✅ Alinhado |
-| — | **TEMPORARILY_CLOSED** | ❌ **FALTA no frontend** |
+| TEMPORARILY_CLOSED | TEMPORARILY_CLOSED | ✅ Alinhado |
 
 ### EstablishmentStatus
 
@@ -216,50 +216,17 @@ src/screens/
 |----------|---------|--------|
 | ACTIVE | ACTIVE | ✅ Alinhado |
 | INACTIVE | INACTIVE | ✅ Alinhado |
-| — | **TEMPORARY_CLOSED** | ❌ **FALTA no frontend** |
+| TEMPORARY_CLOSED | TEMPORARY_CLOSED | ✅ Alinhado |
 
 ### ServiceItemType
 
-| Frontend (8 valores) | Backend (25 valores) | Status |
-|----------------------|----------------------|--------|
-| CORTE_MAQUINA | CORTE_MAQUINA | ✅ |
-| CORTE_TESOURA | CORTE_TESOURA | ✅ |
-| BARBA | BARBA | ✅ |
-| CORTE_FEMININO | — | ❌ **NAO EXISTE no backend** |
-| MANICURE | MANICURE | ✅ |
-| PEDICURE | PEDICURE | ✅ |
-| MASSAGEM | — | ❌ **NAO EXISTE** (backend tem MASSAGEM_RELAXANTE e MASSAGEM_MODELADORA) |
-| DEPILACAO | DEPILACAO | ✅ |
-| — | SOBRANCELHA | ❌ Falta |
-| — | PINTURA | ❌ Falta |
-| — | HENNA_SOBRANCELHA | ❌ Falta |
-| — | MICROPIGMENTACAO_SOBRANCELHA | ❌ Falta |
-| — | BROW_LAMINATION | ❌ Falta |
-| — | TINTURA_SOBRANCELHA | ❌ Falta |
-| — | RECORTE_PONTAS | ❌ Falta |
-| — | ESCOVA | ❌ Falta |
-| — | HIDRATACAO | ❌ Falta |
-| — | PROGRESSIVA | ❌ Falta |
-| — | UNHAS_GEL | ❌ Falta |
-| — | NAIL_ART | ❌ Falta |
-| — | MASSAGEM_RELAXANTE | ❌ Falta |
-| — | MASSAGEM_MODELADORA | ❌ Falta |
-| — | LIMPEZA_PELE | ❌ Falta |
-| — | DRENAGEM | ❌ Falta |
-| — | PEELING | ❌ Falta |
-| — | BOTOX | ❌ Falta |
-| — | MICROAGULHAMENTO | ❌ Falta |
+✅ **Alinhado (25/25)** — `src/domain/establishment/types.ts` tem exatamente os 25 valores do backend:
+`CORTE_MAQUINA, CORTE_TESOURA, BARBA, SOBRANCELHA, PINTURA, HENNA_SOBRANCELHA, MICROPIGMENTACAO_SOBRANCELHA, BROW_LAMINATION, TINTURA_SOBRANCELHA, RECORTE_PONTAS, ESCOVA, HIDRATACAO, PROGRESSIVA, MANICURE, PEDICURE, UNHAS_GEL, NAIL_ART, MASSAGEM_RELAXANTE, MASSAGEM_MODELADORA, LIMPEZA_PELE, DEPILACAO, DRENAGEM, PEELING, BOTOX, MICROAGULHAMENTO`.
+Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram removidos.
 
 ### Specialty (profissional)
 
-| Frontend (enum fixo) | Backend (String livre) | Status |
-|----------------------|----------------------|--------|
-| BARBER | "BARBER" | ✅ Funciona |
-| HAIRDRESSER | "HAIRDRESSER" | ✅ Funciona |
-| NAIL_TECH | "NAIL_TECH" | ✅ Funciona |
-| MASSEUSE | "MASSEUSE" | ✅ Funciona |
-| ESTHETICIAN | "ESTHETICIAN" | ✅ Funciona |
-| — | Qualquer string | ⚠️ Frontend vai falhar com valores fora do enum |
+✅ **Alinhado** — o frontend usa `specialty: string` (`src/domain/professional/types.ts`), aceitando qualquer valor que o backend enviar. Não há mais enum fixo que quebraria com strings livres.
 
 ### AttendanceStatus
 
@@ -277,23 +244,25 @@ src/screens/
 
 ### CRITICAS — precisam ser corrigidas
 
+> **Nota (2026-06-24):** as divergências de tipos/contrato abaixo (#1, #2, #5, #6, #7, #8) **já foram resolvidas no código** (confirmado em auditoria contra o backend). Mantidas como histórico riscado. Em aberto restam só itens informativos (#9) e de funcionalidade (#11).
+
 | # | Divergencia | Detalhe | Acao |
 |---|-------------|---------|------|
-| 1 | **`services` no GET /establishment** | Backend retorna `string[]` (ex: `["BARBER"]`). Frontend espera `ServiceItem[]` (objetos com id, price, etc.) | Frontend deve tratar `services` como `string[]` na listagem. ServiceItems vem via `GET /professional/{id}/service-items` |
-| 2 | **`professionals-with-queue` response** | Backend retorna estrutura diferente: `professionals[].waiting_list[]` com campos `clientId`, `clientName`, `services`, `totalValue`, etc. Frontend espera `attendancesInQueue[]` com campos `position`, `estimatedWaitMinutes` | Ajustar tipo `ProfessionalWithQueue` para refletir contrato real: `waiting_list`, `queue_count`, `estimated_wait_minutes`, `current_attendance` |
-| ~~3~~ | ~~QueueStatus nao cria attendance~~ | ~~Corrigido: QueueStatus agora chama POST /attendances ao entrar~~ | **FEITO** (2026-06-03) |
-| ~~4~~ | ~~`client-queue` endpoint errado~~ | ~~Corrigido: getQueue envia establishmentId como query param~~ | **FEITO** (2026-06-03) |
-| 5 | **ServiceItemType desalinhado** | Frontend tem 8 valores, 2 nao existem no backend (`CORTE_FEMININO`, `MASSAGEM`). Backend tem 25 valores | Alinhar com os 25 valores do backend |
-| 6 | **ServiceType falta EYEBROW** | Backend tem `EYEBROW`, frontend nao | Adicionar ao tipo e ao filtro da Home |
+| ~~1~~ | ~~`services` no GET /establishment~~ | ~~Backend retorna `string[]`~~ | **FEITO** — `establishmentService` trata `services` como `string[]` |
+| ~~2~~ | ~~`professionals-with-queue` response~~ | ~~Contrato `waiting_list`/`queue_count`/`estimated_wait_minutes`/`is_available`~~ | **FEITO** — `ProfessionalWithQueue` reflete o contrato real |
+| ~~3~~ | ~~QueueStatus nao cria attendance~~ | ~~Corrigido: POST /attendances ao entrar~~ | **FEITO** (2026-06-03) |
+| ~~4~~ | ~~`client-queue` endpoint errado~~ | ~~getQueue envia establishmentId como query param~~ | **FEITO** (2026-06-03) |
+| ~~5~~ | ~~ServiceItemType desalinhado~~ | ~~Frontend tinha 8 valores, 2 invalidos~~ | **FEITO** — 25/25 alinhados, `CORTE_FEMININO`/`MASSAGEM` removidos |
+| ~~6~~ | ~~ServiceType falta EYEBROW~~ | ~~Backend tem `EYEBROW`~~ | **FEITO** — `EYEBROW` no tipo e no filtro |
 
 ### MEDIAS — funcionam mas precisam atencao
 
 | # | Divergencia | Detalhe | Acao |
 |---|-------------|---------|------|
-| 7 | **OpenStatus falta TEMPORARILY_CLOSED** | Backend suporta 3 estados, frontend so 2 | Adicionar e tratar como "Fechado" na UI |
-| 8 | **Specialty e String livre** | Backend aceita qualquer string, frontend usa enum fixo | Mudar para `string` no tipo, mostrar o valor que vier |
-| 9 | **Login response tem campos extras** | Backend retorna `first_name`, `last_name`, `phone`, `birth_date`, `gender`, `profile_image_url`, `modified_fields` | Ignorar por agora, usar quando tiver tela de perfil |
-| ~~10~~ | ~~`wait-time` endpoint nao usado~~ | ~~Corrigido: useQueueCountdown usa GET /client-queue/{attendanceId}/wait-time com polling adaptativo~~ | **FEITO** (2026-06-03) |
+| ~~7~~ | ~~OpenStatus falta TEMPORARILY_CLOSED~~ | ~~Backend suporta 3 estados~~ | **FEITO** — `OpenStatus` com 3 estados |
+| ~~8~~ | ~~Specialty e String livre~~ | ~~Frontend usava enum fixo~~ | **FEITO** — `specialty: string` |
+| 9 | **Login response tem campos extras** | Backend retorna `first_name`, `last_name`, `phone`, `birth_date`, `gender`, `profile_image_url`, `modified_fields` | Já usados nas telas de perfil; sem ação pendente |
+| ~~10~~ | ~~`wait-time` endpoint nao usado~~ | ~~useQueueCountdown usa GET /client-queue/{attendanceId}/wait-time~~ | **FEITO** (2026-06-03) |
 | 11 | **`leave-queue` nao implementado** | Backend tem `DELETE /attendances/{id}/leave-queue` alem de `PUT /cancel` | Avaliar qual usar no cancelamento |
 
 ---
@@ -430,6 +399,8 @@ src/screens/
 | 2 | Tela Attendances — historico real | Consumir `GET /attendances/client/me` (filtros: status, dateFrom, dateTo). ClientId extraido do JWT | Pendente |
 | 3 | Visualizacao do atendimento atual | Cliente ve detalhes do atendimento IN_PROGRESS (profissional, servicos, tempo decorrido). Dados vem do `GET /client-queue/{attendanceId}/wait-time` + `GET /attendances/{id}` | Pendente |
 | 4 | ~~Selecao de servicos obrigatoria~~ | Implementado: ServiceSelection.tsx — lista servicos, multi-selecao, preco, confirmar antes de entrar na fila. Endpoint: `GET /professional-queue/{id}/service-items` | **FEITO** |
+| 5 | Tempo real via WebSocket (STOMP) | **Backend pronto (2026-06-14, PRD_BACKEND 18b)** — handoff C3 do partner. Instalar `@stomp/stompjs`; derivar URL do socket do BASE_URL (`http→ws`/`https→wss`, sufixo `/ws`); CONNECT com `Authorization: Bearer <token>`; SUBSCRIBE `/topic/establishment/{id}/queue` (snapshot completo, **substituir o polling** com refetch de fallback) e `/user/queue/notifications` (notificacao pessoal `ATTENDANCE_STARTED` "é a sua vez!" / `ATTENDANCE_FINISHED`). Modelo: partner `src/hooks/useQueueSocket.ts` | Pendente |
+| 6 | Consumir ETA estavel (meal-aware lock) | **Backend pronto (item 37, 2026-06-22)** — `GET /client-queue/{attendanceId}/wait-time` ja retorna estimativa estavel (refeicoes travadas no ingresso). O client ja consome esse endpoint em `useQueueCountdown`; validar que usa o `estimatedWaitingTime` estavel e nao recalcula por fora | Validar |
 
 ### Media prioridade — Funcionalidades
 
@@ -440,6 +411,8 @@ src/screens/
 | 8 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
 | 9 | Busca "Pra ontem" | Botao que busca o profissional com menor tempo de espera mais proximo do cliente. Ordena por tempo estimado ASC | Pendente |
 | 10 | Calendario para pedir entrada na fila | Cliente escolhe o dia em um calendario para solicitar entrada na fila do profissional. Ver secao "Agenda e manifestacao de interesse" | Pendente |
+| 11 | Atualizar Gluestack (handoff C2 partner) | Partner foi para `@gluestack-ui/themed` 1.1.73 (ultima v1); client esta em `^1.1.34`. Subir para a ultima v1 e depois avaliar v1→v2. Atencao: 1.1.73 puxa `@gluestack-ui/tooltip → react-aria → react-dom` (adicionar `react-dom` na versao do React) e reiniciar com `expo start -c` | Pendente |
+| 12 | Validar UI sem profissional "fantasma" (C4) | Backend (#31) ja nao retorna profissional sem servico em `professionals-with-queue`; so garantir que a UI trata lista vazia e nao assume profissionais inexistentes | Validar |
 
 ### Correcoes de UX e ajustes pendentes
 
@@ -530,7 +503,7 @@ src/screens/
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
 | 10 | Trocar lugar na fila | Endpoint pendente no backend (`ClientServiceImpl:138`). Frontend consumira quando pronto | Aguarda backend |
-| 11 | Busca por bairro/cidade | Depende de establishments terem endereco cadastrado | Pendente |
+| 11 | Busca por bairro ordenada por menor fila (C1) | Cliente escolhe estabelecimento pelo **bairro** ordenado pela **menor fila** (e GPS na fase 2). Depende do backend #2 (`GET /establishment?neighborhood=X` + tempo de espera agregado + ordenacao). Handoff do partner | Aguarda backend |
 | 12 | Testes de componente/tela | React Native Testing Library | Pendente |
 | 13 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
 | 14 | Countdown resiliente offline | O countdown ja roda a partir do relogio do device (`useQueueCountdown` calcula `estimatedMinutes - (Date.now() - enteredAt)`), so o polling depende de internet. Falta polish: detectar conexao (`@react-native-community/netinfo`), pausar polling offline e re-sincronizar ao reconectar, mostrar badge "offline / atualizado ha X min" para o usuario nao ficar cego, e manter `activeQueue` persistido (ja em SecureStore) entre reinicios offline. A cada reconexao a aferição melhora; sem internet o numero continua descontando localmente | Pendente |
@@ -547,13 +520,14 @@ O backend tem `PATCH /establishment/{id}/owner` que transfere ownership para out
 | 14 | Gerar APK (Android) | `eas build --platform android --profile preview` (env=dev/Render). Em andamento | Em progresso |
 | 15 | Gerar AAB (Play Store) | `eas build --platform android --profile production` (env=prod/Railway) | Futuro |
 | 16 | Publicar na Play Store | EAS Submit ou upload manual do AAB | Futuro |
-| 17 | OTA Update | `eas update --branch preview -m "..."` — atualiza JS sem rebuild | Disponivel |
+| 17 | ~~Auto-publish OTA no push (C5)~~ | `.github/workflows/eas-update.yml`: push `dev`→`eas update --branch preview` (env=dev), push `main`→`--branch production` (env=prod). Env setada **explicitamente** por branch no step (o `env` do eas.json so vale para build, nao para update). Export roda na nuvem (sem travar no Metro local) | **FEITO** |
 
 ### Portao anti-quebra (CI/CD)
 
 - **Pre-push** (`.githooks/pre-push`, versionado): roda lint + typecheck + testes; bloqueia push se falhar. Ativado via `core.hooksPath` (script `prepare` no `package.json`).
 - **CI** (`.github/workflows/ci.yml`): lint + typecheck (bloqueante) + testes em `dev`/`main`.
-- **Auto-rollback** (`.github/workflows/auto-rollback.yml`): reverte o commit que deixar o CI vermelho em `dev`/`main`, voltando ao ultimo estado funcional.
+- **EAS Update OTA** (`.github/workflows/eas-update.yml`): publica o bundle JS automaticamente no push (dev→preview, main→production) com `EXPO_PUBLIC_API_ENV` por branch.
+- **Auto-rollback** (`.github/workflows/auto-rollback.yml`): reverte o commit que deixar o CI vermelho em `dev`/`main`, voltando ao ultimo estado funcional. **(Nota: o partner ainda nao tem auto-rollback — vale portar para la.)**
 
 ### Concluidos
 
