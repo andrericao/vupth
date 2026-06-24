@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Alert, TouchableOpacity } from "react-native";
+import * as Updates from "expo-updates";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import {
   VStack,
@@ -106,6 +107,36 @@ export function Settings() {
     );
   }
 
+  const [isChecking, setIsChecking] = useState(false);
+
+  async function handleCheckUpdate() {
+    setIsChecking(true);
+    try {
+      const result = await Updates.checkForUpdateAsync();
+      if (result.isAvailable) {
+        await Updates.fetchUpdateAsync();
+        Alert.alert(
+          "Atualização baixada",
+          "O app vai reiniciar para aplicar a nova versão.",
+          [{ text: "OK", onPress: () => Updates.reloadAsync() }],
+        );
+      } else {
+        Alert.alert("Tudo certo", "Você já está na versão mais recente.");
+      }
+    } catch {
+      Alert.alert(
+        "Não foi possível verificar",
+        "Atualizações OTA só funcionam no APK de build (não no Expo Go/modo dev).",
+      );
+    } finally {
+      setIsChecking(false);
+    }
+  }
+
+  const otaInfo = Updates.updateId
+    ? `OTA ${Updates.updateId.slice(0, 8)}${Updates.createdAt ? ` · ${Updates.createdAt.toLocaleDateString()} ${Updates.createdAt.toLocaleTimeString()}` : ""}`
+    : "bundle embutido (nenhum OTA aplicado)";
+
   return (
     <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
       <Header showBackButton />
@@ -148,6 +179,19 @@ export function Settings() {
           onPress={handleDeleteAccount}
           borderColor="$red500"
           $active-bg="$red500"
+        />
+      </VStack>
+
+      <VStack mt="$8" alignItems="center" gap="$1">
+        <Text size="xs" color="$gray400">
+          Runtime {Updates.runtimeVersion ?? "—"} · canal {Updates.channel ?? "dev"}
+        </Text>
+        <Text size="xs" color="$gray400">{otaInfo}</Text>
+        <Button
+          title={isChecking ? "Verificando..." : "Verificar atualização"}
+          variant="outline"
+          mt="$2"
+          onPress={handleCheckUpdate}
         />
       </VStack>
     </VStack>
