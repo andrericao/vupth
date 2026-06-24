@@ -15,11 +15,11 @@ import { useQueueCountdown } from "@hooks/useQueueCountdown";
 
 type RouteParams = {
   professionalId: string;
-  professionalName: string;
   establishmentId: string;
-  establishmentName: string;
-  estimatedWaitMinutes: number;
-  serviceItemIds: string[];
+  professionalName?: string;
+  establishmentName?: string;
+  estimatedWaitMinutes?: number;
+  serviceItemIds?: string[];
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -58,9 +58,9 @@ export function QueueStatus() {
     const joinQueue = useQueueStore.getState().joinQueue;
     joinQueue({
       professionalId,
-      professionalName: paramProfName,
+      professionalName: paramProfName ?? "",
       establishmentId,
-      establishmentName: paramEstName,
+      establishmentName: paramEstName ?? "",
       enteredAt: Date.now(),
       estimatedMinutes: estimatedWaitMinutes ?? 0,
       status: "SCHEDULED",
@@ -72,7 +72,7 @@ export function QueueStatus() {
       setIsCreating(true);
       try {
         const { data } = await attendanceService.create(
-          { professionalId, establishmentId, serviceItemIds, scheduledTime: new Date().toISOString() },
+          { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], scheduledTime: new Date().toISOString() },
           accessToken!,
         );
         if (!cancelled) {

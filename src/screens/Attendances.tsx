@@ -27,6 +27,9 @@ export function Attendances() {
     navigation.navigate("queueStatus", {
       professionalId: activeQueue.professionalId,
       establishmentId: activeQueue.establishmentId,
+      professionalName: activeQueue.professionalName,
+      establishmentName: activeQueue.establishmentName,
+      estimatedWaitMinutes: activeQueue.estimatedMinutes,
     });
   }
 
