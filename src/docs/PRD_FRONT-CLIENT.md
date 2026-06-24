@@ -543,10 +543,17 @@ O backend tem `PATCH /establishment/{id}/owner` que transfere ownership para out
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 13 | Configurar EAS Build | Criar `eas.json`, adicionar `package` no `app.json`, configurar ambientes (dev/prod) | Pendente |
-| 14 | Gerar APK (Android) | `eas build --platform android --profile preview` para APK de teste | Pendente |
-| 15 | Gerar AAB (Play Store) | `eas build --platform android --profile production` para publicacao | Futuro |
+| 13 | ~~Configurar EAS Build + Update~~ | Projeto `@andrericao/vupth-client` (package `com.vupth.client`, separado do partner). `eas.json` com perfis development/preview/production (channel + `env` EXPO_PUBLIC_API_ENV por perfil); `app.json` com projectId, runtimeVersion e updates.url. EAS Update via `expo-updates` | **FEITO** |
+| 14 | Gerar APK (Android) | `eas build --platform android --profile preview` (env=dev/Render). Em andamento | Em progresso |
+| 15 | Gerar AAB (Play Store) | `eas build --platform android --profile production` (env=prod/Railway) | Futuro |
 | 16 | Publicar na Play Store | EAS Submit ou upload manual do AAB | Futuro |
+| 17 | OTA Update | `eas update --branch preview -m "..."` — atualiza JS sem rebuild | Disponivel |
+
+### Portao anti-quebra (CI/CD)
+
+- **Pre-push** (`.githooks/pre-push`, versionado): roda lint + typecheck + testes; bloqueia push se falhar. Ativado via `core.hooksPath` (script `prepare` no `package.json`).
+- **CI** (`.github/workflows/ci.yml`): lint + typecheck (bloqueante) + testes em `dev`/`main`.
+- **Auto-rollback** (`.github/workflows/auto-rollback.yml`): reverte o commit que deixar o CI vermelho em `dev`/`main`, voltando ao ultimo estado funcional.
 
 ### Concluidos
 
