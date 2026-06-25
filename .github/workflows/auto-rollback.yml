@@ -1,0 +1,60 @@
+name: Auto-rollback on red
+
+# Rede de seguranca: se o CI ficar VERMELHO num push direto para dev/main,
+# reverte automaticamente o commit que quebrou, voltando ao ultimo estado funcional.
+# (O hook pre-push ja barra a maioria dos casos; isto cobre push --no-verify ou
+#  pushes feitos fora desta maquina.)
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [dev, main]
+
+permissions:
+  contents: write
+
+jobs:
+  rollback:
+    # So age quando: o CI falhou E foi um push (nao PR)
+    if: >
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurar git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Reverter commit que quebrou
+        run: |
+          BAD_SHA="${{ github.event.workflow_run.head_sha }}"
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          echo "CI vermelho em $BRANCH @ $BAD_SHA"
+
+          # A branch pode ter avancado desde o commit ruim; so reverte se ele
+          # ainda for o HEAD (evita reverter algo ja corrigido por cima).
+          git fetch origin "$BRANCH"
+          CURRENT_HEAD="$(git rev-parse origin/$BRANCH)"
+          if [ "$CURRENT_HEAD" != "$BAD_SHA" ]; then
+            echo "HEAD de $BRANCH ($CURRENT_HEAD) != commit ruim; ja avancou. Abortando rollback."
+            exit 0
+          fi
+
+          # Nao reverter um revert (evita loop).
+          if git log -1 --format=%s "$BAD_SHA" | grep -qiE '^Revert|\[skip-rollback\]'; then
+            echo "Commit ja e um revert ou marcado [skip-rollback]. Abortando."
+            exit 0
+          fi
+
+          git checkout "$BRANCH"
+          git revert --no-edit "$BAD_SHA"
+          git push origin "$BRANCH"
+          echo "↩️  Revertido $BAD_SHA em $BRANCH — branch voltou ao ultimo estado funcional."

@@ -24,6 +24,16 @@ export interface QueuePosition {
   status: AttendanceStatus;
 }
 
+export type QueueNotificationType = 'ATTENDANCE_STARTED' | 'ATTENDANCE_FINISHED';
+
+export interface QueueNotification {
+  type: QueueNotificationType;
+  attendanceId: string;
+  establishmentId: string;
+  message: string;
+  timestamp: string;
+}
+
 export function canCancelAttendance(status: AttendanceStatus): boolean {
   return status === 'SCHEDULED';
 }

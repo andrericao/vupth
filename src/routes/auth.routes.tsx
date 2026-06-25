@@ -31,11 +31,11 @@ export type AppRoutes = {
   };
   queueStatus: {
     professionalId: string;
-    professionalName: string;
     establishmentId: string;
-    establishmentName: string;
-    estimatedWaitMinutes: number;
-    serviceItemIds: string[];
+    professionalName?: string;
+    establishmentName?: string;
+    estimatedWaitMinutes?: number;
+    serviceItemIds?: string[];
   };
   profile: undefined;
   attendances: undefined;

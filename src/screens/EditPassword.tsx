@@ -21,7 +21,7 @@ export function EditPassword() {
   const [isSaving, setIsSaving] = useState(false);
 
   const rules = getPasswordRules(password);
-  const allRulesPass = rules.every((r) => r.valid);
+  const allRulesPass = rules.every((r) => r.passed);
   const passwordsMatch = password.length > 0 && password === confirmPassword;
   const canSave = allRulesPass && passwordsMatch && !isSaving;
 

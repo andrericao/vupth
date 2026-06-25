@@ -1,0 +1,46 @@
+name: EAS Update (OTA)
+
+# Publica a camada JavaScript (telas/logica/fixes) pela internet, sem rebuild de loja.
+# push em dev  -> branch/canal "preview"     (testers, APK preview)  | API: dev (Render)
+# push em main -> branch/canal "production"   (usuarios finais)       | API: prod (Railway)
+#
+# IMPORTANTE: o `env` dos perfis do eas.json so vale para `eas build`.
+# Para `eas update` a env precisa ser setada explicitamente aqui, senao o
+# bundle do OTA pode sair apontando para a API errada (ver src/services/api.ts).
+#
+# Nao atualiza camada nativa: lib nativa nova / permissao / icone / bump de SDK
+# exigem um novo build (o runtimeVersion muda e o update deixa de casar).
+
+on:
+  push:
+    branches: [dev, main]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Publish OTA (dev -> preview)
+        if: github.ref == 'refs/heads/dev'
+        env:
+          EXPO_PUBLIC_API_ENV: dev
+        run: eas update --branch preview --message "${{ github.event.head_commit.message }}" --non-interactive
+
+      - name: Publish OTA (main -> production)
+        if: github.ref == 'refs/heads/main'
+        env:
+          EXPO_PUBLIC_API_ENV: prod
+        run: eas update --branch production --message "${{ github.event.head_commit.message }}" --non-interactive
