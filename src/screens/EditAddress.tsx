@@ -58,7 +58,7 @@ export function EditAddress() {
   }
 
   function handleEdit(addr: AddressResponse) {
-    setEditingId(addr.id);
+    setEditingId(addr.userAddressId);
     setForm({
       street: addr.street,
       number: addr.number,
@@ -208,7 +208,7 @@ export function EditAddress() {
         ) : (
           <VStack gap="$3">
             {addresses.map((addr) => (
-              <Box key={addr.id} bg="$white" p="$4" borderRadius="$lg">
+              <Box key={addr.userAddressId} bg="$white" p="$4" borderRadius="$lg">
                 <HStack justifyContent="space-between" alignItems="flex-start">
                   <VStack flex={1} mr="$2">
                     <Text fontFamily="$heading" size="sm">
@@ -219,7 +219,7 @@ export function EditAddress() {
                       {addr.neighborhood} — {addr.city}/{addr.state}
                     </Text>
                     <Text size="xs" color="$gray300">CEP: {addr.zipCode}</Text>
-                    {addr.main && (
+                    {addr.isMain && (
                       <HStack alignItems="center" gap="$1" mt="$1">
                         <Star size={14} color="#F59E0B" weight="fill" />
                         <Text size="xs" color="$yellow500">Principal</Text>
@@ -227,15 +227,15 @@ export function EditAddress() {
                     )}
                   </VStack>
                   <HStack gap="$3">
-                    {!addr.main && (
-                      <TouchableOpacity onPress={() => handleSetMain(addr.id)}>
+                    {!addr.isMain && (
+                      <TouchableOpacity onPress={() => handleSetMain(addr.userAddressId)}>
                         <Star size={20} color="#9CA3AF" />
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity onPress={() => handleEdit(addr)}>
                       <PencilSimple size={20} color="#22C55E" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDelete(addr.id)}>
+                    <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)}>
                       <Trash size={20} color="#EF4444" />
                     </TouchableOpacity>
                   </HStack>

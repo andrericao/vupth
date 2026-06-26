@@ -14,7 +14,10 @@ export interface AddressRequest {
 }
 
 export interface AddressResponse {
-  id: string;
+  userAddressId: string;
+  userId?: string;
+  userName?: string;
+  isMain: boolean;
   street: string;
   number: string;
   complement: string | null;
@@ -25,7 +28,6 @@ export interface AddressResponse {
   reference: string | null;
   latitude: number | null;
   longitude: number | null;
-  main: boolean;
 }
 
 function authHeader(accessToken: string) {
