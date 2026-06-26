@@ -8,6 +8,8 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 import { addressService, AddressResponse, AddressRequest } from "@services/addressService";
+import { maskCEP, unmask } from "@utils/masks";
+import { lookupCep } from "@utils/cep";
 
 type Mode = "list" | "form";
 
@@ -29,6 +31,7 @@ export function EditAddress() {
   const [addresses, setAddresses] = useState<AddressResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AddressRequest>(EMPTY_FORM);
@@ -66,7 +69,7 @@ export function EditAddress() {
       neighborhood: addr.neighborhood,
       city: addr.city,
       state: addr.state,
-      zipCode: addr.zipCode,
+      zipCode: maskCEP(addr.zipCode),
       reference: addr.reference ?? "",
     });
     setMode("form");
@@ -134,6 +137,27 @@ export function EditAddress() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  async function handleCepChange(value: string) {
+    const masked = maskCEP(value);
+    setForm((prev) => ({ ...prev, zipCode: masked }));
+
+    if (unmask(masked).length !== 8) return;
+
+    setCepLoading(true);
+    const result = await lookupCep(masked);
+    setCepLoading(false);
+    if (!result) return;
+
+    // Preenche o que o ViaCEP retornou, sem apagar o que ja estava (numero/complemento/referencia ficam intactos).
+    setForm((prev) => ({
+      ...prev,
+      street: result.street || prev.street,
+      neighborhood: result.neighborhood || prev.neighborhood,
+      city: result.city || prev.city,
+      state: result.state || prev.state,
+    }));
+  }
+
   if (mode === "form") {
     return (
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
@@ -174,8 +198,10 @@ export function EditAddress() {
               </VStack>
             </HStack>
             <VStack gap="$1">
-              <Text size="sm" color="$gray300">CEP * (8 dígitos)</Text>
-              <Input2 placeholder="01310100" value={form.zipCode} onChangeText={(v: string) => updateField("zipCode", v)} keyboardType="numeric" maxLength={9} />
+              <Text size="sm" color="$gray300">
+                CEP *{cepLoading ? " — buscando endereço..." : ""}
+              </Text>
+              <Input2 placeholder="01310-100" value={form.zipCode} onChangeText={handleCepChange} keyboardType="numeric" maxLength={9} />
             </VStack>
             <VStack gap="$1">
               <Text size="sm" color="$gray300">Referência</Text>
