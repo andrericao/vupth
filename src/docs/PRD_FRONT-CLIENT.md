@@ -413,6 +413,15 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 | 10 | Calendario para pedir entrada na fila | Cliente escolhe o dia em um calendario para solicitar entrada na fila do profissional. Ver secao "Agenda e manifestacao de interesse" | Pendente |
 | 11 | Atualizar Gluestack (handoff C2 partner) | Partner foi para `@gluestack-ui/themed` 1.1.73 (ultima v1); client esta em `^1.1.34`. Subir para a ultima v1 e depois avaliar v1→v2. Atencao: 1.1.73 puxa `@gluestack-ui/tooltip → react-aria → react-dom` (adicionar `react-dom` na versao do React) e reiniciar com `expo start -c` | Pendente |
 | 12 | Validar UI sem profissional "fantasma" (C4) | Backend (#31) ja nao retorna profissional sem servico em `professionals-with-queue`; so garantir que a UI trata lista vazia e nao assume profissionais inexistentes | Validar |
+| 13 | Senha atual na troca de senha | EditPassword deve pedir a **senha atual** alem da nova. **Aguarda backend** (ver "Pendencia para o backend" abaixo). Front so implementa o campo apos o backend verificar `currentPassword` (verificacao no front via re-login foi descartada) | Aguarda backend |
+| 14 | Esqueci minha senha (forgot password) | Fluxo de recuperacao de senha (cliente sem sessao). **Depende do backend**: endpoint para solicitar reset (codigo/email) + confirmar nova senha. Verificar se ja existe — provavelmente nao implementado | Aguarda backend |
+
+> ⚠️ **Pendencia para o backend (handoff)** — *Verificacao da senha atual na troca de senha.*
+> Hoje `PATCH /profile/update-password/me` recebe so `{ "password": "<nova>" }` (`PasswordRequest`) e o `UpdatePasswordUseCase` troca direto, **sem conferir a senha atual**. Para o app pedir a senha atual com seguranca real, o backend precisa:
+> 1. Adicionar `currentPassword` ao `PasswordRequest` (`@NotBlank`).
+> 2. No `UpdatePasswordUseCase`, validar `passwordEncoder.matches(request.currentPassword(), user.getPassword())` antes de trocar; se nao bater, retornar **401/403** ("senha atual incorreta").
+> 3. Atualizar testes de integracao + collection Postman + PRD_BACKEND (secao "PATCH /profile/update-password/me").
+> Depois disso o front envia `{ currentPassword, password }` e adiciona o campo na tela. (Tambem avaliar o endpoint de **forgot password** do item 14.)
 
 ### Correcoes de UX e ajustes pendentes
 
