@@ -28,4 +28,49 @@ describe('AttendanceService', () => {
     expect(response.status).toBe(200);
     expect(response.data.status).toBe('CANCELLED');
   });
+
+  it('listClientHistory deve buscar GET /attendances/client/me com Bearer token', async () => {
+    mock.onGet('/attendances/client/me').reply((config) => {
+      expect(config.headers?.Authorization).toBe('Bearer my-token');
+      return [
+        200,
+        [
+          {
+            id: 'att-1',
+            clientId: 'cli-1',
+            clientName: 'Joao',
+            professionalId: 'prof-1',
+            professionalName: 'Carlos',
+            establishmentId: 'est-1',
+            services: [{ id: 's1', customName: 'Corte', estimatedMinutes: 30 }],
+            status: 'FINISHED',
+            totalValue: 35,
+            scheduledTime: '2026-06-01T14:00:00Z',
+            startTime: '2026-06-01T14:02:00Z',
+            endTime: '2026-06-01T14:28:00Z',
+            durationInMinutes: 26,
+          },
+        ],
+      ];
+    });
+
+    const response = await attendanceService.listClientHistory('my-token');
+
+    expect(response.data).toHaveLength(1);
+    expect(response.data[0].status).toBe('FINISHED');
+    expect(response.data[0].professionalName).toBe('Carlos');
+  });
+
+  it('listClientHistory deve repassar filtros como query params', async () => {
+    mock.onGet('/attendances/client/me').reply((config) => {
+      expect(config.params).toEqual({ status: 'FINISHED' });
+      return [200, []];
+    });
+
+    const response = await attendanceService.listClientHistory('my-token', {
+      status: 'FINISHED',
+    });
+
+    expect(response.data).toEqual([]);
+  });
 });

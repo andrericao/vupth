@@ -71,7 +71,7 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 | `/client-queue/{id}/wait-time` | GET | QueueStatus (polling) | Implementado | 2 |
 | `/professional/{id}/service-items` | GET | ServiceSelection | Implementado | — |
 | `/attendances/{id}/leave-queue` | DELETE | — | **NAO IMPLEMENTADO** | — |
-| `/attendances/client/me` | GET | Attendances | **NAO IMPLEMENTADO** | — |
+| `/attendances/client/me` | GET | Attendances | Implementado | — |
 | `/profile/general-infos` | PATCH | EditProfile | Implementado | 5 |
 | `/profile/update-email/me` | PATCH | EditEmail | Implementado | 5 |
 | `/profile/update-password/me` | PATCH | EditPassword | Implementado | 5 |
@@ -396,10 +396,10 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
 | 1 | ~~Interceptor 401 → refresh → retry~~ | Implementado em api.ts — auto-token, refresh, fila de requests, logout automatico | **FEITO** |
-| 2 | Tela Attendances — historico real | Consumir `GET /attendances/client/me` (filtros: status, dateFrom, dateTo). ClientId extraido do JWT | Pendente |
+| 2 | ~~Tela Attendances — historico real~~ | Implementado: `attendanceService.listClientHistory` + hook `useClientAttendances` (TanStack Query) consomem `GET /attendances/client/me` (filtros opcionais status/dateFrom/dateTo, clientId do JWT). Attendances.tsx renderiza secao REALIZADOS (FINISHED/CANCELLED/LATE) com profissional, servicos, data, duracao, valor e badge de status; loading + empty state | **FEITO** |
 | 3 | Visualizacao do atendimento atual | Cliente ve detalhes do atendimento IN_PROGRESS (profissional, servicos, tempo decorrido). Dados vem do `GET /client-queue/{attendanceId}/wait-time` + `GET /attendances/{id}` | Pendente |
 | 4 | ~~Selecao de servicos obrigatoria~~ | Implementado: ServiceSelection.tsx — lista servicos, multi-selecao, preco, confirmar antes de entrar na fila. Endpoint: `GET /professional-queue/{id}/service-items` | **FEITO** |
-| 5 | Tempo real via WebSocket (STOMP) | **Backend pronto (2026-06-14, PRD_BACKEND 18b)** — handoff C3. **Fatias 1-2 FEITAS:** `@stomp/stompjs` + `WS_URL` (`/ws/websocket`); `useQueueSocket` assina `/topic/establishment/{id}/queue` (atualiza cache, polling vira fallback) em EstablishmentDetail; `useQueueNotifications` (alerta "é a sua vez!"/concluido) agora **app-wide** via `App.tsx`, dirigido por `activeQueue` do store — vale em qualquer tela enquanto houver fila ativa; workarounds RN (`forceBinaryWSFrames`+`appendMissingNULLonIncoming`). **Falta validar (nao e codigo):** (3) confirmar `/ws` deployado no Render; (4) testar no device os eventos `ATTENDANCE_STARTED/FINISHED` | Em progresso |
+| 5 | Tempo real via WebSocket (STOMP) | **Backend pronto (2026-06-14, PRD_BACKEND 18b)** — handoff C3. **Fatias 1-2 FEITAS:** `@stomp/stompjs` + `WS_URL` (`/ws/websocket`); `useQueueSocket` assina `/topic/establishment/{id}/queue` (atualiza cache, polling vira fallback) em EstablishmentDetail; `useQueueNotifications` (alerta "é a sua vez!"/concluido) agora **app-wide** via `App.tsx`, dirigido por `activeQueue` do store — vale em qualquer tela enquanto houver fila ativa; workarounds RN (`forceBinaryWSFrames`+`appendMissingNULLonIncoming`). (3) `/ws` confirmado no Render (`/ws/info` → `{"websocket":true}`, `/ws/websocket` → 400 = existe). **Falta so:** (4) testar no device os eventos `ATTENDANCE_STARTED/FINISHED` | Em progresso |
 | 6 | Consumir ETA estavel (meal-aware lock) | **Backend pronto (item 37, 2026-06-22)** — `GET /client-queue/{attendanceId}/wait-time` ja retorna estimativa estavel (refeicoes travadas no ingresso). O client ja consome esse endpoint em `useQueueCountdown`; validar que usa o `estimatedWaitingTime` estavel e nao recalcula por fora | Validar |
 
 ### Media prioridade — Funcionalidades

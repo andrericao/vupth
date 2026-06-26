@@ -1,4 +1,4 @@
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   VStack,
@@ -16,11 +16,31 @@ import { Queue, Clock, CaretRight } from "phosphor-react-native";
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
+import { useClientAttendances } from "@hooks/useAttendances";
 import { formatWaitTime } from "@domain/queue/types";
+
+const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
+  FINISHED: { label: "Concluído", color: "#22C55E" },
+  CANCELLED: { label: "Cancelado", color: "#EF4444" },
+  LATE: { label: "Atrasado", color: "#F59E0B" },
+};
+
+function formatDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString("pt-BR");
+  } catch {
+    return "";
+  }
+}
 
 export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
+  const { data: history = [], isLoading } = useClientAttendances();
+
+  const realizados = history.filter(
+    (a) => a.status === "FINISHED" || a.status === "CANCELLED" || a.status === "LATE",
+  );
 
   function handleGoToQueue() {
     if (!activeQueue) return;
@@ -92,12 +112,55 @@ export function Attendances() {
             REALIZADOS
           </Text>
 
-          <Center py="$8">
-            <Clock size={40} color="#9CA3AF" />
-            <Text size="sm" color="$gray300" mt="$2">
-              Histórico em breve
-            </Text>
-          </Center>
+          {isLoading ? (
+            <Center py="$8">
+              <ActivityIndicator size="large" color="#22C55E" />
+            </Center>
+          ) : realizados.length === 0 ? (
+            <Center py="$8">
+              <Clock size={40} color="#9CA3AF" />
+              <Text size="sm" color="$gray300" mt="$2">
+                Nenhum atendimento realizado ainda
+              </Text>
+            </Center>
+          ) : (
+            <VStack gap="$3">
+              {realizados.map((a) => {
+                const st = HISTORY_STATUS[a.status] ?? {
+                  label: a.status,
+                  color: "#9CA3AF",
+                };
+                return (
+                  <Box key={a.id} bg="$white" p="$4" borderRadius="$lg">
+                    <HStack justifyContent="space-between" alignItems="flex-start">
+                      <VStack flex={1} pr="$2">
+                        <Text fontFamily="$heading" size="sm">
+                          {a.professionalName}
+                        </Text>
+                        <Text size="xs" color="$gray300">
+                          {a.services.map((s) => s.customName).join(", ") || "—"}
+                        </Text>
+                        <Text size="xs" color="$gray400" mt="$1">
+                          {formatDate(a.scheduledTime)}
+                          {a.durationInMinutes ? ` · ${a.durationInMinutes} min` : ""}
+                        </Text>
+                      </VStack>
+                      <VStack alignItems="flex-end" gap="$1">
+                        <Badge bg={st.color} borderRadius="$full" px="$3" py="$1">
+                          <BadgeText color="$white" size="xs">
+                            {st.label}
+                          </BadgeText>
+                        </Badge>
+                        <Text size="xs" color="$gray300">
+                          R$ {a.totalValue.toFixed(2)}
+                        </Text>
+                      </VStack>
+                    </HStack>
+                  </Box>
+                );
+              })}
+            </VStack>
+          )}
         </VStack>
       </ScrollView>
     </VStack>

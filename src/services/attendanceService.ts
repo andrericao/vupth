@@ -21,6 +21,34 @@ export interface CancelAttendanceResponse {
   status: string;
 }
 
+export interface AttendanceServiceLine {
+  id: string;
+  customName: string;
+  estimatedMinutes: number;
+}
+
+export interface ClientAttendance {
+  id: string;
+  clientId: string;
+  clientName: string;
+  professionalId: string;
+  professionalName: string;
+  establishmentId: string;
+  services: AttendanceServiceLine[];
+  status: string;
+  totalValue: number;
+  scheduledTime: string;
+  startTime: string | null;
+  endTime: string | null;
+  durationInMinutes: number | null;
+}
+
+export interface ClientAttendanceFilters {
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
 export const attendanceService = {
   create(data: CreateAttendanceRequest, accessToken: string) {
     return api.post<AttendanceResponse>('/attendances', data, {
@@ -34,5 +62,12 @@ export const attendanceService = {
       null,
       { headers: { Authorization: `Bearer ${accessToken}` } },
     );
+  },
+
+  listClientHistory(accessToken: string, filters?: ClientAttendanceFilters) {
+    return api.get<ClientAttendance[]>('/attendances/client/me', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      params: filters,
+    });
   },
 };
