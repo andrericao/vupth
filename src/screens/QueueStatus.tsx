@@ -11,6 +11,7 @@ import { canCancelAttendance, formatWaitTime, shouldCreateAttendance } from "@do
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { attendanceService } from "@services/attendanceService";
+import { waitForBackend } from "@services/healthService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 
 type RouteParams = {
@@ -48,6 +49,7 @@ export function QueueStatus() {
   const { remaining, color, isInQueue, isBeingAttended, activeQueue } = useQueueCountdown();
 
   const [isCreating, setIsCreating] = useState(false);
+  const [createMsg, setCreateMsg] = useState("Entrando na fila...");
   const [createError, setCreateError] = useState<string | null>(null);
   const didCreate = useRef(false);
 
@@ -80,6 +82,18 @@ export function QueueStatus() {
     async function createAttendance() {
       setIsCreating(true);
       try {
+        // Cold start do Render: acorda a instancia antes de criar, evitando spinner
+        // "infinito" enquanto o backend (hibernado) demora ~50s a responder.
+        setCreateMsg("Preparando servidor...");
+        const ready = await waitForBackend({ isCancelled: () => cancelled });
+        if (cancelled) return;
+        if (!ready) {
+          await leaveQueue();
+          setCreateError("O servidor está demorando para responder. Tente novamente em instantes.");
+          return;
+        }
+
+        setCreateMsg("Entrando na fila...");
         const { data } = await attendanceService.create(
           { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], scheduledTime: new Date().toISOString() },
           accessToken!,
@@ -138,9 +152,12 @@ export function QueueStatus() {
 
   if (isCreating) {
     return (
-      <Center flex={1} bg="$gray700">
+      <Center flex={1} bg="$gray700" px={15}>
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text mt="$2" color="$gray300">Entrando na fila...</Text>
+        <Text mt="$2" color="$gray300">{createMsg}</Text>
+        <Text mt="$1" size="xs" color="$gray400" textAlign="center">
+          Na primeira vez pode levar até ~50s para o servidor acordar.
+        </Text>
       </Center>
     );
   }
