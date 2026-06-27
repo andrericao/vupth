@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 
 import { useFonts } from "expo-font";
-import { Roboto_400Regular, Roboto_700Bold } from "@expo-google-fonts/roboto";
+import { Poppins_600SemiBold, Poppins_700Bold } from "@expo-google-fonts/poppins";
+import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from "@expo-google-fonts/inter";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -20,7 +21,13 @@ import { waitForBackend } from "@services/healthService";
 const queryClient = new QueryClient();
 
 export default function App() {
-  const [fontsLoaded] = useFonts({ Roboto_400Regular, Roboto_700Bold });
+  const [fontsLoaded] = useFonts({
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_700Bold,
+  });
   const restoreSession = useAuthStore((s) => s.restoreSession);
   const restoreQueue = useQueueStore((s) => s.restoreQueue);
   const activeQueue = useQueueStore((s) => s.activeQueue);

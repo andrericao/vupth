@@ -151,10 +151,10 @@ export const gluestackUIConfig = createConfig({
       green100: '#dcfce7',
       green200: '#bbf7d0',
       green300: '#9BEC00',
-      green400: '#4ade80',
+      green400: '#52B788',
       green500: '#00B37E',
-      green600: '#16a34a',
-      green700: '#639339',
+      green600: '#009E6F',
+      green700: '#1B4332',
       green800: '#166534',
       green900: '#14532d',
       lime50: '#f7fee7',
@@ -182,7 +182,7 @@ export const gluestackUIConfig = createConfig({
       amber200: '#fde68a',
       amber300: '#fcd34d',
       amber400: '#fbbf24',
-      amber500: '#f59e0b',
+      amber500: '#FFB703', // [verde-imersivo] alertas moderados (guia de design)
       amber600: '#d97706',
       amber700: '#b45309',
       amber800: '#92400e',
@@ -202,7 +202,7 @@ export const gluestackUIConfig = createConfig({
       red200: '#fecaca',
       red300: '#fca5a5',
       red400: '#f87171',
-      red500: '#ef4444',
+      red500: '#E63946', // [verde-imersivo] erros/cancelamentos (guia de design)
       red600: '#dc2626',
       red700: '#b91c1c',
       red800: '#991b1b',
@@ -551,8 +551,9 @@ export const gluestackUIConfig = createConfig({
       extraBlack: '950',
     },
     fonts: {
-      heading: 'Roboto_700Bold',
-      body: 'Roboto_400Regular',
+      // [verde-imersivo] Poppins p/ titulos/botoes (heading), Inter p/ texto (body).
+      heading: 'Poppins_700Bold',
+      body: 'Inter_400Regular',
       mono: undefined,
     },
     fontSizes: {
