@@ -130,8 +130,8 @@ export function QueueStatus() {
   const status = activeQueue?.status ?? "SCHEDULED";
   const canCancel = canCancelAttendance(status);
 
-  const borderColor = isInQueue ? color : "#22C55E";
-  const timeColor = isInQueue ? color : "#22C55E";
+  const borderColor = isInQueue ? color : "#00B37E";
+  const timeColor = isInQueue ? color : "#00B37E";
   const timeLabel = remaining <= 0 && isInQueue
     ? "Aguardando chamada"
     : formatWaitTime(remaining).replace('~', '');
@@ -167,7 +167,7 @@ export function QueueStatus() {
   if (isCreating) {
     return (
       <Center flex={1} bg="$gray700" px={15}>
-        <ActivityIndicator size="large" color="#22C55E" />
+        <ActivityIndicator size="large" color="#00B37E" />
         <Text mt="$2" color="$gray300">{createMsg}</Text>
         <Text mt="$1" size="xs" color="$gray400" textAlign="center">
           Na primeira vez pode levar até ~50s para o servidor acordar.

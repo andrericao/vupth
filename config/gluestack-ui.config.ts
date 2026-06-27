@@ -213,7 +213,12 @@ export const gluestackUIConfig = createConfig({
 			gray400: "#B9BBBC",
 			gray500: "#DDDEDF",
 			gray600: "#EFF0F0",
-			gray700: "#FAFAFA",
+			gray700: "#F7FAF8",
+      // Paleta VUPTH (PRD): tokens de marca. cta == green500 (#00B37E).
+      brandPrimary: '#1B4332',
+      brandAccent: '#52B788',
+      brandCta: '#00B37E',
+      brandBg: '#F7FAF8',
       warmGray50: '#fafaf9',
       warmGray100: '#f5f5f4',
       warmGray200: '#e7e5e4',

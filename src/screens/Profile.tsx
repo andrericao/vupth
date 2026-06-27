@@ -81,12 +81,12 @@ export function Profile() {
 
       <Box borderRadius="$lg" mt="$8" overflow="hidden">
         <MenuItem
-          icon={<ClipboardText size={22} color="#22C55E" />}
+          icon={<ClipboardText size={22} color="#00B37E" />}
           label="Atendimentos"
           onPress={() => navigation.navigate("attendances")}
         />
         <MenuItem
-          icon={<Gear size={22} color="#22C55E" />}
+          icon={<Gear size={22} color="#00B37E" />}
           label="Configurações"
           onPress={() => navigation.navigate("settings")}
         />

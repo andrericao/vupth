@@ -122,7 +122,7 @@ export function Home() {
       <HStack justifyContent="flex-end" mt="$2">
         {isAuthenticated ? (
           <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
-            <UserCircle size={32} color="#22C55E" weight="fill" />
+            <UserCircle size={32} color="#00B37E" weight="fill" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
@@ -203,7 +203,7 @@ export function Home() {
 
       {isLoading ? (
         <Center mt="$10">
-          <ActivityIndicator size="large" color="#22C55E" />
+          <ActivityIndicator size="large" color="#00B37E" />
           <Text color="$gray300" mt="$2">Carregando...</Text>
         </Center>
       ) : isError ? (
@@ -217,7 +217,7 @@ export function Home() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={["#22C55E"]} tintColor="#22C55E" />
+            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={["#00B37E"]} tintColor="#00B37E" />
           }
           renderItem={({ item }) => (
             <EstablishmentCard

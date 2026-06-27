@@ -118,7 +118,7 @@ export function SignUp() {
             />
             {passwordsMatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <Check size={14} color="#22C55E" weight="bold" />
+                <Check size={14} color="#00B37E" weight="bold" />
                 <Text size="xs" color="$green500">Senhas conferem</Text>
               </HStack>
             )}

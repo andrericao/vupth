@@ -259,7 +259,7 @@ export function EditAddress() {
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity onPress={() => handleEdit(addr)}>
-                      <PencilSimple size={20} color="#22C55E" />
+                      <PencilSimple size={20} color="#00B37E" />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)}>
                       <Trash size={20} color="#EF4444" />

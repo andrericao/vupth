@@ -110,7 +110,7 @@ export function EstablishmentDetail() {
   if (isLoading) {
     return (
       <Center flex={1}>
-        <ActivityIndicator size="large" color="#22C55E" />
+        <ActivityIndicator size="large" color="#00B37E" />
       </Center>
     );
   }

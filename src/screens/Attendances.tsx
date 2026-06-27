@@ -20,7 +20,7 @@ import { useClientAttendances } from "@hooks/useAttendances";
 import { formatWaitTime } from "@domain/queue/types";
 
 const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Concluído", color: "#22C55E" },
+  FINISHED: { label: "Concluído", color: "#00B37E" },
   CANCELLED: { label: "Cancelado", color: "#EF4444" },
   LATE: { label: "Atrasado", color: "#F59E0B" },
 };
@@ -114,7 +114,7 @@ export function Attendances() {
 
           {isLoading ? (
             <Center py="$8">
-              <ActivityIndicator size="large" color="#22C55E" />
+              <ActivityIndicator size="large" color="#00B37E" />
             </Center>
           ) : realizados.length === 0 ? (
             <Center py="$8">
