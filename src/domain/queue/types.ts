@@ -59,6 +59,21 @@ export function isActiveAttendance(status: AttendanceStatus): boolean {
   return status === 'SCHEDULED' || status === 'IN_PROGRESS' || status === 'PAUSED';
 }
 
+/** Formata um Date como HH:MM (relógio local, 24h). */
+export function formatClockTime(date: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/**
+ * Horário previsto de início do atendimento = agora + tempo de espera restante.
+ * Retorna "HH:MM". Minutos negativos são tratados como 0 (previsão = agora).
+ */
+export function estimatedStartTime(nowMs: number, remainingMinutes: number): string {
+  const safeMinutes = Math.max(0, remainingMinutes);
+  return formatClockTime(new Date(nowMs + safeMinutes * 60000));
+}
+
 export function formatWaitTime(minutes: number): string {
   if (minutes < 1) return 'Agora';
   if (minutes < 60) return `${minutes} min`;

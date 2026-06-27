@@ -7,7 +7,7 @@ import { Info } from "phosphor-react-native";
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
-import { canCancelAttendance, formatWaitTime, shouldCreateAttendance } from "@domain/queue/types";
+import { canCancelAttendance, formatWaitTime, shouldCreateAttendance, estimatedStartTime } from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { attendanceService } from "@services/attendanceService";
@@ -135,6 +135,11 @@ export function QueueStatus() {
   const timeLabel = remaining <= 0 && isInQueue
     ? "Aguardando chamada"
     : formatWaitTime(remaining).replace('~', '');
+  // Previsão fixa = entrada na fila + estimativa (atualiza quando o poll re-sincroniza).
+  // Evita Date.now() no render (react-hooks/purity).
+  const startTimeLabel = activeQueue
+    ? estimatedStartTime(activeQueue.enteredAt, activeQueue.estimatedMinutes)
+    : "";
 
   function handleCancel() {
     Alert.alert(
@@ -232,6 +237,15 @@ export function QueueStatus() {
           </Heading>
 
           <Box w="$full" h="$px" bg="$gray500" my="$4" />
+
+          {isInQueue && (
+            <HStack w="$full" justifyContent="space-between" mb="$3">
+              <Text size="sm" color="$gray300">Previsão de início</Text>
+              <Text size="sm" fontFamily="$heading">
+                {remaining <= 0 ? "A qualquer momento" : `~${startTimeLabel}`}
+              </Text>
+            </HStack>
+          )}
 
           <HStack w="$full" justifyContent="space-between" mb="$3">
             <Text size="sm" color="$gray300">Estabelecimento</Text>

@@ -3,6 +3,8 @@ import {
   isActiveAttendance,
   formatWaitTime,
   shouldCreateAttendance,
+  estimatedStartTime,
+  formatClockTime,
   AttendanceStatus,
 } from '@domain/queue/types';
 import { MOCK_QUEUE_POSITION } from '@domain/queue/mockData';
@@ -35,6 +37,24 @@ describe('Queue Domain', () => {
 
     it('NÃO cria sem token', () => {
       expect(shouldCreateAttendance({ ...base, hasToken: false })).toBe(false);
+    });
+  });
+
+  describe('estimatedStartTime / formatClockTime', () => {
+    it('soma os minutos restantes a agora e formata HH:MM', () => {
+      const base = new Date(2026, 5, 27, 14, 0, 0).getTime(); // 14:00 local
+      expect(estimatedStartTime(base, 45)).toBe('14:45');
+      expect(estimatedStartTime(base, 90)).toBe('15:30');
+    });
+
+    it('trata minutos <= 0 como previsão = agora', () => {
+      const base = new Date(2026, 5, 27, 9, 5, 0).getTime();
+      expect(estimatedStartTime(base, 0)).toBe('09:05');
+      expect(estimatedStartTime(base, -10)).toBe('09:05');
+    });
+
+    it('formatClockTime preenche zero à esquerda', () => {
+      expect(formatClockTime(new Date(2026, 0, 1, 8, 7))).toBe('08:07');
     });
   });
 
