@@ -10,6 +10,7 @@ import { Establishment, ServiceType } from "@domain/establishment/types";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
+import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { formatWaitTime } from "@domain/queue/types";
 import { UserCircle, Queue } from "phosphor-react-native";
 
@@ -93,6 +94,9 @@ export function Home() {
   const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
+
+  // Home é a raiz do stack: evita que um único "voltar" do Android feche o app.
+  useDoubleBackExit();
 
   const isSearching = search.trim().length > 0;
 
