@@ -7,7 +7,7 @@ import { Info } from "phosphor-react-native";
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
-import { canCancelAttendance, formatWaitTime } from "@domain/queue/types";
+import { canCancelAttendance, formatWaitTime, shouldCreateAttendance } from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { attendanceService } from "@services/attendanceService";
@@ -52,7 +52,16 @@ export function QueueStatus() {
   const didCreate = useRef(false);
 
   useEffect(() => {
-    if (didCreate.current || activeQueue?.attendanceId || !accessToken) return;
+    if (
+      !shouldCreateAttendance({
+        alreadyCreated: didCreate.current,
+        hasAttendanceId: !!activeQueue?.attendanceId,
+        hasToken: !!accessToken,
+        serviceItemIds,
+      })
+    ) {
+      return;
+    }
     didCreate.current = true;
 
     const joinQueue = useQueueStore.getState().joinQueue;
@@ -80,6 +89,8 @@ export function QueueStatus() {
         }
       } catch (error: any) {
         if (!cancelled) {
+          // Limpa a fila otimista para não deixar tarja/banner residual sem atendimento real.
+          await leaveQueue();
           const msg = error.response?.data?.message || error.message || "Erro ao entrar na fila";
           setCreateError(msg);
         }
@@ -90,7 +101,7 @@ export function QueueStatus() {
 
     createAttendance();
     return () => { cancelled = true; };
-  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes]);
+  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";

@@ -2,11 +2,42 @@ import {
   canCancelAttendance,
   isActiveAttendance,
   formatWaitTime,
+  shouldCreateAttendance,
   AttendanceStatus,
 } from '@domain/queue/types';
 import { MOCK_QUEUE_POSITION } from '@domain/queue/mockData';
 
 describe('Queue Domain', () => {
+  describe('shouldCreateAttendance', () => {
+    const base = {
+      alreadyCreated: false,
+      hasAttendanceId: false,
+      hasToken: true,
+      serviceItemIds: ['s1'],
+    };
+
+    it('cria quando veio com serviços, sem atendimento e com token', () => {
+      expect(shouldCreateAttendance(base)).toBe(true);
+    });
+
+    it('NÃO cria sem serviços (re-entrada via banner Home/Atendimentos) — evita "no service found"', () => {
+      expect(shouldCreateAttendance({ ...base, serviceItemIds: [] })).toBe(false);
+      expect(shouldCreateAttendance({ ...base, serviceItemIds: undefined })).toBe(false);
+    });
+
+    it('NÃO cria se já existe attendanceId (fila real em andamento)', () => {
+      expect(shouldCreateAttendance({ ...base, hasAttendanceId: true })).toBe(false);
+    });
+
+    it('NÃO cria se já criou nesta montagem (guard de idempotência)', () => {
+      expect(shouldCreateAttendance({ ...base, alreadyCreated: true })).toBe(false);
+    });
+
+    it('NÃO cria sem token', () => {
+      expect(shouldCreateAttendance({ ...base, hasToken: false })).toBe(false);
+    });
+  });
+
   describe('canCancelAttendance', () => {
     it('deve permitir cancelar quando status é SCHEDULED', () => {
       expect(canCancelAttendance('SCHEDULED')).toBe(true);

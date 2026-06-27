@@ -38,6 +38,23 @@ export function canCancelAttendance(status: AttendanceStatus): boolean {
   return status === 'SCHEDULED';
 }
 
+/**
+ * Decide se a tela de fila deve CRIAR um atendimento novo.
+ * Só cria no fluxo "entrar na fila" (veio com serviços selecionados).
+ * Re-entrar na tela (banner da Home/Atendimentos, sem serviços) nunca cria —
+ * evita o erro "no service found" e filas-fantasma sem attendanceId.
+ */
+export function shouldCreateAttendance(params: {
+  alreadyCreated: boolean;
+  hasAttendanceId: boolean;
+  hasToken: boolean;
+  serviceItemIds?: string[];
+}): boolean {
+  const { alreadyCreated, hasAttendanceId, hasToken, serviceItemIds } = params;
+  if (alreadyCreated || hasAttendanceId || !hasToken) return false;
+  return (serviceItemIds?.length ?? 0) > 0;
+}
+
 export function isActiveAttendance(status: AttendanceStatus): boolean {
   return status === 'SCHEDULED' || status === 'IN_PROGRESS' || status === 'PAUSED';
 }
