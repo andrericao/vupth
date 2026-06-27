@@ -52,6 +52,17 @@ export function QueueStatus() {
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
   const [createError, setCreateError] = useState<string | null>(null);
   const didCreate = useRef(false);
+  const mountedRef = useRef(true);
+
+  // mountedRef só vira false no UNMOUNT real — não em re-execuções benignas do
+  // effect de criação. Sem isso, um re-render durante o create deixava o spinner
+  // preso (a flag de cancelamento era flipada e o finally não limpava isCreating).
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (
@@ -66,8 +77,7 @@ export function QueueStatus() {
     }
     didCreate.current = true;
 
-    const joinQueue = useQueueStore.getState().joinQueue;
-    joinQueue({
+    useQueueStore.getState().joinQueue({
       professionalId,
       professionalName: paramProfName ?? "",
       establishmentId,
@@ -77,19 +87,19 @@ export function QueueStatus() {
       status: "SCHEDULED",
     });
 
-    let cancelled = false;
-
     async function createAttendance() {
       setIsCreating(true);
       try {
         // Cold start do Render: acorda a instancia antes de criar, evitando spinner
         // "infinito" enquanto o backend (hibernado) demora ~50s a responder.
         setCreateMsg("Preparando servidor...");
-        const ready = await waitForBackend({ isCancelled: () => cancelled });
-        if (cancelled) return;
+        const ready = await waitForBackend({ isCancelled: () => !mountedRef.current });
+        if (!mountedRef.current) return;
         if (!ready) {
           await leaveQueue();
-          setCreateError("O servidor está demorando para responder. Tente novamente em instantes.");
+          if (mountedRef.current) {
+            setCreateError("O servidor está demorando para responder. Tente novamente em instantes.");
+          }
           return;
         }
 
@@ -98,23 +108,22 @@ export function QueueStatus() {
           { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], scheduledTime: new Date().toISOString() },
           accessToken!,
         );
-        if (!cancelled) {
+        if (mountedRef.current) {
           await updateQueue({ attendanceId: data.id });
         }
       } catch (error: any) {
-        if (!cancelled) {
-          // Limpa a fila otimista para não deixar tarja/banner residual sem atendimento real.
-          await leaveQueue();
+        // Limpa a fila otimista para não deixar tarja/banner residual sem atendimento real.
+        await leaveQueue();
+        if (mountedRef.current) {
           const msg = error.response?.data?.message || error.message || "Erro ao entrar na fila";
           setCreateError(msg);
         }
       } finally {
-        if (!cancelled) setIsCreating(false);
+        if (mountedRef.current) setIsCreating(false);
       }
     }
 
     createAttendance();
-    return () => { cancelled = true; };
   }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
