@@ -10,6 +10,8 @@ import { useAuthStore } from "@stores/authStore";
 import { addressService, AddressResponse, AddressRequest } from "@services/addressService";
 import { maskCEP, unmask } from "@utils/masks";
 import { lookupCep } from "@utils/cep";
+import { SkeletonList } from "@components/Skeleton";
+import { cardShadow } from "@utils/styles";
 
 type Mode = "list" | "form";
 
@@ -228,13 +230,13 @@ export function EditAddress() {
         </Heading>
 
         {isLoading ? (
-          <Text color="$gray300">Carregando...</Text>
+          <SkeletonList count={3} />
         ) : addresses.length === 0 ? (
           <Text color="$gray300">Nenhum endereço cadastrado</Text>
         ) : (
           <VStack gap="$3">
             {addresses.map((addr) => (
-              <Box key={addr.userAddressId} bg="$white" p="$4" borderRadius="$lg">
+              <Box key={addr.userAddressId} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                 <HStack justifyContent="space-between" alignItems="flex-start">
                   <VStack flex={1} mr="$2">
                     <Text fontFamily="$heading" size="sm">

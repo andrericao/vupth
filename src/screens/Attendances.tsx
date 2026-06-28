@@ -1,4 +1,4 @@
-import { TouchableOpacity, ActivityIndicator } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   VStack,
@@ -17,6 +17,8 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
+import { SkeletonList } from "@components/Skeleton";
+import { cardShadow } from "@utils/styles";
 import { formatWaitTime } from "@domain/queue/types";
 
 const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
@@ -75,7 +77,7 @@ export function Attendances() {
 
           {isInQueue && activeQueue ? (
             <TouchableOpacity onPress={handleGoToQueue}>
-              <Box bg="$white" p="$4" borderRadius="$lg" borderWidth="$1" borderColor={color}>
+              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={color}>
                 <HStack alignItems="center" gap="$3">
                   <Queue size={24} color={color} />
                   <VStack flex={1}>
@@ -113,9 +115,7 @@ export function Attendances() {
           </Text>
 
           {isLoading ? (
-            <Center py="$8">
-              <ActivityIndicator size="large" color="#00B37E" />
-            </Center>
+            <SkeletonList count={3} />
           ) : realizados.length === 0 ? (
             <Center py="$8">
               <Clock size={40} color="#9CA3AF" />
@@ -131,7 +131,7 @@ export function Attendances() {
                   color: "#9CA3AF",
                 };
                 return (
-                  <Box key={a.id} bg="$white" p="$4" borderRadius="$lg">
+                  <Box key={a.id} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                     <HStack justifyContent="space-between" alignItems="flex-start">
                       <VStack flex={1} pr="$2">
                         <Text fontFamily="$heading" size="sm">

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
+import { FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@gluestack-ui/themed";
 
@@ -11,6 +11,8 @@ import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
+import { SkeletonList } from "@components/Skeleton";
+import { cardShadow } from "@utils/styles";
 import { formatWaitTime } from "@domain/queue/types";
 import { UserCircle, Queue } from "phosphor-react-native";
 
@@ -48,9 +50,8 @@ function EstablishmentCard({
         bg="$white"
         p="$4"
         mb="$3"
-        borderRadius="$lg"
-        borderWidth="$1"
-        borderColor={isOpen ? "$green500" : "$gray400"}
+        borderRadius="$2xl"
+        style={cardShadow}
       >
         <HStack justifyContent="space-between" alignItems="center">
           <VStack flex={1}>
@@ -202,10 +203,7 @@ export function Home() {
       </Box>
 
       {isLoading ? (
-        <Center mt="$10">
-          <ActivityIndicator size="large" color="#00B37E" />
-          <Text color="$gray300" mt="$2">Carregando...</Text>
-        </Center>
+        <SkeletonList count={4} />
       ) : isError ? (
         <Center mt="$10">
           <Text color="$red500">Erro ao carregar estabelecimentos</Text>
