@@ -56,7 +56,7 @@ function ProfessionalCard({
               {professional.queue_count ?? 0} na fila
             </Text>
             <Text size="xs" color="$gray300">
-              ~{formatWaitTime(professional.estimated_wait_minutes ?? 0)}
+              {formatWaitTime(professional.estimated_wait_minutes ?? 0)}
             </Text>
           </VStack>
         </HStack>

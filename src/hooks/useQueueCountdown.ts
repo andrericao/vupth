@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useQueueStore, ActiveQueue } from '@stores/queueStore';
 import { useAuthStore } from '@stores/authStore';
 import { queueService } from '@services/queueService';
-import { reconcileQueueEstimate } from '@domain/queue/types';
+import { attendanceService } from '@services/attendanceService';
+import { reconcileQueueEstimate, AttendanceStatus } from '@domain/queue/types';
 
 export type UrgencyLevel = 'normal' | 'urgent';
 
@@ -25,7 +26,8 @@ function getUrgency(remaining: number, status: string): UrgencyLevel {
 function getPollingInterval(remaining: number): number {
   if (remaining > 60) return 600000;
   if (remaining > 10) return 300000;
-  return 60000;
+  if (remaining > 0) return 60000;
+  return 30000; // aguardando chamada: checa status (START/FINISH) mais rápido
 }
 
 export function useQueueCountdown() {
@@ -81,9 +83,17 @@ export function useQueueCountdown() {
             updateQueue(reconciled);
           }
 
-          if (data.totalRemainingMinutes <= 0) {
-            updateQueue({ status: 'SCHEDULED' });
-          }
+          // Fallback de status (caso o WebSocket nao entregue ATTENDANCE_STARTED/
+          // FINISHED): le o status real do atendimento e reflete na tela. Sem isso
+          // a tela ficava presa em "aguardando chamada" quando o profissional
+          // iniciava/concluia o atendimento.
+          try {
+            const hist = await attendanceService.listClientHistory(accessToken);
+            const mine = hist.data.find((a) => a.id === activeQueue.attendanceId);
+            if (mine && mine.status !== activeQueue.status) {
+              updateQueue({ status: mine.status as AttendanceStatus });
+            }
+          } catch {}
         }
       } catch {}
     };

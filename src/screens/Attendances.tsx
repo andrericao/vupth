@@ -89,7 +89,7 @@ export function Attendances() {
                     </Text>
                   </VStack>
                   <Badge bg={color} borderRadius="$full" px="$3" py="$1">
-                    <BadgeText color="$white" size="xs">~{formatWaitTime(remaining)}</BadgeText>
+                    <BadgeText color="$white" size="xs">{formatWaitTime(remaining)}</BadgeText>
                   </Badge>
                   <CaretRight size={18} color="#9CA3AF" />
                 </HStack>
