@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueueStore, ActiveQueue } from '@stores/queueStore';
 import { useAuthStore } from '@stores/authStore';
 import { queueService } from '@services/queueService';
@@ -39,6 +39,7 @@ export function useQueueCountdown() {
   const [remaining, setRemaining] = useState(0);
   const [urgency, setUrgency] = useState<UrgencyLevel>('normal');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollRef = useRef<() => Promise<void>>(async () => {});
 
   useEffect(() => {
     if (!activeQueue) return;
@@ -65,38 +66,36 @@ export function useQueueCountdown() {
   useEffect(() => {
     if (!activeQueue || !accessToken) return;
 
+    // Um ciclo de atualização. Lê o estado fresco da fila via getState.
     const poll = async () => {
-      try {
-        if (activeQueue.attendanceId && user?.id) {
-          const { data } = await queueService.getWaitTime(
-            activeQueue.attendanceId,
-            user.id,
-            accessToken,
-          );
-          // Mantém o countdown monotônico (não pula pra cima a cada poll).
-          const reconciled = reconcileQueueEstimate(
-            { enteredAt: activeQueue.enteredAt, estimatedMinutes: activeQueue.estimatedMinutes },
-            data.estimatedWaitingTime,
-            Date.now(),
-          );
-          if (reconciled) {
-            updateQueue(reconciled);
-          }
+      const q = useQueueStore.getState().activeQueue;
+      if (!q?.attendanceId || !user?.id) return;
 
-          // Fallback de status (caso o WebSocket nao entregue ATTENDANCE_STARTED/
-          // FINISHED): le o status real do atendimento e reflete na tela. Sem isso
-          // a tela ficava presa em "aguardando chamada" quando o profissional
-          // iniciava/concluia o atendimento.
-          try {
-            const hist = await attendanceService.listClientHistory(accessToken);
-            const mine = hist.data.find((a) => a.id === activeQueue.attendanceId);
-            if (mine && mine.status !== activeQueue.status) {
-              updateQueue({ status: mine.status as AttendanceStatus });
-            }
-          } catch {}
+      // 1. Tempo de espera (pode falhar quando o atendimento sai da fila / vira
+      //    IN_PROGRESS) — isolado para NÃO impedir a checagem de status abaixo.
+      try {
+        const { data } = await queueService.getWaitTime(q.attendanceId, user.id, accessToken);
+        const reconciled = reconcileQueueEstimate(
+          { enteredAt: q.enteredAt, estimatedMinutes: q.estimatedMinutes },
+          data.estimatedWaitingTime,
+          Date.now(),
+        );
+        if (reconciled) updateQueue(reconciled);
+      } catch {}
+
+      // 2. Status real do atendimento (fallback do WebSocket): reflete
+      //    IN_PROGRESS/FINISHED na tela. Roda SEMPRE, mesmo se o wait-time falhar.
+      try {
+        const hist = await attendanceService.listClientHistory(accessToken);
+        const mine = hist.data.find((a) => a.id === q.attendanceId);
+        if (mine && mine.status !== q.status) {
+          updateQueue({ status: mine.status as AttendanceStatus });
         }
       } catch {}
     };
+
+    // expõe o ciclo para o pull-to-refresh (sempre a versão mais recente).
+    pollRef.current = poll;
 
     const r = getRemainingMinutes(activeQueue);
     const interval = getPollingInterval(r);
@@ -109,6 +108,8 @@ export function useQueueCountdown() {
     };
   }, [activeQueue, accessToken, user?.id, updateQueue]);
 
+  const refresh = useCallback(() => pollRef.current(), []);
+
   const color = activeQueue ? URGENCY_COLORS[urgency] : URGENCY_COLORS.normal;
 
   return {
@@ -120,5 +121,6 @@ export function useQueueCountdown() {
     isPaused: !!activeQueue && activeQueue.status === 'PAUSED',
     isFinished: !!activeQueue && activeQueue.status === 'FINISHED',
     activeQueue,
+    refresh,
   };
 }
