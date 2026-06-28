@@ -89,7 +89,7 @@ export function Profile() {
         <MenuItem
           icon={<Gear size={22} color="#00B37E" />}
           label="Configurações"
-          onPress={() => navigation.navigate("settings")}
+          onPress={() => navigation.getParent()?.navigate("settingsTab", { screen: "settings" })}
         />
       </Box>
 

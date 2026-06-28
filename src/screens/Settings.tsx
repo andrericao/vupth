@@ -97,7 +97,8 @@ export function Settings() {
                 await profileService.deleteAccount(accessToken);
               }
               await logout();
-              navigation.reset({ index: 0, routes: [{ name: "home" }] });
+              // Settings vive na aba Config.; volta para a aba Home (pai = tabs).
+              navigation.getParent()?.navigate("homeTab", { screen: "home" });
             } catch (error: any) {
               const msg = error.response?.data?.message || error.message || "Erro ao deletar conta";
               Alert.alert("Erro", msg);

@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { FlatList, TouchableOpacity, RefreshControl } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@gluestack-ui/themed";
 
-import { AppNavigatorRoutesProps } from "@routes/auth.routes";
+import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
@@ -103,12 +103,20 @@ export function Home() {
   const [selectedFilter, setSelectedFilter] = useState<ServiceType | "ALL">("ALL");
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const route = useRoute<RouteProp<AppRoutes, "home">>();
   const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
 
   // Home é a raiz do stack: evita que um único "voltar" do Android feche o app.
   useDoubleBackExit();
+
+  // Filtro vindo da aba Serviços (navigate("home", { filter })).
+  const filterParam = route.params?.filter;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (filterParam) setSelectedFilter(filterParam);
+  }, [filterParam]);
 
   const filteredEstablishments = filterEstablishments(establishments, search, selectedFilter);
 

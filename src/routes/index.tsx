@@ -1,4 +1,5 @@
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AuthRoutes } from "./auth.routes";
 
@@ -15,10 +16,12 @@ const theme = {
 
 export function Routes(){
 	return(
+		<SafeAreaProvider>
 		<Box flex={1} bg="$white">
 		<NavigationContainer theme={theme}>
 			<AuthRoutes />
 		</NavigationContainer>
 		</Box>
+		</SafeAreaProvider>
 	);
 }
