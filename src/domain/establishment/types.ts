@@ -63,6 +63,9 @@ export interface Establishment {
   status: EstablishmentStatus;
   services: string[];
   address?: Address;
+  // Menor tempo de espera (min) entre os profissionais com servico — so vem na
+  // listagem GET /establishment. null = sem profissional disponivel (esconder).
+  estimated_wait_minutes?: number | null;
 }
 
 export interface EstablishmentDetail extends Omit<Establishment, 'services'> {

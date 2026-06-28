@@ -7,6 +7,7 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
+import { filterEstablishments } from "@domain/establishment/filter";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
@@ -14,7 +15,7 @@ import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
 import { formatWaitTime } from "@domain/queue/types";
-import { UserCircle, Queue } from "phosphor-react-native";
+import { UserCircle, Queue, Clock } from "phosphor-react-native";
 
 const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   BARBER: "Barbearia",
@@ -70,6 +71,16 @@ function EstablishmentCard({
                 {establishment.address.neighborhood}, {establishment.address.city}
               </Text>
             )}
+            {establishment.estimated_wait_minutes != null && (
+              <HStack alignItems="center" gap="$1" mt="$2">
+                <Clock size={14} color="#00B37E" weight="fill" />
+                <Text size="xs" color="$green700" fontFamily="$heading">
+                  {establishment.estimated_wait_minutes === 0
+                    ? "Atende agora"
+                    : `Menor espera ~${formatWaitTime(establishment.estimated_wait_minutes)}`}
+                </Text>
+              </HStack>
+            )}
           </VStack>
           <Badge
             bg={isOpen ? "$green500" : "$gray400"}
@@ -99,14 +110,7 @@ export function Home() {
   // Home é a raiz do stack: evita que um único "voltar" do Android feche o app.
   useDoubleBackExit();
 
-  const isSearching = search.trim().length > 0;
-
-  const filteredEstablishments = establishments.filter((e) => {
-    const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = selectedFilter === "ALL" || e.serviceType === selectedFilter;
-    const matchesOpen = isSearching || e.open_status === "OPEN";
-    return matchesSearch && matchesFilter && matchesOpen;
-  });
+  const filteredEstablishments = filterEstablishments(establishments, search, selectedFilter);
 
   const onRefresh = useCallback(() => {
     refetch();
