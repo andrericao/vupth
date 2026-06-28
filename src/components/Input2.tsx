@@ -19,15 +19,17 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
     <GluestackInput2
       h="$14"
       px="$4"
+      bg="$white"
       borderWidth="$1"
-      borderColor="$success500"
-      borderRadius="$md"
+      borderColor="$coolGray300"
+      borderRadius="$xl"
       variant="outline"
       $focus-borderWidth="$2"
+      $focus-borderColor="$green500"
     >
       <HStack flex={1} alignItems="center">
         <InputField
-          color="$success950"
+          color="$coolGray900"
           fontFamily="$body"
           secureTextEntry={isSecure}
           flex={1}

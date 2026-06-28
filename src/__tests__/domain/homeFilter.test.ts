@@ -1,20 +1,6 @@
 import { MOCK_ESTABLISHMENTS } from '@domain/establishment/mockData';
-import { Establishment, ServiceType } from '@domain/establishment/types';
-
-function filterEstablishments(
-  establishments: Establishment[],
-  search: string,
-  selectedFilter: ServiceType | 'ALL'
-): Establishment[] {
-  const isSearching = search.trim().length > 0;
-
-  return establishments.filter((e) => {
-    const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = selectedFilter === 'ALL' || e.serviceType === selectedFilter;
-    const matchesOpen = isSearching || e.open_status === 'OPEN';
-    return matchesSearch && matchesFilter && matchesOpen;
-  });
-}
+import { Establishment } from '@domain/establishment/types';
+import { filterEstablishments } from '@domain/establishment/filter';
 
 describe('Home - Filtro de Estabelecimentos', () => {
   it('sem busca deve mostrar apenas abertos', () => {
@@ -69,5 +55,31 @@ describe('Home - Filtro de Estabelecimentos', () => {
   it('deve retornar vazio quando filtro não tem resultados', () => {
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'SPA');
     expect(result.length).toBe(0);
+  });
+
+  it('esconde estabelecimentos sem profissional (estimated_wait_minutes === null)', () => {
+    const semProf: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'sem-prof',
+      name: 'Loja Sem Profissional',
+      open_status: 'OPEN',
+      estimated_wait_minutes: null,
+    };
+    const comProf: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'com-prof',
+      name: 'Loja Com Profissional',
+      open_status: 'OPEN',
+      estimated_wait_minutes: 10,
+    };
+
+    const result = filterEstablishments([semProf, comProf], '', 'ALL');
+    expect(result.map((e) => e.id)).toEqual(['com-prof']);
+  });
+
+  it('mantém estabelecimentos com estimated_wait_minutes undefined (mocks/legado)', () => {
+    // MOCK_ESTABLISHMENTS não definem o campo -> não devem ser escondidos
+    const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'ALL');
+    expect(result.length).toBeGreaterThan(0);
   });
 });

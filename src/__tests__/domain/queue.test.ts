@@ -2,11 +2,62 @@ import {
   canCancelAttendance,
   isActiveAttendance,
   formatWaitTime,
+  shouldCreateAttendance,
+  estimatedStartTime,
+  formatClockTime,
   AttendanceStatus,
 } from '@domain/queue/types';
 import { MOCK_QUEUE_POSITION } from '@domain/queue/mockData';
 
 describe('Queue Domain', () => {
+  describe('shouldCreateAttendance', () => {
+    const base = {
+      alreadyCreated: false,
+      hasAttendanceId: false,
+      hasToken: true,
+      serviceItemIds: ['s1'],
+    };
+
+    it('cria quando veio com serviços, sem atendimento e com token', () => {
+      expect(shouldCreateAttendance(base)).toBe(true);
+    });
+
+    it('NÃO cria sem serviços (re-entrada via banner Home/Atendimentos) — evita "no service found"', () => {
+      expect(shouldCreateAttendance({ ...base, serviceItemIds: [] })).toBe(false);
+      expect(shouldCreateAttendance({ ...base, serviceItemIds: undefined })).toBe(false);
+    });
+
+    it('NÃO cria se já existe attendanceId (fila real em andamento)', () => {
+      expect(shouldCreateAttendance({ ...base, hasAttendanceId: true })).toBe(false);
+    });
+
+    it('NÃO cria se já criou nesta montagem (guard de idempotência)', () => {
+      expect(shouldCreateAttendance({ ...base, alreadyCreated: true })).toBe(false);
+    });
+
+    it('NÃO cria sem token', () => {
+      expect(shouldCreateAttendance({ ...base, hasToken: false })).toBe(false);
+    });
+  });
+
+  describe('estimatedStartTime / formatClockTime', () => {
+    it('soma os minutos restantes a agora e formata HH:MM', () => {
+      const base = new Date(2026, 5, 27, 14, 0, 0).getTime(); // 14:00 local
+      expect(estimatedStartTime(base, 45)).toBe('14:45');
+      expect(estimatedStartTime(base, 90)).toBe('15:30');
+    });
+
+    it('trata minutos <= 0 como previsão = agora', () => {
+      const base = new Date(2026, 5, 27, 9, 5, 0).getTime();
+      expect(estimatedStartTime(base, 0)).toBe('09:05');
+      expect(estimatedStartTime(base, -10)).toBe('09:05');
+    });
+
+    it('formatClockTime preenche zero à esquerda', () => {
+      expect(formatClockTime(new Date(2026, 0, 1, 8, 7))).toBe('08:07');
+    });
+  });
+
   describe('canCancelAttendance', () => {
     it('deve permitir cancelar quando status é SCHEDULED', () => {
       expect(canCancelAttendance('SCHEDULED')).toBe(true);

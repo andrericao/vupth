@@ -118,13 +118,13 @@ export function SignUp() {
             />
             {passwordsMatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <Check size={14} color="#22C55E" weight="bold" />
+                <Check size={14} color="#00B37E" weight="bold" />
                 <Text size="xs" color="$green500">Senhas conferem</Text>
               </HStack>
             )}
             {passwordsMismatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <X size={14} color="#EF4444" weight="bold" />
+                <X size={14} color="#E63946" weight="bold" />
                 <Text size="xs" color="$red500">Senhas não conferem</Text>
               </HStack>
             )}

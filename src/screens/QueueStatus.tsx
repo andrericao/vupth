@@ -7,10 +7,12 @@ import { Info } from "phosphor-react-native";
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
-import { canCancelAttendance, formatWaitTime } from "@domain/queue/types";
+import { canCancelAttendance, formatWaitTime, shouldCreateAttendance, estimatedStartTime } from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { attendanceService } from "@services/attendanceService";
+import { waitForBackend } from "@services/healthService";
+import { cardShadow } from "@utils/styles";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 
 type RouteParams = {
@@ -48,15 +50,35 @@ export function QueueStatus() {
   const { remaining, color, isInQueue, isBeingAttended, activeQueue } = useQueueCountdown();
 
   const [isCreating, setIsCreating] = useState(false);
+  const [createMsg, setCreateMsg] = useState("Entrando na fila...");
   const [createError, setCreateError] = useState<string | null>(null);
   const didCreate = useRef(false);
+  const mountedRef = useRef(true);
+
+  // mountedRef só vira false no UNMOUNT real — não em re-execuções benignas do
+  // effect de criação. Sem isso, um re-render durante o create deixava o spinner
+  // preso (a flag de cancelamento era flipada e o finally não limpava isCreating).
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
-    if (didCreate.current || activeQueue?.attendanceId || !accessToken) return;
+    if (
+      !shouldCreateAttendance({
+        alreadyCreated: didCreate.current,
+        hasAttendanceId: !!activeQueue?.attendanceId,
+        hasToken: !!accessToken,
+        serviceItemIds,
+      })
+    ) {
+      return;
+    }
     didCreate.current = true;
 
-    const joinQueue = useQueueStore.getState().joinQueue;
-    joinQueue({
+    useQueueStore.getState().joinQueue({
       professionalId,
       professionalName: paramProfName ?? "",
       establishmentId,
@@ -66,41 +88,59 @@ export function QueueStatus() {
       status: "SCHEDULED",
     });
 
-    let cancelled = false;
-
     async function createAttendance() {
       setIsCreating(true);
       try {
+        // Cold start do Render: acorda a instancia antes de criar, evitando spinner
+        // "infinito" enquanto o backend (hibernado) demora ~50s a responder.
+        setCreateMsg("Preparando servidor...");
+        const ready = await waitForBackend({ isCancelled: () => !mountedRef.current });
+        if (!mountedRef.current) return;
+        if (!ready) {
+          await leaveQueue();
+          if (mountedRef.current) {
+            setCreateError("O servidor está demorando para responder. Tente novamente em instantes.");
+          }
+          return;
+        }
+
+        setCreateMsg("Entrando na fila...");
         const { data } = await attendanceService.create(
           { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], scheduledTime: new Date().toISOString() },
           accessToken!,
         );
-        if (!cancelled) {
+        if (mountedRef.current) {
           await updateQueue({ attendanceId: data.id });
         }
       } catch (error: any) {
-        if (!cancelled) {
+        // Limpa a fila otimista para não deixar tarja/banner residual sem atendimento real.
+        await leaveQueue();
+        if (mountedRef.current) {
           const msg = error.response?.data?.message || error.message || "Erro ao entrar na fila";
           setCreateError(msg);
         }
       } finally {
-        if (!cancelled) setIsCreating(false);
+        if (mountedRef.current) setIsCreating(false);
       }
     }
 
     createAttendance();
-    return () => { cancelled = true; };
-  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes]);
+  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";
   const canCancel = canCancelAttendance(status);
 
-  const borderColor = isInQueue ? color : "#22C55E";
-  const timeColor = isInQueue ? color : "#22C55E";
+  const borderColor = isInQueue ? color : "#00B37E";
+  const timeColor = isInQueue ? color : "#00B37E";
   const timeLabel = remaining <= 0 && isInQueue
     ? "Aguardando chamada"
     : formatWaitTime(remaining).replace('~', '');
+  // Previsão fixa = entrada na fila + estimativa (atualiza quando o poll re-sincroniza).
+  // Evita Date.now() no render (react-hooks/purity).
+  const startTimeLabel = activeQueue
+    ? estimatedStartTime(activeQueue.enteredAt, activeQueue.estimatedMinutes)
+    : "";
 
   function handleCancel() {
     Alert.alert(
@@ -127,9 +167,12 @@ export function QueueStatus() {
 
   if (isCreating) {
     return (
-      <Center flex={1} bg="$gray700">
-        <ActivityIndicator size="large" color="#22C55E" />
-        <Text mt="$2" color="$gray300">Entrando na fila...</Text>
+      <Center flex={1} bg="$gray700" px={15}>
+        <ActivityIndicator size="large" color="#00B37E" />
+        <Text mt="$2" color="$gray300">{createMsg}</Text>
+        <Text mt="$1" size="xs" color="$gray400" textAlign="center">
+          Na primeira vez pode levar até ~50s para o servidor acordar.
+        </Text>
       </Center>
     );
   }
@@ -168,9 +211,10 @@ export function QueueStatus() {
           bg="$white"
           p="$6"
           mt="$6"
-          borderRadius="$xl"
+          borderRadius="$2xl"
           borderWidth="$2"
           borderColor={borderColor}
+          style={cardShadow}
           w="$full"
           alignItems="center"
         >
@@ -195,6 +239,15 @@ export function QueueStatus() {
           </Heading>
 
           <Box w="$full" h="$px" bg="$gray500" my="$4" />
+
+          {isInQueue && (
+            <HStack w="$full" justifyContent="space-between" mb="$3">
+              <Text size="sm" color="$gray300">Previsão de início</Text>
+              <Text size="sm" fontFamily="$heading">
+                {remaining <= 0 ? "A qualquer momento" : `~${startTimeLabel}`}
+              </Text>
+            </HStack>
+          )}
 
           <HStack w="$full" justifyContent="space-between" mb="$3">
             <Text size="sm" color="$gray300">Estabelecimento</Text>

@@ -12,6 +12,10 @@ const BASE_URLS: Record<string, string> = {
 
 const env = (process.env.EXPO_PUBLIC_API_ENV || "local") as keyof typeof BASE_URLS;
 
+// Base URL HTTP resolvida e env atual — usados pelo portao de readiness (cold start Render).
+export const API_BASE_URL = BASE_URLS[env];
+export const API_ENV = env;
+
 // WebSocket (STOMP) — deriva ws(s) do baseURL HTTP. `/ws/websocket` e o transporte
 // raw do SockJS (o handshake nativo do RN nao usa a lib SockJS).
 export function deriveWsUrl(baseUrl: string): string {

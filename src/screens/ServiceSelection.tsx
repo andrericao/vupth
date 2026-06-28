@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TouchableOpacity, ActivityIndicator, ScrollView } from "react-native";
+import { TouchableOpacity, ScrollView } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   VStack,
@@ -14,6 +14,8 @@ import { Check } from "phosphor-react-native";
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { SkeletonList } from "@components/Skeleton";
+import { cardShadow } from "@utils/styles";
 import { ServiceItemResponse } from "@domain/professional/types";
 import { establishmentService } from "@services/establishmentService";
 
@@ -80,10 +82,12 @@ export function ServiceSelection() {
 
   if (isLoading) {
     return (
-      <Center flex={1} bg="$gray700">
-        <ActivityIndicator size="large" color="#22C55E" />
-        <Text mt="$2" color="$gray300">Carregando serviços...</Text>
-      </Center>
+      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
+        <Header showBackButton />
+        <VStack mt="$6">
+          <SkeletonList count={4} />
+        </VStack>
+      </VStack>
     );
   }
 
@@ -130,9 +134,10 @@ export function ServiceSelection() {
                     <Box
                       bg="$white"
                       p="$4"
-                      borderRadius="$lg"
-                      borderWidth="$2"
-                      borderColor={isSelected ? "$green500" : "$gray500"}
+                      borderRadius="$2xl"
+                      style={cardShadow}
+                      borderWidth={isSelected ? "$2" : "$0"}
+                      borderColor="$green500"
                     >
                       <HStack justifyContent="space-between" alignItems="center">
                         <VStack flex={1}>
@@ -170,7 +175,7 @@ export function ServiceSelection() {
 
           {selectedIds.length > 0 && (
             <Box position="absolute" bottom={30} left={15} right={15}>
-              <Box bg="$white" p="$4" borderRadius="$lg" mb="$3">
+              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} mb="$3">
                 <HStack justifyContent="space-between">
                   <Text size="sm" color="$gray300">
                     {selectedIds.length} serviço(s) — ~{totalMinutes} min

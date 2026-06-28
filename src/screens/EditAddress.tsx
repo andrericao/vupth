@@ -8,6 +8,10 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 import { addressService, AddressResponse, AddressRequest } from "@services/addressService";
+import { maskCEP, unmask } from "@utils/masks";
+import { lookupCep } from "@utils/cep";
+import { SkeletonList } from "@components/Skeleton";
+import { cardShadow } from "@utils/styles";
 
 type Mode = "list" | "form";
 
@@ -29,6 +33,7 @@ export function EditAddress() {
   const [addresses, setAddresses] = useState<AddressResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AddressRequest>(EMPTY_FORM);
@@ -58,7 +63,7 @@ export function EditAddress() {
   }
 
   function handleEdit(addr: AddressResponse) {
-    setEditingId(addr.id);
+    setEditingId(addr.userAddressId);
     setForm({
       street: addr.street,
       number: addr.number,
@@ -66,7 +71,7 @@ export function EditAddress() {
       neighborhood: addr.neighborhood,
       city: addr.city,
       state: addr.state,
-      zipCode: addr.zipCode,
+      zipCode: maskCEP(addr.zipCode),
       reference: addr.reference ?? "",
     });
     setMode("form");
@@ -134,6 +139,27 @@ export function EditAddress() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  async function handleCepChange(value: string) {
+    const masked = maskCEP(value);
+    setForm((prev) => ({ ...prev, zipCode: masked }));
+
+    if (unmask(masked).length !== 8) return;
+
+    setCepLoading(true);
+    const result = await lookupCep(masked);
+    setCepLoading(false);
+    if (!result) return;
+
+    // Preenche o que o ViaCEP retornou, sem apagar o que ja estava (numero/complemento/referencia ficam intactos).
+    setForm((prev) => ({
+      ...prev,
+      street: result.street || prev.street,
+      neighborhood: result.neighborhood || prev.neighborhood,
+      city: result.city || prev.city,
+      state: result.state || prev.state,
+    }));
+  }
+
   if (mode === "form") {
     return (
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
@@ -174,8 +200,10 @@ export function EditAddress() {
               </VStack>
             </HStack>
             <VStack gap="$1">
-              <Text size="sm" color="$gray300">CEP * (8 dígitos)</Text>
-              <Input2 placeholder="01310100" value={form.zipCode} onChangeText={(v: string) => updateField("zipCode", v)} keyboardType="numeric" maxLength={9} />
+              <Text size="sm" color="$gray300">
+                CEP *{cepLoading ? " — buscando endereço..." : ""}
+              </Text>
+              <Input2 placeholder="01310-100" value={form.zipCode} onChangeText={handleCepChange} keyboardType="numeric" maxLength={9} />
             </VStack>
             <VStack gap="$1">
               <Text size="sm" color="$gray300">Referência</Text>
@@ -202,13 +230,13 @@ export function EditAddress() {
         </Heading>
 
         {isLoading ? (
-          <Text color="$gray300">Carregando...</Text>
+          <SkeletonList count={3} />
         ) : addresses.length === 0 ? (
           <Text color="$gray300">Nenhum endereço cadastrado</Text>
         ) : (
           <VStack gap="$3">
             {addresses.map((addr) => (
-              <Box key={addr.id} bg="$white" p="$4" borderRadius="$lg">
+              <Box key={addr.userAddressId} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                 <HStack justifyContent="space-between" alignItems="flex-start">
                   <VStack flex={1} mr="$2">
                     <Text fontFamily="$heading" size="sm">
@@ -219,7 +247,7 @@ export function EditAddress() {
                       {addr.neighborhood} — {addr.city}/{addr.state}
                     </Text>
                     <Text size="xs" color="$gray300">CEP: {addr.zipCode}</Text>
-                    {addr.main && (
+                    {addr.isMain && (
                       <HStack alignItems="center" gap="$1" mt="$1">
                         <Star size={14} color="#F59E0B" weight="fill" />
                         <Text size="xs" color="$yellow500">Principal</Text>
@@ -227,16 +255,16 @@ export function EditAddress() {
                     )}
                   </VStack>
                   <HStack gap="$3">
-                    {!addr.main && (
-                      <TouchableOpacity onPress={() => handleSetMain(addr.id)}>
+                    {!addr.isMain && (
+                      <TouchableOpacity onPress={() => handleSetMain(addr.userAddressId)}>
                         <Star size={20} color="#9CA3AF" />
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity onPress={() => handleEdit(addr)}>
-                      <PencilSimple size={20} color="#22C55E" />
+                      <PencilSimple size={20} color="#00B37E" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDelete(addr.id)}>
-                      <Trash size={20} color="#EF4444" />
+                    <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)}>
+                      <Trash size={20} color="#E63946" />
                     </TouchableOpacity>
                   </HStack>
                 </HStack>

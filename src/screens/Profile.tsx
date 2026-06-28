@@ -17,6 +17,7 @@ import {
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
+import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
 
 function MenuItem({
@@ -79,24 +80,24 @@ export function Profile() {
         </Heading>
       </Center>
 
-      <Box borderRadius="$lg" mt="$8" overflow="hidden">
+      <Box borderRadius="$2xl" mt="$8" overflow="hidden" style={cardShadow}>
         <MenuItem
-          icon={<ClipboardText size={22} color="#22C55E" />}
+          icon={<ClipboardText size={22} color="#00B37E" />}
           label="Atendimentos"
           onPress={() => navigation.navigate("attendances")}
         />
         <MenuItem
-          icon={<Gear size={22} color="#22C55E" />}
+          icon={<Gear size={22} color="#00B37E" />}
           label="Configurações"
-          onPress={() => navigation.navigate("settings")}
+          onPress={() => navigation.getParent()?.navigate("settingsTab", { screen: "settings" })}
         />
       </Box>
 
       <VStack flex={1} justifyContent="flex-end">
         <TouchableOpacity onPress={handleLogout}>
-          <Box bg="$white" px="$4" py="$4" borderRadius="$lg">
+          <Box bg="$white" px="$4" py="$4" borderRadius="$2xl" style={cardShadow}>
             <HStack alignItems="center" gap="$3">
-              <SignOut size={22} color="#EF4444" />
+              <SignOut size={22} color="#E63946" />
               <Text size="sm" color="$red500">Sair da conta</Text>
             </HStack>
           </Box>

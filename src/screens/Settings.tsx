@@ -20,6 +20,7 @@ import {
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
 import { addressService, AddressResponse } from "@services/addressService";
@@ -96,7 +97,8 @@ export function Settings() {
                 await profileService.deleteAccount(accessToken);
               }
               await logout();
-              navigation.reset({ index: 0, routes: [{ name: "home" }] });
+              // Settings vive na aba Config.; volta para a aba Home (pai = tabs).
+              navigation.getParent()?.navigate("homeTab", { screen: "home" });
             } catch (error: any) {
               const msg = error.response?.data?.message || error.message || "Erro ao deletar conta";
               Alert.alert("Erro", msg);
@@ -145,27 +147,27 @@ export function Settings() {
         Configurações
       </Heading>
 
-      <Box borderRadius="$lg" overflow="hidden">
+      <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
         <MenuItem
-          icon={<User size={22} color="#22C55E" />}
+          icon={<User size={22} color="#00B37E" />}
           label="Nome"
           value={displayName}
           onPress={() => navigation.navigate("editProfile")}
         />
         <MenuItem
-          icon={<EnvelopeSimple size={22} color="#22C55E" />}
+          icon={<EnvelopeSimple size={22} color="#00B37E" />}
           label="E-mail"
           value={user?.email ?? "—"}
           onPress={() => navigation.navigate("editEmail")}
         />
         <MenuItem
-          icon={<Lock size={22} color="#22C55E" />}
+          icon={<Lock size={22} color="#00B37E" />}
           label="Senha"
           value="••••••"
           onPress={() => navigation.navigate("editPassword")}
         />
         <MenuItem
-          icon={<MapPin size={22} color="#22C55E" />}
+          icon={<MapPin size={22} color="#00B37E" />}
           label="Endereço"
           value={displayAddress}
           onPress={() => navigation.navigate("editAddress")}

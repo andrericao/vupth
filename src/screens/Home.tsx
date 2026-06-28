@@ -1,17 +1,22 @@
-import { useState, useCallback } from "react";
-import { FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useState, useCallback, useEffect } from "react";
+import { FlatList, TouchableOpacity, RefreshControl } from "react-native";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@gluestack-ui/themed";
 
-import { AppNavigatorRoutesProps } from "@routes/auth.routes";
+import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
+import { filterEstablishments } from "@domain/establishment/filter";
+import { pseudoRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
+import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
+import { SkeletonList } from "@components/Skeleton";
+import { cardShadow } from "@utils/styles";
 import { formatWaitTime } from "@domain/queue/types";
-import { UserCircle, Queue } from "phosphor-react-native";
+import { UserCircle, Queue, Clock, Star } from "phosphor-react-native";
 
 const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   BARBER: "Barbearia",
@@ -47,9 +52,8 @@ function EstablishmentCard({
         bg="$white"
         p="$4"
         mb="$3"
-        borderRadius="$lg"
-        borderWidth="$1"
-        borderColor={isOpen ? "$green500" : "$gray400"}
+        borderRadius="$2xl"
+        style={cardShadow}
       >
         <HStack justifyContent="space-between" alignItems="center">
           <VStack flex={1}>
@@ -68,6 +72,22 @@ function EstablishmentCard({
                 {establishment.address.neighborhood}, {establishment.address.city}
               </Text>
             )}
+            <HStack alignItems="center" gap="$3" mt="$2">
+              {establishment.estimated_wait_minutes != null && (
+                <HStack alignItems="center" gap="$1">
+                  <Clock size={14} color="#00B37E" weight="fill" />
+                  <Text size="xs" color="$green700" fontFamily="$heading">
+                    {formatWaitTime(establishment.estimated_wait_minutes)}
+                  </Text>
+                </HStack>
+              )}
+              <HStack alignItems="center" gap="$1">
+                <Star size={14} color="#FFB703" weight="fill" />
+                <Text size="xs" color="$gray300" fontFamily="$heading">
+                  {pseudoRating(establishment.id).toFixed(1)}
+                </Text>
+              </HStack>
+            </HStack>
           </VStack>
           <Badge
             bg={isOpen ? "$green500" : "$gray400"}
@@ -90,18 +110,22 @@ export function Home() {
   const [selectedFilter, setSelectedFilter] = useState<ServiceType | "ALL">("ALL");
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const route = useRoute<RouteProp<AppRoutes, "home">>();
   const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
 
-  const isSearching = search.trim().length > 0;
+  // Home é a raiz do stack: evita que um único "voltar" do Android feche o app.
+  useDoubleBackExit();
 
-  const filteredEstablishments = establishments.filter((e) => {
-    const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = selectedFilter === "ALL" || e.serviceType === selectedFilter;
-    const matchesOpen = isSearching || e.open_status === "OPEN";
-    return matchesSearch && matchesFilter && matchesOpen;
-  });
+  // Filtro vindo da aba Serviços (navigate("home", { filter })).
+  const filterParam = route.params?.filter;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (filterParam) setSelectedFilter(filterParam);
+  }, [filterParam]);
+
+  const filteredEstablishments = filterEstablishments(establishments, search, selectedFilter);
 
   const onRefresh = useCallback(() => {
     refetch();
@@ -118,7 +142,7 @@ export function Home() {
       <HStack justifyContent="flex-end" mt="$2">
         {isAuthenticated ? (
           <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
-            <UserCircle size={32} color="#22C55E" weight="fill" />
+            <UserCircle size={32} color="#00B37E" weight="fill" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
@@ -198,10 +222,7 @@ export function Home() {
       </Box>
 
       {isLoading ? (
-        <Center mt="$10">
-          <ActivityIndicator size="large" color="#22C55E" />
-          <Text color="$gray300" mt="$2">Carregando...</Text>
-        </Center>
+        <SkeletonList count={4} />
       ) : isError ? (
         <Center mt="$10">
           <Text color="$red500">Erro ao carregar estabelecimentos</Text>
@@ -213,7 +234,7 @@ export function Home() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={["#22C55E"]} tintColor="#22C55E" />
+            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={["#00B37E"]} tintColor="#00B37E" />
           }
           renderItem={({ item }) => (
             <EstablishmentCard
