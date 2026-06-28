@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useQueueStore, ActiveQueue } from '@stores/queueStore';
 import { useAuthStore } from '@stores/authStore';
 import { queueService } from '@services/queueService';
+import { reconcileQueueEstimate } from '@domain/queue/types';
 
 export type UrgencyLevel = 'normal' | 'urgent';
 
@@ -70,10 +71,15 @@ export function useQueueCountdown() {
             user.id,
             accessToken,
           );
-          updateQueue({
-            estimatedMinutes: data.estimatedWaitingTime,
-            enteredAt: Date.now(),
-          });
+          // Mantém o countdown monotônico (não pula pra cima a cada poll).
+          const reconciled = reconcileQueueEstimate(
+            { enteredAt: activeQueue.enteredAt, estimatedMinutes: activeQueue.estimatedMinutes },
+            data.estimatedWaitingTime,
+            Date.now(),
+          );
+          if (reconciled) {
+            updateQueue(reconciled);
+          }
 
           if (data.totalRemainingMinutes <= 0) {
             updateQueue({ status: 'SCHEDULED' });
