@@ -3,10 +3,17 @@ import { Alert, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
 import { Info } from "phosphor-react-native";
+import * as SecureStore from "expo-secure-store";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import {
+  QueueDisclaimerModal,
+  QUEUE_DISCLAIMER_TITLE,
+  QUEUE_DISCLAIMER_TEXT,
+} from "@components/QueueDisclaimerModal";
+import { RatingModal } from "@components/RatingModal";
 import { canCancelAttendance, formatWaitTime, shouldCreateAttendance, estimatedStartTime } from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
@@ -47,13 +54,35 @@ export function QueueStatus() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
-  const { remaining, color, isInQueue, isBeingAttended, activeQueue } = useQueueCountdown();
+  const { remaining, color, isInQueue, isBeingAttended, isFinished, activeQueue } = useQueueCountdown();
 
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
   const [createError, setCreateError] = useState<string | null>(null);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showRating, setShowRating] = useState(false);
   const didCreate = useRef(false);
   const mountedRef = useRef(true);
+
+  const DISCLAIMER_KEY = "vupth_hide_queue_disclaimer";
+
+  // Mostra o aviso de "tempo é estimativa" ao entrar na fila, salvo se o cliente
+  // marcou "não mostrar novamente".
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const hidden = await SecureStore.getItemAsync(DISCLAIMER_KEY);
+      if (active && hidden !== "1") setShowDisclaimer(true);
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleCloseDisclaimer(dontShowAgain: boolean) {
+    setShowDisclaimer(false);
+    if (dontShowAgain) await SecureStore.setItemAsync(DISCLAIMER_KEY, "1");
+  }
 
   // mountedRef só vira false no UNMOUNT real — não em re-execuções benignas do
   // effect de criação. Sem isso, um re-render durante o create deixava o spinner
@@ -204,7 +233,11 @@ export function QueueStatus() {
 
       <Center flex={1}>
         <Heading fontFamily="$heading" fontSize="$2xl" textAlign="center">
-          {isBeingAttended ? "Em atendimento!" : "Você está na fila!"}
+          {isFinished
+            ? "Atendimento concluído ✅"
+            : isBeingAttended
+              ? "Em atendimento!"
+              : "Você está na fila!"}
         </Heading>
 
         <Box
@@ -221,10 +254,7 @@ export function QueueStatus() {
           <HStack alignItems="center" gap="$1">
             <Text size="sm" color="$gray300">Tempo estimado</Text>
             <TouchableOpacity
-              onPress={() => Alert.alert(
-                "Tempo estimado",
-                "Este tempo é uma estimativa baseada nos atendimentos anteriores. O tempo real pode variar dependendo do profissional e dos serviços escolhidos."
-              )}
+              onPress={() => Alert.alert(QUEUE_DISCLAIMER_TITLE, QUEUE_DISCLAIMER_TEXT)}
             >
               <Info size={16} color="#9CA3AF" />
             </TouchableOpacity>
@@ -244,7 +274,7 @@ export function QueueStatus() {
             <HStack w="$full" justifyContent="space-between" mb="$3">
               <Text size="sm" color="$gray300">Previsão de início</Text>
               <Text size="sm" fontFamily="$heading">
-                {remaining <= 0 ? "A qualquer momento" : `~${startTimeLabel}`}
+                {remaining <= 0 ? "A qualquer momento" : startTimeLabel}
               </Text>
             </HStack>
           )}
@@ -284,8 +314,30 @@ export function QueueStatus() {
             onPress={handleCancel}
           />
         )}
-        <Button title="Voltar ao início" onPress={() => navigation.navigate("home")} />
+        {isFinished && attendanceId && (
+          <Button title="Avaliar atendimento" onPress={() => setShowRating(true)} />
+        )}
+        {isFinished ? (
+          <Button
+            title="Concluir"
+            variant="outline"
+            onPress={() => {
+              leaveQueue();
+              navigation.navigate("home");
+            }}
+          />
+        ) : (
+          <Button title="Voltar ao início" onPress={() => navigation.navigate("home")} />
+        )}
       </VStack>
+
+      <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
+      <RatingModal
+        visible={showRating}
+        attendanceId={attendanceId}
+        professionalName={activeQueue?.professionalName ?? paramProfName}
+        onClose={() => setShowRating(false)}
+      />
     </VStack>
   );
 }

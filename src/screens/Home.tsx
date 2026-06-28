@@ -8,7 +8,7 @@ import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
-import { pseudoRating } from "@domain/establishment/rating";
+import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
@@ -81,12 +81,22 @@ function EstablishmentCard({
                   </Text>
                 </HStack>
               )}
-              <HStack alignItems="center" gap="$1">
-                <Star size={14} color="#FFB703" weight="fill" />
-                <Text size="xs" color="$gray300" fontFamily="$heading">
-                  {pseudoRating(establishment.id).toFixed(1)}
-                </Text>
-              </HStack>
+              {(() => {
+                const r = resolveRating(
+                  establishment.rating_average,
+                  establishment.rating_count,
+                  establishment.id,
+                );
+                return (
+                  <HStack alignItems="center" gap="$1">
+                    <Star size={14} color="#FFB703" weight="fill" />
+                    <Text size="xs" color="$gray300" fontFamily="$heading">
+                      {r.value.toFixed(1)}
+                      {r.real && r.count != null ? ` (${r.count})` : ""}
+                    </Text>
+                  </HStack>
+                );
+              })()}
             </HStack>
           </VStack>
           <Badge

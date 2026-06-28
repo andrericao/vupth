@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -11,13 +12,14 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Queue, Clock, CaretRight } from "phosphor-react-native";
+import { Queue, Clock, CaretRight, Star } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { SkeletonList } from "@components/Skeleton";
+import { RatingModal } from "@components/RatingModal";
 import { cardShadow } from "@utils/styles";
 import { formatWaitTime } from "@domain/queue/types";
 
@@ -39,6 +41,7 @@ export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
   const { data: history = [], isLoading } = useClientAttendances();
+  const [ratingFor, setRatingFor] = useState<{ id: string; name: string } | null>(null);
 
   const realizados = history.filter(
     (a) => a.status === "FINISHED" || a.status === "CANCELLED" || a.status === "LATE",
@@ -89,7 +92,7 @@ export function Attendances() {
                     </Text>
                   </VStack>
                   <Badge bg={color} borderRadius="$full" px="$3" py="$1">
-                    <BadgeText color="$white" size="xs">~{formatWaitTime(remaining)}</BadgeText>
+                    <BadgeText color="$white" size="xs">{formatWaitTime(remaining)}</BadgeText>
                   </Badge>
                   <CaretRight size={18} color="#9CA3AF" />
                 </HStack>
@@ -130,39 +133,65 @@ export function Attendances() {
                   label: a.status,
                   color: "#9CA3AF",
                 };
+                const canRate = a.status === "FINISHED";
                 return (
-                  <Box key={a.id} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-                    <HStack justifyContent="space-between" alignItems="flex-start">
-                      <VStack flex={1} pr="$2">
-                        <Text fontFamily="$heading" size="sm">
-                          {a.professionalName}
-                        </Text>
-                        <Text size="xs" color="$gray300">
-                          {a.services.map((s) => s.customName).join(", ") || "—"}
-                        </Text>
-                        <Text size="xs" color="$gray400" mt="$1">
-                          {formatDate(a.scheduledTime)}
-                          {a.durationInMinutes ? ` · ${a.durationInMinutes} min` : ""}
-                        </Text>
-                      </VStack>
-                      <VStack alignItems="flex-end" gap="$1">
-                        <Badge bg={st.color} borderRadius="$full" px="$3" py="$1">
-                          <BadgeText color="$white" size="xs">
-                            {st.label}
-                          </BadgeText>
-                        </Badge>
-                        <Text size="xs" color="$gray300">
-                          R$ {a.totalValue.toFixed(2)}
-                        </Text>
-                      </VStack>
-                    </HStack>
-                  </Box>
+                  <TouchableOpacity
+                    key={a.id}
+                    activeOpacity={canRate ? 0.7 : 1}
+                    onPress={
+                      canRate
+                        ? () => setRatingFor({ id: a.id, name: a.professionalName })
+                        : undefined
+                    }
+                  >
+                    <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                      <HStack justifyContent="space-between" alignItems="flex-start">
+                        <VStack flex={1} pr="$2">
+                          <Text fontFamily="$heading" size="sm">
+                            {a.professionalName}
+                          </Text>
+                          <Text size="xs" color="$gray300">
+                            {a.services.map((s) => s.customName).join(", ") || "—"}
+                          </Text>
+                          <Text size="xs" color="$gray400" mt="$1">
+                            {formatDate(a.scheduledTime)}
+                            {a.durationInMinutes ? ` · ${a.durationInMinutes} min` : ""}
+                          </Text>
+                        </VStack>
+                        <VStack alignItems="flex-end" gap="$1">
+                          <Badge bg={st.color} borderRadius="$full" px="$3" py="$1">
+                            <BadgeText color="$white" size="xs">
+                              {st.label}
+                            </BadgeText>
+                          </Badge>
+                          <Text size="xs" color="$gray300">
+                            R$ {a.totalValue.toFixed(2)}
+                          </Text>
+                        </VStack>
+                      </HStack>
+                      {canRate && (
+                        <HStack alignItems="center" gap="$1" mt="$3">
+                          <Star size={14} color="#FFB703" weight="fill" />
+                          <Text size="xs" color="$green700" fontFamily="$heading">
+                            Toque para avaliar
+                          </Text>
+                        </HStack>
+                      )}
+                    </Box>
+                  </TouchableOpacity>
                 );
               })}
             </VStack>
           )}
         </VStack>
       </ScrollView>
+
+      <RatingModal
+        visible={!!ratingFor}
+        attendanceId={ratingFor?.id ?? null}
+        professionalName={ratingFor?.name}
+        onClose={() => setRatingFor(null)}
+      />
     </VStack>
   );
 }

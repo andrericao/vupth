@@ -415,6 +415,7 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 | 12 | Validar UI sem profissional "fantasma" (C4) | Backend (#31) ja nao retorna profissional sem servico em `professionals-with-queue`; so garantir que a UI trata lista vazia e nao assume profissionais inexistentes | Validar |
 | 13 | Senha atual na troca de senha | EditPassword deve pedir a **senha atual** alem da nova. **Aguarda backend** (ver "Pendencia para o backend" abaixo). Front so implementa o campo apos o backend verificar `currentPassword` (verificacao no front via re-login foi descartada) | Aguarda backend |
 | 14 | Esqueci minha senha (forgot password) | Fluxo de recuperacao de senha (cliente sem sessao). **Depende do backend**: endpoint para solicitar reset (codigo/email) + confirmar nova senha. Verificar se ja existe — provavelmente nao implementado | Aguarda backend |
+| 15 | Avaliacao de atendimento (front do Item 6) | **Front FEITO** (envio + exibicao preparada): `RatingModal` (1-5 estrelas + comentario) em QueueStatus concluido e nos cards FINISHED de Atendimentos; `ratingService` -> `POST /attendances/{id}/rating`; `resolveRating` exibe nota real quando o backend mandar, senao placeholder. **Aguarda backend** (Item 6 ⬜ aberto): endpoint + agregados (ver callout) | Front FEITO / Aguarda backend |
 
 > ⚠️ **Pendencia para o backend (handoff)** — *Verificacao da senha atual na troca de senha.*
 > Hoje `PATCH /profile/update-password/me` recebe so `{ "password": "<nova>" }` (`PasswordRequest`) e o `UpdatePasswordUseCase` troca direto, **sem conferir a senha atual**. Para o app pedir a senha atual com seguranca real, o backend precisa:
@@ -422,6 +423,11 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 > 2. No `UpdatePasswordUseCase`, validar `passwordEncoder.matches(request.currentPassword(), user.getPassword())` antes de trocar; se nao bater, retornar **401/403** ("senha atual incorreta").
 > 3. Atualizar testes de integracao + collection Postman + PRD_BACKEND (secao "PATCH /profile/update-password/me").
 > Depois disso o front envia `{ currentPassword, password }` e adiciona o campo na tela. (Tambem avaliar o endpoint de **forgot password** do item 14.)
+
+> ⚠️ **Pendencia para o backend (handoff)** — *Avaliacao de atendimento (Item 6 do PRD_BACKEND, hoje ⬜ aberto).* O front ja esta pronto (envio + exibicao); falta o backend:
+> 1. `POST /attendances/{id}/rating` `{ score 1-5, comment? }` — so o **cliente dono** do attendance, so com `status = FINISHED`, **1 voto** (409 no 2o), guest nao avalia. (entidade `AttendanceRating` + agregados `ratingSum`/`ratingCount` em `Professional` e `ServiceItem`, ja especificado no Item 6.)
+> 2. **Devolver no payload** os campos `rating_average` (number|null) + `rating_count` (number): **por profissional** em `GET /establishment/id/{id}/professionals-with-queue`, e **agregado por estabelecimento** em `GET /establishment` (a media da loja = **soma dos `ratingSum` / soma dos `ratingCount`** dos profissionais — media ponderada, barato pois sao poucos profissionais). Sem isso o front mostra um placeholder ficticio.
+> 3. (Opcional, recomendado) expor no `GET /attendances/client/me` se o atendimento **ja foi avaliado** (ex.: `rated: boolean`), para o front esconder o "Toque para avaliar" depois do voto. Hoje o front so descobre via 409 ao tentar.
 
 ### Correcoes de UX e ajustes pendentes
 

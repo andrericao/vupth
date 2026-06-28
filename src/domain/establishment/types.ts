@@ -66,6 +66,10 @@ export interface Establishment {
   // Menor tempo de espera (min) entre os profissionais com servico — so vem na
   // listagem GET /establishment. null = sem profissional disponivel (esconder).
   estimated_wait_minutes?: number | null;
+  // Avaliacao agregada da loja (media dos profissionais) — Item 6 backend.
+  // Opcional ate o backend implementar; ausente => placeholder (pseudoRating).
+  rating_average?: number | null;
+  rating_count?: number;
 }
 
 export interface EstablishmentDetail extends Omit<Establishment, 'services'> {

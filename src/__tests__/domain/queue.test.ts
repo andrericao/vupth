@@ -5,6 +5,7 @@ import {
   shouldCreateAttendance,
   estimatedStartTime,
   formatClockTime,
+  reconcileQueueEstimate,
   AttendanceStatus,
 } from '@domain/queue/types';
 import { MOCK_QUEUE_POSITION } from '@domain/queue/mockData';
@@ -37,6 +38,28 @@ describe('Queue Domain', () => {
 
     it('NÃO cria sem token', () => {
       expect(shouldCreateAttendance({ ...base, hasToken: false })).toBe(false);
+    });
+  });
+
+  describe('reconcileQueueEstimate (countdown monotônico)', () => {
+    const NOW = 1_000_000_000_000;
+    const minAgo = (m: number) => NOW - m * 60000;
+
+    it('re-ancora pra baixo quando o servidor indica menos tempo (fila andou)', () => {
+      // entrou há 5min com 60min de estimativa -> restando ~55min
+      const out = reconcileQueueEstimate({ enteredAt: minAgo(5), estimatedMinutes: 60 }, 40, NOW);
+      expect(out).toEqual({ enteredAt: NOW, estimatedMinutes: 40 });
+    });
+
+    it('NÃO altera quando o servidor indica um pouco mais e ainda descontando (sem pulo pra cima)', () => {
+      const out = reconcileQueueEstimate({ enteredAt: minAgo(5), estimatedMinutes: 60 }, 58, NOW);
+      expect(out).toBeNull();
+    });
+
+    it('re-ancora pra cima quando já zerou localmente mas o servidor ainda tem espera', () => {
+      // entrou há 65min com 60min -> restante negativo (zerado)
+      const out = reconcileQueueEstimate({ enteredAt: minAgo(65), estimatedMinutes: 60 }, 30, NOW);
+      expect(out).toEqual({ enteredAt: NOW, estimatedMinutes: 30 });
     });
   });
 

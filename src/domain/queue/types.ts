@@ -55,6 +55,32 @@ export function shouldCreateAttendance(params: {
   return (serviceItemIds?.length ?? 0) > 0;
 }
 
+/**
+ * Reconcilia o countdown local com a estimativa do servidor mantendo-o
+ * MONOTÔNICO (nunca pula pra cima a cada poll — o que causava o "tempo volta
+ * pra 1h"). Retorna o novo âncora { enteredAt, estimatedMinutes } a aplicar, ou
+ * `null` para manter como está (segue descontando localmente).
+ *
+ * - servidor indica MENOS tempo (fila andou) → re-ancora pra baixo.
+ * - servidor indica MAIS tempo mas já zeramos localmente → re-ancora pra cima
+ *   (evita mostrar "Agora" indevidamente quando ainda há espera real).
+ * - servidor indica um pouco mais e ainda estamos descontando → ignora (sem pulo).
+ * O sinal autoritativo de "é a sua vez" vem do WebSocket, não do zero local.
+ */
+export function reconcileQueueEstimate(
+  current: { enteredAt: number; estimatedMinutes: number },
+  serverEstimateMinutes: number,
+  now: number,
+): { enteredAt: number; estimatedMinutes: number } | null {
+  const elapsedMin = (now - current.enteredAt) / 60000;
+  const currentRemaining = current.estimatedMinutes - elapsedMin;
+
+  if (serverEstimateMinutes <= currentRemaining || currentRemaining <= 0) {
+    return { enteredAt: now, estimatedMinutes: serverEstimateMinutes };
+  }
+  return null;
+}
+
 export function isActiveAttendance(status: AttendanceStatus): boolean {
   return status === 'SCHEDULED' || status === 'IN_PROGRESS' || status === 'PAUSED';
 }
