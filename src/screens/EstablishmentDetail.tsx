@@ -10,6 +10,7 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
+import { Star } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
@@ -17,6 +18,7 @@ import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
 import { ProfessionalWithQueue } from "@domain/professional/types";
+import { resolveRating } from "@domain/establishment/rating";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { useQueueSocket } from "@hooks/useQueueSocket";
@@ -50,6 +52,22 @@ function ProfessionalCard({
             <Text size="xs" color="$gray300" mt="$1">
               {professional.specialty}
             </Text>
+            {(() => {
+              const r = resolveRating(
+                professional.rating_average,
+                professional.rating_count,
+                professional.id,
+              );
+              return (
+                <HStack alignItems="center" gap="$1" mt="$1">
+                  <Star size={13} color="#FFB703" weight="fill" />
+                  <Text size="xs" color="$gray400" fontFamily="$heading">
+                    {r.value.toFixed(1)}
+                    {r.real && r.count != null ? ` (${r.count})` : ""}
+                  </Text>
+                </HStack>
+              );
+            })()}
           </VStack>
           <VStack alignItems="flex-end">
             <Text size="sm" fontFamily="$heading" color="$green500">

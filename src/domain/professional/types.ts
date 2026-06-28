@@ -12,6 +12,10 @@ export interface ProfessionalWithQueue extends Professional {
   waiting_list: AttendanceInQueue[];
   queue_count: number;
   estimated_wait_minutes: number;
+  // Avaliação (Item 6 backend) — média e contagem denormalizadas. Opcional até o
+  // backend implementar; quando ausente, o front usa placeholder (pseudoRating).
+  rating_average?: number | null;
+  rating_count?: number;
 }
 
 export interface AttendanceInQueue {

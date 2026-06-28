@@ -13,6 +13,7 @@ import {
   QUEUE_DISCLAIMER_TITLE,
   QUEUE_DISCLAIMER_TEXT,
 } from "@components/QueueDisclaimerModal";
+import { RatingModal } from "@components/RatingModal";
 import { canCancelAttendance, formatWaitTime, shouldCreateAttendance, estimatedStartTime } from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
@@ -59,6 +60,7 @@ export function QueueStatus() {
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
   const [createError, setCreateError] = useState<string | null>(null);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showRating, setShowRating] = useState(false);
   const didCreate = useRef(false);
   const mountedRef = useRef(true);
 
@@ -312,9 +314,13 @@ export function QueueStatus() {
             onPress={handleCancel}
           />
         )}
+        {isFinished && attendanceId && (
+          <Button title="Avaliar atendimento" onPress={() => setShowRating(true)} />
+        )}
         {isFinished ? (
           <Button
             title="Concluir"
+            variant="outline"
             onPress={() => {
               leaveQueue();
               navigation.navigate("home");
@@ -326,6 +332,12 @@ export function QueueStatus() {
       </VStack>
 
       <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
+      <RatingModal
+        visible={showRating}
+        attendanceId={attendanceId}
+        professionalName={activeQueue?.professionalName ?? paramProfName}
+        onClose={() => setShowRating(false)}
+      />
     </VStack>
   );
 }

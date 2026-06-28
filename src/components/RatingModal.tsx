@@ -1,0 +1,112 @@
+import { useState } from "react";
+import { Modal, TouchableOpacity, TextInput, Alert } from "react-native";
+import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
+import { Star } from "phosphor-react-native";
+
+import { Button } from "@components/Button";
+import { cardShadow } from "@utils/styles";
+import { ratingService } from "@services/ratingService";
+import { useAuthStore } from "@stores/authStore";
+
+type Props = {
+  visible: boolean;
+  attendanceId: string | null;
+  professionalName?: string;
+  onClose: (rated: boolean) => void;
+};
+
+// Avaliação do atendimento (Item 6): 1–5 estrelas + comentário opcional.
+// POST /attendances/{id}/rating. Trata 409 (já avaliado) como concluído.
+export function RatingModal({ visible, attendanceId, professionalName, onClose }: Props) {
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const [score, setScore] = useState(0);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  function reset() {
+    setScore(0);
+    setComment("");
+  }
+
+  async function handleSubmit() {
+    if (score < 1) {
+      Alert.alert("Avaliação", "Escolha de 1 a 5 estrelas.");
+      return;
+    }
+    if (!accessToken || !attendanceId) return;
+
+    setSubmitting(true);
+    try {
+      await ratingService.submit(
+        attendanceId,
+        { score, comment: comment.trim() || undefined },
+        accessToken,
+      );
+      Alert.alert("Obrigado! 🙏", "Sua avaliação foi registrada.");
+      reset();
+      onClose(true);
+    } catch (e: any) {
+      const status = e.response?.status;
+      const msg =
+        status === 409
+          ? "Você já avaliou este atendimento."
+          : e.response?.data?.message || "Não foi possível enviar a avaliação. Tente mais tarde.";
+      Alert.alert("Avaliação", msg);
+      if (status === 409) {
+        reset();
+        onClose(true);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={() => onClose(false)}>
+      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
+        <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
+          <Heading fontFamily="$heading" fontSize="$lg">
+            Como foi seu atendimento?
+          </Heading>
+          {professionalName ? (
+            <Text size="sm" color="$gray300" mt="$1">
+              {professionalName}
+            </Text>
+          ) : null}
+
+          <HStack justifyContent="center" gap="$2" mt="$5" mb="$2">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <TouchableOpacity key={n} onPress={() => setScore(n)} hitSlop={6}>
+                <Star
+                  size={36}
+                  color={n <= score ? "#FFB703" : "#D1D5DB"}
+                  weight={n <= score ? "fill" : "regular"}
+                />
+              </TouchableOpacity>
+            ))}
+          </HStack>
+
+          <Box borderWidth="$1" borderColor="$coolGray300" borderRadius="$xl" px="$3" py="$2" mt="$4">
+            <TextInput
+              placeholder="Comentário (opcional)"
+              placeholderTextColor="#9CA3AF"
+              value={comment}
+              onChangeText={setComment}
+              multiline
+              maxLength={300}
+              style={{ minHeight: 60, textAlignVertical: "top", color: "#111827" }}
+            />
+          </Box>
+
+          <Button
+            title={submitting ? "Enviando..." : "Enviar avaliação"}
+            mt="$5"
+            isLoading={submitting}
+            onPress={handleSubmit}
+          />
+          <Button title="Agora não" variant="outline" mt="$3" onPress={() => onClose(false)} />
+        </VStack>
+      </Box>
+    </Modal>
+  );
+}
