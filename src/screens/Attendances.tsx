@@ -23,7 +23,7 @@ import { formatWaitTime } from "@domain/queue/types";
 
 const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
   FINISHED: { label: "Concluído", color: "#00B37E" },
-  CANCELLED: { label: "Cancelado", color: "#EF4444" },
+  CANCELLED: { label: "Cancelado", color: "#E63946" },
   LATE: { label: "Atrasado", color: "#F59E0B" },
 };
 
@@ -96,7 +96,7 @@ export function Attendances() {
               </Box>
             </TouchableOpacity>
           ) : (
-            <Box bg="$white" p="$4" borderRadius="$lg">
+            <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
               <Text size="sm" color="$gray300" textAlign="center">
                 Nenhum atendimento em andamento
               </Text>

@@ -14,7 +14,7 @@ export function PasswordRules({ rules }: Props) {
           {rule.passed ? (
             <Check size={14} color="#00B37E" weight="bold" />
           ) : (
-            <X size={14} color="#EF4444" weight="bold" />
+            <X size={14} color="#E63946" weight="bold" />
           )}
           <Text size="xs" color={rule.passed ? "$green500" : "$red500"}>
             {rule.label}

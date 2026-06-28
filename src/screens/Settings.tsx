@@ -20,6 +20,7 @@ import {
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
 import { addressService, AddressResponse } from "@services/addressService";
@@ -145,7 +146,7 @@ export function Settings() {
         Configurações
       </Heading>
 
-      <Box borderRadius="$lg" overflow="hidden">
+      <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
         <MenuItem
           icon={<User size={22} color="#00B37E" />}
           label="Nome"

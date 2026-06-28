@@ -12,6 +12,7 @@ import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { attendanceService } from "@services/attendanceService";
 import { waitForBackend } from "@services/healthService";
+import { cardShadow } from "@utils/styles";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 
 type RouteParams = {
@@ -210,9 +211,10 @@ export function QueueStatus() {
           bg="$white"
           p="$6"
           mt="$6"
-          borderRadius="$xl"
+          borderRadius="$2xl"
           borderWidth="$2"
           borderColor={borderColor}
+          style={cardShadow}
           w="$full"
           alignItems="center"
         >

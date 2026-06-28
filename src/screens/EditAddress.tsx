@@ -264,7 +264,7 @@ export function EditAddress() {
                       <PencilSimple size={20} color="#00B37E" />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)}>
-                      <Trash size={20} color="#EF4444" />
+                      <Trash size={20} color="#E63946" />
                     </TouchableOpacity>
                   </HStack>
                 </HStack>

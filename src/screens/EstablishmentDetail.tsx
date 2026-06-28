@@ -1,4 +1,4 @@
-import { FlatList, TouchableOpacity, ActivityIndicator } from "react-native";
+import { FlatList, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   VStack,
@@ -14,6 +14,8 @@ import {
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { SkeletonList } from "@components/Skeleton";
+import { cardShadow } from "@utils/styles";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
@@ -37,9 +39,8 @@ function ProfessionalCard({
         bg="$white"
         p="$4"
         mb="$3"
-        borderRadius="$lg"
-        borderWidth="$1"
-        borderColor="$green500"
+        borderRadius="$2xl"
+        style={cardShadow}
       >
         <HStack justifyContent="space-between" alignItems="center">
           <VStack flex={1}>
@@ -109,9 +110,12 @@ export function EstablishmentDetail() {
 
   if (isLoading) {
     return (
-      <Center flex={1}>
-        <ActivityIndicator size="large" color="#00B37E" />
-      </Center>
+      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
+        <Header showBackButton />
+        <VStack mt="$6">
+          <SkeletonList count={4} />
+        </VStack>
+      </VStack>
     );
   }
 
