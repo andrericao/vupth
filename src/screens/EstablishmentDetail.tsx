@@ -1,4 +1,4 @@
-import { FlatList, TouchableOpacity } from "react-native";
+import { FlatList, TouchableOpacity, Alert } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   VStack,
@@ -97,6 +97,16 @@ export function EstablishmentDetail() {
 
   function handleSelectProfessional(professionalId: string) {
     const prof = professionals.find((p) => p.id === professionalId);
+
+    // Loja fechada: ninguém entra na fila. (Futuro: manifestar interesse para a
+    // próxima abertura — depende do backend, ver "Solicitação antecipada".)
+    if (establishment?.open_status !== "OPEN") {
+      Alert.alert(
+        "Estabelecimento fechado",
+        "Este estabelecimento está fechado agora, então não é possível entrar na fila. Em breve você poderá manifestar interesse para a próxima abertura.",
+      );
+      return;
+    }
 
     if (!isAuthenticated) {
       navigation.navigate("login", {

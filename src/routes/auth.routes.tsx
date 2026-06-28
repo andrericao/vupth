@@ -4,7 +4,7 @@ import {
 } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { House, Scissors, Gear } from "phosphor-react-native";
+import { House, ClipboardText, Gear } from "phosphor-react-native";
 
 import { Home } from "@screens/Home";
 import { EstablishmentDetail } from "@screens/EstablishmentDetail";
@@ -19,7 +19,6 @@ import { EditEmail } from "@screens/EditEmail";
 import { EditPassword } from "@screens/EditPassword";
 import { EditAddress } from "@screens/EditAddress";
 import { ServiceSelection } from "@screens/ServiceSelection";
-import { Services } from "@screens/Services";
 import { TabPill, TAB_ACTIVE, TAB_INACTIVE, tabBarShadow } from "@components/TabPill";
 import { ServiceType } from "@domain/establishment/types";
 
@@ -64,19 +63,18 @@ function HomeStack() {
       <HomeStackNav.Screen name="serviceSelection" component={ServiceSelection} />
       <HomeStackNav.Screen name="queueStatus" component={QueueStatus} />
       <HomeStackNav.Screen name="profile" component={Profile} />
-      <HomeStackNav.Screen name="attendances" component={Attendances} />
       <HomeStackNav.Screen name="login" component={Login} />
       <HomeStackNav.Screen name="signUp" component={SignUp} />
     </HomeStackNav.Navigator>
   );
 }
 
-const ServicesStackNav = createNativeStackNavigator<AppRoutes>();
-function ServicesStack() {
+const AttendancesStackNav = createNativeStackNavigator<AppRoutes>();
+function AttendancesStack() {
   return (
-    <ServicesStackNav.Navigator screenOptions={{ headerShown: false }}>
-      <ServicesStackNav.Screen name="services" component={Services} />
-    </ServicesStackNav.Navigator>
+    <AttendancesStackNav.Navigator screenOptions={{ headerShown: false }}>
+      <AttendancesStackNav.Screen name="attendances" component={Attendances} />
+    </AttendancesStackNav.Navigator>
   );
 }
 
@@ -95,7 +93,7 @@ function SettingsStack() {
 
 type TabRoutes = {
   homeTab: undefined;
-  servicesTab: undefined;
+  atendimentosTab: undefined;
   settingsTab: undefined;
 };
 
@@ -135,13 +133,13 @@ export function AuthRoutes() {
         }}
       />
       <Tab.Screen
-        name="servicesTab"
-        component={ServicesStack}
+        name="atendimentosTab"
+        component={AttendancesStack}
         options={{
-          tabBarLabel: "Serviços",
+          tabBarLabel: "Atendimentos",
           tabBarIcon: ({ focused, color }) => (
             <TabPill focused={focused}>
-              <Scissors size={24} color={color} weight={focused ? "fill" : "regular"} />
+              <ClipboardText size={24} color={color} weight={focused ? "fill" : "regular"} />
             </TabPill>
           ),
         }}

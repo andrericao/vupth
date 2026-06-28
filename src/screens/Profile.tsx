@@ -84,7 +84,7 @@ export function Profile() {
         <MenuItem
           icon={<ClipboardText size={22} color="#00B37E" />}
           label="Atendimentos"
-          onPress={() => navigation.navigate("attendances")}
+          onPress={() => navigation.getParent()?.navigate("atendimentosTab", { screen: "attendances" })}
         />
         <MenuItem
           icon={<Gear size={22} color="#00B37E" />}

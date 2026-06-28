@@ -49,19 +49,23 @@ export function Attendances() {
 
   function handleGoToQueue() {
     if (!activeQueue) return;
-    navigation.navigate("queueStatus", {
-      professionalId: activeQueue.professionalId,
-      establishmentId: activeQueue.establishmentId,
-      professionalName: activeQueue.professionalName,
-      establishmentName: activeQueue.establishmentName,
-      estimatedWaitMinutes: activeQueue.estimatedMinutes,
+    // queueStatus vive na aba Início (pai = tabs).
+    navigation.getParent()?.navigate("homeTab", {
+      screen: "queueStatus",
+      params: {
+        professionalId: activeQueue.professionalId,
+        establishmentId: activeQueue.establishmentId,
+        professionalName: activeQueue.professionalName,
+        establishmentName: activeQueue.establishmentName,
+        estimatedWaitMinutes: activeQueue.estimatedMinutes,
+      },
     });
   }
 
   return (
     <VStack flex={1} bg="$gray700">
       <VStack px={15} pt={60}>
-        <Header showBackButton />
+        <Header />
         <Heading fontFamily="$heading" fontSize="$2xl" mt="$4">
           Atendimentos
         </Heading>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
 import { Info } from "phosphor-react-native";
@@ -54,14 +54,24 @@ export function QueueStatus() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
-  const { remaining, color, isInQueue, isBeingAttended, isFinished, activeQueue } = useQueueCountdown();
+  const { remaining, color, isInQueue, isBeingAttended, isFinished, activeQueue, refresh } = useQueueCountdown();
 
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
   const [createError, setCreateError] = useState<string | null>(null);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showRating, setShowRating] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const didCreate = useRef(false);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    try {
+      await refresh();
+    } finally {
+      setRefreshing(false);
+    }
+  }
   const mountedRef = useRef(true);
 
   const DISCLAIMER_KEY = "vupth_hide_queue_disclaimer";
@@ -231,6 +241,13 @@ export function QueueStatus() {
     <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
       <Header />
 
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#00B37E" colors={["#00B37E"]} />
+        }
+      >
       <Center flex={1}>
         <Heading fontFamily="$heading" fontSize="$2xl" textAlign="center">
           {isFinished
@@ -302,9 +319,10 @@ export function QueueStatus() {
         </Box>
 
         <Text size="xs" color="$gray300" mt="$4" textAlign="center">
-          A fila é atualizada automaticamente
+          A fila atualiza sozinha — arraste para baixo para atualizar agora
         </Text>
       </Center>
+      </ScrollView>
 
       <VStack gap="$3" mt="$4">
         {canCancel && (
