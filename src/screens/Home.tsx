@@ -8,6 +8,7 @@ import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
+import { pseudoRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
@@ -15,7 +16,7 @@ import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
 import { formatWaitTime } from "@domain/queue/types";
-import { UserCircle, Queue, Clock } from "phosphor-react-native";
+import { UserCircle, Queue, Clock, Star } from "phosphor-react-native";
 
 const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   BARBER: "Barbearia",
@@ -71,16 +72,22 @@ function EstablishmentCard({
                 {establishment.address.neighborhood}, {establishment.address.city}
               </Text>
             )}
-            {establishment.estimated_wait_minutes != null && (
-              <HStack alignItems="center" gap="$1" mt="$2">
-                <Clock size={14} color="#00B37E" weight="fill" />
-                <Text size="xs" color="$green700" fontFamily="$heading">
-                  {establishment.estimated_wait_minutes === 0
-                    ? "Atende agora"
-                    : `Menor espera ~${formatWaitTime(establishment.estimated_wait_minutes)}`}
+            <HStack alignItems="center" gap="$3" mt="$2">
+              {establishment.estimated_wait_minutes != null && (
+                <HStack alignItems="center" gap="$1">
+                  <Clock size={14} color="#00B37E" weight="fill" />
+                  <Text size="xs" color="$green700" fontFamily="$heading">
+                    {formatWaitTime(establishment.estimated_wait_minutes)}
+                  </Text>
+                </HStack>
+              )}
+              <HStack alignItems="center" gap="$1">
+                <Star size={14} color="#FFB703" weight="fill" />
+                <Text size="xs" color="$gray300" fontFamily="$heading">
+                  {pseudoRating(establishment.id).toFixed(1)}
                 </Text>
               </HStack>
-            )}
+            </HStack>
           </VStack>
           <Badge
             bg={isOpen ? "$green500" : "$gray400"}

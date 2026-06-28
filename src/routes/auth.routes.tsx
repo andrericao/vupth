@@ -3,6 +3,7 @@ import {
   NativeStackNavigationProp,
 } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { House, Scissors, Gear } from "phosphor-react-native";
 
 import { Home } from "@screens/Home";
@@ -101,6 +102,8 @@ type TabRoutes = {
 const Tab = createBottomTabNavigator<TabRoutes>();
 
 export function AuthRoutes() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={{
@@ -111,8 +114,9 @@ export function AuthRoutes() {
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
           borderTopWidth: 0,
-          height: 70,
-          paddingBottom: 10,
+          // soma o inset inferior do device para a barra nao ficar sob os botoes do sistema
+          height: 62 + insets.bottom,
+          paddingBottom: 8 + insets.bottom,
           paddingTop: 8,
           ...tabBarShadow,
         },
