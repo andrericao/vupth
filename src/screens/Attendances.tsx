@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useState, useCallback } from "react";
+import { TouchableOpacity, RefreshControl } from "react-native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import {
   VStack,
   Text,
@@ -40,8 +40,15 @@ function formatDate(iso: string): string {
 export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
-  const { data: history = [], isLoading } = useClientAttendances();
+  const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
   const [ratingFor, setRatingFor] = useState<{ id: string; name: string } | null>(null);
+
+  // Atualiza ao focar a aba (sem precisar fechar/reabrir o app).
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch]),
+  );
 
   const realizados = history.filter(
     (a) => a.status === "FINISHED" || a.status === "CANCELLED" || a.status === "LATE",
@@ -71,7 +78,12 @@ export function Attendances() {
         </Heading>
       </VStack>
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#00B37E" colors={["#00B37E"]} />
+        }
+      >
         <VStack mt="$6" px={15}>
           <Text
             size="xs"

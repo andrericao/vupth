@@ -54,7 +54,7 @@ export function QueueStatus() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
-  const { remaining, color, isInQueue, isBeingAttended, isFinished, activeQueue, refresh } = useQueueCountdown();
+  const { remaining, elapsed, color, isInQueue, isBeingAttended, isFinished, activeQueue, refresh } = useQueueCountdown();
 
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
@@ -172,14 +172,24 @@ export function QueueStatus() {
 
   const borderColor = isInQueue ? color : "#00B37E";
   const timeColor = isInQueue ? color : "#00B37E";
-  const timeLabel = remaining <= 0 && isInQueue
-    ? "Aguardando chamada"
-    : formatWaitTime(remaining).replace('~', '');
+  // Em atendimento: mostra o TEMPO DECORRIDO desde o início. Na fila: o countdown.
+  const timeLabel = isBeingAttended
+    ? elapsed < 1
+      ? "Iniciado agora"
+      : formatWaitTime(elapsed)
+    : remaining <= 0 && isInQueue
+      ? "Aguardando chamada"
+      : formatWaitTime(remaining).replace('~', '');
   // Previsão fixa = entrada na fila + estimativa (atualiza quando o poll re-sincroniza).
   // Evita Date.now() no render (react-hooks/purity).
   const startTimeLabel = activeQueue
     ? estimatedStartTime(activeQueue.enteredAt, activeQueue.estimatedMinutes)
     : "";
+  // Término estimado do atendimento em curso = início + duração estimada.
+  const endTimeLabel =
+    isBeingAttended && activeQueue?.startedAt && activeQueue?.serviceMinutes != null
+      ? estimatedStartTime(activeQueue.startedAt, activeQueue.serviceMinutes)
+      : null;
 
   function handleCancel() {
     Alert.alert(
@@ -269,12 +279,16 @@ export function QueueStatus() {
           alignItems="center"
         >
           <HStack alignItems="center" gap="$1">
-            <Text size="sm" color="$gray300">Tempo estimado</Text>
-            <TouchableOpacity
-              onPress={() => Alert.alert(QUEUE_DISCLAIMER_TITLE, QUEUE_DISCLAIMER_TEXT)}
-            >
-              <Info size={16} color="#9CA3AF" />
-            </TouchableOpacity>
+            <Text size="sm" color="$gray300">
+              {isBeingAttended ? "Tempo de atendimento" : "Tempo estimado"}
+            </Text>
+            {!isBeingAttended && (
+              <TouchableOpacity
+                onPress={() => Alert.alert(QUEUE_DISCLAIMER_TITLE, QUEUE_DISCLAIMER_TEXT)}
+              >
+                <Info size={16} color="#9CA3AF" />
+              </TouchableOpacity>
+            )}
           </HStack>
           <Heading
             fontFamily="$heading"
@@ -293,6 +307,13 @@ export function QueueStatus() {
               <Text size="sm" fontFamily="$heading">
                 {remaining <= 0 ? "A qualquer momento" : startTimeLabel}
               </Text>
+            </HStack>
+          )}
+
+          {endTimeLabel && (
+            <HStack w="$full" justifyContent="space-between" mb="$3">
+              <Text size="sm" color="$gray300">Término estimado</Text>
+              <Text size="sm" fontFamily="$heading">{endTimeLabel}</Text>
             </HStack>
           )}
 

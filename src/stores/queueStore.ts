@@ -11,6 +11,10 @@ export interface ActiveQueue {
   enteredAt: number;
   estimatedMinutes: number;
   status: AttendanceStatus;
+  // Preenchidos quando o atendimento inicia (IN_PROGRESS): início real (ms) e
+  // duração estimada do serviço (min) — para tempo decorrido + término estimado.
+  startedAt?: number;
+  serviceMinutes?: number;
 }
 
 interface QueueState {
