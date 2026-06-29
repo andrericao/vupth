@@ -42,7 +42,7 @@ function formatDateTime(iso: string): string {
 
 export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
+  const { activeQueue, remaining, color, isInQueue, isBeingAttended } = useQueueCountdown();
   const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
   const [ratingFor, setRatingFor] = useState<{ id: string; name: string } | null>(null);
   const [detailFor, setDetailFor] = useState<ClientAttendance | null>(null);
@@ -98,11 +98,11 @@ export function Attendances() {
             EM ANDAMENTO
           </Text>
 
-          {isInQueue && activeQueue ? (
+          {activeQueue && (isInQueue || isBeingAttended) ? (
             <TouchableOpacity onPress={handleGoToQueue}>
-              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={color}>
+              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={isBeingAttended ? "#00B37E" : color}>
                 <HStack alignItems="center" gap="$3">
-                  <Queue size={24} color={color} />
+                  <Queue size={24} color={isBeingAttended ? "#00B37E" : color} />
                   <VStack flex={1}>
                     <Text fontFamily="$heading" size="sm">
                       {activeQueue.establishmentName}
@@ -111,8 +111,10 @@ export function Attendances() {
                       {activeQueue.professionalName}
                     </Text>
                   </VStack>
-                  <Badge bg={color} borderRadius="$full" px="$3" py="$1">
-                    <BadgeText color="$white" size="xs">{formatWaitTime(remaining)}</BadgeText>
+                  <Badge bg={isBeingAttended ? "#00B37E" : color} borderRadius="$full" px="$3" py="$1">
+                    <BadgeText color="$white" size="xs">
+                      {isBeingAttended ? "Em atendimento" : formatWaitTime(remaining)}
+                    </BadgeText>
                   </Badge>
                   <CaretRight size={18} color="#9CA3AF" />
                 </HStack>

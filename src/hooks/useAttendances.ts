@@ -18,5 +18,7 @@ export function useClientAttendances(filters?: ClientAttendanceFilters) {
         .then((res) => res.data),
     enabled: !!accessToken,
     staleTime: 30000,
+    // WS fora do ar → atualiza sozinho enquanto a tela está aberta.
+    refetchInterval: 30000,
   });
 }
