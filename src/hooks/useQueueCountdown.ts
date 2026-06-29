@@ -37,7 +37,7 @@ export function useQueueCountdown() {
   const user = useAuthStore((s) => s.user);
 
   const [remaining, setRemaining] = useState(0);
-  const [elapsed, setElapsed] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [urgency, setUrgency] = useState<UrgencyLevel>('normal');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollRef = useRef<() => Promise<void>>(async () => {});
@@ -49,12 +49,6 @@ export function useQueueCountdown() {
       const r = getRemainingMinutes(activeQueue);
       setRemaining(r);
       setUrgency(getUrgency(r, activeQueue.status));
-      // tempo decorrido desde o início do atendimento (IN_PROGRESS)
-      if (activeQueue.startedAt) {
-        setElapsed(Math.max(0, Math.floor((Date.now() - activeQueue.startedAt) / 60000)));
-      } else {
-        setElapsed(0);
-      }
     };
 
     const timer = setInterval(tick, 30000);
@@ -65,6 +59,23 @@ export function useQueueCountdown() {
       clearTimeout(immediate);
     };
   }, [activeQueue]);
+
+  // Tempo de atendimento rolando em SEGUNDOS — 100% no front a partir do
+  // startedAt (cacheado no store/SecureStore). Sem backend; timer de 1s só roda
+  // enquanto há atendimento em curso.
+  useEffect(() => {
+    const startedAt = activeQueue?.startedAt;
+    const tick = () =>
+      setElapsedSeconds(startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : 0);
+
+    const immediate = setTimeout(tick, 0); // cálculo inicial (assíncrono)
+    const id = startedAt ? setInterval(tick, 1000) : null;
+
+    return () => {
+      clearTimeout(immediate);
+      if (id) clearInterval(id);
+    };
+  }, [activeQueue?.startedAt]);
 
   useEffect(() => {
     if (!activeQueue || !accessToken) return;
@@ -125,7 +136,7 @@ export function useQueueCountdown() {
 
   return {
     remaining,
-    elapsed,
+    elapsedSeconds,
     urgency,
     color,
     isInQueue: !!activeQueue && activeQueue.status === 'SCHEDULED',

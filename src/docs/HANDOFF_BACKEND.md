@@ -37,5 +37,6 @@ O **front já está pronto** (envio + exibição): `RatingModal` (1–5 estrelas
    - **por profissional** em `GET /establishment/id/{id}/professionals-with-queue`;
    - **agregado por estabelecimento** em `GET /establishment` — a média da loja = **soma dos `ratingSum` ÷ soma dos `ratingCount`** dos profissionais da loja (média ponderada pelos votos; barato pois são poucos profissionais). *Isto é um complemento ao Item 6, que hoje só prevê agregados de profissional/serviço.*
 3. (Opcional, recomendado) expor em `GET /attendances/client/me` se o atendimento **já foi avaliado** (ex.: `rated: boolean`), para o front esconder o "Toque para avaliar" após o voto. Hoje o front só descobre via 409 ao tentar.
+4. (Pequeno) incluir **`establishmentName`** no `GET /attendances/client/me` (hoje só vem `establishmentId`). A tela de detalhes do atendimento quer mostrar "qual a loja" e não tem o nome.
 
 **Granularidade alinhada com o usuário:** nota **por profissional** na tela do estabelecimento + nota **agregada** no card da loja.

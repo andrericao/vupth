@@ -5,6 +5,7 @@ import {
   shouldCreateAttendance,
   estimatedStartTime,
   formatClockTime,
+  formatElapsed,
   reconcileQueueEstimate,
   AttendanceStatus,
 } from '@domain/queue/types';
@@ -78,6 +79,21 @@ describe('Queue Domain', () => {
 
     it('formatClockTime preenche zero à esquerda', () => {
       expect(formatClockTime(new Date(2026, 0, 1, 8, 7))).toBe('08:07');
+    });
+  });
+
+  describe('formatElapsed', () => {
+    it('formata segundos como m:ss', () => {
+      expect(formatElapsed(0)).toBe('0:00');
+      expect(formatElapsed(5)).toBe('0:05');
+      expect(formatElapsed(65)).toBe('1:05');
+      expect(formatElapsed(600)).toBe('10:00');
+    });
+    it('usa h:mm:ss acima de 1h', () => {
+      expect(formatElapsed(3661)).toBe('1:01:01');
+    });
+    it('trata negativo como 0', () => {
+      expect(formatElapsed(-10)).toBe('0:00');
     });
   });
 

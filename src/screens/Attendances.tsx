@@ -12,7 +12,7 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Queue, Clock, CaretRight, Star } from "phosphor-react-native";
+import { Queue, Clock, CaretRight } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
@@ -20,8 +20,10 @@ import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { SkeletonList } from "@components/Skeleton";
 import { RatingModal } from "@components/RatingModal";
+import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
+import { ClientAttendance } from "@services/attendanceService";
 import { cardShadow } from "@utils/styles";
-import { formatWaitTime } from "@domain/queue/types";
+import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 
 const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
   FINISHED: { label: "Concluído", color: "#00B37E" },
@@ -29,9 +31,10 @@ const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
   LATE: { label: "Atrasado", color: "#F59E0B" },
 };
 
-function formatDate(iso: string): string {
+function formatDateTime(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString("pt-BR");
+    const d = new Date(iso);
+    return `${d.toLocaleDateString("pt-BR")} às ${formatClockTime(d)}`;
   } catch {
     return "";
   }
@@ -42,6 +45,7 @@ export function Attendances() {
   const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
   const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
   const [ratingFor, setRatingFor] = useState<{ id: string; name: string } | null>(null);
+  const [detailFor, setDetailFor] = useState<ClientAttendance | null>(null);
 
   // Atualiza ao focar a aba (sem precisar fechar/reabrir o app).
   useFocusEffect(
@@ -151,15 +155,7 @@ export function Attendances() {
                 };
                 const canRate = a.status === "FINISHED";
                 return (
-                  <TouchableOpacity
-                    key={a.id}
-                    activeOpacity={canRate ? 0.7 : 1}
-                    onPress={
-                      canRate
-                        ? () => setRatingFor({ id: a.id, name: a.professionalName })
-                        : undefined
-                    }
-                  >
+                  <TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => setDetailFor(a)}>
                     <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                       <HStack justifyContent="space-between" alignItems="flex-start">
                         <VStack flex={1} pr="$2">
@@ -170,8 +166,7 @@ export function Attendances() {
                             {a.services.map((s) => s.customName).join(", ") || "—"}
                           </Text>
                           <Text size="xs" color="$gray400" mt="$1">
-                            {formatDate(a.scheduledTime)}
-                            {a.durationInMinutes ? ` · ${a.durationInMinutes} min` : ""}
+                            {formatDateTime(a.startTime ?? a.scheduledTime)}
                           </Text>
                         </VStack>
                         <VStack alignItems="flex-end" gap="$1">
@@ -185,14 +180,12 @@ export function Attendances() {
                           </Text>
                         </VStack>
                       </HStack>
-                      {canRate && (
-                        <HStack alignItems="center" gap="$1" mt="$3">
-                          <Star size={14} color="#FFB703" weight="fill" />
-                          <Text size="xs" color="$green700" fontFamily="$heading">
-                            Toque para avaliar
-                          </Text>
-                        </HStack>
-                      )}
+                      <HStack alignItems="center" gap="$1" mt="$3">
+                        <CaretRight size={13} color={canRate ? "#FFB703" : "#9CA3AF"} weight="bold" />
+                        <Text size="xs" color="$gray300" fontFamily="$heading">
+                          {canRate ? "Toque para detalhes e avaliar" : "Toque para ver detalhes"}
+                        </Text>
+                      </HStack>
                     </Box>
                   </TouchableOpacity>
                 );
@@ -201,6 +194,15 @@ export function Attendances() {
           )}
         </VStack>
       </ScrollView>
+
+      <AttendanceDetailModal
+        attendance={detailFor}
+        onClose={() => setDetailFor(null)}
+        onRate={() => {
+          if (detailFor) setRatingFor({ id: detailFor.id, name: detailFor.professionalName });
+          setDetailFor(null);
+        }}
+      />
 
       <RatingModal
         visible={!!ratingFor}

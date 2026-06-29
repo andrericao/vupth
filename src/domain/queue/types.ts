@@ -100,6 +100,16 @@ export function estimatedStartTime(nowMs: number, remainingMinutes: number): str
   return formatClockTime(new Date(nowMs + safeMinutes * 60000));
 }
 
+/** Tempo decorrido em segundos → "m:ss" (ou "h:mm:ss" acima de 1h). */
+export function formatElapsed(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
+}
+
 export function formatWaitTime(minutes: number): string {
   if (minutes < 1) return 'Agora';
   if (minutes < 60) return `${minutes} min`;

@@ -14,7 +14,7 @@ import {
   QUEUE_DISCLAIMER_TEXT,
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
-import { canCancelAttendance, formatWaitTime, shouldCreateAttendance, estimatedStartTime } from "@domain/queue/types";
+import { canCancelAttendance, formatWaitTime, formatElapsed, shouldCreateAttendance, estimatedStartTime } from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { attendanceService } from "@services/attendanceService";
@@ -54,7 +54,7 @@ export function QueueStatus() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
-  const { remaining, elapsed, color, isInQueue, isBeingAttended, isFinished, activeQueue, refresh } = useQueueCountdown();
+  const { remaining, elapsedSeconds, color, isInQueue, isBeingAttended, isFinished, activeQueue, refresh } = useQueueCountdown();
 
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
@@ -172,14 +172,15 @@ export function QueueStatus() {
 
   const borderColor = isInQueue ? color : "#00B37E";
   const timeColor = isInQueue ? color : "#00B37E";
-  // Em atendimento: mostra o TEMPO DECORRIDO desde o início. Na fila: o countdown.
-  const timeLabel = isBeingAttended
-    ? elapsed < 1
-      ? "Iniciado agora"
-      : formatWaitTime(elapsed)
-    : remaining <= 0 && isInQueue
-      ? "Aguardando chamada"
-      : formatWaitTime(remaining).replace('~', '');
+  // Finalizado: "Finalizado". Em atendimento: tempo decorrido rolando (m:ss).
+  // Na fila: countdown ("Aguardando" quando zera).
+  const timeLabel = isFinished
+    ? "Finalizado"
+    : isBeingAttended
+      ? formatElapsed(elapsedSeconds)
+      : remaining <= 0 && isInQueue
+        ? "Aguardando"
+        : formatWaitTime(remaining).replace('~', '');
   // Previsão fixa = entrada na fila + estimativa (atualiza quando o poll re-sincroniza).
   // Evita Date.now() no render (react-hooks/purity).
   const startTimeLabel = activeQueue
@@ -278,18 +279,20 @@ export function QueueStatus() {
           w="$full"
           alignItems="center"
         >
-          <HStack alignItems="center" gap="$1">
-            <Text size="sm" color="$gray300">
-              {isBeingAttended ? "Tempo de atendimento" : "Tempo estimado"}
-            </Text>
-            {!isBeingAttended && (
-              <TouchableOpacity
-                onPress={() => Alert.alert(QUEUE_DISCLAIMER_TITLE, QUEUE_DISCLAIMER_TEXT)}
-              >
-                <Info size={16} color="#9CA3AF" />
-              </TouchableOpacity>
-            )}
-          </HStack>
+          {!isFinished && (
+            <HStack alignItems="center" gap="$1">
+              <Text size="sm" color="$gray300">
+                {isBeingAttended ? "Tempo de atendimento" : "Duração estimada"}
+              </Text>
+              {!isBeingAttended && (
+                <TouchableOpacity
+                  onPress={() => Alert.alert(QUEUE_DISCLAIMER_TITLE, QUEUE_DISCLAIMER_TEXT)}
+                >
+                  <Info size={16} color="#9CA3AF" />
+                </TouchableOpacity>
+              )}
+            </HStack>
+          )}
           <Heading
             fontFamily="$heading"
             fontSize="$4xl"
@@ -310,9 +313,18 @@ export function QueueStatus() {
             </HStack>
           )}
 
+          {isBeingAttended && activeQueue?.serviceMinutes != null && (
+            <HStack w="$full" justifyContent="space-between" mb="$3">
+              <Text size="sm" color="$gray300">Duração estimada</Text>
+              <Text size="sm" fontFamily="$heading">
+                {formatWaitTime(activeQueue.serviceMinutes)}
+              </Text>
+            </HStack>
+          )}
+
           {endTimeLabel && (
             <HStack w="$full" justifyContent="space-between" mb="$3">
-              <Text size="sm" color="$gray300">Término estimado</Text>
+              <Text size="sm" color="$gray300">Horário de término</Text>
               <Text size="sm" fontFamily="$heading">{endTimeLabel}</Text>
             </HStack>
           )}
