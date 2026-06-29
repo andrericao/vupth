@@ -37,6 +37,7 @@ export function useQueueCountdown() {
   const user = useAuthStore((s) => s.user);
 
   const [remaining, setRemaining] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
   const [urgency, setUrgency] = useState<UrgencyLevel>('normal');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollRef = useRef<() => Promise<void>>(async () => {});
@@ -44,18 +45,20 @@ export function useQueueCountdown() {
   useEffect(() => {
     if (!activeQueue) return;
 
-    const timer = setInterval(() => {
+    const tick = () => {
       const r = getRemainingMinutes(activeQueue);
       setRemaining(r);
       setUrgency(getUrgency(r, activeQueue.status));
-    }, 30000);
+      // tempo decorrido desde o início do atendimento (IN_PROGRESS)
+      if (activeQueue.startedAt) {
+        setElapsed(Math.max(0, Math.floor((Date.now() - activeQueue.startedAt) / 60000)));
+      } else {
+        setElapsed(0);
+      }
+    };
 
-    // initial calc via interval trick
-    const immediate = setTimeout(() => {
-      const r = getRemainingMinutes(activeQueue);
-      setRemaining(r);
-      setUrgency(getUrgency(r, activeQueue.status));
-    }, 0);
+    const timer = setInterval(tick, 30000);
+    const immediate = setTimeout(tick, 0); // cálculo inicial
 
     return () => {
       clearInterval(timer);
@@ -88,8 +91,16 @@ export function useQueueCountdown() {
       try {
         const hist = await attendanceService.listClientHistory(accessToken);
         const mine = hist.data.find((a) => a.id === q.attendanceId);
-        if (mine && mine.status !== q.status) {
-          updateQueue({ status: mine.status as AttendanceStatus });
+        if (mine) {
+          const patch: Partial<ActiveQueue> = {};
+          if (mine.status !== q.status) patch.status = mine.status as AttendanceStatus;
+          // Ao iniciar o atendimento, guarda o início real e a duração estimada
+          // (soma dos serviços) para exibir tempo decorrido + término estimado.
+          if (mine.status === 'IN_PROGRESS' && mine.startTime && !q.startedAt) {
+            patch.startedAt = Date.parse(mine.startTime);
+            patch.serviceMinutes = mine.services.reduce((s, x) => s + (x.estimatedMinutes ?? 0), 0);
+          }
+          if (Object.keys(patch).length > 0) updateQueue(patch);
         }
       } catch {}
     };
@@ -114,6 +125,7 @@ export function useQueueCountdown() {
 
   return {
     remaining,
+    elapsed,
     urgency,
     color,
     isInQueue: !!activeQueue && activeQueue.status === 'SCHEDULED',
