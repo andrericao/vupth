@@ -35,22 +35,44 @@
 
 App para **clientes** que querem buscar estabelecimentos e entrar em filas de atendimento. A Home e publica (nao exige login). Auth so e exigida para entrar na fila.
 
+**Navegacao = bottom tab bar (3 abas)**, cada uma com sua stack (sempre visivel):
 ```
-Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
-                                        ↓
-                               Login (se nao autenticado)
-                                        ↓
-                               QueueStatus (posicao na fila)
+[ Inicio ]            [ Atendimentos ]      [ Config. ]
+ Home → Detalhe        Attendances           Settings → Edit*
+  → ServiceSelection   (em andamento +
+  → QueueStatus         historico)
+  (+ Profile, Login,
+   SignUp)
 ```
+Entrar na fila: Home → Detalhe → (Login se nao autenticado) → ServiceSelection → QueueStatus. Tocar na aba ativa volta ao topo; trocar de aba e 1 toque (resolve o "voltar varias vezes").
 
 **Stack:**
 - React Native + Expo SDK 54
 - Gluestack UI v1 (sem NativeWind)
-- React Navigation native-stack (nao Expo Router)
+- React Navigation: **bottom-tabs + native-stack** (nao Expo Router)
 - Axios + axios-mock-adapter (testes)
 - Zustand v5 + Expo SecureStore
-- TanStack Query v5
+- TanStack Query v5 (com `refetchInterval` como fallback do WebSocket)
 - Phosphor React Native (icones)
+- Fontes **Poppins** (titulos/botoes) + **Inter** (texto)
+
+---
+
+## 1b. Estado atual (2026-06-29) — features recentes
+
+**Design "Verde Imersivo"** (alinhado com o front-partner, handoff C7): tokens green 400 `#52B788` / 500 `#00B37E` (CTA) / 600 `#009E6F` / 700 `#1B4332`; amber `#FFB703`; red `#E63946`; bg `#F7FAF8`. Fontes Poppins/Inter. `Button` pilula+sombra; `Input2` raio `$xl` + foco verde; `cardShadow` em cards `$2xl` sem borda; **Skeleton** (SkeletonCard/List) no lugar dos spinners; **TabPill** (pilula verde na aba ativa). **Animacao de abertura** (`PreparingServer`/WarmupAnimation): sequencia de icones (celular→loja→tesoura→saindo) no portao de readiness (cold start), respeita reduce-motion.
+
+**Home:** card mostra **menor tempo de espera** (`estimated_wait_minutes`) + **estrela de avaliacao** (real quando o backend mandar, senao placeholder); **esconde estabelecimentos sem profissional** (`estimated_wait_minutes === null`).
+
+**Loja fechada:** bloqueia entrar na fila (`open_status != OPEN`) com aviso (futuro: manifestar interesse — depende do backend).
+
+**Tela da fila (QueueStatus):** status reflete **SCHEDULED → IN_PROGRESS → FINISHED** (via poll de `/attendances/client/me`, fallback do WS). Aguardando: countdown monotonico + "Previsao de inicio". Em atendimento: **tempo decorrido em segundos** (100% no front via `startedAt` cacheado) + "Duracao estimada" + "Horario de termino". Concluido: "Finalizado" + **Avaliar**. **Disclaimer** de estimativa (modal 1x + icone "i"). **Pull-to-refresh**.
+
+**Atendimentos:** EM ANDAMENTO (SCHEDULED ou IN_PROGRESS) + REALIZADOS (dia+hora de inicio); refetch no foco + pull-to-refresh; tocar no card abre **detalhes** (AttendanceDetailModal) + avaliar.
+
+**Avaliacao (Item 6, front feito / aguarda backend):** `RatingModal` 1-5 estrelas + comentario → `POST /attendances/{id}/rating`.
+
+**WebSocket:** `useQueueSocket` / `useQueueNotifications` existem mas **nao funcionam no device** (pendencia, precisa device+backend logs). Substituido por **polling** (`refetchInterval`: establishments 60s, fila 20s, atendimentos 30s) + poll de status da fila (30s).
 
 ---
 
@@ -72,6 +94,7 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 | `/professional/{id}/service-items` | GET | ServiceSelection | Implementado | — |
 | `/attendances/{id}/leave-queue` | DELETE | — | **NAO IMPLEMENTADO** | — |
 | `/attendances/client/me` | GET | Attendances | Implementado | — |
+| `/attendances/{id}/rating` | POST | RatingModal | **Front feito / aguarda backend (Item 6)** | — |
 | `/profile/general-infos` | PATCH | EditProfile | Implementado | 5 |
 | `/profile/update-email/me` | PATCH | EditEmail | Implementado | 5 |
 | `/profile/update-password/me` | PATCH | EditPassword | Implementado | 5 |
