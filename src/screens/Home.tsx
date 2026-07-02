@@ -82,8 +82,10 @@ function EstablishmentCard({
                 </HStack>
               )}
               {(() => {
+                // Card destaca a MAIOR estrela (melhor avaliado); cai na média
+                // agregada e, por fim, no placeholder até o backend mandar.
                 const r = resolveRating(
-                  establishment.rating_average,
+                  establishment.rating_best ?? establishment.rating_average,
                   establishment.rating_count,
                   establishment.id,
                 );

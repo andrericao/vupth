@@ -36,6 +36,7 @@ O **front já está pronto** (envio + exibição): `RatingModal` (1–5 estrelas
 2. **Devolver no payload** `rating_average` (number|null) + `rating_count` (number):
    - **por profissional** em `GET /establishment/id/{id}/professionals-with-queue`;
    - **agregado por estabelecimento** em `GET /establishment` — a média da loja = **soma dos `ratingSum` ÷ soma dos `ratingCount`** dos profissionais da loja (média ponderada pelos votos; barato pois são poucos profissionais). *Isto é um complemento ao Item 6, que hoje só prevê agregados de profissional/serviço.*
+   - **Card da loja (pedido do usuário 2026-06-29):** o card deve destacar o **melhor** — **menor tempo** (`estimated_wait_minutes`, já feito) + **MAIOR estrela** (loja "mais bem avaliada"). Então, além do `rating_average` agregado, devolver em `GET /establishment` a **maior nota entre os profissionais** da loja (ex.: `rating_best`: number|null) para exibir no card. **Ordenação (#11):** hoje é só por menor fila; considerar também a avaliação (ex.: desempate/boost por melhor avaliado) na ordenação da listagem.
 3. (Opcional, recomendado) expor em `GET /attendances/client/me` se o atendimento **já foi avaliado** (ex.: `rated: boolean`), para o front esconder o "Toque para avaliar" após o voto. Hoje o front só descobre via 409 ao tentar.
 4. (Pequeno) incluir **`establishmentName`** no `GET /attendances/client/me` (hoje só vem `establishmentId`). A tela de detalhes do atendimento quer mostrar "qual a loja" e não tem o nome.
 

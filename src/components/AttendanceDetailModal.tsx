@@ -14,11 +14,19 @@ const STATUS: Record<string, { label: string; color: string }> = {
   SCHEDULED: { label: "Aguardando", color: "#F59E0B" },
 };
 
-function dateTime(iso: string | null): string {
+function dateOnly(iso: string | null): string {
   if (!iso) return "—";
   try {
-    const d = new Date(iso);
-    return `${d.toLocaleDateString("pt-BR")} às ${formatClockTime(d)}`;
+    return new Date(iso).toLocaleDateString("pt-BR");
+  } catch {
+    return "—";
+  }
+}
+
+function timeOnly(iso: string | null): string {
+  if (!iso) return "—";
+  try {
+    return formatClockTime(new Date(iso));
   } catch {
     return "—";
   }
@@ -67,8 +75,9 @@ export function AttendanceDetailModal({ attendance, onClose, onRate }: Props) {
                 label="Serviços"
                 value={a.services.map((s) => s.customName).join(", ") || "—"}
               />
-              <Row label="Início" value={dateTime(a.startTime ?? a.scheduledTime)} />
-              {a.endTime ? <Row label="Término" value={dateTime(a.endTime)} /> : null}
+              <Row label="Dia" value={dateOnly(a.startTime ?? a.scheduledTime)} />
+              <Row label="Início" value={timeOnly(a.startTime ?? a.scheduledTime)} />
+              {a.endTime ? <Row label="Término" value={timeOnly(a.endTime)} /> : null}
               {a.durationInMinutes != null ? (
                 <Row label="Duração" value={`${a.durationInMinutes} min`} />
               ) : null}
