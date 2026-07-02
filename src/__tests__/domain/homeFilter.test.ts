@@ -1,6 +1,6 @@
 import { MOCK_ESTABLISHMENTS } from '@domain/establishment/mockData';
 import { Establishment } from '@domain/establishment/types';
-import { filterEstablishments } from '@domain/establishment/filter';
+import { filterEstablishments, sortEstablishments } from '@domain/establishment/filter';
 
 describe('Home - Filtro de Estabelecimentos', () => {
   it('sem busca deve mostrar apenas abertos', () => {
@@ -81,5 +81,33 @@ describe('Home - Filtro de Estabelecimentos', () => {
     // MOCK_ESTABLISHMENTS não definem o campo -> não devem ser escondidos
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'ALL');
     expect(result.length).toBeGreaterThan(0);
+  });
+});
+
+describe('sortEstablishments', () => {
+  const make = (id: string, wait: number | null, best?: number): Establishment => ({
+    ...MOCK_ESTABLISHMENTS[0],
+    id,
+    estimated_wait_minutes: wait,
+    rating_best: best ?? null,
+  });
+
+  it('ordena por menor tempo de espera primeiro', () => {
+    const out = sortEstablishments([make('c', 30), make('a', 5), make('b', 10)]);
+    expect(out.map((e) => e.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('no empate de tempo, o mais bem avaliado (maior estrela) vem antes', () => {
+    const out = sortEstablishments([
+      make('baixa', 10, 4.1),
+      make('alta', 10, 4.9),
+      make('media', 10, 4.5),
+    ]);
+    expect(out.map((e) => e.id)).toEqual(['alta', 'media', 'baixa']);
+  });
+
+  it('estabelecimentos sem disponibilidade (null) vão por último', () => {
+    const out = sortEstablishments([make('sem', null, 5), make('com', 20, 4)]);
+    expect(out.map((e) => e.id)).toEqual(['com', 'sem']);
   });
 });

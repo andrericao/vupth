@@ -7,7 +7,7 @@ import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
-import { filterEstablishments } from "@domain/establishment/filter";
+import { filterEstablishments, sortEstablishments } from "@domain/establishment/filter";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
@@ -137,7 +137,9 @@ export function Home() {
     if (filterParam) setSelectedFilter(filterParam);
   }, [filterParam]);
 
-  const filteredEstablishments = filterEstablishments(establishments, search, selectedFilter);
+  const filteredEstablishments = sortEstablishments(
+    filterEstablishments(establishments, search, selectedFilter),
+  );
 
   const onRefresh = useCallback(() => {
     refetch();
