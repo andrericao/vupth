@@ -14,10 +14,21 @@ name: EAS Update (OTA)
 on:
   push:
     branches: [dev, main]
+    # Commits so de documentacao nao mudam o bundle JS -> nao publica OTA.
+    paths-ignore:
+      - '**.md'
+      - 'src/docs/**'
+      - '.gitignore'
+
+# Pushes seguidos: cancela o OTA anterior, so o ultimo commit e publicado.
+concurrency:
+  group: eas-update-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 

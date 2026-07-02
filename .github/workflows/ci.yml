@@ -3,12 +3,29 @@ name: CI
 on:
   push:
     branches: [dev, main]
+    # Commits so de documentacao nao rodam CI (economiza minutos).
+    paths-ignore:
+      - '**.md'
+      - 'src/docs/**'
+      - '.gitignore'
   pull_request:
     branches: [dev, main]
+    paths-ignore:
+      - '**.md'
+      - 'src/docs/**'
+
+# Pushes seguidos na mesma ref cancelam runs anteriores ainda em andamento.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint:
+  # Um job unico: instala as deps 1x e roda lint -> typecheck -> testes em
+  # sequencia (fail-fast). Antes eram 3 jobs, cada um com seu `npm ci` (3x o
+  # custo de instalacao).
+  verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -22,38 +39,8 @@ jobs:
       - name: Lint
         run: npx eslint . --max-warnings 0
 
-  typecheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - run: npm ci
-
       - name: TypeScript check
         run: npx tsc --noEmit
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - run: npm ci
-
-      - run: npm test -- --ci --coverage
-
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
+      - name: Tests
+        run: npm test -- --ci
