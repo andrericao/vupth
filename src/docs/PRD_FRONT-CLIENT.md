@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + TanStack Query v5 + Expo SecureStore
 > **Testes unitarios/integracao:** 144 passando em 18 suites (Jest 29 + axios-mock-adapter)
 > **Testes E2E:** Maestro v2.5.1 no celular fisico (Moto G54 via USB)
-> **CI/CD:** GitHub Actions — lint (ESLint v9 flat config + eslint-config-expo), typecheck (tsc --noEmit), test (jest --ci --coverage) — 0 erros/0 warnings
+> **CI/CD:** GitHub Actions — job unico: lint (ESLint v9 flat config + eslint-config-expo) → typecheck (tsc --noEmit) → test (jest --ci), fail-fast — 0 erros/0 warnings. Otimizado p/ economizar minutos (concurrency/cancel-in-progress, paths-ignore, timeout) — ver secao "Economia de minutos" em CI/CD.
 >
 > **Ultima atualizacao:** 2026-06-08
 
@@ -566,6 +566,13 @@ O backend tem `PATCH /establishment/{id}/owner` que transfere ownership para out
 - **CI** (`.github/workflows/ci.yml`): lint + typecheck (bloqueante) + testes em `dev`/`main`.
 - **EAS Update OTA** (`.github/workflows/eas-update.yml`): publica o bundle JS automaticamente no push (dev→preview, main→production) com `EXPO_PUBLIC_API_ENV` por branch.
 - **Auto-rollback** (`.github/workflows/auto-rollback.yml`): reverte o commit que deixar o CI vermelho em `dev`/`main`, voltando ao ultimo estado funcional. **(Nota: o partner ainda nao tem auto-rollback — vale portar para la.)**
+
+> **Economia de minutos do GitHub Actions (2026-06-29)** — aplicado no client, **recomendado tambem para o front-partner**:
+> - **CI num job unico** (lint→typecheck→testes em sequencia, fail-fast) em vez de 3 jobs separados. Antes cada job rodava `npm ci` do zero (3x o custo de instalacao); agora instala **1x**.
+> - **`concurrency` + `cancel-in-progress: true`** no CI e no eas-update: pushes seguidos na mesma branch **cancelam** runs/OTA anteriores ainda em andamento (evita gastar minutos com builds que serao descartados). Runs cancelados tem conclusion `cancelled` (nao `failure`), entao **nao disparam o auto-rollback**.
+> - **`paths-ignore`** (`**.md`, `src/docs/**`, `.gitignore`): commits so de documentacao **nao rodam CI nem publicam OTA**.
+> - **`timeout-minutes`** em todos os jobs (CI 15 / OTA 20 / rollback 10): evita workflow "preso" queimando minutos.
+> - Removido `--coverage` + upload de artefato do CI (o pre-push local ja roda os testes).
 
 ### Concluidos
 
