@@ -55,3 +55,13 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 **Diagnóstico grátis recomendado:** testar o mesmo backend por uma página HTML no navegador (STOMP → `/topic/establishment/{id}/queue`). Funciona no browser mas não no app ⇒ transporte do RN; não funciona em nenhum ⇒ config do backend.
 
 **Nota de plataforma:** no **Render free** a instância **hiberna** e o WS **cai** quando dorme — então, no plano grátis, o **polling** tende a ser mais robusto que WS de qualquer forma. WS = melhoria futura; polling é a base.
+
+---
+
+## 5. Cliente trocar de lugar na fila — endpoint pendente no backend
+
+Funcionalidade: o cliente pede para **trocar de posição / reordenar** o próprio lugar na fila. **Não existe no front ainda** (bloqueado) — o front consome quando o backend expuser.
+
+**Precisa (backend):** endpoint para o cliente alterar a própria posição na fila (o backend já tem o ponto marcado como pendente em `ClientServiceImpl:138`). Definir a semântica (ex.: trocar com outro cliente / mover para uma posição / "ceder a vez") e as regras (só o próprio `clientId`, só enquanto `SCHEDULED`, limites/anti-abuso).
+
+**Quando estiver pronto**, avisar o front com o contrato (rota, payload, regras) que a gente implementa a ação na tela da fila.
