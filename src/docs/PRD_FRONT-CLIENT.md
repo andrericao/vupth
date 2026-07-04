@@ -453,7 +453,7 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 > 3. Atualizar testes de integracao + collection Postman + PRD_BACKEND (secao "PATCH /profile/update-password/me").
 > Depois disso o front envia `{ currentPassword, password }` e adiciona o campo na tela. (Tambem avaliar o endpoint de **forgot password** do item 14.)
 
-> 🟢 **Avaliacao (Item 6) — BACKEND ENTREGOU o essencial (confirmado 2026-07-04 via PRD front-partner).** `POST /attendances/{id}/rating` existe **e** os agregados `rating_average`/`rating_count` **JA vem** no `GET /establishment/id/{id}/professionals-with-queue` (por profissional **e** por service item). O front ja consome (`resolveRating` + tipos) → **validar no device** que a nota real aparece. **Ainda falta confirmar (menores):**
+> ✅ **Avaliacao (Item 6) — VALIDADO NO DEVICE (2026-07-04, OTA `019f2b2f`): ver a nota real E avaliar funcionam.** `POST /attendances/{id}/rating` existe **e** os agregados `rating_average`/`rating_count` vem no `GET /establishment/id/{id}/professionals-with-queue` (por profissional **e** por service item); o front consome (`resolveRating`). **Melhorias opcionais (nao bloqueiam):**
 > 1. **Rollup por ESTABELECIMENTO** no `GET /establishment` (media da loja = soma `ratingSum` / soma `ratingCount`) — para os cards da Home; o partner confirmou so o nivel profissional/service-item.
 > 2. Expor `rated: boolean` no `GET /attendances/client/me` para esconder o "Toque para avaliar" apos o voto (hoje o front so descobre via 409).
 > 3. (Se faltar) `establishmentName` no `/attendances/client/me`.
@@ -475,7 +475,7 @@ Lista viva dos handoffs abertos do front-client para o backend. Detalhe em `HAND
 |---|---------|:--------:|:----------:|--------|
 | H1 | Verificar **senha atual** no `PATCH /profile/update-password/me` (add `currentPassword`) | 1 | — | Aguarda backend |
 | H2 | **Esqueci minha senha** — endpoint de reset (codigo/email) | 2 | S5/S6 | Aguarda backend |
-| H3 | **Avaliacao (Item 6)** — 🟢 **backend CONFIRMOU (2026-07-04, via partner): `POST /attendances/{id}/rating` existe E os agregados `rating_average`/`rating_count` JA vem no `professionals-with-queue`** (por profissional e por service item). Front ja consome (`resolveRating` + tipos). **Resta confirmar:** rollup por ESTABELECIMENTO no `GET /establishment` (cards da Home) + `rated`/`establishmentName` no `/attendances/client/me` | 3 | — | **Quase resolvido — validar no device** |
+| H3 | **Avaliacao (Item 6)** — ✅ **VALIDADO NO DEVICE (2026-07-04, OTA `019f2b2f`): ver a nota real E avaliar funcionam.** Backend manda `rating_average`/`rating_count` no `professionals-with-queue`; front consome (`resolveRating`). **Melhorias opcionais (nao bloqueiam):** rollup por ESTABELECIMENTO no `GET /establishment` (cards da Home) + `rated`/`establishmentName` no `/attendances/client/me` | 3 | — | ✅ **Feito (device)** |
 | H4 | **WebSocket** nao funciona no device (backend compartilhado) — coberto por polling | 4 | — | **Ultima prioridade** (Andre 2026-07-04) |
 | H5 | **Estender strike #39** a `reschedule` e `move-to-end` com ETA < 1h (hoje so no `cancel`) | 6 | — | Aguarda backend |
 | H6 | **Oferta ABERTA de troca** (rework #42): `/swap-offers` (direcao + maxMinutes, lista aberta, accept); **morre no IN_PROGRESS** | 7 | **S3** (=C6) | Aguarda backend |
