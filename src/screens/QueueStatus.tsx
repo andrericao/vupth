@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
-import { Info } from "phosphor-react-native";
+import { Info, Clock } from "phosphor-react-native";
 import * as SecureStore from "expo-secure-store";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
@@ -26,6 +26,7 @@ import {
   incursLatePenalty,
   rescheduleErrorMessage,
   moveToEndErrorMessage,
+  formatClockTime,
   CANCELLATION_PENALTY_VALUE,
 } from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
@@ -124,6 +125,24 @@ export function QueueStatus() {
       mountedRef.current = false;
     };
   }, []);
+
+  // Item 2 — horário em que a fila termina hoje (ETA do último = agora + tempo
+  // restante total). Buscado ao entrar na tela para o destaque.
+  useEffect(() => {
+    let alive = true;
+    const q = useQueueStore.getState().activeQueue;
+    if (isInQueue && q && accessToken) {
+      queueService
+        .getQueue(q.professionalId, q.establishmentId, accessToken)
+        .then(({ data }) => {
+          if (alive) setTailEtaMs(Date.now() + data.totalRemainingMinutes * 60000);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      alive = false;
+    };
+  }, [isInQueue, accessToken]);
 
   useEffect(() => {
     if (
@@ -479,6 +498,27 @@ export function QueueStatus() {
             </Text>
           </HStack>
         </Box>
+
+        {/* Item 2 — destaque do horário em que a fila termina hoje (último). */}
+        {isInQueue && tailEtaMs != null && (
+          <Box
+            bg="$green100"
+            borderRadius="$xl"
+            px="$4"
+            py="$3"
+            mt="$4"
+            w="$full"
+            borderWidth="$1"
+            borderColor="$green500"
+          >
+            <HStack alignItems="center" justifyContent="center" gap="$2">
+              <Clock size={18} color="#009E6F" />
+              <Text fontFamily="$heading" size="sm" color="$green700">
+                A fila hoje termina às {formatClockTime(new Date(tailEtaMs))}
+              </Text>
+            </HStack>
+          </Box>
+        )}
 
         <Text size="xs" color="$gray300" mt="$4" textAlign="center">
           A fila atualiza sozinha — arraste para baixo para atualizar agora
