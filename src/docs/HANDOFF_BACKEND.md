@@ -74,7 +74,9 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 
 **Front já pronto:** a tela da fila **já avisa** o usuário da multa nessas três ações (sair, reagendar, ir pro fim) quando ETA < 1h. Falta só o backend efetivar o strike/cobrança (a cobrança monetária é a Fase 2 do #39, dep. gateway #21).
 
-## 7. Troca de posição como OFERTA ABERTA (rework do #42) — pedido do Andre
+## 7. Troca de posição como OFERTA ABERTA (rework do #42) — pedido do Andre — = S3 (front-partner)
+
+> **Alinhamento:** este é o mesmo handoff que o **PRD front-partner** rastreia como **S3** ("oferta ABERTA de troca" / marketplace C6). Manter os dois em sincronia; quando o backend incorporar na lista dele, atualizar ambos.
 
 **Regra de negócio (Andre 2026-07-03).** A troca desejada **não** é direcionada (escolher um cliente específico). O modelo certo:
 - O cliente abre uma **solicitação de troca** dizendo a **direção** (adiantar ou atrasar a vez) e **em até quanto tempo** (ex.: "adiantar em até 30 min", "atrasar em até 1h").
@@ -91,7 +93,9 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 
 **Enquanto isso, o front (Item "Mudar minha vez"):** já entrega **Atrasar → (ir pro fim / agendar)** com o #43; a opção **"Trocar"** está marcada como **"em breve"** aguardando este endpoint. **Avisar o front quando estiver pronto** com o contrato final.
 
-## 8. Agendar respeitando fechamento e refeições (barreira de horário)
+## 8. Agendar respeitando fechamento e refeições (barreira de horário) — aparentada de BUG5 / S4 (front-partner)
+
+> **Alinhamento:** o **PRD front-partner** já rastreia **BUG5** (backend não auto-fecha no `closing_time` / não expõe `is_open` efetivo) e **S4** (refeições Modelo B). Esta barreira é um **requisito NOVO e distinto** — validar o **alvo do `reschedule`** contra fechamento/refeição — mas usa os mesmos dados. Incorporar junto de BUG5/S4 na lista do backend.
 
 **Regra de negócio (Andre 2026-07-03).** Ao **agendar / reagendar** (`reschedule`), o cliente **não pode** escolher um horário:
 - **após o fechamento** do estabelecimento (se `closing_time = 20:00`, não pode marcar 20:01), nem
