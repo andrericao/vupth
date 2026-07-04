@@ -14,10 +14,23 @@ import {
   QUEUE_DISCLAIMER_TEXT,
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
-import { canCancelAttendance, formatWaitTime, formatElapsed, shouldCreateAttendance, estimatedStartTime } from "@domain/queue/types";
+import { RescheduleModal } from "@components/RescheduleModal";
+import {
+  canCancelAttendance,
+  formatWaitTime,
+  formatElapsed,
+  shouldCreateAttendance,
+  estimatedStartTime,
+  canReshuffleQueue,
+  incursLatePenalty,
+  rescheduleErrorMessage,
+  moveToEndErrorMessage,
+  CANCELLATION_PENALTY_VALUE,
+} from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { attendanceService } from "@services/attendanceService";
+import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
 import { cardShadow } from "@utils/styles";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
@@ -52,6 +65,7 @@ export function QueueStatus() {
   } = route.params as RouteParams;
 
   const accessToken = useAuthStore((s) => s.accessToken);
+  const user = useAuthStore((s) => s.user);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
   const { remaining, elapsedSeconds, color, isInQueue, isBeingAttended, isFinished, activeQueue, refresh } = useQueueCountdown();
@@ -62,6 +76,10 @@ export function QueueStatus() {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [isRemanejando, setIsRemanejando] = useState(false);
+  const [showReschedule, setShowReschedule] = useState(false);
+  const [tailEtaMs, setTailEtaMs] = useState<number | null>(null);
+  const [rescheduleBaseMs, setRescheduleBaseMs] = useState(0);
   const didCreate = useRef(false);
 
   async function handleRefresh() {
@@ -169,6 +187,9 @@ export function QueueStatus() {
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";
   const canCancel = canCancelAttendance(status);
+  // Item 16 — remanejar a vez (trocar horário / ir pro fim) é sempre livre e sem
+  // multa enquanto aguardando. Só SAIR da fila com espera curta gera multa.
+  const canReshuffle = canReshuffleQueue(status);
 
   const borderColor = isInQueue ? color : "#00B37E";
   const timeColor = isInQueue ? color : "#00B37E";
@@ -192,10 +213,18 @@ export function QueueStatus() {
       ? estimatedStartTime(activeQueue.startedAt, activeQueue.serviceMinutes)
       : null;
 
+  // Multa é pelo TEMPO estimado (não pelo status): vagar um lugar com < 1h para
+  // ser atendido prejudica quem se segue. Vale para sair, reagendar e ir pro fim.
+  // A TROCA por consentimento mútuo (#42) é que nunca terá multa.
+  const penalty = incursLatePenalty(remaining);
+
   function handleCancel() {
+    const message = penalty
+      ? `Você está perto de ser atendido. Sair agora gera uma multa de R$ ${CANCELLATION_PENALTY_VALUE},00 no seu próximo atendimento.`
+      : "Tem certeza que deseja sair da fila?";
     Alert.alert(
-      "Cancelar atendimento",
-      "Tem certeza que deseja sair da fila?",
+      "Sair da fila",
+      message,
       [
         { text: "Não", style: "cancel" },
         {
@@ -212,6 +241,98 @@ export function QueueStatus() {
           },
         },
       ]
+    );
+  }
+
+  // Item 16 — "Escolher um horário": busca o ETA do último da fila (piso da
+  // escolha) e abre o seletor. Sem bloquear se a fila não responder.
+  async function handleReschedule() {
+    let tail: number | null = null;
+    if (activeQueue && accessToken) {
+      try {
+        const { data } = await queueService.getQueue(
+          activeQueue.professionalId,
+          activeQueue.establishmentId,
+          accessToken,
+        );
+        tail = Date.now() + data.totalRemainingMinutes * 60000;
+      } catch {
+        tail = null;
+      }
+    }
+    setTailEtaMs(tail);
+    // Base estável dos slots (evita Date.now() no render do modal).
+    setRescheduleBaseMs(tail ?? Date.now());
+    setShowReschedule(true);
+  }
+
+  // Item 16 — reagenda para o horário escolhido (vira intenção de fila).
+  async function submitReschedule(targetIso: string) {
+    if (!attendanceId || !accessToken) return;
+    setIsRemanejando(true);
+    try {
+      const { data } = await attendanceService.reschedule(attendanceId, targetIso, accessToken);
+      // Re-ancora pela previsão real devolvida (scheduledTime), lembrando que oscila.
+      const targetMs = Date.parse(data.scheduledTime ?? targetIso);
+      await updateQueue({
+        enteredAt: Date.now(),
+        estimatedMinutes: Math.max(0, Math.round((targetMs - Date.now()) / 60000)),
+      });
+      setShowReschedule(false);
+      Alert.alert(
+        "Horário reservado",
+        "Você cedeu a vez e será chamado por volta do horário escolhido. Pode variar um pouco.",
+      );
+      refresh();
+    } catch (error: any) {
+      Alert.alert(
+        "Não foi possível reagendar",
+        rescheduleErrorMessage(error.response?.status, error.response?.data?.code),
+      );
+    } finally {
+      if (mountedRef.current) setIsRemanejando(false);
+    }
+  }
+
+  // Item 16 — descer a vez para o fim da fila (sem sair, sem perder o atendimento).
+  async function submitMoveToEnd() {
+    if (!attendanceId || !accessToken) return;
+    setIsRemanejando(true);
+    try {
+      await attendanceService.moveToEnd(attendanceId, accessToken);
+      // Ação explícita que AUMENTA a espera: re-ancora direto pelo servidor, pois
+      // o guard monotônico do poll ignoraria um estimado maior.
+      if (user?.id) {
+        try {
+          const { data } = await queueService.getWaitTime(attendanceId, user.id, accessToken);
+          await updateQueue({ enteredAt: Date.now(), estimatedMinutes: data.estimatedWaitingTime });
+        } catch {}
+      }
+      Alert.alert("Pronto", "Você foi para o fim da fila.");
+      refresh();
+    } catch (error: any) {
+      Alert.alert(
+        "Não foi possível",
+        moveToEndErrorMessage(error.response?.status),
+      );
+    } finally {
+      if (mountedRef.current) setIsRemanejando(false);
+    }
+  }
+
+  function handleMoveToEnd() {
+    // Ir pro fim com < 1h também vaga um lugar perto do início → avisa multa.
+    const base = "Sua vez passa para depois de quem está esperando. Você continua na fila, sem perder o atendimento.";
+    const message = penalty
+      ? `${base}\n\nComo falta menos de 1h, isso gera multa de R$ ${CANCELLATION_PENALTY_VALUE},00 no seu próximo atendimento.`
+      : base;
+    Alert.alert(
+      "Ir para o fim da fila",
+      message,
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Ir para o fim", onPress: submitMoveToEnd },
+      ],
     );
   }
 
@@ -358,10 +479,29 @@ export function QueueStatus() {
       </ScrollView>
 
       <VStack gap="$3" mt="$4">
+        {canReshuffle && (
+          <>
+            <Text size="xs" color="$gray300" textAlign="center">
+              Não pode esperar agora? Escolha outro horário ou vá para o fim da fila.
+            </Text>
+            <Button
+              title="Escolher um horário"
+              isLoading={isRemanejando}
+              onPress={handleReschedule}
+            />
+            <Button
+              title="Ir para o fim da fila"
+              variant="outline"
+              isDisabled={isRemanejando}
+              onPress={handleMoveToEnd}
+            />
+          </>
+        )}
         {canCancel && (
           <Button
             title="Sair da fila"
             variant="outline"
+            isDisabled={isRemanejando}
             onPress={handleCancel}
           />
         )}
@@ -382,6 +522,15 @@ export function QueueStatus() {
         )}
       </VStack>
 
+      <RescheduleModal
+        visible={showReschedule}
+        baseMs={rescheduleBaseMs}
+        tailEtaMs={tailEtaMs}
+        penalty={penalty}
+        loading={isRemanejando}
+        onConfirm={submitReschedule}
+        onClose={() => setShowReschedule(false)}
+      />
       <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
       <RatingModal
         visible={showRating}

@@ -7,6 +7,12 @@ import {
   formatClockTime,
   formatElapsed,
   reconcileQueueEstimate,
+  canReshuffleQueue,
+  incursLatePenalty,
+  generateTimeSlots,
+  rescheduleErrorMessage,
+  moveToEndErrorMessage,
+  LATE_PENALTY_THRESHOLD_MINUTES,
   AttendanceStatus,
 } from '@domain/queue/types';
 import { MOCK_QUEUE_POSITION } from '@domain/queue/mockData';
@@ -129,6 +135,81 @@ describe('Queue Domain', () => {
 
     it.each(inactiveStatuses)('deve retornar false para status %s', (status) => {
       expect(isActiveAttendance(status)).toBe(false);
+    });
+  });
+
+  describe('canReshuffleQueue (Item 16 — trocar é sempre livre)', () => {
+    it('permite remanejar sempre que aguardando (SCHEDULED), independente do ETA', () => {
+      expect(canReshuffleQueue('SCHEDULED')).toBe(true);
+    });
+
+    it('NÃO permite fora de SCHEDULED', () => {
+      const others: AttendanceStatus[] = ['IN_PROGRESS', 'PAUSED', 'FINISHED', 'CANCELLED'];
+      others.forEach((status) => expect(canReshuffleQueue(status)).toBe(false));
+    });
+  });
+
+  describe('incursLatePenalty (multa pelo TEMPO estimado, não pelo status)', () => {
+    it('multa quando falta MENOS de 1h para ser atendido', () => {
+      expect(incursLatePenalty(59)).toBe(true);
+      expect(incursLatePenalty(10)).toBe(true);
+      expect(incursLatePenalty(0)).toBe(true);
+    });
+
+    it('SEM multa no limiar (60min) ou acima — sair/remanejar cedo não prejudica', () => {
+      expect(incursLatePenalty(LATE_PENALTY_THRESHOLD_MINUTES)).toBe(false);
+      expect(incursLatePenalty(120)).toBe(false);
+    });
+  });
+
+  describe('generateTimeSlots (Item 16 — seletor de horário)', () => {
+    it('gera slots de 30min a partir do próximo múltiplo após o piso', () => {
+      const from = Date.parse('2026-07-03T13:05:00.000Z');
+      const slots = generateTimeSlots(from, 3, 30);
+      expect(slots).toHaveLength(3);
+      // primeiro slot arredonda para cima (13:30), depois 14:00, 14:30
+      expect(slots[1].ms - slots[0].ms).toBe(30 * 60000);
+      expect(slots[2].ms - slots[1].ms).toBe(30 * 60000);
+      expect(slots[0].ms).toBe(Date.parse('2026-07-03T13:30:00.000Z'));
+    });
+
+    it('cada slot traz um label HH:MM', () => {
+      const from = Date.parse('2026-07-03T13:00:00.000Z');
+      const [first] = generateTimeSlots(from, 1, 30);
+      expect(first.label).toMatch(/^\d{2}:\d{2}$/);
+    });
+  });
+
+  describe('rescheduleErrorMessage (Item 16)', () => {
+    it('422 ou QUEUE_TARGET_NOT_FEASIBLE → alvo inviável', () => {
+      expect(rescheduleErrorMessage(422)).toMatch(/horário mais adiante/i);
+      expect(rescheduleErrorMessage(undefined, 'QUEUE_TARGET_NOT_FEASIBLE')).toMatch(/horário mais adiante/i);
+    });
+
+    it('400 → horário no passado/ inválido', () => {
+      expect(rescheduleErrorMessage(400)).toMatch(/inválido|futuro/i);
+    });
+
+    it('403 → não é o dono', () => {
+      expect(rescheduleErrorMessage(403)).toMatch(/não pode remanejar/i);
+    });
+
+    it('genérico para o resto', () => {
+      expect(rescheduleErrorMessage(500)).toMatch(/tente novamente/i);
+    });
+  });
+
+  describe('moveToEndErrorMessage (Item 16)', () => {
+    it('400 → só enquanto aguarda', () => {
+      expect(moveToEndErrorMessage(400)).toMatch(/enquanto você aguarda/i);
+    });
+
+    it('403 → não é o dono', () => {
+      expect(moveToEndErrorMessage(403)).toMatch(/não pode remanejar/i);
+    });
+
+    it('genérico para o resto', () => {
+      expect(moveToEndErrorMessage(500)).toMatch(/tente novamente/i);
     });
   });
 

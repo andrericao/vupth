@@ -85,6 +85,76 @@ export function isActiveAttendance(status: AttendanceStatus): boolean {
   return status === 'SCHEDULED' || status === 'IN_PROGRESS' || status === 'PAUSED';
 }
 
+/**
+ * Limiar (min) da multa: qualquer ação que VAGA um lugar perto do início —
+ * sair, reagendar ou ir pro fim — prejudica quem se segue (é atendido antes do
+ * previsto). Se falta MENOS que isso para ser atendido, gera multa.
+ */
+export const LATE_PENALTY_THRESHOLD_MINUTES = 60;
+
+/** Valor da multa por vagar um lugar em espera curta (R$). */
+export const CANCELLATION_PENALTY_VALUE = 3;
+
+/**
+ * Remanejar/sair (Item 16) — trocar de horário, ir pro fim ou sair — só faz
+ * sentido enquanto o cliente aguarda (SCHEDULED). A TROCA por consentimento
+ * mútuo (#42) é a única sempre sem multa (o tempo da fila não muda).
+ */
+export function canReshuffleQueue(status: AttendanceStatus): boolean {
+  return status === 'SCHEDULED';
+}
+
+/**
+ * Gera multa? Regra pelo TEMPO estimado (não pelo status): vagar um lugar com
+ * MENOS de 1h para ser atendido prejudica quem se segue → multa. Vale para
+ * sair da fila, reagendar e ir pro fim (a troca #42 não passa por aqui).
+ */
+export function incursLatePenalty(remainingMinutes: number): boolean {
+  return remainingMinutes < LATE_PENALTY_THRESHOLD_MINUTES;
+}
+
+export interface TimeSlot {
+  ms: number;
+  label: string;
+}
+
+/**
+ * Horários candidatos para reagendar (Item 16): a partir do próximo múltiplo de
+ * `stepMinutes` após `fromMs` (normalmente o ETA do último da fila), gera `count`
+ * slots. O cliente escolhe um horário real, sabendo que oscila (intenção de fila).
+ */
+export function generateTimeSlots(
+  fromMs: number,
+  count: number,
+  stepMinutes = 30,
+): TimeSlot[] {
+  const step = stepMinutes * 60000;
+  const first = Math.ceil(fromMs / step) * step;
+  const slots: TimeSlot[] = [];
+  for (let i = 0; i < count; i++) {
+    const ms = first + i * step;
+    slots.push({ ms, label: formatClockTime(new Date(ms)) });
+  }
+  return slots;
+}
+
+/** Mensagem amigável para os erros do reschedule (Item 16). */
+export function rescheduleErrorMessage(status?: number, code?: string): string {
+  if (status === 422 || code === 'QUEUE_TARGET_NOT_FEASIBLE') {
+    return 'A fila já prevê te atender nesse horário ou depois. Escolha um horário mais adiante.';
+  }
+  if (status === 400) return 'Horário inválido. Escolha um horário no futuro.';
+  if (status === 403) return 'Você não pode remanejar este atendimento.';
+  return 'Não foi possível reagendar. Tente novamente.';
+}
+
+/** Mensagem amigável para os erros do move-to-end (Item 16). */
+export function moveToEndErrorMessage(status?: number): string {
+  if (status === 400) return 'Só é possível ir para o fim da fila enquanto você aguarda.';
+  if (status === 403) return 'Você não pode remanejar este atendimento.';
+  return 'Não foi possível ir para o fim da fila. Tente novamente.';
+}
+
 /** Formata um Date como HH:MM (relógio local, 24h). */
 export function formatClockTime(date: Date): string {
   const pad = (n: number) => n.toString().padStart(2, '0');

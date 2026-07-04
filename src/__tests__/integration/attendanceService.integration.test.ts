@@ -73,4 +73,43 @@ describe('AttendanceService', () => {
 
     expect(response.data).toEqual([]);
   });
+
+  // Item 16 — remanejar cliente com espera longa
+  it('reschedule deve enviar PATCH com targetTime no query + Bearer token', async () => {
+    mock.onPatch('/attendances/att-1/reschedule').reply((config) => {
+      expect(config.headers?.Authorization).toBe('Bearer my-token');
+      expect(config.params).toEqual({ targetTime: '2026-07-03T11:00:00.000Z' });
+      return [200, { id: 'att-1', status: 'SCHEDULED', isIntent: true, targetTime: '2026-07-03T11:00:00.000Z' }];
+    });
+
+    const response = await attendanceService.reschedule(
+      'att-1',
+      '2026-07-03T11:00:00.000Z',
+      'my-token',
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.data.isIntent).toBe(true);
+    expect(response.data.targetTime).toBe('2026-07-03T11:00:00.000Z');
+  });
+
+  it('reschedule deve propagar 422 (alvo inviável)', async () => {
+    mock.onPatch('/attendances/att-1/reschedule').reply(422, { code: 'QUEUE_TARGET_NOT_FEASIBLE' });
+
+    await expect(
+      attendanceService.reschedule('att-1', '2026-07-03T11:00:00.000Z', 'my-token'),
+    ).rejects.toMatchObject({ response: { status: 422 } });
+  });
+
+  it('moveToEnd deve enviar PATCH com Bearer token', async () => {
+    mock.onPatch('/attendances/att-1/move-to-end').reply((config) => {
+      expect(config.headers?.Authorization).toBe('Bearer my-token');
+      return [200, { id: 'att-1', status: 'SCHEDULED' }];
+    });
+
+    const response = await attendanceService.moveToEnd('att-1', 'my-token');
+
+    expect(response.status).toBe(200);
+    expect(response.data.status).toBe('SCHEDULED');
+  });
 });
