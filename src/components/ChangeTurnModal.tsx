@@ -79,7 +79,7 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onRes
               </Heading>
               {tailEtaMs != null && (
                 <Text size="sm" color="$gray300" mt="$1">
-                  A fila hoje deve ir até ~{formatClockTime(new Date(tailEtaMs))}.
+                  A fila hoje deve ir até {formatClockTime(new Date(tailEtaMs))}.
                 </Text>
               )}
               <Button title="Ir para o fim da fila" mt="$5" onPress={goMoveToEnd} />

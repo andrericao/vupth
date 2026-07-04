@@ -69,7 +69,7 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
             <HStack alignItems="center" gap="$1" mt="$1">
               <Clock size={16} color="#6B7280" />
               <Text size="sm" color="$gray300">
-                A fila hoje deve ir até ~{formatClockTime(new Date(tailEtaMs))}
+                A fila hoje deve ir até {formatClockTime(new Date(tailEtaMs))}
               </Text>
             </HStack>
           )}

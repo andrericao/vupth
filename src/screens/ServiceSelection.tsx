@@ -145,7 +145,7 @@ export function ServiceSelection() {
                             {service.customName}
                           </Text>
                           <Text size="xs" color="$gray300" mt="$1">
-                            ~{service.weeklyAverageDurationInMinutes ?? 30} min
+                            {service.weeklyAverageDurationInMinutes ?? 30} min
                           </Text>
                         </VStack>
                         <HStack alignItems="center" gap="$3">
@@ -178,7 +178,7 @@ export function ServiceSelection() {
               <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} mb="$3">
                 <HStack justifyContent="space-between">
                   <Text size="sm" color="$gray300">
-                    {selectedIds.length} serviço(s) — ~{totalMinutes} min
+                    {selectedIds.length} serviço(s) — {totalMinutes} min
                   </Text>
                   <Text fontFamily="$heading" color="$green500">
                     R$ {totalPrice.toFixed(2)}

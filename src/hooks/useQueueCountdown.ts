@@ -24,8 +24,9 @@ function getUrgency(remaining: number, status: string): UrgencyLevel {
 }
 
 function getPollingInterval(remaining: number): number {
-  if (remaining > 60) return 600000;
-  if (remaining > 10) return 300000;
+  // Teto de 2min: sem WebSocket, é o poll que detecta remoção pelo profissional
+  // (CANCELLED) e mudanças de status — não pode demorar muito.
+  if (remaining > 10) return 120000;
   if (remaining > 0) return 60000;
   return 30000; // aguardando chamada: checa status (START/FINISH) mais rápido
 }
@@ -103,6 +104,12 @@ export function useQueueCountdown() {
         const hist = await attendanceService.listClientHistory(accessToken);
         const mine = hist.data.find((a) => a.id === q.attendanceId);
         if (mine) {
+          // Profissional removeu / cancelou o atendimento (→ CANCELLED): sai da
+          // fila no cliente (limpa store + SecureStore) para o banner sumir.
+          if (mine.status === 'CANCELLED') {
+            useQueueStore.getState().leaveQueue();
+            return;
+          }
           const patch: Partial<ActiveQueue> = {};
           if (mine.status !== q.status) patch.status = mine.status as AttendanceStatus;
           // Ao iniciar o atendimento, guarda o início real e a duração estimada
