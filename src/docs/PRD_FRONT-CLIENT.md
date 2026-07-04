@@ -453,10 +453,10 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 > 3. Atualizar testes de integracao + collection Postman + PRD_BACKEND (secao "PATCH /profile/update-password/me").
 > Depois disso o front envia `{ currentPassword, password }` e adiciona o campo na tela. (Tambem avaliar o endpoint de **forgot password** do item 14.)
 
-> ⚠️ **Pendencia para o backend (handoff)** — *Avaliacao de atendimento (Item 6 do PRD_BACKEND, hoje ⬜ aberto).* O front ja esta pronto (envio + exibicao); falta o backend:
-> 1. `POST /attendances/{id}/rating` `{ score 1-5, comment? }` — so o **cliente dono** do attendance, so com `status = FINISHED`, **1 voto** (409 no 2o), guest nao avalia. (entidade `AttendanceRating` + agregados `ratingSum`/`ratingCount` em `Professional` e `ServiceItem`, ja especificado no Item 6.)
-> 2. **Devolver no payload** os campos `rating_average` (number|null) + `rating_count` (number): **por profissional** em `GET /establishment/id/{id}/professionals-with-queue`, e **agregado por estabelecimento** em `GET /establishment` (a media da loja = **soma dos `ratingSum` / soma dos `ratingCount`** dos profissionais — media ponderada, barato pois sao poucos profissionais). Sem isso o front mostra um placeholder ficticio.
-> 3. (Opcional, recomendado) expor no `GET /attendances/client/me` se o atendimento **ja foi avaliado** (ex.: `rated: boolean`), para o front esconder o "Toque para avaliar" depois do voto. Hoje o front so descobre via 409 ao tentar.
+> 🟢 **Avaliacao (Item 6) — BACKEND ENTREGOU o essencial (confirmado 2026-07-04 via PRD front-partner).** `POST /attendances/{id}/rating` existe **e** os agregados `rating_average`/`rating_count` **JA vem** no `GET /establishment/id/{id}/professionals-with-queue` (por profissional **e** por service item). O front ja consome (`resolveRating` + tipos) → **validar no device** que a nota real aparece. **Ainda falta confirmar (menores):**
+> 1. **Rollup por ESTABELECIMENTO** no `GET /establishment` (media da loja = soma `ratingSum` / soma `ratingCount`) — para os cards da Home; o partner confirmou so o nivel profissional/service-item.
+> 2. Expor `rated: boolean` no `GET /attendances/client/me` para esconder o "Toque para avaliar" apos o voto (hoje o front so descobre via 409).
+> 3. (Se faltar) `establishmentName` no `/attendances/client/me`.
 
 > ✅ **Backend PRONTO (handoff #43)** — *Remanejar cliente com espera longa (2026-07-03).* Quando o ETA da vez do cliente ficar longo (o front decide o gatilho, ex.: > 60 min), oferecer 2 acoes na QueueStatus, **so quando o atendimento estiver `SCHEDULED`**:
 > 1. **"Escolher um horario"** → `PATCH /attendances/{id}/reschedule?targetTime=<ISO-8601>`. O atendimento vira **intencao de fila** (mesmo estado do Item 40: cede a vez aos que chegam ate o previsto encostar no alvo, quando e reconfirmado automaticamente). Erros: **422** (`QUEUE_TARGET_NOT_FEASIBLE`, a fila ja preve atender em cima/depois do alvo — sugerir outro horario) e **400** (alvo no passado).
@@ -475,11 +475,11 @@ Lista viva dos handoffs abertos do front-client para o backend. Detalhe em `HAND
 |---|---------|:--------:|:----------:|--------|
 | H1 | Verificar **senha atual** no `PATCH /profile/update-password/me` (add `currentPassword`) | 1 | — | Aguarda backend |
 | H2 | **Esqueci minha senha** — endpoint de reset (codigo/email) | 2 | S5/S6 | Aguarda backend |
-| H3 | **Avaliacao (Item 6)** — `POST /attendances/{id}/rating` + agregados por profissional/estabelecimento + `rated` no `/attendances/client/me` | 3 | — | Aguarda backend |
+| H3 | **Avaliacao (Item 6)** — 🟢 **backend CONFIRMOU (2026-07-04, via partner): `POST /attendances/{id}/rating` existe E os agregados `rating_average`/`rating_count` JA vem no `professionals-with-queue`** (por profissional e por service item). Front ja consome (`resolveRating` + tipos). **Resta confirmar:** rollup por ESTABELECIMENTO no `GET /establishment` (cards da Home) + `rated`/`establishmentName` no `/attendances/client/me` | 3 | — | **Quase resolvido — validar no device** |
 | H4 | **WebSocket** nao funciona no device (backend compartilhado) — coberto por polling | 4 | — | **Ultima prioridade** (Andre 2026-07-04) |
 | H5 | **Estender strike #39** a `reschedule` e `move-to-end` com ETA < 1h (hoje so no `cancel`) | 6 | — | Aguarda backend |
 | H6 | **Oferta ABERTA de troca** (rework #42): `/swap-offers` (direcao + maxMinutes, lista aberta, accept); **morre no IN_PROGRESS** | 7 | **S3** (=C6) | Aguarda backend |
-| H7 | **Barreira de horario ao agendar**: **fechamento BLOQUEIA** (novo erro); **refeicao NAO bloqueia** — agenda pos-intervalo + **estimado meal-aware contando quem ja pediu pos-almoco** (so o backend calcula; resposta traz `scheduledTime` real + ex. `placedAfterBreak`) | 8 | ~BUG5 / S4 | Aguarda backend |
+| H7 | **Barreira de horario ao agendar**: **fechamento BLOQUEIA** (novo erro); **refeicao NAO bloqueia** — agenda pos-intervalo + **estimado meal-aware contando quem ja pediu pos-almoco** (so o backend calcula; resposta traz `scheduledTime` real + ex. `placedAfterBreak`) | 8 | ~BUG5/BUG6 / S4 | Aguarda backend |
 
 > ✅ Ja entregues pelo backend nesta frente (fora da lista): remanejar #43 (`reschedule`/`move-to-end`), troca direcionada #42 (front descartou em favor da oferta aberta H6), rating #6 (backend), push notifications.
 
