@@ -95,6 +95,8 @@ Entrar na fila: Home → Detalhe → (Login se nao autenticado) → ServiceSelec
 | `/attendances/{id}/leave-queue` | DELETE | — | **NAO IMPLEMENTADO** | — |
 | `/attendances/client/me` | GET | Attendances | Implementado | — |
 | `/attendances/{id}/rating` | POST | RatingModal | **Front feito / aguarda backend (Item 6)** | — |
+| `/attendances/{id}/reschedule?targetTime=` | PATCH | QueueStatus (espera longa) | **Implementado (front) / aguarda teste device** | — |
+| `/attendances/{id}/move-to-end` | PATCH | QueueStatus (espera longa) | **Implementado (front) / aguarda teste device** | — |
 | `/profile/general-infos` | PATCH | EditProfile | Implementado | 5 |
 | `/profile/update-email/me` | PATCH | EditEmail | Implementado | 5 |
 | `/profile/update-password/me` | PATCH | EditPassword | Implementado | 5 |
@@ -439,6 +441,7 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 | 13 | Senha atual na troca de senha | EditPassword deve pedir a **senha atual** alem da nova. **Aguarda backend** (ver "Pendencia para o backend" abaixo). Front so implementa o campo apos o backend verificar `currentPassword` (verificacao no front via re-login foi descartada) | Aguarda backend |
 | 14 | Esqueci minha senha (forgot password) | Fluxo de recuperacao de senha (cliente sem sessao). **Depende do backend**: endpoint para solicitar reset (codigo/email) + confirmar nova senha. Verificar se ja existe — provavelmente nao implementado | Aguarda backend |
 | 15 | Avaliacao de atendimento (front do Item 6) | **Front FEITO** (envio + exibicao preparada): `RatingModal` (1-5 estrelas + comentario) em QueueStatus concluido e nos cards FINISHED de Atendimentos; `ratingService` -> `POST /attendances/{id}/rating`; `resolveRating` exibe nota real quando o backend mandar, senao placeholder. **Aguarda backend** (Item 6 ⬜ aberto): endpoint + agregados (ver callout) | Front FEITO / Aguarda backend |
+| 16 | Remanejar cliente na fila (Item 43) + multa por tempo | **FRONT FEITO (2026-07-03, aguarda teste device).** **Regra de negocio (selada com o usuario):** a multa **nao** e definida pela acao, e sim pelo **prejuizo a quem se segue** — se a acao **vaga um lugar perto do inicio** (faltando **< 1h**), o proximo e atendido antes do previsto (tem que se apressar) → **multa**. So a **TROCA por consentimento mutuo (#42)** e sempre livre (o tempo da fila nao muda). Regra pelo **tempo estimado, nao pelo status** (`incursLatePenalty(remaining) = remaining < 60`). Na QueueStatus, sempre que `SCHEDULED` (`canReshuffleQueue`): **"Escolher um horario"** → `RescheduleModal` (mostra ate quando a fila vai hoje = ETA do ultimo via `queueService.getQueue`, e oferece **horarios reais** em slots de 30min via `generateTimeSlots` — seletor JS puro, **OTA-safe**; alvo oscila) → `PATCH /reschedule?targetTime=<ISO>`; **"Ir para o fim da fila"** → `PATCH /move-to-end`. **Ambas avisam a multa de R$3 quando < 1h** (reschedule no proprio modal; move-to-end no Alert). Erros mapeados (`rescheduleErrorMessage`/`moveToEndErrorMessage`): **422** alvo inviavel, **400** passado/status, **403** nao-dono. Re-ancora o countdown pela previsao real (`scheduledTime`) apos reagendar; move-to-end re-le `getWaitTime`. **"Sair da fila"** tambem avisa multa quando < 1h. ⚠️ **A cobranca/strike ainda depende do backend** — hoje o backend so aplica strike no CANCELAR (#39); o front ja **avisa** tambem no reschedule/move-to-end, mas o backend precisa **estender o #39** a essas acoes (ver handoff abaixo). A **TROCA #42** (swap com aceite) ainda **nao foi construida** no front (ver pendencia separada). Testes: dominio + service. Falta validar no device | **Front FEITO / aguarda teste device + handoff backend** |
 
 > ⚠️ **Pendencia para o backend (handoff)** — *Verificacao da senha atual na troca de senha.*
 > Hoje `PATCH /profile/update-password/me` recebe so `{ "password": "<nova>" }` (`PasswordRequest`) e o `UpdatePasswordUseCase` troca direto, **sem conferir a senha atual**. Para o app pedir a senha atual com seguranca real, o backend precisa:
@@ -451,6 +454,11 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 > 1. `POST /attendances/{id}/rating` `{ score 1-5, comment? }` — so o **cliente dono** do attendance, so com `status = FINISHED`, **1 voto** (409 no 2o), guest nao avalia. (entidade `AttendanceRating` + agregados `ratingSum`/`ratingCount` em `Professional` e `ServiceItem`, ja especificado no Item 6.)
 > 2. **Devolver no payload** os campos `rating_average` (number|null) + `rating_count` (number): **por profissional** em `GET /establishment/id/{id}/professionals-with-queue`, e **agregado por estabelecimento** em `GET /establishment` (a media da loja = **soma dos `ratingSum` / soma dos `ratingCount`** dos profissionais — media ponderada, barato pois sao poucos profissionais). Sem isso o front mostra um placeholder ficticio.
 > 3. (Opcional, recomendado) expor no `GET /attendances/client/me` se o atendimento **ja foi avaliado** (ex.: `rated: boolean`), para o front esconder o "Toque para avaliar" depois do voto. Hoje o front so descobre via 409 ao tentar.
+
+> ✅ **Backend PRONTO (handoff #43)** — *Remanejar cliente com espera longa (2026-07-03).* Quando o ETA da vez do cliente ficar longo (o front decide o gatilho, ex.: > 60 min), oferecer 2 acoes na QueueStatus, **so quando o atendimento estiver `SCHEDULED`**:
+> 1. **"Escolher um horario"** → `PATCH /attendances/{id}/reschedule?targetTime=<ISO-8601>`. O atendimento vira **intencao de fila** (mesmo estado do Item 40: cede a vez aos que chegam ate o previsto encostar no alvo, quando e reconfirmado automaticamente). Erros: **422** (`QUEUE_TARGET_NOT_FEASIBLE`, a fila ja preve atender em cima/depois do alvo — sugerir outro horario) e **400** (alvo no passado).
+> 2. **"Ir pro fim da fila"** → `PATCH /attendances/{id}/move-to-end`. Desce a vez para depois do ultimo em espera, **sem sair da fila** e sem strike (no-op se ja for o ultimo).
+> Ambos exigem ser o **proprio cliente** (clientId do JWT — `403` senao) e status `SCHEDULED` (`400` senao). A fila ao vivo (WebSocket/polling) ja reflete a nova posicao/estado. Resposta = o proprio `AttendanceInQueueResponse` (com `isIntent`/`targetTime`).
 
 ### Correcoes de UX e ajustes pendentes
 
@@ -477,9 +485,10 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 - Se profissional == proprietario: dividido entre **profissional + plataforma** (2 partes)
 
 **Frontend (app client):**
-- Tela de multas pendentes acessivel via Profile
-- Popup de cancelamento mostra aviso de multa quando tempo <= 60min
-- Na tela de pagamento do proximo atendimento, mostrar multas pendentes somadas ao valor
+- Tela de multas pendentes acessivel via Profile — *pendente (depende do backend)*
+- ✅ **FEITO (2026-07-03):** aviso de multa de R$3 quando o ETA da vez e **< 1h** (`incursLatePenalty`, regra pelo TEMPO nao pelo status) em **todas** as acoes que vagam um lugar perto do inicio: **sair da fila**, **reagendar** ("Escolher um horario") e **ir pro fim**. So a **TROCA por consentimento mutuo (#42)** nunca gera multa. **A cobranca/strike em si ainda depende do backend** — e hoje o backend so aplica strike no CANCELAR (#39); **handoff:** estender o #39 tambem a reschedule/move-to-end com ETA < 1h (ver abaixo).
+- ⏳ **Handoff backend — estender strike #39:** hoje `AttendanceServiceImpl` so registra `ClientPenaltyEvent`/`strikeCount` no `PUT /attendances/{id}/cancel` com ETA < 1h. Pela regra selada, **`PATCH /reschedule` e `PATCH /move-to-end` com ETA < 1h tambem prejudicam quem se segue** e devem registrar o mesmo strike. O front ja avisa o usuario nessas acoes.
+- Na tela de pagamento do proximo atendimento, mostrar multas pendentes somadas ao valor — *pendente (depende do backend)*
 
 ### Regras de negocio — Encaixe na fila
 
@@ -540,11 +549,12 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 10 | Trocar lugar na fila | Endpoint pendente no backend (`ClientServiceImpl:138`). Frontend consumira quando pronto | Aguarda backend |
+| 10 | Trocar lugar na fila (remanejar #43) | **Backend entregou (handoff #43, 2026-07-03)** via `PATCH /attendances/{id}/reschedule` + `PATCH /attendances/{id}/move-to-end`. Consolidado no **Item 16** — **front FEITO** (aguarda teste device). Ver callout "Backend PRONTO (handoff #43)" | Front FEITO (ver Item 16) |
+| 10b | **Troca por consentimento mutuo (#42)** — NAO construida no front | Cliente↔cliente trocam de posicao **com aceite** dos dois — **nunca gera multa** (o tempo da fila nao muda). Backend PRONTO (#42): `POST /swap-requests` `{proposerAttendanceId, targetAttendanceId}` (cria PENDING, "boiando" ate alguem aceitar), `PATCH /swap-requests/{id}?accept=true\|false` (so o **target** responde), `GET /swap-requests/me` (pendentes recebidas/enviadas). Erros: `403`, `409 QUEUE_SWAP_ALREADY_PENDING`, `422 QUEUE_SWAP_NOT_ALLOWED`. **Front a fazer:** botao "trocar de posicao" → escolher outro cliente da fila → `POST`; ver/aceitar/recusar propostas → `PATCH`. Notificacao via WS (`SWAP_REQUESTED`/`ACCEPTED`/`REJECTED`) — como **o WS nao roda no device hoje** (pendencia #1), usar **polling de `GET /swap-requests/me`** como fallback. Idealmente anda junto do WebSocket | **Backend PRONTO / front NAO construido** |
 | 11 | Busca por bairro ordenada por menor fila (C1) | Cliente escolhe estabelecimento pelo **bairro** ordenado pela **menor fila** (e GPS na fase 2). Depende do backend #2 (`GET /establishment?neighborhood=X` + tempo de espera agregado + ordenacao). Handoff do partner | Aguarda backend |
 | 12 | Testes de componente/tela | React Native Testing Library | Pendente |
 | 13 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
-| 14 | Countdown resiliente offline | O countdown ja roda a partir do relogio do device (`useQueueCountdown` calcula `estimatedMinutes - (Date.now() - enteredAt)`), so o polling depende de internet. Falta polish: detectar conexao (`@react-native-community/netinfo`), pausar polling offline e re-sincronizar ao reconectar, mostrar badge "offline / atualizado ha X min" para o usuario nao ficar cego, e manter `activeQueue` persistido (ja em SecureStore) entre reinicios offline. A cada reconexao a aferição melhora; sem internet o numero continua descontando localmente | Pendente |
+| 14 | Countdown resiliente offline | **FEITO no codigo (commit `f056c67f`).** Countdown ja roda pelo relogio do device (`useQueueCountdown`); alem disso: `@react-native-community/netinfo` + `onlineManager` do React Query pausam as queries offline e re-sincronizam ao reconectar, `OfflineBanner` (barra vermelha no topo) avisa o usuario, e `activeQueue` persiste em SecureStore entre reinicios. Uso DEFENSIVO (try/catch) — netinfo e nativo; se o OTA cair em build sem ele, assume online e nao quebra. ⚠️ **A deteccao de offline so ATIVA apos um novo `eas build`** (o OTA atual e seguro mas inerte, pois o modulo nativo nao esta no binario) | **FEITO (codigo) / ativa apos novo eas build** |
 
 ### Nota — Transferencia de proprietario (OWNER)
 

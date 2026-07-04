@@ -58,10 +58,18 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 
 ---
 
-## 5. Cliente trocar de lugar na fila — endpoint pendente no backend
+## 5. Cliente trocar de lugar na fila — ✅ BACKEND ENTREGOU (#43 + #42)
 
-Funcionalidade: o cliente pede para **trocar de posição / reordenar** o próprio lugar na fila. **Não existe no front ainda** (bloqueado) — o front consome quando o backend expuser.
+**Resolvido (2026-07-03).** O backend entregou dois mecanismos:
+- **#43 Remanejar:** `PATCH /attendances/{id}/reschedule?targetTime=<ISO>` (vira intenção de fila) + `PATCH /attendances/{id}/move-to-end`. **Front FEITO** (Item 16 do PRD_FRONT-CLIENT), aguarda teste no device.
+- **#42 Troca por consentimento mútuo:** `POST /swap-requests`, `PATCH /swap-requests/{id}?accept=`, `GET /swap-requests/me`. **Front ainda NÃO construído** (pendência 10b do PRD) — depende de notificação; como o WebSocket não roda no device (seção 4), o front vai usar polling de `GET /swap-requests/me`.
 
-**Precisa (backend):** endpoint para o cliente alterar a própria posição na fila (o backend já tem o ponto marcado como pendente em `ClientServiceImpl:138`). Definir a semântica (ex.: trocar com outro cliente / mover para uma posição / "ceder a vez") e as regras (só o próprio `clientId`, só enquanto `SCHEDULED`, limites/anti-abuso).
+## 6. Estender o strike de cancelamento tardio (#39) a reschedule/move-to-end
 
-**Quando estiver pronto**, avisar o front com o contrato (rota, payload, regras) que a gente implementa a ação na tela da fila.
+**Regra de negócio selada com o Andre (2026-07-03):** a multa não é definida pela ação, e sim pelo **prejuízo a quem se segue** — qualquer ação que **vaga um lugar perto do início** (ETA da própria vez **< 1h**) faz o próximo ser atendido antes do previsto → deve gerar strike. Regra pelo **tempo estimado, não pelo status**.
+
+**Hoje:** o backend só registra `ClientPenaltyEvent`/`strikeCount` no `PUT /attendances/{id}/cancel` com ETA < 1h (#39, Fase 1).
+
+**Precisa (backend):** aplicar o **mesmo strike** também em `PATCH /attendances/{id}/reschedule` e `PATCH /attendances/{id}/move-to-end` quando o ETA da vez do cliente for **< 1h**. A **troca #42** (consentimento mútuo) **nunca** gera strike (o tempo da fila não muda).
+
+**Front já pronto:** a tela da fila **já avisa** o usuário da multa nessas três ações (sair, reagendar, ir pro fim) quando ETA < 1h. Falta só o backend efetivar o strike/cobrança (a cobrança monetária é a Fase 2 do #39, dep. gateway #21).
