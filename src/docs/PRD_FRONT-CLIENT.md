@@ -467,6 +467,22 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 
 > ⏳ **Troca "morre" ao iniciar o atendimento (Andre 2026-07-03).** Quando o atendimento vai para `IN_PROGRESS` (`start`), qualquer solicitacao/oferta de troca ainda nao aceita deve ser **cancelada**. O `#42` direcionado **ja** expira no `start`; a **oferta aberta** (rework, ver 10b + HANDOFF secao 7) deve seguir a mesma regra. *Pratica de mercado: invalidar alteracoes pendentes quando o servico comeca e padrao.*
 
+### Handoffs para o backend (resumo — 2026-07-04)
+
+Lista viva dos handoffs abertos do front-client para o backend. Detalhe em `HANDOFF_BACKEND.md` (seção indicada). Onde o front-partner ja rastreia o mesmo item, o ID compartilhado esta na coluna.
+
+| # | Handoff | HANDOFF §| ID partner | Status |
+|---|---------|:--------:|:----------:|--------|
+| H1 | Verificar **senha atual** no `PATCH /profile/update-password/me` (add `currentPassword`) | 1 | — | Aguarda backend |
+| H2 | **Esqueci minha senha** — endpoint de reset (codigo/email) | 2 | S5/S6 | Aguarda backend |
+| H3 | **Avaliacao (Item 6)** — `POST /attendances/{id}/rating` + agregados por profissional/estabelecimento + `rated` no `/attendances/client/me` | 3 | — | Aguarda backend |
+| H4 | **WebSocket** nao funciona no device (backend compartilhado) — coberto por polling | 4 | — | Adiado |
+| H5 | **Estender strike #39** a `reschedule` e `move-to-end` com ETA < 1h (hoje so no `cancel`) | 6 | — | Aguarda backend |
+| H6 | **Oferta ABERTA de troca** (rework #42): `/swap-offers` (direcao + maxMinutes, lista aberta, accept); **morre no IN_PROGRESS** | 7 | **S3** (=C6) | Aguarda backend |
+| H7 | **Barreira de horario ao agendar**: **fechamento BLOQUEIA** (novo erro); **refeicao NAO bloqueia** — agenda pos-intervalo + **estimado meal-aware contando quem ja pediu pos-almoco** (so o backend calcula; resposta traz `scheduledTime` real + ex. `placedAfterBreak`) | 8 | ~BUG5 / S4 | Aguarda backend |
+
+> ✅ Ja entregues pelo backend nesta frente (fora da lista): remanejar #43 (`reschedule`/`move-to-end`), troca direcionada #42 (front descartou em favor da oferta aberta H6), rating #6 (backend), push notifications.
+
 ### Correcoes de UX e ajustes pendentes
 
 | # | Item | Descricao | Status |
