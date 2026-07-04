@@ -62,7 +62,7 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 
 **Resolvido (2026-07-03).** O backend entregou dois mecanismos:
 - **#43 Remanejar:** `PATCH /attendances/{id}/reschedule?targetTime=<ISO>` (vira intenção de fila) + `PATCH /attendances/{id}/move-to-end`. **Front FEITO** (Item 16 do PRD_FRONT-CLIENT), aguarda teste no device.
-- **#42 Troca por consentimento mútuo:** `POST /swap-requests`, `PATCH /swap-requests/{id}?accept=`, `GET /swap-requests/me`. **Front FEITO** (2026-07-03, pendência 10b) — botão "Trocar de posição" + banner de propostas recebidas; como o WS não roda no device (seção 4), usa **polling de `GET /swap-requests/me`** (20s). Aguarda teste no device.
+- **#42 Troca por consentimento mútuo (DIRECIONADO):** `POST /swap-requests` `{proposerAttendanceId, targetAttendanceId}`, `PATCH /swap-requests/{id}?accept=`, `GET /swap-requests/me`. Backend PRONTO, mas ver a **seção 7** — o modelo desejado pelo Andre é **oferta ABERTA** (não direcionada), que precisa de mudança no backend. O front do modelo direcionado foi **removido** (não era o fluxo desejado).
 
 ## 6. Estender o strike de cancelamento tardio (#39) a reschedule/move-to-end
 
@@ -73,3 +73,32 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 **Precisa (backend):** aplicar o **mesmo strike** também em `PATCH /attendances/{id}/reschedule` e `PATCH /attendances/{id}/move-to-end` quando o ETA da vez do cliente for **< 1h**. A **troca #42** (consentimento mútuo) **nunca** gera strike (o tempo da fila não muda).
 
 **Front já pronto:** a tela da fila **já avisa** o usuário da multa nessas três ações (sair, reagendar, ir pro fim) quando ETA < 1h. Falta só o backend efetivar o strike/cobrança (a cobrança monetária é a Fase 2 do #39, dep. gateway #21).
+
+## 7. Troca de posição como OFERTA ABERTA (rework do #42) — pedido do Andre
+
+**Regra de negócio (Andre 2026-07-03).** A troca desejada **não** é direcionada (escolher um cliente específico). O modelo certo:
+- O cliente abre uma **solicitação de troca** dizendo a **direção** (adiantar ou atrasar a vez) e **em até quanto tempo** (ex.: "adiantar em até 30 min", "atrasar em até 1h").
+- A solicitação fica **"boiando" (aberta)** — **qualquer cliente elegível** da mesma fila pode aceitar. **O app não faz o match — é na sorte.**
+- A oferta **só aparece para quem faz sentido**: se A quer **adiantar**, só interessa a quem está **à frente** dele (que aceitaria atrasar); se quer **atrasar**, só a quem está **atrás**.
+- **Nunca gera multa** (a troca não muda o tempo total da fila).
+- Se **ninguém aceitar**, o cliente recorre às alternativas do #43: **ir pro fim** ou **agendar para depois**.
+
+**O #42 atual não atende isso** — ele é 1-a-1 (proposer escolhe um target). Precisa de um modelo de **oferta aberta**, algo como:
+- `POST /swap-offers` `{ attendanceId, direction: EARLIER|LATER, maxMinutes }` — cria a oferta aberta (só o dono do attendance; só SCHEDULED).
+- `GET /swap-offers` (na fila do cliente) — lista as ofertas **abertas de outros** que o cliente pode aceitar (filtradas por elegibilidade de direção/posição).
+- `PATCH /swap-offers/{id}/accept` — o cliente aceita uma oferta aberta; o backend troca os `scheduledTime` dos dois (reusando a máquina do #42), expira a oferta e notifica.
+- **Expiração por evento** (como o #42 já faz): a oferta aberta **"morre" (CANCELLED)** quando o atendimento do dono **vai para IN_PROGRESS** (`start`) ou sai da fila (cancel/leave/remove). Confirmado pelo Andre 2026-07-03: *"quando o status muda para IN_PROGRESS a solicitação de troca, se não foi atendida, deve morrer."*
+
+**Enquanto isso, o front (Item "Mudar minha vez"):** já entrega **Atrasar → (ir pro fim / agendar)** com o #43; a opção **"Trocar"** está marcada como **"em breve"** aguardando este endpoint. **Avisar o front quando estiver pronto** com o contrato final.
+
+## 8. Agendar respeitando fechamento e refeições (barreira de horário)
+
+**Regra de negócio (Andre 2026-07-03).** Ao **agendar / reagendar** (`reschedule`), o cliente **não pode** escolher um horário:
+- **após o fechamento** do estabelecimento (se `closing_time = 20:00`, não pode marcar 20:01), nem
+- **durante uma refeição/intervalo** do profissional (almoço/janta).
+
+**Hoje o backend não bloqueia isso no `reschedule`** — a trava atual (`422 QUEUE_TARGET_NOT_FEASIBLE`) é só sobre a **previsão da fila**, não sobre horário de funcionamento nem refeição. O `closing_time`/`opening_time` já existem (`EstablishmentResponse`) e as refeições estão em `GET .../intervals`, mas o `assignAgendaSlot`/`isTargetFeasible` **não** os considera.
+
+**Precisa (backend, autoritativo):** rejeitar `PATCH /attendances/{id}/reschedule?targetTime=` (e o ingresso com `targetTime` do #40) quando o alvo cair **após `closing_time`** ou **dentro de uma refeição/intervalo** do profissional — novo código de erro (ex.: `422 QUEUE_TARGET_OUTSIDE_HOURS` / `..._DURING_BREAK`) para o front exibir a mensagem certa.
+
+**Front (a fazer quando o backend expuser/confirmar):** o seletor de horário (`generateTimeSlots` no `RescheduleModal`) deve **filtrar os slots** — não gerar horários após o `closing_time` nem dentro das refeições, usando `closing_time` (já exposto) + `GET .../intervals`. Hoje o seletor gera slots fixos de 30min sem essa consciência (gap conhecido).
