@@ -15,6 +15,7 @@ import {
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
+import { SwapProposeModal } from "@components/SwapProposeModal";
 import {
   canCancelAttendance,
   formatWaitTime,
@@ -27,13 +28,21 @@ import {
   moveToEndErrorMessage,
   CANCELLATION_PENALTY_VALUE,
 } from "@domain/queue/types";
+import {
+  swapCandidates,
+  positionOf,
+  swapErrorMessage,
+  SwapCandidate,
+} from "@domain/queue/swap";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { attendanceService } from "@services/attendanceService";
-import { queueService } from "@services/queueService";
+import { queueService, QueueMember } from "@services/queueService";
+import { swapService } from "@services/swapService";
 import { waitForBackend } from "@services/healthService";
 import { cardShadow } from "@utils/styles";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
+import { useSwapRequests } from "@hooks/useSwapRequests";
 
 type RouteParams = {
   professionalId: string;
@@ -69,6 +78,8 @@ export function QueueStatus() {
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
   const { remaining, elapsedSeconds, color, isInQueue, isBeingAttended, isFinished, activeQueue, refresh } = useQueueCountdown();
+  // Item #42 — propostas de troca chegam por polling (WS não roda no device).
+  const { received: swapReceived, sent: swapSent, refresh: refreshSwaps } = useSwapRequests(isInQueue);
 
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
@@ -80,6 +91,12 @@ export function QueueStatus() {
   const [showReschedule, setShowReschedule] = useState(false);
   const [tailEtaMs, setTailEtaMs] = useState<number | null>(null);
   const [rescheduleBaseMs, setRescheduleBaseMs] = useState(0);
+  // Item #42 — troca de posição
+  const [showSwap, setShowSwap] = useState(false);
+  const [swapCandidatesList, setSwapCandidatesList] = useState<SwapCandidate[]>([]);
+  const [myPosition, setMyPosition] = useState<number | null>(null);
+  const [queueMembers, setQueueMembers] = useState<QueueMember[]>([]);
+  const [respondingSwapId, setRespondingSwapId] = useState<string | null>(null);
   const didCreate = useRef(false);
 
   async function handleRefresh() {
@@ -121,6 +138,23 @@ export function QueueStatus() {
       mountedRef.current = false;
     };
   }, []);
+
+  // Item #42 — quando chega proposta recebida, busca a fila para mostrar a
+  // posição de quem propôs (a fila é anônima: só a posição, sem nome).
+  useEffect(() => {
+    let alive = true;
+    if (isInQueue && swapReceived.length > 0 && activeQueue && accessToken) {
+      queueService
+        .getQueue(activeQueue.professionalId, activeQueue.establishmentId, accessToken)
+        .then(({ data }) => {
+          if (alive) setQueueMembers(data.attendancesInQueue ?? []);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      alive = false;
+    };
+  }, [isInQueue, swapReceived.length, activeQueue, accessToken]);
 
   useEffect(() => {
     if (
@@ -305,7 +339,7 @@ export function QueueStatus() {
       if (user?.id) {
         try {
           const { data } = await queueService.getWaitTime(attendanceId, user.id, accessToken);
-          await updateQueue({ enteredAt: Date.now(), estimatedMinutes: data.estimatedWaitingTime });
+          await useQueueStore.getState().reanchorQueue(data.estimatedWaitingTime);
         } catch {}
       }
       Alert.alert("Pronto", "Você foi para o fim da fila.");
@@ -334,6 +368,79 @@ export function QueueStatus() {
         { text: "Ir para o fim", onPress: submitMoveToEnd },
       ],
     );
+  }
+
+  // Item #42 — abre o seletor de troca: busca a fila e lista os outros que aguardam.
+  async function handleOpenSwap() {
+    let members: QueueMember[] = [];
+    if (activeQueue && accessToken) {
+      try {
+        const { data } = await queueService.getQueue(
+          activeQueue.professionalId,
+          activeQueue.establishmentId,
+          accessToken,
+        );
+        members = data.attendancesInQueue ?? [];
+      } catch {}
+    }
+    setQueueMembers(members);
+    setSwapCandidatesList(swapCandidates(members, attendanceId));
+    setMyPosition(positionOf(members, attendanceId));
+    setShowSwap(true);
+  }
+
+  // Item #42 — propõe a troca com o alvo escolhido (só efetiva se o outro aceitar).
+  async function submitPropose(targetAttendanceId: string) {
+    if (!attendanceId || !accessToken) return;
+    setIsRemanejando(true);
+    try {
+      await swapService.propose(attendanceId, targetAttendanceId, accessToken);
+      setShowSwap(false);
+      Alert.alert("Proposta enviada", "Aguardando o outro cliente aceitar a troca.");
+      refreshSwaps();
+    } catch (error: any) {
+      Alert.alert("Não foi possível trocar", swapErrorMessage(error.response?.status));
+    } finally {
+      if (mountedRef.current) setIsRemanejando(false);
+    }
+  }
+
+  function confirmSwap(swapRequestId: string, accept: boolean) {
+    Alert.alert(
+      accept ? "Aceitar troca" : "Recusar troca",
+      accept
+        ? "Você vai trocar de posição na fila com este cliente. Confirmar?"
+        : "Recusar a proposta de troca?",
+      [
+        { text: "Voltar", style: "cancel" },
+        { text: accept ? "Trocar" : "Recusar", onPress: () => respondSwap(swapRequestId, accept) },
+      ],
+    );
+  }
+
+  // Item #42 — responde (aceita/recusa) uma proposta recebida (sou o alvo).
+  async function respondSwap(swapRequestId: string, accept: boolean) {
+    if (!accessToken) return;
+    setRespondingSwapId(swapRequestId);
+    try {
+      await swapService.respond(swapRequestId, accept, accessToken);
+      await refreshSwaps();
+      if (accept) {
+        // Troca efetivada: re-ancora pelo servidor (a posição/tempo mudou).
+        if (attendanceId && user?.id) {
+          try {
+            const { data } = await queueService.getWaitTime(attendanceId, user.id, accessToken);
+            await useQueueStore.getState().reanchorQueue(data.estimatedWaitingTime);
+          } catch {}
+        }
+        refresh();
+        Alert.alert("Troca feita", "Você trocou de posição na fila.");
+      }
+    } catch (error: any) {
+      Alert.alert("Não foi possível", swapErrorMessage(error.response?.status));
+    } finally {
+      if (mountedRef.current) setRespondingSwapId(null);
+    }
   }
 
   if (isCreating) {
@@ -381,6 +488,43 @@ export function QueueStatus() {
         }
       >
       <Center flex={1}>
+        {/* Item #42 — propostas de troca recebidas (sou o alvo) */}
+        {isInQueue && swapReceived.map((s) => {
+          const pos = positionOf(queueMembers, s.proposerAttendanceId);
+          const busy = respondingSwapId === s.id;
+          return (
+            <Box
+              key={s.id}
+              w="$full"
+              bg="$green100"
+              borderRadius="$xl"
+              p="$4"
+              mb="$4"
+              borderWidth="$1"
+              borderColor="$green500"
+            >
+              <Text size="sm" fontFamily="$heading" color="$green700">
+                Um cliente {pos != null ? `(posição ${pos}) ` : ""}quer trocar de posição com você.
+              </Text>
+              <HStack gap="$2" mt="$3">
+                <Button
+                  title="Recusar"
+                  variant="outline"
+                  isDisabled={busy}
+                  flex={1}
+                  onPress={() => confirmSwap(s.id, false)}
+                />
+                <Button
+                  title="Aceitar"
+                  isLoading={busy}
+                  flex={1}
+                  onPress={() => confirmSwap(s.id, true)}
+                />
+              </HStack>
+            </Box>
+          );
+        })}
+
         <Heading fontFamily="$heading" fontSize="$2xl" textAlign="center">
           {isFinished
             ? "Atendimento concluído ✅"
@@ -482,11 +626,22 @@ export function QueueStatus() {
         {canReshuffle && (
           <>
             <Text size="xs" color="$gray300" textAlign="center">
-              Não pode esperar agora? Escolha outro horário ou vá para o fim da fila.
+              Não pode esperar agora? Troque com outro cliente (sem multa), escolha outro horário ou vá para o fim da fila.
             </Text>
             <Button
-              title="Escolher um horário"
+              title="Trocar de posição"
               isLoading={isRemanejando}
+              onPress={handleOpenSwap}
+            />
+            {swapSent.length > 0 && (
+              <Text size="xs" color="$gray300" textAlign="center">
+                Você propôs uma troca — aguardando o outro cliente aceitar.
+              </Text>
+            )}
+            <Button
+              title="Escolher um horário"
+              variant="outline"
+              isDisabled={isRemanejando}
               onPress={handleReschedule}
             />
             <Button
@@ -530,6 +685,14 @@ export function QueueStatus() {
         loading={isRemanejando}
         onConfirm={submitReschedule}
         onClose={() => setShowReschedule(false)}
+      />
+      <SwapProposeModal
+        visible={showSwap}
+        candidates={swapCandidatesList}
+        myPosition={myPosition}
+        loading={isRemanejando}
+        onPropose={submitPropose}
+        onClose={() => setShowSwap(false)}
       />
       <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
       <RatingModal
