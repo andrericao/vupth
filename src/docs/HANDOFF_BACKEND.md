@@ -108,3 +108,13 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 2. **Refeição = NÃO bloqueia, empurra pra depois.** Se o alvo cair **dentro de uma refeição/intervalo**, o cliente é agendado **após o intervalo** (não recusar). Regra de negócio do Andre (2026-07-03): *"se ele agendar 12:30, é avisado que será atendido após o intervalo; e se alguém já pediu para cortar depois do almoço, o estimado dele é pós-almoço + o tempo de quem pediu antes dele para depois do intervalo."* Ou seja, o **estimado tem de ser meal-aware e contar os outros já posicionados após a refeição** — **só o backend calcula** (o front não tem essa fila). A resposta deve trazer o `scheduledTime`/estimado real + um indicador (ex.: `placedAfterBreak: true`) para o front exibir "você será atendido após o intervalo, por volta de HH:MM".
 
 **Front (já feito):** o `RescheduleModal` agora é um **formulário** (o cliente digita HH:MM, sem sugestões) com validação básica (formato + após o fim da fila). A validação de fechamento (bloqueio) e o comportamento de refeição (empurrar + estimado meal-aware) **dependem deste handoff** — o front consome os novos erros/indicadores quando o backend expuser. Dados já disponíveis: `closing_time` (`EstablishmentResponse`) e refeições (`GET .../intervals`).
+
+## 9. Cliente adicionar mais serviço quando JÁ está na fila — endpoint client pendente
+
+**Pedido do Andre (2026-07-04).** O cliente que já está na fila (atendimento `SCHEDULED`) quer **adicionar mais serviço(s)** ao próprio atendimento, sem sair e re-entrar.
+
+**Hoje NÃO dá:** o único endpoint de adicionar serviço é `POST /professional-queue/{professionalId}/add-service-items` — role **PROFESSIONAL** e mexe no **catálogo do profissional**, não no atendimento do cliente. Não há endpoint **CLIENT** para acrescentar service items a um atendimento existente.
+
+**Precisa (backend):** endpoint CLIENT tipo `PATCH /attendances/{id}/service-items` (ou `POST .../add-services`) — só o **dono** (clientId do JWT), só em `SCHEDULED`, que **acrescenta** serviceItemIds ao atendimento e **recalcula** `totalValue` + `estimatedTotalMinutes` (e reflete na fila/ETA). Resposta = `AttendanceInQueueResponse` atualizado. Definir se remover serviço também é permitido.
+
+**Front (quando pronto):** na `QueueStatus`, botão "Adicionar serviço" → abre a seleção (reusa a lista de `ServiceSelection`) → chama o endpoint → atualiza o atendimento na tela.

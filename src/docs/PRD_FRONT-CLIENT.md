@@ -480,6 +480,7 @@ Lista viva dos handoffs abertos do front-client para o backend. Detalhe em `HAND
 | H5 | **Estender strike #39** a `reschedule` e `move-to-end` com ETA < 1h (hoje so no `cancel`) | 6 | — | Aguarda backend |
 | H6 | **Oferta ABERTA de troca** (rework #42): `/swap-offers` (direcao + maxMinutes, lista aberta, accept); **morre no IN_PROGRESS** | 7 | **S3** (=C6) | Aguarda backend |
 | H7 | **Barreira de horario ao agendar**: **fechamento BLOQUEIA** (novo erro); **refeicao NAO bloqueia** — agenda pos-intervalo + **estimado meal-aware contando quem ja pediu pos-almoco** (so o backend calcula; resposta traz `scheduledTime` real + ex. `placedAfterBreak`) | 8 | ~BUG5/BUG6 / S4 | Aguarda backend |
+| H8 | **Cliente adicionar mais servico JA na fila** — endpoint CLIENT (ex.: `PATCH /attendances/{id}/service-items`), so dono + SCHEDULED, acrescenta serviceItemIds e recalcula `totalValue`/`estimatedTotalMinutes`. Hoje so existe `add-service-items` PROFESSIONAL (catalogo, nao o atendimento) | 9 | — | Aguarda backend |
 
 > ✅ Ja entregues pelo backend nesta frente (fora da lista): remanejar #43 (`reschedule`/`move-to-end`), troca direcionada #42 (front descartou em favor da oferta aberta H6), rating #6 (backend), push notifications.
 
