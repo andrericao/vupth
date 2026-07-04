@@ -62,7 +62,7 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 
 **Resolvido (2026-07-03).** O backend entregou dois mecanismos:
 - **#43 Remanejar:** `PATCH /attendances/{id}/reschedule?targetTime=<ISO>` (vira intenção de fila) + `PATCH /attendances/{id}/move-to-end`. **Front FEITO** (Item 16 do PRD_FRONT-CLIENT), aguarda teste no device.
-- **#42 Troca por consentimento mútuo:** `POST /swap-requests`, `PATCH /swap-requests/{id}?accept=`, `GET /swap-requests/me`. **Front ainda NÃO construído** (pendência 10b do PRD) — depende de notificação; como o WebSocket não roda no device (seção 4), o front vai usar polling de `GET /swap-requests/me`.
+- **#42 Troca por consentimento mútuo:** `POST /swap-requests`, `PATCH /swap-requests/{id}?accept=`, `GET /swap-requests/me`. **Front FEITO** (2026-07-03, pendência 10b) — botão "Trocar de posição" + banner de propostas recebidas; como o WS não roda no device (seção 4), usa **polling de `GET /swap-requests/me`** (20s). Aguarda teste no device.
 
 ## 6. Estender o strike de cancelamento tardio (#39) a reschedule/move-to-end
 
