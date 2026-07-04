@@ -113,29 +113,31 @@ export function incursLatePenalty(remainingMinutes: number): boolean {
   return remainingMinutes < LATE_PENALTY_THRESHOLD_MINUTES;
 }
 
-export interface TimeSlot {
-  ms: number;
-  label: string;
+/**
+ * Alvo (ms) para HOJE às HH:MM no relógio local, a partir do dia de `dayRefMs`.
+ * O cliente digita o horário que deseja (Item 16 — formulário, sem sugestões).
+ */
+export function buildTargetFromTime(dayRefMs: number, hours: number, minutes: number): number {
+  const d = new Date(dayRefMs);
+  d.setHours(hours, minutes, 0, 0);
+  return d.getTime();
 }
 
 /**
- * Horários candidatos para reagendar (Item 16): a partir do próximo múltiplo de
- * `stepMinutes` após `fromMs` (normalmente o ETA do último da fila), gera `count`
- * slots. O cliente escolhe um horário real, sabendo que oscila (intenção de fila).
+ * Valida o horário digitado para reagendar. Retorna a mensagem de erro ou `null`
+ * se ok. A validação de fechamento/refeição é AUTORITATIVA no backend; aqui só
+ * cobrimos o básico (formato + não antes do fim da fila de hoje).
  */
-export function generateTimeSlots(
-  fromMs: number,
-  count: number,
-  stepMinutes = 30,
-): TimeSlot[] {
-  const step = stepMinutes * 60000;
-  const first = Math.ceil(fromMs / step) * step;
-  const slots: TimeSlot[] = [];
-  for (let i = 0; i < count; i++) {
-    const ms = first + i * step;
-    slots.push({ ms, label: formatClockTime(new Date(ms)) });
-  }
-  return slots;
+export function validateRescheduleTime(
+  hours: number,
+  minutes: number,
+  targetMs: number,
+  floorMs: number,
+): string | null {
+  if (!Number.isInteger(hours) || hours < 0 || hours > 23) return 'Hora inválida (00–23).';
+  if (!Number.isInteger(minutes) || minutes < 0 || minutes > 59) return 'Minuto inválido (00–59).';
+  if (targetMs < floorMs) return 'Escolha um horário após o fim da fila de hoje.';
+  return null;
 }
 
 /** Mensagem amigável para os erros do reschedule (Item 16). */

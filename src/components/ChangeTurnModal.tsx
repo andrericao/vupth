@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal } from "react-native";
+import { Modal, Alert } from "react-native";
 import { VStack, Box, Text, Heading } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
@@ -10,6 +10,8 @@ type Props = {
   visible: boolean;
   // ETA (ms) do fim da fila hoje (o último cliente), quando conhecido.
   tailEtaMs: number | null;
+  // Cliente já é o último da fila? (não faz sentido "ir para o fim").
+  isLast: boolean;
   onMoveToEnd: () => void; // ser o último da fila
   onReschedule: () => void; // agendar para depois
   onClose: () => void;
@@ -18,7 +20,7 @@ type Props = {
 // "Mudar minha vez" (consolida remanejar + troca). O cliente escolhe a DIREÇÃO:
 // adiantar (só via troca — depende de outro aceitar, em breve) ou atrasar
 // (trocar / ser o último / agendar). A oferta de troca aberta aguarda o backend.
-export function ChangeTurnModal({ visible, tailEtaMs, onMoveToEnd, onReschedule, onClose }: Props) {
+export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onReschedule, onClose }: Props) {
   const [step, setStep] = useState<"root" | "adiantar" | "atrasar">("root");
 
   function close() {
@@ -26,6 +28,11 @@ export function ChangeTurnModal({ visible, tailEtaMs, onMoveToEnd, onReschedule,
     onClose();
   }
   function goMoveToEnd() {
+    // Já é o último: não permite, só avisa.
+    if (isLast) {
+      Alert.alert("Você já é o último", "Você já está no fim da fila de espera.");
+      return;
+    }
     setStep("root");
     onMoveToEnd();
   }

@@ -9,7 +9,8 @@ import {
   reconcileQueueEstimate,
   canReshuffleQueue,
   incursLatePenalty,
-  generateTimeSlots,
+  buildTargetFromTime,
+  validateRescheduleTime,
   rescheduleErrorMessage,
   moveToEndErrorMessage,
   LATE_PENALTY_THRESHOLD_MINUTES,
@@ -162,21 +163,30 @@ describe('Queue Domain', () => {
     });
   });
 
-  describe('generateTimeSlots (Item 16 — seletor de horário)', () => {
-    it('gera slots de 30min a partir do próximo múltiplo após o piso', () => {
-      const from = Date.parse('2026-07-03T13:05:00.000Z');
-      const slots = generateTimeSlots(from, 3, 30);
-      expect(slots).toHaveLength(3);
-      // primeiro slot arredonda para cima (13:30), depois 14:00, 14:30
-      expect(slots[1].ms - slots[0].ms).toBe(30 * 60000);
-      expect(slots[2].ms - slots[1].ms).toBe(30 * 60000);
-      expect(slots[0].ms).toBe(Date.parse('2026-07-03T13:30:00.000Z'));
+  describe('buildTargetFromTime (Item 16 — formulário de horário)', () => {
+    it('constrói o horário local de HOJE (hora/minuto), zerando seg/ms', () => {
+      const dayRef = new Date(2026, 6, 3, 9, 5, 30).getTime(); // 03/07 09:05:30 local
+      const d = new Date(buildTargetFromTime(dayRef, 16, 30));
+      expect(d.getHours()).toBe(16);
+      expect(d.getMinutes()).toBe(30);
+      expect(d.getSeconds()).toBe(0);
+      expect(d.getDate()).toBe(3);
     });
+  });
 
-    it('cada slot traz um label HH:MM', () => {
-      const from = Date.parse('2026-07-03T13:00:00.000Z');
-      const [first] = generateTimeSlots(from, 1, 30);
-      expect(first.label).toMatch(/^\d{2}:\d{2}$/);
+  describe('validateRescheduleTime (Item 16 — validação básica)', () => {
+    const floor = new Date(2026, 6, 3, 13, 0, 0).getTime(); // fim da fila 13:00
+    it('aceita horário válido após o piso', () => {
+      const target = buildTargetFromTime(floor, 16, 0);
+      expect(validateRescheduleTime(16, 0, target, floor)).toBeNull();
+    });
+    it('rejeita hora/minuto fora de faixa', () => {
+      expect(validateRescheduleTime(24, 0, floor, floor)).toMatch(/hora inválida/i);
+      expect(validateRescheduleTime(10, 60, floor, floor)).toMatch(/minuto inválido/i);
+    });
+    it('rejeita horário antes do fim da fila de hoje', () => {
+      const target = buildTargetFromTime(floor, 11, 0); // 11:00 < 13:00
+      expect(validateRescheduleTime(11, 0, target, floor)).toMatch(/após o fim da fila/i);
     });
   });
 

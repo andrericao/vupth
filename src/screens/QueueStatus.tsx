@@ -82,6 +82,7 @@ export function QueueStatus() {
   const [tailEtaMs, setTailEtaMs] = useState<number | null>(null);
   const [rescheduleBaseMs, setRescheduleBaseMs] = useState(0);
   const [showChangeTurn, setShowChangeTurn] = useState(false);
+  const [isLastInQueue, setIsLastInQueue] = useState(false);
   const didCreate = useRef(false);
 
   async function handleRefresh() {
@@ -250,6 +251,7 @@ export function QueueStatus() {
   // menu de direção (adiantar/atrasar). Sem bloquear se a fila não responder.
   async function handleOpenChangeTurn() {
     let tail: number | null = null;
+    let last = false;
     if (activeQueue && accessToken) {
       try {
         const { data } = await queueService.getQueue(
@@ -258,12 +260,16 @@ export function QueueStatus() {
           accessToken,
         );
         tail = Date.now() + data.totalRemainingMinutes * 60000;
+        // Já é o último da espera? (para bloquear "ir para o fim").
+        const waiting = (data.attendancesInQueue ?? []).filter((a) => a.status === "SCHEDULED");
+        last = waiting.length > 0 && waiting[waiting.length - 1].id === attendanceId;
       } catch {
         tail = null;
       }
     }
     setTailEtaMs(tail);
-    // Base estável dos slots do reagendamento (evita Date.now() no render do modal).
+    setIsLastInQueue(last);
+    // Base estável do formulário de reagendamento (evita Date.now() no render do modal).
     setRescheduleBaseMs(tail ?? Date.now());
     setShowChangeTurn(true);
   }
@@ -530,6 +536,7 @@ export function QueueStatus() {
       <ChangeTurnModal
         visible={showChangeTurn}
         tailEtaMs={tailEtaMs}
+        isLast={isLastInQueue}
         onMoveToEnd={() => {
           setShowChangeTurn(false);
           handleMoveToEnd();
