@@ -1,0 +1,88 @@
+import { useState } from "react";
+import { Modal } from "react-native";
+import { VStack, Box, Text, Heading } from "@gluestack-ui/themed";
+
+import { Button } from "@components/Button";
+import { cardShadow } from "@utils/styles";
+import { formatClockTime } from "@domain/queue/types";
+
+type Props = {
+  visible: boolean;
+  // ETA (ms) do fim da fila hoje (o último cliente), quando conhecido.
+  tailEtaMs: number | null;
+  onMoveToEnd: () => void; // ser o último da fila
+  onReschedule: () => void; // agendar para depois
+  onClose: () => void;
+};
+
+// "Mudar minha vez" (consolida remanejar + troca). O cliente escolhe a DIREÇÃO:
+// adiantar (só via troca — depende de outro aceitar, em breve) ou atrasar
+// (trocar / ser o último / agendar). A oferta de troca aberta aguarda o backend.
+export function ChangeTurnModal({ visible, tailEtaMs, onMoveToEnd, onReschedule, onClose }: Props) {
+  const [step, setStep] = useState<"root" | "adiantar" | "atrasar">("root");
+
+  function close() {
+    setStep("root");
+    onClose();
+  }
+  function goMoveToEnd() {
+    setStep("root");
+    onMoveToEnd();
+  }
+  function goReschedule() {
+    setStep("root");
+    onReschedule();
+  }
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
+      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
+        <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
+          {step === "root" && (
+            <>
+              <Heading fontFamily="$heading" fontSize="$lg">
+                Mudar minha vez
+              </Heading>
+              <Text size="sm" color="$gray300" mt="$1">
+                Você quer ser atendido antes ou depois?
+              </Text>
+              <Button title="Adiantar minha vez" mt="$5" onPress={() => setStep("adiantar")} />
+              <Button title="Atrasar minha vez" variant="outline" mt="$3" onPress={() => setStep("atrasar")} />
+              <Button title="Cancelar" variant="outline" mt="$3" onPress={close} />
+            </>
+          )}
+
+          {step === "adiantar" && (
+            <>
+              <Heading fontFamily="$heading" fontSize="$lg">
+                Adiantar minha vez
+              </Heading>
+              <Text size="sm" color="$gray300" mt="$2">
+                Para adiantar, outro cliente à sua frente precisa aceitar trocar com você. Esse
+                recurso chega em breve.
+              </Text>
+              <Button title="Voltar" variant="outline" mt="$5" onPress={() => setStep("root")} />
+            </>
+          )}
+
+          {step === "atrasar" && (
+            <>
+              <Heading fontFamily="$heading" fontSize="$lg">
+                Atrasar minha vez
+              </Heading>
+              {tailEtaMs != null && (
+                <Text size="sm" color="$gray300" mt="$1">
+                  A fila hoje deve ir até ~{formatClockTime(new Date(tailEtaMs))}.
+                </Text>
+              )}
+              <Button title="Ir para o fim da fila" mt="$5" onPress={goMoveToEnd} />
+              <Button title="Agendar para depois" variant="outline" mt="$3" onPress={goReschedule} />
+              <Button title="Trocar com alguém (em breve)" variant="outline" mt="$3" isDisabled onPress={() => {}} />
+              <Button title="Voltar" variant="outline" mt="$3" onPress={() => setStep("root")} />
+            </>
+          )}
+        </VStack>
+      </Box>
+    </Modal>
+  );
+}
