@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Modal, Alert } from "react-native";
-import { VStack, Box, Text, Heading } from "@gluestack-ui/themed";
+import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
+import { Clock } from "phosphor-react-native";
 
 import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";
@@ -78,9 +79,25 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onRes
                 Atrasar minha vez
               </Heading>
               {tailEtaMs != null && (
-                <Text size="sm" color="$gray300" mt="$1">
-                  A fila hoje deve ir até {formatClockTime(new Date(tailEtaMs))}.
-                </Text>
+                <Box
+                  bg="$green100"
+                  borderRadius="$xl"
+                  borderWidth="$1"
+                  borderColor="$green500"
+                  px="$4"
+                  py="$3"
+                  mt="$3"
+                >
+                  <HStack alignItems="center" gap="$2">
+                    <Clock size={18} color="#009E6F" />
+                    <Text fontFamily="$heading" size="md" color="$green700">
+                      A fila hoje termina às {formatClockTime(new Date(tailEtaMs))}
+                    </Text>
+                  </HStack>
+                  <Text size="xs" color="$gray300" mt="$1">
+                    Use como referência: ir para o fim te deixa após esse horário; ou agende para depois dele.
+                  </Text>
+                </Box>
               )}
               <Button title="Ir para o fim da fila" mt="$5" onPress={goMoveToEnd} />
               <Button title="Agendar para depois" variant="outline" mt="$3" onPress={goReschedule} />

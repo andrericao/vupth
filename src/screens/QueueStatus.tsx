@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
-import { Info, Clock } from "phosphor-react-native";
+import { Info } from "phosphor-react-native";
 import * as SecureStore from "expo-secure-store";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
@@ -26,7 +26,6 @@ import {
   incursLatePenalty,
   rescheduleErrorMessage,
   moveToEndErrorMessage,
-  formatClockTime,
   CANCELLATION_PENALTY_VALUE,
 } from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
@@ -70,7 +69,7 @@ export function QueueStatus() {
   const user = useAuthStore((s) => s.user);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
-  const { remaining, elapsedSeconds, color, isInQueue, isBeingAttended, isFinished, activeQueue, refresh } = useQueueCountdown();
+  const { remaining, elapsedSeconds, color, isInQueue, isBeingAttended, isPaused, isFinished, activeQueue, refresh } = useQueueCountdown();
 
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
@@ -125,24 +124,6 @@ export function QueueStatus() {
       mountedRef.current = false;
     };
   }, []);
-
-  // Item 2 — horário em que a fila termina hoje (ETA do último = agora + tempo
-  // restante total). Buscado ao entrar na tela para o destaque.
-  useEffect(() => {
-    let alive = true;
-    const q = useQueueStore.getState().activeQueue;
-    if (isInQueue && q && accessToken) {
-      queueService
-        .getQueue(q.professionalId, q.establishmentId, accessToken)
-        .then(({ data }) => {
-          if (alive) setTailEtaMs(Date.now() + data.totalRemainingMinutes * 60000);
-        })
-        .catch(() => {});
-    }
-    return () => {
-      alive = false;
-    };
-  }, [isInQueue, accessToken]);
 
   useEffect(() => {
     if (
@@ -219,11 +200,13 @@ export function QueueStatus() {
   // Na fila: countdown ("Aguardando" quando zera).
   const timeLabel = isFinished
     ? "Finalizado"
-    : isBeingAttended
-      ? formatElapsed(elapsedSeconds)
-      : remaining <= 0 && isInQueue
-        ? "Aguardando"
-        : formatWaitTime(remaining).replace('~', '');
+    : isPaused
+      ? "Pausado"
+      : isBeingAttended
+        ? formatElapsed(elapsedSeconds)
+        : remaining <= 0 && isInQueue
+          ? "Aguardando"
+          : formatWaitTime(remaining).replace('~', '');
   // Previsão fixa = entrada na fila + estimativa (atualiza quando o poll re-sincroniza).
   // Evita Date.now() no render (react-hooks/purity).
   const startTimeLabel = activeQueue
@@ -411,9 +394,11 @@ export function QueueStatus() {
         <Heading fontFamily="$heading" fontSize="$2xl" textAlign="center">
           {isFinished
             ? "Atendimento concluído ✅"
-            : isBeingAttended
-              ? "Em atendimento!"
-              : "Você está na fila!"}
+            : isPaused
+              ? "Atendimento pausado"
+              : isBeingAttended
+                ? "Em atendimento!"
+                : "Você está na fila!"}
         </Heading>
 
         <Box
@@ -499,27 +484,6 @@ export function QueueStatus() {
           </HStack>
         </Box>
 
-        {/* Item 2 — destaque do horário em que a fila termina hoje (último). */}
-        {isInQueue && tailEtaMs != null && (
-          <Box
-            bg="$green100"
-            borderRadius="$xl"
-            px="$4"
-            py="$3"
-            mt="$4"
-            w="$full"
-            borderWidth="$1"
-            borderColor="$green500"
-          >
-            <HStack alignItems="center" justifyContent="center" gap="$2">
-              <Clock size={18} color="#009E6F" />
-              <Text fontFamily="$heading" size="sm" color="$green700">
-                A fila hoje termina às {formatClockTime(new Date(tailEtaMs))}
-              </Text>
-            </HStack>
-          </Box>
-        )}
-
         <Text size="xs" color="$gray300" mt="$4" textAlign="center">
           A fila atualiza sozinha — arraste para baixo para atualizar agora
         </Text>
@@ -539,14 +503,6 @@ export function QueueStatus() {
             />
           </>
         )}
-        {canCancel && (
-          <Button
-            title="Sair da fila"
-            variant="outline"
-            isDisabled={isRemanejando}
-            onPress={handleCancel}
-          />
-        )}
         {isFinished && attendanceId && (
           <Button title="Avaliar atendimento" onPress={() => setShowRating(true)} />
         )}
@@ -561,6 +517,15 @@ export function QueueStatus() {
           />
         ) : (
           <Button title="Voltar ao início" onPress={() => navigation.navigate("home")} />
+        )}
+        {/* Sair da fila: vermelho e SEMPRE a última opção (pedido do Andre). */}
+        {canCancel && (
+          <Button
+            title="Sair da fila"
+            variant="destructive"
+            isDisabled={isRemanejando}
+            onPress={handleCancel}
+          />
         )}
       </VStack>
 

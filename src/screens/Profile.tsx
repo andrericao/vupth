@@ -1,4 +1,4 @@
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   VStack,
@@ -53,9 +53,22 @@ export function Profile() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
-  async function handleLogout() {
-    await logout();
-    navigation.reset({ index: 0, routes: [{ name: "home" }] });
+  function handleLogout() {
+    Alert.alert(
+      "Sair da conta",
+      "Tem certeza que deseja sair da sua conta?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sair",
+          style: "destructive",
+          onPress: async () => {
+            await logout();
+            navigation.reset({ index: 0, routes: [{ name: "home" }] });
+          },
+        },
+      ],
+    );
   }
 
   return (
