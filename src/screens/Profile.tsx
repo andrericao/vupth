@@ -95,12 +95,12 @@ export function Profile() {
 
       <Box borderRadius="$2xl" mt="$8" overflow="hidden" style={cardShadow}>
         <MenuItem
-          icon={<ClipboardText size={22} color="#00B37E" />}
+          icon={<ClipboardText size={22} color="#2F432F" />}
           label="Atendimentos"
           onPress={() => navigation.getParent()?.navigate("atendimentosTab", { screen: "attendances" })}
         />
         <MenuItem
-          icon={<Gear size={22} color="#00B37E" />}
+          icon={<Gear size={22} color="#2F432F" />}
           label="Configurações"
           onPress={() => navigation.getParent()?.navigate("settingsTab", { screen: "settings" })}
         />

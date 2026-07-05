@@ -18,12 +18,12 @@ export function TabPill({ focused, children }: { focused: boolean; children: Rea
   );
 }
 
-export const TAB_ACTIVE = "#00B37E";
+export const TAB_ACTIVE = "#2F432F";
 export const TAB_INACTIVE = "#9CA3AF";
 
 // [verde-imersivo] Sombra superior sutil da tab bar (mesclar no tabBarStyle).
 export const tabBarShadow = {
-  shadowColor: "#1B4332",
+  shadowColor: "#1A281A",
   shadowOffset: { width: 0, height: -4 },
   shadowOpacity: 0.06,
   shadowRadius: 14,

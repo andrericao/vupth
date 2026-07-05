@@ -75,7 +75,7 @@ function EstablishmentCard({
             <HStack alignItems="center" gap="$3" mt="$2">
               {establishment.estimated_wait_minutes != null && (
                 <HStack alignItems="center" gap="$1">
-                  <Clock size={14} color="#00B37E" weight="fill" />
+                  <Clock size={14} color="#2F432F" weight="fill" />
                   <Text size="xs" color="$green700" fontFamily="$heading">
                     {formatWaitTime(establishment.estimated_wait_minutes)}
                   </Text>
@@ -156,7 +156,7 @@ export function Home() {
       <HStack justifyContent="flex-end" mt="$2">
         {isAuthenticated ? (
           <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
-            <UserCircle size={32} color="#00B37E" weight="fill" />
+            <UserCircle size={32} color="#2F432F" weight="fill" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
@@ -248,7 +248,7 @@ export function Home() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={["#00B37E"]} tintColor="#00B37E" />
+            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={["#2F432F"]} tintColor="#2F432F" />
           }
           renderItem={({ item }) => (
             <EstablishmentCard

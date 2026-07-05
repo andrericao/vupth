@@ -89,7 +89,7 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onRes
                   mt="$3"
                 >
                   <HStack alignItems="center" gap="$2">
-                    <Clock size={18} color="#009E6F" />
+                    <Clock size={18} color="#2F432F" />
                     <Text fontFamily="$heading" size="md" color="$green700">
                       A fila hoje termina às {formatClockTime(new Date(tailEtaMs))}
                     </Text>

@@ -60,7 +60,7 @@ Entrar na fila: Home → Detalhe → (Login se nao autenticado) → ServiceSelec
 
 ## 1b. Estado atual (2026-06-29) — features recentes
 
-**Design "Verde Imersivo"** (alinhado com o front-partner, handoff C7): tokens green 400 `#52B788` / 500 `#00B37E` (CTA) / 600 `#009E6F` / 700 `#1B4332`; amber `#FFB703`; red `#E63946`; bg `#F7FAF8`. Fontes Poppins/Inter. `Button` pilula+sombra; `Input2` raio `$xl` + foco verde; `cardShadow` em cards `$2xl` sem borda; **Skeleton** (SkeletonCard/List) no lugar dos spinners; **TabPill** (pilula verde na aba ativa). **Animacao de abertura** (`PreparingServer`/WarmupAnimation): sequencia de icones (celular→loja→tesoura→saindo) no portao de readiness (cold start), respeita reduce-motion.
+**Design "Verde Marca"** (2026-07-05 — verde-floresta escuro do ÍCONE do app, look sofisticado, alto contraste; alinhado com o front-partner, handoff C7): escala green derivada de **#2F432F** (RGB 47,67,47) — 100 `#e2ebdf` / 300 `#9cb397` / 400 `#647f5e` / **500 `#2f432f` (CTA/primário)** / 600 `#253624` / 700 `#1a281a`. Fundo mantido **claro**. amber `#FFB703` (dourado — ratings/urgência, pareia com o verde) e red `#E63946` (destructive/erros) **mantidos** (dão o acento). Anterior era o teal `#00B37E`. Fontes Poppins/Inter. `Button` pilula+sombra; `Input2` raio `$xl` + foco verde; `cardShadow` em cards `$2xl` sem borda; **Skeleton** (SkeletonCard/List) no lugar dos spinners; **TabPill** (pilula verde na aba ativa). **Animacao de abertura** (`PreparingServer`/WarmupAnimation): sequencia de icones (celular→loja→tesoura→saindo) no portao de readiness (cold start), respeita reduce-motion.
 
 **Home:** card mostra **menor tempo de espera** (`estimated_wait_minutes`) + **estrela de avaliacao** (real quando o backend mandar, senao placeholder); **esconde estabelecimentos sem profissional** (`estimated_wait_minutes === null`).
 
@@ -436,7 +436,7 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 |---|------|-----------|--------|
 | 6 | Visualizacao de fila para cliente | Qualquer cliente ve a fila de um profissional (lista de attendances). Endpoint: `GET /client-queue/{profId}/queue?establishmentId=` — campo `attendancesInQueue[]` ja retornado | Pendente |
 | 7 | Usar `DELETE /attendances/{id}/leave-queue` | Backend tem endpoint separado para sair da fila (alem de PUT /cancel). Avaliar qual usar em cada contexto | Pendente |
-| 8 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
+| 8 | Paleta PRD | **Verde Marca aplicado (2026-07-05):** green derivado do ícone `#2F432F` (CTA/primário), fundo claro; amber/red mantidos. Escala no `config/gluestack-ui.config.ts` + hexes hardcoded trocados | **FEITO** |
 | 9 | Busca "Pra ontem" | Botao que busca o profissional com menor tempo de espera mais proximo do cliente. Ordena por tempo estimado ASC | Pendente |
 | 10 | Calendario para pedir entrada na fila | Cliente escolhe o dia em um calendario para solicitar entrada na fila do profissional. Ver secao "Agenda e manifestacao de interesse" | Pendente |
 | 11 | Atualizar Gluestack (handoff C2 partner) | Partner foi para `@gluestack-ui/themed` 1.1.73 (ultima v1); client esta em `^1.1.34`. Subir para a ultima v1 e depois avaliar v1→v2. Atencao: 1.1.73 puxa `@gluestack-ui/tooltip → react-aria → react-dom` (adicionar `react-dom` na versao do React) e reiniciar com `expo start -c` | Pendente |

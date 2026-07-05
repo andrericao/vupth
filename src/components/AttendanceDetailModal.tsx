@@ -7,10 +7,10 @@ import { ClientAttendance } from "@services/attendanceService";
 import { formatClockTime } from "@domain/queue/types";
 
 const STATUS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Concluído", color: "#00B37E" },
+  FINISHED: { label: "Concluído", color: "#2F432F" },
   CANCELLED: { label: "Cancelado", color: "#E63946" },
   LATE: { label: "Atrasado", color: "#F59E0B" },
-  IN_PROGRESS: { label: "Em atendimento", color: "#00B37E" },
+  IN_PROGRESS: { label: "Em atendimento", color: "#2F432F" },
   SCHEDULED: { label: "Aguardando", color: "#F59E0B" },
 };
 

@@ -194,8 +194,8 @@ export function QueueStatus() {
   // multa enquanto aguardando. Só SAIR da fila com espera curta gera multa.
   const canReshuffle = canReshuffleQueue(status);
 
-  const borderColor = isInQueue ? color : "#00B37E";
-  const timeColor = isInQueue ? color : "#00B37E";
+  const borderColor = isInQueue ? color : "#2F432F";
+  const timeColor = isInQueue ? color : "#2F432F";
   // Finalizado: "Finalizado". Em atendimento: tempo decorrido rolando (m:ss).
   // Na fila: countdown ("Aguardando" quando zera).
   const timeLabel = isFinished
@@ -349,7 +349,7 @@ export function QueueStatus() {
   if (isCreating) {
     return (
       <Center flex={1} bg="$gray700" px={15}>
-        <ActivityIndicator size="large" color="#00B37E" />
+        <ActivityIndicator size="large" color="#2F432F" />
         <Text mt="$2" color="$gray300">{createMsg}</Text>
         <Text mt="$1" size="xs" color="$gray400" textAlign="center">
           Na primeira vez pode levar até ~50s para o servidor acordar.
@@ -387,7 +387,7 @@ export function QueueStatus() {
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#00B37E" colors={["#00B37E"]} />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#2F432F" colors={["#2F432F"]} />
         }
       >
       <Center flex={1}>

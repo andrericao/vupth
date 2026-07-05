@@ -26,7 +26,7 @@ import { cardShadow } from "@utils/styles";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 
 const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Concluído", color: "#00B37E" },
+  FINISHED: { label: "Concluído", color: "#2F432F" },
   CANCELLED: { label: "Cancelado", color: "#E63946" },
   LATE: { label: "Atrasado", color: "#F59E0B" },
 };
@@ -85,7 +85,7 @@ export function Attendances() {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#00B37E" colors={["#00B37E"]} />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#2F432F" colors={["#2F432F"]} />
         }
       >
         <VStack mt="$6" px={15}>
@@ -100,9 +100,9 @@ export function Attendances() {
 
           {activeQueue && (isInQueue || isBeingAttended) ? (
             <TouchableOpacity onPress={handleGoToQueue}>
-              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={isBeingAttended ? "#00B37E" : color}>
+              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={isBeingAttended ? "#2F432F" : color}>
                 <HStack alignItems="center" gap="$3">
-                  <Queue size={24} color={isBeingAttended ? "#00B37E" : color} />
+                  <Queue size={24} color={isBeingAttended ? "#2F432F" : color} />
                   <VStack flex={1}>
                     <Text fontFamily="$heading" size="sm">
                       {activeQueue.establishmentName}
@@ -111,7 +111,7 @@ export function Attendances() {
                       {activeQueue.professionalName}
                     </Text>
                   </VStack>
-                  <Badge bg={isBeingAttended ? "#00B37E" : color} borderRadius="$full" px="$3" py="$1">
+                  <Badge bg={isBeingAttended ? "#2F432F" : color} borderRadius="$full" px="$3" py="$1">
                     <BadgeText color="$white" size="xs">
                       {isBeingAttended ? "Em atendimento" : formatWaitTime(remaining)}
                     </BadgeText>

@@ -12,7 +12,7 @@ export function PasswordRules({ rules }: Props) {
       {rules.map((rule) => (
         <HStack key={rule.label} alignItems="center" gap="$1">
           {rule.passed ? (
-            <Check size={14} color="#00B37E" weight="bold" />
+            <Check size={14} color="#2F432F" weight="bold" />
           ) : (
             <X size={14} color="#E63946" weight="bold" />
           )}

@@ -12,7 +12,7 @@ type Props = Omit<ComponentProps<typeof GluestackButton>, "variant"> & {
 // suave e texto Poppins ($heading). Outline = acoes secundarias; destructive =
 // pilula vermelha vazada (ex.: "Sair da fila").
 const btnShadow = {
-  shadowColor: "#1B4332",
+  shadowColor: "#1A281A",
   shadowOffset: { width: 0, height: 6 },
   shadowOpacity: 0.18,
   shadowRadius: 10,

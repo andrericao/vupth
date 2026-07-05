@@ -14,7 +14,7 @@ import {
 // cadeira -> sair sem fila. Espelha o front-partner (ServerWarmup/WarmupAnimation).
 // Respeita reduce-motion. Futuro: trocar por Lottie quando o design entregar o JSON.
 
-const GREEN = "#00B37E";
+const GREEN = "#2F432F";
 
 const STEPS = [
   { Icon: DeviceMobile, label: "Abrindo o app" },
