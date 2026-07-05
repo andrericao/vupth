@@ -118,3 +118,15 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 **Precisa (backend):** endpoint CLIENT tipo `PATCH /attendances/{id}/service-items` (ou `POST .../add-services`) — só o **dono** (clientId do JWT), só em `SCHEDULED`, que **acrescenta** serviceItemIds ao atendimento e **recalcula** `totalValue` + `estimatedTotalMinutes` (e reflete na fila/ETA). Resposta = `AttendanceInQueueResponse` atualizado. Definir se remover serviço também é permitido.
 
 **Front (quando pronto):** na `QueueStatus`, botão "Adicionar serviço" → abre a seleção (reusa a lista de `ServiceSelection`) → chama o endpoint → atualiza o atendimento na tela.
+
+## 10. Atendimento PAUSED fica órfão (profissional não vê/retoma) — backend + partner
+
+**Bug reportado pelo Andre (2026-07-04).** O profissional **pausa** um atendimento (`PATCH /attendances/{id}/pause`: IN_PROGRESS → PAUSED) e depois **não consegue mais retomar nem iniciar outro** com aquele cliente — *"na tela do profissional não há resquício, é como se o atendimento não estivesse mais vinculado a ele"*. No client, o atendimento continua ativo.
+
+**Causa provável:** a fila do profissional (`GET /client-queue/{professionalId}/queue` → `QueueResponse`) expõe `attendancesInQueue` (os SCHEDULED em espera) e `inAttendance` (o **IN_PROGRESS** atual). O **PAUSED não é nenhum dos dois** → some da visão do profissional. Como PAUSED é status **ativo** (bloqueia fechar loja / desvincular), o atendimento fica "preso" sem UI para retomar.
+
+**Precisa:**
+- **Backend:** o `QueueResponse` (ou um campo dedicado) deve **incluir o atendimento PAUSED** para o profissional dono — hoje ele desaparece. Confirmar também que `/resume` funciona a partir do estado real.
+- **Front-partner:** exibir o atendimento **PAUSED** na fila com botão **"Retomar"** (`PATCH /attendances/{id}/resume`) e/ou "Encerrar". (Provável que o partner só renderize `inAttendance` quando IN_PROGRESS.)
+
+**Front-client (já feito):** a tela da fila agora mostra **"Atendimento pausado"/"Pausado"** em vez de "Agora" (antes confundia o cliente). O resto é backend+partner.
