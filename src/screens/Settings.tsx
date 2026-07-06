@@ -149,25 +149,25 @@ export function Settings() {
 
       <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
         <MenuItem
-          icon={<User size={22} color="#2F432F" />}
+          icon={<User size={22} color="#3B7A3F" />}
           label="Nome"
           value={displayName}
           onPress={() => navigation.navigate("editProfile")}
         />
         <MenuItem
-          icon={<EnvelopeSimple size={22} color="#2F432F" />}
+          icon={<EnvelopeSimple size={22} color="#3B7A3F" />}
           label="E-mail"
           value={user?.email ?? "—"}
           onPress={() => navigation.navigate("editEmail")}
         />
         <MenuItem
-          icon={<Lock size={22} color="#2F432F" />}
+          icon={<Lock size={22} color="#3B7A3F" />}
           label="Senha"
           value="••••••"
           onPress={() => navigation.navigate("editPassword")}
         />
         <MenuItem
-          icon={<MapPin size={22} color="#2F432F" />}
+          icon={<MapPin size={22} color="#3B7A3F" />}
           label="Endereço"
           value={displayAddress}
           onPress={() => navigation.navigate("editAddress")}

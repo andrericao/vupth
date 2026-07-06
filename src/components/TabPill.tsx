@@ -18,7 +18,7 @@ export function TabPill({ focused, children }: { focused: boolean; children: Rea
   );
 }
 
-export const TAB_ACTIVE = "#2F432F";
+export const TAB_ACTIVE = "#3B7A3F";
 export const TAB_INACTIVE = "#9CA3AF";
 
 // [verde-imersivo] Sombra superior sutil da tab bar (mesclar no tabBarStyle).

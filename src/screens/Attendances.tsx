@@ -26,7 +26,7 @@ import { cardShadow } from "@utils/styles";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 
 const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Concluído", color: "#2F432F" },
+  FINISHED: { label: "Concluído", color: "#3B7A3F" },
   CANCELLED: { label: "Cancelado", color: "#E63946" },
   LATE: { label: "Atrasado", color: "#F59E0B" },
 };
@@ -42,7 +42,9 @@ function formatDateTime(iso: string): string {
 
 export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const { activeQueue, remaining, color, isInQueue, isBeingAttended } = useQueueCountdown();
+  const { activeQueue, remaining, color, isInQueue, isBeingAttended, isPaused } = useQueueCountdown();
+  // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
+  const emAtendimento = isBeingAttended || isPaused;
   const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
   const [ratingFor, setRatingFor] = useState<{ id: string; name: string } | null>(null);
   const [detailFor, setDetailFor] = useState<ClientAttendance | null>(null);
@@ -85,7 +87,7 @@ export function Attendances() {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#2F432F" colors={["#2F432F"]} />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#3B7A3F" colors={["#3B7A3F"]} />
         }
       >
         <VStack mt="$6" px={15}>
@@ -98,11 +100,11 @@ export function Attendances() {
             EM ANDAMENTO
           </Text>
 
-          {activeQueue && (isInQueue || isBeingAttended) ? (
+          {activeQueue && (isInQueue || emAtendimento) ? (
             <TouchableOpacity onPress={handleGoToQueue}>
-              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={isBeingAttended ? "#2F432F" : color}>
+              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={emAtendimento ? "#3B7A3F" : color}>
                 <HStack alignItems="center" gap="$3">
-                  <Queue size={24} color={isBeingAttended ? "#2F432F" : color} />
+                  <Queue size={24} color={emAtendimento ? "#3B7A3F" : color} />
                   <VStack flex={1}>
                     <Text fontFamily="$heading" size="sm">
                       {activeQueue.establishmentName}
@@ -111,9 +113,9 @@ export function Attendances() {
                       {activeQueue.professionalName}
                     </Text>
                   </VStack>
-                  <Badge bg={isBeingAttended ? "#2F432F" : color} borderRadius="$full" px="$3" py="$1">
+                  <Badge bg={emAtendimento ? "#3B7A3F" : color} borderRadius="$full" px="$3" py="$1">
                     <BadgeText color="$white" size="xs">
-                      {isBeingAttended ? "Em atendimento" : formatWaitTime(remaining)}
+                      {isBeingAttended ? "Em atendimento" : isPaused ? "Pausado" : formatWaitTime(remaining)}
                     </BadgeText>
                   </Badge>
                   <CaretRight size={18} color="#9CA3AF" />
