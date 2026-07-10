@@ -25,8 +25,24 @@ import { ServiceType } from "@domain/establishment/types";
 export type AppRoutes = {
   home: { filter?: ServiceType | "ALL" } | undefined;
   establishmentDetail: { establishmentId: string };
-  login: { redirectTo?: string; establishmentId?: string; professionalId?: string };
-  signUp: { redirectTo?: string; establishmentId?: string; professionalId?: string };
+  login: {
+    redirectTo?: string;
+    establishmentId?: string;
+    professionalId?: string;
+    professionalName?: string;
+    establishmentName?: string;
+    estimatedWaitMinutes?: number;
+    serviceItemIds?: string[];
+  };
+  signUp: {
+    redirectTo?: string;
+    establishmentId?: string;
+    professionalId?: string;
+    professionalName?: string;
+    establishmentName?: string;
+    estimatedWaitMinutes?: number;
+    serviceItemIds?: string[];
+  };
   serviceSelection: {
     professionalId: string;
     professionalName: string;

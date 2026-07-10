@@ -14,6 +14,10 @@ type RouteParams = {
   redirectTo?: string;
   establishmentId?: string;
   professionalId?: string;
+  professionalName?: string;
+  establishmentName?: string;
+  estimatedWaitMinutes?: number;
+  serviceItemIds?: string[];
 };
 
 export function Login() {
@@ -45,6 +49,10 @@ export function Login() {
         navigation.replace("queueStatus", {
           establishmentId: params.establishmentId,
           professionalId: params.professionalId,
+          professionalName: params.professionalName,
+          establishmentName: params.establishmentName,
+          estimatedWaitMinutes: params.estimatedWaitMinutes,
+          serviceItemIds: params.serviceItemIds,
         });
       } else {
         navigation.reset({ index: 0, routes: [{ name: "home" }] });
@@ -62,6 +70,10 @@ export function Login() {
       redirectTo: params.redirectTo,
       establishmentId: params.establishmentId,
       professionalId: params.professionalId,
+      professionalName: params.professionalName,
+      establishmentName: params.establishmentName,
+      estimatedWaitMinutes: params.estimatedWaitMinutes,
+      serviceItemIds: params.serviceItemIds,
     });
   }
 

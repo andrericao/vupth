@@ -33,7 +33,7 @@
 
 ## 1. Visao Geral do App
 
-App para **clientes** que querem buscar estabelecimentos e entrar em filas de atendimento. A Home e publica (nao exige login). Auth so e exigida para entrar na fila.
+App para **clientes** que querem buscar estabelecimentos e entrar em filas de atendimento. **Modo visitante (sem login):** o cliente curioso navega livremente e ve **estabelecimentos, profissionais e os precos de cada servico** sem cadastro (todos esses endpoints sao publicos no backend). A **verificacao de token acontece so na ENTRADA da fila** — depois que o visitante ja escolheu os servicos, na `ServiceSelection`. Se nao estiver logado, vai pro login/cadastro levando a selecao e, ao autenticar, o atendimento e criado (`POST /attendances`, exige token — pedido do Andre 2026-07-10; o backend tambem tem `add-quest-attendance` publico, mas optamos por **exigir conta** para vincular historico/avaliacao).
 
 **Navegacao = bottom tab bar (3 abas)**, cada uma com sua stack (sempre visivel):
 ```
@@ -44,7 +44,7 @@ App para **clientes** que querem buscar estabelecimentos e entrar em filas de at
   (+ Profile, Login,
    SignUp)
 ```
-Entrar na fila: Home → Detalhe → (Login se nao autenticado) → ServiceSelection → QueueStatus. Tocar na aba ativa volta ao topo; trocar de aba e 1 toque (resolve o "voltar varias vezes").
+Entrar na fila (visitante ou logado): Home → Detalhe → **ServiceSelection (ve precos, escolhe)** → **portao de auth aqui** (se nao logado → Login/SignUp levando os `serviceItemIds`) → QueueStatus. O login/cadastro redireciona de volta pra `queueStatus` com a selecao preservada. Tocar na aba ativa volta ao topo; trocar de aba e 1 toque (resolve o "voltar varias vezes").
 
 **Stack:**
 - React Native + Expo SDK 54
@@ -62,9 +62,9 @@ Entrar na fila: Home → Detalhe → (Login se nao autenticado) → ServiceSelec
 
 **Design "Verde Marca"** (2026-07-06 — "folha vivo" `#3B7A3F` como CTA/primário; alinhado com o front-partner, handoff C7): o verde-floresta escuro do ÍCONE (`#2F432F`) ficava **pesado demais** espalhado pela UI (headers, botões, badges) → o app inteiro escurecia. Escala green re-ancorada no **#3B7A3F** (mesma família do ícone, porém mais claro/saturado, contraste ~5.2:1 com branco) — 50 `#eef5ee` / 100 `#d9ead9` / 300 `#8bbd8d` / 400 `#5c9c60` / **500 `#3b7a3f` (CTA/primário)** / 600 `#316635` / 700 `#26522a` / 900 `#142c17`. O `#2F432F` segue como brand-deep (fundo do 900) e no **ícone NATIVO** do app (só muda com novo `eas build`). Fundo mantido **claro**. amber `#FFB703` (dourado — ratings/atenção; agora também o aviso "a fila hoje termina às HH:MM" no modal Atrasar, cor de **atenção** e não urgência) e red `#E63946` (destructive/erros) **mantidos**. Histórico: teal `#00B37E` → `#2F432F` (2026-07-05, escuro demais) → `#3B7A3F`. Fontes Poppins/Inter. `Button` pilula+sombra; `Input2` raio `$xl` + foco verde; `cardShadow` em cards `$2xl` sem borda; **Skeleton** (SkeletonCard/List) no lugar dos spinners; **TabPill** (pilula verde na aba ativa). **Animacao de abertura** (`PreparingServer`/WarmupAnimation): sequencia de icones (celular→loja→tesoura→saindo) no portao de readiness (cold start), respeita reduce-motion.
 
-**Home:** card mostra **menor tempo de espera** (`estimated_wait_minutes`) + **estrela de avaliacao** (real quando o backend mandar, senao placeholder); **esconde estabelecimentos sem profissional** (`estimated_wait_minutes === null`).
+**Home:** card mostra **menor tempo de espera** (`estimated_wait_minutes`) + **estrela de avaliacao** (real quando o backend mandar, senao placeholder). **Abertos E fechados aparecem** na listagem (o cliente pode querer manifestar interesse / agendar para a proxima abertura) — a ordenacao joga os fechados pro fim (sem wait → por ultimo, `sortEstablishments`). **Esconde por disponibilidade so nas ABERTAS**: aberta sem profissional (`estimated_wait_minutes === null`) e escondida; **na fechada o wait e irrelevante** (nao da pra entrar na fila agora), entao ela sempre aparece. `filterEstablishments` (2026-07-10).
 
-**Loja fechada:** bloqueia entrar na fila (`open_status != OPEN`) com aviso (futuro: manifestar interesse — depende do backend).
+**Loja fechada:** aparece na Home (badge "Fechado", sem tempo de espera) mas **bloqueia entrar na fila** (`open_status != OPEN`) com aviso. **Manifestar interesse / agendar para quando reabrir = aguarda backend** (endpoint de intent/agenda — ver HANDOFF secao 11 e "Agenda e manifestacao de interesse"). Hoje o aviso ja diz "em breve voce podera manifestar interesse para a proxima abertura".
 
 **Tela da fila (QueueStatus):** status reflete **SCHEDULED → IN_PROGRESS → FINISHED** (via poll de `/attendances/client/me`, fallback do WS). Aguardando: countdown monotonico + "Previsao de inicio". Em atendimento: **tempo decorrido em segundos** (100% no front via `startedAt` cacheado) + "Duracao estimada" + "Horario de termino". Concluido: "Finalizado" + **Avaliar**. **Disclaimer** de estimativa (modal 1x + icone "i"). **Pull-to-refresh**.
 
@@ -131,12 +131,11 @@ Entrar na fila: Home → Detalhe → (Login se nao autenticado) → ServiceSelec
 
 ### Regras de negocio no frontend
 
-- Home mostra **apenas estabelecimentos OPEN** por padrao
-- Busca por nome mostra **OPEN e CLOSED**
+- Home mostra estabelecimentos **OPEN e CLOSED** (o `getAll()` pede `?includeAll=true`; fechados vao pro fim). Aberta sem profissional (`estimated_wait_minutes === null`) e escondida; fechada sempre aparece
 - Filtro por `serviceType` (BARBER, BEAUTY_SALON, NAIL_SALON, SPA, CLINIC)
-- Login so e exigido ao clicar "Entrar na fila"
-- Se nao autenticado, redireciona para Login com `redirectTo` params
-- Apos login/cadastro, volta para o fluxo de fila automaticamente
+- **Visitante navega e ve precos sem login**; o token so e exigido ao **confirmar a entrada na fila** na `ServiceSelection` (nao mais no Detalhe)
+- Se nao autenticado, redireciona para Login/SignUp com `redirectTo: "queueStatus"` + `serviceItemIds` e demais params
+- Apos login/cadastro, volta para `queueStatus` com a selecao preservada e cria o atendimento
 - Polling adaptativo da fila via `useQueueCountdown`: >60min=10min, >10min=5min, <10min=1min
 
 ---
