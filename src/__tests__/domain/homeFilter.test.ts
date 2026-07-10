@@ -3,12 +3,11 @@ import { Establishment } from '@domain/establishment/types';
 import { filterEstablishments, sortEstablishments } from '@domain/establishment/filter';
 
 describe('Home - Filtro de Estabelecimentos', () => {
-  it('sem busca deve mostrar apenas abertos', () => {
+  it('sem busca deve mostrar abertos E fechados (cliente pode manifestar interesse)', () => {
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'ALL');
-    result.forEach((e) => {
-      expect(e.open_status).toBe('OPEN');
-    });
-    expect(result.length).toBeLessThan(MOCK_ESTABLISHMENTS.length);
+    const statuses = new Set(result.map((e) => e.open_status));
+    expect(statuses.has('OPEN')).toBe(true);
+    expect(statuses.has('CLOSED')).toBe(true);
   });
 
   it('com busca deve mostrar abertos e fechados', () => {
@@ -32,13 +31,24 @@ describe('Home - Filtro de Estabelecimentos', () => {
     expect(result[0].name).toBe('Barbearia Top');
   });
 
-  it('deve filtrar por serviceType BARBER (só abertos)', () => {
+  it('deve filtrar por serviceType BARBER', () => {
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'BARBER');
     expect(result.length).toBeGreaterThan(0);
     result.forEach((e) => {
       expect(e.serviceType).toBe('BARBER');
-      expect(e.open_status).toBe('OPEN');
     });
+  });
+
+  it('mostra estabelecimento fechado mesmo sem wait (null) — cliente manifesta interesse', () => {
+    const fechadoSemWait: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'fechado-null',
+      name: 'Loja Fechada',
+      open_status: 'CLOSED',
+      estimated_wait_minutes: null,
+    };
+    const result = filterEstablishments([fechadoSemWait], '', 'ALL');
+    expect(result.map((e) => e.id)).toEqual(['fechado-null']);
   });
 
   it('deve combinar busca + filtro', () => {

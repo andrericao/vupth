@@ -130,3 +130,13 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 - **Front-partner:** exibir o atendimento **PAUSED** na fila com botão **"Retomar"** (`PATCH /attendances/{id}/resume`) e/ou "Encerrar". (Provável que o partner só renderize `inAttendance` quando IN_PROGRESS.)
 
 **Front-client (já feito):** a tela da fila agora mostra **"Atendimento pausado"/"Pausado"** em vez de "Agora" (antes confundia o cliente). O resto é backend+partner.
+
+## 11. Estabelecimento fechado aparece na Home — manifestar interesse / agendar para a reabertura
+
+**Pedido do Andre (2026-07-10).** A Home passou a listar **estabelecimentos abertos E fechados** (antes só abertos, exceto durante busca). Motivo: o cliente pode querer **manifestar interesse / agendar** para quando o estabelecimento **reabrir**, mesmo estando fechado agora.
+
+**Front (já feito):** `filterEstablishments` não esconde mais os fechados; a ordenação (`sortEstablishments`) joga os fechados pro fim (sem `estimated_wait_minutes` → por último). O card mostra badge **"Fechado"** e **sem** tempo de espera. O filtro por disponibilidade (`estimated_wait_minutes === null` = esconder) passou a valer **só para as ABERTAS** — na fechada o wait é irrelevante, então ela sempre aparece.
+
+**Precisa (backend) — 2 pontos:**
+1. **Distinguir "fechado" de "sem profissional".** Hoje `estimated_wait_minutes === null` é o único sinal de "esconder", mas ele mistura *"não tem profissional afiliado"* com *"está fechado (sem fila agora)"*. Para o front decidir corretamente o que mostrar/esconder num fechado, o `GET /establishment` deveria expor **quantos profissionais afiliados** o estabelecimento tem (ex.: `available_professionals`/`has_professionals`) **independente** do wait. Assim dá pra esconder o fechado **genuinamente vazio** (nenhum profissional) e manter o fechado que só está fora do horário. Enquanto não vier, o front mostra **todos** os fechados.
+2. **Endpoint de manifestar interesse / agenda (quando fechado).** É a mesma família da seção "Agenda e manifestação de interesse" do PRD: o cliente escolhe um dia/horário futuro e **manifesta interesse** (status PENDENTE), o profissional confirma antes de virar fila. Contrato a definir (ex.: `POST /attendances/intent { establishmentId, professionalId, serviceItemIds, targetDay }`). Enquanto não existir, o front mostra o aviso **"em breve você poderá manifestar interesse para a próxima abertura"** e bloqueia entrar na fila com a loja fechada.

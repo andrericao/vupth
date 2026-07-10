@@ -16,7 +16,10 @@ export interface EstablishmentWithProfessionals {
 
 export const establishmentService = {
   getAll() {
-    return api.get<Establishment[]>('/establishment');
+    // includeAll=true: traz tambem os FECHADOS (por padrao a listagem publica so
+    // retorna abertos — BUG5 do backend). O cliente pode querer manifestar
+    // interesse/agendar para a reabertura; o front ordena os fechados por ultimo.
+    return api.get<Establishment[]>('/establishment', { params: { includeAll: true } });
   },
 
   getById(id: string) {
