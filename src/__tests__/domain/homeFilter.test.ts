@@ -3,18 +3,19 @@ import { Establishment } from '@domain/establishment/types';
 import { filterEstablishments, sortEstablishments } from '@domain/establishment/filter';
 
 describe('Home - Filtro de Estabelecimentos', () => {
-  it('sem busca deve mostrar abertos E fechados (cliente pode manifestar interesse)', () => {
+  it('esconde as fechadas sem sinal de profissional agendavel (interim, aguarda backend)', () => {
+    // mocks nao definem available_professionals -> fechadas ficam escondidas
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'ALL');
-    const statuses = new Set(result.map((e) => e.open_status));
-    expect(statuses.has('OPEN')).toBe(true);
-    expect(statuses.has('CLOSED')).toBe(true);
+    result.forEach((e) => {
+      expect(e.open_status).toBe('OPEN');
+    });
+    expect(result.length).toBeGreaterThan(0);
   });
 
-  it('com busca deve mostrar abertos e fechados', () => {
+  it('busca tambem esconde fechada sem profissional agendavel', () => {
+    // "Nail Designer" e CLOSED e nao tem available_professionals -> some da busca
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, 'Nail', 'ALL');
-    expect(result.length).toBe(1);
-    expect(result[0].name).toBe('Nail Designer');
-    expect(result[0].open_status).toBe('CLOSED');
+    expect(result.length).toBe(0);
   });
 
   it('deve filtrar por nome (case insensitive)', () => {
@@ -39,16 +40,33 @@ describe('Home - Filtro de Estabelecimentos', () => {
     });
   });
 
-  it('mostra estabelecimento fechado mesmo sem wait (null) — cliente manifesta interesse', () => {
-    const fechadoSemWait: Establishment = {
+  it('fechada COM profissional agendavel (available_professionals > 0) aparece', () => {
+    const fechadaComProf: Establishment = {
       ...MOCK_ESTABLISHMENTS[0],
-      id: 'fechado-null',
-      name: 'Loja Fechada',
+      id: 'fechada-com',
+      name: 'Fechada Com Profissional',
       open_status: 'CLOSED',
       estimated_wait_minutes: null,
+      available_professionals: 2,
     };
-    const result = filterEstablishments([fechadoSemWait], '', 'ALL');
-    expect(result.map((e) => e.id)).toEqual(['fechado-null']);
+    const result = filterEstablishments([fechadaComProf], '', 'ALL');
+    expect(result.map((e) => e.id)).toEqual(['fechada-com']);
+  });
+
+  it('fechada SEM profissional (available_professionals 0 ou ausente) fica escondida', () => {
+    const fechadaZero: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'fechada-zero',
+      open_status: 'CLOSED',
+      available_professionals: 0,
+    };
+    const fechadaUndef: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'fechada-undef',
+      open_status: 'CLOSED',
+    };
+    const result = filterEstablishments([fechadaZero, fechadaUndef], '', 'ALL');
+    expect(result.length).toBe(0);
   });
 
   it('deve combinar busca + filtro', () => {

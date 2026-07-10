@@ -24,14 +24,14 @@ export function sortEstablishments(list: Establishment[]): Establishment[] {
  * Filtra a lista de estabelecimentos da Home.
  * - busca por nome (case-insensitive)
  * - filtro por categoria (serviceType)
- * - **abertos e fechados aparecem** (sempre): o cliente pode querer manifestar
- *   interesse / agendar para quando o estabelecimento reabrir, então fechado NÃO
- *   é escondido. A ordenação joga os fechados pro fim (sem wait → por último).
- * - **só nas ABERTAS** esconde quem não tem profissional disponível: o backend
- *   sinaliza isso com `estimated_wait_minutes === null` na listagem
- *   GET /establishment. (undefined — ex.: mocks/legado — NÃO é escondido.)
- *   Nas fechadas o wait é irrelevante (não dá pra entrar na fila agora), então
- *   não filtramos por disponibilidade.
+ * - **ABERTA**: esconde quem não tem profissional com serviço — o backend
+ *   sinaliza com `estimated_wait_minutes === null` na listagem GET /establishment.
+ *   (undefined — ex.: mocks/legado — NÃO é escondido.)
+ * - **FECHADA**: só aparece se tiver profissional afiliado COM serviço
+ *   (`available_professionals > 0`), pra o cliente poder **agendar** pra
+ *   reabertura — não adianta mostrar loja fechada sem ninguém. Enquanto o
+ *   backend não expõe `available_professionals` na listagem (HANDOFF seção 11),
+ *   o campo vem `undefined` → **todas as fechadas ficam escondidas** (interim).
  */
 export function filterEstablishments(
   establishments: Establishment[],
@@ -41,9 +41,10 @@ export function filterEstablishments(
   return establishments.filter((e) => {
     const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
     const matchesFilter = selectedFilter === 'ALL' || e.serviceType === selectedFilter;
-    const isOpen = e.open_status === 'OPEN';
-    // Aberta: esconde se não há profissional (wait null). Fechada: sempre mostra.
-    const visibleByAvailability = isOpen ? e.estimated_wait_minutes !== null : true;
+    const visibleByAvailability =
+      e.open_status === 'OPEN'
+        ? e.estimated_wait_minutes !== null
+        : (e.available_professionals ?? 0) > 0;
     return matchesSearch && matchesFilter && visibleByAvailability;
   });
 }

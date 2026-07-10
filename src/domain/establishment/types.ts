@@ -66,6 +66,11 @@ export interface Establishment {
   // Menor tempo de espera (min) entre os profissionais com servico — so vem na
   // listagem GET /establishment. null = sem profissional disponivel (esconder).
   estimated_wait_minutes?: number | null;
+  // Qtd de profissionais AFILIADOS com >=1 servico (agendaveis) — usado para
+  // decidir se uma loja FECHADA vale aparecer (da pra agendar pra reabertura).
+  // AGUARDA BACKEND expor na listagem (HANDOFF secao 11); ausente => fechada
+  // fica escondida.
+  available_professionals?: number | null;
   // Avaliacao da loja — Item 6 backend. Opcional ate implementar; ausente =>
   // placeholder (pseudoRating). O card mostra a MAIOR estrela (rating_best =
   // melhor profissional) quando presente; senao a media agregada.
