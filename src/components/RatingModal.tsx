@@ -15,7 +15,12 @@ type Props = {
   onClose: (rated: boolean) => void;
 };
 
-// Avaliação do atendimento (Item 6): 1–5 estrelas + comentário opcional.
+// Campo de comentário desativado por ora (Andre 2026-07-11): não precisa agora,
+// mas o código fica (só escondido) pra reativar sem retrabalho. Flip para true
+// pra mostrar de novo. O submit continua enviando comment (vazio => undefined).
+const SHOW_COMMENT = false;
+
+// Avaliação do atendimento (Item 6): 1–5 estrelas + comentário (hoje oculto).
 // POST /attendances/{id}/rating. Trata 409 (já avaliado) como concluído.
 export function RatingModal({ visible, attendanceId, professionalName, onClose }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -86,17 +91,19 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
             ))}
           </HStack>
 
-          <Box borderWidth="$1" borderColor="$coolGray300" borderRadius="$xl" px="$3" py="$2" mt="$4">
-            <TextInput
-              placeholder="Comentário (opcional)"
-              placeholderTextColor="#9CA3AF"
-              value={comment}
-              onChangeText={setComment}
-              multiline
-              maxLength={300}
-              style={{ minHeight: 60, textAlignVertical: "top", color: "#111827" }}
-            />
-          </Box>
+          {SHOW_COMMENT && (
+            <Box borderWidth="$1" borderColor="$coolGray300" borderRadius="$xl" px="$3" py="$2" mt="$4">
+              <TextInput
+                placeholder="Comentário (opcional)"
+                placeholderTextColor="#9CA3AF"
+                value={comment}
+                onChangeText={setComment}
+                multiline
+                maxLength={300}
+                style={{ minHeight: 60, textAlignVertical: "top", color: "#111827" }}
+              />
+            </Box>
+          )}
 
           <Button
             title={submitting ? "Enviando..." : "Enviar avaliação"}

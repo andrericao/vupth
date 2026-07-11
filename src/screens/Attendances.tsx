@@ -12,7 +12,7 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Queue, Clock, CaretRight, Star } from "phosphor-react-native";
+import { Queue, Clock, CaretRight } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
@@ -20,18 +20,21 @@ import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { SkeletonList } from "@components/Skeleton";
 import { RatingModal } from "@components/RatingModal";
+import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
+import { ClientAttendance } from "@services/attendanceService";
 import { cardShadow } from "@utils/styles";
-import { formatWaitTime } from "@domain/queue/types";
+import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 
 const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Concluído", color: "#00B37E" },
+  FINISHED: { label: "Concluído", color: "#3B7A3F" },
   CANCELLED: { label: "Cancelado", color: "#E63946" },
   LATE: { label: "Atrasado", color: "#F59E0B" },
 };
 
-function formatDate(iso: string): string {
+function formatDateTime(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString("pt-BR");
+    const d = new Date(iso);
+    return `${d.toLocaleDateString("pt-BR")} às ${formatClockTime(d)}`;
   } catch {
     return "";
   }
@@ -39,9 +42,12 @@ function formatDate(iso: string): string {
 
 export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
+  const { activeQueue, remaining, color, isInQueue, isBeingAttended, isPaused } = useQueueCountdown();
+  // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
+  const emAtendimento = isBeingAttended || isPaused;
   const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
   const [ratingFor, setRatingFor] = useState<{ id: string; name: string } | null>(null);
+  const [detailFor, setDetailFor] = useState<ClientAttendance | null>(null);
 
   // Atualiza ao focar a aba (sem precisar fechar/reabrir o app).
   useFocusEffect(
@@ -81,7 +87,7 @@ export function Attendances() {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#00B37E" colors={["#00B37E"]} />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#3B7A3F" colors={["#3B7A3F"]} />
         }
       >
         <VStack mt="$6" px={15}>
@@ -94,11 +100,11 @@ export function Attendances() {
             EM ANDAMENTO
           </Text>
 
-          {isInQueue && activeQueue ? (
+          {activeQueue && (isInQueue || emAtendimento) ? (
             <TouchableOpacity onPress={handleGoToQueue}>
-              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={color}>
+              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={emAtendimento ? "#3B7A3F" : color}>
                 <HStack alignItems="center" gap="$3">
-                  <Queue size={24} color={color} />
+                  <Queue size={24} color={emAtendimento ? "#3B7A3F" : color} />
                   <VStack flex={1}>
                     <Text fontFamily="$heading" size="sm">
                       {activeQueue.establishmentName}
@@ -107,8 +113,10 @@ export function Attendances() {
                       {activeQueue.professionalName}
                     </Text>
                   </VStack>
-                  <Badge bg={color} borderRadius="$full" px="$3" py="$1">
-                    <BadgeText color="$white" size="xs">{formatWaitTime(remaining)}</BadgeText>
+                  <Badge bg={emAtendimento ? "#3B7A3F" : color} borderRadius="$full" px="$3" py="$1">
+                    <BadgeText color="$white" size="xs">
+                      {isBeingAttended ? "Em atendimento" : isPaused ? "Pausado" : formatWaitTime(remaining)}
+                    </BadgeText>
                   </Badge>
                   <CaretRight size={18} color="#9CA3AF" />
                 </HStack>
@@ -151,15 +159,7 @@ export function Attendances() {
                 };
                 const canRate = a.status === "FINISHED";
                 return (
-                  <TouchableOpacity
-                    key={a.id}
-                    activeOpacity={canRate ? 0.7 : 1}
-                    onPress={
-                      canRate
-                        ? () => setRatingFor({ id: a.id, name: a.professionalName })
-                        : undefined
-                    }
-                  >
+                  <TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => setDetailFor(a)}>
                     <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                       <HStack justifyContent="space-between" alignItems="flex-start">
                         <VStack flex={1} pr="$2">
@@ -170,8 +170,7 @@ export function Attendances() {
                             {a.services.map((s) => s.customName).join(", ") || "—"}
                           </Text>
                           <Text size="xs" color="$gray400" mt="$1">
-                            {formatDate(a.scheduledTime)}
-                            {a.durationInMinutes ? ` · ${a.durationInMinutes} min` : ""}
+                            {formatDateTime(a.startTime ?? a.scheduledTime)}
                           </Text>
                         </VStack>
                         <VStack alignItems="flex-end" gap="$1">
@@ -185,14 +184,12 @@ export function Attendances() {
                           </Text>
                         </VStack>
                       </HStack>
-                      {canRate && (
-                        <HStack alignItems="center" gap="$1" mt="$3">
-                          <Star size={14} color="#FFB703" weight="fill" />
-                          <Text size="xs" color="$green700" fontFamily="$heading">
-                            Toque para avaliar
-                          </Text>
-                        </HStack>
-                      )}
+                      <HStack alignItems="center" gap="$1" mt="$3">
+                        <CaretRight size={13} color={canRate ? "#FFB703" : "#9CA3AF"} weight="bold" />
+                        <Text size="xs" color="$gray300" fontFamily="$heading">
+                          {canRate ? "Toque para detalhes e avaliar" : "Toque para ver detalhes"}
+                        </Text>
+                      </HStack>
                     </Box>
                   </TouchableOpacity>
                 );
@@ -201,6 +198,15 @@ export function Attendances() {
           )}
         </VStack>
       </ScrollView>
+
+      <AttendanceDetailModal
+        attendance={detailFor}
+        onClose={() => setDetailFor(null)}
+        onRate={() => {
+          if (detailFor) setRatingFor({ id: detailFor.id, name: detailFor.professionalName });
+          setDetailFor(null);
+        }}
+      />
 
       <RatingModal
         visible={!!ratingFor}

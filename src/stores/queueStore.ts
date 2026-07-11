@@ -21,6 +21,10 @@ interface QueueState {
   activeQueue: ActiveQueue | null;
   joinQueue: (queue: ActiveQueue) => Promise<void>;
   updateQueue: (partial: Partial<ActiveQueue>) => Promise<void>;
+  // Re-ancora o countdown ao "agora" com uma nova estimativa (após ações que
+  // mudam a posição: move-to-end, troca #42). O Date.now() vive aqui, fora do
+  // render, driblando o guard monotônico do poll de forma explícita.
+  reanchorQueue: (estimatedMinutes: number) => Promise<void>;
   leaveQueue: () => Promise<void>;
   restoreQueue: () => Promise<void>;
 }
@@ -39,6 +43,14 @@ export const useQueueStore = create<QueueState>((set, get) => ({
     const current = get().activeQueue;
     if (!current) return;
     const updated = { ...current, ...partial };
+    await SecureStore.setItemAsync(QUEUE_KEY, JSON.stringify(updated));
+    set({ activeQueue: updated });
+  },
+
+  reanchorQueue: async (estimatedMinutes) => {
+    const current = get().activeQueue;
+    if (!current) return;
+    const updated = { ...current, enteredAt: Date.now(), estimatedMinutes };
     await SecureStore.setItemAsync(QUEUE_KEY, JSON.stringify(updated));
     set({ activeQueue: updated });
   },

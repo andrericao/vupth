@@ -1,4 +1,4 @@
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import {
   VStack,
@@ -53,9 +53,22 @@ export function Profile() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
-  async function handleLogout() {
-    await logout();
-    navigation.reset({ index: 0, routes: [{ name: "home" }] });
+  function handleLogout() {
+    Alert.alert(
+      "Sair da conta",
+      "Tem certeza que deseja sair da sua conta?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Sair",
+          style: "destructive",
+          onPress: async () => {
+            await logout();
+            navigation.reset({ index: 0, routes: [{ name: "home" }] });
+          },
+        },
+      ],
+    );
   }
 
   return (
@@ -82,12 +95,12 @@ export function Profile() {
 
       <Box borderRadius="$2xl" mt="$8" overflow="hidden" style={cardShadow}>
         <MenuItem
-          icon={<ClipboardText size={22} color="#00B37E" />}
+          icon={<ClipboardText size={22} color="#3B7A3F" />}
           label="Atendimentos"
           onPress={() => navigation.getParent()?.navigate("atendimentosTab", { screen: "attendances" })}
         />
         <MenuItem
-          icon={<Gear size={22} color="#00B37E" />}
+          icon={<Gear size={22} color="#3B7A3F" />}
           label="Configurações"
           onPress={() => navigation.getParent()?.navigate("settingsTab", { screen: "settings" })}
         />

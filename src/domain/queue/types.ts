@@ -85,6 +85,78 @@ export function isActiveAttendance(status: AttendanceStatus): boolean {
   return status === 'SCHEDULED' || status === 'IN_PROGRESS' || status === 'PAUSED';
 }
 
+/**
+ * Limiar (min) da multa: qualquer ação que VAGA um lugar perto do início —
+ * sair, reagendar ou ir pro fim — prejudica quem se segue (é atendido antes do
+ * previsto). Se falta MENOS que isso para ser atendido, gera multa.
+ */
+export const LATE_PENALTY_THRESHOLD_MINUTES = 60;
+
+/** Valor da multa por vagar um lugar em espera curta (R$). */
+export const CANCELLATION_PENALTY_VALUE = 3;
+
+/**
+ * Remanejar/sair (Item 16) — trocar de horário, ir pro fim ou sair — só faz
+ * sentido enquanto o cliente aguarda (SCHEDULED). A TROCA por consentimento
+ * mútuo (#42) é a única sempre sem multa (o tempo da fila não muda).
+ */
+export function canReshuffleQueue(status: AttendanceStatus): boolean {
+  return status === 'SCHEDULED';
+}
+
+/**
+ * Gera multa? Regra pelo TEMPO estimado (não pelo status): vagar um lugar com
+ * MENOS de 1h para ser atendido prejudica quem se segue → multa. Vale para
+ * sair da fila, reagendar e ir pro fim (a troca #42 não passa por aqui).
+ */
+export function incursLatePenalty(remainingMinutes: number): boolean {
+  return remainingMinutes < LATE_PENALTY_THRESHOLD_MINUTES;
+}
+
+/**
+ * Alvo (ms) para HOJE às HH:MM no relógio local, a partir do dia de `dayRefMs`.
+ * O cliente digita o horário que deseja (Item 16 — formulário, sem sugestões).
+ */
+export function buildTargetFromTime(dayRefMs: number, hours: number, minutes: number): number {
+  const d = new Date(dayRefMs);
+  d.setHours(hours, minutes, 0, 0);
+  return d.getTime();
+}
+
+/**
+ * Valida o horário digitado para reagendar. Retorna a mensagem de erro ou `null`
+ * se ok. A validação de fechamento/refeição é AUTORITATIVA no backend; aqui só
+ * cobrimos o básico (formato + não antes do fim da fila de hoje).
+ */
+export function validateRescheduleTime(
+  hours: number,
+  minutes: number,
+  targetMs: number,
+  floorMs: number,
+): string | null {
+  if (!Number.isInteger(hours) || hours < 0 || hours > 23) return 'Hora inválida (00–23).';
+  if (!Number.isInteger(minutes) || minutes < 0 || minutes > 59) return 'Minuto inválido (00–59).';
+  if (targetMs < floorMs) return 'Escolha um horário após o fim da fila de hoje.';
+  return null;
+}
+
+/** Mensagem amigável para os erros do reschedule (Item 16). */
+export function rescheduleErrorMessage(status?: number, code?: string): string {
+  if (status === 422 || code === 'QUEUE_TARGET_NOT_FEASIBLE') {
+    return 'A fila já prevê te atender nesse horário ou depois. Escolha um horário mais adiante.';
+  }
+  if (status === 400) return 'Horário inválido. Escolha um horário no futuro.';
+  if (status === 403) return 'Você não pode remanejar este atendimento.';
+  return 'Não foi possível reagendar. Tente novamente.';
+}
+
+/** Mensagem amigável para os erros do move-to-end (Item 16). */
+export function moveToEndErrorMessage(status?: number): string {
+  if (status === 400) return 'Só é possível ir para o fim da fila enquanto você aguarda.';
+  if (status === 403) return 'Você não pode remanejar este atendimento.';
+  return 'Não foi possível ir para o fim da fila. Tente novamente.';
+}
+
 /** Formata um Date como HH:MM (relógio local, 24h). */
 export function formatClockTime(date: Date): string {
   const pad = (n: number) => n.toString().padStart(2, '0');
@@ -98,6 +170,16 @@ export function formatClockTime(date: Date): string {
 export function estimatedStartTime(nowMs: number, remainingMinutes: number): string {
   const safeMinutes = Math.max(0, remainingMinutes);
   return formatClockTime(new Date(nowMs + safeMinutes * 60000));
+}
+
+/** Tempo decorrido em segundos → "m:ss" (ou "h:mm:ss" acima de 1h). */
+export function formatElapsed(totalSeconds: number): string {
+  const s = Math.max(0, Math.floor(totalSeconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${m}:${pad(sec)}`;
 }
 
 export function formatWaitTime(minutes: number): string {

@@ -22,7 +22,6 @@ import { resolveRating } from "@domain/establishment/rating";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { useQueueSocket } from "@hooks/useQueueSocket";
-import { useAuthStore } from "@stores/authStore";
 
 type RouteParams = {
   establishmentId: string;
@@ -90,7 +89,6 @@ export function EstablishmentDetail() {
 
   const { data: establishment, isLoading, isError } = useEstablishment(establishmentId);
   const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   // Tempo real: atualiza a fila via WebSocket; o polling vira fallback (backend 18b)
   useQueueSocket(establishmentId);
@@ -108,15 +106,9 @@ export function EstablishmentDetail() {
       return;
     }
 
-    if (!isAuthenticated) {
-      navigation.navigate("login", {
-        redirectTo: "serviceSelection",
-        establishmentId,
-        professionalId,
-      });
-      return;
-    }
-
+    // Visitante (sem login) pode navegar e ver os servicos/precos: a verificacao
+    // de token acontece so na ENTRADA da fila (apos escolher os servicos), na
+    // ServiceSelection. Aqui nao barra mais.
     navigation.navigate("serviceSelection", {
       professionalId,
       professionalName: prof?.name ?? "",

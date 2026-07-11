@@ -24,8 +24,9 @@ function getUrgency(remaining: number, status: string): UrgencyLevel {
 }
 
 function getPollingInterval(remaining: number): number {
-  if (remaining > 60) return 600000;
-  if (remaining > 10) return 300000;
+  // Teto de 2min: sem WebSocket, é o poll que detecta remoção pelo profissional
+  // (CANCELLED) e mudanças de status — não pode demorar muito.
+  if (remaining > 10) return 120000;
   if (remaining > 0) return 60000;
   return 30000; // aguardando chamada: checa status (START/FINISH) mais rápido
 }
@@ -37,7 +38,7 @@ export function useQueueCountdown() {
   const user = useAuthStore((s) => s.user);
 
   const [remaining, setRemaining] = useState(0);
-  const [elapsed, setElapsed] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [urgency, setUrgency] = useState<UrgencyLevel>('normal');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollRef = useRef<() => Promise<void>>(async () => {});
@@ -49,12 +50,6 @@ export function useQueueCountdown() {
       const r = getRemainingMinutes(activeQueue);
       setRemaining(r);
       setUrgency(getUrgency(r, activeQueue.status));
-      // tempo decorrido desde o início do atendimento (IN_PROGRESS)
-      if (activeQueue.startedAt) {
-        setElapsed(Math.max(0, Math.floor((Date.now() - activeQueue.startedAt) / 60000)));
-      } else {
-        setElapsed(0);
-      }
     };
 
     const timer = setInterval(tick, 30000);
@@ -65,6 +60,23 @@ export function useQueueCountdown() {
       clearTimeout(immediate);
     };
   }, [activeQueue]);
+
+  // Tempo de atendimento rolando em SEGUNDOS — 100% no front a partir do
+  // startedAt (cacheado no store/SecureStore). Sem backend; timer de 1s só roda
+  // enquanto há atendimento em curso.
+  useEffect(() => {
+    const startedAt = activeQueue?.startedAt;
+    const tick = () =>
+      setElapsedSeconds(startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : 0);
+
+    const immediate = setTimeout(tick, 0); // cálculo inicial (assíncrono)
+    const id = startedAt ? setInterval(tick, 1000) : null;
+
+    return () => {
+      clearTimeout(immediate);
+      if (id) clearInterval(id);
+    };
+  }, [activeQueue?.startedAt]);
 
   useEffect(() => {
     if (!activeQueue || !accessToken) return;
@@ -92,6 +104,12 @@ export function useQueueCountdown() {
         const hist = await attendanceService.listClientHistory(accessToken);
         const mine = hist.data.find((a) => a.id === q.attendanceId);
         if (mine) {
+          // Profissional removeu / cancelou o atendimento (→ CANCELLED): sai da
+          // fila no cliente (limpa store + SecureStore) para o banner sumir.
+          if (mine.status === 'CANCELLED') {
+            useQueueStore.getState().leaveQueue();
+            return;
+          }
           const patch: Partial<ActiveQueue> = {};
           if (mine.status !== q.status) patch.status = mine.status as AttendanceStatus;
           // Ao iniciar o atendimento, guarda o início real e a duração estimada
@@ -125,7 +143,7 @@ export function useQueueCountdown() {
 
   return {
     remaining,
-    elapsed,
+    elapsedSeconds,
     urgency,
     color,
     isInQueue: !!activeQueue && activeQueue.status === 'SCHEDULED',

@@ -16,6 +16,10 @@ type RouteParams = {
   redirectTo?: string;
   establishmentId?: string;
   professionalId?: string;
+  professionalName?: string;
+  establishmentName?: string;
+  estimatedWaitMinutes?: number;
+  serviceItemIds?: string[];
 };
 
 export function SignUp() {
@@ -54,6 +58,10 @@ export function SignUp() {
         navigation.replace("queueStatus", {
           establishmentId: params.establishmentId,
           professionalId: params.professionalId,
+          professionalName: params.professionalName,
+          establishmentName: params.establishmentName,
+          estimatedWaitMinutes: params.estimatedWaitMinutes,
+          serviceItemIds: params.serviceItemIds,
         });
       } else {
         navigation.reset({ index: 0, routes: [{ name: "home" }] });
@@ -71,6 +79,10 @@ export function SignUp() {
       redirectTo: params.redirectTo,
       establishmentId: params.establishmentId,
       professionalId: params.professionalId,
+      professionalName: params.professionalName,
+      establishmentName: params.establishmentName,
+      estimatedWaitMinutes: params.estimatedWaitMinutes,
+      serviceItemIds: params.serviceItemIds,
     });
   }
 
@@ -118,7 +130,7 @@ export function SignUp() {
             />
             {passwordsMatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <Check size={14} color="#00B37E" weight="bold" />
+                <Check size={14} color="#3B7A3F" weight="bold" />
                 <Text size="xs" color="$green500">Senhas conferem</Text>
               </HStack>
             )}

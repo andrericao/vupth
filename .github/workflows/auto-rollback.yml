@@ -14,6 +14,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: rollback-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
 jobs:
   rollback:
     # So age quando: o CI falhou E foi um push (nao PR)
@@ -21,6 +25,7 @@ jobs:
       github.event.workflow_run.conclusion == 'failure' &&
       github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:

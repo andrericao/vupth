@@ -16,7 +16,11 @@ import { PreparingServer } from "@components/PreparingServer";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useQueueNotifications } from "@hooks/useQueueNotifications";
+import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
+
+// Pausa/retoma as queries conforme a conexao real (netinfo). 1x no boot.
+setupOnlineManager();
 
 const queryClient = new QueryClient();
 

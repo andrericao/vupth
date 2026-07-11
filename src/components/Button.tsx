@@ -1,16 +1,18 @@
 import { Button as GluestackButton, ButtonSpinner, Text } from "@gluestack-ui/themed";
 import { ComponentProps } from "react";
 
-type Props = ComponentProps<typeof GluestackButton> & {
+// Omit o `variant` do Gluestack (que tem união própria) para não anular o nosso.
+type Props = Omit<ComponentProps<typeof GluestackButton>, "variant"> & {
   title: string;
-  variant?: "solid" | "outline";
+  variant?: "solid" | "outline" | "destructive";
   isLoading?: boolean;
 };
 
 // [verde-imersivo] Botao com presenca: pilula (rounded full), altura 54, sombra
-// suave e texto Poppins ($heading). Outline mantido para acoes secundarias.
+// suave e texto Poppins ($heading). Outline = acoes secundarias; destructive =
+// pilula vermelha vazada (ex.: "Sair da fila").
 const btnShadow = {
-  shadowColor: "#1B4332",
+  shadowColor: "#1A281A",
   shadowOffset: { width: 0, height: 6 },
   shadowOpacity: 0.18,
   shadowRadius: 10,
@@ -19,24 +21,27 @@ const btnShadow = {
 
 export function Button({ title, variant = "solid", isLoading = false, ...rest }: Props) {
   const isOutline = variant === "outline";
+  const isDestructive = variant === "destructive";
+  const isGhost = isOutline || isDestructive; // fundo transparente + borda
+  const accent = isDestructive ? "$red500" : "$green500";
 
   return (
     <GluestackButton
       w="$full"
       h={54}
       rounded="$full"
-      bg={isOutline ? "transparent" : "$green500"}
-      $active-bg={isOutline ? "$green100" : "$green600"}
-      borderWidth={isOutline ? "$2" : "$0"}
-      borderColor="$green500"
-      style={isOutline ? undefined : btnShadow}
+      bg={isGhost ? "transparent" : "$green500"}
+      $active-bg={isDestructive ? "$red100" : isOutline ? "$green100" : "$green600"}
+      borderWidth={isGhost ? "$2" : "$0"}
+      borderColor={accent}
+      style={isGhost ? undefined : btnShadow}
       disabled={isLoading}
       {...rest}
     >
       {isLoading ? (
-        <ButtonSpinner color={isOutline ? "$green500" : "$white"} />
+        <ButtonSpinner color={isGhost ? accent : "$white"} />
       ) : (
-        <Text fontFamily="$heading" fontSize="$md" color={isOutline ? "$green500" : "$white"}>
+        <Text fontFamily="$heading" fontSize="$md" color={isGhost ? accent : "$white"}>
           {title}
         </Text>
       )}

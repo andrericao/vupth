@@ -19,7 +19,7 @@
       "package": "com.vupth.client",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#304430"
       }
     },
     "web": {

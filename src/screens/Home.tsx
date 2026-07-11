@@ -7,7 +7,7 @@ import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType } from "@domain/establishment/types";
-import { filterEstablishments } from "@domain/establishment/filter";
+import { filterEstablishments, sortEstablishments } from "@domain/establishment/filter";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
@@ -75,15 +75,17 @@ function EstablishmentCard({
             <HStack alignItems="center" gap="$3" mt="$2">
               {establishment.estimated_wait_minutes != null && (
                 <HStack alignItems="center" gap="$1">
-                  <Clock size={14} color="#00B37E" weight="fill" />
+                  <Clock size={14} color="#3B7A3F" weight="fill" />
                   <Text size="xs" color="$green700" fontFamily="$heading">
                     {formatWaitTime(establishment.estimated_wait_minutes)}
                   </Text>
                 </HStack>
               )}
               {(() => {
+                // Card destaca a MAIOR estrela (melhor avaliado); cai na média
+                // agregada e, por fim, no placeholder até o backend mandar.
                 const r = resolveRating(
-                  establishment.rating_average,
+                  establishment.rating_best ?? establishment.rating_average,
                   establishment.rating_count,
                   establishment.id,
                 );
@@ -135,7 +137,9 @@ export function Home() {
     if (filterParam) setSelectedFilter(filterParam);
   }, [filterParam]);
 
-  const filteredEstablishments = filterEstablishments(establishments, search, selectedFilter);
+  const filteredEstablishments = sortEstablishments(
+    filterEstablishments(establishments, search, selectedFilter),
+  );
 
   const onRefresh = useCallback(() => {
     refetch();
@@ -152,7 +156,7 @@ export function Home() {
       <HStack justifyContent="flex-end" mt="$2">
         {isAuthenticated ? (
           <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
-            <UserCircle size={32} color="#00B37E" weight="fill" />
+            <UserCircle size={32} color="#3B7A3F" weight="fill" />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
@@ -244,7 +248,7 @@ export function Home() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
           refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={["#00B37E"]} tintColor="#00B37E" />
+            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={["#3B7A3F"]} tintColor="#3B7A3F" />
           }
           renderItem={({ item }) => (
             <EstablishmentCard

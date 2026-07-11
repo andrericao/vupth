@@ -147,16 +147,21 @@ export const gluestackUIConfig = createConfig({
       emerald700: '#047857',
       emerald800: '#065f46',
       emerald900: '#064e3b',
-      green50: '#f0fdf4',
-      green100: '#dcfce7',
-      green200: '#bbf7d0',
-      green300: '#9BEC00',
-      green400: '#52B788',
-      green500: '#00B37E',
-      green600: '#009E6F',
-      green700: '#1B4332',
-      green800: '#166534',
-      green900: '#14532d',
+      // [verde-marca] "Folha vivo" (#3B7A3F) = primario/CTA — mesma familia do
+      // verde do ICONE (#2F432F) porem mais claro e saturado, pra tirar o peso
+      // (o icone escuro ficava muito pesado espalhado pela UI). O #2F432F segue
+      // como brand-deep (green900-ish) e no icone NATIVO do app. Contraste do
+      // 500 com texto branco ~5.2:1. Fundo mantido claro.
+      green50: '#eef5ee',
+      green100: '#d9ead9',
+      green200: '#b5d5b6',
+      green300: '#8bbd8d',
+      green400: '#5c9c60',
+      green500: '#3b7a3f',
+      green600: '#316635',
+      green700: '#26522a',
+      green800: '#1c3d1f',
+      green900: '#142c17',
       lime50: '#f7fee7',
       lime100: '#ecfccb',
       lime200: '#d9f99d',

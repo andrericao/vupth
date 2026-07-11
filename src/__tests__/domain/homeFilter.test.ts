@@ -1,21 +1,21 @@
 import { MOCK_ESTABLISHMENTS } from '@domain/establishment/mockData';
 import { Establishment } from '@domain/establishment/types';
-import { filterEstablishments } from '@domain/establishment/filter';
+import { filterEstablishments, sortEstablishments } from '@domain/establishment/filter';
 
 describe('Home - Filtro de Estabelecimentos', () => {
-  it('sem busca deve mostrar apenas abertos', () => {
+  it('esconde as fechadas sem sinal de profissional agendavel (interim, aguarda backend)', () => {
+    // mocks nao definem available_professionals -> fechadas ficam escondidas
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'ALL');
     result.forEach((e) => {
       expect(e.open_status).toBe('OPEN');
     });
-    expect(result.length).toBeLessThan(MOCK_ESTABLISHMENTS.length);
+    expect(result.length).toBeGreaterThan(0);
   });
 
-  it('com busca deve mostrar abertos e fechados', () => {
+  it('busca tambem esconde fechada sem profissional agendavel', () => {
+    // "Nail Designer" e CLOSED e nao tem available_professionals -> some da busca
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, 'Nail', 'ALL');
-    expect(result.length).toBe(1);
-    expect(result[0].name).toBe('Nail Designer');
-    expect(result[0].open_status).toBe('CLOSED');
+    expect(result.length).toBe(0);
   });
 
   it('deve filtrar por nome (case insensitive)', () => {
@@ -32,13 +32,41 @@ describe('Home - Filtro de Estabelecimentos', () => {
     expect(result[0].name).toBe('Barbearia Top');
   });
 
-  it('deve filtrar por serviceType BARBER (só abertos)', () => {
+  it('deve filtrar por serviceType BARBER', () => {
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'BARBER');
     expect(result.length).toBeGreaterThan(0);
     result.forEach((e) => {
       expect(e.serviceType).toBe('BARBER');
-      expect(e.open_status).toBe('OPEN');
     });
+  });
+
+  it('fechada COM profissional agendavel (available_professionals > 0) aparece', () => {
+    const fechadaComProf: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'fechada-com',
+      name: 'Fechada Com Profissional',
+      open_status: 'CLOSED',
+      estimated_wait_minutes: null,
+      available_professionals: 2,
+    };
+    const result = filterEstablishments([fechadaComProf], '', 'ALL');
+    expect(result.map((e) => e.id)).toEqual(['fechada-com']);
+  });
+
+  it('fechada SEM profissional (available_professionals 0 ou ausente) fica escondida', () => {
+    const fechadaZero: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'fechada-zero',
+      open_status: 'CLOSED',
+      available_professionals: 0,
+    };
+    const fechadaUndef: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'fechada-undef',
+      open_status: 'CLOSED',
+    };
+    const result = filterEstablishments([fechadaZero, fechadaUndef], '', 'ALL');
+    expect(result.length).toBe(0);
   });
 
   it('deve combinar busca + filtro', () => {
@@ -81,5 +109,33 @@ describe('Home - Filtro de Estabelecimentos', () => {
     // MOCK_ESTABLISHMENTS não definem o campo -> não devem ser escondidos
     const result = filterEstablishments(MOCK_ESTABLISHMENTS, '', 'ALL');
     expect(result.length).toBeGreaterThan(0);
+  });
+});
+
+describe('sortEstablishments', () => {
+  const make = (id: string, wait: number | null, best?: number): Establishment => ({
+    ...MOCK_ESTABLISHMENTS[0],
+    id,
+    estimated_wait_minutes: wait,
+    rating_best: best ?? null,
+  });
+
+  it('ordena por menor tempo de espera primeiro', () => {
+    const out = sortEstablishments([make('c', 30), make('a', 5), make('b', 10)]);
+    expect(out.map((e) => e.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('no empate de tempo, o mais bem avaliado (maior estrela) vem antes', () => {
+    const out = sortEstablishments([
+      make('baixa', 10, 4.1),
+      make('alta', 10, 4.9),
+      make('media', 10, 4.5),
+    ]);
+    expect(out.map((e) => e.id)).toEqual(['alta', 'media', 'baixa']);
+  });
+
+  it('estabelecimentos sem disponibilidade (null) vão por último', () => {
+    const out = sortEstablishments([make('sem', null, 5), make('com', 20, 4)]);
+    expect(out.map((e) => e.id)).toEqual(['com', 'sem']);
   });
 });

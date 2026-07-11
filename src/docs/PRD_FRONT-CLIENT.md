@@ -8,7 +8,7 @@
 > **State:** Zustand v5 + Axios + TanStack Query v5 + Expo SecureStore
 > **Testes unitarios/integracao:** 144 passando em 18 suites (Jest 29 + axios-mock-adapter)
 > **Testes E2E:** Maestro v2.5.1 no celular fisico (Moto G54 via USB)
-> **CI/CD:** GitHub Actions — lint (ESLint v9 flat config + eslint-config-expo), typecheck (tsc --noEmit), test (jest --ci --coverage) — 0 erros/0 warnings
+> **CI/CD:** GitHub Actions — job unico: lint (ESLint v9 flat config + eslint-config-expo) → typecheck (tsc --noEmit) → test (jest --ci), fail-fast — 0 erros/0 warnings. Otimizado p/ economizar minutos (concurrency/cancel-in-progress, paths-ignore, timeout) — ver secao "Economia de minutos" em CI/CD.
 >
 > **Ultima atualizacao:** 2026-06-08
 
@@ -33,24 +33,46 @@
 
 ## 1. Visao Geral do App
 
-App para **clientes** que querem buscar estabelecimentos e entrar em filas de atendimento. A Home e publica (nao exige login). Auth so e exigida para entrar na fila.
+App para **clientes** que querem buscar estabelecimentos e entrar em filas de atendimento. **Modo visitante (sem login):** o cliente curioso navega livremente e ve **estabelecimentos, profissionais e os precos de cada servico** sem cadastro (todos esses endpoints sao publicos no backend). A **verificacao de token acontece so na ENTRADA da fila** — depois que o visitante ja escolheu os servicos, na `ServiceSelection`. Se nao estiver logado, vai pro login/cadastro levando a selecao e, ao autenticar, o atendimento e criado (`POST /attendances`, exige token — pedido do Andre 2026-07-10; o backend tambem tem `add-quest-attendance` publico, mas optamos por **exigir conta** para vincular historico/avaliacao).
 
+**Navegacao = bottom tab bar (3 abas)**, cada uma com sua stack (sempre visivel):
 ```
-Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
-                                        ↓
-                               Login (se nao autenticado)
-                                        ↓
-                               QueueStatus (posicao na fila)
+[ Inicio ]            [ Atendimentos ]      [ Config. ]
+ Home → Detalhe        Attendances           Settings → Edit*
+  → ServiceSelection   (em andamento +
+  → QueueStatus         historico)
+  (+ Profile, Login,
+   SignUp)
 ```
+Entrar na fila (visitante ou logado): Home → Detalhe → **ServiceSelection (ve precos, escolhe)** → **portao de auth aqui** (se nao logado → Login/SignUp levando os `serviceItemIds`) → QueueStatus. O login/cadastro redireciona de volta pra `queueStatus` com a selecao preservada. Tocar na aba ativa volta ao topo; trocar de aba e 1 toque (resolve o "voltar varias vezes").
 
 **Stack:**
 - React Native + Expo SDK 54
 - Gluestack UI v1 (sem NativeWind)
-- React Navigation native-stack (nao Expo Router)
+- React Navigation: **bottom-tabs + native-stack** (nao Expo Router)
 - Axios + axios-mock-adapter (testes)
 - Zustand v5 + Expo SecureStore
-- TanStack Query v5
+- TanStack Query v5 (com `refetchInterval` como fallback do WebSocket)
 - Phosphor React Native (icones)
+- Fontes **Poppins** (titulos/botoes) + **Inter** (texto)
+
+---
+
+## 1b. Estado atual (2026-06-29) — features recentes
+
+**Design "Verde Marca"** (2026-07-06 — "folha vivo" `#3B7A3F` como CTA/primário; alinhado com o front-partner, handoff C7): o verde-floresta escuro do ÍCONE (`#2F432F`) ficava **pesado demais** espalhado pela UI (headers, botões, badges) → o app inteiro escurecia. Escala green re-ancorada no **#3B7A3F** (mesma família do ícone, porém mais claro/saturado, contraste ~5.2:1 com branco) — 50 `#eef5ee` / 100 `#d9ead9` / 300 `#8bbd8d` / 400 `#5c9c60` / **500 `#3b7a3f` (CTA/primário)** / 600 `#316635` / 700 `#26522a` / 900 `#142c17`. O `#2F432F` segue como brand-deep (fundo do 900) e no **ícone NATIVO** do app (só muda com novo `eas build`). Fundo mantido **claro**. amber `#FFB703` (dourado — ratings/atenção; agora também o aviso "a fila hoje termina às HH:MM" no modal Atrasar, cor de **atenção** e não urgência) e red `#E63946` (destructive/erros) **mantidos**. Histórico: teal `#00B37E` → `#2F432F` (2026-07-05, escuro demais) → `#3B7A3F`. Fontes Poppins/Inter. `Button` pilula+sombra; `Input2` raio `$xl` + foco verde; `cardShadow` em cards `$2xl` sem borda; **Skeleton** (SkeletonCard/List) no lugar dos spinners; **TabPill** (pilula verde na aba ativa). **Animacao de abertura** (`PreparingServer`/WarmupAnimation): sequencia de icones (celular→loja→tesoura→saindo) no portao de readiness (cold start), respeita reduce-motion.
+
+**Home:** card mostra **menor tempo de espera** (`estimated_wait_minutes`) + **estrela de avaliacao** (real quando o backend mandar, senao placeholder). **Aberta**: escondida se nao tem profissional com servico (`estimated_wait_minutes === null`). **Fechada**: so aparece se tiver **profissional afiliado com servico** (`available_professionals > 0`), pra o cliente poder **agendar** pra reabertura — nao adianta mostrar loja fechada sem ninguem (regra do Andre 2026-07-10). ⏳ **Interim:** o backend ainda NAO expoe `available_professionals` na listagem `GET /establishment` (so no detalhe `professionals-with-queue`) → enquanto isso o front **esconde TODAS as fechadas**; quando o backend expuser, as fechadas-com-profissional aparecem sozinhas. Ver **HANDOFF secao 11** — ⏳ **formalizado no backlog do backend (#3)**. `filterEstablishments` + `getAll()?includeAll=true` (2026-07-10).
+
+**Loja fechada:** quando aparecer (backend com `available_professionals`), badge "Fechado" e **bloqueia entrar na fila** (`open_status != OPEN`) com aviso. **Manifestar interesse / agendar para quando reabrir = aguarda backend** (endpoint de intent/agenda — ver HANDOFF secao 11 e "Agenda e manifestacao de interesse"). Hoje o aviso ja diz "em breve voce podera manifestar interesse para a proxima abertura".
+
+**Tela da fila (QueueStatus):** status reflete **SCHEDULED → IN_PROGRESS → FINISHED** (via poll de `/attendances/client/me`, fallback do WS). Aguardando: countdown monotonico + "Previsao de inicio". Em atendimento: **tempo decorrido em segundos** (100% no front via `startedAt` cacheado) + "Duracao estimada" + "Horario de termino". Concluido: "Finalizado" + **Avaliar**. **Disclaimer** de estimativa (modal 1x + icone "i"). **Pull-to-refresh**.
+
+**Atendimentos:** EM ANDAMENTO (SCHEDULED ou IN_PROGRESS) + REALIZADOS (dia+hora de inicio); refetch no foco + pull-to-refresh; tocar no card abre **detalhes** (AttendanceDetailModal) + avaliar.
+
+**Avaliacao (Item 6) — ✅ FEITO (front + backend, validado no device 2026-07-04):** `RatingModal` **só 1-5 estrelas** (comentario OCULTO desde 2026-07-11, flag `SHOW_COMMENT=false`) → `POST /attendances/{id}/rating`; agregados `rating_average`/`rating_count` vem no `professionals-with-queue` e o front consome (`resolveRating`). Falta backend expor `rated` pra esconder "avaliar" apos o voto (HANDOFF sec.3).
+
+**WebSocket:** `useQueueSocket` / `useQueueNotifications` existem mas **nao funcionam no device** (pendencia, precisa device+backend logs). Substituido por **polling** (`refetchInterval`: establishments 60s, fila 20s, atendimentos 30s) + poll de status da fila (30s).
 
 ---
 
@@ -72,6 +94,12 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 | `/professional/{id}/service-items` | GET | ServiceSelection | Implementado | — |
 | `/attendances/{id}/leave-queue` | DELETE | — | **NAO IMPLEMENTADO** | — |
 | `/attendances/client/me` | GET | Attendances | Implementado | — |
+| `/attendances/{id}/rating` | POST | RatingModal | ✅ **Feito (backend entregou, validado device 2026-07-04)** | — |
+| `/attendances/{id}/reschedule?targetTime=` | PATCH | QueueStatus (espera longa) | **Implementado (front) / aguarda teste device** | — |
+| `/attendances/{id}/move-to-end` | PATCH | QueueStatus (espera longa) | **Implementado (front) / aguarda teste device** | — |
+| `/swap-requests` (#42 direcionado) | POST | — | **Front REMOVIDO** — modelo desejado é oferta aberta (ver 10b + HANDOFF sec. 7) | — |
+| `/swap-requests/{id}?accept=` | PATCH | — | **Front REMOVIDO** (idem) | — |
+| `/swap-requests/me` | GET | — | **Front REMOVIDO** (idem) | — |
 | `/profile/general-infos` | PATCH | EditProfile | Implementado | 5 |
 | `/profile/update-email/me` | PATCH | EditEmail | Implementado | 5 |
 | `/profile/update-password/me` | PATCH | EditPassword | Implementado | 5 |
@@ -103,12 +131,11 @@ Home (publica) → Busca/Filtro → Detalhe do Estabelecimento
 
 ### Regras de negocio no frontend
 
-- Home mostra **apenas estabelecimentos OPEN** por padrao
-- Busca por nome mostra **OPEN e CLOSED**
+- Home: **aberta** sem profissional (`estimated_wait_minutes === null`) e escondida; **fechada** so aparece se `available_professionals > 0` (⏳ backend ainda nao expoe na listagem → todas as fechadas escondidas por ora; **rastreado no backlog do backend #3**). O `getAll()` ja pede `?includeAll=true` pra receber as fechadas quando o filtro puder liberar
 - Filtro por `serviceType` (BARBER, BEAUTY_SALON, NAIL_SALON, SPA, CLINIC)
-- Login so e exigido ao clicar "Entrar na fila"
-- Se nao autenticado, redireciona para Login com `redirectTo` params
-- Apos login/cadastro, volta para o fluxo de fila automaticamente
+- **Visitante navega e ve precos sem login**; o token so e exigido ao **confirmar a entrada na fila** na `ServiceSelection` (nao mais no Detalhe)
+- Se nao autenticado, redireciona para Login/SignUp com `redirectTo: "queueStatus"` + `serviceItemIds` e demais params
+- Apos login/cadastro, volta para `queueStatus` com a selecao preservada e cria o atendimento
 - Polling adaptativo da fila via `useQueueCountdown`: >60min=10min, >10min=5min, <10min=1min
 
 ---
@@ -399,7 +426,7 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 | 2 | ~~Tela Attendances — historico real~~ | Implementado: `attendanceService.listClientHistory` + hook `useClientAttendances` (TanStack Query) consomem `GET /attendances/client/me` (filtros opcionais status/dateFrom/dateTo, clientId do JWT). Attendances.tsx renderiza secao REALIZADOS (FINISHED/CANCELLED/LATE) com profissional, servicos, data, duracao, valor e badge de status; loading + empty state | **FEITO** |
 | 3 | Visualizacao do atendimento atual | Cliente ve detalhes do atendimento IN_PROGRESS (profissional, servicos, tempo decorrido). Dados vem do `GET /client-queue/{attendanceId}/wait-time` + `GET /attendances/{id}` | Pendente |
 | 4 | ~~Selecao de servicos obrigatoria~~ | Implementado: ServiceSelection.tsx — lista servicos, multi-selecao, preco, confirmar antes de entrar na fila. Endpoint: `GET /professional-queue/{id}/service-items` | **FEITO** |
-| 5 | Tempo real via WebSocket (STOMP) | **Backend pronto (2026-06-14, PRD_BACKEND 18b)** — handoff C3. **Fatias 1-2 FEITAS:** `@stomp/stompjs` + `WS_URL` (`/ws/websocket`); `useQueueSocket` assina `/topic/establishment/{id}/queue` (atualiza cache, polling vira fallback) em EstablishmentDetail; `useQueueNotifications` (alerta "é a sua vez!"/concluido) agora **app-wide** via `App.tsx`, dirigido por `activeQueue` do store — vale em qualquer tela enquanto houver fila ativa; workarounds RN (`forceBinaryWSFrames`+`appendMissingNULLonIncoming`). (3) `/ws` confirmado no Render (`/ws/info` → `{"websocket":true}`, `/ws/websocket` → 400 = existe). **Falta so:** (4) testar no device os eventos `ATTENDANCE_STARTED/FINISHED` | Em progresso |
+| 5 | Tempo real via WebSocket (STOMP) | **Backend pronto (2026-06-14, PRD_BACKEND 18b)** — handoff C3. **Fatias 1-2 FEITAS:** `@stomp/stompjs` + `WS_URL` (`/ws/websocket`); `useQueueSocket` assina `/topic/establishment/{id}/queue` (atualiza cache, polling vira fallback) em EstablishmentDetail; `useQueueNotifications` (alerta "é a sua vez!"/concluido) agora **app-wide** via `App.tsx`, dirigido por `activeQueue` do store — vale em qualquer tela enquanto houver fila ativa; workarounds RN (`forceBinaryWSFrames`+`appendMissingNULLonIncoming`). (3) `/ws` confirmado no Render (`/ws/info` → `{"websocket":true}`, `/ws/websocket` → 400 = existe). **Falta so:** (4) testar no device os eventos `ATTENDANCE_STARTED/FINISHED`. **⏬ REPRIORIZADO: ULTIMA prioridade (Andre 2026-07-04) — o polling cobre; WS fica por ultimo** | Ultima prioridade |
 | 6 | Consumir ETA estavel (meal-aware lock) | **Backend pronto (item 37, 2026-06-22)** — `GET /client-queue/{attendanceId}/wait-time` ja retorna estimativa estavel (refeicoes travadas no ingresso). O client ja consome esse endpoint em `useQueueCountdown`; validar que usa o `estimatedWaitingTime` estavel e nao recalcula por fora | Validar |
 
 ### Media prioridade — Funcionalidades
@@ -408,14 +435,15 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 |---|------|-----------|--------|
 | 6 | Visualizacao de fila para cliente | Qualquer cliente ve a fila de um profissional (lista de attendances). Endpoint: `GET /client-queue/{profId}/queue?establishmentId=` — campo `attendancesInQueue[]` ja retornado | Pendente |
 | 7 | Usar `DELETE /attendances/{id}/leave-queue` | Backend tem endpoint separado para sair da fila (alem de PUT /cancel). Avaliar qual usar em cada contexto | Pendente |
-| 8 | Paleta PRD | primary #1B4332, accent #52B788, cta #00B37E, bg #F7FAF8 | Pendente |
+| 8 | Paleta PRD | **Verde Marca (2026-07-06):** CTA/primário = "folha vivo" `#3B7A3F` (o `#2F432F` do ícone escurecia demais a UI); fundo claro; amber/red mantidos; aviso do fim da fila no modal Atrasar agora âmbar (atenção). Escala no `config/gluestack-ui.config.ts` + hexes hardcoded trocados | **FEITO** |
 | 9 | Busca "Pra ontem" | Botao que busca o profissional com menor tempo de espera mais proximo do cliente. Ordena por tempo estimado ASC | Pendente |
 | 10 | Calendario para pedir entrada na fila | Cliente escolhe o dia em um calendario para solicitar entrada na fila do profissional. Ver secao "Agenda e manifestacao de interesse" | Pendente |
 | 11 | Atualizar Gluestack (handoff C2 partner) | Partner foi para `@gluestack-ui/themed` 1.1.73 (ultima v1); client esta em `^1.1.34`. Subir para a ultima v1 e depois avaliar v1→v2. Atencao: 1.1.73 puxa `@gluestack-ui/tooltip → react-aria → react-dom` (adicionar `react-dom` na versao do React) e reiniciar com `expo start -c` | Pendente |
 | 12 | Validar UI sem profissional "fantasma" (C4) | Backend (#31) ja nao retorna profissional sem servico em `professionals-with-queue`; so garantir que a UI trata lista vazia e nao assume profissionais inexistentes | Validar |
 | 13 | Senha atual na troca de senha | EditPassword deve pedir a **senha atual** alem da nova. **Aguarda backend** (ver "Pendencia para o backend" abaixo). Front so implementa o campo apos o backend verificar `currentPassword` (verificacao no front via re-login foi descartada) | Aguarda backend |
 | 14 | Esqueci minha senha (forgot password) | Fluxo de recuperacao de senha (cliente sem sessao). **Depende do backend**: endpoint para solicitar reset (codigo/email) + confirmar nova senha. Verificar se ja existe — provavelmente nao implementado | Aguarda backend |
-| 15 | Avaliacao de atendimento (front do Item 6) | **Front FEITO** (envio + exibicao preparada): `RatingModal` (1-5 estrelas + comentario) em QueueStatus concluido e nos cards FINISHED de Atendimentos; `ratingService` -> `POST /attendances/{id}/rating`; `resolveRating` exibe nota real quando o backend mandar, senao placeholder. **Aguarda backend** (Item 6 ⬜ aberto): endpoint + agregados (ver callout) | Front FEITO / Aguarda backend |
+| 15 | Avaliacao de atendimento (front do Item 6) | ✅ **FEITO (front + backend, validado device 2026-07-04):** `RatingModal` (1-5 estrelas + comentario) em QueueStatus concluido e nos cards FINISHED de Atendimentos; `ratingService` -> `POST /attendances/{id}/rating`; `resolveRating` exibe a nota real (`rating_average`/`rating_count` vem no `professionals-with-queue`). Melhorias opcionais (nao bloqueiam): rollup por ESTABELECIMENTO no `GET /establishment` + `rated` no `client/me` (ver callout) | ✅ **Feito** |
+| 16 | Mudar minha vez (remanejar #43 + multa por tempo) | **FRONT FEITO (2026-07-03, aguarda teste device).** Consolidado em **um botao "Mudar minha vez"** (`ChangeTurnModal`) que pergunta a **direcao**: **Adiantar** (so via troca — "em breve", aguarda oferta aberta do backend, ver 10b) ou **Atrasar** (mostra ate quando a fila vai hoje = ETA do ultimo via `queueService.getQueue`, e oferece: **Ir para o fim** → `PATCH /move-to-end` (**bloqueado se o cliente ja for o ultimo** — so avisa "voce ja e o ultimo", `isLast` calculado de `attendancesInQueue`); **Agendar para depois** → `RescheduleModal` = **formulario** onde o cliente DIGITA o horario (HH:MM), sem sugestoes de slot; valida formato + "apos o fim da fila" (`buildTargetFromTime`/`validateRescheduleTime`); **fechamento/refeicao sao validados no backend** → `PATCH /reschedule?targetTime=`; **Trocar** = em breve). **Regra de multa selada:** nao e pela acao, e pelo **prejuizo a quem se segue** — vagar um lugar com ETA **< 1h** (`incursLatePenalty = remaining < 60`, pelo tempo nao pelo status) avisa **multa de R$3** em **sair, reagendar e ir pro fim**. So a **troca** (oferta aberta, #42 rework) nunca tera multa. Erros: **422** alvo inviavel, **400** passado/status, **403** nao-dono. Re-ancora o countdown pela previsao real. ⚠️ **Strike ainda depende do backend** (hoje so no CANCELAR #39 — handoff sec. 6 pra estender a reschedule/move-to-end). Testes: dominio. Falta validar no device | **Front FEITO / aguarda teste device + handoffs backend** |
 
 > ⚠️ **Pendencia para o backend (handoff)** — *Verificacao da senha atual na troca de senha.*
 > Hoje `PATCH /profile/update-password/me` recebe so `{ "password": "<nova>" }` (`PasswordRequest`) e o `UpdatePasswordUseCase` troca direto, **sem conferir a senha atual**. Para o app pedir a senha atual com seguranca real, o backend precisa:
@@ -424,10 +452,40 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 > 3. Atualizar testes de integracao + collection Postman + PRD_BACKEND (secao "PATCH /profile/update-password/me").
 > Depois disso o front envia `{ currentPassword, password }` e adiciona o campo na tela. (Tambem avaliar o endpoint de **forgot password** do item 14.)
 
-> ⚠️ **Pendencia para o backend (handoff)** — *Avaliacao de atendimento (Item 6 do PRD_BACKEND, hoje ⬜ aberto).* O front ja esta pronto (envio + exibicao); falta o backend:
-> 1. `POST /attendances/{id}/rating` `{ score 1-5, comment? }` — so o **cliente dono** do attendance, so com `status = FINISHED`, **1 voto** (409 no 2o), guest nao avalia. (entidade `AttendanceRating` + agregados `ratingSum`/`ratingCount` em `Professional` e `ServiceItem`, ja especificado no Item 6.)
-> 2. **Devolver no payload** os campos `rating_average` (number|null) + `rating_count` (number): **por profissional** em `GET /establishment/id/{id}/professionals-with-queue`, e **agregado por estabelecimento** em `GET /establishment` (a media da loja = **soma dos `ratingSum` / soma dos `ratingCount`** dos profissionais — media ponderada, barato pois sao poucos profissionais). Sem isso o front mostra um placeholder ficticio.
-> 3. (Opcional, recomendado) expor no `GET /attendances/client/me` se o atendimento **ja foi avaliado** (ex.: `rated: boolean`), para o front esconder o "Toque para avaliar" depois do voto. Hoje o front so descobre via 409 ao tentar.
+> ✅ **Avaliacao (Item 6) — VALIDADO NO DEVICE (2026-07-04): ver a nota real E avaliar funcionam.** `POST /attendances/{id}/rating` existe **e** os agregados `rating_average`/`rating_count` vem no `professionals-with-queue` (por profissional **e** por service item); o front consome (`resolveRating`). **Comentario OCULTO no front (Andre 2026-07-11)** — `RatingModal` so pede as estrelas (flag `SHOW_COMMENT=false`, codigo mantido); o `POST /rating` vai sem `comment` por ora. **Melhorias (backend) — ver HANDOFF secao 3:**
+> 1. 📌 **`rated: boolean` no `GET /attendances/client/me`** (pedido FIRME do Andre 2026-07-11): **se ja avaliado, esconder o "Toque para avaliar"**. Hoje o front so descobre via 409 (esconde in-session; ao reabrir volta). Persistente so com `rated`.
+> 2. **Rollup por ESTABELECIMENTO** no `GET /establishment` (media da loja = soma `ratingSum` / soma `ratingCount`) — cards da Home.
+> 3. **`rating_best`** (maior nota da loja) no `GET /establishment` — card destaca o melhor; ordenacao #11 considera avaliacao.
+> 4. (Se faltar) `establishmentName` no `/attendances/client/me`.
+
+> ✅ **Backend PRONTO (handoff #43)** — *Remanejar cliente com espera longa (2026-07-03).* Quando o ETA da vez do cliente ficar longo (o front decide o gatilho, ex.: > 60 min), oferecer 2 acoes na QueueStatus, **so quando o atendimento estiver `SCHEDULED`**:
+> 1. **"Escolher um horario"** → `PATCH /attendances/{id}/reschedule?targetTime=<ISO-8601>`. O atendimento vira **intencao de fila** (mesmo estado do Item 40: cede a vez aos que chegam ate o previsto encostar no alvo, quando e reconfirmado automaticamente). Erros: **422** (`QUEUE_TARGET_NOT_FEASIBLE`, a fila ja preve atender em cima/depois do alvo — sugerir outro horario) e **400** (alvo no passado).
+> 2. **"Ir pro fim da fila"** → `PATCH /attendances/{id}/move-to-end`. Desce a vez para depois do ultimo em espera, **sem sair da fila** e sem strike (no-op se ja for o ultimo).
+> Ambos exigem ser o **proprio cliente** (clientId do JWT — `403` senao) e status `SCHEDULED` (`400` senao). A fila ao vivo (WebSocket/polling) ja reflete a nova posicao/estado. Resposta = o proprio `AttendanceInQueueResponse` (com `isIntent`/`targetTime`).
+
+> ⏳ **Barreiras de horario ao agendar (Andre 2026-07-03) — aguarda backend.** Ao agendar/reagendar, o cliente **nao pode** escolher horario **apos o fechamento** (`closing_time`; se fecha 20:00, nao marca 20:01) nem **durante uma refeicao/intervalo** do profissional. Hoje o `reschedule` **nao** bloqueia isso (a trava `422 QUEUE_TARGET_NOT_FEASIBLE` e so sobre a fila). **Backend** deve rejeitar o alvo **apos o fechamento** (novo erro) e, quando cair **em refeicao**, **NAO** bloquear: agendar o cliente para **depois do intervalo**, com o estimado ja contando **quem ja pediu para depois do almoco** (o front nao consegue calcular isso — e fila meal-aware, so o backend). O front hoje ja e um **formulario** que digita o horario (sem sugestoes) e faz so a validacao basica; o aviso "voce sera atendido apos o intervalo" + o estimado real vem do backend. Ver **HANDOFF_BACKEND secao 8**. **Alinhamento com front-partner:** e uma validacao NOVA do alvo do `reschedule`, aparentada de **BUG5** (backend nao auto-fecha no `closing_time` / nao expoe `is_open` efetivo) e de **S4** (refeicoes Modelo B) — reusa os mesmos dados (`closing_time`/intervalos), mas e requisito proprio. *Praticas de mercado: bloquear reserva fora do horario e em intervalos e padrao (Calendly, OpenTable, apps de salao).*
+
+> ⏳ **Horario que vaga logo antes do almoco (Andre 2026-07-09) — DECIDIDO (opcao C), aguarda backend.** Quando alguem sai/reagenda/vai pro fim e **vaga um lugar imediatamente antes do inicio do intervalo de almoco**, sobra um **buraco curto** ate o almoco que pode nao caber um atendimento inteiro (ex.: vagou 12:50, almoco 13:00 → so 10 min ate o intervalo). **Regra escolhida (C):** o slot so e oferecido/preenchido por quem tem servico **curto o suficiente para caber antes do inicio do almoco** (soma das duracoes dos serviceItems ≤ minutos ate o `mealStart`). Quem nao couber **nao** e puxado pro buraco — segue e e atendido **apos o intervalo** (sem cruzar o almoco). E **calculo do backend** (o front nao sabe duracoes/ordem da fila); o front so exibe o resultado (ex.: proximo elegivel encaixado, ou gap ate o pos-almoco). Impacta o **estimado meal-aware**. Aparentado das **barreiras de horario (H7)** e da fila meal-aware. **Handoff backend a registrar** (ainda nao esta na HANDOFF_BACKEND). *Praticas de mercado: encaixar so servicos que cabem antes do bloqueio e padrao em agenda com intervalos.*
+
+> ⏳ **Troca "morre" ao iniciar o atendimento (Andre 2026-07-03).** Quando o atendimento vai para `IN_PROGRESS` (`start`), qualquer solicitacao/oferta de troca ainda nao aceita deve ser **cancelada**. O `#42` direcionado **ja** expira no `start`; a **oferta aberta** (rework, ver 10b + HANDOFF secao 7) deve seguir a mesma regra. *Pratica de mercado: invalidar alteracoes pendentes quando o servico comeca e padrao.*
+
+### Handoffs para o backend (resumo — 2026-07-04)
+
+Lista viva dos handoffs abertos do front-client para o backend. Detalhe em `HANDOFF_BACKEND.md` (seção indicada). Onde o front-partner ja rastreia o mesmo item, o ID compartilhado esta na coluna.
+
+| # | Handoff | HANDOFF §| ID partner | Status |
+|---|---------|:--------:|:----------:|--------|
+| H1 | Verificar **senha atual** no `PATCH /profile/update-password/me` (add `currentPassword`) | 1 | — | Aguarda backend |
+| H2 | **Esqueci minha senha** — endpoint de reset (codigo/email) | 2 | S5/S6 | Aguarda backend |
+| H3 | **Avaliacao (Item 6)** — ✅ **VALIDADO NO DEVICE (2026-07-04, OTA `019f2b2f`): ver a nota real E avaliar funcionam.** Backend manda `rating_average`/`rating_count` no `professionals-with-queue`; front consome (`resolveRating`). **Melhorias opcionais (nao bloqueiam):** rollup por ESTABELECIMENTO no `GET /establishment` (cards da Home) + `rated`/`establishmentName` no `/attendances/client/me` | 3 | — | ✅ **Feito (device)** |
+| H4 | **WebSocket** nao funciona no device (backend compartilhado) — coberto por polling | 4 | — | **Ultima prioridade** (Andre 2026-07-04) |
+| H5 | **Estender strike #39** a `reschedule` e `move-to-end` com ETA < 1h (hoje so no `cancel`) | 6 | — | Aguarda backend |
+| H6 | **Oferta ABERTA de troca** (rework #42): `/swap-offers` (direcao + maxMinutes, lista aberta, accept); **morre no IN_PROGRESS** | 7 | **S3** (=C6) | Aguarda backend |
+| H7 | **Barreira de horario ao agendar**: **fechamento BLOQUEIA** (novo erro); **refeicao NAO bloqueia** — agenda pos-intervalo + **estimado meal-aware contando quem ja pediu pos-almoco** (so o backend calcula; resposta traz `scheduledTime` real + ex. `placedAfterBreak`) | 8 | ~BUG5/BUG6 / S4 | Aguarda backend |
+| H8 | **Cliente adicionar mais servico JA na fila** — endpoint CLIENT (ex.: `PATCH /attendances/{id}/service-items`), so dono + SCHEDULED, acrescenta serviceItemIds e recalcula `totalValue`/`estimatedTotalMinutes`. Hoje so existe `add-service-items` PROFESSIONAL (catalogo, nao o atendimento) | 9 | — | Aguarda backend |
+| H9 | **Atendimento PAUSED fica orfao** — ao pausar (IN_PROGRESS→PAUSED), o atendimento some da fila do profissional (`QueueResponse` so expoe `inAttendance`=IN_PROGRESS) e nao da pra retomar. **Backend:** incluir o PAUSED no `QueueResponse` do dono. **Partner:** UI de "Retomar" (`/resume`). Client ja mostra "Pausado" | 10 | — | Aguarda backend + partner |
+
+> ✅ Ja entregues pelo backend nesta frente (fora da lista): remanejar #43 (`reschedule`/`move-to-end`), troca direcionada #42 (front descartou em favor da oferta aberta H6), rating #6 (backend), push notifications.
 
 ### Correcoes de UX e ajustes pendentes
 
@@ -454,9 +512,10 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 - Se profissional == proprietario: dividido entre **profissional + plataforma** (2 partes)
 
 **Frontend (app client):**
-- Tela de multas pendentes acessivel via Profile
-- Popup de cancelamento mostra aviso de multa quando tempo <= 60min
-- Na tela de pagamento do proximo atendimento, mostrar multas pendentes somadas ao valor
+- Tela de multas pendentes acessivel via Profile — *pendente (depende do backend)*
+- ✅ **FEITO (2026-07-03):** aviso de multa de R$3 quando o ETA da vez e **< 1h** (`incursLatePenalty`, regra pelo TEMPO nao pelo status) em **todas** as acoes que vagam um lugar perto do inicio: **sair da fila**, **reagendar** ("Escolher um horario") e **ir pro fim**. So a **TROCA por consentimento mutuo (#42)** nunca gera multa. **A cobranca/strike em si ainda depende do backend** — e hoje o backend so aplica strike no CANCELAR (#39); **handoff:** estender o #39 tambem a reschedule/move-to-end com ETA < 1h (ver abaixo).
+- ⏳ **Handoff backend — estender strike #39:** hoje `AttendanceServiceImpl` so registra `ClientPenaltyEvent`/`strikeCount` no `PUT /attendances/{id}/cancel` com ETA < 1h. Pela regra selada, **`PATCH /reschedule` e `PATCH /move-to-end` com ETA < 1h tambem prejudicam quem se segue** e devem registrar o mesmo strike. O front ja avisa o usuario nessas acoes.
+- Na tela de pagamento do proximo atendimento, mostrar multas pendentes somadas ao valor — *pendente (depende do backend)*
 
 ### Regras de negocio — Encaixe na fila
 
@@ -517,11 +576,12 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
-| 10 | Trocar lugar na fila | Endpoint pendente no backend (`ClientServiceImpl:138`). Frontend consumira quando pronto | Aguarda backend |
+| 10 | Trocar lugar na fila (remanejar #43) | **Backend entregou (handoff #43, 2026-07-03)** via `PATCH /attendances/{id}/reschedule` + `PATCH /attendances/{id}/move-to-end`. Consolidado no **Item 16** — **front FEITO** (aguarda teste device). Ver callout "Backend PRONTO (handoff #43)" | Front FEITO (ver Item 16) |
+| 10b | **Troca de posicao como OFERTA ABERTA (#42 rework)** | Modelo desejado (Andre 2026-07-03): o cliente abre uma solicitacao com **direcao (adiantar/atrasar) + em ate quanto tempo**; ela fica **"boiando"** e **qualquer elegivel** aceita (o app nao faz match, e na sorte); so aparece pra quem faz sentido (adiantar→quem esta a frente; atrasar→atras); **nunca multa**; se ninguem aceitar, recorre a ir-pro-fim/agendar. **O #42 atual e DIRECIONADO (1-a-1) — nao atende isso.** O front direcionado foi **REMOVIDO**; a opcao "Trocar" no `ChangeTurnModal` esta como **"em breve"**. **Precisa backend** (oferta aberta: `POST /swap-offers {attendanceId, direction, maxMinutes}`, `GET /swap-offers`, `PATCH /swap-offers/{id}/accept`) — **HANDOFF_BACKEND secao 7**. **= S3 no PRD front-partner** (que ja rastreia como pendencia aberta de backend; = C6 marketplace de troca) | **Aguarda backend (S3 / oferta aberta)** |
 | 11 | Busca por bairro ordenada por menor fila (C1) | Cliente escolhe estabelecimento pelo **bairro** ordenado pela **menor fila** (e GPS na fase 2). Depende do backend #2 (`GET /establishment?neighborhood=X` + tempo de espera agregado + ordenacao). Handoff do partner | Aguarda backend |
 | 12 | Testes de componente/tela | React Native Testing Library | Pendente |
 | 13 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
-| 14 | Countdown resiliente offline | O countdown ja roda a partir do relogio do device (`useQueueCountdown` calcula `estimatedMinutes - (Date.now() - enteredAt)`), so o polling depende de internet. Falta polish: detectar conexao (`@react-native-community/netinfo`), pausar polling offline e re-sincronizar ao reconectar, mostrar badge "offline / atualizado ha X min" para o usuario nao ficar cego, e manter `activeQueue` persistido (ja em SecureStore) entre reinicios offline. A cada reconexao a aferição melhora; sem internet o numero continua descontando localmente | Pendente |
+| 14 | Countdown resiliente offline | **FEITO no codigo (commit `f056c67f`).** Countdown ja roda pelo relogio do device (`useQueueCountdown`); alem disso: `@react-native-community/netinfo` + `onlineManager` do React Query pausam as queries offline e re-sincronizam ao reconectar, `OfflineBanner` (barra vermelha no topo) avisa o usuario, e `activeQueue` persiste em SecureStore entre reinicios. Uso DEFENSIVO (try/catch) — netinfo e nativo; se o OTA cair em build sem ele, assume online e nao quebra. ⚠️ **A deteccao de offline so ATIVA apos um novo `eas build`** (o OTA atual e seguro mas inerte, pois o modulo nativo nao esta no binario) | **FEITO (codigo) / ativa apos novo eas build** |
 
 ### Nota — Transferencia de proprietario (OWNER)
 
@@ -543,6 +603,13 @@ O backend tem `PATCH /establishment/{id}/owner` que transfere ownership para out
 - **CI** (`.github/workflows/ci.yml`): lint + typecheck (bloqueante) + testes em `dev`/`main`.
 - **EAS Update OTA** (`.github/workflows/eas-update.yml`): publica o bundle JS automaticamente no push (dev→preview, main→production) com `EXPO_PUBLIC_API_ENV` por branch.
 - **Auto-rollback** (`.github/workflows/auto-rollback.yml`): reverte o commit que deixar o CI vermelho em `dev`/`main`, voltando ao ultimo estado funcional. **(Nota: o partner ainda nao tem auto-rollback — vale portar para la.)**
+
+> **Economia de minutos do GitHub Actions (2026-06-29)** — aplicado no client, **recomendado tambem para o front-partner**:
+> - **CI num job unico** (lint→typecheck→testes em sequencia, fail-fast) em vez de 3 jobs separados. Antes cada job rodava `npm ci` do zero (3x o custo de instalacao); agora instala **1x**.
+> - **`concurrency` + `cancel-in-progress: true`** no CI e no eas-update: pushes seguidos na mesma branch **cancelam** runs/OTA anteriores ainda em andamento (evita gastar minutos com builds que serao descartados). Runs cancelados tem conclusion `cancelled` (nao `failure`), entao **nao disparam o auto-rollback**.
+> - **`paths-ignore`** (`**.md`, `src/docs/**`, `.gitignore`): commits so de documentacao **nao rodam CI nem publicam OTA**.
+> - **`timeout-minutes`** em todos os jobs (CI 15 / OTA 20 / rollback 10): evita workflow "preso" queimando minutos.
+> - Removido `--coverage` + upload de artefato do CI (o pre-push local ja roda os testes).
 
 ### Concluidos
 

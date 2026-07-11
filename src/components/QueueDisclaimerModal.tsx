@@ -32,7 +32,7 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
         <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
           <HStack alignItems="center" gap="$2" mb="$3">
-            <Info size={24} color="#00B37E" weight="fill" />
+            <Info size={24} color="#3B7A3F" weight="fill" />
             <Heading fontFamily="$heading" fontSize="$lg" flex={1}>
               {QUEUE_DISCLAIMER_TITLE}
             </Heading>

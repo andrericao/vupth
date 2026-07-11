@@ -5,6 +5,7 @@ import { AuthRoutes } from "./auth.routes";
 
 import { gluestackUIConfig } from "config/gluestack-ui.config";
 import { Box } from "@gluestack-ui/themed";
+import { OfflineBanner } from "@components/OfflineBanner";
 
 const theme = {
 	...DefaultTheme,
@@ -21,6 +22,7 @@ export function Routes(){
 		<NavigationContainer theme={theme}>
 			<AuthRoutes />
 		</NavigationContainer>
+		<OfflineBanner />
 		</Box>
 		</SafeAreaProvider>
 	);

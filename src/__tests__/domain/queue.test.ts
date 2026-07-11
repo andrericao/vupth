@@ -5,7 +5,15 @@ import {
   shouldCreateAttendance,
   estimatedStartTime,
   formatClockTime,
+  formatElapsed,
   reconcileQueueEstimate,
+  canReshuffleQueue,
+  incursLatePenalty,
+  buildTargetFromTime,
+  validateRescheduleTime,
+  rescheduleErrorMessage,
+  moveToEndErrorMessage,
+  LATE_PENALTY_THRESHOLD_MINUTES,
   AttendanceStatus,
 } from '@domain/queue/types';
 import { MOCK_QUEUE_POSITION } from '@domain/queue/mockData';
@@ -81,6 +89,21 @@ describe('Queue Domain', () => {
     });
   });
 
+  describe('formatElapsed', () => {
+    it('formata segundos como m:ss', () => {
+      expect(formatElapsed(0)).toBe('0:00');
+      expect(formatElapsed(5)).toBe('0:05');
+      expect(formatElapsed(65)).toBe('1:05');
+      expect(formatElapsed(600)).toBe('10:00');
+    });
+    it('usa h:mm:ss acima de 1h', () => {
+      expect(formatElapsed(3661)).toBe('1:01:01');
+    });
+    it('trata negativo como 0', () => {
+      expect(formatElapsed(-10)).toBe('0:00');
+    });
+  });
+
   describe('canCancelAttendance', () => {
     it('deve permitir cancelar quando status é SCHEDULED', () => {
       expect(canCancelAttendance('SCHEDULED')).toBe(true);
@@ -113,6 +136,90 @@ describe('Queue Domain', () => {
 
     it.each(inactiveStatuses)('deve retornar false para status %s', (status) => {
       expect(isActiveAttendance(status)).toBe(false);
+    });
+  });
+
+  describe('canReshuffleQueue (Item 16 — trocar é sempre livre)', () => {
+    it('permite remanejar sempre que aguardando (SCHEDULED), independente do ETA', () => {
+      expect(canReshuffleQueue('SCHEDULED')).toBe(true);
+    });
+
+    it('NÃO permite fora de SCHEDULED', () => {
+      const others: AttendanceStatus[] = ['IN_PROGRESS', 'PAUSED', 'FINISHED', 'CANCELLED'];
+      others.forEach((status) => expect(canReshuffleQueue(status)).toBe(false));
+    });
+  });
+
+  describe('incursLatePenalty (multa pelo TEMPO estimado, não pelo status)', () => {
+    it('multa quando falta MENOS de 1h para ser atendido', () => {
+      expect(incursLatePenalty(59)).toBe(true);
+      expect(incursLatePenalty(10)).toBe(true);
+      expect(incursLatePenalty(0)).toBe(true);
+    });
+
+    it('SEM multa no limiar (60min) ou acima — sair/remanejar cedo não prejudica', () => {
+      expect(incursLatePenalty(LATE_PENALTY_THRESHOLD_MINUTES)).toBe(false);
+      expect(incursLatePenalty(120)).toBe(false);
+    });
+  });
+
+  describe('buildTargetFromTime (Item 16 — formulário de horário)', () => {
+    it('constrói o horário local de HOJE (hora/minuto), zerando seg/ms', () => {
+      const dayRef = new Date(2026, 6, 3, 9, 5, 30).getTime(); // 03/07 09:05:30 local
+      const d = new Date(buildTargetFromTime(dayRef, 16, 30));
+      expect(d.getHours()).toBe(16);
+      expect(d.getMinutes()).toBe(30);
+      expect(d.getSeconds()).toBe(0);
+      expect(d.getDate()).toBe(3);
+    });
+  });
+
+  describe('validateRescheduleTime (Item 16 — validação básica)', () => {
+    const floor = new Date(2026, 6, 3, 13, 0, 0).getTime(); // fim da fila 13:00
+    it('aceita horário válido após o piso', () => {
+      const target = buildTargetFromTime(floor, 16, 0);
+      expect(validateRescheduleTime(16, 0, target, floor)).toBeNull();
+    });
+    it('rejeita hora/minuto fora de faixa', () => {
+      expect(validateRescheduleTime(24, 0, floor, floor)).toMatch(/hora inválida/i);
+      expect(validateRescheduleTime(10, 60, floor, floor)).toMatch(/minuto inválido/i);
+    });
+    it('rejeita horário antes do fim da fila de hoje', () => {
+      const target = buildTargetFromTime(floor, 11, 0); // 11:00 < 13:00
+      expect(validateRescheduleTime(11, 0, target, floor)).toMatch(/após o fim da fila/i);
+    });
+  });
+
+  describe('rescheduleErrorMessage (Item 16)', () => {
+    it('422 ou QUEUE_TARGET_NOT_FEASIBLE → alvo inviável', () => {
+      expect(rescheduleErrorMessage(422)).toMatch(/horário mais adiante/i);
+      expect(rescheduleErrorMessage(undefined, 'QUEUE_TARGET_NOT_FEASIBLE')).toMatch(/horário mais adiante/i);
+    });
+
+    it('400 → horário no passado/ inválido', () => {
+      expect(rescheduleErrorMessage(400)).toMatch(/inválido|futuro/i);
+    });
+
+    it('403 → não é o dono', () => {
+      expect(rescheduleErrorMessage(403)).toMatch(/não pode remanejar/i);
+    });
+
+    it('genérico para o resto', () => {
+      expect(rescheduleErrorMessage(500)).toMatch(/tente novamente/i);
+    });
+  });
+
+  describe('moveToEndErrorMessage (Item 16)', () => {
+    it('400 → só enquanto aguarda', () => {
+      expect(moveToEndErrorMessage(400)).toMatch(/enquanto você aguarda/i);
+    });
+
+    it('403 → não é o dono', () => {
+      expect(moveToEndErrorMessage(403)).toMatch(/não pode remanejar/i);
+    });
+
+    it('genérico para o resto', () => {
+      expect(moveToEndErrorMessage(500)).toMatch(/tente novamente/i);
     });
   });
 

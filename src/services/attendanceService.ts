@@ -49,6 +49,19 @@ export interface ClientAttendanceFilters {
   dateTo?: string;
 }
 
+// Resposta dos remanejamentos de fila (Item 16): reschedule / move-to-end.
+// É o próprio AttendanceInQueueResponse do backend (com isIntent/targetTime).
+export interface AttendanceInQueueResponse {
+  id: string;
+  clientId: string;
+  professionalId: string;
+  establishmentId: string;
+  status: string;
+  scheduledTime: string;
+  isIntent?: boolean;
+  targetTime?: string | null;
+}
+
 export const attendanceService = {
   create(data: CreateAttendanceRequest, accessToken: string) {
     return api.post<AttendanceResponse>('/attendances', data, {
@@ -69,5 +82,29 @@ export const attendanceService = {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: filters,
     });
+  },
+
+  // Item 16 — espera longa: reagenda a vez para um horário (targetTime ISO-8601).
+  // O atendimento vira intenção de fila. Erros: 422 (alvo inviável), 400 (passado),
+  // 403 (não é o dono), 400 (status != SCHEDULED).
+  reschedule(attendanceId: string, targetTimeISO: string, accessToken: string) {
+    return api.patch<AttendanceInQueueResponse>(
+      `/attendances/${attendanceId}/reschedule`,
+      null,
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        params: { targetTime: targetTimeISO },
+      },
+    );
+  },
+
+  // Item 16 — espera longa: desce a vez para o fim da fila (sem sair, sem strike).
+  // No-op se já for o último. Erros: 403 (não é o dono), 400 (status != SCHEDULED).
+  moveToEnd(attendanceId: string, accessToken: string) {
+    return api.patch<AttendanceInQueueResponse>(
+      `/attendances/${attendanceId}/move-to-end`,
+      null,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
   },
 };

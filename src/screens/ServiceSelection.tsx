@@ -18,6 +18,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
 import { ServiceItemResponse } from "@domain/professional/types";
 import { establishmentService } from "@services/establishmentService";
+import { useAuthStore } from "@stores/authStore";
 
 type RouteParams = {
   professionalId: string;
@@ -37,6 +38,8 @@ export function ServiceSelection() {
     establishmentName,
     estimatedWaitMinutes,
   } = route.params as RouteParams;
+
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const [services, setServices] = useState<ServiceItemResponse[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -70,6 +73,23 @@ export function ServiceSelection() {
   );
 
   function handleConfirm() {
+    // Portao de auth: a verificacao de token acontece AQUI, ao tentar entrar na
+    // fila, ja com os servicos escolhidos. Visitante -> login/cadastro levando a
+    // selecao; ao autenticar, o Login/SignUp redireciona pra queueStatus com os
+    // mesmos serviceItemIds e cria o atendimento.
+    if (!isAuthenticated) {
+      navigation.navigate("login", {
+        redirectTo: "queueStatus",
+        professionalId,
+        professionalName,
+        establishmentId,
+        establishmentName,
+        estimatedWaitMinutes,
+        serviceItemIds: selectedIds,
+      });
+      return;
+    }
+
     navigation.navigate("queueStatus", {
       professionalId,
       professionalName,
@@ -145,7 +165,7 @@ export function ServiceSelection() {
                             {service.customName}
                           </Text>
                           <Text size="xs" color="$gray300" mt="$1">
-                            ~{service.weeklyAverageDurationInMinutes ?? 30} min
+                            {service.weeklyAverageDurationInMinutes ?? 30} min
                           </Text>
                         </VStack>
                         <HStack alignItems="center" gap="$3">
@@ -178,7 +198,7 @@ export function ServiceSelection() {
               <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} mb="$3">
                 <HStack justifyContent="space-between">
                   <Text size="sm" color="$gray300">
-                    {selectedIds.length} serviço(s) — ~{totalMinutes} min
+                    {selectedIds.length} serviço(s) — {totalMinutes} min
                   </Text>
                   <Text fontFamily="$heading" color="$green500">
                     R$ {totalPrice.toFixed(2)}
