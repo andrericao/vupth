@@ -70,7 +70,7 @@ Entrar na fila (visitante ou logado): Home → Detalhe → **ServiceSelection (v
 
 **Atendimentos:** EM ANDAMENTO (SCHEDULED ou IN_PROGRESS) + REALIZADOS (dia+hora de inicio); refetch no foco + pull-to-refresh; tocar no card abre **detalhes** (AttendanceDetailModal) + avaliar.
 
-**Avaliacao (Item 6) — ✅ FEITO (front + backend, validado no device 2026-07-04):** `RatingModal` 1-5 estrelas + comentario → `POST /attendances/{id}/rating`; agregados `rating_average`/`rating_count` vem no `professionals-with-queue` e o front consome (`resolveRating`).
+**Avaliacao (Item 6) — ✅ FEITO (front + backend, validado no device 2026-07-04):** `RatingModal` **só 1-5 estrelas** (comentario OCULTO desde 2026-07-11, flag `SHOW_COMMENT=false`) → `POST /attendances/{id}/rating`; agregados `rating_average`/`rating_count` vem no `professionals-with-queue` e o front consome (`resolveRating`). Falta backend expor `rated` pra esconder "avaliar" apos o voto (HANDOFF sec.3).
 
 **WebSocket:** `useQueueSocket` / `useQueueNotifications` existem mas **nao funcionam no device** (pendencia, precisa device+backend logs). Substituido por **polling** (`refetchInterval`: establishments 60s, fila 20s, atendimentos 30s) + poll de status da fila (30s).
 
@@ -452,10 +452,11 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 > 3. Atualizar testes de integracao + collection Postman + PRD_BACKEND (secao "PATCH /profile/update-password/me").
 > Depois disso o front envia `{ currentPassword, password }` e adiciona o campo na tela. (Tambem avaliar o endpoint de **forgot password** do item 14.)
 
-> ✅ **Avaliacao (Item 6) — VALIDADO NO DEVICE (2026-07-04, OTA `019f2b2f`): ver a nota real E avaliar funcionam.** `POST /attendances/{id}/rating` existe **e** os agregados `rating_average`/`rating_count` vem no `GET /establishment/id/{id}/professionals-with-queue` (por profissional **e** por service item); o front consome (`resolveRating`). **Melhorias opcionais (nao bloqueiam):**
-> 1. **Rollup por ESTABELECIMENTO** no `GET /establishment` (media da loja = soma `ratingSum` / soma `ratingCount`) — para os cards da Home; o partner confirmou so o nivel profissional/service-item.
-> 2. Expor `rated: boolean` no `GET /attendances/client/me` para esconder o "Toque para avaliar" apos o voto (hoje o front so descobre via 409).
-> 3. (Se faltar) `establishmentName` no `/attendances/client/me`.
+> ✅ **Avaliacao (Item 6) — VALIDADO NO DEVICE (2026-07-04): ver a nota real E avaliar funcionam.** `POST /attendances/{id}/rating` existe **e** os agregados `rating_average`/`rating_count` vem no `professionals-with-queue` (por profissional **e** por service item); o front consome (`resolveRating`). **Comentario OCULTO no front (Andre 2026-07-11)** — `RatingModal` so pede as estrelas (flag `SHOW_COMMENT=false`, codigo mantido); o `POST /rating` vai sem `comment` por ora. **Melhorias (backend) — ver HANDOFF secao 3:**
+> 1. 📌 **`rated: boolean` no `GET /attendances/client/me`** (pedido FIRME do Andre 2026-07-11): **se ja avaliado, esconder o "Toque para avaliar"**. Hoje o front so descobre via 409 (esconde in-session; ao reabrir volta). Persistente so com `rated`.
+> 2. **Rollup por ESTABELECIMENTO** no `GET /establishment` (media da loja = soma `ratingSum` / soma `ratingCount`) — cards da Home.
+> 3. **`rating_best`** (maior nota da loja) no `GET /establishment` — card destaca o melhor; ordenacao #11 considera avaliacao.
+> 4. (Se faltar) `establishmentName` no `/attendances/client/me`.
 
 > ✅ **Backend PRONTO (handoff #43)** — *Remanejar cliente com espera longa (2026-07-03).* Quando o ETA da vez do cliente ficar longo (o front decide o gatilho, ex.: > 60 min), oferecer 2 acoes na QueueStatus, **so quando o atendimento estiver `SCHEDULED`**:
 > 1. **"Escolher um horario"** → `PATCH /attendances/{id}/reschedule?targetTime=<ISO-8601>`. O atendimento vira **intencao de fila** (mesmo estado do Item 40: cede a vez aos que chegam ate o previsto encostar no alvo, quando e reconfirmado automaticamente). Erros: **422** (`QUEUE_TARGET_NOT_FEASIBLE`, a fila ja preve atender em cima/depois do alvo — sugerir outro horario) e **400** (alvo no passado).

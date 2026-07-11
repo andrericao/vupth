@@ -27,20 +27,21 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 
 ---
 
-## 3. Avaliação de atendimento (Item 6 do PRD_BACKEND — hoje ⬜ aberto)
+## 3. Avaliação de atendimento (Item 6 do PRD_BACKEND)
 
-O **front já está pronto** (envio + exibição): `RatingModal` (1–5 estrelas + comentário) no atendimento concluído e nos cards FINISHED; `ratingService` chama `POST /attendances/{id}/rating`; `resolveRating` mostra a nota real quando vier, senão um placeholder.
+✅ **NÚCLEO ENTREGUE (backend confirmou 2026-07-11, validado no device 2026-07-04):** `POST /attendances/{id}/rating` + agregados `rating_average`/`rating_count` **por profissional** no `professionals-with-queue`. O front envia (`RatingModal` → `ratingService`) e exibe (`resolveRating`).
 
-**Precisa:**
-1. `POST /attendances/{id}/rating` com `{ score: 1-5 (int), comment?: string }` — só o **cliente dono** do attendance, só com `status = FINISHED`, **1 voto** por attendance (409 no 2º), guest não avalia. (Entidade `AttendanceRating` + agregados `ratingSum`/`ratingCount` em `Professional` e `ServiceItem` — já especificado no Item 6.)
-2. **Devolver no payload** `rating_average` (number|null) + `rating_count` (number):
-   - **por profissional** em `GET /establishment/id/{id}/professionals-with-queue`;
-   - **agregado por estabelecimento** em `GET /establishment` — a média da loja = **soma dos `ratingSum` ÷ soma dos `ratingCount`** dos profissionais da loja (média ponderada pelos votos; barato pois são poucos profissionais). *Isto é um complemento ao Item 6, que hoje só prevê agregados de profissional/serviço.*
-   - **Card da loja (pedido do usuário 2026-06-29):** o card deve destacar o **melhor** — **menor tempo** (`estimated_wait_minutes`, já feito) + **MAIOR estrela** (loja "mais bem avaliada"). Então, além do `rating_average` agregado, devolver em `GET /establishment` a **maior nota entre os profissionais** da loja (ex.: `rating_best`: number|null) para exibir no card. **Ordenação (#11):** hoje é só por menor fila; considerar também a avaliação (ex.: desempate/boost por melhor avaliado) na ordenação da listagem.
-3. (Opcional, recomendado) expor em `GET /attendances/client/me` se o atendimento **já foi avaliado** (ex.: `rated: boolean`), para o front esconder o "Toque para avaliar" após o voto. Hoje o front só descobre via 409 ao tentar.
-4. (Pequeno) incluir **`establishmentName`** no `GET /attendances/client/me` (hoje só vem `establishmentId`). A tela de detalhes do atendimento quer mostrar "qual a loja" e não tem o nome.
+> **Front (2026-07-11):** o **campo de comentário está OCULTO** no `RatingModal` (flag `SHOW_COMMENT = false`, pedido do Andre — não precisa agora, código mantido pra reativar). O `POST /rating` passa a ir **sem `comment`** por enquanto — o backend já trata `comment?` como opcional, então nada muda do lado dele.
 
-**Granularidade alinhada com o usuário:** nota **por profissional** na tela do estabelecimento + nota **agregada** no card da loja.
+**Ainda falta (melhorias, não bloqueiam):**
+1. **`rated: boolean` no `GET /attendances/client/me`** — 📌 **pedido firme do Andre (2026-07-11): se o atendimento já foi avaliado, o front deve ESCONDER o "Toque para avaliar".** O esconder tem **duas partes**:
+   - **In-session — ✅ já feito no front:** logo após votar, o `RatingModal` chama `onClose(true)` e a tela para de oferecer avaliar naquela sessão. Não depende do backend.
+   - **Persistente (ao reabrir o app) — ⬜ depende deste `rated`:** sem o campo, ao reabrir o app o botão "avaliar" **reaparece** (o front recarrega o `client/me` e não sabe que já votou); só some de novo quando o cliente tenta votar e leva **409**. Com `rated: boolean` no payload, o front esconde de forma persistente, sem depender do 409.
+2. **Rollup por ESTABELECIMENTO** em `GET /establishment` — média da loja = **soma `ratingSum` ÷ soma `ratingCount`** dos profissionais (ponderada; barato). Hoje só há agregado por profissional/serviço. Para os **cards da Home**.
+3. **`rating_best` (maior nota entre os profissionais)** em `GET /establishment` — o card destaca o "melhor" (menor tempo + maior estrela). **Ordenação (#11):** considerar avaliação como desempate/boost.
+4. (Pequeno) **`establishmentName`** no `GET /attendances/client/me` (hoje só `establishmentId`) — a tela de detalhes quer mostrar a loja.
+
+**Granularidade alinhada com o usuário:** nota **por profissional** na tela do estabelecimento (✅ feito) + nota **agregada** no card da loja (pendente, itens 2/3).
 
 ---
 
