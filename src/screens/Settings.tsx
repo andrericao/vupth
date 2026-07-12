@@ -22,6 +22,8 @@ import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
+import { useComingSoonStore } from "@stores/comingSoonStore";
+import { COMING_SOON_LABELS, ComingSoonFeature } from "@domain/comingSoon";
 import { profileService } from "@services/profileService";
 import { addressService, AddressResponse } from "@services/addressService";
 
@@ -67,6 +69,12 @@ export function Settings() {
   const logout = useAuthStore((s) => s.logout);
 
   const [mainAddress, setMainAddress] = useState<AddressResponse | null>(null);
+
+  // Funcionalidades "em breve" mais tocadas primeiro = as que fizeram mais falta.
+  const comingSoonCounts = useComingSoonStore((s) => s.counts);
+  const awaited = (Object.entries(comingSoonCounts) as [string, number][])
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1]);
 
   useFocusEffect(
     useCallback(() => {
@@ -183,6 +191,39 @@ export function Settings() {
           $active-bg="$red500"
         />
       </VStack>
+
+      {awaited.length > 0 && (
+        <VStack mt="$8">
+          <Heading fontFamily="$heading" fontSize="$md" mb="$1">
+            Funcionalidades aguardadas
+          </Heading>
+          <Text size="xs" color="$gray300" mb="$3">
+            As mais tocadas fizeram mais falta — priorizar quando o backend liberar.
+          </Text>
+          <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
+            {awaited.map(([feature, count]) => (
+              <HStack
+                key={feature}
+                bg="$white"
+                px="$4"
+                py="$3"
+                borderBottomWidth="$1"
+                borderBottomColor="$gray500"
+                alignItems="center"
+              >
+                <Text size="sm" flex={1}>
+                  {COMING_SOON_LABELS[feature as ComingSoonFeature] ?? feature}
+                </Text>
+                <Box bg="$green100" borderRadius="$full" px="$3" py="$1">
+                  <Text size="xs" fontFamily="$heading" color="$green700">
+                    {count}×
+                  </Text>
+                </Box>
+              </HStack>
+            ))}
+          </Box>
+        </VStack>
+      )}
 
       <VStack mt="$8" alignItems="center" gap="$1">
         <Text size="xs" color="$gray400">

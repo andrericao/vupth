@@ -15,6 +15,7 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
+import { ScheduleModal } from "@components/ScheduleModal";
 import { cardShadow } from "@utils/styles";
 import { ServiceItemResponse } from "@domain/professional/types";
 import { establishmentService } from "@services/establishmentService";
@@ -45,6 +46,7 @@ export function ServiceSelection() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showSchedule, setShowSchedule] = useState(false);
 
   useEffect(() => {
     establishmentService
@@ -209,10 +211,18 @@ export function ServiceSelection() {
                 title="Confirmar e entrar na fila"
                 onPress={handleConfirm}
               />
+              <Button
+                title="Agendar para depois"
+                variant="outline"
+                mt="$2"
+                onPress={() => setShowSchedule(true)}
+              />
             </Box>
           )}
         </>
       )}
+
+      <ScheduleModal visible={showSchedule} onClose={() => setShowSchedule(false)} />
     </VStack>
   );
 }

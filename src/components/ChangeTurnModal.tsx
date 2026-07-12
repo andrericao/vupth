@@ -6,6 +6,8 @@ import { Clock } from "phosphor-react-native";
 import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";
 import { formatClockTime } from "@domain/queue/types";
+import { notifyComingSoon } from "@domain/comingSoon";
+import { useComingSoonStore } from "@stores/comingSoonStore";
 
 type Props = {
   visible: boolean;
@@ -54,7 +56,14 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onRes
               <Text size="sm" color="$gray300" mt="$1">
                 Você quer ser atendido antes ou depois?
               </Text>
-              <Button title="Adiantar minha vez" mt="$5" onPress={() => setStep("adiantar")} />
+              <Button
+                title="Adiantar minha vez"
+                mt="$5"
+                onPress={() => {
+                  void useComingSoonStore.getState().tap("trocar_posicao");
+                  setStep("adiantar");
+                }}
+              />
               <Button title="Atrasar minha vez" variant="outline" mt="$3" onPress={() => setStep("atrasar")} />
               <Button title="Cancelar" variant="outline" mt="$3" onPress={close} />
             </>
@@ -101,7 +110,12 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onRes
               )}
               <Button title="Ir para o fim da fila" mt="$5" onPress={goMoveToEnd} />
               <Button title="Agendar para depois" variant="outline" mt="$3" onPress={goReschedule} />
-              <Button title="Trocar com alguém (em breve)" variant="outline" mt="$3" isDisabled onPress={() => {}} />
+              <Button
+                title="Trocar com alguém (em breve)"
+                variant="outline"
+                mt="$3"
+                onPress={() => notifyComingSoon("trocar_posicao")}
+              />
               <Button title="Voltar" variant="outline" mt="$3" onPress={() => setStep("root")} />
             </>
           )}

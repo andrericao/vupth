@@ -1,0 +1,30 @@
+import { Alert } from 'react-native';
+import { useComingSoonStore } from '@stores/comingSoonStore';
+
+// Funcionalidades cuja UI já existe no front, mas que AGUARDAM ENDPOINT do backend.
+// Ao tocar, mostram "em breve" e contabilizam o toque (comingSoonStore) para o
+// Andre priorizar depois. Quando o endpoint existir, é só trocar o notifyComingSoon
+// pela chamada real no ponto de uso.
+export type ComingSoonFeature =
+  | 'agendar_hoje'
+  | 'agendar_outro_dia'
+  | 'esqueci_senha'
+  | 'trocar_posicao'
+  | 'manifestar_interesse';
+
+export const COMING_SOON_LABELS: Record<ComingSoonFeature, string> = {
+  agendar_hoje: 'Agendar para hoje (mais tarde)',
+  agendar_outro_dia: 'Agendar para outro dia',
+  esqueci_senha: 'Esqueci minha senha',
+  trocar_posicao: 'Trocar posição na fila',
+  manifestar_interesse: 'Manifestar interesse (loja fechada)',
+};
+
+// Ordem estável para exibir a lista em Config.
+export const COMING_SOON_FEATURES = Object.keys(COMING_SOON_LABELS) as ComingSoonFeature[];
+
+/** Registra o toque e avisa "em breve". Ponto único a trocar quando o endpoint vier. */
+export function notifyComingSoon(feature: ComingSoonFeature) {
+  void useComingSoonStore.getState().tap(feature);
+  Alert.alert('Em breve 🚧', `${COMING_SOON_LABELS[feature]} estará disponível em breve.`);
+}

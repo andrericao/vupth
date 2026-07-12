@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Text, Center, VStack, ScrollView } from "@gluestack-ui/themed";
 
@@ -8,6 +8,7 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { validateLogin } from "@domain/auth/validateAuth";
+import { notifyComingSoon } from "@domain/comingSoon";
 import { useAuthStore } from "@stores/authStore";
 
 type RouteParams = {
@@ -112,6 +113,12 @@ export function Login() {
           </VStack>
 
           <Button title={isSubmitting ? "Entrando..." : "Entrar"} onPress={handleLogin} />
+
+          <TouchableOpacity onPress={() => notifyComingSoon("esqueci_senha")}>
+            <Text size="sm" color="$green500" fontFamily="$heading">
+              Esqueci minha senha
+            </Text>
+          </TouchableOpacity>
         </Center>
 
         <Center mt={200} flex={1} justifyContent="flex-end">
