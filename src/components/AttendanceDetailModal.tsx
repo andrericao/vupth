@@ -47,11 +47,13 @@ type Props = {
   attendance: ClientAttendance | null;
   onClose: () => void;
   onRate: () => void;
+  // false quando o atendimento já foi avaliado (esconde o "Avaliar").
+  canRate?: boolean;
 };
 
 // Detalhes de um atendimento (quem atendeu, quando, serviços, duração, valor) +
-// opção de avaliar (quando FINISHED).
-export function AttendanceDetailModal({ attendance, onClose, onRate }: Props) {
+// opção de avaliar (quando FINISHED e ainda não avaliado).
+export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = true }: Props) {
   const a = attendance;
   const st = a ? STATUS[a.status] ?? { label: a.status, color: "#9CA3AF" } : null;
 
@@ -84,7 +86,7 @@ export function AttendanceDetailModal({ attendance, onClose, onRate }: Props) {
               <Row label="Valor" value={`R$ ${a.totalValue.toFixed(2)}`} />
             </ScrollView>
 
-            {a.status === "FINISHED" && (
+            {a.status === "FINISHED" && canRate && (
               <Button title="Avaliar atendimento" mt="$5" onPress={onRate} />
             )}
             <Button title="Fechar" variant="outline" mt="$3" onPress={onClose} />

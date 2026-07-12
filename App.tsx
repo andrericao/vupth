@@ -15,6 +15,7 @@ import { Loading } from "@components/Loading";
 import { PreparingServer } from "@components/PreparingServer";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
+import { useRatedStore } from "@stores/ratedStore";
 import { useQueueNotifications } from "@hooks/useQueueNotifications";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
@@ -34,12 +35,14 @@ export default function App() {
   });
   const restoreSession = useAuthStore((s) => s.restoreSession);
   const restoreQueue = useQueueStore((s) => s.restoreQueue);
+  const restoreRated = useRatedStore((s) => s.restoreRated);
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
 
   useEffect(() => {
     restoreSession();
     restoreQueue();
+    restoreRated();
     // Portao de readiness (cold start do Render): acorda o backend ANTES de liberar
     // login/cadastro/listagem. A 1a cutucada acorda a instancia; segue mesmo se
     // estourar o teto (chamadas seguintes ja pegam a instancia quente). CLAUDE.md 18c.
@@ -50,7 +53,7 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [restoreSession, restoreQueue]);
+  }, [restoreSession, restoreQueue, restoreRated]);
 
   // Notificacao pessoal "é a sua vez" (WebSocket) app-wide: vale em qualquer
   // tela enquanto houver fila ativa, nao so na QueueStatus (item #5, fatia 2).

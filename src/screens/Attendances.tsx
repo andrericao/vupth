@@ -18,6 +18,7 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
+import { useRatedStore } from "@stores/ratedStore";
 import { SkeletonList } from "@components/Skeleton";
 import { RatingModal } from "@components/RatingModal";
 import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
@@ -46,6 +47,7 @@ export function Attendances() {
   // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
   const emAtendimento = isBeingAttended || isPaused;
   const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
+  const ratedIds = useRatedStore((s) => s.ids);
   const [ratingFor, setRatingFor] = useState<{ id: string; name: string } | null>(null);
   const [detailFor, setDetailFor] = useState<ClientAttendance | null>(null);
 
@@ -157,7 +159,7 @@ export function Attendances() {
                   label: a.status,
                   color: "#9CA3AF",
                 };
-                const canRate = a.status === "FINISHED";
+                const canRate = a.status === "FINISHED" && !ratedIds.includes(a.id);
                 return (
                   <TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => setDetailFor(a)}>
                     <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
@@ -201,6 +203,7 @@ export function Attendances() {
 
       <AttendanceDetailModal
         attendance={detailFor}
+        canRate={!!detailFor && detailFor.status === "FINISHED" && !ratedIds.includes(detailFor.id)}
         onClose={() => setDetailFor(null)}
         onRate={() => {
           if (detailFor) setRatingFor({ id: detailFor.id, name: detailFor.professionalName });

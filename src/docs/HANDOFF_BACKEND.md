@@ -34,9 +34,9 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 > **Front (2026-07-11):** o **campo de comentário está OCULTO** no `RatingModal` (flag `SHOW_COMMENT = false`, pedido do Andre — não precisa agora, código mantido pra reativar). O `POST /rating` passa a ir **sem `comment`** por enquanto — o backend já trata `comment?` como opcional, então nada muda do lado dele.
 
 **Ainda falta (melhorias, não bloqueiam):**
-1. **`rated: boolean` no `GET /attendances/client/me`** — 📌 **pedido firme do Andre (2026-07-11): se o atendimento já foi avaliado, o front deve ESCONDER o "Toque para avaliar".** O esconder tem **duas partes**:
-   - **In-session — ✅ já feito no front:** logo após votar, o `RatingModal` chama `onClose(true)` e a tela para de oferecer avaliar naquela sessão. Não depende do backend.
-   - **Persistente (ao reabrir o app) — ⬜ depende deste `rated`:** sem o campo, ao reabrir o app o botão "avaliar" **reaparece** (o front recarrega o `client/me` e não sabe que já votou); só some de novo quando o cliente tenta votar e leva **409**. Com `rated: boolean` no payload, o front esconde de forma persistente, sem depender do 409.
+1. **`rated: boolean` no `GET /attendances/client/me`** — ⚠️ **NÃO bloqueia mais o front (workaround local entregue 2026-07-12), mas ainda é desejável.** Esconder o "Avaliar" quando já avaliado:
+   - **Front — ✅ FEITO (in-session E persistente):** o `RatingModal` marca o atendimento no `ratedStore` (SecureStore) ao votar **e no 409**; `restoreRated()` recarrega no boot; QueueStatus/Attendances/AttendanceDetailModal escondem o "Avaliar" via `ratedStore`. Persiste entre reaberturas **sem depender do backend**.
+   - **Backend `rated` (desejável, não bloqueia):** o `ratedStore` é **local ao device** — não sincroniza entre aparelhos nem sobrevive a limpar dados/reinstalar. Com `rated: boolean` no `client/me` (fonte da verdade), o front usa o backend e o local vira só cache/fallback.
 2. **Rollup por ESTABELECIMENTO** em `GET /establishment` — média da loja = **soma `ratingSum` ÷ soma `ratingCount`** dos profissionais (ponderada; barato). Hoje só há agregado por profissional/serviço. Para os **cards da Home**.
 3. **`rating_best` (maior nota entre os profissionais)** em `GET /establishment` — o card destaca o "melhor" (menor tempo + maior estrela). **Ordenação (#11):** considerar avaliação como desempate/boost.
 4. (Pequeno) **`establishmentName`** no `GET /attendances/client/me` (hoje só `establishmentId`) — a tela de detalhes quer mostrar a loja.

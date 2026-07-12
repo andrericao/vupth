@@ -70,7 +70,7 @@ Entrar na fila (visitante ou logado): Home → Detalhe → **ServiceSelection (v
 
 **Atendimentos:** EM ANDAMENTO (SCHEDULED ou IN_PROGRESS) + REALIZADOS (dia+hora de inicio); refetch no foco + pull-to-refresh; tocar no card abre **detalhes** (AttendanceDetailModal) + avaliar.
 
-**Avaliacao (Item 6) — ✅ FEITO (front + backend, validado no device 2026-07-04):** `RatingModal` **só 1-5 estrelas** (comentario OCULTO desde 2026-07-11, flag `SHOW_COMMENT=false`) → `POST /attendances/{id}/rating`; agregados `rating_average`/`rating_count` vem no `professionals-with-queue` e o front consome (`resolveRating`). Falta backend expor `rated` pra esconder "avaliar" apos o voto (HANDOFF sec.3).
+**Avaliacao (Item 6) — ✅ FEITO (front + backend, validado no device 2026-07-04):** `RatingModal` **só 1-5 estrelas** (comentario OCULTO desde 2026-07-11, flag `SHOW_COMMENT=false`) → `POST /attendances/{id}/rating`; agregados `rating_average`/`rating_count` vem no `professionals-with-queue` e o front consome (`resolveRating`). **Esconder "avaliar" apos o voto = FEITO no front** (`ratedStore` local/SecureStore, persistente entre reaberturas; `rated` do backend ainda desejavel p/ cross-device — HANDOFF sec.3.1).
 
 **WebSocket:** `useQueueSocket` / `useQueueNotifications` existem mas **nao funcionam no device** (pendencia, precisa device+backend logs). Substituido por **polling** (`refetchInterval`: establishments 60s, fila 20s, atendimentos 30s) + poll de status da fila (30s).
 
@@ -453,7 +453,7 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 > Depois disso o front envia `{ currentPassword, password }` e adiciona o campo na tela. (Tambem avaliar o endpoint de **forgot password** do item 14.)
 
 > ✅ **Avaliacao (Item 6) — VALIDADO NO DEVICE (2026-07-04): ver a nota real E avaliar funcionam.** `POST /attendances/{id}/rating` existe **e** os agregados `rating_average`/`rating_count` vem no `professionals-with-queue` (por profissional **e** por service item); o front consome (`resolveRating`). **Comentario OCULTO no front (Andre 2026-07-11)** — `RatingModal` so pede as estrelas (flag `SHOW_COMMENT=false`, codigo mantido); o `POST /rating` vai sem `comment` por ora. **Melhorias (backend) — ver HANDOFF secao 3:**
-> 1. 📌 **`rated: boolean` no `GET /attendances/client/me`** (pedido FIRME do Andre 2026-07-11): **se ja avaliado, esconder o "Toque para avaliar"**. Hoje o front so descobre via 409 (esconde in-session; ao reabrir volta). Persistente so com `rated`.
+> 1. ✅ **Esconder "avaliar" quando ja avaliado — FEITO no front (2026-07-12, workaround local `ratedStore`/SecureStore):** marca ao votar e no 409, restaura no boot, esconde em QueueStatus/Attendances/DetailModal; persiste entre reaberturas. **`rated: boolean` no `client/me` ainda desejavel** (fonte da verdade cross-device; o local nao sincroniza entre aparelhos / nao sobrevive a reinstalar) — vira cache quando vier. HANDOFF sec.3.1.
 > 2. **Rollup por ESTABELECIMENTO** no `GET /establishment` (media da loja = soma `ratingSum` / soma `ratingCount`) — cards da Home.
 > 3. **`rating_best`** (maior nota da loja) no `GET /establishment` — card destaca o melhor; ordenacao #11 considera avaliacao.
 > 4. (Se faltar) `establishmentName` no `/attendances/client/me`.

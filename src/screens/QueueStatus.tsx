@@ -30,6 +30,7 @@ import {
 } from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
+import { useRatedStore } from "@stores/ratedStore";
 import { attendanceService } from "@services/attendanceService";
 import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
@@ -67,6 +68,7 @@ export function QueueStatus() {
 
   const accessToken = useAuthStore((s) => s.accessToken);
   const user = useAuthStore((s) => s.user);
+  const ratedIds = useRatedStore((s) => s.ids);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
   const { remaining, elapsedSeconds, color, isInQueue, isBeingAttended, isPaused, isFinished, activeQueue, refresh } = useQueueCountdown();
@@ -503,7 +505,7 @@ export function QueueStatus() {
             />
           </>
         )}
-        {isFinished && attendanceId && (
+        {isFinished && attendanceId && !ratedIds.includes(attendanceId) && (
           <Button title="Avaliar atendimento" onPress={() => setShowRating(true)} />
         )}
         {isFinished ? (
