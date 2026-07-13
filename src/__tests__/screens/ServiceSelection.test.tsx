@@ -26,6 +26,10 @@ jest.mock('@services/establishmentService', () => ({
 
 const mockGetServices = establishmentService.getServiceItemsByProfessional as jest.Mock;
 
+// Render de tela com GluestackUIProvider é pesado sob o jest (a 1ª montagem
+// carrega o build inteiro do gluestack). O default de 5s não cobre o 1º teste.
+jest.setTimeout(30000);
+
 describe('ServiceSelection — portão de auth (modo visitante)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
