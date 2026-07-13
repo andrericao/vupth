@@ -85,7 +85,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
 
           <HStack justifyContent="center" gap="$2" mt="$5" mb="$2">
             {[1, 2, 3, 4, 5].map((n) => (
-              <TouchableOpacity key={n} onPress={() => setScore(n)} hitSlop={6}>
+              <TouchableOpacity key={n} testID={`star-${n}`} onPress={() => setScore(n)} hitSlop={6}>
                 <Star
                   size={36}
                   color={n <= score ? "#FFB703" : "#D1D5DB"}
