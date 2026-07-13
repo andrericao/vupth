@@ -8,14 +8,17 @@ import { notifyComingSoon } from "@domain/comingSoon";
 type Props = {
   visible: boolean;
   onClose: () => void;
+  // "Para hoje, mais tarde" → abre o seletor de horário (intenção de fila #40, já
+  // ligada ao backend). "Para outro dia" segue "em breve" (agenda por dia).
+  onScheduleToday: () => void;
 };
 
-// "Agendar atendimento" — UI pronta; os dois caminhos AGUARDAM backend:
-// - hoje/mais tarde reusa a intenção de fila com horário-alvo (#40, já existe no
-//   backend, só falta conectar aqui);
+// "Agendar atendimento":
+// - hoje/mais tarde reusa a intenção de fila com horário-alvo (#40, LIGADO ao
+//   backend via targetTime no POST /attendances);
 // - outro dia depende da agenda por dia (disponibilidade do profissional) que
-//   ainda não existe. Por ora ambos mostram "em breve" e contabilizam o toque.
-export function ScheduleModal({ visible, onClose }: Props) {
+//   ainda não existe → "em breve" + contabiliza o toque.
+export function ScheduleModal({ visible, onClose, onScheduleToday }: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
@@ -32,8 +35,8 @@ export function ScheduleModal({ visible, onClose }: Props) {
             <Button
               title="Para hoje, mais tarde"
               onPress={() => {
-                notifyComingSoon("agendar_hoje");
                 onClose();
+                onScheduleToday();
               }}
             />
             <Button

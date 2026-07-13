@@ -150,7 +150,7 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 
 **Pedido do Andre (2026-07-12).** No fluxo de entrar na fila (após escolher os serviços, na `ServiceSelection`) há um botão **"Agendar para depois"** → abre o `ScheduleModal` com dois caminhos. **UI pronta no front; ambos AGUARDAM conexão** (mostram "em breve" e contam o toque via `comingSoonStore` p/ priorização — ver seção 13):
 
-1. **"Para hoje, mais tarde"** — ⚡ **backend JÁ TEM (#40)**, só falta o front conectar. Reusa a **intenção de fila com horário-alvo**: `POST /attendances` com `targetTime` opcional (entra como `isIntent=true`, cede a vez aos walk-ins até o previsto encostar no alvo, confirma sozinho). Erros já definidos: `422 QUEUE_TARGET_NOT_FEASIBLE`, `400` alvo no passado. **Conectar = trocar o `notifyComingSoon("agendar_hoje")` por um seletor de horário + `POST /attendances { ..., targetTime }`.**
+1. **"Para hoje, mais tarde"** — ✅ **CONECTADO ao #40 (2026-07-12).** Abre um seletor de horário (reusa o `RescheduleModal`, HH:MM) e cria o atendimento com `targetTime` no `POST /attendances` → entra como **intenção** (`isIntent=true`). Piso do seletor = agora + espera estimada. Erros tratados no front: `422 QUEUE_TARGET_NOT_FEASIBLE` e `400` (passado) → mensagem amigável sugerindo outro horário (`rescheduleErrorMessage`). Fluxo respeita o portão de auth (visitante → login/cadastro levando o `targetTime` → cria após autenticar). **Nada pendente no backend aqui.**
 
 2. **"Para outro dia"** — ❌ **backend NÃO tem** (backlog #23/#24). **Modelo decidido com o Andre (2026-07-12):**
    - Cliente escolhe **um DIA** (dentre os que o profissional deixou disponíveis) e **manifesta intenção** (não é reserva de horário fixo — é intenção por dia).

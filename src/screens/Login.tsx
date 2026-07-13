@@ -19,6 +19,7 @@ type RouteParams = {
   establishmentName?: string;
   estimatedWaitMinutes?: number;
   serviceItemIds?: string[];
+  targetTime?: string;
 };
 
 export function Login() {
@@ -54,6 +55,7 @@ export function Login() {
           establishmentName: params.establishmentName,
           estimatedWaitMinutes: params.estimatedWaitMinutes,
           serviceItemIds: params.serviceItemIds,
+          targetTime: params.targetTime,
         });
       } else {
         navigation.reset({ index: 0, routes: [{ name: "home" }] });
@@ -75,6 +77,7 @@ export function Login() {
       establishmentName: params.establishmentName,
       estimatedWaitMinutes: params.estimatedWaitMinutes,
       serviceItemIds: params.serviceItemIds,
+      targetTime: params.targetTime,
     });
   }
 

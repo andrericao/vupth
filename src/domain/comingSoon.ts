@@ -5,15 +5,15 @@ import { useComingSoonStore } from '@stores/comingSoonStore';
 // Ao tocar, mostram "em breve" e contabilizam o toque (comingSoonStore) para o
 // Andre priorizar depois. Quando o endpoint existir, é só trocar o notifyComingSoon
 // pela chamada real no ponto de uso.
+// 'agendar_hoje' saiu daqui: já está LIGADO ao backend (#40, targetTime no
+// POST /attendances). O que resta "em breve" aguarda endpoint próprio.
 export type ComingSoonFeature =
-  | 'agendar_hoje'
   | 'agendar_outro_dia'
   | 'esqueci_senha'
   | 'trocar_posicao'
   | 'manifestar_interesse';
 
 export const COMING_SOON_LABELS: Record<ComingSoonFeature, string> = {
-  agendar_hoje: 'Agendar para hoje (mais tarde)',
   agendar_outro_dia: 'Agendar para outro dia',
   esqueci_senha: 'Esqueci minha senha',
   trocar_posicao: 'Trocar posição na fila',

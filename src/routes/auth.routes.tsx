@@ -33,6 +33,7 @@ export type AppRoutes = {
     establishmentName?: string;
     estimatedWaitMinutes?: number;
     serviceItemIds?: string[];
+    targetTime?: string;
   };
   signUp: {
     redirectTo?: string;
@@ -42,6 +43,7 @@ export type AppRoutes = {
     establishmentName?: string;
     estimatedWaitMinutes?: number;
     serviceItemIds?: string[];
+    targetTime?: string;
   };
   serviceSelection: {
     professionalId: string;
@@ -57,6 +59,8 @@ export type AppRoutes = {
     establishmentName?: string;
     estimatedWaitMinutes?: number;
     serviceItemIds?: string[];
+    // Agendar (#40): quando presente, cria o atendimento como intenção com alvo.
+    targetTime?: string;
   };
   profile: undefined;
   attendances: undefined;

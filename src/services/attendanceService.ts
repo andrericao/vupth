@@ -5,6 +5,9 @@ export interface CreateAttendanceRequest {
   establishmentId: string;
   serviceItemIds: string[];
   scheduledTime?: string;
+  // Item #40: quando presente, o cliente entra como INTENÇÃO com horário-alvo
+  // (cede a vez aos walk-ins até o previsto encostar no alvo). ISO-8601.
+  targetTime?: string;
 }
 
 export interface AttendanceResponse {

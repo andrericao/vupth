@@ -13,12 +13,12 @@ describe('ComingSoonStore', () => {
   });
 
   it('tap incrementa a contagem e persiste', async () => {
-    await useComingSoonStore.getState().tap('agendar_hoje');
+    await useComingSoonStore.getState().tap('manifestar_interesse');
 
-    expect(useComingSoonStore.getState().counts).toEqual({ agendar_hoje: 1 });
+    expect(useComingSoonStore.getState().counts).toEqual({ manifestar_interesse: 1 });
     expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith(
       KEY,
-      JSON.stringify({ agendar_hoje: 1 }),
+      JSON.stringify({ manifestar_interesse: 1 }),
     );
   });
 

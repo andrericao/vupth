@@ -16,6 +16,7 @@ import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { ScheduleModal } from "@components/ScheduleModal";
+import { RescheduleModal } from "@components/RescheduleModal";
 import { cardShadow } from "@utils/styles";
 import { ServiceItemResponse } from "@domain/professional/types";
 import { establishmentService } from "@services/establishmentService";
@@ -47,6 +48,10 @@ export function ServiceSelection() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSchedule, setShowSchedule] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  // Piso do agendamento (#40): ~quando o cliente seria atendido se entrasse agora
+  // (now + espera estimada). Calculado AO ABRIR o picker (evento, não no render).
+  const [scheduleBaseMs, setScheduleBaseMs] = useState(0);
 
   useEffect(() => {
     establishmentService
@@ -74,32 +79,29 @@ export function ServiceSelection() {
     0,
   );
 
-  function handleConfirm() {
-    // Portao de auth: a verificacao de token acontece AQUI, ao tentar entrar na
-    // fila, ja com os servicos escolhidos. Visitante -> login/cadastro levando a
-    // selecao; ao autenticar, o Login/SignUp redireciona pra queueStatus com os
-    // mesmos serviceItemIds e cria o atendimento.
-    if (!isAuthenticated) {
-      navigation.navigate("login", {
-        redirectTo: "queueStatus",
-        professionalId,
-        professionalName,
-        establishmentId,
-        establishmentName,
-        estimatedWaitMinutes,
-        serviceItemIds: selectedIds,
-      });
-      return;
-    }
-
-    navigation.navigate("queueStatus", {
+  // Vai pra fila (agora, sem targetTime) ou agenda (com targetTime = intencao #40).
+  // Portao de auth: a verificacao de token acontece AQUI, ja com os servicos
+  // escolhidos. Visitante -> login/cadastro levando a selecao (e o targetTime);
+  // ao autenticar, o Login/SignUp redireciona pra queueStatus e cria o atendimento.
+  function goToQueue(targetTime?: string) {
+    const payload = {
       professionalId,
       professionalName,
       establishmentId,
       establishmentName,
       estimatedWaitMinutes,
       serviceItemIds: selectedIds,
-    });
+      ...(targetTime ? { targetTime } : {}),
+    };
+    if (!isAuthenticated) {
+      navigation.navigate("login", { redirectTo: "queueStatus", ...payload });
+      return;
+    }
+    navigation.navigate("queueStatus", payload);
+  }
+
+  function handleConfirm() {
+    goToQueue();
   }
 
   if (isLoading) {
@@ -222,7 +224,27 @@ export function ServiceSelection() {
         </>
       )}
 
-      <ScheduleModal visible={showSchedule} onClose={() => setShowSchedule(false)} />
+      <ScheduleModal
+        visible={showSchedule}
+        onClose={() => setShowSchedule(false)}
+        onScheduleToday={() => {
+          setScheduleBaseMs(Date.now() + (estimatedWaitMinutes ?? 0) * 60_000);
+          setShowTimePicker(true);
+        }}
+      />
+
+      <RescheduleModal
+        visible={showTimePicker}
+        baseMs={scheduleBaseMs}
+        tailEtaMs={scheduleBaseMs}
+        penalty={false}
+        loading={false}
+        onConfirm={(targetIso) => {
+          setShowTimePicker(false);
+          goToQueue(targetIso);
+        }}
+        onClose={() => setShowTimePicker(false)}
+      />
     </VStack>
   );
 }

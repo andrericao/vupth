@@ -44,6 +44,7 @@ type RouteParams = {
   establishmentName?: string;
   estimatedWaitMinutes?: number;
   serviceItemIds?: string[];
+  targetTime?: string;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -64,6 +65,7 @@ export function QueueStatus() {
     establishmentName: paramEstName,
     serviceItemIds,
     estimatedWaitMinutes,
+    targetTime,
   } = route.params as RouteParams;
 
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -166,9 +168,11 @@ export function QueueStatus() {
           return;
         }
 
-        setCreateMsg("Entrando na fila...");
+        setCreateMsg(targetTime ? "Agendando..." : "Entrando na fila...");
         const { data } = await attendanceService.create(
-          { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], scheduledTime: new Date().toISOString() },
+          targetTime
+            ? { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], targetTime }
+            : { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], scheduledTime: new Date().toISOString() },
           accessToken!,
         );
         if (mountedRef.current) {
@@ -178,7 +182,12 @@ export function QueueStatus() {
         // Limpa a fila otimista para não deixar tarja/banner residual sem atendimento real.
         await leaveQueue();
         if (mountedRef.current) {
-          const msg = error.response?.data?.message || error.message || "Erro ao entrar na fila";
+          // Agendamento (#40): 422 alvo inviável / 400 passado -> mensagem amigável
+          // sugerindo outro horário; senão, mensagem genérica de entrada na fila.
+          const status = error.response?.status;
+          const msg = targetTime
+            ? rescheduleErrorMessage(status, error.response?.data?.code)
+            : error.response?.data?.message || error.message || "Erro ao entrar na fila";
           setCreateError(msg);
         }
       } finally {
@@ -187,7 +196,7 @@ export function QueueStatus() {
     }
 
     createAttendance();
-  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes]);
+  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";
