@@ -7,22 +7,20 @@ jest.mock('@domain/comingSoon', () => ({ notifyComingSoon: jest.fn() }));
 
 describe('ScheduleModal', () => {
   const onClose = jest.fn();
-  const onScheduleToday = jest.fn();
 
   beforeEach(() => jest.clearAllMocks());
 
   function renderModal() {
     return renderWithProviders(
-      <ScheduleModal visible onClose={onClose} onScheduleToday={onScheduleToday} />,
+      <ScheduleModal visible onClose={onClose} />,
     );
   }
 
-  it('"Para hoje, mais tarde" fecha o modal e abre o seletor (onScheduleToday)', () => {
+  it('"Para hoje, mais tarde" mostra "em breve" (agendar_hoje) e fecha', () => {
     const { getByText } = renderModal();
     fireEvent.press(getByText('Para hoje, mais tarde'));
+    expect(notifyComingSoon).toHaveBeenCalledWith('agendar_hoje');
     expect(onClose).toHaveBeenCalledTimes(1);
-    expect(onScheduleToday).toHaveBeenCalledTimes(1);
-    expect(notifyComingSoon).not.toHaveBeenCalled();
   });
 
   it('"Para outro dia" mostra "em breve" (agendar_outro_dia)', () => {
@@ -35,7 +33,6 @@ describe('ScheduleModal', () => {
     const { getByText } = renderModal();
     fireEvent.press(getByText('Cancelar'));
     expect(onClose).toHaveBeenCalledTimes(1);
-    expect(onScheduleToday).not.toHaveBeenCalled();
     expect(notifyComingSoon).not.toHaveBeenCalled();
   });
 });

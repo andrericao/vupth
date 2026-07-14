@@ -8,17 +8,17 @@ import { notifyComingSoon } from "@domain/comingSoon";
 type Props = {
   visible: boolean;
   onClose: () => void;
-  // "Para hoje, mais tarde" → abre o seletor de horário (intenção de fila #40, já
-  // ligada ao backend). "Para outro dia" segue "em breve" (agenda por dia).
-  onScheduleToday: () => void;
 };
 
-// "Agendar atendimento":
-// - hoje/mais tarde reusa a intenção de fila com horário-alvo (#40, LIGADO ao
-//   backend via targetTime no POST /attendances);
-// - outro dia depende da agenda por dia (disponibilidade do profissional) que
+// "Agendar atendimento": ambas as opções seguem "em breve" (padrão comingSoon).
+// - "hoje/mais tarde" (#40): o front sabe mandar targetTime no POST /attendances,
+//   mas o backend NÃO honra a intenção (regressão 2026-07-14 — entrava atendível
+//   na hora). Revertido para "em breve" até o backend implementar (HANDOFF §12.1).
+//   Religar = trocar notifyComingSoon('agendar_hoje') pelo seletor de horário +
+//   goToQueue(targetTime) em ServiceSelection.
+// - "outro dia" depende da agenda por dia (disponibilidade do profissional), que
 //   ainda não existe → "em breve" + contabiliza o toque.
-export function ScheduleModal({ visible, onClose, onScheduleToday }: Props) {
+export function ScheduleModal({ visible, onClose }: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
@@ -35,8 +35,8 @@ export function ScheduleModal({ visible, onClose, onScheduleToday }: Props) {
             <Button
               title="Para hoje, mais tarde"
               onPress={() => {
+                notifyComingSoon("agendar_hoje");
                 onClose();
-                onScheduleToday();
               }}
             />
             <Button

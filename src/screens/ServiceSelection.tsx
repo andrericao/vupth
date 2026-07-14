@@ -16,7 +16,6 @@ import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { ScheduleModal } from "@components/ScheduleModal";
-import { RescheduleModal } from "@components/RescheduleModal";
 import { cardShadow } from "@utils/styles";
 import { ServiceItemResponse } from "@domain/professional/types";
 import { establishmentService } from "@services/establishmentService";
@@ -48,10 +47,6 @@ export function ServiceSelection() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSchedule, setShowSchedule] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  // Piso do agendamento (#40): ~quando o cliente seria atendido se entrasse agora
-  // (now + espera estimada). Calculado AO ABRIR o picker (evento, não no render).
-  const [scheduleBaseMs, setScheduleBaseMs] = useState(0);
 
   useEffect(() => {
     establishmentService
@@ -79,7 +74,9 @@ export function ServiceSelection() {
     0,
   );
 
-  // Vai pra fila (agora, sem targetTime) ou agenda (com targetTime = intencao #40).
+  // Vai pra fila. Hoje sempre "agora" (sem targetTime): o agendamento #40 foi
+  // revertido para "em breve" ate o backend honrar a intencao (HANDOFF §12.1). O
+  // parametro targetTime segue aqui para religar o agendamento sem retrabalho.
   // Portao de auth: a verificacao de token acontece AQUI, ja com os servicos
   // escolhidos. Visitante -> login/cadastro levando a selecao (e o targetTime);
   // ao autenticar, o Login/SignUp redireciona pra queueStatus e cria o atendimento.
@@ -227,23 +224,6 @@ export function ServiceSelection() {
       <ScheduleModal
         visible={showSchedule}
         onClose={() => setShowSchedule(false)}
-        onScheduleToday={() => {
-          setScheduleBaseMs(Date.now() + (estimatedWaitMinutes ?? 0) * 60_000);
-          setShowTimePicker(true);
-        }}
-      />
-
-      <RescheduleModal
-        visible={showTimePicker}
-        baseMs={scheduleBaseMs}
-        tailEtaMs={scheduleBaseMs}
-        penalty={false}
-        loading={false}
-        onConfirm={(targetIso) => {
-          setShowTimePicker(false);
-          goToQueue(targetIso);
-        }}
-        onClose={() => setShowTimePicker(false)}
       />
     </VStack>
   );
