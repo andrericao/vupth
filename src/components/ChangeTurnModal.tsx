@@ -57,14 +57,14 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onRes
                 Você quer ser atendido antes ou depois?
               </Text>
               <Button
-                title="Adiantar minha vez"
+                title="Adiantar"
                 mt="$5"
                 onPress={() => {
                   void useComingSoonStore.getState().tap("trocar_posicao");
                   setStep("adiantar");
                 }}
               />
-              <Button title="Atrasar minha vez" variant="outline" mt="$3" onPress={() => setStep("atrasar")} />
+              <Button title="Atrasar" variant="outline" mt="$3" onPress={() => setStep("atrasar")} />
               <Button title="Cancelar" variant="outline" mt="$3" onPress={close} />
             </>
           )}
