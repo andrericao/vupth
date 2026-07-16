@@ -75,9 +75,9 @@ O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo en
 
 **Front já pronto:** a tela da fila **já avisa** o usuário da multa nessas três ações (sair, reagendar, ir pro fim) quando ETA < 1h. Falta só o backend efetivar o strike/cobrança (a cobrança monetária é a Fase 2 do #39, dep. gateway #21).
 
-## 7. Troca de posição como OFERTA ABERTA (rework do #42) — pedido do Andre — = S3 (front-partner)
+## 7. Troca de posição como OFERTA ABERTA (`/swap-offers`) — pedido do Andre — = C13 (front-partner, partner passivo)
 
-> **Alinhamento:** este é o mesmo handoff que o **PRD front-partner** rastreia como **S3** ("oferta ABERTA de troca" / marketplace C6). Manter os dois em sincronia; quando o backend incorporar na lista dele, atualizar ambos.
+> **Alinhamento (partner leu e confirmou 2026-07-15):** o partner rastreia isto como **C13** (troca), separado do **C6/S2** (agendamento/INTENÇÃO). O **partner é PASSIVO** — só reflete a fila pós-troca via `professionals-with-queue`/WS, **não marca LATE**, sem ação nova. **Não** é S2 nem S4 (S4 = "promover ao topo" do profissional, outra origem). Manter os dois em sincronia; quando o backend incorporar `/swap-offers` na lista dele, atualizar ambos.
 
 > ✅ **MODELO FECHADO com o Andre (2026-07-15).** Distinto da **INTENÇÃO** (S2 / agendamento futuro): a **TROCA** é sobre a **fila viva** (agora). A reconciliação anterior confundiu os dois — o `INTENTION` **não** substitui a troca; são features separadas. **O `#42` direcionado (`/swap-requests`) fica MANTIDO em paralelo por ora** (decisão Andre 2026-07-15); a **oferta ABERTA (`/swap-offers`) é backend NOVO** a construir com o contrato abaixo.
 
