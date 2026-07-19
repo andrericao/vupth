@@ -11,25 +11,40 @@ describe('ScheduleModal', () => {
   beforeEach(() => jest.clearAllMocks());
 
   function renderModal() {
-    return renderWithProviders(
-      <ScheduleModal visible onClose={onClose} />,
-    );
+    return renderWithProviders(<ScheduleModal visible onClose={onClose} />);
   }
 
-  it('"Para hoje, mais tarde" mostra "em breve" (agendar_hoje) e fecha', () => {
+  it('mostra o seletor de dia (Hoje) em vez do split hoje/outro-dia', () => {
+    const { getByText, queryByText } = renderModal();
+    expect(getByText('Hoje')).toBeTruthy();
+    expect(queryByText('Para hoje, mais tarde')).toBeNull();
+    expect(queryByText('Para outro dia')).toBeNull();
+  });
+
+  it('sem dia escolhido, "Confirmar dia" não dispara nada', () => {
     const { getByText } = renderModal();
-    fireEvent.press(getByText('Para hoje, mais tarde'));
+    fireEvent.press(getByText('Confirmar dia'));
+    expect(notifyComingSoon).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('escolher "Hoje" e confirmar conta agendar_hoje e fecha (barra em breve)', () => {
+    const { getByText } = renderModal();
+    fireEvent.press(getByText('Hoje'));
+    fireEvent.press(getByText('Confirmar dia'));
     expect(notifyComingSoon).toHaveBeenCalledWith('agendar_hoje');
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('"Para outro dia" mostra "em breve" (agendar_outro_dia)', () => {
-    const { getByText } = renderModal();
-    fireEvent.press(getByText('Para outro dia'));
+  it('escolher outro dia (2ª pílula) conta agendar_outro_dia', () => {
+    const { getByText, getAllByRole } = renderModal();
+    // Ordem de render: pílulas de dia primeiro; [1] = amanhã.
+    fireEvent.press(getAllByRole('button')[1]);
+    fireEvent.press(getByText('Confirmar dia'));
     expect(notifyComingSoon).toHaveBeenCalledWith('agendar_outro_dia');
   });
 
-  it('"Cancelar" só fecha', () => {
+  it('"Cancelar" só fecha, sem contar', () => {
     const { getByText } = renderModal();
     fireEvent.press(getByText('Cancelar'));
     expect(onClose).toHaveBeenCalledTimes(1);
