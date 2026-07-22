@@ -52,15 +52,32 @@ describe('ProfileService', () => {
   });
 
   describe('PATCH /profile/update-password/me', () => {
-    it('deve atualizar senha e retornar novos tokens', async () => {
-      mock.onPatch('/profile/update-password/me').reply(200, {
-        user: { id: 'user-1', email: 'user@test.com' },
-        tokens: { access_token: 'new-at', refresh_token: 'new-rt', expires_in: 3600 },
+    it('deve enviar current_password + password e retornar novos tokens', async () => {
+      mock.onPatch('/profile/update-password/me').reply((config) => {
+        expect(JSON.parse(config.data)).toEqual({
+          current_password: 'senhaAtual123',
+          password: 'novaSenha123',
+        });
+        return [
+          200,
+          {
+            user: { id: 'user-1', email: 'user@test.com' },
+            tokens: { access_token: 'new-at', refresh_token: 'new-rt', expires_in: 3600 },
+          },
+        ];
       });
 
-      const { data } = await profileService.updatePassword('novaSenha123', token);
+      const { data } = await profileService.updatePassword('senhaAtual123', 'novaSenha123', token);
 
       expect(data.tokens.access_token).toBe('new-at');
+    });
+
+    it('senha atual errada propaga 401 CURRENT_PASSWORD_INVALID (sem virar logout)', async () => {
+      mock.onPatch('/profile/update-password/me').reply(401, { code: 'CURRENT_PASSWORD_INVALID' });
+
+      await expect(
+        profileService.updatePassword('errada', 'novaSenha123', token),
+      ).rejects.toMatchObject({ response: { status: 401, data: { code: 'CURRENT_PASSWORD_INVALID' } } });
     });
   });
 

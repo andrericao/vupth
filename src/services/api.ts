@@ -79,7 +79,17 @@ api.interceptors.response.use(
 	async (error: AxiosError) => {
 		const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-		if (error.response?.status !== 401 || originalRequest._retry || isPublicPath(originalRequest.url)) {
+		// 401 de NEGÓCIO, não de sessão: senha atual incorreta na troca de senha
+		// (PATCH /profile/update-password/me). Não dispara refresh/logout — a tela
+		// trata como erro de campo ("senha atual incorreta").
+		const errorCode = (error.response?.data as { code?: string } | undefined)?.code;
+
+		if (
+			error.response?.status !== 401 ||
+			errorCode === "CURRENT_PASSWORD_INVALID" ||
+			originalRequest._retry ||
+			isPublicPath(originalRequest.url)
+		) {
 			return Promise.reject(error);
 		}
 

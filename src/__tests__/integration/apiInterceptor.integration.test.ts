@@ -163,6 +163,23 @@ describe('api — interceptors', () => {
       expect(refreshCalled).toBe(false);
     });
 
+    it('401 CURRENT_PASSWORD_INVALID passa direto (erro de campo, sem refresh/logout)', async () => {
+      withTokens('tok', 'refresh-1');
+      mock.onPatch('/profile/update-password/me').reply(401, { code: 'CURRENT_PASSWORD_INVALID' });
+      let refreshCalled = false;
+      mock.onPost('/auth/refresh').reply(() => {
+        refreshCalled = true;
+        return [200, {}];
+      });
+
+      await expect(api.patch('/profile/update-password/me', {})).rejects.toMatchObject({
+        response: { status: 401, data: { code: 'CURRENT_PASSWORD_INVALID' } },
+      });
+      expect(refreshCalled).toBe(false);
+      // Tokens intactos: não pode ter deslogado.
+      expect(ss.deleteItemAsync).not.toHaveBeenCalled();
+    });
+
     it('erro não-401 passa direto (sem refresh)', async () => {
       withTokens('tok', 'refresh-1');
       mock.onGet(PROTECTED).reply(500);
