@@ -10,6 +10,7 @@ import { Home } from "@screens/Home";
 import { EstablishmentDetail } from "@screens/EstablishmentDetail";
 import { Login } from "@screens/Login";
 import { SignUp } from "@screens/SignUp";
+import { ForgotPassword } from "@screens/ForgotPassword";
 import { QueueStatus } from "@screens/QueueStatus";
 import { Profile } from "@screens/Profile";
 import { Attendances } from "@screens/Attendances";
@@ -45,6 +46,8 @@ export type AppRoutes = {
     serviceItemIds?: string[];
     targetTime?: string;
   };
+  // Esqueci minha senha (fluxo público): e-mail → código de 6 dígitos → nova senha.
+  forgotPassword: { email?: string } | undefined;
   serviceSelection: {
     professionalId: string;
     professionalName: string;
@@ -85,6 +88,7 @@ function HomeStack() {
       <HomeStackNav.Screen name="profile" component={Profile} />
       <HomeStackNav.Screen name="login" component={Login} />
       <HomeStackNav.Screen name="signUp" component={SignUp} />
+      <HomeStackNav.Screen name="forgotPassword" component={ForgotPassword} />
     </HomeStackNav.Navigator>
   );
 }

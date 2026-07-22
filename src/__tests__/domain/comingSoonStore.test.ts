@@ -23,12 +23,12 @@ describe('ComingSoonStore', () => {
   });
 
   it('tap acumula por feature', async () => {
-    await useComingSoonStore.getState().tap('esqueci_senha');
-    await useComingSoonStore.getState().tap('esqueci_senha');
+    await useComingSoonStore.getState().tap('trocar_posicao');
+    await useComingSoonStore.getState().tap('trocar_posicao');
     await useComingSoonStore.getState().tap('agendar_outro_dia');
 
     expect(useComingSoonStore.getState().counts).toEqual({
-      esqueci_senha: 2,
+      trocar_posicao: 2,
       agendar_outro_dia: 1,
     });
   });

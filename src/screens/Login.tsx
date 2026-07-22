@@ -8,7 +8,6 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { validateLogin } from "@domain/auth/validateAuth";
-import { notifyComingSoon } from "@domain/comingSoon";
 import { useAuthStore } from "@stores/authStore";
 
 type RouteParams = {
@@ -117,7 +116,7 @@ export function Login() {
 
           <Button title={isSubmitting ? "Entrando..." : "Entrar"} onPress={handleLogin} />
 
-          <TouchableOpacity onPress={() => notifyComingSoon("esqueci_senha")}>
+          <TouchableOpacity onPress={() => navigation.navigate("forgotPassword", { email })}>
             <Text size="sm" color="$green500" fontFamily="$heading">
               Esqueci minha senha
             </Text>

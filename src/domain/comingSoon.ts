@@ -11,17 +11,17 @@ import { useComingSoonStore } from '@stores/comingSoonStore';
 // status INTENTION/S2) → é divergência a DIAGNOSTICAR (backend na fila viva ou
 // display no front), não "backend não fez". Revertido para "em breve" até o
 // diagnóstico; religar trocando por goToQueue(targetTime). Ver HANDOFF_BACKEND §12.1.
+// 'esqueci_senha' SAIU (2026-07-22): backend entregou forgot/reset-password e a
+// tela ForgotPassword está LIGADA (Login → forgotPassword).
 export type ComingSoonFeature =
   | 'agendar_hoje'
   | 'agendar_outro_dia'
-  | 'esqueci_senha'
   | 'trocar_posicao'
   | 'manifestar_interesse';
 
 export const COMING_SOON_LABELS: Record<ComingSoonFeature, string> = {
   agendar_hoje: 'Agendar para hoje, mais tarde',
   agendar_outro_dia: 'Agendar para outro dia',
-  esqueci_senha: 'Esqueci minha senha',
   trocar_posicao: 'Trocar posição na fila',
   manifestar_interesse: 'Manifestar interesse (loja fechada)',
 };
