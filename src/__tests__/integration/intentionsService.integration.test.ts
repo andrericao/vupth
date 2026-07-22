@@ -104,4 +104,31 @@ describe('IntentionsService', () => {
       response: { status: 400 },
     });
   });
+
+  it('getClientAgenda busca GET /attendances/intentions/client/me com Bearer token', async () => {
+    mock.onGet('/attendances/intentions/client/me').reply((config) => {
+      expect(config.headers?.Authorization).toBe('Bearer my-token');
+      return [
+        200,
+        {
+          frames: [
+            {
+              professionalId: 'prof-1',
+              establishmentId: 'est-1',
+              projectedQueueEnd: '2026-07-20T16:30:00.000Z',
+              openingTime: '08:00',
+              closingTime: '20:00',
+            },
+          ],
+          intentions: [intentionResponse],
+        },
+      ];
+    });
+
+    const response = await intentionsService.getClientAgenda('my-token');
+
+    expect(response.data.frames[0].projectedQueueEnd).toBe('2026-07-20T16:30:00.000Z');
+    expect(response.data.intentions).toHaveLength(1);
+    expect(response.data.intentions[0].status).toBe('INTENTION');
+  });
 });

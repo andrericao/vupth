@@ -34,6 +34,22 @@ export interface IntentionResponse {
   estimatedStartTime: string; // o que o sistema projeta (encaixe cronológico)
 }
 
+// "Quadro" da barra de encaixe por profissional (visão de agenda, backend 2026-07-22):
+// projectedQueueEnd = fim projetado da fila viva (piso do agendável de hoje);
+// openingTime/closingTime = janela de expediente.
+export interface AgendaFrame {
+  professionalId: string;
+  establishmentId: string;
+  projectedQueueEnd: string;
+  openingTime: string | null;
+  closingTime: string | null;
+}
+
+export interface IntentionAgendaResponse {
+  frames: AgendaFrame[];
+  intentions: IntentionResponse[];
+}
+
 export const intentionsService = {
   // Erros possíveis (backend): 422 INTENTION_OUTSIDE_BUSINESS_HOURS,
   // 422 INTENTION_HORIZON_EXCEEDED (>30 dias), 422 INTENTION_BEFORE_QUEUE_END,
@@ -57,6 +73,14 @@ export const intentionsService = {
   // Cancela a intenção (INTENTION → CANCELLED). Erros: 403, 404, 400 (já promovido/cancelado).
   cancel(intentionId: string, accessToken: string) {
     return api.delete<void>(`/attendances/intentions/${intentionId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
+  // "Meus agendamentos": intenções futuras do próprio cliente + um frame por
+  // profissional distinto (moldura da barra de encaixe). Ordenadas por desiredTime.
+  getClientAgenda(accessToken: string) {
+    return api.get<IntentionAgendaResponse>('/attendances/intentions/client/me', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
   },
