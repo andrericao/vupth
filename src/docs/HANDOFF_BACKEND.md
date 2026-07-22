@@ -2,7 +2,38 @@
 
 Pendências do app **cliente** que dependem do backend. O front já está pronto (ou pronto para consumir) em cada caso. Detalhe completo nos callouts do `PRD_FRONT-CLIENT.md`.
 
-Última atualização: 2026-06-28 · branch `dev` do front-client.
+Última atualização: **2026-07-22** · branch `dev` do front-client.
+
+---
+
+## 📌 QUADRO GERAL — pendências e desalinhamentos por equipe (2026-07-22)
+
+> Consolidado após a reconciliação com o lote do backend de 2026-07-22 e com o partner. **Cada equipe: ler a sua coluna.** Detalhes nas seções indicadas.
+
+### 🔴 BACKEND — pedidos abertos do client
+| # | Pedido | Seção | Situação |
+|---|--------|:-----:|----------|
+| B1 | **⚠️ DESALINHAMENTO — `/swap-offers` (troca aberta, C13) fora da FONTE ÚNICA.** Certificado no PRD_BACKEND inteiro (2026-07-22): não foi feito nem está registrado; só existem o #42 direcionado (não atende) e a nota stale de 2026-07-07 ("substituído pela INTENTION" — **superada em 2026-07-15**: troca ≠ agendamento). O partner também cobrou. **Registrar o item na fonte única + corrigir a nota stale.** Contrato pronto na §7 | 7 | ⬜ registrar |
+| B2 | **Endpoint público `GET /attendances/intentions/professional/{id}` com blocos ANÔNIMOS** — o `client/me` só traz as intenções do próprio cliente; sem este endpoint a barra de encaixe ao agendar não mostra os blocos de terceiros (follow-up que o próprio backend anotou na fatia 2) | 12 | ⬜ aberto |
+| B3 | **Validar o envio real de e-mail (SMTP/Brevo)** do esqueci-senha — fatia 2 configurada, falta o teste de ponta | 2 | 🔧 falta testar |
+| B4 | Já na fonte única do backend (só lembrar a prioridade do client): validação do alvo do `reschedule` (janela+refeição) · estender strike a `reschedule`/`move-to-end` ETA<1h · adicionar serviço a attendance na fila (C8) | 8/6/9 | ⬜ abertos lá |
+
+### 🟢 FRONT-CLIENT — a fazer (nossa equipe), por prioridade
+| # | Tarefa | Ref |
+|---|--------|-----|
+| F1 | **⚠️ BREAKING/URGENTE — `EditPassword`**: campo "senha atual" (`{current_password, password}`) + exceção no interceptor 401 (`CURRENT_PASSWORD_INVALID` = erro de campo, NÃO logout). A tela atual toma 422 | §1 / PRD H1 |
+| F2 | **Tratar `ATTENDANCE_PROMOTED`** (WS+push) — intenção promovida → avisar "você entrou na fila" + atualizar tela | §12 |
+| F3 | **Tela "Esqueci minha senha"** (e-mail → código 6 dígitos → nova senha); tirar `esqueci_senha` do "em breve" | §2 / PRD H2 |
+| F4 | **"Meus agendamentos"** — `GET /attendances/intentions/client/me` (listar por dia, editar/cancelar; `intentionsService` pronto) | §12 |
+| F5 | **Barra de encaixe** — moldura já dá com o `frame` (`projectedQueueEnd`+`opening/closingTime`); blocos de terceiros aguardam **B2** | §12 |
+| F6 | **Solicitar corte** — no `409 ESTABLISHMENT_NOT_OPEN`, oferecer `POST /attendances/cut-requests` + escutar `CUT_ACCEPTED/REFUSED/EXPIRED` | PRD H10 |
+| F7 | **Validar no device:** lojas fechadas com equipe aparecendo na Home (`available_professionals`) + novo fluxo Agendar (seletor de dia) | §11 |
+| F8 | **UI da troca** ("Trocar"+dot, criar/aceitar/cancelar ofertas) — 🔒 bloqueada até **B1** | §7 |
+
+### 🔵 FRONT-PARTNER — nada bloqueante do nosso lado
+- **Troca (C13): partner é PASSIVO** — só reflete a fila pós-troca (já via `professionals-with-queue`/WS); nenhuma ação nova, não marca LATE (§7).
+- Promoções de intenção chegam na fila normalmente (o partner já consome o read-model); aba Agenda (`professional/me`) é handoff backend→partner, já nos docs deles.
+- Alinhado em 2026-07-15 (C13 criado, C6 corrigido) — sem divergência conosco.
 
 ---
 
