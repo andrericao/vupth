@@ -24,7 +24,13 @@ export interface QueuePosition {
   status: AttendanceStatus;
 }
 
-export type QueueNotificationType = 'ATTENDANCE_STARTED' | 'ATTENDANCE_FINISHED';
+export type QueueNotificationType =
+  | 'ATTENDANCE_STARTED'
+  | 'ATTENDANCE_FINISHED'
+  // Profissional removeu da fila (BUG9) — o client limpa a fila ativa na hora.
+  | 'ATTENDANCE_CANCELLED'
+  // INTENÇÃO promovida a SCHEDULED (entrou na fila viva — backend 2026-07-22).
+  | 'ATTENDANCE_PROMOTED';
 
 export interface QueueNotification {
   type: QueueNotificationType;
