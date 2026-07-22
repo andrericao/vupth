@@ -32,6 +32,7 @@ import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
 import { attendanceService } from "@services/attendanceService";
+import { cutRequestService } from "@services/cutRequestService";
 import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
 import { cardShadow } from "@utils/styles";
@@ -78,6 +79,9 @@ export function QueueStatus() {
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
   const [createError, setCreateError] = useState<string | null>(null);
+  // Loja fechada p/ novos (409 ESTABLISHMENT_NOT_OPEN) → oferece "solicitar corte".
+  const [canRequestCut, setCanRequestCut] = useState(false);
+  const [isRequestingCut, setIsRequestingCut] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -182,11 +186,20 @@ export function QueueStatus() {
         // Limpa a fila otimista para não deixar tarja/banner residual sem atendimento real.
         await leaveQueue();
         if (mountedRef.current) {
+          const status = error.response?.status;
+          const code = error.response?.data?.code;
+          // Loja fechada p/ novos (gate C1): oferece "solicitar corte" (BUG5 C2).
+          if (status === 409 && code === "ESTABLISHMENT_NOT_OPEN") {
+            setCanRequestCut(true);
+            setCreateError(
+              "A loja não está aberta agora, então não dá para entrar na fila direto. Você pode pedir um corte — o profissional tem 5 minutos para aceitar.",
+            );
+            return;
+          }
           // Agendamento (#40): 422 alvo inviável / 400 passado -> mensagem amigável
           // sugerindo outro horário; senão, mensagem genérica de entrada na fila.
-          const status = error.response?.status;
           const msg = targetTime
-            ? rescheduleErrorMessage(status, error.response?.data?.code)
+            ? rescheduleErrorMessage(status, code)
             : error.response?.data?.message || error.message || "Erro ao entrar na fila";
           setCreateError(msg);
         }
@@ -374,11 +387,48 @@ export function QueueStatus() {
       <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
         <Header />
         <Center flex={1}>
-          <Text color="$red500" fontSize="$lg" fontFamily="$heading" textAlign="center">
+          <Text
+            color={canRequestCut ? "$gray500" : "$red500"}
+            fontSize="$lg"
+            fontFamily="$heading"
+            textAlign="center"
+          >
             {createError}
           </Text>
+          {canRequestCut && (
+            <Button
+              title={isRequestingCut ? "Enviando pedido..." : "Solicitar corte"}
+              mt="$4"
+              isDisabled={isRequestingCut}
+              onPress={async () => {
+                if (!accessToken || isRequestingCut) return;
+                setIsRequestingCut(true);
+                try {
+                  await cutRequestService.create(
+                    { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [] },
+                    accessToken,
+                  );
+                  Alert.alert(
+                    "Pedido enviado! ⏳",
+                    "O profissional tem 5 minutos para responder. Você será avisado aqui no app.",
+                  );
+                  navigation.goBack();
+                } catch (error: any) {
+                  const code = error.response?.data?.code;
+                  const msg =
+                    code === "CUT_REQUEST_NOT_ALLOWED"
+                      ? "A loja está aberta agora — tente entrar na fila normalmente."
+                      : error.response?.data?.message || "Erro ao enviar o pedido de corte";
+                  Alert.alert("Erro", msg);
+                } finally {
+                  setIsRequestingCut(false);
+                }
+              }}
+            />
+          )}
           <Button
             title="Voltar"
+            variant={canRequestCut ? "outline" : "solid"}
             mt="$4"
             onPress={() => {
               leaveQueue();

@@ -42,5 +42,16 @@ export function handleQueueNotification(
       }
       fx.alert('Atendimento cancelado', notif.message);
       break;
+    // Solicitar corte (BUG5 C2): o atendimento aceito entra na fila (o poll de
+    // Atendimentos reflete); recusado/expirado é só informação.
+    case 'CUT_ACCEPTED':
+      fx.alert('Pedido aceito! 🎉', notif.message);
+      break;
+    case 'CUT_REFUSED':
+      fx.alert('Pedido recusado', notif.message);
+      break;
+    case 'CUT_EXPIRED':
+      fx.alert('Pedido expirou', notif.message);
+      break;
   }
 }

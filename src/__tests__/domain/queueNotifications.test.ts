@@ -54,4 +54,16 @@ describe('handleQueueNotification', () => {
     handleQueueNotification(notif('ATTENDANCE_CANCELLED'), f);
     expect(f.leaveQueue).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ['CUT_ACCEPTED', 'Pedido aceito! 🎉'],
+    ['CUT_REFUSED', 'Pedido recusado'],
+    ['CUT_EXPIRED', 'Pedido expirou'],
+  ] as const)('%s → só alerta, sem mexer na fila', (type, title) => {
+    const f = fx();
+    handleQueueNotification(notif(type), f);
+    expect(f.alert).toHaveBeenCalledWith(title, 'msg');
+    expect(f.updateQueue).not.toHaveBeenCalled();
+    expect(f.leaveQueue).not.toHaveBeenCalled();
+  });
 });
