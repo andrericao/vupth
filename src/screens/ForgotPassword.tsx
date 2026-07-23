@@ -10,6 +10,7 @@ import { Button } from "@components/Button";
 import { PasswordRules } from "@components/PasswordRules";
 import { getPasswordRules } from "@domain/auth/validateAuth";
 import { authService } from "@services/authService";
+import { waitForBackend } from "@services/healthService";
 
 const EMAIL_RE = /\S+@\S+\.\S+/;
 
@@ -38,9 +39,26 @@ export function ForgotPassword() {
     if (!canSend) return;
     setIsSubmitting(true);
     try {
+      // Cold start do Render: acorda a instância antes de enviar — sem isso o
+      // request penava até 90s com o botão travado ("intocável") e sem código
+      // chegando (feedback Andre 2026-07-23).
+      const ready = await waitForBackend({});
+      if (!ready) {
+        Alert.alert(
+          "Servidor demorando",
+          "O servidor está acordando. Tente novamente em alguns instantes.",
+        );
+        return;
+      }
+
+      const isResend = step === "reset";
       await authService.forgotPassword(email.trim());
       // Sempre 200 (anti-enumeração) — não revelamos se o e-mail existe.
-      setStep("reset");
+      if (isResend) {
+        Alert.alert("Código reenviado! ✉️", "Confira seu e-mail (vale 15 minutos).");
+      } else {
+        setStep("reset");
+      }
     } catch (error: any) {
       const msg = error.response?.data?.message || error.message || "Erro ao enviar o código";
       Alert.alert("Erro", msg);
@@ -135,7 +153,7 @@ export function ForgotPassword() {
             />
             <TouchableOpacity onPress={handleSendCode} disabled={isSubmitting}>
               <Text size="sm" color="$green500" fontFamily="$heading" textAlign="center">
-                Reenviar código
+                {isSubmitting ? "Reenviando..." : "Reenviar código"}
               </Text>
             </TouchableOpacity>
           </VStack>
