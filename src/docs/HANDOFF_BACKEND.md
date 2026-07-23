@@ -15,7 +15,7 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 |---|--------|:-----:|----------|
 | B1 | **⚠️ DESALINHAMENTO — `/swap-offers` (troca aberta, C13) fora da FONTE ÚNICA.** Certificado no PRD_BACKEND inteiro (2026-07-22): não foi feito nem está registrado; só existem o #42 direcionado (não atende) e a nota stale de 2026-07-07 ("substituído pela INTENTION" — **superada em 2026-07-15**: troca ≠ agendamento). O partner também cobrou. **Registrar o item na fonte única + corrigir a nota stale.** Contrato pronto na §7 | 7 | ⬜ registrar |
 | B2 | **Endpoint público `GET /attendances/intentions/professional/{id}` com blocos ANÔNIMOS** — o `client/me` só traz as intenções do próprio cliente; sem este endpoint a barra de encaixe ao agendar não mostra os blocos de terceiros (follow-up que o próprio backend anotou na fatia 2) | 12 | ⬜ aberto |
-| B3 | **Validar o envio real de e-mail (SMTP/Brevo)** do esqueci-senha — fatia 2 configurada, falta o teste de ponta | 2 | 🔧 falta testar |
+| B3 | **Validar o envio real de e-mail (SMTP/Brevo)** do esqueci-senha — fatia 2 configurada, falta o teste de ponta. ⚠️ **Reforço (teste device Andre 2026-07-23):** o fluxo passou, mas o **REENVIO do código não chegou por e-mail**. Investigar a entrega do reenvio no provedor (Brevo: limite/duplicidade/spam?) — o front já corrigiu a UX do botão (cold-start gate + feedback) | 2 | 🔧 falta testar + investigar reenvio |
 | B4 | Já na fonte única do backend (só lembrar a prioridade do client): validação do alvo do `reschedule` (janela+refeição) · estender strike a `reschedule`/`move-to-end` ETA<1h · adicionar serviço a attendance na fila (C8) | 8/6/9 | ⬜ abertos lá |
 
 ### 🟢 FRONT-CLIENT — a fazer (nossa equipe), por prioridade
