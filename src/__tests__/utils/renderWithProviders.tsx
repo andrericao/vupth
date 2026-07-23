@@ -1,3 +1,6 @@
+// ⚠️ PRIMEIRO import: filtra o warning de SafeAreaView que o Gluestack v1 solta
+// ao ser carregado (ver comentário no módulo). Não reordenar.
+import './silenceSafeAreaViewWarning';
 import { ReactElement } from 'react';
 import { render } from '@testing-library/react-native';
 import { GluestackUIProvider } from '@gluestack-ui/themed';
