@@ -19,6 +19,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { resolveRating } from "@domain/establishment/rating";
+import { isEffectivelyOpen } from "@domain/establishment/types";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { useQueueSocket } from "@hooks/useQueueSocket";
@@ -96,9 +97,9 @@ export function EstablishmentDetail() {
   function handleSelectProfessional(professionalId: string) {
     const prof = professionals.find((p) => p.id === professionalId);
 
-    // Loja fechada: ninguém entra na fila. (Futuro: manifestar interesse para a
-    // próxima abertura — depende do backend, ver "Solicitação antecipada".)
-    if (establishment?.open_status !== "OPEN") {
+    // Loja fechada AGORA (inclui OPEN fora do horário — is_open efetivo):
+    // ninguém entra na fila. (Futuro: manifestar interesse — INTENÇÃO.)
+    if (!establishment || !isEffectivelyOpen(establishment)) {
       Alert.alert(
         "Estabelecimento fechado",
         "Este estabelecimento está fechado agora, então não é possível entrar na fila. Em breve você poderá manifestar interesse para a próxima abertura.",
@@ -162,13 +163,13 @@ export function EstablishmentDetail() {
         </Heading>
         <HStack mt="$2" gap="$2" alignItems="center">
           <Badge
-            bg={establishment.open_status === "OPEN" ? "$green500" : "$gray400"}
+            bg={isEffectivelyOpen(establishment) ? "$green500" : "$gray400"}
             borderRadius="$full"
             px="$3"
             py="$1"
           >
             <BadgeText color="$white" size="xs">
-              {establishment.open_status === "OPEN" ? "Aberto" : "Fechado"}
+              {isEffectivelyOpen(establishment) ? "Aberto" : "Fechado"}
             </BadgeText>
           </Badge>
           <Text size="sm" color="$gray300">
@@ -198,7 +199,7 @@ export function EstablishmentDetail() {
         }
       />
 
-      {establishment.open_status === "OPEN" && professionals.length > 0 && (
+      {isEffectivelyOpen(establishment) && professionals.length > 0 && (
         <Button
           title="Entrar na fila (menor espera)"
           onPress={handleSelectShortestQueue}

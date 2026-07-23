@@ -6,7 +6,7 @@ import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@g
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
-import { Establishment, ServiceType } from "@domain/establishment/types";
+import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
 import { filterEstablishments, sortEstablishments } from "@domain/establishment/filter";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
@@ -44,7 +44,9 @@ function EstablishmentCard({
   establishment: Establishment;
   onPress: () => void;
 }) {
-  const isOpen = establishment.open_status === "OPEN";
+  // "Aberta AGORA" efetiva (inclui horario de funcionamento) — loja OPEN fora
+  // do horario mostra "Fechado" (feedback Andre 2026-07-22).
+  const isOpen = isEffectivelyOpen(establishment);
 
   return (
     <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>

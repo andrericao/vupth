@@ -1,5 +1,5 @@
 import { MOCK_ESTABLISHMENTS } from '@domain/establishment/mockData';
-import { Establishment } from '@domain/establishment/types';
+import { Establishment, isEffectivelyOpen } from '@domain/establishment/types';
 import { filterEstablishments, sortEstablishments } from '@domain/establishment/filter';
 
 describe('Home - Filtro de Estabelecimentos', () => {
@@ -67,6 +67,44 @@ describe('Home - Filtro de Estabelecimentos', () => {
     };
     const result = filterEstablishments([fechadaZero, fechadaUndef], '', 'ALL');
     expect(result.length).toBe(0);
+  });
+
+  // is_open efetivo (BUG5 B): loja OPEN fora do horário = FECHADA p/ exibição
+  // (feedback Andre 2026-07-22: fechava 20:00 e aparecia aberta de noite).
+  it('OPEN mas fora do horário (is_open=false) vira FECHADA: some sem profissional agendável', () => {
+    const abertaForaDoHorario: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'fora-horario',
+      open_status: 'OPEN',
+      is_open: false,
+      estimated_wait_minutes: 10,
+    };
+    expect(filterEstablishments([abertaForaDoHorario], '', 'ALL').length).toBe(0);
+  });
+
+  it('OPEN fora do horário COM profissional agendável aparece (pra agendar a reabertura)', () => {
+    const foraDoHorarioComProf: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'fora-horario-com',
+      open_status: 'OPEN',
+      is_open: false,
+      estimated_wait_minutes: null,
+      available_professionals: 3,
+    };
+    expect(filterEstablishments([foraDoHorarioComProf], '', 'ALL').map((e) => e.id)).toEqual([
+      'fora-horario-com',
+    ]);
+  });
+
+  it('is_open=true segue a regra de aberta (esconde só sem profissional/estimativa null)', () => {
+    const abertaAgora: Establishment = {
+      ...MOCK_ESTABLISHMENTS[0],
+      id: 'aberta-agora',
+      open_status: 'OPEN',
+      is_open: true,
+      estimated_wait_minutes: 15,
+    };
+    expect(filterEstablishments([abertaAgora], '', 'ALL').map((e) => e.id)).toEqual(['aberta-agora']);
   });
 
   it('deve combinar busca + filtro', () => {
@@ -137,5 +175,19 @@ describe('sortEstablishments', () => {
   it('estabelecimentos sem disponibilidade (null) vão por último', () => {
     const out = sortEstablishments([make('sem', null, 5), make('com', 20, 4)]);
     expect(out.map((e) => e.id)).toEqual(['com', 'sem']);
+  });
+});
+
+describe('isEffectivelyOpen', () => {
+  const base = MOCK_ESTABLISHMENTS[0];
+
+  it('usa o is_open do backend quando presente (OPEN fora do horário = fechada)', () => {
+    expect(isEffectivelyOpen({ ...base, open_status: 'OPEN', is_open: false })).toBe(false);
+    expect(isEffectivelyOpen({ ...base, open_status: 'OPEN', is_open: true })).toBe(true);
+  });
+
+  it('sem is_open (mocks/legado), cai no open_status', () => {
+    expect(isEffectivelyOpen({ ...base, open_status: 'OPEN' })).toBe(true);
+    expect(isEffectivelyOpen({ ...base, open_status: 'CLOSED' })).toBe(false);
   });
 });

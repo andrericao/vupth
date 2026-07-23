@@ -60,6 +60,11 @@ export interface Establishment {
   urlImage: string | null;
   serviceType?: ServiceType;
   open_status: OpenStatus;
+  // "Aberta AGORA" efetiva (backend BUG5 parte B): open_status == OPEN E o
+  // horario atual dentro de [opening_time, closing_time). Uma loja OPEN fora
+  // do horario vem is_open=false — exibir como FECHADA (feedback Andre
+  // 2026-07-22: loja que fecha 20:00 aparecia aberta de noite).
+  is_open?: boolean;
   status: EstablishmentStatus;
   services: string[];
   address?: Address;
@@ -83,4 +88,14 @@ export interface EstablishmentDetail extends Omit<Establishment, 'services'> {
   services: string[];
   total_in_queue?: number;
   available_professionals?: number;
+}
+
+/**
+ * A loja está aberta AGORA para exibição/entrada na fila?
+ * Usa o `is_open` efetivo do backend (open_status OPEN **E** dentro do horário
+ * de funcionamento — BUG5 parte B); fallback para `open_status` quando o campo
+ * não vier (mocks/payload legado). Loja OPEN fora do horário => FECHADA.
+ */
+export function isEffectivelyOpen(e: { open_status: OpenStatus; is_open?: boolean }): boolean {
+  return e.is_open ?? e.open_status === 'OPEN';
 }
