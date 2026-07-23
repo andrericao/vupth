@@ -96,26 +96,19 @@ export function EstablishmentDetail() {
 
   function handleSelectProfessional(professionalId: string) {
     const prof = professionals.find((p) => p.id === professionalId);
+    if (!establishment) return;
 
-    // Loja fechada AGORA (inclui OPEN fora do horário — is_open efetivo):
-    // ninguém entra na fila. (Futuro: manifestar interesse — INTENÇÃO.)
-    if (!establishment || !isEffectivelyOpen(establishment)) {
-      Alert.alert(
-        "Estabelecimento fechado",
-        "Este estabelecimento está fechado agora, então não é possível entrar na fila. Em breve você poderá manifestar interesse para a próxima abertura.",
-      );
-      return;
-    }
-
-    // Visitante (sem login) pode navegar e ver os servicos/precos: a verificacao
-    // de token acontece so na ENTRADA da fila (apos escolher os servicos), na
-    // ServiceSelection. Aqui nao barra mais.
+    // Loja fechada NÃO bloqueia mais (Andre 2026-07-23): o fluxo segue até os
+    // serviços e lá as ações viram "Solicitar corte" + "Agendar para depois"
+    // (o backend continua guardião — gate C1). Visitante (sem login) navega e vê
+    // preços; o portão de auth fica na ServiceSelection.
     navigation.navigate("serviceSelection", {
       professionalId,
       professionalName: prof?.name ?? "",
       establishmentId,
       establishmentName: establishment?.name ?? "",
       estimatedWaitMinutes: prof?.estimated_wait_minutes ?? 0,
+      establishmentOpen: isEffectivelyOpen(establishment),
     });
   }
 
@@ -163,13 +156,13 @@ export function EstablishmentDetail() {
         </Heading>
         <HStack mt="$2" gap="$2" alignItems="center">
           <Badge
-            bg={isEffectivelyOpen(establishment) ? "$green500" : "$gray400"}
+            bg={isEffectivelyOpen(establishment) ? "$green500" : "$amber500"}
             borderRadius="$full"
             px="$3"
             py="$1"
           >
-            <BadgeText color="$white" size="xs">
-              {isEffectivelyOpen(establishment) ? "Aberto" : "Fechado"}
+            <BadgeText color={isEffectivelyOpen(establishment) ? "$white" : "#1A281A"} size="xs">
+              {isEffectivelyOpen(establishment) ? "Aberto" : "AGENDAR"}
             </BadgeText>
           </Badge>
           <Text size="sm" color="$gray300">
@@ -208,29 +201,31 @@ export function EstablishmentDetail() {
       )}
 
       {/* Loja fechada agora (inclui OPEN fora do horário): no lugar do botão de
-          fila, um "i" explicativo (pedido Andre 2026-07-23). Quando a barra de
-          encaixe (F5) entrar, isto vira o botão "Agendar". */}
+          fila, banner âmbar acionável (Andre 2026-07-23) — o fluxo segue pelo
+          profissional, onde as ações são Agendar / Solicitar corte. */}
       {!isEffectivelyOpen(establishment) && (
         <TouchableOpacity
           onPress={() =>
             Alert.alert(
-              "Estabelecimento fechado",
-              "Fora do horário de funcionamento não dá para entrar na fila. Em breve você poderá agendar um horário para quando reabrir.",
+              "Fila fechada agora",
+              "A fila não está recebendo clientes neste momento. Escolha um profissional para AGENDAR um horário ou SOLICITAR um corte (o profissional responde em até 5 minutos).",
             )
           }
         >
           <Box
-            bg="$white"
+            bg="$amber100"
+            borderWidth="$1"
+            borderColor="$amber500"
             borderRadius="$2xl"
             px="$4"
             py="$3"
             mt="$3"
-            style={cardShadow}
           >
             <HStack alignItems="center" gap="$2">
-              <Info size={18} color="#3B7A3F" />
-              <Text size="xs" color="$gray300" flex={1}>
-                Fechado agora — em breve você poderá agendar para a reabertura.
+              <Info size={18} color="#B45309" />
+              <Text size="xs" color="$gray500" flex={1}>
+                Fila fechada agora — escolha um profissional para agendar ou
+                solicitar um corte.
               </Text>
             </HStack>
           </Box>

@@ -54,6 +54,9 @@ export type AppRoutes = {
     establishmentId: string;
     establishmentName: string;
     estimatedWaitMinutes: number;
+    // Loja aberta AGORA (is_open efetivo)? false => ações viram "Solicitar
+    // corte" + "Agendar para depois" (fila fechada). Ausente = aberta.
+    establishmentOpen?: boolean;
   };
   queueStatus: {
     professionalId: string;

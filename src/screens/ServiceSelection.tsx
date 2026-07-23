@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { TouchableOpacity, ScrollView } from "react-native";
+import { Alert, TouchableOpacity, ScrollView } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   VStack,
@@ -19,6 +19,7 @@ import { ScheduleModal } from "@components/ScheduleModal";
 import { cardShadow } from "@utils/styles";
 import { ServiceItemResponse } from "@domain/professional/types";
 import { establishmentService } from "@services/establishmentService";
+import { cutRequestService } from "@services/cutRequestService";
 import { useAuthStore } from "@stores/authStore";
 
 type RouteParams = {
@@ -27,6 +28,7 @@ type RouteParams = {
   establishmentId: string;
   establishmentName: string;
   estimatedWaitMinutes: number;
+  establishmentOpen?: boolean;
 };
 
 export function ServiceSelection() {
@@ -38,15 +40,20 @@ export function ServiceSelection() {
     establishmentId,
     establishmentName,
     estimatedWaitMinutes,
+    establishmentOpen,
   } = route.params as RouteParams;
+  // Ausente = aberta (fluxos legados). false = fila fechada agora.
+  const storeOpen = establishmentOpen ?? true;
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   const [services, setServices] = useState<ServiceItemResponse[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showSchedule, setShowSchedule] = useState(false);
+  const [isRequestingCut, setIsRequestingCut] = useState(false);
 
   useEffect(() => {
     establishmentService
@@ -99,6 +106,38 @@ export function ServiceSelection() {
 
   function handleConfirm() {
     goToQueue();
+  }
+
+  // Fila fechada agora: "Solicitar corte" (BUG5 C2) — pedido sob aprovação com
+  // validade de 5min. Visitante passa pelo mesmo portão de auth da fila (após
+  // logar, o create dá 409 e o QueueStatus oferece o corte por lá).
+  async function handleRequestCut() {
+    if (selectedIds.length === 0 || isRequestingCut) return;
+    if (!isAuthenticated || !accessToken) {
+      goToQueue();
+      return;
+    }
+    setIsRequestingCut(true);
+    try {
+      await cutRequestService.create(
+        { professionalId, establishmentId, serviceItemIds: selectedIds },
+        accessToken,
+      );
+      Alert.alert(
+        "Pedido enviado! ⏳",
+        "O profissional tem 5 minutos para responder. Você será avisado aqui no app.",
+      );
+      navigation.navigate("home");
+    } catch (error: any) {
+      const code = error.response?.data?.code;
+      const msg =
+        code === "CUT_REQUEST_NOT_ALLOWED"
+          ? "A loja está aberta agora — dá para entrar na fila normalmente."
+          : error.response?.data?.message || "Erro ao enviar o pedido de corte";
+      Alert.alert("Erro", msg);
+    } finally {
+      setIsRequestingCut(false);
+    }
   }
 
   if (isLoading) {
@@ -206,10 +245,20 @@ export function ServiceSelection() {
                   </Text>
                 </HStack>
               </Box>
-              <Button
-                title="Confirmar e entrar na fila"
-                onPress={handleConfirm}
-              />
+              {/* Fila fechada agora: sem "entrar na fila" — as ações são
+                  Solicitar corte + Agendar (badge AGENDAR, Andre 2026-07-23). */}
+              {storeOpen ? (
+                <Button
+                  title="Confirmar e entrar na fila"
+                  onPress={handleConfirm}
+                />
+              ) : (
+                <Button
+                  title={isRequestingCut ? "Enviando pedido..." : "Solicitar corte"}
+                  isDisabled={isRequestingCut}
+                  onPress={handleRequestCut}
+                />
+              )}
               <Button
                 title="Agendar para depois"
                 variant="outline"

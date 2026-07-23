@@ -103,14 +103,16 @@ function EstablishmentCard({
               })()}
             </HStack>
           </VStack>
+          {/* Fechada não é beco sem saída: badge âmbar "AGENDAR" sinaliza que a
+              fila está fechada mas dá pra agendar/solicitar (Andre 2026-07-23). */}
           <Badge
-            bg={isOpen ? "$green500" : "$gray400"}
+            bg={isOpen ? "$green500" : "$amber500"}
             borderRadius="$full"
             px="$3"
             py="$1"
           >
-            <BadgeText color="$white" size="xs">
-              {isOpen ? "Aberto" : "Fechado"}
+            <BadgeText color={isOpen ? "$white" : "#1A281A"} size="xs">
+              {isOpen ? "Aberto" : "AGENDAR"}
             </BadgeText>
           </Badge>
         </HStack>
