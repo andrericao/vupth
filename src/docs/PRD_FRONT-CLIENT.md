@@ -46,6 +46,10 @@ App para **clientes** que querem buscar estabelecimentos e entrar em filas de at
 ```
 Entrar na fila (visitante ou logado): Home → Detalhe → **ServiceSelection (ve precos, escolhe)** → **portao de auth aqui** (se nao logado → Login/SignUp levando os `serviceItemIds`) → QueueStatus. O login/cadastro redireciona de volta pra `queueStatus` com a selecao preservada. Tocar na aba ativa volta ao topo; trocar de aba e 1 toque (resolve o "voltar varias vezes").
 
+**Fila fechada agora (loja fechada OU `OPEN` fora do horario — `is_open` efetivo, 2026-07-23):** o MESMO fluxo segue ate a ServiceSelection (badge ambar **"AGENDAR"** na Home/loja; param `establishmentOpen` na rota), mas as acoes finais viram **"Solicitar corte"** (direto p/ autenticado; visitante passa pelo portao de auth e cai na oferta do 409 no QueueStatus) + **"Agendar para depois"**. Ver secao "Loja fechada".
+
+**Visitante e opcoes de conta (2026-07-23):** sem login, **Config.** esconde nome/e-mail/senha/endereco e "Deletar conta" (mostra o convite "Entrar ou criar conta"); **Perfil** mostra "Visitante" e troca "Sair da conta" pelo mesmo convite. Funcionalidades aguardadas e info de OTA seguem visiveis.
+
 **Stack:**
 - React Native + Expo SDK 54
 - Gluestack UI v1 (sem NativeWind)
@@ -476,7 +480,7 @@ Lista viva dos handoffs abertos do front-client para o backend. Detalhe em `HAND
 | # | Handoff | HANDOFF §| ID partner | Status |
 |---|---------|:--------:|:----------:|--------|
 | H1 | **Senha atual** no `PATCH /profile/update-password/me` — ✅ **BACKEND ENTREGOU (2026-07-22)**: exige `current_password` (401 `CURRENT_PASSWORD_INVALID` / 422 se ausente). ⚠️ **BREAKING**: EditPassword atual toma 422 → front DEVE add campo "senha atual" + exceção no interceptor 401 (não é sessão expirada) | 1 | — | ⚠️ **Ação no front (breaking)** |
-| H2 | **Esqueci minha senha** — ✅ **FATIA 1 ENTREGUE (2026-07-22)**: `POST /auth/forgot-password {email}` (sempre 200) + `POST /auth/reset-password {email, code, new_password}`, código 6 dígitos 15min. SMTP (Brevo) configurado, falta validar envio real. Front: construir a tela + tirar `esqueci_senha` do "em breve" | 2 | S5/S6 | Front pode construir |
+| H2 | **Esqueci minha senha** — ✅ **FRONT FEITO (2026-07-22, validado device 2026-07-23)**: tela `ForgotPassword` (e-mail → código 6 dígitos → nova senha), `esqueci_senha` fora do "em breve". **Fix 2026-07-23:** gate de cold start (`waitForBackend`) antes do envio + feedback no reenvio ("Reenviando…"/"Código reenviado!"). ⚠️ **E-mail do REENVIO não chegou no device — investigação é do backend (B3/SMTP Brevo)** | 2 | S5/S6 | ✅ Front feito / e-mail reenvio ← backend B3 |
 | H3 | **Avaliacao (Item 6)** — ✅ **VALIDADO NO DEVICE (2026-07-04, OTA `019f2b2f`): ver a nota real E avaliar funcionam.** Backend manda `rating_average`/`rating_count` no `professionals-with-queue`; front consome (`resolveRating`). **Melhorias opcionais (nao bloqueiam):** rollup por ESTABELECIMENTO no `GET /establishment` (cards da Home) + `rated`/`establishmentName` no `/attendances/client/me` | 3 | — | ✅ **Feito (device)** |
 | H4 | **WebSocket** nao funciona no device (backend compartilhado) — coberto por polling | 4 | — | **Ultima prioridade** (Andre 2026-07-04) |
 | H5 | **Estender strike #39** a `reschedule` e `move-to-end` com ETA < 1h (hoje so no `cancel`) | 6 | — | Aguarda backend |

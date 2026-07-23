@@ -2,7 +2,7 @@
 
 Pendências do app **cliente** que dependem do backend. O front já está pronto (ou pronto para consumir) em cada caso. Detalhe completo nos callouts do `PRD_FRONT-CLIENT.md`.
 
-Última atualização: **2026-07-22** · branch `dev` do front-client.
+Última atualização: **2026-07-23** · branch `dev` do front-client.
 
 ---
 
@@ -19,16 +19,23 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 | B4 | Já na fonte única do backend (só lembrar a prioridade do client): validação do alvo do `reschedule` (janela+refeição) · estender strike a `reschedule`/`move-to-end` ETA<1h · adicionar serviço a attendance na fila (C8) | 8/6/9 | ⬜ abertos lá |
 
 ### 🟢 FRONT-CLIENT — a fazer (nossa equipe), por prioridade
-| # | Tarefa | Ref |
-|---|--------|-----|
-| F1 | **⚠️ BREAKING/URGENTE — `EditPassword`**: campo "senha atual" (`{current_password, password}`) + exceção no interceptor 401 (`CURRENT_PASSWORD_INVALID` = erro de campo, NÃO logout). A tela atual toma 422 | §1 / PRD H1 |
-| F2 | **Tratar `ATTENDANCE_PROMOTED`** (WS+push) — intenção promovida → avisar "você entrou na fila" + atualizar tela | §12 |
-| F3 | **Tela "Esqueci minha senha"** (e-mail → código 6 dígitos → nova senha); tirar `esqueci_senha` do "em breve" | §2 / PRD H2 |
-| F4 | **"Meus agendamentos"** — `GET /attendances/intentions/client/me` (listar por dia, editar/cancelar; `intentionsService` pronto) | §12 |
-| F5 | **Barra de encaixe** — moldura já dá com o `frame` (`projectedQueueEnd`+`opening/closingTime`); blocos de terceiros aguardam **B2** | §12 |
-| F6 | **Solicitar corte** — no `409 ESTABLISHMENT_NOT_OPEN`, oferecer `POST /attendances/cut-requests` + escutar `CUT_ACCEPTED/REFUSED/EXPIRED` | PRD H10 |
-| F7 | **Validar no device:** lojas fechadas com equipe aparecendo na Home (`available_professionals`) + novo fluxo Agendar (seletor de dia) | §11 |
-| F8 | **UI da troca** ("Trocar"+dot, criar/aceitar/cancelar ofertas) — 🔒 bloqueada até **B1** | §7 |
+| # | Tarefa | Ref | Status |
+|---|--------|-----|--------|
+| F1 | **`EditPassword`**: campo "senha atual" (`{current_password, password}`) + exceção no interceptor 401 (`CURRENT_PASSWORD_INVALID` = erro de campo, NÃO logout) | §1 / PRD H1 | ✅ **FEITO 2026-07-22** |
+| F2 | **Tratar `ATTENDANCE_PROMOTED`/`CANCELLED`/`CUT_*`** no WS — handler puro `handleQueueNotification` (⚠️ entrega in-app é melhor-esforço: WS só conecta com fila ativa + client sem push token, ver F9) | §12 | ✅ **FEITO 2026-07-22** |
+| F3 | **Tela "Esqueci minha senha"** (e-mail → código 6 dígitos → nova senha); `esqueci_senha` saiu do "em breve". **2026-07-23:** + gate de cold start (`waitForBackend` antes do envio — o botão penava com o Render hibernado) e feedback no reenvio ("Reenviando…"/"Código reenviado!") | §2 / PRD H2 | ✅ **FEITO** (e-mail do reenvio ← B3) |
+| F4 | **"Meus agendamentos"** — seção AGENDAMENTOS na aba Atendimentos (`client/me` agrupado por dia, cancelar com confirmação; editar horário fica com a barra F5) | §12 | ✅ **FEITO 2026-07-22** |
+| F5 | **Barra de encaixe** — moldura já dá com o `frame` (`projectedQueueEnd`+`opening/closingTime`); blocos de terceiros aguardam **B2**. Design a fechar antes de codar | §12 | 🎨 próxima |
+| F6 | **Solicitar corte** — (a) `409 ESTABLISHMENT_NOT_OPEN` no QueueStatus oferece o corte; (b) **2026-07-23:** loja fechada libera o fluxo até os serviços com botão **"Solicitar corte" DIRETO** na ServiceSelection | PRD H10 | ✅ **FEITO** |
+| F7 | **Validar no device** — parcial: esqueci-senha ✅; restam: fechadas na Home (badge AGENDAR), fluxo corte, meus agendamentos, trocar senha, visitante | §11 | 🔜 Andre |
+| F8 | **UI da troca** ("Trocar"+dot, criar/aceitar/cancelar ofertas) — 🔒 bloqueada até **B1** | §7 | 🔒 |
+| F9 | **Push token no client** (permissão + Expo Push Token + `POST /devices`; logout `DELETE /devices`) — sem isso, promoção/corte só chegam por poll/WS-com-fila. ⚠️ `expo-notifications` é **módulo NATIVO → exige novo `eas build`** (OTA não entrega) | PRD_BACKEND 18d | ⬜ follow-up |
+
+**🎨 Decisões de UX registradas em 2026-07-23 (sessão de feedback no device):**
+1. **Loja fechada (fila fechada agora, `is_open` efetivo) deixou de ser beco sem saída:** badge **ÂMBAR "AGENDAR"** na Home e na tela da loja (era "Fechado" cinza, conclusivo demais). O fluxo **não bloqueia mais**: cliente toca no profissional, vê serviços/preços e as ações finais viram **"Solicitar corte"** + **"Agendar para depois"** (o backend segue guardião — gate C1). Banner "i" âmbar explica os dois caminhos. *Consequência: o F6 ficou alcançável — antes o bloqueio na tela da loja impedia de chegar ao 409.*
+2. **`is_open` efetivo adotado no front** (loja `OPEN` fora do horário = fechada p/ exibição/entrada) — corrige o caso "fecha 20:00 e aparecia aberta de noite".
+3. **Visitante não vê opções de conta** (boa prática): Config. esconde nome/e-mail/senha/endereço/deletar e mostra "Entrar ou criar conta"; Perfil mostra "Visitante" com o mesmo convite.
+4. Nota p/ quando a **barra de encaixe (F5)** chegar: o banner "i" da loja fechada vira o botão **"Agendar"** de verdade, e o coming-soon `manifestar_interesse` é aposentado (superado pelo caminho Agendar/Solicitar).
 
 ### 🔵 FRONT-PARTNER — nada bloqueante do nosso lado
 - **Troca (C13): partner é PASSIVO** — só reflete a fila pós-troca (já via `professionals-with-queue`/WS); nenhuma ação nova, não marca LATE (§7).
