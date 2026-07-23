@@ -10,7 +10,7 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Star } from "phosphor-react-native";
+import { Star, Info } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
@@ -205,6 +205,36 @@ export function EstablishmentDetail() {
           onPress={handleSelectShortestQueue}
           mt="$3"
         />
+      )}
+
+      {/* Loja fechada agora (inclui OPEN fora do horário): no lugar do botão de
+          fila, um "i" explicativo (pedido Andre 2026-07-23). Quando a barra de
+          encaixe (F5) entrar, isto vira o botão "Agendar". */}
+      {!isEffectivelyOpen(establishment) && (
+        <TouchableOpacity
+          onPress={() =>
+            Alert.alert(
+              "Estabelecimento fechado",
+              "Fora do horário de funcionamento não dá para entrar na fila. Em breve você poderá agendar um horário para quando reabrir.",
+            )
+          }
+        >
+          <Box
+            bg="$white"
+            borderRadius="$2xl"
+            px="$4"
+            py="$3"
+            mt="$3"
+            style={cardShadow}
+          >
+            <HStack alignItems="center" gap="$2">
+              <Info size={18} color="#3B7A3F" />
+              <Text size="xs" color="$gray300" flex={1}>
+                Fechado agora — em breve você poderá agendar para a reabertura.
+              </Text>
+            </HStack>
+          </Box>
+        </TouchableOpacity>
       )}
     </VStack>
   );
