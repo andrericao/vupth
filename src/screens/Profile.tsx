@@ -17,6 +17,7 @@ import {
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
+import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
 
@@ -51,6 +52,7 @@ function MenuItem({
 export function Profile() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
 
   function handleLogout() {
@@ -89,7 +91,7 @@ export function Profile() {
           </Text>
         </Box>
         <Heading fontFamily="$heading" fontSize="$xl" mt="$3">
-          {user?.email ?? "Usuário"}
+          {isAuthenticated ? (user?.email ?? "Usuário") : "Visitante"}
         </Heading>
       </Center>
 
@@ -107,14 +109,23 @@ export function Profile() {
       </Box>
 
       <VStack flex={1} justifyContent="flex-end">
-        <TouchableOpacity onPress={handleLogout}>
-          <Box bg="$white" px="$4" py="$4" borderRadius="$2xl" style={cardShadow}>
-            <HStack alignItems="center" gap="$3">
-              <SignOut size={22} color="#E63946" />
-              <Text size="sm" color="$red500">Sair da conta</Text>
-            </HStack>
-          </Box>
-        </TouchableOpacity>
+        {/* Visitante não tem "sair da conta" — vê o convite para entrar/criar
+            conta (boa prática; pedido Andre 2026-07-23). */}
+        {isAuthenticated ? (
+          <TouchableOpacity onPress={handleLogout}>
+            <Box bg="$white" px="$4" py="$4" borderRadius="$2xl" style={cardShadow}>
+              <HStack alignItems="center" gap="$3">
+                <SignOut size={22} color="#E63946" />
+                <Text size="sm" color="$red500">Sair da conta</Text>
+              </HStack>
+            </Box>
+          </TouchableOpacity>
+        ) : (
+          <Button
+            title="Entrar ou criar conta"
+            onPress={() => navigation.navigate("login", {})}
+          />
+        )}
       </VStack>
     </VStack>
   );

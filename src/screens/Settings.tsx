@@ -66,6 +66,7 @@ export function Settings() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const user = useAuthStore((s) => s.user);
   const accessToken = useAuthStore((s) => s.accessToken);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
 
   const [mainAddress, setMainAddress] = useState<AddressResponse | null>(null);
@@ -155,42 +156,61 @@ export function Settings() {
         Configurações
       </Heading>
 
-      <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
-        <MenuItem
-          icon={<User size={22} color="#3B7A3F" />}
-          label="Nome"
-          value={displayName}
-          onPress={() => navigation.navigate("editProfile")}
-        />
-        <MenuItem
-          icon={<EnvelopeSimple size={22} color="#3B7A3F" />}
-          label="E-mail"
-          value={user?.email ?? "—"}
-          onPress={() => navigation.navigate("editEmail")}
-        />
-        <MenuItem
-          icon={<Lock size={22} color="#3B7A3F" />}
-          label="Senha"
-          value="••••••"
-          onPress={() => navigation.navigate("editPassword")}
-        />
-        <MenuItem
-          icon={<MapPin size={22} color="#3B7A3F" />}
-          label="Endereço"
-          value={displayAddress}
-          onPress={() => navigation.navigate("editAddress")}
-        />
-      </Box>
+      {/* Opções de CONTA só para quem tem conta (visitante não vê trocar senha,
+          e-mail, endereço nem deletar — boa prática; pedido Andre 2026-07-23). */}
+      {isAuthenticated ? (
+        <>
+          <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
+            <MenuItem
+              icon={<User size={22} color="#3B7A3F" />}
+              label="Nome"
+              value={displayName}
+              onPress={() => navigation.navigate("editProfile")}
+            />
+            <MenuItem
+              icon={<EnvelopeSimple size={22} color="#3B7A3F" />}
+              label="E-mail"
+              value={user?.email ?? "—"}
+              onPress={() => navigation.navigate("editEmail")}
+            />
+            <MenuItem
+              icon={<Lock size={22} color="#3B7A3F" />}
+              label="Senha"
+              value="••••••"
+              onPress={() => navigation.navigate("editPassword")}
+            />
+            <MenuItem
+              icon={<MapPin size={22} color="#3B7A3F" />}
+              label="Endereço"
+              value={displayAddress}
+              onPress={() => navigation.navigate("editAddress")}
+            />
+          </Box>
 
-      <VStack mt="$8">
-        <Button
-          title="Deletar conta"
-          variant="outline"
-          onPress={handleDeleteAccount}
-          borderColor="$red500"
-          $active-bg="$red500"
-        />
-      </VStack>
+          <VStack mt="$8">
+            <Button
+              title="Deletar conta"
+              variant="outline"
+              onPress={handleDeleteAccount}
+              borderColor="$red500"
+              $active-bg="$red500"
+            />
+          </VStack>
+        </>
+      ) : (
+        <Box bg="$white" borderRadius="$2xl" p="$4" style={cardShadow}>
+          <Text size="sm" color="$gray300" mb="$3">
+            Você está navegando como visitante. Entre ou crie uma conta para
+            gerenciar seu perfil, senha e endereço.
+          </Text>
+          <Button
+            title="Entrar ou criar conta"
+            onPress={() =>
+              navigation.getParent()?.navigate("homeTab", { screen: "login", params: {} })
+            }
+          />
+        </Box>
+      )}
 
       {awaited.length > 0 && (
         <VStack mt="$8">
