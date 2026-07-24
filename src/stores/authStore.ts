@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { authService } from '../services/authService';
+import { pushService } from '../services/pushService';
 import { registerAuthStore } from '../services/api';
 import { useQueueStore } from './queueStore';
 
@@ -35,6 +36,9 @@ interface AuthState {
 const TOKEN_KEY = 'vupth_access_token';
 const REFRESH_KEY = 'vupth_refresh_token';
 const USER_KEY = 'vupth_user';
+// Expo Push Token registrado (gravado pelo usePushRegistration nativo); o logout
+// desregistra no backend. Só existe após um build COM o módulo nativo de push.
+const PUSH_TOKEN_KEY = 'vupth_push_token';
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -65,6 +69,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     const { accessToken } = get();
     if (accessToken) {
+      // Desregistra o push token deste device (best-effort; no-op se não houver
+      // token — só existe após build com o módulo nativo de push).
+      try {
+        const pushToken = await SecureStore.getItemAsync(PUSH_TOKEN_KEY);
+        if (pushToken) {
+          await pushService.unregisterDevice(pushToken, accessToken);
+          await SecureStore.deleteItemAsync(PUSH_TOKEN_KEY);
+        }
+      } catch {}
+
       try {
         await authService.logout(accessToken);
       } catch {}
