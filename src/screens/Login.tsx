@@ -124,11 +124,15 @@ export function Login() {
         </Center>
 
         <Center mt={200} flex={1} justifyContent="flex-end">
-          <Text>Criar conta</Text>
+          <Text size="md" fontFamily="$heading" color="$green500">
+            Novo por aqui?
+          </Text>
+          <Text size="sm" color="$gray300" mb="$3" textAlign="center">
+            Crie sua conta em segundos para entrar na fila.
+          </Text>
           <Button
-            variant="outline"
-            mt="$3"
-            title="Cadastrar"
+            mt="$1"
+            title="Criar conta grátis"
             onPress={handleSignUp}
           />
         </Center>

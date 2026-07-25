@@ -222,8 +222,8 @@ export function EstablishmentDetail() {
             mt="$3"
           >
             <HStack alignItems="center" gap="$2">
-              <Info size={18} color="#B45309" />
-              <Text size="xs" color="$gray500" flex={1}>
+              <Info size={18} color="#92400e" />
+              <Text size="xs" color="$amber800" fontFamily="$heading" flex={1}>
                 Fila fechada agora — escolha um profissional para agendar ou
                 solicitar um corte.
               </Text>
