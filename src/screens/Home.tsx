@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@gluestack-ui/themed";
@@ -14,6 +14,7 @@ import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
 import { useLocationStore } from "@stores/locationStore";
 import { LocationSelector } from "@components/LocationSelector";
+import { addressService } from "@services/addressService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
@@ -147,6 +148,28 @@ export function Home() {
   // Ordena por proximidade (bairro→cidade→resto) quando o cliente definiu uma
   // localização; senão, ordem padrão (menor espera). Ver LocationSelector.
   const location = useLocationStore((s) => s.location);
+  const locationResolved = useLocationStore((s) => s.resolved);
+  const setLocation = useLocationStore((s) => s.setLocation);
+  const accessToken = useAuthStore((s) => s.accessToken);
+
+  // Polimento: cliente logado sem localidade ainda resolvida → usa o endereço
+  // principal dele automaticamente (proximidade funciona sem tocar em nada). Uma
+  // vez por sessão; quem limpou o filtro ("Ver todos") já está `resolved` e não
+  // tem a localidade de volta sozinho.
+  const didAutoLocate = useRef(false);
+  useEffect(() => {
+    if (didAutoLocate.current || !isAuthenticated || !accessToken || locationResolved) return;
+    didAutoLocate.current = true;
+    addressService
+      .getMain(accessToken)
+      .then(({ data }) => {
+        if (data?.city) {
+          setLocation({ city: data.city, neighborhood: data.neighborhood, state: data.state });
+        }
+      })
+      .catch(() => {});
+  }, [isAuthenticated, accessToken, locationResolved, setLocation]);
+
   const filteredEstablishments = sortByProximity(
     filterEstablishments(establishments, search, selectedFilter),
     location,
