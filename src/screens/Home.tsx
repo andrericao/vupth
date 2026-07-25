@@ -7,10 +7,13 @@ import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
-import { filterEstablishments, sortEstablishments } from "@domain/establishment/filter";
+import { filterEstablishments } from "@domain/establishment/filter";
+import { sortByProximity } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
+import { useLocationStore } from "@stores/locationStore";
+import { LocationSelector } from "@components/LocationSelector";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
@@ -141,8 +144,12 @@ export function Home() {
     if (filterParam) setSelectedFilter(filterParam);
   }, [filterParam]);
 
-  const filteredEstablishments = sortEstablishments(
+  // Ordena por proximidade (bairro→cidade→resto) quando o cliente definiu uma
+  // localização; senão, ordem padrão (menor espera). Ver LocationSelector.
+  const location = useLocationStore((s) => s.location);
+  const filteredEstablishments = sortByProximity(
     filterEstablishments(establishments, search, selectedFilter),
+    location,
   );
 
   const onRefresh = useCallback(() => {
@@ -194,9 +201,11 @@ export function Home() {
         </TouchableOpacity>
       )}
 
-      <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$2">
+      <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$1">
         Estabelecimentos
       </Heading>
+
+      <LocationSelector />
 
       <Input2
         placeholder="Buscar estabelecimento..."
