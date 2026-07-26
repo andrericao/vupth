@@ -19,6 +19,7 @@ import { useRatedStore } from "@stores/ratedStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
 import { useLocationStore } from "@stores/locationStore";
 import { useQueueNotifications } from "@hooks/useQueueNotifications";
+import { usePushRegistration } from "@hooks/usePushRegistration";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 
@@ -64,6 +65,11 @@ export default function App() {
   // Notificacao pessoal "é a sua vez" (WebSocket) app-wide: vale em qualquer
   // tela enquanto houver fila ativa, nao so na QueueStatus (item #5, fatia 2).
   useQueueNotifications(!!activeQueue);
+
+  // Push (background/fechado): registra o device (POST /devices) quando autentica
+  // e trata o toque. Best-effort/guardado — inerte ate um build COM o modulo
+  // nativo de push (expo-notifications).
+  usePushRegistration();
 
   return (
     <QueryClientProvider client={queryClient}>
