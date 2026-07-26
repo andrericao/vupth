@@ -16,6 +16,8 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
+import { SwapOffersModal } from "@components/SwapOffersModal";
+import { useSwapOffers } from "@hooks/useSwapOffers";
 import {
   canCancelAttendance,
   formatWaitTime,
@@ -93,6 +95,7 @@ export function QueueStatus() {
   const [showChangeTurn, setShowChangeTurn] = useState(false);
   const [isLastInQueue, setIsLastInQueue] = useState(false);
   const [isPublishingSwap, setIsPublishingSwap] = useState(false);
+  const [showSwapOffers, setShowSwapOffers] = useState(false);
   const didCreate = useRef(false);
 
   async function handleRefresh() {
@@ -219,6 +222,11 @@ export function QueueStatus() {
   // Item 16 — remanejar a vez (trocar horário / ir pro fim) é sempre livre e sem
   // multa enquanto aguardando. Só SAIR da fila com espera curta gera multa.
   const canReshuffle = canReshuffleQueue(status);
+
+  // Troca aberta (C13): ofertas que EU posso aceitar → dot + modal. Só enquanto
+  // aguardando na fila.
+  const { data: acceptableOffers = [] } = useSwapOffers(professionalId, canReshuffle);
+  const acceptableCount = acceptableOffers.length;
 
   const borderColor = isInQueue ? color : "#3B7A3F";
   const timeColor = isInQueue ? color : "#3B7A3F";
@@ -591,6 +599,11 @@ export function QueueStatus() {
               isLoading={isRemanejando}
               onPress={handleOpenChangeTurn}
             />
+            <Button
+              title={acceptableCount > 0 ? `Trocar de lugar (${acceptableCount})` : "Trocar de lugar"}
+              variant="outline"
+              onPress={() => setShowSwapOffers(true)}
+            />
           </>
         )}
         {isFinished && attendanceId && !ratedIds.includes(attendanceId) && (
@@ -643,6 +656,13 @@ export function QueueStatus() {
         }}
         onCreateSwapOffer={handleCreateSwapOffer}
         onClose={() => setShowChangeTurn(false)}
+      />
+
+      <SwapOffersModal
+        visible={showSwapOffers}
+        professionalId={professionalId}
+        onClose={() => setShowSwapOffers(false)}
+        onChanged={refresh}
       />
       <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
       <RatingModal
