@@ -59,6 +59,7 @@ describe('handleQueueNotification', () => {
     ['CUT_ACCEPTED', 'Pedido aceito! 🎉'],
     ['CUT_REFUSED', 'Pedido recusado'],
     ['CUT_EXPIRED', 'Pedido expirou'],
+    ['SWAP_OFFER_ACCEPTED', 'Troca feita! 🔄'],
   ] as const)('%s → só alerta, sem mexer na fila', (type, title) => {
     const f = fx();
     handleQueueNotification(notif(type), f);

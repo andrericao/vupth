@@ -53,5 +53,10 @@ export function handleQueueNotification(
     case 'CUT_EXPIRED':
       fx.alert('Pedido expirou', notif.message);
       break;
+    // Troca aceita (C13): a posição na fila mudou. O poll da fila/QueueStatus
+    // reflete; aqui só avisa.
+    case 'SWAP_OFFER_ACCEPTED':
+      fx.alert('Troca feita! 🔄', notif.message);
+      break;
   }
 }

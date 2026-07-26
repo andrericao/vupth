@@ -34,7 +34,10 @@ export type QueueNotificationType =
   // Solicitar corte (BUG5 C2): resposta do profissional / expiração em 5min.
   | 'CUT_ACCEPTED'
   | 'CUT_REFUSED'
-  | 'CUT_EXPIRED';
+  | 'CUT_EXPIRED'
+  // Troca aberta (C13): a oferta foi aceita — chega aos DOIS lados, cada um com
+  // o próprio attendanceId; o app só recarrega a posição.
+  | 'SWAP_OFFER_ACCEPTED';
 
 export interface QueueNotification {
   type: QueueNotificationType;
