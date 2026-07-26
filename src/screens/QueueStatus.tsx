@@ -33,6 +33,7 @@ import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
 import { attendanceService } from "@services/attendanceService";
 import { cutRequestService } from "@services/cutRequestService";
+import { swapOfferService, SwapOfferDirection } from "@services/swapOfferService";
 import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
 import { cardShadow } from "@utils/styles";
@@ -91,6 +92,7 @@ export function QueueStatus() {
   const [rescheduleBaseMs, setRescheduleBaseMs] = useState(0);
   const [showChangeTurn, setShowChangeTurn] = useState(false);
   const [isLastInQueue, setIsLastInQueue] = useState(false);
+  const [isPublishingSwap, setIsPublishingSwap] = useState(false);
   const didCreate = useRef(false);
 
   async function handleRefresh() {
@@ -354,6 +356,33 @@ export function QueueStatus() {
     }
   }
 
+  // Troca aberta (C13): publica a oferta (Adiantar=EARLIER / Atrasar=LATER).
+  // Se alguém à frente/atrás aceitar, o backend troca as posições e avisa por WS.
+  async function handleCreateSwapOffer(direction: SwapOfferDirection) {
+    if (!attendanceId || !accessToken || isPublishingSwap) return;
+    setIsPublishingSwap(true);
+    try {
+      await swapOfferService.create({ attendanceId, direction }, accessToken);
+      setShowChangeTurn(false);
+      Alert.alert(
+        "Pedido publicado! 🔄",
+        direction === "EARLIER"
+          ? "Se alguém à sua frente aceitar, vocês trocam de lugar. Você será avisado aqui."
+          : "Se alguém atrás de você aceitar, vocês trocam de lugar. Você será avisado aqui.",
+      );
+    } catch (error: any) {
+      const code = error.response?.data?.code;
+      Alert.alert(
+        "Não foi possível publicar",
+        code === "QUEUE_SWAP_OFFER_NOT_ALLOWED"
+          ? "A troca só vale enquanto você está aguardando na fila."
+          : error.response?.data?.message || "Tente novamente em instantes.",
+      );
+    } finally {
+      if (mountedRef.current) setIsPublishingSwap(false);
+    }
+  }
+
   function handleMoveToEnd() {
     // Ir pro fim com < 1h também vaga um lugar perto do início → avisa multa.
     const base = "Sua vez passa para depois de quem está esperando. Você continua na fila, sem perder o atendimento.";
@@ -603,6 +632,7 @@ export function QueueStatus() {
         visible={showChangeTurn}
         tailEtaMs={tailEtaMs}
         isLast={isLastInQueue}
+        swapBusy={isPublishingSwap}
         onMoveToEnd={() => {
           setShowChangeTurn(false);
           handleMoveToEnd();
@@ -611,6 +641,7 @@ export function QueueStatus() {
           setShowChangeTurn(false);
           setShowReschedule(true);
         }}
+        onCreateSwapOffer={handleCreateSwapOffer}
         onClose={() => setShowChangeTurn(false)}
       />
       <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />

@@ -13,16 +13,16 @@ import { useComingSoonStore } from '@stores/comingSoonStore';
 // diagnóstico; religar trocando por goToQueue(targetTime). Ver HANDOFF_BACKEND §12.1.
 // 'esqueci_senha' SAIU (2026-07-22): backend entregou forgot/reset-password e a
 // tela ForgotPassword está LIGADA (Login → forgotPassword).
+// 'trocar_posicao' SAIU (2026-07-24): backend entregou a troca (/swap-offers,
+// fatia 1) e a UI está LIGADA (ChangeTurnModal → swapOfferService).
 export type ComingSoonFeature =
   | 'agendar_hoje'
   | 'agendar_outro_dia'
-  | 'trocar_posicao'
   | 'manifestar_interesse';
 
 export const COMING_SOON_LABELS: Record<ComingSoonFeature, string> = {
   agendar_hoje: 'Agendar para hoje, mais tarde',
   agendar_outro_dia: 'Agendar para outro dia',
-  trocar_posicao: 'Trocar posição na fila',
   manifestar_interesse: 'Manifestar interesse (loja fechada)',
 };
 

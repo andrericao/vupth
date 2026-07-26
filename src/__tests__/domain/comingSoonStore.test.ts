@@ -23,22 +23,22 @@ describe('ComingSoonStore', () => {
   });
 
   it('tap acumula por feature', async () => {
-    await useComingSoonStore.getState().tap('trocar_posicao');
-    await useComingSoonStore.getState().tap('trocar_posicao');
+    await useComingSoonStore.getState().tap('manifestar_interesse');
+    await useComingSoonStore.getState().tap('manifestar_interesse');
     await useComingSoonStore.getState().tap('agendar_outro_dia');
 
     expect(useComingSoonStore.getState().counts).toEqual({
-      trocar_posicao: 2,
+      manifestar_interesse: 2,
       agendar_outro_dia: 1,
     });
   });
 
   it('restore carrega as contagens do SecureStore', async () => {
-    mockSecureStore.getItemAsync.mockResolvedValueOnce(JSON.stringify({ trocar_posicao: 5 }));
+    mockSecureStore.getItemAsync.mockResolvedValueOnce(JSON.stringify({ manifestar_interesse: 5 }));
 
     await useComingSoonStore.getState().restore();
 
-    expect(useComingSoonStore.getState().counts).toEqual({ trocar_posicao: 5 });
+    expect(useComingSoonStore.getState().counts).toEqual({ manifestar_interesse: 5 });
   });
 
   it('restore sem dados mantém vazio', async () => {
