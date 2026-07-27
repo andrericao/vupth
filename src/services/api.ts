@@ -1,6 +1,11 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import * as SecureStore from "expo-secure-store";
-import { authService } from "./authService";
+
+interface RefreshResponse {
+	access_token: string;
+	refresh_token: string;
+	expires_in: number;
+}
 
 const localIp = process.env.EXPO_PUBLIC_API_LOCAL_IP || "localhost";
 
@@ -112,7 +117,12 @@ api.interceptors.response.use(
 			const refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);
 			if (!refreshToken) throw new Error("No refresh token");
 
-			const { data } = await authService.refresh(refreshToken);
+			// Chamada inline (não importa authService) para evitar o require cycle
+			// api ↔ authService. `/auth/` é rota pública → o interceptor não tenta
+			// refresh-sobre-refresh (sem recursão).
+			const { data } = await api.post<RefreshResponse>("/auth/refresh", {
+				refresh_token: refreshToken,
+			});
 
 			await SecureStore.setItemAsync(TOKEN_KEY, data.access_token);
 			await SecureStore.setItemAsync(REFRESH_KEY, data.refresh_token);
