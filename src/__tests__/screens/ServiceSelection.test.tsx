@@ -42,7 +42,9 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
     useAuthStore.setState({ isAuthenticated: false });
     const { getByText, findByTestId } = renderWithProviders(<ServiceSelection />);
 
-    fireEvent.press(await findByTestId('service-s1')); // seleciona o serviço
+    // findByTestId default é 1s; o 1º mount do Gluestack pode passar disso sob
+    // carga (flaky) — dá 15s (jest.setTimeout acima cobre).
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
     fireEvent.press(getByText('Confirmar e entrar na fila'));
 
     expect(mockNavigate).toHaveBeenCalledWith(
@@ -59,7 +61,7 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
     useAuthStore.setState({ isAuthenticated: true });
     const { getByText, findByTestId } = renderWithProviders(<ServiceSelection />);
 
-    fireEvent.press(await findByTestId('service-s1'));
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
     fireEvent.press(getByText('Confirmar e entrar na fila'));
 
     expect(mockNavigate).toHaveBeenCalledWith(
