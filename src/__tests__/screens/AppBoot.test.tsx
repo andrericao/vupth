@@ -1,0 +1,46 @@
+import { render, waitFor } from '@testing-library/react-native';
+
+import App from '../../../App';
+
+// Regressão real (2026-07-29): `useOutOfQueueSwap` (React Query) era chamado no
+// corpo do App, ACIMA do QueryClientProvider — o `useQuery` estourava "No
+// QueryClient set" e o app fechava no boot / ficava com tela branca. O jest não
+// pegou porque os testes de hook montam o provider por conta. Este smoke monta o
+// App de verdade: qualquer hook app-wide fora do seu provider derruba aqui.
+jest.mock('expo-secure-store');
+jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('@routes/index', () => ({ Routes: () => null }));
+jest.mock('expo-font', () => ({ useFonts: () => [true, null] }));
+jest.mock('@expo-google-fonts/poppins', () => ({
+  Poppins_600SemiBold: 'Poppins_600SemiBold',
+  Poppins_700Bold: 'Poppins_700Bold',
+}));
+jest.mock('@expo-google-fonts/inter', () => ({
+  Inter_400Regular: 'Inter_400Regular',
+  Inter_500Medium: 'Inter_500Medium',
+  Inter_700Bold: 'Inter_700Bold',
+}));
+jest.mock('expo-location', () => ({
+  requestForegroundPermissionsAsync: jest.fn().mockResolvedValue({ status: 'denied' }),
+  getCurrentPositionAsync: jest.fn(),
+  reverseGeocodeAsync: jest.fn(),
+  Accuracy: { Balanced: 3 },
+}));
+jest.mock('@services/healthService', () => ({
+  waitForBackend: jest.fn().mockResolvedValue(true),
+}));
+
+// O mount do Gluestack é pesado sob o jest.
+jest.setTimeout(30000);
+
+describe('App — boot', () => {
+  it('monta sem estourar (todo hook app-wide dentro do seu provider)', async () => {
+    const { unmount } = render(<App />);
+
+    // Deixa o efeito do readiness resolver antes de desmontar, senão o setState
+    // pós-unmount vira warning de act.
+    await waitFor(() => expect(true).toBe(true));
+
+    unmount();
+  });
+});
