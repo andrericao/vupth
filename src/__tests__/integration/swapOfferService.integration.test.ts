@@ -28,11 +28,43 @@ describe('SwapOfferService', () => {
     expect(res.data.status).toBe('OPEN');
   });
 
-  it('create propaga 422 QUEUE_SWAP_OFFER_NOT_ALLOWED (fora da fila = fatia 2)', async () => {
+  it('create propaga 422 QUEUE_SWAP_OFFER_NOT_ALLOWED (não SCHEDULED)', async () => {
     mock.onPost('/swap-offers').reply(422, { code: 'QUEUE_SWAP_OFFER_NOT_ALLOWED' });
     await expect(
       swapOfferService.create({ attendanceId: 'att-1', direction: 'LATER' }, 'tok'),
     ).rejects.toMatchObject({ response: { status: 422, data: { code: 'QUEUE_SWAP_OFFER_NOT_ALLOWED' } } });
+  });
+
+  // Fatia 2 — solicitante FORA da fila: manda professionalId + serviceItemIds e
+  // recebe a oferta com requesterAttendanceId nulo (o atendimento só nasce no aceite).
+  it('create fora da fila envia { professionalId, serviceItemIds, direction: EARLIER }', async () => {
+    mock.onPost('/swap-offers').reply((config) => {
+      expect(JSON.parse(config.data)).toEqual({
+        professionalId: 'prof-1',
+        serviceItemIds: ['s1', 's2'],
+        direction: 'EARLIER',
+      });
+      return [201, { ...offer, requesterAttendanceId: null, serviceItemIds: ['s1', 's2'] }];
+    });
+
+    const res = await swapOfferService.create(
+      { professionalId: 'prof-1', serviceItemIds: ['s1', 's2'], direction: 'EARLIER' },
+      'tok',
+    );
+    expect(res.status).toBe(201);
+    expect(res.data.requesterAttendanceId).toBeNull();
+  });
+
+  it('create fora da fila propaga 422 SERVICE_ITEM_NOT_OF_PROFESSIONAL', async () => {
+    mock.onPost('/swap-offers').reply(422, { code: 'SERVICE_ITEM_NOT_OF_PROFESSIONAL' });
+    await expect(
+      swapOfferService.create(
+        { professionalId: 'prof-1', serviceItemIds: ['s9'], direction: 'EARLIER' },
+        'tok',
+      ),
+    ).rejects.toMatchObject({
+      response: { status: 422, data: { code: 'SERVICE_ITEM_NOT_OF_PROFESSIONAL' } },
+    });
   });
 
   it('listAcceptable busca GET /swap-offers?professionalId=', async () => {

@@ -1,17 +1,30 @@
 import { api } from './api';
 
-// Oferta ABERTA de troca de posição na fila viva (Client C13 — backend fatia 1
-// entregue 2026-07-24, solicitante NA fila). Adiantar = EARLIER (aparece p/ quem
-// está à frente); Atrasar = LATER (aparece p/ quem está atrás). Nunca gera multa;
-// expira quando o solicitante é atendido/cancela. Fatia 2 (solicitante fora da
-// fila) ainda dá 422 QUEUE_SWAP_OFFER_NOT_ALLOWED.
+// Oferta ABERTA de troca de posição (Client C13). Backend completo: fatia 1
+// (solicitante NA fila, 2026-07-24) + fatia 2 (solicitante FORA da fila,
+// 2026-07-27). Adiantar = EARLIER (aparece p/ quem está à frente); Atrasar =
+// LATER (aparece p/ quem está atrás). Nunca gera multa; expira quando o
+// solicitante é atendido/cancela.
 export type SwapOfferDirection = 'EARLIER' | 'LATER';
 export type SwapOfferStatus = 'OPEN' | 'ACCEPTED' | 'CANCELLED' | 'EXPIRED';
 
-export interface CreateSwapOfferRequest {
+// Fatia 1 — quem JÁ está na fila oferta a própria vez (as duas direções).
+export interface InQueueSwapOfferRequest {
   attendanceId: string;
   direction: SwapOfferDirection;
 }
+
+// Fatia 2 — quem está FORA da fila publica para entrar por troca. Posição
+// implícita = FIM, por isso só EARLIER. Os serviços vêm já na publicação: o
+// atendimento só nasce no aceite, e a fila precisa da duração para recalcular
+// os ETAs. Quem aceita cede a vaga e vai pro fim.
+export interface OutOfQueueSwapOfferRequest {
+  professionalId: string;
+  serviceItemIds: string[];
+  direction: 'EARLIER';
+}
+
+export type CreateSwapOfferRequest = InQueueSwapOfferRequest | OutOfQueueSwapOfferRequest;
 
 // Espelha SwapOfferResponse do backend. Sem nome do solicitante — a UI usa a
 // direção para o texto (não revela quem é).
@@ -30,8 +43,10 @@ export interface SwapOfferResponse {
 }
 
 export const swapOfferService = {
-  // Publica a oferta (só o dono do attendance; só SCHEDULED). Erros: 403 não-dono,
-  // 422 QUEUE_SWAP_OFFER_NOT_ALLOWED (não SCHEDULED / fora da fila = fatia 2).
+  // Publica a oferta. NA fila: só o dono do attendance, só SCHEDULED (403
+  // não-dono, 422 QUEUE_SWAP_OFFER_NOT_ALLOWED se não SCHEDULED). FORA da fila:
+  // 422 QUEUE_SWAP_OFFER_NOT_ALLOWED (LATER / já estar na fila daquele
+  // profissional), 404 SERVICE_ITEM_NOT_FOUND, 422 SERVICE_ITEM_NOT_OF_PROFESSIONAL.
   create(data: CreateSwapOfferRequest, accessToken: string) {
     return api.post<SwapOfferResponse>('/swap-offers', data, {
       headers: { Authorization: `Bearer ${accessToken}` },
