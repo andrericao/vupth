@@ -29,6 +29,18 @@ jest.mock('expo-location', () => ({
 jest.mock('@services/healthService', () => ({
   waitForBackend: jest.fn().mockResolvedValue(true),
 }));
+// expo-notifications também é nativo e, só de ser importado, registra listeners
+// de push e avisa que Expo Go não suporta mais push (poluía o log e podia
+// segurar o processo). O registro em si é testado em `push.test.ts`.
+jest.mock('expo-notifications', () => ({
+  setNotificationHandler: jest.fn(),
+  setNotificationChannelAsync: jest.fn().mockResolvedValue(undefined),
+  getPermissionsAsync: jest.fn().mockResolvedValue({ status: 'denied' }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'denied' }),
+  getExpoPushTokenAsync: jest.fn(),
+  addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  AndroidImportance: { DEFAULT: 3 },
+}));
 // netinfo é nativo: sem mock, o `setupOnlineManager()` do boot tenta sondar a
 // internet de verdade (estoura em `isInternetReachable` e ainda deixa o jest
 // pendurado). O listener devolve a função de unsubscribe, como no módulo real.
