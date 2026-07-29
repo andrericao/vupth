@@ -35,6 +35,7 @@ export type AppRoutes = {
     estimatedWaitMinutes?: number;
     serviceItemIds?: string[];
     targetTime?: string;
+    establishmentOpen?: boolean;
   };
   signUp: {
     redirectTo?: string;
@@ -45,6 +46,7 @@ export type AppRoutes = {
     estimatedWaitMinutes?: number;
     serviceItemIds?: string[];
     targetTime?: string;
+    establishmentOpen?: boolean;
   };
   // Esqueci minha senha (fluxo público): e-mail → código de 6 dígitos → nova senha.
   forgotPassword: { email?: string } | undefined;
@@ -54,9 +56,11 @@ export type AppRoutes = {
     establishmentId: string;
     establishmentName: string;
     estimatedWaitMinutes: number;
-    // Loja aberta AGORA (is_open efetivo)? false => ações viram "Solicitar
-    // corte" + "Agendar para depois" (fila fechada). Ausente = aberta.
+    // Loja aberta AGORA (is_open efetivo)? false => a ação primária vira
+    // "Agendar" e o "Solicitar corte" entra no menu. Ausente = aberta.
     establishmentOpen?: boolean;
+    // Seleção de serviços restaurada ao voltar do portão de auth.
+    serviceItemIds?: string[];
   };
   queueStatus: {
     professionalId: string;
