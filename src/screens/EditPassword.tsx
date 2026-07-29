@@ -16,6 +16,7 @@ export function EditPassword() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const updateTokensAndUser = useAuthStore((s) => s.updateTokensAndUser);
 
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -23,21 +24,27 @@ export function EditPassword() {
   const rules = getPasswordRules(password);
   const allRulesPass = rules.every((r) => r.passed);
   const passwordsMatch = password.length > 0 && password === confirmPassword;
-  const canSave = allRulesPass && passwordsMatch && !isSaving;
+  const canSave = currentPassword.length > 0 && allRulesPass && passwordsMatch && !isSaving;
 
   async function handleSave() {
     if (!accessToken || !canSave) return;
 
     setIsSaving(true);
     try {
-      const { data } = await profileService.updatePassword(password, accessToken);
+      const { data } = await profileService.updatePassword(currentPassword, password, accessToken);
 
       await updateTokensAndUser(data.tokens, {});
 
       Alert.alert("Sucesso", "Senha atualizada!");
       navigation.goBack();
     } catch (error: any) {
-      const msg = error.response?.data?.message || error.message || "Erro ao atualizar senha";
+      // 401 CURRENT_PASSWORD_INVALID = senha atual errada (erro de campo; o
+      // interceptor deixa passar sem deslogar).
+      const code = error.response?.data?.code;
+      const msg =
+        code === "CURRENT_PASSWORD_INVALID"
+          ? "Senha atual incorreta."
+          : error.response?.data?.message || error.message || "Erro ao atualizar senha";
       Alert.alert("Erro", msg);
     } finally {
       setIsSaving(false);
@@ -53,6 +60,15 @@ export function EditPassword() {
       </Heading>
 
       <VStack gap="$4">
+        <VStack gap="$1">
+          <Input2
+            isPassword
+            placeholder="Senha atual"
+            value={currentPassword}
+            onChangeText={setCurrentPassword}
+          />
+        </VStack>
+
         <VStack gap="$1">
           <Input2
             isPassword

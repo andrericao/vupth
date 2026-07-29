@@ -22,6 +22,8 @@ import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
+import { useComingSoonStore } from "@stores/comingSoonStore";
+import { COMING_SOON_LABELS, ComingSoonFeature } from "@domain/comingSoon";
 import { profileService } from "@services/profileService";
 import { addressService, AddressResponse } from "@services/addressService";
 
@@ -64,9 +66,16 @@ export function Settings() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const user = useAuthStore((s) => s.user);
   const accessToken = useAuthStore((s) => s.accessToken);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
 
   const [mainAddress, setMainAddress] = useState<AddressResponse | null>(null);
+
+  // Funcionalidades "em breve" mais tocadas primeiro = as que fizeram mais falta.
+  const comingSoonCounts = useComingSoonStore((s) => s.counts);
+  const awaited = (Object.entries(comingSoonCounts) as [string, number][])
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1]);
 
   useFocusEffect(
     useCallback(() => {
@@ -147,42 +156,94 @@ export function Settings() {
         Configurações
       </Heading>
 
-      <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
-        <MenuItem
-          icon={<User size={22} color="#3B7A3F" />}
-          label="Nome"
-          value={displayName}
-          onPress={() => navigation.navigate("editProfile")}
-        />
-        <MenuItem
-          icon={<EnvelopeSimple size={22} color="#3B7A3F" />}
-          label="E-mail"
-          value={user?.email ?? "—"}
-          onPress={() => navigation.navigate("editEmail")}
-        />
-        <MenuItem
-          icon={<Lock size={22} color="#3B7A3F" />}
-          label="Senha"
-          value="••••••"
-          onPress={() => navigation.navigate("editPassword")}
-        />
-        <MenuItem
-          icon={<MapPin size={22} color="#3B7A3F" />}
-          label="Endereço"
-          value={displayAddress}
-          onPress={() => navigation.navigate("editAddress")}
-        />
-      </Box>
+      {/* Opções de CONTA só para quem tem conta (visitante não vê trocar senha,
+          e-mail, endereço nem deletar — boa prática; pedido Andre 2026-07-23). */}
+      {isAuthenticated ? (
+        <>
+          <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
+            <MenuItem
+              icon={<User size={22} color="#3B7A3F" />}
+              label="Nome"
+              value={displayName}
+              onPress={() => navigation.navigate("editProfile")}
+            />
+            <MenuItem
+              icon={<EnvelopeSimple size={22} color="#3B7A3F" />}
+              label="E-mail"
+              value={user?.email ?? "—"}
+              onPress={() => navigation.navigate("editEmail")}
+            />
+            <MenuItem
+              icon={<Lock size={22} color="#3B7A3F" />}
+              label="Senha"
+              value="••••••"
+              onPress={() => navigation.navigate("editPassword")}
+            />
+            <MenuItem
+              icon={<MapPin size={22} color="#3B7A3F" />}
+              label="Endereço"
+              value={displayAddress}
+              onPress={() => navigation.navigate("editAddress")}
+            />
+          </Box>
 
-      <VStack mt="$8">
-        <Button
-          title="Deletar conta"
-          variant="outline"
-          onPress={handleDeleteAccount}
-          borderColor="$red500"
-          $active-bg="$red500"
-        />
-      </VStack>
+          <VStack mt="$8">
+            <Button
+              title="Deletar conta"
+              variant="outline"
+              onPress={handleDeleteAccount}
+              borderColor="$red500"
+              $active-bg="$red500"
+            />
+          </VStack>
+        </>
+      ) : (
+        <Box bg="$white" borderRadius="$2xl" p="$4" style={cardShadow}>
+          <Text size="sm" color="$gray300" mb="$3">
+            Você está navegando como visitante. Entre ou crie uma conta para
+            gerenciar seu perfil, senha e endereço.
+          </Text>
+          <Button
+            title="Entrar ou criar conta"
+            onPress={() =>
+              navigation.getParent()?.navigate("homeTab", { screen: "login", params: {} })
+            }
+          />
+        </Box>
+      )}
+
+      {awaited.length > 0 && (
+        <VStack mt="$8">
+          <Heading fontFamily="$heading" fontSize="$md" mb="$1">
+            Funcionalidades aguardadas
+          </Heading>
+          <Text size="xs" color="$gray300" mb="$3">
+            As mais tocadas fizeram mais falta — priorizar quando o backend liberar.
+          </Text>
+          <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
+            {awaited.map(([feature, count]) => (
+              <HStack
+                key={feature}
+                bg="$white"
+                px="$4"
+                py="$3"
+                borderBottomWidth="$1"
+                borderBottomColor="$gray500"
+                alignItems="center"
+              >
+                <Text size="sm" flex={1}>
+                  {COMING_SOON_LABELS[feature as ComingSoonFeature] ?? feature}
+                </Text>
+                <Box bg="$green100" borderRadius="$full" px="$3" py="$1">
+                  <Text size="xs" fontFamily="$heading" color="$green700">
+                    {count}×
+                  </Text>
+                </Box>
+              </HStack>
+            ))}
+          </Box>
+        </VStack>
+      )}
 
       <VStack mt="$8" alignItems="center" gap="$1">
         <Text size="xs" color="$gray400">

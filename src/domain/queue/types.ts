@@ -24,7 +24,20 @@ export interface QueuePosition {
   status: AttendanceStatus;
 }
 
-export type QueueNotificationType = 'ATTENDANCE_STARTED' | 'ATTENDANCE_FINISHED';
+export type QueueNotificationType =
+  | 'ATTENDANCE_STARTED'
+  | 'ATTENDANCE_FINISHED'
+  // Profissional removeu da fila (BUG9) — o client limpa a fila ativa na hora.
+  | 'ATTENDANCE_CANCELLED'
+  // INTENÇÃO promovida a SCHEDULED (entrou na fila viva — backend 2026-07-22).
+  | 'ATTENDANCE_PROMOTED'
+  // Solicitar corte (BUG5 C2): resposta do profissional / expiração em 5min.
+  | 'CUT_ACCEPTED'
+  | 'CUT_REFUSED'
+  | 'CUT_EXPIRED'
+  // Troca aberta (C13): a oferta foi aceita — chega aos DOIS lados, cada um com
+  // o próprio attendanceId; o app só recarrega a posição.
+  | 'SWAP_OFFER_ACCEPTED';
 
 export interface QueueNotification {
   type: QueueNotificationType;
@@ -32,6 +45,9 @@ export interface QueueNotification {
   establishmentId: string;
   message: string;
   timestamp: string;
+  // CUT_*: id do pedido de corte viaja em campo próprio (CUT_ACCEPTED também
+  // preenche attendanceId com o atendimento gerado).
+  cutRequestId?: string | null;
 }
 
 export function canCancelAttendance(status: AttendanceStatus): boolean {

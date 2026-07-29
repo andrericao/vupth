@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { TouchableOpacity, RefreshControl } from "react-native";
+import { Alert, TouchableOpacity, RefreshControl } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import {
   VStack,
@@ -12,16 +12,24 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Queue, Clock, CaretRight } from "phosphor-react-native";
+import { Queue, Clock, CaretRight, CalendarBlank, ArrowsLeftRight } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
+import { useClientIntentions } from "@hooks/useIntentions";
+import { useAuthStore } from "@stores/authStore";
+import { useRatedStore } from "@stores/ratedStore";
 import { SkeletonList } from "@components/Skeleton";
 import { RatingModal } from "@components/RatingModal";
 import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
 import { ClientAttendance } from "@services/attendanceService";
+import { intentionsService } from "@services/intentionsService";
+import { swapOfferService } from "@services/swapOfferService";
+import { usePendingSwapStore } from "@stores/pendingSwapStore";
+import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
+import { groupIntentionsByDay } from "@domain/schedule/agenda";
 import { cardShadow } from "@utils/styles";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 
@@ -46,15 +54,92 @@ export function Attendances() {
   // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
   const emAtendimento = isBeingAttended || isPaused;
   const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
+  const { data: agenda, refetch: refetchIntentions } = useClientIntentions();
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const ratedIds = useRatedStore((s) => s.ids);
   const [ratingFor, setRatingFor] = useState<{ id: string; name: string } | null>(null);
   const [detailFor, setDetailFor] = useState<ClientAttendance | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  // Pedidos de troca publicados de FORA da fila (F8 fatia 2): o hook vigia o
+  // aceite (poll) e este card deixa acompanhar/cancelar enquanto está aberto.
+  const { pending: pendingSwaps, refetchMyOffers } = useOutOfQueueSwap();
+  const removePendingSwap = usePendingSwapStore((s) => s.removePending);
+  const [cancellingSwapId, setCancellingSwapId] = useState<string | null>(null);
+
+  const intentionGroups = groupIntentionsByDay(agenda?.intentions ?? []);
 
   // Atualiza ao focar a aba (sem precisar fechar/reabrir o app).
   useFocusEffect(
     useCallback(() => {
       refetch();
-    }, [refetch]),
+      refetchIntentions();
+    }, [refetch, refetchIntentions]),
   );
+
+  // Cancela uma intenção (meus agendamentos) com confirmação.
+  function handleCancelIntention(id: string, professionalName: string) {
+    Alert.alert(
+      "Cancelar agendamento",
+      `Cancelar o agendamento com ${professionalName}?`,
+      [
+        { text: "Voltar", style: "cancel" },
+        {
+          text: "Cancelar agendamento",
+          style: "destructive",
+          onPress: async () => {
+            if (!accessToken) return;
+            setCancellingId(id);
+            try {
+              await intentionsService.cancel(id, accessToken);
+              await refetchIntentions();
+            } catch (error: any) {
+              const msg =
+                error.response?.status === 400
+                  ? "Este agendamento já virou fila (ou já foi cancelado)."
+                  : error.response?.data?.message || "Erro ao cancelar o agendamento";
+              Alert.alert("Erro", msg);
+              refetchIntentions();
+            } finally {
+              setCancellingId(null);
+            }
+          },
+        },
+      ],
+    );
+  }
+
+  // Cancela o pedido de troca publicado de fora da fila. 422 = já não está mais
+  // aberto (alguém aceitou ou expirou) — some da lista do mesmo jeito.
+  function handleCancelSwap(offerId: string, professionalName: string) {
+    Alert.alert(
+      "Cancelar pedido de troca",
+      `Cancelar o pedido para entrar na fila de ${professionalName}?`,
+      [
+        { text: "Voltar", style: "cancel" },
+        {
+          text: "Cancelar pedido",
+          style: "destructive",
+          onPress: async () => {
+            if (!accessToken) return;
+            setCancellingSwapId(offerId);
+            try {
+              await swapOfferService.cancel(offerId, accessToken);
+              await removePendingSwap(offerId);
+            } catch (error: any) {
+              if (error.response?.status === 422 || error.response?.status === 404) {
+                await removePendingSwap(offerId);
+              } else {
+                Alert.alert("Erro", "Não foi possível cancelar o pedido. Tente de novo.");
+              }
+            } finally {
+              setCancellingSwapId(null);
+              refetchMyOffers();
+            }
+          },
+        },
+      ],
+    );
+  }
 
   const realizados = history.filter(
     (a) => a.status === "FINISHED" || a.status === "CANCELLED" || a.status === "LATE",
@@ -131,6 +216,90 @@ export function Attendances() {
           )}
         </VStack>
 
+        {pendingSwaps.length > 0 && (
+          <VStack mt="$6" px={15}>
+            <Text size="xs" color="$gray300" fontFamily="$heading" mb="$2">
+              PEDIDOS DE TROCA
+            </Text>
+
+            <VStack gap="$3">
+              {pendingSwaps.map((s) => (
+                <Box key={s.offerId} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                  <HStack alignItems="center" gap="$3">
+                    <ArrowsLeftRight size={22} color="#2F432F" />
+                    <VStack flex={1}>
+                      <Text fontFamily="$heading" size="sm">
+                        {s.professionalName}
+                      </Text>
+                      <Text size="xs" color="$gray300">
+                        {s.establishmentName}
+                      </Text>
+                      <Text size="xs" color="$gray400" mt="$1">
+                        Aguardando alguém da fila ceder o lugar
+                      </Text>
+                    </VStack>
+                    <TouchableOpacity
+                      onPress={() => handleCancelSwap(s.offerId, s.professionalName)}
+                      disabled={cancellingSwapId === s.offerId}
+                    >
+                      <Text size="xs" color="$red500" fontFamily="$heading">
+                        {cancellingSwapId === s.offerId ? "Cancelando..." : "Cancelar"}
+                      </Text>
+                    </TouchableOpacity>
+                  </HStack>
+                </Box>
+              ))}
+            </VStack>
+          </VStack>
+        )}
+
+        {intentionGroups.length > 0 && (
+          <VStack mt="$6" px={15}>
+            <Text size="xs" color="$gray300" fontFamily="$heading" mb="$2">
+              AGENDAMENTOS
+            </Text>
+
+            <VStack gap="$3">
+              {intentionGroups.map((group) => (
+                <VStack key={group.day.toISOString()} gap="$2">
+                  <Text size="xs" color="$gray400" fontFamily="$heading">
+                    {group.dayLabel}
+                  </Text>
+                  {group.items.map((i) => (
+                    <Box key={i.id} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                      <HStack alignItems="center" gap="$3">
+                        <CalendarBlank size={22} color="#2F432F" />
+                        <VStack flex={1}>
+                          <Text fontFamily="$heading" size="sm">
+                            {i.professionalName}
+                          </Text>
+                          <Text size="xs" color="$gray300">
+                            {i.services.map((s) => s.customName).join(", ") || i.establishmentName}
+                          </Text>
+                          <Text size="xs" color="$gray400" mt="$1">
+                            Pedido para às {formatClockTime(new Date(i.desiredTime))}
+                            {i.estimatedStartTime && i.estimatedStartTime !== i.desiredTime
+                              ? ` · previsto ~${formatClockTime(new Date(i.estimatedStartTime))}`
+                              : ""}
+                          </Text>
+                        </VStack>
+                        <TouchableOpacity
+                          onPress={() => handleCancelIntention(i.id, i.professionalName)}
+                          disabled={cancellingId === i.id}
+                        >
+                          <Text size="xs" color="$red500" fontFamily="$heading">
+                            {cancellingId === i.id ? "Cancelando..." : "Cancelar"}
+                          </Text>
+                        </TouchableOpacity>
+                      </HStack>
+                    </Box>
+                  ))}
+                </VStack>
+              ))}
+            </VStack>
+          </VStack>
+        )}
+
         <VStack mt="$6" px={15}>
           <Text
             size="xs"
@@ -157,7 +326,7 @@ export function Attendances() {
                   label: a.status,
                   color: "#9CA3AF",
                 };
-                const canRate = a.status === "FINISHED";
+                const canRate = a.status === "FINISHED" && !ratedIds.includes(a.id);
                 return (
                   <TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => setDetailFor(a)}>
                     <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
@@ -201,6 +370,7 @@ export function Attendances() {
 
       <AttendanceDetailModal
         attendance={detailFor}
+        canRate={!!detailFor && detailFor.status === "FINISHED" && !ratedIds.includes(detailFor.id)}
         onClose={() => setDetailFor(null)}
         onRate={() => {
           if (detailFor) setRatingFor({ id: detailFor.id, name: detailFor.professionalName });

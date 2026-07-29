@@ -6,6 +6,7 @@ import { Clock } from "phosphor-react-native";
 import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";
 import { formatClockTime } from "@domain/queue/types";
+import { SwapOfferDirection } from "@services/swapOfferService";
 
 type Props = {
   visible: boolean;
@@ -13,15 +14,18 @@ type Props = {
   tailEtaMs: number | null;
   // Cliente já é o último da fila? (não faz sentido "ir para o fim").
   isLast: boolean;
+  swapBusy?: boolean; // publicando a oferta de troca
   onMoveToEnd: () => void; // ser o último da fila
   onReschedule: () => void; // agendar para depois
+  onCreateSwapOffer: (direction: SwapOfferDirection) => void; // publica oferta de troca
   onClose: () => void;
 };
 
 // "Mudar minha vez" (consolida remanejar + troca). O cliente escolhe a DIREÇÃO:
-// adiantar (só via troca — depende de outro aceitar, em breve) ou atrasar
-// (trocar / ser o último / agendar). A oferta de troca aberta aguarda o backend.
-export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onReschedule, onClose }: Props) {
+// adiantar (publica oferta EARLIER p/ quem está à frente) ou atrasar (trocar =
+// oferta LATER p/ quem está atrás / ser o último / agendar). Troca = /swap-offers
+// (backend fatia 1), nunca gera multa.
+export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveToEnd, onReschedule, onCreateSwapOffer, onClose }: Props) {
   const [step, setStep] = useState<"root" | "adiantar" | "atrasar">("root");
 
   function close() {
@@ -54,8 +58,8 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onRes
               <Text size="sm" color="$gray300" mt="$1">
                 Você quer ser atendido antes ou depois?
               </Text>
-              <Button title="Adiantar minha vez" mt="$5" onPress={() => setStep("adiantar")} />
-              <Button title="Atrasar minha vez" variant="outline" mt="$3" onPress={() => setStep("atrasar")} />
+              <Button title="Adiantar" mt="$5" onPress={() => setStep("adiantar")} />
+              <Button title="Atrasar" variant="outline" mt="$3" onPress={() => setStep("atrasar")} />
               <Button title="Cancelar" variant="outline" mt="$3" onPress={close} />
             </>
           )}
@@ -66,10 +70,16 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onRes
                 Adiantar minha vez
               </Heading>
               <Text size="sm" color="$gray300" mt="$2">
-                Para adiantar, outro cliente à sua frente precisa aceitar trocar com você. Esse
-                recurso chega em breve.
+                Publicamos seu pedido para quem está à sua frente. Se alguém aceitar,
+                vocês trocam de lugar — sem custo. Você pode cancelar quando quiser.
               </Text>
-              <Button title="Voltar" variant="outline" mt="$5" onPress={() => setStep("root")} />
+              <Button
+                title={swapBusy ? "Publicando..." : "Publicar pedido"}
+                mt="$5"
+                isDisabled={swapBusy}
+                onPress={() => onCreateSwapOffer("EARLIER")}
+              />
+              <Button title="Voltar" variant="outline" mt="$3" onPress={() => setStep("root")} />
             </>
           )}
 
@@ -101,7 +111,13 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, onMoveToEnd, onRes
               )}
               <Button title="Ir para o fim da fila" mt="$5" onPress={goMoveToEnd} />
               <Button title="Agendar para depois" variant="outline" mt="$3" onPress={goReschedule} />
-              <Button title="Trocar com alguém (em breve)" variant="outline" mt="$3" isDisabled onPress={() => {}} />
+              <Button
+                title={swapBusy ? "Publicando..." : "Trocar com alguém atrás"}
+                variant="outline"
+                mt="$3"
+                isDisabled={swapBusy}
+                onPress={() => onCreateSwapOffer("LATER")}
+              />
               <Button title="Voltar" variant="outline" mt="$3" onPress={() => setStep("root")} />
             </>
           )}

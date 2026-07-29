@@ -10,7 +10,7 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Star } from "phosphor-react-native";
+import { Star, Info } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
@@ -19,6 +19,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { resolveRating } from "@domain/establishment/rating";
+import { isEffectivelyOpen } from "@domain/establishment/types";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { useQueueSocket } from "@hooks/useQueueSocket";
@@ -95,26 +96,19 @@ export function EstablishmentDetail() {
 
   function handleSelectProfessional(professionalId: string) {
     const prof = professionals.find((p) => p.id === professionalId);
+    if (!establishment) return;
 
-    // Loja fechada: ninguém entra na fila. (Futuro: manifestar interesse para a
-    // próxima abertura — depende do backend, ver "Solicitação antecipada".)
-    if (establishment?.open_status !== "OPEN") {
-      Alert.alert(
-        "Estabelecimento fechado",
-        "Este estabelecimento está fechado agora, então não é possível entrar na fila. Em breve você poderá manifestar interesse para a próxima abertura.",
-      );
-      return;
-    }
-
-    // Visitante (sem login) pode navegar e ver os servicos/precos: a verificacao
-    // de token acontece so na ENTRADA da fila (apos escolher os servicos), na
-    // ServiceSelection. Aqui nao barra mais.
+    // Loja fechada NÃO bloqueia mais (Andre 2026-07-23): o fluxo segue até os
+    // serviços e lá as ações viram "Solicitar corte" + "Agendar para depois"
+    // (o backend continua guardião — gate C1). Visitante (sem login) navega e vê
+    // preços; o portão de auth fica na ServiceSelection.
     navigation.navigate("serviceSelection", {
       professionalId,
       professionalName: prof?.name ?? "",
       establishmentId,
       establishmentName: establishment?.name ?? "",
       estimatedWaitMinutes: prof?.estimated_wait_minutes ?? 0,
+      establishmentOpen: isEffectivelyOpen(establishment),
     });
   }
 
@@ -162,13 +156,13 @@ export function EstablishmentDetail() {
         </Heading>
         <HStack mt="$2" gap="$2" alignItems="center">
           <Badge
-            bg={establishment.open_status === "OPEN" ? "$green500" : "$gray400"}
+            bg={isEffectivelyOpen(establishment) ? "$green500" : "$amber500"}
             borderRadius="$full"
             px="$3"
             py="$1"
           >
-            <BadgeText color="$white" size="xs">
-              {establishment.open_status === "OPEN" ? "Aberto" : "Fechado"}
+            <BadgeText color={isEffectivelyOpen(establishment) ? "$white" : "#1A281A"} size="xs">
+              {isEffectivelyOpen(establishment) ? "Aberto" : "AGENDAR"}
             </BadgeText>
           </Badge>
           <Text size="sm" color="$gray300">
@@ -198,12 +192,44 @@ export function EstablishmentDetail() {
         }
       />
 
-      {establishment.open_status === "OPEN" && professionals.length > 0 && (
+      {isEffectivelyOpen(establishment) && professionals.length > 0 && (
         <Button
           title="Entrar na fila (menor espera)"
           onPress={handleSelectShortestQueue}
           mt="$3"
         />
+      )}
+
+      {/* Loja fechada agora (inclui OPEN fora do horário): no lugar do botão de
+          fila, banner âmbar acionável (Andre 2026-07-23) — o fluxo segue pelo
+          profissional, onde as ações são Agendar / Solicitar corte. */}
+      {!isEffectivelyOpen(establishment) && (
+        <TouchableOpacity
+          onPress={() =>
+            Alert.alert(
+              "Fila fechada agora",
+              "A fila não está recebendo clientes neste momento. Escolha um profissional para AGENDAR um horário ou SOLICITAR um corte (o profissional responde em até 5 minutos).",
+            )
+          }
+        >
+          <Box
+            bg="$amber100"
+            borderWidth="$1"
+            borderColor="$amber500"
+            borderRadius="$2xl"
+            px="$4"
+            py="$3"
+            mt="$3"
+          >
+            <HStack alignItems="center" gap="$2">
+              <Info size={18} color="#92400e" />
+              <Text size="xs" color="$amber800" fontFamily="$heading" flex={1}>
+                Fila fechada agora — escolha um profissional para agendar ou
+                solicitar um corte.
+              </Text>
+            </HStack>
+          </Box>
+        </TouchableOpacity>
       )}
     </VStack>
   );

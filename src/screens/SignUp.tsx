@@ -20,6 +20,8 @@ type RouteParams = {
   establishmentName?: string;
   estimatedWaitMinutes?: number;
   serviceItemIds?: string[];
+  targetTime?: string;
+  establishmentOpen?: boolean;
 };
 
 export function SignUp() {
@@ -54,7 +56,22 @@ export function SignUp() {
       await register(email, password);
       await login(email, password);
 
-      if (params.redirectTo === "queueStatus" && params.establishmentId && params.professionalId) {
+      // Mesmo retorno do Login: corte/troca voltam pra seleção de serviços.
+      if (
+        params.redirectTo === "serviceSelection" &&
+        params.establishmentId &&
+        params.professionalId
+      ) {
+        navigation.replace("serviceSelection", {
+          establishmentId: params.establishmentId,
+          professionalId: params.professionalId,
+          professionalName: params.professionalName ?? "",
+          establishmentName: params.establishmentName ?? "",
+          estimatedWaitMinutes: params.estimatedWaitMinutes ?? 0,
+          serviceItemIds: params.serviceItemIds,
+          establishmentOpen: params.establishmentOpen,
+        });
+      } else if (params.redirectTo === "queueStatus" && params.establishmentId && params.professionalId) {
         navigation.replace("queueStatus", {
           establishmentId: params.establishmentId,
           professionalId: params.professionalId,
@@ -62,6 +79,7 @@ export function SignUp() {
           establishmentName: params.establishmentName,
           estimatedWaitMinutes: params.estimatedWaitMinutes,
           serviceItemIds: params.serviceItemIds,
+          targetTime: params.targetTime,
         });
       } else {
         navigation.reset({ index: 0, routes: [{ name: "home" }] });
@@ -83,6 +101,7 @@ export function SignUp() {
       establishmentName: params.establishmentName,
       estimatedWaitMinutes: params.estimatedWaitMinutes,
       serviceItemIds: params.serviceItemIds,
+      targetTime: params.targetTime,
     });
   }
 

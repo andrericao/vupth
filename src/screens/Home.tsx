@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { FlatList, TouchableOpacity, RefreshControl } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@gluestack-ui/themed";
@@ -6,11 +6,15 @@ import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@g
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
-import { Establishment, ServiceType } from "@domain/establishment/types";
-import { filterEstablishments, sortEstablishments } from "@domain/establishment/filter";
+import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
+import { filterEstablishments } from "@domain/establishment/filter";
+import { sortByProximity } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
+import { useLocationStore } from "@stores/locationStore";
+import { LocationSelector } from "@components/LocationSelector";
+import { addressService } from "@services/addressService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
@@ -44,7 +48,9 @@ function EstablishmentCard({
   establishment: Establishment;
   onPress: () => void;
 }) {
-  const isOpen = establishment.open_status === "OPEN";
+  // "Aberta AGORA" efetiva (inclui horario de funcionamento) — loja OPEN fora
+  // do horario mostra "Fechado" (feedback Andre 2026-07-22).
+  const isOpen = isEffectivelyOpen(establishment);
 
   return (
     <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>
@@ -101,14 +107,16 @@ function EstablishmentCard({
               })()}
             </HStack>
           </VStack>
+          {/* Fechada não é beco sem saída: badge âmbar "AGENDAR" sinaliza que a
+              fila está fechada mas dá pra agendar/solicitar (Andre 2026-07-23). */}
           <Badge
-            bg={isOpen ? "$green500" : "$gray400"}
+            bg={isOpen ? "$green500" : "$amber500"}
             borderRadius="$full"
             px="$3"
             py="$1"
           >
-            <BadgeText color="$white" size="xs">
-              {isOpen ? "Aberto" : "Fechado"}
+            <BadgeText color={isOpen ? "$white" : "#1A281A"} size="xs">
+              {isOpen ? "Aberto" : "AGENDAR"}
             </BadgeText>
           </Badge>
         </HStack>
@@ -137,8 +145,34 @@ export function Home() {
     if (filterParam) setSelectedFilter(filterParam);
   }, [filterParam]);
 
-  const filteredEstablishments = sortEstablishments(
+  // Ordena por proximidade (bairro→cidade→resto) quando o cliente definiu uma
+  // localização; senão, ordem padrão (menor espera). Ver LocationSelector.
+  const location = useLocationStore((s) => s.location);
+  const locationResolved = useLocationStore((s) => s.resolved);
+  const setLocation = useLocationStore((s) => s.setLocation);
+  const accessToken = useAuthStore((s) => s.accessToken);
+
+  // Polimento: cliente logado sem localidade ainda resolvida → usa o endereço
+  // principal dele automaticamente (proximidade funciona sem tocar em nada). Uma
+  // vez por sessão; quem limpou o filtro ("Ver todos") já está `resolved` e não
+  // tem a localidade de volta sozinho.
+  const didAutoLocate = useRef(false);
+  useEffect(() => {
+    if (didAutoLocate.current || !isAuthenticated || !accessToken || locationResolved) return;
+    didAutoLocate.current = true;
+    addressService
+      .getMain(accessToken)
+      .then(({ data }) => {
+        if (data?.city) {
+          setLocation({ city: data.city, neighborhood: data.neighborhood, state: data.state });
+        }
+      })
+      .catch(() => {});
+  }, [isAuthenticated, accessToken, locationResolved, setLocation]);
+
+  const filteredEstablishments = sortByProximity(
     filterEstablishments(establishments, search, selectedFilter),
+    location,
   );
 
   const onRefresh = useCallback(() => {
@@ -190,9 +224,11 @@ export function Home() {
         </TouchableOpacity>
       )}
 
-      <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$2">
+      <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$1">
         Estabelecimentos
       </Heading>
+
+      <LocationSelector />
 
       <Input2
         placeholder="Buscar estabelecimento..."

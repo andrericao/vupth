@@ -50,4 +50,43 @@ describe('AuthService', () => {
 
     expect(response.status).toBe(204);
   });
+
+  // Esqueci minha senha (fatia 1 do backend, 2026-07-22)
+  it('forgotPassword envia { email } e aceita o 200 anti-enumeração', async () => {
+    mock.onPost('/auth/forgot-password').reply((config) => {
+      expect(JSON.parse(config.data)).toEqual({ email: 'user@test.com' });
+      return [200, null];
+    });
+
+    const response = await authService.forgotPassword('user@test.com');
+
+    expect(response.status).toBe(200);
+  });
+
+  it('resetPassword envia { email, code, new_password }', async () => {
+    mock.onPost('/auth/reset-password').reply((config) => {
+      expect(JSON.parse(config.data)).toEqual({
+        email: 'user@test.com',
+        code: '123456',
+        new_password: 'NovaSenha123',
+      });
+      return [200, null];
+    });
+
+    const response = await authService.resetPassword('user@test.com', '123456', 'NovaSenha123');
+
+    expect(response.status).toBe(200);
+  });
+
+  it('resetPassword propaga 400 RESET_CODE_INVALID / RESET_CODE_EXPIRED', async () => {
+    mock.onPost('/auth/reset-password').replyOnce(400, { code: 'RESET_CODE_INVALID' });
+    await expect(
+      authService.resetPassword('user@test.com', '000000', 'NovaSenha123'),
+    ).rejects.toMatchObject({ response: { status: 400, data: { code: 'RESET_CODE_INVALID' } } });
+
+    mock.onPost('/auth/reset-password').replyOnce(400, { code: 'RESET_CODE_EXPIRED' });
+    await expect(
+      authService.resetPassword('user@test.com', '123456', 'NovaSenha123'),
+    ).rejects.toMatchObject({ response: { status: 400, data: { code: 'RESET_CODE_EXPIRED' } } });
+  });
 });

@@ -45,10 +45,15 @@ export const profileService = {
     });
   },
 
-  updatePassword(password: string, accessToken: string) {
-    return api.patch<UserProfileAndTokenResponse>('/profile/update-password/me', { password }, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+  // Troca de senha exige provar a senha atual (backend 2026-07-22): senha errada →
+  // 401 CURRENT_PASSWORD_INVALID (erro de campo — o interceptor NÃO desloga);
+  // campo ausente → 422 VALIDATION_ERROR.
+  updatePassword(currentPassword: string, password: string, accessToken: string) {
+    return api.patch<UserProfileAndTokenResponse>(
+      '/profile/update-password/me',
+      { current_password: currentPassword, password },
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
   },
 
   deleteAccount(accessToken: string) {

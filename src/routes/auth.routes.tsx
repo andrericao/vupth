@@ -10,6 +10,7 @@ import { Home } from "@screens/Home";
 import { EstablishmentDetail } from "@screens/EstablishmentDetail";
 import { Login } from "@screens/Login";
 import { SignUp } from "@screens/SignUp";
+import { ForgotPassword } from "@screens/ForgotPassword";
 import { QueueStatus } from "@screens/QueueStatus";
 import { Profile } from "@screens/Profile";
 import { Attendances } from "@screens/Attendances";
@@ -33,6 +34,8 @@ export type AppRoutes = {
     establishmentName?: string;
     estimatedWaitMinutes?: number;
     serviceItemIds?: string[];
+    targetTime?: string;
+    establishmentOpen?: boolean;
   };
   signUp: {
     redirectTo?: string;
@@ -42,13 +45,22 @@ export type AppRoutes = {
     establishmentName?: string;
     estimatedWaitMinutes?: number;
     serviceItemIds?: string[];
+    targetTime?: string;
+    establishmentOpen?: boolean;
   };
+  // Esqueci minha senha (fluxo público): e-mail → código de 6 dígitos → nova senha.
+  forgotPassword: { email?: string } | undefined;
   serviceSelection: {
     professionalId: string;
     professionalName: string;
     establishmentId: string;
     establishmentName: string;
     estimatedWaitMinutes: number;
+    // Loja aberta AGORA (is_open efetivo)? false => a ação primária vira
+    // "Agendar" e o "Solicitar corte" entra no menu. Ausente = aberta.
+    establishmentOpen?: boolean;
+    // Seleção de serviços restaurada ao voltar do portão de auth.
+    serviceItemIds?: string[];
   };
   queueStatus: {
     professionalId: string;
@@ -57,6 +69,8 @@ export type AppRoutes = {
     establishmentName?: string;
     estimatedWaitMinutes?: number;
     serviceItemIds?: string[];
+    // Agendar (#40): quando presente, cria o atendimento como intenção com alvo.
+    targetTime?: string;
   };
   profile: undefined;
   attendances: undefined;
@@ -81,6 +95,7 @@ function HomeStack() {
       <HomeStackNav.Screen name="profile" component={Profile} />
       <HomeStackNav.Screen name="login" component={Login} />
       <HomeStackNav.Screen name="signUp" component={SignUp} />
+      <HomeStackNav.Screen name="forgotPassword" component={ForgotPassword} />
     </HomeStackNav.Navigator>
   );
 }

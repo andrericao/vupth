@@ -100,4 +100,29 @@ describe('QueueStore', () => {
     const { activeQueue } = useQueueStore.getState();
     expect(activeQueue?.professionalName).toBe('Pedro');
   });
+
+  it('reanchorQueue re-ancora enteredAt no agora + nova estimativa e persiste', async () => {
+    await useQueueStore.getState().joinQueue({ ...sampleQueue, enteredAt: 1000, estimatedMinutes: 30 });
+    jest.clearAllMocks();
+    const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(999999);
+
+    await useQueueStore.getState().reanchorQueue(45);
+
+    const { activeQueue } = useQueueStore.getState();
+    expect(activeQueue?.enteredAt).toBe(999999);
+    expect(activeQueue?.estimatedMinutes).toBe(45);
+    expect(activeQueue?.professionalName).toBe('Carlos'); // demais campos preservados
+    expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith(
+      QUEUE_KEY,
+      JSON.stringify({ ...sampleQueue, enteredAt: 999999, estimatedMinutes: 45 }),
+    );
+    nowSpy.mockRestore();
+  });
+
+  it('reanchorQueue sem fila ativa nao deve fazer nada', async () => {
+    await useQueueStore.getState().reanchorQueue(45);
+
+    expect(useQueueStore.getState().activeQueue).toBeNull();
+    expect(mockSecureStore.setItemAsync).not.toHaveBeenCalled();
+  });
 });

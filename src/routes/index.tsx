@@ -2,6 +2,7 @@ import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AuthRoutes } from "./auth.routes";
+import { navigationRef } from "./navigationRef";
 
 import { gluestackUIConfig } from "config/gluestack-ui.config";
 import { Box } from "@gluestack-ui/themed";
@@ -19,7 +20,7 @@ export function Routes(){
 	return(
 		<SafeAreaProvider>
 		<Box flex={1} bg="$white">
-		<NavigationContainer theme={theme}>
+		<NavigationContainer ref={navigationRef} theme={theme}>
 			<AuthRoutes />
 		</NavigationContainer>
 		<OfflineBanner />

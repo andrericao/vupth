@@ -7,6 +7,7 @@ import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";
 import { ratingService } from "@services/ratingService";
 import { useAuthStore } from "@stores/authStore";
+import { useRatedStore } from "@stores/ratedStore";
 
 type Props = {
   visible: boolean;
@@ -47,6 +48,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
         { score, comment: comment.trim() || undefined },
         accessToken,
       );
+      await useRatedStore.getState().markRated(attendanceId);
       Alert.alert("Obrigado! 🙏", "Sua avaliação foi registrada.");
       reset();
       onClose(true);
@@ -58,6 +60,8 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
           : e.response?.data?.message || "Não foi possível enviar a avaliação. Tente mais tarde.";
       Alert.alert("Avaliação", msg);
       if (status === 409) {
+        // 409 = backend confirma que já foi avaliado → marca pra esconder também.
+        await useRatedStore.getState().markRated(attendanceId);
         reset();
         onClose(true);
       }
@@ -81,7 +85,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
 
           <HStack justifyContent="center" gap="$2" mt="$5" mb="$2">
             {[1, 2, 3, 4, 5].map((n) => (
-              <TouchableOpacity key={n} onPress={() => setScore(n)} hitSlop={6}>
+              <TouchableOpacity key={n} testID={`star-${n}`} onPress={() => setScore(n)} hitSlop={6}>
                 <Star
                   size={36}
                   color={n <= score ? "#FFB703" : "#D1D5DB"}

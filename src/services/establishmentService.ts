@@ -9,6 +9,8 @@ export interface EstablishmentWithProfessionals {
   services: string[];
   owner_id: string;
   open_status: string;
+  // "Aberta agora" efetiva (open_status OPEN E dentro do horário — BUG5 B).
+  is_open?: boolean;
   total_in_queue: number;
   available_professionals: number;
   professionals: ProfessionalWithQueue[];

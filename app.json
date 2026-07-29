@@ -2,7 +2,7 @@
   "expo": {
     "name": "vupth",
     "slug": "vupth-client",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -27,7 +27,16 @@
     },
     "plugins": [
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "O VUPTH usa sua localização para mostrar primeiro os estabelecimentos perto de você.",
+          "locationWhenInUsePermission": "O VUPTH usa sua localização para mostrar primeiro os estabelecimentos perto de você.",
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ]
     ],
     "runtimeVersion": {
       "policy": "appVersion"

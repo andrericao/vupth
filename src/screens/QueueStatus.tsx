@@ -16,6 +16,8 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
+import { SwapOffersModal } from "@components/SwapOffersModal";
+import { useSwapOffers } from "@hooks/useSwapOffers";
 import {
   canCancelAttendance,
   formatWaitTime,
@@ -30,7 +32,10 @@ import {
 } from "@domain/queue/types";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
+import { useRatedStore } from "@stores/ratedStore";
 import { attendanceService } from "@services/attendanceService";
+import { cutRequestService } from "@services/cutRequestService";
+import { swapOfferService, SwapOfferDirection } from "@services/swapOfferService";
 import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
 import { cardShadow } from "@utils/styles";
@@ -43,6 +48,7 @@ type RouteParams = {
   establishmentName?: string;
   estimatedWaitMinutes?: number;
   serviceItemIds?: string[];
+  targetTime?: string;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -63,10 +69,12 @@ export function QueueStatus() {
     establishmentName: paramEstName,
     serviceItemIds,
     estimatedWaitMinutes,
+    targetTime,
   } = route.params as RouteParams;
 
   const accessToken = useAuthStore((s) => s.accessToken);
   const user = useAuthStore((s) => s.user);
+  const ratedIds = useRatedStore((s) => s.ids);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
   const { remaining, elapsedSeconds, color, isInQueue, isBeingAttended, isPaused, isFinished, activeQueue, refresh } = useQueueCountdown();
@@ -74,6 +82,9 @@ export function QueueStatus() {
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
   const [createError, setCreateError] = useState<string | null>(null);
+  // Loja fechada p/ novos (409 ESTABLISHMENT_NOT_OPEN) → oferece "solicitar corte".
+  const [canRequestCut, setCanRequestCut] = useState(false);
+  const [isRequestingCut, setIsRequestingCut] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -83,6 +94,8 @@ export function QueueStatus() {
   const [rescheduleBaseMs, setRescheduleBaseMs] = useState(0);
   const [showChangeTurn, setShowChangeTurn] = useState(false);
   const [isLastInQueue, setIsLastInQueue] = useState(false);
+  const [isPublishingSwap, setIsPublishingSwap] = useState(false);
+  const [showSwapOffers, setShowSwapOffers] = useState(false);
   const didCreate = useRef(false);
 
   async function handleRefresh() {
@@ -164,9 +177,11 @@ export function QueueStatus() {
           return;
         }
 
-        setCreateMsg("Entrando na fila...");
+        setCreateMsg(targetTime ? "Agendando..." : "Entrando na fila...");
         const { data } = await attendanceService.create(
-          { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], scheduledTime: new Date().toISOString() },
+          targetTime
+            ? { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], targetTime }
+            : { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], scheduledTime: new Date().toISOString() },
           accessToken!,
         );
         if (mountedRef.current) {
@@ -176,7 +191,21 @@ export function QueueStatus() {
         // Limpa a fila otimista para não deixar tarja/banner residual sem atendimento real.
         await leaveQueue();
         if (mountedRef.current) {
-          const msg = error.response?.data?.message || error.message || "Erro ao entrar na fila";
+          const status = error.response?.status;
+          const code = error.response?.data?.code;
+          // Loja fechada p/ novos (gate C1): oferece "solicitar corte" (BUG5 C2).
+          if (status === 409 && code === "ESTABLISHMENT_NOT_OPEN") {
+            setCanRequestCut(true);
+            setCreateError(
+              "A loja não está aberta agora, então não dá para entrar na fila direto. Você pode pedir um corte — o profissional tem 5 minutos para aceitar.",
+            );
+            return;
+          }
+          // Agendamento (#40): 422 alvo inviável / 400 passado -> mensagem amigável
+          // sugerindo outro horário; senão, mensagem genérica de entrada na fila.
+          const msg = targetTime
+            ? rescheduleErrorMessage(status, code)
+            : error.response?.data?.message || error.message || "Erro ao entrar na fila";
           setCreateError(msg);
         }
       } finally {
@@ -185,7 +214,7 @@ export function QueueStatus() {
     }
 
     createAttendance();
-  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes]);
+  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";
@@ -193,6 +222,11 @@ export function QueueStatus() {
   // Item 16 — remanejar a vez (trocar horário / ir pro fim) é sempre livre e sem
   // multa enquanto aguardando. Só SAIR da fila com espera curta gera multa.
   const canReshuffle = canReshuffleQueue(status);
+
+  // Troca aberta (C13): ofertas que EU posso aceitar → dot + modal. Só enquanto
+  // aguardando na fila.
+  const { data: acceptableOffers = [] } = useSwapOffers(professionalId, canReshuffle);
+  const acceptableCount = acceptableOffers.length;
 
   const borderColor = isInQueue ? color : "#3B7A3F";
   const timeColor = isInQueue ? color : "#3B7A3F";
@@ -330,6 +364,33 @@ export function QueueStatus() {
     }
   }
 
+  // Troca aberta (C13): publica a oferta (Adiantar=EARLIER / Atrasar=LATER).
+  // Se alguém à frente/atrás aceitar, o backend troca as posições e avisa por WS.
+  async function handleCreateSwapOffer(direction: SwapOfferDirection) {
+    if (!attendanceId || !accessToken || isPublishingSwap) return;
+    setIsPublishingSwap(true);
+    try {
+      await swapOfferService.create({ attendanceId, direction }, accessToken);
+      setShowChangeTurn(false);
+      Alert.alert(
+        "Pedido publicado! 🔄",
+        direction === "EARLIER"
+          ? "Se alguém à sua frente aceitar, vocês trocam de lugar. Você será avisado aqui."
+          : "Se alguém atrás de você aceitar, vocês trocam de lugar. Você será avisado aqui.",
+      );
+    } catch (error: any) {
+      const code = error.response?.data?.code;
+      Alert.alert(
+        "Não foi possível publicar",
+        code === "QUEUE_SWAP_OFFER_NOT_ALLOWED"
+          ? "A troca só vale enquanto você está aguardando na fila."
+          : error.response?.data?.message || "Tente novamente em instantes.",
+      );
+    } finally {
+      if (mountedRef.current) setIsPublishingSwap(false);
+    }
+  }
+
   function handleMoveToEnd() {
     // Ir pro fim com < 1h também vaga um lugar perto do início → avisa multa.
     const base = "Sua vez passa para depois de quem está esperando. Você continua na fila, sem perder o atendimento.";
@@ -363,11 +424,48 @@ export function QueueStatus() {
       <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
         <Header />
         <Center flex={1}>
-          <Text color="$red500" fontSize="$lg" fontFamily="$heading" textAlign="center">
+          <Text
+            color={canRequestCut ? "$gray500" : "$red500"}
+            fontSize="$lg"
+            fontFamily="$heading"
+            textAlign="center"
+          >
             {createError}
           </Text>
+          {canRequestCut && (
+            <Button
+              title={isRequestingCut ? "Enviando pedido..." : "Solicitar corte"}
+              mt="$4"
+              isDisabled={isRequestingCut}
+              onPress={async () => {
+                if (!accessToken || isRequestingCut) return;
+                setIsRequestingCut(true);
+                try {
+                  await cutRequestService.create(
+                    { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [] },
+                    accessToken,
+                  );
+                  Alert.alert(
+                    "Pedido enviado! ⏳",
+                    "O profissional tem 5 minutos para responder. Você será avisado aqui no app.",
+                  );
+                  navigation.goBack();
+                } catch (error: any) {
+                  const code = error.response?.data?.code;
+                  const msg =
+                    code === "CUT_REQUEST_NOT_ALLOWED"
+                      ? "A loja está aberta agora — tente entrar na fila normalmente."
+                      : error.response?.data?.message || "Erro ao enviar o pedido de corte";
+                  Alert.alert("Erro", msg);
+                } finally {
+                  setIsRequestingCut(false);
+                }
+              }}
+            />
+          )}
           <Button
             title="Voltar"
+            variant={canRequestCut ? "outline" : "solid"}
             mt="$4"
             onPress={() => {
               leaveQueue();
@@ -501,9 +599,14 @@ export function QueueStatus() {
               isLoading={isRemanejando}
               onPress={handleOpenChangeTurn}
             />
+            <Button
+              title={acceptableCount > 0 ? `Trocar de lugar (${acceptableCount})` : "Trocar de lugar"}
+              variant="outline"
+              onPress={() => setShowSwapOffers(true)}
+            />
           </>
         )}
-        {isFinished && attendanceId && (
+        {isFinished && attendanceId && !ratedIds.includes(attendanceId) && (
           <Button title="Avaliar atendimento" onPress={() => setShowRating(true)} />
         )}
         {isFinished ? (
@@ -542,6 +645,7 @@ export function QueueStatus() {
         visible={showChangeTurn}
         tailEtaMs={tailEtaMs}
         isLast={isLastInQueue}
+        swapBusy={isPublishingSwap}
         onMoveToEnd={() => {
           setShowChangeTurn(false);
           handleMoveToEnd();
@@ -550,7 +654,15 @@ export function QueueStatus() {
           setShowChangeTurn(false);
           setShowReschedule(true);
         }}
+        onCreateSwapOffer={handleCreateSwapOffer}
         onClose={() => setShowChangeTurn(false)}
+      />
+
+      <SwapOffersModal
+        visible={showSwapOffers}
+        professionalId={professionalId}
+        onClose={() => setShowSwapOffers(false)}
+        onChanged={refresh}
       />
       <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
       <RatingModal
