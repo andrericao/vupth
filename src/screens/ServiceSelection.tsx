@@ -24,6 +24,7 @@ import { establishmentService } from "@services/establishmentService";
 import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
+import { usePendingSwapStore } from "@stores/pendingSwapStore";
 
 type RouteParams = {
   professionalId: string;
@@ -53,6 +54,7 @@ export function ServiceSelection() {
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
+  const addPendingSwap = usePendingSwapStore((s) => s.addPending);
 
   const [services, setServices] = useState<ServiceItemResponse[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>(serviceItemIds ?? []);
@@ -144,10 +146,20 @@ export function ServiceSelection() {
     }
     setIsPublishingSwap(true);
     try {
-      await swapOfferService.create(
+      const { data: offer } = await swapOfferService.create(
         { professionalId, serviceItemIds: selectedIds, direction: "EARLIER" },
         accessToken,
       );
+      // Guarda o contexto: o atendimento nasce no ACEITE, sem passar pelo app —
+      // sem isso não teríamos os nomes para montar a fila local depois.
+      await addPendingSwap({
+        offerId: offer.id,
+        professionalId,
+        professionalName,
+        establishmentId,
+        establishmentName,
+        estimatedWaitMinutes,
+      });
       setShowMoreOptions(false);
       Alert.alert(
         "Pedido publicado! 🔄",

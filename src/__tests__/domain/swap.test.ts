@@ -2,6 +2,9 @@ import {
   acceptOfferText,
   myOfferText,
   outOfQueueOfferErrorMessage,
+  isOutOfQueueOffer,
+  vanishedPendingOffers,
+  findSwapAttendance,
 } from '../../domain/queue/swap';
 
 describe('swap text', () => {
@@ -42,6 +45,46 @@ describe('swap text', () => {
       expect(outOfQueueOfferErrorMessage(undefined, 401)).toMatch(/Entre na sua conta/);
       expect(outOfQueueOfferErrorMessage(undefined, 500)).toMatch(/Tente novamente/);
       expect(outOfQueueOfferErrorMessage()).toMatch(/Tente novamente/);
+    });
+  });
+
+  // Detecção do aceite quando o solicitante está FORA da fila: sem WS, o sinal é
+  // a oferta sumir do /swap-offers/me (só lista OPEN) + o atendimento aparecer.
+  describe('detecção do aceite (fatia 2)', () => {
+    it('isOutOfQueueOffer: sem attendance de origem = publicada de fora', () => {
+      expect(isOutOfQueueOffer({ requesterAttendanceId: null })).toBe(true);
+      expect(isOutOfQueueOffer({ requesterAttendanceId: 'att-1' })).toBe(false);
+    });
+
+    it('vanishedPendingOffers: sobra quem não está mais OPEN', () => {
+      const pending = [{ offerId: 'a' }, { offerId: 'b' }];
+      expect(vanishedPendingOffers(pending, [{ id: 'a' }])).toEqual([{ offerId: 'b' }]);
+      expect(vanishedPendingOffers(pending, [{ id: 'a' }, { id: 'b' }])).toEqual([]);
+      expect(vanishedPendingOffers(pending, [])).toEqual(pending);
+    });
+
+    it('findSwapAttendance: acha o atendimento ativo daquele profissional', () => {
+      const history = [
+        { id: 'old', professionalId: 'p1', status: 'FINISHED' },
+        { id: 'other', professionalId: 'p2', status: 'SCHEDULED' },
+        { id: 'novo', professionalId: 'p1', status: 'SCHEDULED' },
+      ];
+      expect(findSwapAttendance(history, 'p1')?.id).toBe('novo');
+      expect(findSwapAttendance(history, 'p3')).toBeUndefined();
+    });
+
+    it('findSwapAttendance: LATE também conta (ainda aguardando)', () => {
+      expect(
+        findSwapAttendance([{ id: 'x', professionalId: 'p1', status: 'LATE' }], 'p1')?.id,
+      ).toBe('x');
+    });
+
+    it('findSwapAttendance: histórico só com encerrados = nada (cancelada/expirada)', () => {
+      const history = [
+        { id: 'a', professionalId: 'p1', status: 'CANCELLED' },
+        { id: 'b', professionalId: 'p1', status: 'FINISHED' },
+      ];
+      expect(findSwapAttendance(history, 'p1')).toBeUndefined();
     });
   });
 });

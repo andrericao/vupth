@@ -23,6 +23,39 @@ export function myOfferText(direction: SwapOfferDirection, outOfQueue = false): 
   return direction === 'EARLIER' ? 'Pedido para adiantar' : 'Pedido para atrasar';
 }
 
+/** Oferta publicada de FORA da fila (fatia 2): não tem atendimento de origem. */
+export function isOutOfQueueOffer(offer: { requesterAttendanceId: string | null }): boolean {
+  return offer.requesterAttendanceId === null;
+}
+
+/**
+ * Pedidos meus que SUMIRAM do `GET /swap-offers/me` (que só lista OPEN): foram
+ * aceitos, cancelados ou expiraram. Quem sumiu por ACEITE é distinguido depois,
+ * procurando o atendimento que nasceu na vaga cedida (`findSwapAttendance`).
+ */
+export function vanishedPendingOffers<T extends { offerId: string }>(
+  pending: T[],
+  openOffers: { id: string }[],
+): T[] {
+  const openIds = openOffers.map((o) => o.id);
+  return pending.filter((p) => !openIds.includes(p.offerId));
+}
+
+/**
+ * O atendimento que nasceu do aceite: ativo (aguardando) com aquele
+ * profissional. O solicitante não passou pelo app para criá-lo — o backend o
+ * cria na vaga cedida —, então ele só aparece no histórico do cliente.
+ */
+export function findSwapAttendance<A extends { professionalId: string; status: string }>(
+  attendances: A[],
+  professionalId: string,
+): A | undefined {
+  return attendances.find(
+    (a) =>
+      a.professionalId === professionalId && (a.status === 'SCHEDULED' || a.status === 'LATE'),
+  );
+}
+
 /**
  * Mensagem de erro ao publicar a oferta de FORA da fila (fatia 2). Os códigos
  * vêm do backend (seção `/swap-offers`); `QUEUE_SWAP_OFFER_NOT_ALLOWED` aqui só

@@ -12,7 +12,7 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Queue, Clock, CaretRight, CalendarBlank } from "phosphor-react-native";
+import { Queue, Clock, CaretRight, CalendarBlank, ArrowsLeftRight } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
@@ -26,6 +26,9 @@ import { RatingModal } from "@components/RatingModal";
 import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
 import { ClientAttendance } from "@services/attendanceService";
 import { intentionsService } from "@services/intentionsService";
+import { swapOfferService } from "@services/swapOfferService";
+import { usePendingSwapStore } from "@stores/pendingSwapStore";
+import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
 import { cardShadow } from "@utils/styles";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
@@ -57,6 +60,11 @@ export function Attendances() {
   const [ratingFor, setRatingFor] = useState<{ id: string; name: string } | null>(null);
   const [detailFor, setDetailFor] = useState<ClientAttendance | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  // Pedidos de troca publicados de FORA da fila (F8 fatia 2): o hook vigia o
+  // aceite (poll) e este card deixa acompanhar/cancelar enquanto está aberto.
+  const { pending: pendingSwaps, refetchMyOffers } = useOutOfQueueSwap();
+  const removePendingSwap = usePendingSwapStore((s) => s.removePending);
+  const [cancellingSwapId, setCancellingSwapId] = useState<string | null>(null);
 
   const intentionGroups = groupIntentionsByDay(agenda?.intentions ?? []);
 
@@ -93,6 +101,39 @@ export function Attendances() {
               refetchIntentions();
             } finally {
               setCancellingId(null);
+            }
+          },
+        },
+      ],
+    );
+  }
+
+  // Cancela o pedido de troca publicado de fora da fila. 422 = já não está mais
+  // aberto (alguém aceitou ou expirou) — some da lista do mesmo jeito.
+  function handleCancelSwap(offerId: string, professionalName: string) {
+    Alert.alert(
+      "Cancelar pedido de troca",
+      `Cancelar o pedido para entrar na fila de ${professionalName}?`,
+      [
+        { text: "Voltar", style: "cancel" },
+        {
+          text: "Cancelar pedido",
+          style: "destructive",
+          onPress: async () => {
+            if (!accessToken) return;
+            setCancellingSwapId(offerId);
+            try {
+              await swapOfferService.cancel(offerId, accessToken);
+              await removePendingSwap(offerId);
+            } catch (error: any) {
+              if (error.response?.status === 422 || error.response?.status === 404) {
+                await removePendingSwap(offerId);
+              } else {
+                Alert.alert("Erro", "Não foi possível cancelar o pedido. Tente de novo.");
+              }
+            } finally {
+              setCancellingSwapId(null);
+              refetchMyOffers();
             }
           },
         },
@@ -174,6 +215,43 @@ export function Attendances() {
             </Box>
           )}
         </VStack>
+
+        {pendingSwaps.length > 0 && (
+          <VStack mt="$6" px={15}>
+            <Text size="xs" color="$gray300" fontFamily="$heading" mb="$2">
+              PEDIDOS DE TROCA
+            </Text>
+
+            <VStack gap="$3">
+              {pendingSwaps.map((s) => (
+                <Box key={s.offerId} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                  <HStack alignItems="center" gap="$3">
+                    <ArrowsLeftRight size={22} color="#2F432F" />
+                    <VStack flex={1}>
+                      <Text fontFamily="$heading" size="sm">
+                        {s.professionalName}
+                      </Text>
+                      <Text size="xs" color="$gray300">
+                        {s.establishmentName}
+                      </Text>
+                      <Text size="xs" color="$gray400" mt="$1">
+                        Aguardando alguém da fila ceder o lugar
+                      </Text>
+                    </VStack>
+                    <TouchableOpacity
+                      onPress={() => handleCancelSwap(s.offerId, s.professionalName)}
+                      disabled={cancellingSwapId === s.offerId}
+                    >
+                      <Text size="xs" color="$red500" fontFamily="$heading">
+                        {cancellingSwapId === s.offerId ? "Cancelando..." : "Cancelar"}
+                      </Text>
+                    </TouchableOpacity>
+                  </HStack>
+                </Box>
+              ))}
+            </VStack>
+          </VStack>
+        )}
 
         {intentionGroups.length > 0 && (
           <VStack mt="$6" px={15}>

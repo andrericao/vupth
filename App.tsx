@@ -16,10 +16,12 @@ import { PreparingServer } from "@components/PreparingServer";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
+import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
 import { useLocationStore } from "@stores/locationStore";
 import { useQueueNotifications } from "@hooks/useQueueNotifications";
 import { usePushRegistration } from "@hooks/usePushRegistration";
+import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 
@@ -41,6 +43,7 @@ export default function App() {
   const restoreRated = useRatedStore((s) => s.restoreRated);
   const restoreComingSoon = useComingSoonStore((s) => s.restore);
   const restoreLocation = useLocationStore((s) => s.restoreLocation);
+  const restorePendingSwap = usePendingSwapStore((s) => s.restorePending);
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
 
@@ -50,6 +53,7 @@ export default function App() {
     restoreRated();
     restoreComingSoon();
     restoreLocation();
+    restorePendingSwap();
     // Portao de readiness (cold start do Render): acorda o backend ANTES de liberar
     // login/cadastro/listagem. A 1a cutucada acorda a instancia; segue mesmo se
     // estourar o teto (chamadas seguintes ja pegam a instancia quente). CLAUDE.md 18c.
@@ -60,7 +64,14 @@ export default function App() {
     return () => {
       active = false;
     };
-  }, [restoreSession, restoreQueue, restoreRated, restoreComingSoon, restoreLocation]);
+  }, [
+    restoreSession,
+    restoreQueue,
+    restoreRated,
+    restoreComingSoon,
+    restoreLocation,
+    restorePendingSwap,
+  ]);
 
   // Notificacao pessoal "é a sua vez" (WebSocket) app-wide: vale em qualquer
   // tela enquanto houver fila ativa, nao so na QueueStatus (item #5, fatia 2).
@@ -70,6 +81,10 @@ export default function App() {
   // e trata o toque. Best-effort/guardado — inerte ate um build COM o modulo
   // nativo de push (expo-notifications).
   usePushRegistration();
+
+  // Troca publicada de FORA da fila (F8 fatia 2): sem WS conectado, o aceite
+  // chega por poll — o hook entra na fila local e avisa quando alguem ceder.
+  useOutOfQueueSwap();
 
   return (
     <QueryClientProvider client={queryClient}>
