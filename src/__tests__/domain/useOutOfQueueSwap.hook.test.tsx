@@ -30,8 +30,12 @@ const ctx: PendingSwapContext = {
   estimatedWaitMinutes: 25,
 };
 
+// Um client por teste, destruído no afterEach: o hook usa `refetchInterval` de
+// 30s e o cache tem gc próprio — sem isso o jest fica com timer aberto no fim
+// da suíte ("did not exit one second after the test run").
+let client: QueryClient;
+
 function wrapper({ children }: { children: ReactNode }) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
 
@@ -40,10 +44,16 @@ function wrapper({ children }: { children: ReactNode }) {
 describe('useOutOfQueueSwap (F8 fatia 2)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
     jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
     useQueueStore.setState({ activeQueue: null });
     usePendingSwapStore.setState({ offers: [ctx] });
+  });
+
+  afterEach(() => {
+    client.clear();
+    client.unmount();
   });
 
   it('oferta sumiu + atendimento ativo = troca aceita: entra na fila e avisa', async () => {

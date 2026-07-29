@@ -22,6 +22,7 @@ import { useLocationStore } from "@stores/locationStore";
 import { useQueueNotifications } from "@hooks/useQueueNotifications";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
+import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 
@@ -85,6 +86,11 @@ export default function App() {
   // Troca publicada de FORA da fila (F8 fatia 2): sem WS conectado, o aceite
   // chega por poll — o hook entra na fila local e avisa quando alguem ceder.
   useOutOfQueueSwap();
+
+  // GPS (Fase 3): na 1a abertura pede a localizacao e deriva bairro/cidade por
+  // reverse geocode, para a Home ja abrir com as lojas perto. Guardado com
+  // try/catch — inerte num binario sem expo-location.
+  useDeviceLocation();
 
   return (
     <QueryClientProvider client={queryClient}>

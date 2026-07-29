@@ -11,6 +11,7 @@ import { lookupCep } from "@utils/cep";
 import { addressService } from "@services/addressService";
 import { useAuthStore } from "@stores/authStore";
 import { useLocationStore } from "@stores/locationStore";
+import { useDeviceLocation } from "@hooks/useDeviceLocation";
 
 // Seletor de localização da Home (Fase 1 do filtro por bairro, Andre 2026-07-23).
 // Barra clicável mostrando o bairro/cidade atual; abre um modal p/ definir por
@@ -22,6 +23,7 @@ export function LocationSelector() {
   const clearLocation = useLocationStore((s) => s.clearLocation);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
+  const { requestDeviceLocation } = useDeviceLocation();
 
   const [open, setOpen] = useState(false);
   const [cep, setCep] = useState("");
@@ -44,6 +46,25 @@ export function LocationSelector() {
       setOpen(false);
     } catch {
       Alert.alert("Erro", "Não foi possível ler seu endereço cadastrado.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // GPS: pede a permissão (ou reusa a já concedida) e resolve bairro/cidade no
+  // próprio device. Negada/indisponível, o cliente segue pelo endereço ou CEP.
+  async function useGps() {
+    setBusy(true);
+    try {
+      const ok = await requestDeviceLocation();
+      if (!ok) {
+        Alert.alert(
+          "Não consegui sua localização",
+          "Confira se o GPS está ligado e se o VUPTH tem permissão de localização. Você também pode escolher pelo CEP.",
+        );
+        return;
+      }
+      setOpen(false);
     } finally {
       setBusy(false);
     }
@@ -87,10 +108,19 @@ export function LocationSelector() {
               Mostramos primeiro os estabelecimentos do seu bairro e cidade.
             </Text>
 
+            <Button
+              title={busy ? "Buscando..." : "Usar minha localização atual"}
+              mt="$5"
+              isDisabled={busy}
+              testID="use-gps"
+              onPress={useGps}
+            />
+
             {isAuthenticated && (
               <Button
                 title={busy ? "Buscando..." : "Usar meu endereço cadastrado"}
-                mt="$5"
+                variant="outline"
+                mt="$3"
                 isDisabled={busy}
                 onPress={useMyAddress}
               />

@@ -7,11 +7,27 @@ import { useAuthStore } from '@stores/authStore';
 // Não deixa chamadas reais de rede/serviço escaparem no render.
 jest.mock('@services/addressService', () => ({ addressService: { getMain: jest.fn() } }));
 jest.mock('@utils/cep', () => ({ lookupCep: jest.fn() }));
+// O GPS é nativo: aqui só interessa que o botão exista e chame o hook (o fluxo
+// de permissão/reverse geocode é testado puro em `gps.test.ts`).
+const mockRequestDeviceLocation = jest.fn().mockResolvedValue(true);
+jest.mock('@hooks/useDeviceLocation', () => ({
+  useDeviceLocation: () => ({ requestDeviceLocation: mockRequestDeviceLocation }),
+}));
 
 describe('LocationSelector', () => {
   beforeEach(() => {
-    useLocationStore.setState({ location: null, resolved: false });
+    useLocationStore.setState({ location: null, resolved: false, coords: null, gpsAsked: false });
     useAuthStore.setState({ isAuthenticated: false, accessToken: null });
+    mockRequestDeviceLocation.mockClear();
+  });
+
+  it('botão de GPS aparece para todos e dispara o pedido de localização', async () => {
+    const { getByText, getByTestId } = renderWithProviders(<LocationSelector />);
+    fireEvent.press(getByText('Escolher meu bairro'));
+
+    fireEvent.press(getByTestId('use-gps'));
+
+    expect(mockRequestDeviceLocation).toHaveBeenCalled();
   });
 
   it('sem localidade → mostra "Escolher meu bairro"', () => {

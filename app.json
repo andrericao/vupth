@@ -28,7 +28,15 @@
     "plugins": [
       "expo-font",
       "expo-secure-store",
-      "expo-notifications"
+      "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "O VUPTH usa sua localização para mostrar primeiro os estabelecimentos perto de você.",
+          "locationWhenInUsePermission": "O VUPTH usa sua localização para mostrar primeiro os estabelecimentos perto de você.",
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ]
     ],
     "runtimeVersion": {
       "policy": "appVersion"
