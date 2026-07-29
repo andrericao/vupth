@@ -29,6 +29,17 @@ jest.mock('expo-location', () => ({
 jest.mock('@services/healthService', () => ({
   waitForBackend: jest.fn().mockResolvedValue(true),
 }));
+// netinfo é nativo: sem mock, o `setupOnlineManager()` do boot tenta sondar a
+// internet de verdade (estoura em `isInternetReachable` e ainda deixa o jest
+// pendurado). O listener devolve a função de unsubscribe, como no módulo real.
+jest.mock('@react-native-community/netinfo', () => ({
+  __esModule: true,
+  default: {
+    addEventListener: jest.fn(() => jest.fn()),
+    fetch: jest.fn().mockResolvedValue({ isConnected: true, isInternetReachable: true }),
+    configure: jest.fn(),
+  },
+}));
 
 // O mount do Gluestack é pesado sob o jest.
 jest.setTimeout(30000);
