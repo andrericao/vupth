@@ -8,7 +8,7 @@ import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
-import { sortByProximity } from "@domain/establishment/proximity";
+import { sortByDistance, establishmentDistanceKm, formatDistanceKm } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
@@ -20,7 +20,7 @@ import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
 import { formatWaitTime } from "@domain/queue/types";
-import { UserCircle, Queue, Clock, Star } from "phosphor-react-native";
+import { UserCircle, Queue, Clock, Star, MapPin } from "phosphor-react-native";
 
 const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   BARBER: "Barbearia",
@@ -43,9 +43,13 @@ const SERVICE_FILTERS: { key: ServiceType | "ALL"; label: string }[] = [
 
 function EstablishmentCard({
   establishment,
+  distanceKm,
   onPress,
 }: {
   establishment: Establishment;
+  // Distancia real (GPS). null = device sem coordenada ou loja ainda nao
+  // geocodificada pelo backend — o card so omite a linha, nunca some da lista.
+  distanceKm: number | null;
   onPress: () => void;
 }) {
   // "Aberta AGORA" efetiva (inclui horario de funcionamento) — loja OPEN fora
@@ -74,9 +78,13 @@ function EstablishmentCard({
               </Text>
             )}
             {establishment.address && (
-              <Text size="xs" color="$gray400" mt="$1">
-                {establishment.address.neighborhood}, {establishment.address.city}
-              </Text>
+              <HStack alignItems="center" gap="$1" mt="$1">
+                <MapPin size={12} color={distanceKm != null ? "#3B7A3F" : "#9CA3AF"} weight="fill" />
+                <Text size="xs" color="$gray400" flex={1} numberOfLines={1}>
+                  {distanceKm != null ? `${formatDistanceKm(distanceKm)} · ` : ""}
+                  {establishment.address.neighborhood}, {establishment.address.city}
+                </Text>
+              </HStack>
             )}
             <HStack alignItems="center" gap="$3" mt="$2">
               {establishment.estimated_wait_minutes != null && (
@@ -170,8 +178,13 @@ export function Home() {
       .catch(() => {});
   }, [isAuthenticated, accessToken, locationResolved, setLocation]);
 
-  const filteredEstablishments = sortByProximity(
+  // GPS: com as coordenadas do device, quem tem distancia real vem primeiro (do
+  // mais perto ao mais longe) e o resto mantem a ordenacao por bairro/cidade.
+  // NAO filtra por raio — a lista nunca pode esvaziar por falta de coordenada.
+  const coords = useLocationStore((s) => s.coords);
+  const filteredEstablishments = sortByDistance(
     filterEstablishments(establishments, search, selectedFilter),
+    coords ?? null,
     location,
   );
 
@@ -289,6 +302,7 @@ export function Home() {
           renderItem={({ item }) => (
             <EstablishmentCard
               establishment={item}
+              distanceKm={establishmentDistanceKm(item, coords ?? null)}
               onPress={() => handleEstablishmentPress(item)}
             />
           )}
