@@ -96,8 +96,8 @@ describe('distância real (GPS)', () => {
       expect(haversineKm(FLORIPA_CENTRO, FLORIPA_CENTRO)).toBe(0);
     });
 
-    it('Floripa → São José ≈ 9 km', () => {
-      expect(haversineKm(FLORIPA_CENTRO, SAO_JOSE_SC)).toBeCloseTo(9, 0);
+    it('Floripa → São José ≈ 8,2 km (conferido no mapa)', () => {
+      expect(haversineKm(FLORIPA_CENTRO, SAO_JOSE_SC)).toBeCloseTo(8.2, 1);
     });
 
     it('Floripa → São Paulo ≈ 490 km', () => {
@@ -121,7 +121,7 @@ describe('distância real (GPS)', () => {
 
     it('calcula quando os dois lados têm coordenada', () => {
       const km = establishmentDistanceKm(withCoords('a', SAO_JOSE_SC.latitude, SAO_JOSE_SC.longitude), FLORIPA_CENTRO);
-      expect(km).toBeCloseTo(9, 0);
+      expect(km).toBeCloseTo(8.2, 1);
     });
   });
 

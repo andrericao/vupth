@@ -38,7 +38,7 @@ export function EditAddress() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AddressRequest>(EMPTY_FORM);
-  // GPS no endereço (Andre 2026-07-29): preenche rua/bairro/cidade/UF/CEP pelo
+  // GPS no endereço (Andre 2026-08-01): preenche rua/bairro/cidade/UF/CEP pelo
   // aparelho e manda as COORDENADAS junto — é delas que sai a distância na Home.
   const { captureDeviceAddress } = useDeviceLocation();
   const [gpsLoading, setGpsLoading] = useState(false);

@@ -26,20 +26,28 @@ export function useQueueSocket(establishmentId: string | null) {
     let client: Client | null = null;
 
     (async () => {
-      const token = await SecureStore.getItemAsync(TOKEN_KEY);
       if (!active) return;
 
       const topic = `/topic/establishment/${establishmentId}/queue`;
 
       client = new Client({
         webSocketFactory: () => new WebSocket(WS_URL),
-        connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
         reconnectDelay: 5000,
-        // Workaround obrigatorio do @stomp/stompjs no React Native: o WebSocket
-        // nativo "engole" o byte NULL que termina cada frame STOMP. Sem isto o
-        // CONNECTED chega mas o parser nunca o reconhece e a conexao trava.
-        forceBinaryWSFrames: true,
-        appendMissingNULLonIncoming: true,
+        // ⚠️ 2026-08-01: `forceBinaryWSFrames` + `appendMissingNULLonIncoming`
+        // REMOVIDAS. O comentario antigo dizia que eram "workaround obrigatorio
+        // do RN" — nao sao: a pagina `src/docs/ws-test.html` conecta neste mesmo
+        // servidor SEM elas e recebe tudo. Com o Spring correto elas atrapalham
+        // o parse (socket vivo, mensagem que nunca aparece).
+        //
+        // Token lido a CADA tentativa (partner C16): o access token dura 1h e o
+        // `reconnectDelay` reconecta sozinho — capturado no mount, a reconexao
+        // levava o header velho e o canal autenticado morria calado.
+        beforeConnect: async () => {
+          const token = await SecureStore.getItemAsync(TOKEN_KEY);
+          if (client) {
+            client.connectHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+          }
+        },
         onConnect: () => {
           client?.subscribe(topic, (message: IMessage) => {
             try {

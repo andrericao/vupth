@@ -1,6 +1,6 @@
 import { findMyPosition, QueueBroadcast } from '@domain/queue/broadcast';
 
-// Payload real capturado no diagnóstico de 2026-07-29 (página ws-test.html),
+// Payload real capturado no diagnóstico de 2026-08-01 (página ws-test.html),
 // enxugado: dois profissionais, cada um com um cliente aguardando.
 function broadcast(over: Partial<QueueBroadcast> = {}): QueueBroadcast {
   return {

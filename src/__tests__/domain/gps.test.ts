@@ -78,7 +78,7 @@ describe('GPS — reverse geocode → localidade (Fase 3)', () => {
     });
   });
 
-  // Preenchimento do formulário de endereço pelo GPS (Andre 2026-07-29).
+  // Preenchimento do formulário de endereço pelo GPS (Andre 2026-08-01).
   describe('toAddressDraft', () => {
     it('mapeia rua, número, bairro, cidade, UF e CEP', () => {
       expect(

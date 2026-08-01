@@ -92,7 +92,7 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
 });
 
 // F8 fatia 2 — a tela principal fica só com a ação primária; corte e troca vão
-// pro menu "Mais opções" (decisão Andre 2026-07-29).
+// pro menu "Mais opções" (decisão Andre 2026-08-01).
 describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia 2)', () => {
   beforeEach(() => {
     jest.clearAllMocks();

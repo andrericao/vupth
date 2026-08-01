@@ -2,7 +2,7 @@ import { render, waitFor } from '@testing-library/react-native';
 
 import App from '../../../App';
 
-// Regressão real (2026-07-29): `useOutOfQueueSwap` (React Query) era chamado no
+// Regressão real (2026-08-01): `useOutOfQueueSwap` (React Query) era chamado no
 // corpo do App, ACIMA do QueryClientProvider — o `useQuery` estourava "No
 // QueryClient set" e o app fechava no boot / ficava com tela branca. O jest não
 // pegou porque os testes de hook montam o provider por conta. Este smoke monta o

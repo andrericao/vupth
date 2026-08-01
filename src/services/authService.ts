@@ -62,7 +62,7 @@ export const authService = {
   // ⏱️ Timeout PRÓPRIO de 20s (o global é 90s, dimensionado p/ o cold start do
   // Render): o backend envia o e-mail DENTRO do request, por SMTP síncrono, e
   // com o servidor já quente ele penou até o teto sem responder (device Andre
-  // 2026-07-29). Um SMTP que trava não pode prender a tela por 90s.
+  // 2026-08-01). Um SMTP que trava não pode prender a tela por 90s.
   forgotPassword(email: string) {
     return api.post('/auth/forgot-password', { email }, { timeout: 20000 });
   },

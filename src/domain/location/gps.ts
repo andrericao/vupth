@@ -1,6 +1,6 @@
 import { UserLocation } from '@domain/establishment/proximity';
 
-// GPS (Fase 3 do filtro por localidade, prioridade Andre 2026-07-29). O app pede
+// GPS (Fase 3 do filtro por localidade, prioridade Andre 2026-08-01). O app pede
 // a permissão de localização na primeira abertura, pega as coordenadas e faz
 // REVERSE GEOCODE no próprio device (expo-location, nativo e gratuito — nada de
 // API paga) para descobrir bairro/cidade/UF. Isso já alimenta o `sortByProximity`
@@ -103,7 +103,7 @@ export async function acquireDeviceLocation(
 
 /**
  * Converte o reverse geocode nos campos do formulário de endereço (Andre
- * 2026-07-29: ao incluir/editar endereço, oferecer o preenchimento por GPS).
+ * 2026-08-01: ao incluir/editar endereço, oferecer o preenchimento por GPS).
  * Só devolve o que veio — campo ausente fica de fora para NÃO apagar o que o
  * cliente já tinha digitado. O CEP vem sem máscara (a tela aplica a dela).
  */

@@ -30,7 +30,7 @@ export function ForgotPassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   // O Render Free hiberna: a 1a cutucada pode levar ~50s. Sem separar as fases,
   // o botao ficava "Enviando..." por ate 90s e parecia travado (feedback Andre
-  // 2026-07-29: "ficou carregando o enviar").
+  // 2026-08-01: "ficou carregando o enviar").
   const [isWakingServer, setIsWakingServer] = useState(false);
 
   const rules = getPasswordRules(password);

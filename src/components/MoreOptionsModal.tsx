@@ -21,7 +21,7 @@ type Props = {
   onClose: () => void;
 };
 
-// Menu de "mais opções" (decisão Andre 2026-07-29): a tela principal do
+// Menu de "mais opções" (decisão Andre 2026-08-01): a tela principal do
 // estabelecimento fica só com a ação primária (entrar na fila / agendar) e as
 // demais — solicitar corte, entrar por troca — vivem aqui, no mesmo espírito do
 // ChangeTurnModal do cliente já na fila.

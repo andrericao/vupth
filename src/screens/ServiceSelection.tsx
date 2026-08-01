@@ -351,7 +351,7 @@ export function ServiceSelection() {
                   </Text>
                 </HStack>
               </Box>
-              {/* Uma ação primária só (Andre 2026-07-29): loja aberta = entrar na
+              {/* Uma ação primária só (Andre 2026-08-01): loja aberta = entrar na
                   fila; fechada = agendar (badge AGENDAR). O resto — solicitar
                   corte, entrar por troca — vive no menu "Mais opções". */}
               {storeOpen ? (

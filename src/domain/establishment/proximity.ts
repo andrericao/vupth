@@ -68,7 +68,7 @@ export function sortByProximity(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DISTÂNCIA REAL (GPS) — Andre 2026-07-29
+// DISTÂNCIA REAL (GPS) — Andre 2026-08-01
 //
 // O backend entregou a fatia A do GPS (geocoding, 2026-07-27): o endereço do
 // estabelecimento já pode trazer `latitude`/`longitude` na listagem. Com as

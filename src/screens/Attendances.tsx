@@ -226,7 +226,7 @@ export function Attendances() {
               {pendingSwaps.map((s) => (
                 <Box key={s.offerId} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                   <HStack alignItems="center" gap="$3">
-                    <ArrowsLeftRight size={22} color="#2F432F" />
+                    <ArrowsLeftRight size={22} color="#3B7A3F" />
                     <VStack flex={1}>
                       <Text fontFamily="$heading" size="sm">
                         {s.professionalName}
@@ -268,7 +268,7 @@ export function Attendances() {
                   {group.items.map((i) => (
                     <Box key={i.id} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                       <HStack alignItems="center" gap="$3">
-                        <CalendarBlank size={22} color="#2F432F" />
+                        <CalendarBlank size={22} color="#3B7A3F" />
                         <VStack flex={1}>
                           <Text fontFamily="$heading" size="sm">
                             {i.professionalName}

@@ -21,7 +21,7 @@ const TOKEN_KEY = "vupth_access_token";
  *    mudanca. Dai sai a MINHA posicao/espera em tempo real (`findMyPosition`),
  *    que antes so vinha do polling de ate 2min.
  *
- * ⚠️ Diagnostico 2026-07-29 (`src/docs/ws-test.html`): o servidor STOMP sempre
+ * ⚠️ Diagnostico 2026-08-01 (`src/docs/ws-test.html`): o servidor STOMP sempre
  * funcionou — handshake livre, JWT do frame CONNECT aceito, Principal setado e
  * broadcast publicando. O que quebrava o app eram as opcoes
  * `forceBinaryWSFrames` + `appendMissingNULLonIncoming`, que existem para
@@ -43,13 +43,24 @@ export function useQueueNotifications(enabled: boolean) {
     let client: Client | null = null;
 
     (async () => {
-      const token = await SecureStore.getItemAsync(TOKEN_KEY);
-      if (!active || !token) return;
+      if (!active) return;
 
       client = new Client({
         webSocketFactory: () => new WebSocket(WS_URL),
-        connectHeaders: { Authorization: `Bearer ${token}` },
         reconnectDelay: 5000,
+        // Token lido a CADA tentativa de conexao (partner C16). Antes ele era
+        // capturado UMA vez no mount e virava `connectHeaders` fixo: como o
+        // access token dura 1h e o `reconnectDelay` reconecta sozinho, toda
+        // reconexao seguinte ia com o header VENCIDO. E o backend, ao receber
+        // token invalido, conecta como ANONIMO em vez de recusar (partner S14)
+        // — resultado: socket "vivo" e `/user/queue/notifications` mudo para
+        // sempre, sem erro nenhum. Candidato a causa-raiz do C14/C9.
+        beforeConnect: async () => {
+          const token = await SecureStore.getItemAsync(TOKEN_KEY);
+          if (client) {
+            client.connectHeaders = token ? { Authorization: `Bearer ${token}` } : {};
+          }
+        },
         onConnect: () => {
           if (__DEV__) console.log("[ws] conectado");
 

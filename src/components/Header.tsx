@@ -4,7 +4,7 @@ import { TouchableOpacity, Image } from "react-native";
 import { Link, Icon, ChevronLeftIcon, Center, Box } from "@gluestack-ui/themed";
 
 // Logotipo dentro do app = o mesmo "V" do icone do celular (decisao Andre
-// 2026-07-29), no lugar do desenho antigo do banco de espera: a marca passa a
+// 2026-08-01), no lugar do desenho antigo do banco de espera: a marca passa a
 // ser a mesma da tela inicial ate dentro do app.
 const LOGO = require("@assets/vupth-logo/vupth-v.png");
 

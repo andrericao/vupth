@@ -2,7 +2,7 @@
 
 Pendências do app **cliente** que dependem do backend. O front já está pronto (ou pronto para consumir) em cada caso. Detalhe completo nos callouts do `PRD_FRONT-CLIENT.md`.
 
-Última atualização: **2026-07-29** · branch `dev` do front-client.
+Última atualização: **2026-08-01** · branch `dev` do front-client.
 
 ---
 
@@ -12,14 +12,17 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 
 | # | Pendência | De quem depende |
 |---|-----------|-----------------|
-| 1 | **GPS — lojas próximas** (permissão na abertura ✅ feita no front 2026-07-29). Falta o **B7**: geocodar o endereço das lojas + `GET /establishment?lat&lng&radiusKm` (Haversine) → distância real | 🔴 backend (front pronto) |
+| 1 | **GPS — lojas próximas** (permissão na abertura ✅ feita no front 2026-08-01). Falta o **B7**: geocodar o endereço das lojas + `GET /establishment?lat&lng&radiusKm` (Haversine) → distância real | 🔴 backend (front pronto) |
 | 2 | **`eas build` 1.0.1** — leva ao device o GPS, o push (F9) e a F8 de uma vez | 🔵 Andre |
 | 3 | **Testes no device** — F8 (troca dentro e fora da fila), GPS/permissão, push, badge AGENDAR, trocar senha, esqueci-senha, meus agendamentos, corte, seletor de dia | 🔵 Andre (pós-build) |
 | 4 | **Esqueci minha senha — refazer** (B3: foi feito e testado, mas o e-mail do reenvio não chegou) | 🔴 backend + reteste |
 | 5 | **F5 — Agendar como lista de horários** — núcleo pronto e testado; UI travada no **B2** (blocos anônimos) | 🔴 backend |
-| 6 | **Endereço da loja visível ao cliente** (Andre 2026-07-29) — hoje o `EstablishmentDetail` NÃO mostra endereço nenhum; o cliente precisa saber para onde ir (rua/número/bairro + atalho p/ abrir no mapa) | 🟢 front |
-| 7 | **WebSocket** — ✅ servidor OK e flags do cliente corrigidas (2026-07-29, ver §4); **falta validar no device** | 🔵 Andre (pós-OTA) |
-| 8 | **Miudezas do front** — coverage dos cantos, Gluestack v1→v2 (tech-debt) | 🟢 front |
+| 6 | **Endereço da loja visível ao cliente** (Andre 2026-08-01) — hoje o `EstablishmentDetail` NÃO mostra endereço nenhum; o cliente precisa saber para onde ir (rua/número/bairro + atalho p/ abrir no mapa) | 🟢 front |
+| 7 | **WebSocket** — ✅ servidor OK, flags removidas nos DOIS hooks e token renovado a cada conexão (2026-08-01, ver §4 e §15); **falta validar no device** | 🔵 Andre (pós-OTA) |
+| 8 | **Unificar as duas conexões STOMP** (partner C17) — `useQueueSocket` + `useQueueNotifications` abrem um `Client` cada: dois handshakes e duas sessões por usuário, num broker em memória de instância única. Partner faz UMA conexão com duas subscriptions | 🟢 front |
+| 9 | **Reconectar ao voltar do background** (partner C18) — sem listener de `AppState`; o Android suspende o processo, o socket morre sem evento e no canal pessoal nada mascara isso | 🟢 front |
+| 10 | **Migração NativeWind** (partner C15) — o partner saiu do Gluestack; decidir QUANDO acompanhar. Não é bump de versão, é troca de arquitetura (~49 arquivos / ~974 props no partner). Cartilha completa no handoff deles | 🟢 front (decisão do Andre) |
+| 11 | **Miudezas do front** — coverage dos cantos, caçar o "Jest did not exit" residual | 🟢 front |
 
 ---
 
@@ -31,15 +34,15 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 > ✅ **Reconciliação 2026-07-23 confirmada no PRD_BACKEND:** os três pedidos abaixo foram **incorporados na fonte única** do backend (a nota stale do `/swap-offers` foi corrigida). Seguem **abertos** (a construir), mas **não são mais desalinhamento** — só aguardam implementação.
 | # | Pedido | Seção | Situação |
 |---|--------|:-----:|----------|
-| B1 | ~~**`/swap-offers` (troca aberta, C13)**~~ — ✅ **BACKEND COMPLETO: fatia 1 (2026-07-24, solicitante NA fila) + fatia 2 (2026-07-27, solicitante FORA da fila).** Fatia 2: `POST /swap-offers {professionalId, serviceItemIds, direction: EARLIER}` (só EARLIER — fora da fila a posição já é o fim) cria a oferta com `requesterAttendanceId=null`, visível a TODOS na fila; no `accept` **quem aceita cede a vaga e vai pro fim** e o atendimento do solicitante **nasce na vaga cedida** (`resultingAttendanceId`). Erros: `422` (LATER / já estar na fila daquele profissional), `404 SERVICE_ITEM_NOT_FOUND`, `422 SERVICE_ITEM_NOT_OF_PROFESSIONAL`. **Front consumiu tudo em 2026-07-29 (F8 completa)** — item ENCERRADO | 7 | ✅ entregue e consumido |
+| B1 | ~~**`/swap-offers` (troca aberta, C13)**~~ — ✅ **BACKEND COMPLETO: fatia 1 (2026-07-24, solicitante NA fila) + fatia 2 (2026-07-27, solicitante FORA da fila).** Fatia 2: `POST /swap-offers {professionalId, serviceItemIds, direction: EARLIER}` (só EARLIER — fora da fila a posição já é o fim) cria a oferta com `requesterAttendanceId=null`, visível a TODOS na fila; no `accept` **quem aceita cede a vaga e vai pro fim** e o atendimento do solicitante **nasce na vaga cedida** (`resultingAttendanceId`). Erros: `422` (LATER / já estar na fila daquele profissional), `404 SERVICE_ITEM_NOT_FOUND`, `422 SERVICE_ITEM_NOT_OF_PROFESSIONAL`. **Front consumiu tudo em 2026-08-01 (F8 completa)** — item ENCERRADO | 7 | ✅ entregue e consumido |
 | B2 | **`GET /attendances/intentions/professional/{id}` público com blocos ANÔNIMOS** — ✅ **REGISTRADO como backend item #6**. **Shape que o front consome (F5):** `{ frame: { projectedQueueEnd, openingTime, closingTime }, blocks: [{ start: ISO-8601, durationMinutes }] }` — **blocos SEM dados pessoais** (só início+duração dos agendamentos de terceiros daquele profissional/dia). Com isso o front calcula os **horários disponíveis** (`computeAvailableSlots`, já pronto+testado no client) e mostra só os que cabem | 12 | ⬜ aberto (registrado) |
 
 > **🎨 UX do F5 fechada (Andre 2026-07-23) — LISTA DE HORÁRIOS, não arrastar.** Em vez da barra de arrastar a "sombra", o app **mostra só os horários em que o serviço cabe** e o cliente toca num. Regra (exemplo do Andre): fila até 14:00 + corte de outro cliente às 17:00 + serviço de 1h → oferece 14:00…16:00 (16:00+1h=17:00, encosta sem invadir) e depois do corte até o fechamento. O **cálculo é do front** (`src/domain/schedule/slots.ts`, `computeAvailableSlots` — piso/fechamento/blocos/duração → horários, alinhado à grade local; já testado com o exemplo). **Só falta o B2 entregar os `blocks`** (o `client/me` só traz os do próprio cliente). No dia de HOJE o piso = `max(agora, projectedQueueEnd)`; dia futuro = `openingTime`.
-| B3 | **Esqueci minha senha — REFAZER (Andre 2026-07-29):** foi feito e testado, mas **apresentou falhas na prática** (o e-mail do reenvio não chegou). Rever o envio real pelo Brevo ponta a ponta — envio inicial E reenvio (limite/duplicidade/spam/chave SMTP expirada) — e retestar no device. Front já fez a parte dele (cold-start gate + feedback no botão) | 2 | 🔁 **refazer e retestar** |
+| B3 | **Esqueci minha senha — REFAZER (Andre 2026-08-01):** foi feito e testado, mas **apresentou falhas na prática** (o e-mail do reenvio não chegou). Rever o envio real pelo Brevo ponta a ponta — envio inicial E reenvio (limite/duplicidade/spam/chave SMTP expirada) — e retestar no device. Front já fez a parte dele (cold-start gate + feedback no botão) | 2 | 🔁 **refazer e retestar** |
 | B4 | Já na fonte única do backend (só lembrar a prioridade do client): validação do alvo do `reschedule` (janela+refeição) · estender strike a `reschedule`/`move-to-end` ETA<1h · adicionar serviço a attendance na fila (C8) | 8/6/9 | ⬜ abertos lá |
 | B5 | **Melhorias de rating (backend item "Melhorias de rating", ⬜ aberto)** — 4 coisas, nenhuma bloqueia: (a) **`rated: boolean`** no `GET /attendances/client/me` (fonte da verdade p/ esconder "Avaliar"; hoje o front usa `ratedStore` local que não sincroniza entre aparelhos) · (b) **rollup por ESTABELECIMENTO** no `GET /establishment` (Σ`ratingSum`÷Σ`ratingCount` → estrela real no card da Home; hoje placeholder) · (c) **`rating_best`** (maior nota entre os profissionais) + rating como desempate na ordenação · (d) **`establishmentName`** no `client/me` (hoje só `establishmentId`) | 3 / PRD H3 | ⬜ backend #13 |
 | B6 | **Filtro por localidade — Fase 2** (escala): aceitar `GET /establishment?uf=&city=&neighborhood=` (+ o `includeAll` já existente) e devolver só os da região. O front já tem a localidade do cliente (`locationStore`) pra mandar nos params; a Fase 1 (ordenar no device) já roda. É o item **C1** | 14 / PRD 11 | ⬜ backend |
-| B7 | **Filtro por localidade — Fase 3 (GPS) — 🔺 PRIORIDADE 1 do client (Andre 2026-07-29)**: **geocodar** o endereço de cada estabelecimento no cadastro (CEP/endereço → `latitude`/`longitude`, campos que o `Address` já tem) + `GET /establishment?lat=&lng=&radiusKm=` ordenado por distância (Haversine). ✅ **O LADO DO CLIENT JÁ ESTÁ FEITO (2026-07-29):** `expo-location` instalado + permissão pedida **na primeira abertura** + **reverse geocode no device** (nativo, sem API paga) preenchendo bairro/cidade/UF, e as **coordenadas já ficam guardadas** (`locationStore.coords`) esperando o endpoint. Enquanto o backend não vem, isso já melhora a Fase 1 (a Home abre ordenada pelo bairro do cliente **sem ele digitar CEP**); com o B7 vira **distância real** ("2,3 km"). ⚠️ Ativa só no binário 1.0.1 (módulo nativo) | 14 / PRD 11 | 🟡 **front pronto / backend é o gargalo** |
+| B7 | **Filtro por localidade — Fase 3 (GPS) — 🔺 PRIORIDADE 1 do client (Andre 2026-08-01)**: **geocodar** o endereço de cada estabelecimento no cadastro (CEP/endereço → `latitude`/`longitude`, campos que o `Address` já tem) + `GET /establishment?lat=&lng=&radiusKm=` ordenado por distância (Haversine). ✅ **O LADO DO CLIENT JÁ ESTÁ FEITO (2026-08-01):** `expo-location` instalado + permissão pedida **na primeira abertura** + **reverse geocode no device** (nativo, sem API paga) preenchendo bairro/cidade/UF, e as **coordenadas já ficam guardadas** (`locationStore.coords`) esperando o endpoint. Enquanto o backend não vem, isso já melhora a Fase 1 (a Home abre ordenada pelo bairro do cliente **sem ele digitar CEP**); com o B7 vira **distância real** ("2,3 km"). ⚠️ Ativa só no binário 1.0.1 (módulo nativo) | 14 / PRD 11 | 🟡 **front pronto / backend é o gargalo** |
 
 **🔗 Regras cross-cutting novas (partner/backend, o client precisa saber):**
 - **ETA com buffer de −10min (S10 partner, regra GLOBAL):** o **backend** calcula o tempo de espera **já com −10min** (piso 0) para o cliente chegar antes; **client e partner só EXIBEM o número** que vier — **NÃO subtrair no front** (evita divergência). O client já mostra `estimated_wait_minutes` como veio (nenhuma lógica de buffer a adicionar). Só ficar atento se o backend expuser `display_wait` vs `raw_eta` em campos separados.
@@ -55,16 +58,16 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 | F5 | **Agendar = LISTA DE HORÁRIOS** (modelo Andre 2026-07-23, substitui a barra de arrastar): mostra só os horários em que o serviço cabe → cria INTENÇÃO. **Núcleo pronto+testado** (`computeAvailableSlots`, `src/domain/schedule/slots.ts`) + `intentionsService.create` pronto. **UI e ligar aguardam o B2** entregar os `blocks` de terceiros (só o `client/me` tem os próprios). Shape do B2 registrado abaixo | 12 / B2 | 🟡 **núcleo FEITO / UI aguarda B2** |
 | F6 | **Solicitar corte** — (a) `409 ESTABLISHMENT_NOT_OPEN` no QueueStatus oferece o corte; (b) **2026-07-23:** loja fechada libera o fluxo até os serviços com botão **"Solicitar corte" DIRETO** na ServiceSelection | PRD H10 | ✅ **FEITO** |
 | F7 | **Validar no device** — parcial: esqueci-senha ✅; restam: fechadas na Home (badge AGENDAR), fluxo corte, meus agendamentos, trocar senha, visitante | §11 | 🔜 Andre |
-| F8 | **UI da troca** — ✅ **COMPLETA.** *Na fila (2026-07-24):* `swapOfferService`; `ChangeTurnModal` Adiantar=`EARLIER`/Atrasar "Trocar com alguém atrás"=`LATER`; botão **"Trocar de lugar (N)"** com contador (`useSwapOffers`, poll 20s) → `SwapOffersModal` (aceitar/cancelar); WS **`SWAP_OFFER_ACCEPTED`**. *Fora da fila (2026-07-29, fatia 2):* a tela da loja passou a ter **UMA ação primária** (aberta = entrar na fila; fechada = agendar) + menu **"Mais opções"** (`MoreOptionsModal`) com **"Entrar por troca"** (publica `EARLIER` com os serviços escolhidos) e o "Solicitar corte"; portão de auth próprio (`redirectTo: "serviceSelection"` devolve o visitante à seleção). Como **fora da fila não há WS**, o aceite chega por **poll** (`useOutOfQueueSwap`, 30s, app-wide): a oferta some do `/swap-offers/me` + o atendimento aparece no `client/me` ⇒ entra na fila local (contexto guardado no `pendingSwapStore`) e avisa. Aba Atendimentos ganhou **PEDIDOS DE TROCA** (acompanhar/cancelar). Nunca multa | §7 | ✅ **FEITA (na fila + fora da fila)** |
+| F8 | **UI da troca** — ✅ **COMPLETA.** *Na fila (2026-07-24):* `swapOfferService`; `ChangeTurnModal` Adiantar=`EARLIER`/Atrasar "Trocar com alguém atrás"=`LATER`; botão **"Trocar de lugar (N)"** com contador (`useSwapOffers`, poll 20s) → `SwapOffersModal` (aceitar/cancelar); WS **`SWAP_OFFER_ACCEPTED`**. *Fora da fila (2026-08-01, fatia 2):* a tela da loja passou a ter **UMA ação primária** (aberta = entrar na fila; fechada = agendar) + menu **"Mais opções"** (`MoreOptionsModal`) com **"Entrar por troca"** (publica `EARLIER` com os serviços escolhidos) e o "Solicitar corte"; portão de auth próprio (`redirectTo: "serviceSelection"` devolve o visitante à seleção). Como **fora da fila não há WS**, o aceite chega por **poll** (`useOutOfQueueSwap`, 30s, app-wide): a oferta some do `/swap-offers/me` + o atendimento aparece no `client/me` ⇒ entra na fila local (contexto guardado no `pendingSwapStore`) e avisa. Aba Atendimentos ganhou **PEDIDOS DE TROCA** (acompanhar/cancelar). Nunca multa | §7 | ✅ **FEITA (na fila + fora da fila)** |
 | F9 | **Push token no client** — ✅ **CÓDIGO COMPLETO 2026-07-23:** núcleo OTA-safe (`domain/push` + `pushService` + logout desregistra) **+ parte nativa** (`expo-notifications`/`expo-device`/`expo-constants` instalados, plugin no `app.json`, hook `usePushRegistration` guardado com try/catch, `navigationRef` p/ o toque, ligado no `App.tsx`). Backend `/devices` PRONTO. **⚠️ Só ATIVA num novo `eas build`** (módulo nativo não sai por OTA); até lá fica inerte/guardado. **Nada mais a fazer no código** — é só buildar | PRD_BACKEND push | ✅ código pronto / ativa no próximo build |
-| F10 | **Filtro por localidade** — ✅ **FASE 1 (2026-07-23):** `LocationSelector` (meu endereço / CEP ViaCEP) + `sortByProximity` (bairro→cidade→resto) + `locationStore`. ✅ **GPS / lado do client da FASE 3 (2026-07-29, prioridade do Andre):** `expo-location` + permissão **na primeira abertura** (`useDeviceLocation`, `require` guardado — inerte em binário sem o módulo) + **reverse geocode no device** → bairro/cidade/UF sem digitar CEP; coordenadas guardadas em `locationStore.coords` p/ o B7; botão "Usar minha localização atual" no seletor. Domínio puro/injetável em `domain/location/gps.ts` (testado). ⚠️ **só ativa no binário 1.0.1.** **Falta o backend:** Fase 2 (`?uf&city&neighborhood`) e o B7 (geocoding das lojas + `?lat&lng&radiusKm` → distância real) | §14 / PRD 11 | ✅ front feito / distância real ← B7 |
+| F10 | **Filtro por localidade** — ✅ **FASE 1 (2026-07-23):** `LocationSelector` (meu endereço / CEP ViaCEP) + `sortByProximity` (bairro→cidade→resto) + `locationStore`. ✅ **GPS / lado do client da FASE 3 (2026-08-01, prioridade do Andre):** `expo-location` + permissão **na primeira abertura** (`useDeviceLocation`, `require` guardado — inerte em binário sem o módulo) + **reverse geocode no device** → bairro/cidade/UF sem digitar CEP; coordenadas guardadas em `locationStore.coords` p/ o B7; botão "Usar minha localização atual" no seletor. Domínio puro/injetável em `domain/location/gps.ts` (testado). ⚠️ **só ativa no binário 1.0.1.** **Falta o backend:** Fase 2 (`?uf&city&neighborhood`) e o B7 (geocoding das lojas + `?lat&lng&radiusKm` → distância real) | §14 / PRD 11 | ✅ front feito / distância real ← B7 |
 
 **🎨 Decisões de UX registradas em 2026-07-23 (sessão de feedback no device):**
 1. **Loja fechada (fila fechada agora, `is_open` efetivo) deixou de ser beco sem saída:** badge **ÂMBAR "AGENDAR"** na Home e na tela da loja (era "Fechado" cinza, conclusivo demais). O fluxo **não bloqueia mais**: cliente toca no profissional, vê serviços/preços e as ações finais viram **"Solicitar corte"** + **"Agendar para depois"** (o backend segue guardião — gate C1). Banner "i" âmbar explica os dois caminhos. *Consequência: o F6 ficou alcançável — antes o bloqueio na tela da loja impedia de chegar ao 409.*
 2. **`is_open` efetivo adotado no front** (loja `OPEN` fora do horário = fechada p/ exibição/entrada) — corrige o caso "fecha 20:00 e aparecia aberta de noite".
 3. **Visitante não vê opções de conta** (boa prática): Config. esconde nome/e-mail/senha/endereço/deletar e mostra "Entrar ou criar conta"; Perfil mostra "Visitante" com o mesmo convite.
 4. Nota p/ quando a **barra de encaixe (F5)** chegar: o banner "i" da loja fechada vira o botão **"Agendar"** de verdade, e o coming-soon `manifestar_interesse` é aposentado (superado pelo caminho Agendar/Solicitar).
-5. **Menu "Mais opções" na tela da loja (Andre 2026-07-29):** a tela de serviços passou a ter **UMA ação primária** — loja aberta = "Confirmar e entrar na fila"; fechada = "Agendar para depois" — e todas as outras (**Solicitar corte**, **Entrar por troca**, e o agendar quando a loja está aberta) vivem num **menu próprio** (`MoreOptionsModal`), no mesmo espírito do `ChangeTurnModal` de quem já está na fila. Efeito colateral bom: o portão de auth dessas ações deixou de jogar o visitante na fila — ele loga e **volta para a seleção de serviços** (`redirectTo: "serviceSelection"`).
+5. **Menu "Mais opções" na tela da loja (Andre 2026-08-01):** a tela de serviços passou a ter **UMA ação primária** — loja aberta = "Confirmar e entrar na fila"; fechada = "Agendar para depois" — e todas as outras (**Solicitar corte**, **Entrar por troca**, e o agendar quando a loja está aberta) vivem num **menu próprio** (`MoreOptionsModal`), no mesmo espírito do `ChangeTurnModal` de quem já está na fila. Efeito colateral bom: o portão de auth dessas ações deixou de jogar o visitante na fila — ele loga e **volta para a seleção de serviços** (`redirectTo: "serviceSelection"`).
 
 ### 🔵 FRONT-PARTNER — nada bloqueante do nosso lado
 - **Troca (C13): partner é PASSIVO** — só reflete a fila pós-troca (já via `professionals-with-queue`/WS); nenhuma ação nova, não marca LATE (§7).
@@ -110,9 +113,9 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 
 ---
 
-## 4. WebSocket em tempo real — ✅ SERVIDOR OK; o defeito era no CLIENTE (diagnosticado 2026-07-29)
+## 4. WebSocket em tempo real — ✅ SERVIDOR OK; o defeito era no CLIENTE (diagnosticado 2026-08-01)
 
-> ⚠️ **Esta seção foi REESCRITA.** Até 2026-07-29 ela dizia "não funciona, causas prováveis no backend" e listava três suspeitas. **As três foram testadas e REFUTADAS.** Quem estava errado era o app.
+> ⚠️ **Esta seção foi REESCRITA.** Até 2026-08-01 ela dizia "não funciona, causas prováveis no backend" e listava três suspeitas. **As três foram testadas e REFUTADAS.** Quem estava errado era o app.
 
 **Como foi diagnosticado.** Página de teste `src/docs/ws-test.html` (abre no navegador, conecta no MESMO servidor STOMP, mostra etapa por etapa). Rodadas feitas contra `dev` (Render):
 
@@ -132,7 +135,7 @@ forceBinaryWSFrames: true,        // manda os frames em binário
 appendMissingNULLonIncoming: true // mexe no terminador do frame recebido
 ```
 
-**Removidas no client em 2026-07-29.** Além disso, o app assinava **só** o canal pessoal, então nunca via o broadcast da fila — passou a assinar `/topic/establishment/{id}/queue` também (`findMyPosition` em `domain/queue/broadcast.ts` deriva a MINHA posição/espera do payload; antes isso só vinha do poll de até 2min).
+**Removidas no client em 2026-08-01.** Além disso, o app assinava **só** o canal pessoal, então nunca via o broadcast da fila — passou a assinar `/topic/establishment/{id}/queue` também (`findMyPosition` em `domain/queue/broadcast.ts` deriva a MINHA posição/espera do payload; antes isso só vinha do poll de até 2min).
 
 **📣 Front-Partner:** o código de vocês é quase idêntico ao nosso (mesmo `@stomp/stompjs`, mesmo servidor). **Confiram se o cliente de vocês tem essas mesmas duas flags** — se tiver, é provavelmente a mesma causa do "WS não funciona" de lá. A página `src/docs/ws-test.html` serve igual para vocês: troquem o `establishmentId` e usem um token de profissional; o canal pessoal de vocês é o mesmo `/user/queue/notifications`.
 
@@ -162,7 +165,7 @@ appendMissingNULLonIncoming: true // mexe no terminador do frame recebido
 
 > ✅ **RESOLVIDO O GAP (2026-07-23):** o backend **registrou a troca aberta na FONTE ÚNICA** (item #5 "Troca de posição como OFERTA ABERTA / `/swap-offers` — Client C13 / Partner S11") e **corrigiu a nota stale** de 2026-07-07. O item está **⬜ aberto** (a construir), com o contrato desta seção. *(Histórico: até 2026-07-22 a troca não constava no backlog — o `#42` direcionado não atende e a nota stale dizia "substituído pela INTENTION", superada em 2026-07-15. Certificado por varredura do arquivo inteiro; partner também cobrou.)* A UI da troca (F8) segue bloqueada até o endpoint existir.
 
-> ✅ **SEÇÃO ENCERRADA (2026-07-29): backend COMPLETO (fatias 1+2) e front CONSUMINDO tudo (F8).** A fatia 2 (solicitante FORA da fila) chegou em 2026-07-27: `POST /swap-offers {professionalId, serviceItemIds, direction: "EARLIER"}` (só EARLIER; `422` para LATER ou para quem já está na fila daquele profissional; `404 SERVICE_ITEM_NOT_FOUND`; `422 SERVICE_ITEM_NOT_OF_PROFESSIONAL`), oferta visível a todos na fila, e no `accept` quem aceita vai pro fim enquanto o atendimento do solicitante nasce na vaga cedida (`resultingAttendanceId`). **Nota de implementação do front:** quem está fora da fila **não tem WS conectado**, então o aceite é detectado por **poll** (`useOutOfQueueSwap`) — a oferta some do `/swap-offers/me` e o atendimento aparece no `client/me`. Nada mais a pedir ao backend aqui.
+> ✅ **SEÇÃO ENCERRADA (2026-08-01): backend COMPLETO (fatias 1+2) e front CONSUMINDO tudo (F8).** A fatia 2 (solicitante FORA da fila) chegou em 2026-07-27: `POST /swap-offers {professionalId, serviceItemIds, direction: "EARLIER"}` (só EARLIER; `422` para LATER ou para quem já está na fila daquele profissional; `404 SERVICE_ITEM_NOT_FOUND`; `422 SERVICE_ITEM_NOT_OF_PROFESSIONAL`), oferta visível a todos na fila, e no `accept` quem aceita vai pro fim enquanto o atendimento do solicitante nasce na vaga cedida (`resultingAttendanceId`). **Nota de implementação do front:** quem está fora da fila **não tem WS conectado**, então o aceite é detectado por **poll** (`useOutOfQueueSwap`) — a oferta some do `/swap-offers/me` e o atendimento aparece no `client/me`. Nada mais a pedir ao backend aqui.
 >
 > ✅ **BACKEND ENTREGOU A FATIA 1 (2026-07-24) — certificado no PRD_BACKEND (item #2).** Troca com o solicitante **NA fila** está PRONTA: `POST /swap-offers {attendanceId, direction: EARLIER|LATER}` · `GET /swap-offers?professionalId=` (aceitáveis pelo caller → dot) · `GET /swap-offers/me` · `PATCH /swap-offers/{id}/accept` (troca 1-por-1 + WS **`SWAP_OFFER_ACCEPTED`** aos DOIS lados, cada um com o próprio `attendanceId` + push) · `DELETE /swap-offers/{id}`. Erros: `403` não-dono, `422` (não SCHEDULED / própria oferta / não elegível / fora da fila / já consumida), `404`. Expira quando o solicitante é atendido/cancela (não por fechamento). **RESTA a FATIA 2** (solicitante FORA da fila: `POST {professionalId, serviceItemIds, direction: EARLIER}`, hoje `422 QUEUE_SWAP_OFFER_NOT_ALLOWED`; no aceite ele entra na vaga e quem aceitou vai pro fim). ⇒ **A F8 pode ser construída agora para o caso "na fila".**
 >
@@ -275,3 +278,50 @@ appendMissingNULLonIncoming: true // mexe no terminador do frame recebido
   3. **Ordenar por distância — backend, GRÁTIS:** `GET /establishment?lat=&lng=&radiusKm=` calcula **Haversine** (matemática pura, sem API) e devolve ordenado por distância / dentro do raio. Idealmente inclui a `distanceKm` no `EstablishmentResponse` p/ o card mostrar "a X km".
   4. **Exibir — client, GRÁTIS:** basta uma **LISTA** ordenada por distância (a Home já é lista). **NÃO precisa de mapa.** Um mapa visual (Google Maps/Mapbox) **teria** custo (tiles/SDK) e é **opcional / fora do MVP**.
   - **Resumo de custo:** GPS = grátis · Haversine = grátis · lista = grátis · geocoding = grátis (Nominatim/CEP-coord BR, 1×/loja). Custo só apareceria com **Google Geocoding** ou **mapa visual**, e **nenhum é necessário**. Já no backlog do backend como "Busca por GPS / proximidade (Haversine)".
+
+---
+
+## 15. Alinhamento de UI/design com o front-partner (leitura de 2026-08-01)
+
+> Lidos: `vupth-partner/src/docs/HANDOFF_CLIENT.md` (handoff **partner → client**, atualizado 2026-08-01) e `PRD_FRONT-PARTNER.md` §13/§13.1 (Guia de Design). **O handoff deles é endereçado a NÓS** — é lá que moram os itens C1–C18.
+
+### 15.1 Paleta — ✅ ALINHADA (conferido hex a hex)
+
+O C7 do partner alerta que a versão antiga daquele item listava a paleta **teal** (`#00B37E`), abandonada em 2026-07-09, e que "se o client copiou aqueles hexes, está com o verde errado". **Conferido: não está.** O `config/gluestack-ui.config.ts` do client já usa a **Verde Marca** — e ela nasceu aqui (o client é a fonte da verdade da MARCA; o partner re-ancorou nela):
+
+`50 #eef5ee · 100 #d9ead9 · 200 #b5d5b6 · 300 #8bbd8d · 400 #5c9c60 · **500 #3b7a3f** · 600 #316635 · 700 #26522a · 800 #1c3d1f · 900 #142c17` · sombra `#1A281A` · amber `#FFB703` · red `#E63946` · Poppins (títulos/botões) + Inter (texto).
+
+**Desvio encontrado e corrigido (2026-08-01):** 4 ícones usavam `#2F432F` hardcoded (o verde **escuro do ícone nativo**, não o da UI) — `LocationSelector`, `ScheduleModal` e 2× `Attendances`. Trocados para `#3B7A3F`. Regra do partner que vale para nós: **nunca "um verde parecido"** — ou o token, ou o hex real da fonte da verdade.
+
+### 15.2 NativeWind (C15) — decisão pendente, sem pressa
+
+O partner **saiu do Gluestack** e estiliza com NativeWind/Tailwind (`className`). Isso **supera o C2** (que mandava atualizar o Gluestack v1) — ou seja, **não vale gastar esforço subindo o v1**. Pontos que herdamos da experiência deles:
+
+- A "v2" do Gluestack **é** NativeWind: migrar é **troca de arquitetura**, não bump. No partner: ~49 arquivos, ~974 props `$token`.
+- **Nada de big-bang:** as duas libs convivem, converte-se tela por tela; o `GluestackUIProvider` só sai quando o último arquivo sair.
+- `nativewind` + `tailwindcss` são **build-time (JS)** → entram por **OTA**, não exigem build novo.
+- `jest`: incluir `nativewind|react-native-css-interop` no `transformIgnorePatterns`.
+- **Armadilha de comportamento (não de estilo):** o `Input` do Gluestack embutia `autoCapitalize="words"`; a primitiva nova precisa manter esse default, senão nome/endereço param de capitalizar e ninguém nota na revisão.
+- Preservar `testID`/`accessibilityLabel` na conversão — são a âncora dos testes RNTL/Maestro e a única rede de proteção, já que estilo não se valida por tipo.
+- `tsc`/`eslint` provam que **compila**, não que **renderiza**: validar no device a cada 2-3 lotes (o partner acumulou 7 antes do primeiro QA).
+
+### 15.3 Guia de Design (PRD partner §13.1) — o que adotamos
+
+Tokens de tipografia e acessibilidade valem para os dois apps: **Poppins** (H1/H2 24–32px, H3/H4 18–22px, botões 16px) + **Inter** (texto 14–16px); toque mínimo **48×48px**; contraste mínimo **4.5:1**. Mockups de referência no repo partner: `design/redesign-form-tabbar-skeleton.html`, `design/agendamento-barra.html` (F5), `design/card-fila-enxuto.html`.
+
+⚠️ **Divergência que o próprio guia carrega:** ele usa linguagem de **"Agendar agora"**, mas o produto é **fila walk-in**. No client isso já está resolvido — "Entrar na fila" é a ação primária e "Agendar" é a INTENÇÃO (F5), coisas distintas. Não importar a semântica do PDF.
+
+### 15.4 Itens que o partner descobriu e são NOSSOS (infra de WS)
+
+| Item | O quê | Status aqui |
+|---|---|---|
+| **C16** | 🔴 **Token do socket nunca renovado** — lido uma vez no mount e fixado em `connectHeaders`; com `reconnectDelay` reconectando sozinho e access token de 1h, toda reconexão vai com header vencido. O backend, ao receber token inválido, **conecta como anônimo em vez de recusar** (partner S14) ⇒ socket "vivo" e canal pessoal **mudo para sempre**, sem erro. Candidato a causa-raiz do C14 e do C9 | ✅ **CORRIGIDO 2026-08-01** — token lido no `beforeConnect` (roda a cada tentativa) nos **dois** hooks |
+| **C17** | 🟠 Client abre **duas** conexões STOMP; partner abre uma com duas subscriptions | ⬜ prioridade 8 |
+| **C18** | 🟡 Nenhum app reconecta ao voltar do background (sem `AppState`) | ⬜ prioridade 9 |
+| **C14** | 🐛 Cliente não vê `IN_PROGRESS` (pula de "na fila" para "concluído") | 🔄 deve cair com o C16 + as flags removidas — **validar no device** |
+| **C9** | 🐛 Remoção da fila não reflete no cliente | 🔄 idem (o poll já cobria; o WS agora reforça) |
+| **C8/C10/C11** | Adicionar serviço na fila · mensagens distintas de saída · ETA com buffer −10min | ⬜ aguardam backend (B4/S10/S11) |
+
+### 15.5 O que MANDAMOS para o partner nesta rodada
+
+O diagnóstico do WebSocket (§4): **as três suspeitas que viviam no nosso handoff eram falsas** — o servidor sempre funcionou. A causa era `forceBinaryWSFrames` + `appendMissingNULLonIncoming` no cliente. **O código deles é quase idêntico ao nosso**, então provavelmente têm as mesmas flags. A página `src/docs/ws-test.html` está versionada aqui e serve aos dois apps.
