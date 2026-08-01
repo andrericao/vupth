@@ -1,9 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, Image } from "react-native";
 
 import { Link, Icon, ChevronLeftIcon, Center, Box } from "@gluestack-ui/themed";
 
-import Logo from "@assets/vupth-logo/people-waiting.svg";
+// Logotipo dentro do app = o mesmo "V" do icone do celular (decisao Andre
+// 2026-07-29), no lugar do desenho antigo do banco de espera: a marca passa a
+// ser a mesma da tela inicial ate dentro do app.
+const LOGO = require("@assets/vupth-logo/vupth-v.png");
 
 type Props = {
   showBackButton?: boolean;
@@ -34,8 +37,14 @@ export function Header({ showBackButton = false }: Props) {
           </TouchableOpacity>
         </Link>
       )}
-      <TouchableOpacity>
-        <Logo width={50} height={50} />
+      <TouchableOpacity accessibilityRole="image" accessibilityLabel="VUPTH">
+        {/* O PNG carrega o fundo verde do icone: cantos arredondados fazem ele
+            ler como marca, e nao como uma imagem solta no meio da tela. */}
+        <Image
+          source={LOGO}
+          style={{ width: 46, height: 46, borderRadius: 12 }}
+          resizeMode="cover"
+        />
       </TouchableOpacity>
     </Center>
   );

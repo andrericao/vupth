@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { acquireDeviceLocation, LocationProviders } from '@domain/location/gps';
+import {
+  acquireDeviceLocation,
+  toAddressDraft,
+  AddressDraft,
+  Coords,
+  LocationProviders,
+} from '@domain/location/gps';
 import { useLocationStore } from '@stores/locationStore';
 
 /**
@@ -65,6 +71,29 @@ export function useDeviceLocation() {
     }
   }, [loadProviders, markGpsAsked, setCoords, setLocation]);
 
+  /**
+   * Endereço do aparelho para PREENCHER o formulário (tela de endereços). Não
+   * mexe no filtro da Home: aqui o GPS serve para o cliente não digitar rua,
+   * bairro, cidade e CEP na mão — e as coordenadas vão junto no cadastro.
+   */
+  const captureDeviceAddress = useCallback(async (): Promise<{
+    coords: Coords;
+    draft: AddressDraft;
+  } | null> => {
+    const providers = loadProviders();
+    if (!providers) return null;
+
+    await markGpsAsked();
+    try {
+      const result = await acquireDeviceLocation(providers);
+      if (!result) return null; // permissão negada
+      await setCoords(result.coords);
+      return { coords: result.coords, draft: toAddressDraft(result.raw) };
+    } catch {
+      return null;
+    }
+  }, [loadProviders, markGpsAsked, setCoords]);
+
   // Primeira abertura: só pergunta quem ainda não foi perguntado E ainda não
   // definiu localidade na mão (`resolved`).
   useEffect(() => {
@@ -75,5 +104,5 @@ export function useDeviceLocation() {
     requestDeviceLocation();
   }, [requestDeviceLocation]);
 
-  return { requestDeviceLocation };
+  return { requestDeviceLocation, captureDeviceAddress };
 }

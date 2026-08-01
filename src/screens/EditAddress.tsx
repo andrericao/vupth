@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Alert, ScrollView, TouchableOpacity } from "react-native";
 import { VStack, Text, Heading, Box, HStack } from "@gluestack-ui/themed";
-import { Star, Trash, PencilSimple } from "phosphor-react-native";
+import { Star, Trash, PencilSimple, MapPin } from "phosphor-react-native";
 
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
@@ -12,6 +12,7 @@ import { maskCEP, unmask } from "@utils/masks";
 import { lookupCep } from "@utils/cep";
 import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
+import { useDeviceLocation } from "@hooks/useDeviceLocation";
 
 type Mode = "list" | "form";
 
@@ -37,6 +38,10 @@ export function EditAddress() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<AddressRequest>(EMPTY_FORM);
+  // GPS no endereço (Andre 2026-07-29): preenche rua/bairro/cidade/UF/CEP pelo
+  // aparelho e manda as COORDENADAS junto — é delas que sai a distância na Home.
+  const { captureDeviceAddress } = useDeviceLocation();
+  const [gpsLoading, setGpsLoading] = useState(false);
 
   const loadAddresses = useCallback(async () => {
     if (!accessToken) return;
@@ -73,6 +78,8 @@ export function EditAddress() {
       state: addr.state,
       zipCode: maskCEP(addr.zipCode),
       reference: addr.reference ?? "",
+      ...(addr.latitude != null ? { latitude: addr.latitude } : {}),
+      ...(addr.longitude != null ? { longitude: addr.longitude } : {}),
     });
     setMode("form");
   }
@@ -135,6 +142,39 @@ export function EditAddress() {
     }
   }
 
+  // Preenche o formulário pelo GPS. Só sobrescreve o que o aparelho soube dizer
+  // (campo ausente não apaga o que já estava digitado) e sempre guarda lat/lng.
+  async function handleUseGps() {
+    if (gpsLoading) return;
+    setGpsLoading(true);
+    try {
+      const result = await captureDeviceAddress();
+      if (!result) {
+        Alert.alert(
+          "Não consegui sua localização",
+          "Confira se o GPS está ligado e se o VUPTH tem permissão de localização. Você pode preencher pelo CEP.",
+        );
+        return;
+      }
+      const { coords, draft } = result;
+      setForm((prev) => ({
+        ...prev,
+        ...draft,
+        ...(draft.zipCode ? { zipCode: maskCEP(draft.zipCode) } : {}),
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+      }));
+      if (!draft.street || !draft.number) {
+        Alert.alert(
+          "Localização capturada 📍",
+          "Confira os campos e complete o que faltar (número, complemento).",
+        );
+      }
+    } finally {
+      setGpsLoading(false);
+    }
+  }
+
   function updateField(field: keyof AddressRequest, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
@@ -169,6 +209,21 @@ export function EditAddress() {
           <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
             {editingId ? "Editar Endereço" : "Novo Endereço"}
           </Heading>
+
+          <Button
+            title={gpsLoading ? "Localizando..." : "Usar minha localização (GPS)"}
+            variant="outline"
+            mb="$4"
+            isDisabled={gpsLoading}
+            testID="address-use-gps"
+            onPress={handleUseGps}
+          />
+          <HStack alignItems="center" gap="$1" mb="$4">
+            <MapPin size={12} color="#9CA3AF" weight="fill" />
+            <Text size="xs" color="$gray400" flex={1}>
+              Com o GPS a gente já preenche o endereço e calcula sua distância até os estabelecimentos.
+            </Text>
+          </HStack>
 
           <VStack gap="$3">
             <VStack gap="$1">

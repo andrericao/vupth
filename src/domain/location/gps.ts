@@ -26,6 +26,21 @@ export interface ReverseGeocodeResult {
   district?: string | null;
   region?: string | null;
   isoCountryCode?: string | null;
+  // Usados ao preencher um ENDEREÇO pelo GPS (tela de endereços).
+  street?: string | null;
+  streetNumber?: string | null;
+  postalCode?: string | null;
+  name?: string | null;
+}
+
+/** Campos de endereço que o GPS consegue preencher (os demais o cliente digita). */
+export interface AddressDraft {
+  street?: string;
+  number?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
 }
 
 export type PermissionOutcome = 'granted' | 'denied';
@@ -39,6 +54,7 @@ export interface LocationProviders {
 export interface DeviceLocation {
   coords: Coords;
   location: UserLocation | null; // null = coordenadas ok, mas sem endereço legível
+  raw: ReverseGeocodeResult | null; // resultado cru, p/ preencher formulário de endereço
 }
 
 /**
@@ -78,8 +94,35 @@ export async function acquireDeviceLocation(
   // O endereço é um bônus: sem ele ainda guardamos as coordenadas (servem ao B7).
   try {
     const results = await providers.reverseGeocode(coords);
-    return { coords, location: toUserLocation(results?.[0]) };
+    const raw = results?.[0] ?? null;
+    return { coords, location: toUserLocation(raw), raw };
   } catch {
-    return { coords, location: null };
+    return { coords, location: null, raw: null };
   }
+}
+
+/**
+ * Converte o reverse geocode nos campos do formulário de endereço (Andre
+ * 2026-07-29: ao incluir/editar endereço, oferecer o preenchimento por GPS).
+ * Só devolve o que veio — campo ausente fica de fora para NÃO apagar o que o
+ * cliente já tinha digitado. O CEP vem sem máscara (a tela aplica a dela).
+ */
+export function toAddressDraft(result?: ReverseGeocodeResult | null): AddressDraft {
+  if (!result) return {};
+
+  const street = (result.street ?? result.name ?? '').trim();
+  const number = (result.streetNumber ?? '').trim();
+  const neighborhood = (result.district ?? '').trim();
+  const city = (result.city ?? result.subregion ?? '').trim();
+  const state = (result.region ?? '').trim();
+  const zipCode = (result.postalCode ?? '').replace(/\D/g, '');
+
+  return {
+    ...(street ? { street } : {}),
+    ...(number ? { number } : {}),
+    ...(neighborhood ? { neighborhood } : {}),
+    ...(city ? { city } : {}),
+    ...(state ? { state } : {}),
+    ...(zipCode.length === 8 ? { zipCode } : {}),
+  };
 }
