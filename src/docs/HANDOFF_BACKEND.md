@@ -17,7 +17,9 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 | 3 | **Testes no device** — F8 (troca dentro e fora da fila), GPS/permissão, push, badge AGENDAR, trocar senha, esqueci-senha, meus agendamentos, corte, seletor de dia | 🔵 Andre (pós-build) |
 | 4 | **Esqueci minha senha — refazer** (B3: foi feito e testado, mas o e-mail do reenvio não chegou) | 🔴 backend + reteste |
 | 5 | **F5 — Agendar como lista de horários** — núcleo pronto e testado; UI travada no **B2** (blocos anônimos) | 🔴 backend |
-| 6 | **Miudezas do front** — coverage dos cantos, Gluestack v1→v2 (tech-debt), WebSocket no device | 🟢 front |
+| 6 | **Endereço da loja visível ao cliente** (Andre 2026-07-29) — hoje o `EstablishmentDetail` NÃO mostra endereço nenhum; o cliente precisa saber para onde ir (rua/número/bairro + atalho p/ abrir no mapa) | 🟢 front |
+| 7 | **WebSocket** — ✅ servidor OK e flags do cliente corrigidas (2026-07-29, ver §4); **falta validar no device** | 🔵 Andre (pós-OTA) |
+| 8 | **Miudezas do front** — coverage dos cantos, Gluestack v1→v2 (tech-debt) | 🟢 front |
 
 ---
 
@@ -108,17 +110,33 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 
 ---
 
-## 4. WebSocket em tempo real — NÃO funciona hoje (pendência, "depois vemos")
+## 4. WebSocket em tempo real — ✅ SERVIDOR OK; o defeito era no CLIENTE (diagnosticado 2026-07-29)
 
-O servidor WS é o **backend**, compartilhado por **client e partner** (mesmo endpoint STOMP; código quase idêntico com `@stomp/stompjs`). Hoje **nada chega** nos apps; tudo atualiza por **polling** (fallback já implementado no client: `refetchInterval` 60/20/30s + poll de status 30s). Análise (2026-06-29) — causas prováveis, todas de config, **sem custo e sem dependência nova**:
+> ⚠️ **Esta seção foi REESCRITA.** Até 2026-07-29 ela dizia "não funciona, causas prováveis no backend" e listava três suspeitas. **As três foram testadas e REFUTADAS.** Quem estava errado era o app.
 
-1. **Handshake exige auth e o RN não manda header no upgrade** — o app faz `new WebSocket(url)` sem headers; se o Spring Security protege `/ws/**`, o upgrade é barrado antes do STOMP. Fix: liberar o **handshake** de `/ws/**` (auth de verdade no CONNECT) e/ou o app passar o token no 3º arg do WebSocket (`{ headers: { Authorization } }`).
-2. **`/user/queue/notifications` sem Principal** — eventos pessoais ("é a sua vez") usam `/user/**`, que exige o usuário na sessão STOMP. Fix: `ChannelInterceptor` no inbound que lê o JWT do frame **CONNECT**, valida (decoder existente) e `accessor.setUser(principal)`.
-3. **SockJS vs WS cru** — `GET /ws/info` responde `{"websocket":true}` ⇒ backend usa `.withSockJS()`. `/ws/websocket` é o transporte cru do SockJS (deveria aceitar WS puro); se não, expor endpoint STOMP **cru** (`addEndpoint("/ws-native")` sem `.withSockJS()`).
+**Como foi diagnosticado.** Página de teste `src/docs/ws-test.html` (abre no navegador, conecta no MESMO servidor STOMP, mostra etapa por etapa). Rodadas feitas contra `dev` (Render):
 
-**Diagnóstico grátis recomendado:** testar o mesmo backend por uma página HTML no navegador (STOMP → `/topic/establishment/{id}/queue`). Funciona no browser mas não no app ⇒ transporte do RN; não funciona em nenhum ⇒ config do backend.
+| Suspeita antiga | Resultado real |
+|---|---|
+| Handshake barrado pelo Spring Security em `/ws/**` | ❌ **falsa** — conecta e recebe `CONNECTED` **até sem token** |
+| `/user/**` sem `Principal` | ❌ **falsa** — com o JWT no frame CONNECT, o `CONNECTED` volta com `user-name: <userId>` |
+| SockJS × WebSocket cru | ❌ **falsa** — o transporte cru `/ws/websocket` funciona |
+| Backend não publica | ❌ **falsa** — entrar na fila disparou o broadcast em `/topic/establishment/{id}/queue` **no ato**, com o payload completo |
 
-**Nota de plataforma:** no **Render free** a instância **hiberna** e o WS **cai** quando dorme — então, no plano grátis, o **polling** tende a ser mais robusto que WS de qualquer forma. WS = melhoria futura; polling é a base.
+**⇒ Nada a fazer no backend.** O servidor sempre esteve certo: handshake livre, JWT do CONNECT validado, `Principal` setado, broadcast publicando.
+
+**A causa real (client):** o cliente STOMP do app passava duas opções que existem para contornar servidores **fora do padrão** e que, com o Spring correto, atrapalham o parse — o socket conecta e a mensagem nunca aparece:
+
+```ts
+forceBinaryWSFrames: true,        // manda os frames em binário
+appendMissingNULLonIncoming: true // mexe no terminador do frame recebido
+```
+
+**Removidas no client em 2026-07-29.** Além disso, o app assinava **só** o canal pessoal, então nunca via o broadcast da fila — passou a assinar `/topic/establishment/{id}/queue` também (`findMyPosition` em `domain/queue/broadcast.ts` deriva a MINHA posição/espera do payload; antes isso só vinha do poll de até 2min).
+
+**📣 Front-Partner:** o código de vocês é quase idêntico ao nosso (mesmo `@stomp/stompjs`, mesmo servidor). **Confiram se o cliente de vocês tem essas mesmas duas flags** — se tiver, é provavelmente a mesma causa do "WS não funciona" de lá. A página `src/docs/ws-test.html` serve igual para vocês: troquem o `establishmentId` e usem um token de profissional; o canal pessoal de vocês é o mesmo `/user/queue/notifications`.
+
+**Nota de plataforma (segue valendo):** no **Render free** a instância hiberna e o WS **cai** junto — o **polling continua sendo a base**, e o WS é a camada de tempo real por cima dele. Não remover o polling.
 
 ---
 

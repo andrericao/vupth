@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>VUPTH — diagnóstico do WebSocket</title>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 14px/1.5 system-ui, sans-serif; margin: 0; padding: 24px; max-width: 900px; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  p.sub { margin: 0 0 20px; opacity: .7; }
+  fieldset { border: 1px solid #8884; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
+  legend { padding: 0 6px; font-weight: 600; }
+  label { display: block; font-size: 12px; opacity: .8; margin: 8px 0 2px; }
+  input, select { width: 100%; padding: 8px; font: inherit; border: 1px solid #8886; border-radius: 6px; background: transparent; color: inherit; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .row > * { flex: 1 1 240px; }
+  button { padding: 10px 16px; font: inherit; font-weight: 600; border: 0; border-radius: 999px; background: #2F432F; color: #fff; cursor: pointer; }
+  button.ghost { background: transparent; color: inherit; border: 2px solid #2F432F; }
+  button:disabled { opacity: .5; cursor: default; }
+  #log { background: #0001; border-radius: 8px; padding: 12px; height: 380px; overflow: auto; white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 12px; }
+  .ok { color: #15803d; font-weight: 600; }
+  .err { color: #b91c1c; font-weight: 600; }
+  .warn { color: #b45309; }
+  .dim { opacity: .6; }
+</style>
+</head>
+<body>
+
+<h1>VUPTH — diagnóstico do WebSocket (STOMP)</h1>
+<p class="sub">
+  Página local, backend real. Serve para descobrir <em>em qual etapa</em> o WebSocket para:
+  handshake, autenticação STOMP ou entrega das mensagens.
+</p>
+
+<fieldset>
+  <legend>Conexão</legend>
+  <div class="row">
+    <div>
+      <label>Ambiente</label>
+      <select id="env">
+        <option value="wss://vupth-backend-ia.onrender.com" selected>dev — Render</option>
+        <option value="wss://vupth-backend-ia-production.up.railway.app">prod — Railway</option>
+        <option value="ws://localhost:8080">local — localhost:8080</option>
+      </select>
+    </div>
+    <div>
+      <label>Transporte</label>
+      <select id="transport">
+        <option value="raw" selected>WebSocket cru (/ws/websocket) — igual ao app</option>
+        <option value="sockjs">SockJS (/ws) — com fallback XHR</option>
+      </select>
+    </div>
+  </div>
+  <label>Access token (JWT do login — sem o "Bearer")</label>
+  <input id="token" placeholder="eyJhbGciOi..." autocomplete="off" />
+  <label>establishmentId (para o tópico público da fila)</label>
+  <input id="establishmentId" placeholder="uuid do estabelecimento" autocomplete="off" />
+  <div class="row" style="margin-top:14px">
+    <button id="connect">Conectar</button>
+    <button id="disconnect" class="ghost" disabled>Desconectar</button>
+    <button id="clear" class="ghost">Limpar log</button>
+  </div>
+</fieldset>
+
+<fieldset>
+  <legend>Log</legend>
+  <div id="log"></div>
+</fieldset>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const logEl = $("log");
+let client = null;
+
+function log(msg, cls = "") {
+  const time = new Date().toLocaleTimeString("pt-BR");
+  const line = document.createElement("div");
+  if (cls) line.className = cls;
+  line.textContent = `[${time}] ${msg}`;
+  logEl.appendChild(line);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+// Sem o STOMP a página não faz nada: avisa cedo em vez de falhar no clique.
+window.addEventListener("load", () => {
+  if (!window.StompJs) {
+    log("A biblioteca STOMP não carregou (CDN bloqueado / sem internet).", "err");
+  } else {
+    log("Pronto. Cole o token, escolha o ambiente e clique em Conectar.", "dim");
+  }
+});
+
+function buildSocket(base, transport) {
+  if (transport === "sockjs") {
+    // SockJS exige http(s), não ws(s), e tem fallback por XHR — o app NÃO tem.
+    const httpBase = base.replace(/^ws/, "http");
+    log(`Abrindo SockJS em ${httpBase}/ws ...`);
+    return new SockJS(`${httpBase}/ws`);
+  }
+  log(`Abrindo WebSocket cru em ${base}/ws/websocket ...`);
+  return new WebSocket(`${base}/ws/websocket`);
+}
+
+$("connect").onclick = () => {
+  const base = $("env").value;
+  const transport = $("transport").value;
+  const token = $("token").value.trim();
+  const establishmentId = $("establishmentId").value.trim();
+
+  if (!token) {
+    log("Sem token: o CONNECT do STOMP vai sem Authorization e o /user/** não terá dono.", "warn");
+  }
+
+  // O navegador NÃO permite header HTTP no handshake — igual ao React Native.
+  // Por isso o token vai no frame CONNECT, exatamente como o app faz.
+  client = new StompJs.Client({
+    webSocketFactory: () => buildSocket(base, transport),
+    connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
+    reconnectDelay: 0, // diagnóstico: falhou, falhou — sem reconectar mascarando
+    debug: (str) => log(str, "dim"),
+  });
+
+  client.onConnect = (frame) => {
+    log("CONNECT aceito pelo servidor — handshake e autenticação STOMP OK.", "ok");
+    log(`user-name no frame: ${frame.headers["user-name"] ?? "(ausente)"}`,
+        frame.headers["user-name"] ? "ok" : "warn");
+    if (!frame.headers["user-name"]) {
+      log("Sem user-name = sem Principal na sessão STOMP: /user/** NÃO vai entregar nada.", "warn");
+    }
+
+    // 1) Canal PESSOAL — é o que o app usa para 'é a sua vez', troca aceita etc.
+    client.subscribe("/user/queue/notifications", (m) => {
+      log(`📨 /user/queue/notifications: ${m.body}`, "ok");
+    });
+    log("Inscrito em /user/queue/notifications (pessoal).");
+
+    // 2) Canal PÚBLICO da fila — se este funcionar e o pessoal não, o problema
+    //    é o Principal, não o transporte.
+    if (establishmentId) {
+      const topic = `/topic/establishment/${establishmentId}/queue`;
+      client.subscribe(topic, (m) => {
+        log(`📨 ${topic}: ${m.body}`, "ok");
+      });
+      log(`Inscrito em ${topic} (broadcast da fila).`);
+    } else {
+      log("Sem establishmentId: pulando o tópico público da fila.", "dim");
+    }
+
+    log("Agora provoque um evento no app/partner (entrar na fila, iniciar atendimento) e observe.", "dim");
+    $("connect").disabled = true;
+    $("disconnect").disabled = false;
+  };
+
+  client.onStompError = (frame) => {
+    log(`ERRO STOMP: ${frame.headers["message"]} — ${frame.body}`, "err");
+    log("Socket abriu mas o CONNECT foi recusado ⇒ autenticação/interceptor do STOMP.", "err");
+  };
+
+  client.onWebSocketError = (evt) => {
+    log(`ERRO de WebSocket: ${evt?.message ?? "handshake recusado"}`, "err");
+    log("O socket nem abriu ⇒ handshake bloqueado (Spring Security em /ws/**) ou origem recusada.", "err");
+    log("Se abriu do disco (file://), a origem vai como 'null' — sirva por http://localhost e repita.", "warn");
+  };
+
+  client.onWebSocketClose = (evt) => {
+    log(`Socket fechado (code=${evt?.code ?? "?"} reason=${evt?.reason || "-"})`, "warn");
+    $("connect").disabled = false;
+    $("disconnect").disabled = true;
+  };
+
+  client.activate();
+};
+
+$("disconnect").onclick = async () => {
+  await client?.deactivate();
+  client = null;
+  log("Desconectado.", "dim");
+  $("connect").disabled = false;
+  $("disconnect").disabled = true;
+};
+
+$("clear").onclick = () => { logEl.innerHTML = ""; };
+</script>
+
+</body>
+</html>
