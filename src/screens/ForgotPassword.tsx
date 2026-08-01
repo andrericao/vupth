@@ -28,6 +28,10 @@ export function ForgotPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // O Render Free hiberna: a 1a cutucada pode levar ~50s. Sem separar as fases,
+  // o botao ficava "Enviando..." por ate 90s e parecia travado (feedback Andre
+  // 2026-07-29: "ficou carregando o enviar").
+  const [isWakingServer, setIsWakingServer] = useState(false);
 
   const rules = getPasswordRules(password);
   const allRulesPass = rules.every((r) => r.passed);
@@ -41,12 +45,19 @@ export function ForgotPassword() {
     try {
       // Cold start do Render: acorda a instância antes de enviar — sem isso o
       // request penava até 90s com o botão travado ("intocável") e sem código
-      // chegando (feedback Andre 2026-07-23).
-      const ready = await waitForBackend({});
+      // chegando (feedback Andre 2026-07-23). O `onAttempt` avisa a UI de que a
+      // espera é o servidor acordando, não o app travado.
+      const ready = await waitForBackend({
+        onAttempt: (attempt) => {
+          // A partir da 2a tentativa está claro que a instância dormiu.
+          if (attempt >= 2) setIsWakingServer(true);
+        },
+      });
+      setIsWakingServer(false);
       if (!ready) {
         Alert.alert(
           "Servidor demorando",
-          "O servidor está acordando. Tente novamente em alguns instantes.",
+          "O servidor está demorando para responder. Tente novamente em alguns instantes.",
         );
         return;
       }
@@ -63,6 +74,7 @@ export function ForgotPassword() {
       const msg = error.response?.data?.message || error.message || "Erro ao enviar o código";
       Alert.alert("Erro", msg);
     } finally {
+      setIsWakingServer(false);
       setIsSubmitting(false);
     }
   }
@@ -111,10 +123,22 @@ export function ForgotPassword() {
               keyboardType="email-address"
             />
             <Button
-              title={isSubmitting ? "Enviando..." : "Enviar código"}
+              title={
+                isWakingServer
+                  ? "Acordando o servidor..."
+                  : isSubmitting
+                    ? "Enviando..."
+                    : "Enviar código"
+              }
               onPress={handleSendCode}
               isDisabled={!canSend}
             />
+            {isWakingServer && (
+              <Text size="xs" color="$gray400" textAlign="center">
+                O servidor hiberna quando fica sem uso e pode levar até 1 minuto para
+                responder. Não feche o app.
+              </Text>
+            )}
           </VStack>
         )}
 
@@ -153,7 +177,11 @@ export function ForgotPassword() {
             />
             <TouchableOpacity onPress={handleSendCode} disabled={isSubmitting}>
               <Text size="sm" color="$green500" fontFamily="$heading" textAlign="center">
-                {isSubmitting ? "Reenviando..." : "Reenviar código"}
+                {isWakingServer
+                  ? "Acordando o servidor..."
+                  : isSubmitting
+                    ? "Reenviando..."
+                    : "Reenviar código"}
               </Text>
             </TouchableOpacity>
           </VStack>
