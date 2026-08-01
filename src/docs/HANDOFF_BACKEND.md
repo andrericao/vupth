@@ -126,7 +126,13 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 | SockJS × WebSocket cru | ❌ **falsa** — o transporte cru `/ws/websocket` funciona |
 | Backend não publica | ❌ **falsa** — entrar na fila disparou o broadcast em `/topic/establishment/{id}/queue` **no ato**, com o payload completo |
 
-**⇒ Nada a fazer no backend.** O servidor sempre esteve certo: handshake livre, JWT do CONNECT validado, `Principal` setado, broadcast publicando.
+**⇒ Nenhuma das três causas antigas existe.** O servidor faz o essencial: handshake livre, JWT do CONNECT validado, `Principal` setado, broadcast publicando.
+
+> ⚠️ **A prova está pela METADE — honestidade sobre o que foi testado (2026-08-01).** Provocamos evento só no **tópico público** (entrar na fila → 📨 chegou com payload completo). O **canal pessoal nunca foi provocado**: nenhum `ATTENDANCE_STARTED`/`CUT_REQUESTED` foi disparado durante o teste. Ou seja, **a entrega do `/user/queue/notifications` ainda NÃO foi comprovada ponta a ponta** — só a subscrição. O partner registra o mesmo ("falta a metade da prova"). Fechar isso no device: entrar na fila e pedir ao partner para **iniciar** o atendimento.
+
+> 🔴 **Dois pedidos ao backend que NASCERAM disto (abertos pelo partner, nos afetam direto):**
+> - **S14 — token inválido conecta como ANÔNIMO em vez de recusar.** O `StompAuthChannelInterceptor` loga `warn` e segue; com token de 1h, a reconexão sobe anônima e o canal pessoal morre **em silêncio**, sem erro em nenhuma ponta. Nós já corrigimos a nossa metade (token fresco no `beforeConnect`), mas **só o backend fecha o buraco**: sem a rejeição, o app não tem como saber que está anônimo. ⚠️ **Divergência entre projetos:** o partner trata como 🔴 causa-raiz de C14/C9; o **backend REBAIXOU** para "item pequeno de robustez", argumentando que nosso teste cobriu "sem token" e "token válido" — **nunca "token expirado"** — e que as flags já explicam os sintomas. **Quem decide é o teste no device.**
+> - **S17 — heartbeat DESLIGADO** (`enableSimpleBroker` sem `TaskScheduler`). **Evidência colhida no NOSSO teste:** pedimos `heart-beat:10000,10000` no CONNECT e o servidor respondeu **`heart-beat:0,0`**. Sem heartbeat, quando o Render corta a conexão ociosa o socket vira **zumbi**: o app se acha conectado, o `reconnectDelay` nunca dispara (não houve erro) e simplesmente para de chegar coisa. Explica o "às vezes não chega" mesmo dentro da 1ª hora — é **independente** do S14.
 
 **A causa real (client):** o cliente STOMP do app passava duas opções que existem para contornar servidores **fora do padrão** e que, com o Spring correto, atrapalham o parse — o socket conecta e a mensagem nunca aparece:
 
