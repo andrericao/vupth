@@ -71,6 +71,17 @@ export function ForgotPassword() {
         setStep("reset");
       }
     } catch (error: any) {
+      // Timeout do POST (SMTP síncrono travado no backend): o pedido PODE ter
+      // sido registrado antes de o envio pendurar, então mandamos o cliente
+      // para o passo do código em vez de deixá-lo na estaca zero.
+      if (error.code === "ECONNABORTED") {
+        Alert.alert(
+          "O servidor não respondeu a tempo",
+          "Se o e-mail estiver cadastrado, o código ainda pode chegar. Confira sua caixa (e o spam) e, se não vier em alguns minutos, toque em 'Reenviar código'.",
+        );
+        setStep("reset");
+        return;
+      }
       const msg = error.response?.data?.message || error.message || "Erro ao enviar o código";
       Alert.alert("Erro", msg);
     } finally {
