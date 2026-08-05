@@ -148,8 +148,12 @@ export function Login() {
           <Text size="sm" color="$gray300" mb="$3" textAlign="center">
             Crie sua conta em segundos para entrar na fila.
           </Text>
+          {/* Ação SECUNDÁRIA: "Entrar" é o que a tela pede: se os dois botões
+              forem sólidos verdes, quem já tem conta hesita (Andre 2026-08-05:
+              "entrar e cadastrar não podem ter o mesmo peso"). */}
           <Button
             mt="$1"
+            variant="outline"
             title="Criar conta grátis"
             onPress={handleSignUp}
           />
