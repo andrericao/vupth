@@ -39,10 +39,12 @@ export function Header({ showBackButton = false }: Props) {
       )}
       <TouchableOpacity accessibilityRole="image" accessibilityLabel="VUPTH">
         {/* O PNG carrega o fundo verde do icone: cantos arredondados fazem ele
-            ler como marca, e nao como uma imagem solta no meio da tela. */}
+            ler como marca, e nao como uma imagem solta no meio da tela.
+            50x50 = a mesma area que o desenho do banco ocupava, para o "V" cair
+            exatamente no lugar dele (Andre 2026-08-05). */}
         <Image
           source={LOGO}
-          style={{ width: 46, height: 46, borderRadius: 12 }}
+          style={{ width: 50, height: 50, borderRadius: 12 }}
           resizeMode="cover"
         />
       </TouchableOpacity>
