@@ -121,10 +121,21 @@ export function Profile() {
             </Box>
           </TouchableOpacity>
         ) : (
-          <Button
-            title="Entrar ou criar conta"
-            onPress={() => navigation.navigate("login", {})}
-          />
+          // Para quem ainda não tem conta, CRIAR é a ação que importa: pílula
+          // sólida na frente, "já tenho conta" como secundária (Andre
+          // 2026-08-05: "cadastrar, na tela de visitantes deve ter um peso
+          // maior, pode ser uma pílula").
+          <VStack gap="$3">
+            <Button
+              title="Criar conta grátis"
+              onPress={() => navigation.navigate("signUp", {})}
+            />
+            <Button
+              variant="outline"
+              title="Já tenho conta"
+              onPress={() => navigation.navigate("login", {})}
+            />
+          </VStack>
         )}
       </VStack>
     </VStack>

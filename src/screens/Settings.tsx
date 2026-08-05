@@ -203,12 +203,23 @@ export function Settings() {
             Você está navegando como visitante. Entre ou crie uma conta para
             gerenciar seu perfil, senha e endereço.
           </Text>
-          <Button
-            title="Entrar ou criar conta"
-            onPress={() =>
-              navigation.getParent()?.navigate("homeTab", { screen: "login", params: {} })
-            }
-          />
+          {/* Mesma hierarquia do Perfil: criar conta é a pílula sólida, entrar
+              fica como secundária (Andre 2026-08-05). */}
+          <VStack gap="$3">
+            <Button
+              title="Criar conta grátis"
+              onPress={() =>
+                navigation.getParent()?.navigate("homeTab", { screen: "signUp", params: {} })
+              }
+            />
+            <Button
+              variant="outline"
+              title="Já tenho conta"
+              onPress={() =>
+                navigation.getParent()?.navigate("homeTab", { screen: "login", params: {} })
+              }
+            />
+          </VStack>
         </Box>
       )}
 
