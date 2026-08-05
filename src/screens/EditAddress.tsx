@@ -61,10 +61,27 @@ export function EditAddress() {
     loadAddresses();
   }, [loadAddresses]);
 
+  // Abrir o formulário já OFERECE o GPS (Andre 2026-08-05: "quando o usuário for
+  // editar ou incluir o endereço deve-se pedir para pegar a localização"). O
+  // botão manual continua ali para quem recusar ou quiser tentar de novo.
+  function offerGps(isEditing: boolean) {
+    Alert.alert(
+      "Usar sua localização?",
+      isEditing
+        ? "Posso atualizar este endereço com onde você está agora. Os campos preenchidos pelo GPS serão substituídos."
+        : "Posso preencher rua, bairro, cidade e CEP com onde você está agora — e é daí que sai a distância até os estabelecimentos.",
+      [
+        { text: "Prefiro digitar", style: "cancel" },
+        { text: "Usar GPS", onPress: handleUseGps },
+      ],
+    );
+  }
+
   function handleNew() {
     setEditingId(null);
     setForm(EMPTY_FORM);
     setMode("form");
+    offerGps(false);
   }
 
   function handleEdit(addr: AddressResponse) {
@@ -82,6 +99,7 @@ export function EditAddress() {
       ...(addr.longitude != null ? { longitude: addr.longitude } : {}),
     });
     setMode("form");
+    offerGps(true);
   }
 
   async function handleSave() {
