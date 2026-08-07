@@ -83,6 +83,47 @@ Entrar na fila (visitante ou logado): Home → Detalhe → **ServiceSelection (v
 
 ---
 
+## 1c. Estado atual (2026-08-06) — identidade da marca e rodada de UI do device
+
+### 🎨 A MARCA TEM UMA FONTE ÚNICA: `BrandMark`
+
+**Trocar o logo do VUPTH = trocar `assets/icon.png`.** Nenhuma tela faz `require` de logo.
+
+Antes desta data a arte estava **duplicada**: `assets/icon.png` (que o `app.json` usa como ícone nativo) e `src/assets/vupth-logo/vupth-v.png` (que o `Header` carregava) eram **byte a byte idênticos** (mesmo md5). Quem trocasse a marca teria que lembrar dos dois, e esquecer um faria o ícone do celular divergir do logo de dentro do app. A cópia foi **removida** e `src/components/BrandMark.tsx` passou a apontar para `assets/icon.png` — a arte existe uma vez só. Sem custo de bundle: antes ia a cópia de 945KB, agora vai o original.
+
+`BrandMark` também concentra o **render** (antes embutido no `Header`): `size` opcional com default `BRAND_MARK_SIZE = 50` e arredondamento **proporcional** (24% do lado), de modo que a marca cresce sem deformar. Um teste trava o apontamento para `assets/icon.png`, então um `require` avulso em outra tela não passa despercebido.
+
+**Fronteira honesta — o que NÃO cabe no `BrandMark`:** `assets/adaptive-icon.png`, `assets/splash.png` e `assets/favicon.png` são resolvidos pelo `app.json` em **tempo de build**; não dá para importá-los de um módulo TS e **não saem por OTA**. Estão listados no cabeçalho do `BrandMark` com o aviso de regerar a partir da mesma arte e rodar `eas build`.
+
+**Decisão do Andre (2026-08-06):** dentro do app entra **apenas o "V"** — o nome escrito não acompanha a marca nas telas. Foram estudados lockups com o nome (V + "vupth" em Poppins 700, empilhado e deitado, com e sem fundo) e a conclusão foi manter só o símbolo.
+
+### 🚪 Abertura em duas partes (splash → sequência)
+
+O `assets/splash.png` **nunca tinha sido trocado** — era o círculo cinza padrão do Expo sobre fundo **branco**. A abertura era: tela branca com um círculo genérico → corte → tela verde do app. Agora:
+
+1. **Splash NATIVO** — o mesmo "V" centralizado sobre o verde do ícone (`#2E432F`), gerado a partir de `assets/icon.png` (mesma arte, sem desenho novo). O `backgroundColor` do splash foi de `#ffffff` para o verde, senão havia um flash branco antes de a imagem aparecer.
+2. **`PreparingServer`** — a primeira coisa que o JS desenha, enquanto o portão de readiness acorda o Render. Repete o **mesmo "V"** no topo (via `BrandMark`) e só então roda a sequência que já existia: *Abrindo o app → Chegando na loja → Na cadeira → Pronto, sem fila*.
+
+Sem o passo 2 a marca sumia no instante em que o splash saía e voltava depois, dando um piscar. ⚠️ O splash é **nativo**: só aparece num `eas build` novo.
+
+### 🔧 Rodada de UI a partir do teste no device (2026-08-05)
+
+| Feedback | O que mudou |
+|---|---|
+| "Esqueci minha senha continua apenas carregando e nada" (passo 1) | **Causa:** `waitForBackend` roda com **60s de timeout por tentativa** e a tela só avisava "Acordando o servidor" a partir da 2ª — que nunca chegava. Com o Render hibernado eram ~50s de "Enviando..." mudo, antes mesmo de o POST sair. **Agora:** `perAttemptMs: 8000`, fases separadas (`sendPhase`: idle/waking/sending), contador de segundos no próprio botão e **"Cancelar espera"** (via `isCancelled` do portão — desistir não dispara o POST). O aviso só aparece após 3s, para não piscar com o servidor quente |
+| GPS ao incluir/editar endereço | O botão existia desde 8332dc17 mas era **passivo**. `handleNew`/`handleEdit` agora **oferecem** o GPS ao abrir o formulário, com texto ajustado ao caso; o botão manual continua para quem recusar |
+| "O V no mesmo lugar que o banco ficava" | O slot no `Header` nunca mudou; o que mudou foi o **tamanho** — o `people-waiting.svg` era 50×50 e o PNG entrou com 46×46. Voltou a 50×50 |
+| "No menu de mudar minha vez quero apenas as opções com select" | `ChangeTurnModal` deixou de ser árvore de telas e virou **uma lista de rádio** (adiantar / trocar com quem está atrás / ir para o fim / agendar) + um único "Confirmar". "Ir para o fim" fica **desabilitado** para quem já é o último, com o motivo na própria linha, no lugar do `Alert` que só aparecia depois do toque. Contrato com o `QueueStatus` inalterado |
+| "Entrar e cadastrar não podem ter o mesmo peso" (Login) | "Criar conta grátis" virou `outline` |
+| "Cadastrar na tela de visitantes deve ter peso maior" | Perfil e Configurações: **"Criar conta grátis"** (pílula sólida, vai direto ao `signUp`) + "Já tenho conta" (outline). Antes era um convite único que levava sempre ao Login — visitante que nunca teve conta caía numa tela de senha |
+| "Formulários do mesmo tamanho dos do partner" | Levantamento entre os repos: os **botões já batiam** (54px / rounded-full nos dois). A diferença estava nos campos — client `h="$14"`/`px="$4"` (56px/16) contra partner `h="$12"`/`px-3` (48px/12). Client passou a **48px/12**. `src/components/Input.tsx` (legado, sem nenhum import) alinhado junto |
+
+**Testes que acompanharam a rodada:** `screens/ForgotPassword.test.tsx` (4 casos), `screens/EditAddress.test.tsx` (3), `components/ChangeTurnModal.test.tsx` (6), `components/BrandMark.test.tsx` (5). Bateria em **55 suítes / 444 testes** no push de 2026-08-06.
+
+> ⚠️ **Correção ao §1b:** a linha "WebSocket: `useQueueSocket` / `useQueueNotifications` existem mas **não funcionam no device**" está **desatualizada**. Em 2026-08-01 o diagnóstico virou o jogo: o **servidor sempre esteve certo** e o defeito era do app (flags `forceBinaryWSFrames`/`appendMissingNULLonIncoming` + token lido uma única vez no mount, que ia vencido em toda reconexão). Ambos corrigidos. Ver HANDOFF §4.
+
+---
+
 ## 2. Endpoints Consumidos — Status
 
 | Endpoint | Metodo | Tela | Status Frontend | Testes |

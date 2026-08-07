@@ -2,7 +2,7 @@
 
 Pendências do app **cliente** que dependem do backend. O front já está pronto (ou pronto para consumir) em cada caso. Detalhe completo nos callouts do `PRD_FRONT-CLIENT.md`.
 
-Última atualização: **2026-08-01** · branch `dev` do front-client.
+Última atualização: **2026-08-06** · branch `dev` do front-client.
 
 ---
 
@@ -12,17 +12,18 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 
 | # | Pendência | De quem depende |
 |---|-----------|-----------------|
-| 1 | **GPS — lojas próximas** (permissão na abertura ✅ feita no front 2026-08-01). Falta o **B7**: geocodar o endereço das lojas + `GET /establishment?lat&lng&radiusKm` (Haversine) → distância real | 🔴 backend (front pronto) |
-| 2 | **`eas build` 1.0.1** — leva ao device o GPS, o push (F9) e a F8 de uma vez | 🔵 Andre |
-| 3 | **Testes no device** — F8 (troca dentro e fora da fila), GPS/permissão, push, badge AGENDAR, trocar senha, esqueci-senha, meus agendamentos, corte, seletor de dia | 🔵 Andre (pós-build) |
-| 4 | **Esqueci minha senha — refazer** (B3: foi feito e testado, mas o e-mail do reenvio não chegou) | 🔴 backend + reteste |
+| 1 | **Testes no device — lote de 2026-08-05/06 (já no ar por OTA)** + o **C14 do WebSocket**, que é o teste decisivo e está aberto desde 01/08: entrar na fila e pedir ao partner para **iniciar** o atendimento — a tela tem que virar "em atendimento" na hora (antes pulava de "na fila" direto para "concluído"); repetir com o app aberto **>1h**, que era quando o canal pessoal morria. É esse teste que arbitra a divergência do **S14** (partner trata como causa-raiz; backend rebaixou). Junto: esqueci-senha (agora com contador e "Cancelar espera"), oferta de GPS no endereço, "Mudar minha vez" em lista de seleção, hierarquia dos botões no Login/Perfil/Configurações, campos a 48px, e o cabeçalho — que deve estar **idêntico** (o `BrandMark` foi refactor puro, qualquer diferença visual é regressão) | 🔵 Andre |
+| 2 | **GPS — lojas próximas** (permissão na abertura ✅ feita no front 2026-08-01). Falta o **B7**: geocodar o endereço das lojas + `GET /establishment?lat&lng&radiusKm` (Haversine) → distância real. **Quando vier é OTA, não precisa de build** | 🔴 backend (front pronto) |
+| 3 | **`eas build` novo** — leva ao device o **splash** com o "V" (2026-08-06). Splash, adaptive-icon e favicon são **nativos**: o `app.json` resolve em tempo de build e **não saem por OTA**. Vale juntar com outras pendências nativas antes de gastar um build | 🔵 Andre |
+| 4 | **Esqueci minha senha — B3** (backend). O lado do front foi refeito em 2026-08-06 e o portão de readiness deixou de ser mudo; se ainda pendurar **depois** de o servidor acordar, a suspeita é **SMTP síncrono sem timeout** (`mail.smtp.connectiontimeout/timeout/writetimeout`) ou porta 587 bloqueada no Render (aí é API HTTP do Brevo) | 🔴 backend + reteste |
 | 5 | **F5 — Agendar como lista de horários** — núcleo pronto e testado; UI travada no **B2** (blocos anônimos) | 🔴 backend |
 | 6 | **Endereço da loja visível ao cliente** (Andre 2026-08-01) — hoje o `EstablishmentDetail` NÃO mostra endereço nenhum; o cliente precisa saber para onde ir (rua/número/bairro + atalho p/ abrir no mapa) | 🟢 front |
-| 7 | **WebSocket** — ✅ servidor OK, flags removidas nos DOIS hooks e token renovado a cada conexão (2026-08-01, ver §4 e §15); **falta validar no device** | 🔵 Andre (pós-OTA) |
-| 8 | **Unificar as duas conexões STOMP** (partner C17) — `useQueueSocket` + `useQueueNotifications` abrem um `Client` cada: dois handshakes e duas sessões por usuário, num broker em memória de instância única. Partner faz UMA conexão com duas subscriptions | 🟢 front |
-| 9 | **Reconectar ao voltar do background** (partner C18) — sem listener de `AppState`; o Android suspende o processo, o socket morre sem evento e no canal pessoal nada mascara isso | 🟢 front |
-| 10 | **Migração NativeWind** (partner C15) — o partner saiu do Gluestack; decidir QUANDO acompanhar. Não é bump de versão, é troca de arquitetura (~49 arquivos / ~974 props no partner). Cartilha completa no handoff deles | 🟢 front (decisão do Andre) |
-| 11 | **Miudezas do front** — coverage dos cantos, caçar o "Jest did not exit" residual | 🟢 front |
+| 7 | **Unificar as duas conexões STOMP** (partner C17) — `useQueueSocket` + `useQueueNotifications` abrem um `Client` cada: dois handshakes e duas sessões por usuário, num broker em memória de instância única. Partner faz UMA conexão com duas subscriptions | 🟢 front |
+| 8 | **Reconectar ao voltar do background** (partner C18) — sem listener de `AppState`; o Android suspende o processo, o socket morre sem evento e no canal pessoal nada mascara isso | 🟢 front |
+| 9 | **Migração NativeWind** (partner C15) — o partner saiu do Gluestack; decidir QUANDO acompanhar. Não é bump de versão, é troca de arquitetura (~49 arquivos / ~974 props no partner). Cartilha completa no handoff deles | 🟢 front (decisão do Andre) |
+| 10 | **Miudezas e código morto** — deletar `src/components/Input.tsx` e `src/assets/vupth-logo/people-waiting.svg` (ambos órfãos, sem nenhum import); coverage dos cantos; caçar o "Jest did not exit" residual (benigno, exit 0) | 🟢 front |
+
+> **Saíram da lista em 2026-08-06:** `eas build 1.0.1` (feito, binário no device) e "WebSocket — validar no device" (absorvido pelo item 1, que é o mesmo teste). A rodada de UI do feedback de device (7 commits) e a identidade da marca (`BrandMark` + splash) estão documentadas no `PRD_FRONT-CLIENT.md` §1c.
 
 ---
 
