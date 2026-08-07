@@ -120,6 +120,35 @@ Sem o passo 2 a marca sumia no instante em que o splash saía e voltava depois, 
 
 **Testes que acompanharam a rodada:** `screens/ForgotPassword.test.tsx` (4 casos), `screens/EditAddress.test.tsx` (3), `components/ChangeTurnModal.test.tsx` (6), `components/BrandMark.test.tsx` (5). Bateria em **55 suítes / 444 testes** no push de 2026-08-06.
 
+### 📍 GPS — a distância passou a ser do BACKEND (2026-08-06)
+
+O backend entregou a fatia B em 01/08: `GET /establishment?lat=&lng=` **ordena por distância** e devolve **`distance_km`** (2 casas) em cada item. O contrato é explícito — **o front NÃO recalcula**, porque se cada app fizesse a própria conta o client e o partner mostrariam números diferentes para a mesma loja.
+
+**Estávamos divergentes** (achado ao ler o PRD deles): calculávamos Haversine em `proximity.ts` e nem mandávamos as coordenadas. O cálculo local foi **removido**.
+
+| O que | Onde |
+|---|---|
+| Manda `lat`/`lng` (sempre em **par** — metade é `422`) | `establishmentService.getAll(coords?)` |
+| **Não** manda `radiusKm` | Não existe raio default (Andre 2026-07-27). Com raio, a loja não geocodificada **sairia** e o cliente leria "não há lojas" onde há |
+| Coordenadas na **query key** | `useEstablishments` — a permissão de GPS resolve *depois* da 1ª busca; sem isso o cache devolveria para sempre a lista sem distância |
+| `distance_km?: number \| null` | `Establishment`. `null` = busca sem coordenada **ou** loja sem coordenada; os dois exibem igual: sem distância |
+| Ordem | `orderForHome(list, hasCoords, loc)` — **com GPS devolve a lista intocada** (reordenar desfaria o desempate estável por id do backend); sem GPS cai na ordenação por bairro/cidade |
+| Formatação | `formatDistanceKm` **ficou** — saiu o cálculo, não a exibição |
+
+**Ordenação com GPS = distância pura (decisão do Andre, 2026-08-06):** loja **fechada perto vem antes de aberta longe**. Ela carrega o badge âmbar AGENDAR, então o cliente entende que há caminho. Há teste fixando isso.
+
+### 🔌 Diagnóstico do WebSocket no device (2026-08-06)
+
+Configurações → **"Tempo real (diagnóstico)"**, uma linha por canal (pessoal e público). Existe porque o "Teste 0" pedido pelo backend (imprimir os headers do `CONNECTED`) era **inexequível**: num binário instalado, `console.log` só aparece via `adb logcat` ou dev client.
+
+- **`user-name` vazio ⇒ conexão ANÔNIMA** — é o `#31`/S14, e a assinatura do "às vezes não chega": o tópico público segue atualizando a fila e só o canal pessoal morre calado, sem erro. O painel diz isso em uma frase.
+- **`heart-beat`** — mostra o negociado e avisa quando vem `0` (socket zumbi).
+- **Recebidas / última / conexões** — separa "conectado" de "recebendo", e conta reconexões.
+
+Domínio puro em `domain/ws/diagnostics.ts` (17 casos). **C18 feito junto:** `AppState` nos dois hooks reconecta ao voltar do primeiro plano com o socket caído — o cenário piorou desde que o servidor passou a mandar heartbeat, porque a sessão suspensa é derrubada em ~10s.
+
+> ⚠️ **Observabilidade não é contorno.** O painel **exibe** o `#31`, não o conserta — ver a regra de fronteira no HANDOFF.
+
 > ⚠️ **Correção ao §1b:** a linha "WebSocket: `useQueueSocket` / `useQueueNotifications` existem mas **não funcionam no device**" está **desatualizada**. Em 2026-08-01 o diagnóstico virou o jogo: o **servidor sempre esteve certo** e o defeito era do app (flags `forceBinaryWSFrames`/`appendMissingNULLonIncoming` + token lido uma única vez no mount, que ia vencido em toda reconexão). Ambos corrigidos. Ver HANDOFF §4.
 
 ---
@@ -132,7 +161,7 @@ Sem o passo 2 a marca sumia no instante em que o splash saía e voltava depois, 
 | `/auth/login` | POST | Login | Implementado | 14 |
 | `/auth/refresh` | POST | authStore | Implementado | 14 |
 | `/auth/logout` | POST | Home | Implementado | 14 |
-| `/establishment` | GET | Home | Implementado | 2 |
+| `/establishment?includeAll=true[&lat&lng]` | GET | Home | Implementado — **`lat`/`lng` desde 2026-08-06**: o backend ordena por distancia e devolve `distance_km`. O front **nao recalcula** | 2 |
 | `/establishment/id/{id}` | GET | EstablishmentDetail | Implementado | 2 |
 | `/establishment/id/{id}/professionals-with-queue` | GET | EstablishmentDetail | Implementado | 2 |
 | `/attendances` | POST | QueueStatus | Implementado | 2 |
@@ -475,7 +504,7 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 | 2 | ~~Tela Attendances — historico real~~ | Implementado: `attendanceService.listClientHistory` + hook `useClientAttendances` (TanStack Query) consomem `GET /attendances/client/me` (filtros opcionais status/dateFrom/dateTo, clientId do JWT). Attendances.tsx renderiza secao REALIZADOS (FINISHED/CANCELLED/LATE) com profissional, servicos, data, duracao, valor e badge de status; loading + empty state | **FEITO** |
 | 3 | Visualizacao do atendimento atual | Cliente ve detalhes do atendimento IN_PROGRESS (profissional, servicos, tempo decorrido). Dados vem do `GET /client-queue/{attendanceId}/wait-time` + `GET /attendances/{id}` | Pendente |
 | 4 | ~~Selecao de servicos obrigatoria~~ | Implementado: ServiceSelection.tsx — lista servicos, multi-selecao, preco, confirmar antes de entrar na fila. Endpoint: `GET /professional-queue/{id}/service-items` | **FEITO** |
-| 5 | Tempo real via WebSocket (STOMP) | **Backend pronto (2026-06-14, PRD_BACKEND 18b)** — handoff C3. **Fatias 1-2 FEITAS:** `@stomp/stompjs` + `WS_URL` (`/ws/websocket`); `useQueueSocket` assina `/topic/establishment/{id}/queue` (atualiza cache, polling vira fallback) em EstablishmentDetail; `useQueueNotifications` (alerta "é a sua vez!"/concluido) agora **app-wide** via `App.tsx`, dirigido por `activeQueue` do store — vale em qualquer tela enquanto houver fila ativa; workarounds RN (`forceBinaryWSFrames`+`appendMissingNULLonIncoming`). (3) `/ws` confirmado no Render (`/ws/info` → `{"websocket":true}`, `/ws/websocket` → 400 = existe). **Falta so:** (4) testar no device os eventos `ATTENDANCE_STARTED/FINISHED`. **⏬ REPRIORIZADO: ULTIMA prioridade (Andre 2026-07-04) — o polling cobre; WS fica por ultimo** | Ultima prioridade |
+| 5 | Tempo real via WebSocket (STOMP) | ✅ **Servidor PROVADO em producao pelo backend (06/08)**: heartbeat `10000,10000`, entrega no canal pessoal e conexao ociosa de 40s sobrevivendo ao proxy do Render. **No front (2026-08-06):** flags do stompjs removidas, token renovado a cada conexao (`beforeConnect`), **C18 feito** (`AppState` reconecta ao voltar do background) e **painel de diagnostico** em Configuracoes. ⚠️ **A entrega no canal PESSOAL segue sem prova de device** — o poll do `getWaitTime` (30s) mascara: o status muda na tela mesmo com o canal mudo. Nao ha sintoma aberto; o que falta e medicao, e o painel resolve em 10s. Fica aberto do lado do backend o **B8** (`#31`: token invalido conecta anonimo em vez de ser recusado) | 🔄 **Sem sintoma; prova pendente** |
 | 6 | Consumir ETA estavel (meal-aware lock) | **Backend pronto (item 37, 2026-06-22)** — `GET /client-queue/{attendanceId}/wait-time` ja retorna estimativa estavel (refeicoes travadas no ingresso). O client ja consome esse endpoint em `useQueueCountdown`; validar que usa o `estimatedWaitingTime` estavel e nao recalcula por fora | Validar |
 
 ### Media prioridade — Funcionalidades
