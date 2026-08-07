@@ -1,9 +1,11 @@
 import { useEffect } from "react";
-import { Alert } from "react-native";
+import { Alert, AppState } from "react-native";
 import { Client, type IMessage } from "@stomp/stompjs";
 import * as SecureStore from "expo-secure-store";
 
 import { WS_URL } from "@services/api";
+import { useWsDiagnosticsStore } from "@stores/wsDiagnosticsStore";
+import { shouldReconnectOnForeground } from "@domain/ws/diagnostics";
 import { useQueueStore } from "@stores/queueStore";
 import { QueueNotification, AttendanceStatus } from "@domain/queue/types";
 import { handleQueueNotification } from "@domain/queue/notifications";
@@ -41,10 +43,12 @@ export function useQueueNotifications(enabled: boolean) {
 
     let active = true;
     let client: Client | null = null;
+    const diag = useWsDiagnosticsStore.getState();
 
     (async () => {
       if (!active) return;
 
+      diag.markConnecting("personal");
       client = new Client({
         webSocketFactory: () => new WebSocket(WS_URL),
         reconnectDelay: 5000,
@@ -61,12 +65,18 @@ export function useQueueNotifications(enabled: boolean) {
             client.connectHeaders = token ? { Authorization: `Bearer ${token}` } : {};
           }
         },
-        onConnect: () => {
-          if (__DEV__) console.log("[ws] conectado");
+        // `frame.headers` responde a pergunta que decide o S14: o `user-name`
+        // veio preenchido, ou o backend nos aceitou como ANÔNIMO? Anônimo =
+        // este canal está mudo para sempre, sem erro nenhum. O painel de
+        // Configurações mostra isso em uma frase.
+        onConnect: (frame) => {
+          diag.markConnected("personal", frame?.headers ?? {});
+          if (__DEV__) console.log("[ws] conectado", frame?.headers);
 
           client?.subscribe(
             "/user/queue/notifications",
             (message: IMessage) => {
+              diag.markMessage("personal");
               try {
                 const notif = JSON.parse(message.body) as QueueNotification;
                 handleQueueNotification(notif, {
@@ -109,6 +119,7 @@ export function useQueueNotifications(enabled: boolean) {
           );
         },
         onWebSocketError: () => {
+          diag.markError("personal");
           if (__DEV__) console.log(`[ws] falha no handshake notif (${WS_URL})`);
         },
       });
@@ -116,8 +127,19 @@ export function useQueueNotifications(enabled: boolean) {
       client.activate();
     })();
 
+    // C18 — ver o comentário gêmeo em `useQueueSocket`. Aqui dói mais: é o
+    // canal PESSOAL, o único que avisa "é a sua vez".
+    const sub = AppState.addEventListener("change", (next) => {
+      if (!shouldReconnectOnForeground(next, client?.connected ?? false)) return;
+      client?.deactivate().then(() => {
+        if (active) client?.activate();
+      });
+    });
+
     return () => {
       active = false;
+      sub.remove();
+      diag.markClosed("personal");
       client?.deactivate();
     };
   }, [enabled, updateQueue, leaveQueue, reanchorQueue, establishmentId]);

@@ -1,10 +1,13 @@
 import { useEffect } from "react";
+import { AppState } from "react-native";
 import { Client, type IMessage } from "@stomp/stompjs";
 import { useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 
 import { WS_URL } from "@services/api";
 import { EstablishmentWithProfessionals } from "@services/establishmentService";
+import { useWsDiagnosticsStore } from "@stores/wsDiagnosticsStore";
+import { shouldReconnectOnForeground } from "@domain/ws/diagnostics";
 
 const TOKEN_KEY = "vupth_access_token";
 
@@ -24,11 +27,13 @@ export function useQueueSocket(establishmentId: string | null) {
 
     let active = true;
     let client: Client | null = null;
+    const diag = useWsDiagnosticsStore.getState();
 
     (async () => {
       if (!active) return;
 
       const topic = `/topic/establishment/${establishmentId}/queue`;
+      diag.markConnecting("public");
 
       client = new Client({
         webSocketFactory: () => new WebSocket(WS_URL),
@@ -48,8 +53,13 @@ export function useQueueSocket(establishmentId: string | null) {
             client.connectHeaders = token ? { Authorization: `Bearer ${token}` } : {};
           }
         },
-        onConnect: () => {
+        // O frame CONNECTED carrega `heart-beat` e `user-name` — os dois dados
+        // que decidem qualquer teste de WS. Vão para o store e aparecem em
+        // Configurações; num binário instalado, `console.log` seria invisível.
+        onConnect: (frame) => {
+          diag.markConnected("public", frame?.headers ?? {});
           client?.subscribe(topic, (message: IMessage) => {
+            diag.markMessage("public");
             try {
               const snapshot = JSON.parse(
                 message.body,
@@ -64,6 +74,7 @@ export function useQueueSocket(establishmentId: string | null) {
           });
         },
         onWebSocketError: () => {
+          diag.markError("public");
           if (__DEV__) console.log(`[ws] falha no handshake (${WS_URL})`);
         },
       });
@@ -71,8 +82,21 @@ export function useQueueSocket(establishmentId: string | null) {
       client.activate();
     })();
 
+    // C18 — o Android suspende o processo e o socket morre SEM evento. Pior
+    // desde que o servidor passou a mandar heartbeat: a sessão suspensa é
+    // derrubada em ~10s em vez de ficar pendurada, então voltar do background
+    // desconectado virou o caso comum, não a exceção.
+    const sub = AppState.addEventListener("change", (next) => {
+      if (!shouldReconnectOnForeground(next, client?.connected ?? false)) return;
+      client?.deactivate().then(() => {
+        if (active) client?.activate();
+      });
+    });
+
     return () => {
       active = false;
+      sub.remove();
+      diag.markClosed("public");
       client?.deactivate();
     };
   }, [establishmentId, queryClient]);

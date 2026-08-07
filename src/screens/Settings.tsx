@@ -20,6 +20,7 @@ import {
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { WsDiagnostics } from "@components/WsDiagnostics";
 import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
@@ -255,6 +256,8 @@ export function Settings() {
           </Box>
         </VStack>
       )}
+
+      <WsDiagnostics />
 
       <VStack mt="$8" alignItems="center" gap="$1">
         <Text size="xs" color="$gray400">
