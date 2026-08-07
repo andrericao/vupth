@@ -76,6 +76,13 @@ export interface Establishment {
   // AGUARDA BACKEND expor na listagem (HANDOFF secao 11); ausente => fechada
   // fica escondida.
   available_professionals?: number | null;
+  // Distancia ate o cliente, em km, arredondada em 2 casas — vem do BACKEND
+  // quando a busca manda `lat`/`lng` (fatia B do GPS, 2026-08-01). O front NAO
+  // recalcula: se cada app fizesse a propria conta, client e partner mostrariam
+  // numeros diferentes para a mesma loja. `null`/ausente tem DOIS significados
+  // (a busca nao mandou coordenada, ou esta loja ainda nao foi geocodificada) —
+  // os dois se exibem igual: sem distancia.
+  distance_km?: number | null;
   // Avaliacao da loja — Item 6 backend. Opcional ate implementar; ausente =>
   // placeholder (pseudoRating). O card mostra a MAIOR estrela (rating_best =
   // melhor profissional) quando presente; senao a media agregada.

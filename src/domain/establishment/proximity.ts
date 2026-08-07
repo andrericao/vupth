@@ -1,6 +1,5 @@
 import { Establishment } from './types';
 import { sortEstablishments } from './filter';
-import { Coords } from '@domain/location/gps';
 
 // Filtro por localidade (Fase 1, front-only — Andre 2026-07-23). Um cliente novo
 // no CE não deveria ver as mesmas lojas de quem está em SC. Enquanto o backend
@@ -68,44 +67,18 @@ export function sortByProximity(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DISTÂNCIA REAL (GPS) — Andre 2026-08-01
+// DISTÂNCIA REAL (GPS) — fatia B do backend, consumida em 2026-08-06
 //
-// O backend entregou a fatia A do GPS (geocoding, 2026-07-27): o endereço do
-// estabelecimento já pode trazer `latitude`/`longitude` na listagem. Com as
-// coordenadas do device (expo-location) dá para calcular a distância AQUI, sem
-// esperar o filtro por raio do backend (fatia B). Quem ainda não foi
-// geocodificado simplesmente não mostra distância — nunca some da lista.
-
-const EARTH_RADIUS_KM = 6371;
-
-const toRad = (deg: number) => (deg * Math.PI) / 180;
-
-/** Haversine: distância em km entre dois pontos (lat/lng em graus). */
-export function haversineKm(a: Coords, b: Coords): number {
-  const dLat = toRad(b.latitude - a.latitude);
-  const dLng = toRad(b.longitude - a.longitude);
-  const lat1 = toRad(a.latitude);
-  const lat2 = toRad(b.latitude);
-
-  const h =
-    Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
-
-  return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(h)));
-}
-
-/**
- * Distância do cliente até o estabelecimento, ou `null` quando falta coordenada
- * de algum dos lados (device sem GPS / loja ainda não geocodificada).
- */
-export function establishmentDistanceKm(
-  e: Establishment,
-  from: Coords | null,
-): number | null {
-  const lat = e.address?.latitude;
-  const lng = e.address?.longitude;
-  if (!from || typeof lat !== 'number' || typeof lng !== 'number') return null;
-  return haversineKm(from, { latitude: lat, longitude: lng });
-}
+// O Haversine que existia AQUI foi REMOVIDO. O backend passou a devolver
+// `distance_km` por item quando a busca manda `lat`/`lng`, e o contrato dele é
+// explícito: o front NÃO recalcula. O motivo é concreto — se cada app fizesse a
+// própria conta (arredondamento, raio da Terra, coordenada de origem), o client
+// e o partner mostrariam números diferentes para a MESMA loja.
+//
+// Junto saiu a ordenação local por distância: com coordenadas, a ordem é a que
+// o backend mandou (distância pura, decisão do Andre 2026-08-06), inclusive
+// misturando lojas fechadas — elas carregam o badge âmbar AGENDAR, então o
+// cliente entende que há caminho.
 
 /** Rótulo curto do card: abaixo de 1 km vira metros arredondados a 50m. */
 export function formatDistanceKm(km: number): string {
@@ -118,31 +91,18 @@ export function formatDistanceKm(km: number): string {
 }
 
 /**
- * Ordena com a MELHOR informação disponível: quem tem distância real vem
- * primeiro (do mais perto ao mais longe); o resto mantém a ordenação por
- * bairro/cidade da Fase 1. Sem coordenadas do device, cai inteiro na Fase 1.
+ * Ordem da Home.
  *
- * Não FILTRA de propósito — a lista nunca pode esvaziar porque a loja ainda não
- * foi geocodificada ou porque o cliente negou o GPS.
+ * COM GPS: devolve a lista intocada — já veio ordenada por distância do
+ * backend. Reordenar aqui só poderia piorar (e desfaria o desempate estável
+ * por id que o backend faz para a paginação futura).
+ *
+ * SEM GPS: cai na Fase 1, ordenando por bairro/cidade do endereço.
  */
-export function sortByDistance(
+export function orderForHome(
   list: Establishment[],
-  from: Coords | null,
+  hasCoords: boolean,
   loc: UserLocation | null,
 ): Establishment[] {
-  if (!from) return sortByProximity(list, loc);
-
-  const withDistance: { e: Establishment; km: number }[] = [];
-  const without: Establishment[] = [];
-
-  for (const e of list) {
-    const km = establishmentDistanceKm(e, from);
-    if (km == null) without.push(e);
-    else withDistance.push({ e, km });
-  }
-
-  return [
-    ...withDistance.sort((a, b) => a.km - b.km).map((x) => x.e),
-    ...sortByProximity(without, loc),
-  ];
+  return hasCoords ? list : sortByProximity(list, loc);
 }

@@ -8,7 +8,7 @@ import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
-import { sortByDistance, establishmentDistanceKm, formatDistanceKm } from "@domain/establishment/proximity";
+import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
@@ -178,13 +178,13 @@ export function Home() {
       .catch(() => {});
   }, [isAuthenticated, accessToken, locationResolved, setLocation]);
 
-  // GPS: com as coordenadas do device, quem tem distancia real vem primeiro (do
-  // mais perto ao mais longe) e o resto mantem a ordenacao por bairro/cidade.
-  // NAO filtra por raio — a lista nunca pode esvaziar por falta de coordenada.
+  // GPS: quando ha coordenadas, `useEstablishments` ja pediu a lista com
+  // `lat`/`lng` e o BACKEND devolveu ordenada por distancia — nao reordenamos.
+  // Sem coordenadas, cai na ordenacao por bairro/cidade (Fase 1).
   const coords = useLocationStore((s) => s.coords);
-  const filteredEstablishments = sortByDistance(
+  const filteredEstablishments = orderForHome(
     filterEstablishments(establishments, search, selectedFilter),
-    coords ?? null,
+    coords != null,
     location,
   );
 
@@ -302,7 +302,7 @@ export function Home() {
           renderItem={({ item }) => (
             <EstablishmentCard
               establishment={item}
-              distanceKm={establishmentDistanceKm(item, coords ?? null)}
+              distanceKm={item.distance_km ?? null}
               onPress={() => handleEstablishmentPress(item)}
             />
           )}

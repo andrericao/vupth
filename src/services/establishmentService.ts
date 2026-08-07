@@ -1,5 +1,6 @@
 import { api } from './api';
 import { Establishment } from '@domain/establishment/types';
+import { Coords } from '@domain/location/gps';
 import { ProfessionalWithQueue, ServiceItemResponse } from '@domain/professional/types';
 
 export interface EstablishmentWithProfessionals {
@@ -17,11 +18,26 @@ export interface EstablishmentWithProfessionals {
 }
 
 export const establishmentService = {
-  getAll() {
+  /**
+   * Listagem da Home. Com `coords`, o BACKEND ordena por distância e devolve
+   * `distance_km` em cada item (fatia B do GPS, 2026-08-01).
+   *
+   * `radiusKm` NÃO é enviado de propósito: não existe raio default (decisão do
+   * Andre, 2026-07-27). Sem raio, ninguém some da lista — a loja ainda não
+   * geocodificada vai para o fim com `distance_km: null`. Com raio, ela SAIRIA,
+   * e o cliente leria "não há lojas" onde na verdade há.
+   */
+  getAll(coords?: Coords | null) {
     // includeAll=true: traz tambem os FECHADOS (por padrao a listagem publica so
     // retorna abertos — BUG5 do backend). O cliente pode querer manifestar
-    // interesse/agendar para a reabertura; o front ordena os fechados por ultimo.
-    return api.get<Establishment[]>('/establishment', { params: { includeAll: true } });
+    // interesse/agendar para a reabertura.
+    return api.get<Establishment[]>('/establishment', {
+      params: {
+        includeAll: true,
+        // Tem de ir o PAR: coordenada pela metade é 422 no backend.
+        ...(coords ? { lat: coords.latitude, lng: coords.longitude } : {}),
+      },
+    });
   },
 
   getById(id: string) {

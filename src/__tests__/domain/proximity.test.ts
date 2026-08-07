@@ -3,10 +3,8 @@ import { Establishment } from '@domain/establishment/types';
 import {
   proximityRank,
   sortByProximity,
-  haversineKm,
-  establishmentDistanceKm,
   formatDistanceKm,
-  sortByDistance,
+  orderForHome,
 } from '@domain/establishment/proximity';
 
 function withAddr(
@@ -78,11 +76,10 @@ describe('sortByProximity', () => {
   });
 });
 
-// ─── Distância real (GPS) — backend entregou o geocoding em 2026-07-27 ───────
+// ─── Distância real (GPS) — o cálculo é do BACKEND desde 2026-08-06 ──────────
 
-// Coordenadas reais para checar a fórmula contra distâncias conhecidas.
-const FLORIPA_CENTRO = { latitude: -27.5954, longitude: -48.548 };
-const SAO_JOSE_SC = { latitude: -27.6136, longitude: -48.6284 };
+// Coordenada real só para montar cenários de ordenação; a distância em si não é
+// mais calculada aqui.
 const SAO_PAULO = { latitude: -23.5505, longitude: -46.6333 };
 
 function withCoords(id: string, latitude: number, longitude: number, wait = 10): Establishment {
@@ -90,40 +87,11 @@ function withCoords(id: string, latitude: number, longitude: number, wait = 10):
   return { ...base, address: { ...base.address!, latitude, longitude } };
 }
 
-describe('distância real (GPS)', () => {
-  describe('haversineKm', () => {
-    it('mesmo ponto = 0', () => {
-      expect(haversineKm(FLORIPA_CENTRO, FLORIPA_CENTRO)).toBe(0);
-    });
-
-    it('Floripa → São José ≈ 8,2 km (conferido no mapa)', () => {
-      expect(haversineKm(FLORIPA_CENTRO, SAO_JOSE_SC)).toBeCloseTo(8.2, 1);
-    });
-
-    it('Floripa → São Paulo ≈ 490 km', () => {
-      expect(haversineKm(FLORIPA_CENTRO, SAO_PAULO)).toBeGreaterThan(470);
-      expect(haversineKm(FLORIPA_CENTRO, SAO_PAULO)).toBeLessThan(510);
-    });
-
-    it('é simétrica', () => {
-      expect(haversineKm(SAO_JOSE_SC, SAO_PAULO)).toBeCloseTo(haversineKm(SAO_PAULO, SAO_JOSE_SC), 6);
-    });
-  });
-
-  describe('establishmentDistanceKm', () => {
-    it('null quando a loja ainda não foi geocodificada', () => {
-      expect(establishmentDistanceKm(withAddr('a', 'X', 'Y', 5), FLORIPA_CENTRO)).toBeNull();
-    });
-
-    it('null quando o device não tem coordenada (GPS negado)', () => {
-      expect(establishmentDistanceKm(withCoords('a', -27.6, -48.5), null)).toBeNull();
-    });
-
-    it('calcula quando os dois lados têm coordenada', () => {
-      const km = establishmentDistanceKm(withCoords('a', SAO_JOSE_SC.latitude, SAO_JOSE_SC.longitude), FLORIPA_CENTRO);
-      expect(km).toBeCloseTo(8.2, 1);
-    });
-  });
+describe('distância real (GPS) — quem calcula é o BACKEND', () => {
+  // O Haversine local foi REMOVIDO em 2026-08-06. O backend devolve
+  // `distance_km` por item quando a busca manda lat/lng, e o contrato dele é
+  // explícito: o front não recalcula — senão client e partner mostrariam
+  // números diferentes para a mesma loja.
 
   describe('formatDistanceKm', () => {
     it('abaixo de 1 km vira metros arredondados a 50', () => {
@@ -144,36 +112,37 @@ describe('distância real (GPS)', () => {
     });
   });
 
-  describe('sortByDistance', () => {
-    it('mais perto primeiro quando há coordenadas', () => {
+  describe('orderForHome', () => {
+    it('COM GPS devolve a lista intocada — a ordem é a do backend', () => {
+      // Decisão do Andre (2026-08-06): distância pura. Reordenar aqui desfaria
+      // o desempate estável por id que o backend faz.
       const list = [
         withCoords('longe', SAO_PAULO.latitude, SAO_PAULO.longitude),
         withCoords('perto', -27.5964, -48.549),
-        withCoords('medio', SAO_JOSE_SC.latitude, SAO_JOSE_SC.longitude),
       ];
-      expect(sortByDistance(list, FLORIPA_CENTRO, null).map((e) => e.id)).toEqual([
-        'perto',
-        'medio',
-        'longe',
+      expect(orderForHome(list, true, null).map((e) => e.id)).toEqual(['longe', 'perto']);
+    });
+
+    it('COM GPS não separa loja fechada — ela some do topo só se estiver longe', () => {
+      const fechada = { ...withCoords('fechada-perto', -27.5964, -48.549), is_open: false };
+      const list = [fechada, withCoords('aberta-longe', SAO_PAULO.latitude, SAO_PAULO.longitude)];
+
+      expect(orderForHome(list, true, null).map((e) => e.id)).toEqual([
+        'fechada-perto',
+        'aberta-longe',
       ]);
     });
 
-    it('quem não tem coordenada NÃO some — vai depois, na ordem da Fase 1', () => {
-      const list = [
-        withAddr('sem-coord-lenta', 'Florianópolis', 'Centro', 40),
-        withCoords('com-coord', SAO_JOSE_SC.latitude, SAO_JOSE_SC.longitude),
-        withAddr('sem-coord-rapida', 'Florianópolis', 'Centro', 5),
-      ];
-      const out = sortByDistance(list, FLORIPA_CENTRO, { city: 'Florianópolis', neighborhood: 'Centro' });
-      expect(out.map((e) => e.id)).toEqual(['com-coord', 'sem-coord-rapida', 'sem-coord-lenta']);
-    });
-
-    it('sem GPS cai na ordenação por bairro/cidade (Fase 1)', () => {
+    it('SEM GPS cai na ordenação por bairro/cidade (Fase 1)', () => {
       const list = [
         withAddr('outra-cidade', 'Fortaleza', 'Centro', 5, 'CE'),
         withAddr('meu-bairro', 'Florianópolis', 'Centro', 30),
       ];
-      const out = sortByDistance(list, null, { city: 'Florianópolis', neighborhood: 'Centro', state: 'SC' });
+      const out = orderForHome(list, false, {
+        city: 'Florianópolis',
+        neighborhood: 'Centro',
+        state: 'SC',
+      });
       expect(out.map((e) => e.id)).toEqual(['meu-bairro', 'outra-cidade']);
     });
   });
