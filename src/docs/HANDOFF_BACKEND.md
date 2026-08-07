@@ -32,6 +32,26 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 
 > Consolidado após a reconciliação com o lote do backend de 2026-07-22 e com o partner. **Cada equipe: ler a sua coluna.** Detalhes nas seções indicadas.
 
+### 🚧 REGRA DE FRONTEIRA (Andre, 2026-08-06): o que é do backend, o backend resolve
+
+> **O front-client NÃO constrói contorno para pendência de backend.** A regra saiu de um caso
+> concreto: até 06/08 nós calculávamos a distância por conta própria (Haversine em `proximity.ts`),
+> fazendo o trabalho que era do backend — e contra o contrato deles, que diz "o front NÃO
+> recalcula". Resultado: client e partner podiam mostrar distâncias diferentes para a MESMA loja, e
+> na hora em que a fatia B chegou foi preciso **desmontar** o que tínhamos feito. Contorno em
+> território alheio não economiza trabalho, adia e duplica.
+>
+> **O que isso significa na prática:** os itens abaixo ficam **parados** esperando o backend. Não
+> deduzir blocos de agenda por outra rota, não simular envio de e-mail, não mascarar no app uma
+> conexão que o servidor deveria ter recusado. Se o custo de esperar for alto, a saída é priorizar
+> com o backend — não construir aqui.
+>
+> **Exceção explícita — observabilidade não é contorno.** O painel de diagnóstico do WS
+> (Configurações → "Tempo real") **detecta** o `#31`, não o conserta: mostra quando a sessão subiu
+> anônima. Ele existe porque sem instrumento nenhum teste conclui nada, e **não deve ser usado como
+> argumento para rebaixar o `#31`** — enquanto o backend não recusar token inválido, o app continua
+> sem receber erro nenhum e o canal pessoal segue podendo morrer calado.
+
 ### 🔴 BACKEND — pedidos abertos do client
 > ✅ **Reconciliação 2026-07-23 confirmada no PRD_BACKEND:** os três pedidos abaixo foram **incorporados na fonte única** do backend (a nota stale do `/swap-offers` foi corrigida). Seguem **abertos** (a construir), mas **não são mais desalinhamento** — só aguardam implementação.
 | # | Pedido | Seção | Situação |
@@ -44,7 +64,8 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 | B4 | Já na fonte única do backend (só lembrar a prioridade do client): validação do alvo do `reschedule` (janela+refeição) · estender strike a `reschedule`/`move-to-end` ETA<1h · adicionar serviço a attendance na fila (C8) | 8/6/9 | ⬜ abertos lá |
 | B5 | **Melhorias de rating (backend item "Melhorias de rating", ⬜ aberto)** — 4 coisas, nenhuma bloqueia: (a) **`rated: boolean`** no `GET /attendances/client/me` (fonte da verdade p/ esconder "Avaliar"; hoje o front usa `ratedStore` local que não sincroniza entre aparelhos) · (b) **rollup por ESTABELECIMENTO** no `GET /establishment` (Σ`ratingSum`÷Σ`ratingCount` → estrela real no card da Home; hoje placeholder) · (c) **`rating_best`** (maior nota entre os profissionais) + rating como desempate na ordenação · (d) **`establishmentName`** no `client/me` (hoje só `establishmentId`) | 3 / PRD H3 | ⬜ backend #13 |
 | B6 | **Filtro por localidade — Fase 2** (escala): aceitar `GET /establishment?uf=&city=&neighborhood=` (+ o `includeAll` já existente) e devolver só os da região. O front já tem a localidade do cliente (`locationStore`) pra mandar nos params; a Fase 1 (ordenar no device) já roda. É o item **C1** | 14 / PRD 11 | ⬜ backend |
-| B7 | **Filtro por localidade — Fase 3 (GPS) — 🔺 PRIORIDADE 1 do client (Andre 2026-08-01)**: **geocodar** o endereço de cada estabelecimento no cadastro (CEP/endereço → `latitude`/`longitude`, campos que o `Address` já tem) + `GET /establishment?lat=&lng=&radiusKm=` ordenado por distância (Haversine). ✅ **O LADO DO CLIENT JÁ ESTÁ FEITO (2026-08-01):** `expo-location` instalado + permissão pedida **na primeira abertura** + **reverse geocode no device** (nativo, sem API paga) preenchendo bairro/cidade/UF, e as **coordenadas já ficam guardadas** (`locationStore.coords`) esperando o endpoint. Enquanto o backend não vem, isso já melhora a Fase 1 (a Home abre ordenada pelo bairro do cliente **sem ele digitar CEP**); com o B7 vira **distância real** ("2,3 km"). ⚠️ Ativa só no binário 1.0.1 (módulo nativo) | 14 / PRD 11 | 🟡 **front pronto / backend é o gargalo** |
+| B7 | ✅ **ENTREGUE E CONSUMIDO (2026-08-06)** — ~~Filtro por localidade — Fase 3 (GPS) — PRIORIDADE 1 do client (Andre 2026-08-01)**: **geocodar** o endereço de cada estabelecimento no cadastro (CEP/endereço → `latitude`/`longitude`, campos que o `Address` já tem) + `GET /establishment?lat=&lng=&radiusKm=` ordenado por distância (Haversine). ✅ **O LADO DO CLIENT JÁ ESTÁ FEITO (2026-08-01):** `expo-location` instalado + permissão pedida **na primeira abertura** + **reverse geocode no device** (nativo, sem API paga) preenchendo bairro/cidade/UF, e as **coordenadas já ficam guardadas** (`locationStore.coords`) esperando o endpoint. Enquanto o backend não vem, isso já melhora a Fase 1 (a Home abre ordenada pelo bairro do cliente **sem ele digitar CEP**); com o B7 vira **distância real** ("2,3 km"). ⚠️ Ativa só no binário 1.0.1 (módulo nativo) | 14 / PRD 11 | 🟡 **front pronto / backend é o gargalo** |
+| B8 | 🔴 **`#31` / partner S14 — token inválido conecta ANÔNIMO em vez de ser recusado.** O `StompAuthChannelInterceptor` loga `warn` e segue. Com access token de 1h e `reconnectDelay` reconectando sozinho, uma reconexão com token vencido sobe anônima: o tópico público continua atualizando a fila e **só o canal pessoal morre calado**, sem erro em nenhuma ponta. **Só o backend fecha** — sem a recusa, o app não tem como saber que está anônimo. O painel de diagnóstico do client (2026-08-06) apenas EXIBE o estado; não substitui a correção. Pedido: recusar o CONNECT com token inválido/expirado (erro STOMP), em vez de degradar para anônimo | 18b | ⬜ aberto |
 
 **🔗 Regras cross-cutting novas (partner/backend, o client precisa saber):**
 - **ETA com buffer de −10min (S10 partner, regra GLOBAL):** o **backend** calcula o tempo de espera **já com −10min** (piso 0) para o cliente chegar antes; **client e partner só EXIBEM o número** que vier — **NÃO subtrair no front** (evita divergência). O client já mostra `estimated_wait_minutes` como veio (nenhuma lógica de buffer a adicionar). Só ficar atento se o backend expuser `display_wait` vs `raw_eta` em campos separados.
