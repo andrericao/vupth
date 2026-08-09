@@ -8,6 +8,8 @@ import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
+// Rotulos das categorias: fonte unica, compartilhada com a tela do estabelecimento.
+import { SERVICE_TYPE_LABELS, serviceTypeLabel } from "@domain/establishment/serviceType";
 import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
@@ -22,23 +24,14 @@ import { cardShadow } from "@utils/styles";
 import { formatWaitTime } from "@domain/queue/types";
 import { UserCircle, Queue, Clock, Star, MapPin } from "phosphor-react-native";
 
-const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
-  BARBER: "Barbearia",
-  BEAUTY_SALON: "Salão",
-  EYEBROW: "Sobrancelha",
-  NAIL_SALON: "Manicure",
-  SPA: "Spa",
-  CLINIC: "Clínica",
-};
-
+// Derivado da fonte unica: categoria nova entra aqui sozinha, e o rotulo do
+// filtro nunca diverge do rotulo do card.
 const SERVICE_FILTERS: { key: ServiceType | "ALL"; label: string }[] = [
   { key: "ALL", label: "Todos" },
-  { key: "BARBER", label: "Barbearia" },
-  { key: "BEAUTY_SALON", label: "Salão" },
-  { key: "EYEBROW", label: "Sobrancelha" },
-  { key: "NAIL_SALON", label: "Manicure" },
-  { key: "SPA", label: "Spa" },
-  { key: "CLINIC", label: "Clínica" },
+  ...(Object.keys(SERVICE_TYPE_LABELS) as ServiceType[]).map((key) => ({
+    key,
+    label: SERVICE_TYPE_LABELS[key],
+  })),
 ];
 
 function EstablishmentCard({
@@ -73,7 +66,7 @@ function EstablishmentCard({
             {establishment.services?.length > 0 && (
               <Text size="sm" color="$gray300" mt="$1">
                 {establishment.services
-                  .map((s) => SERVICE_TYPE_LABELS[s as ServiceType] ?? s)
+                  .map(serviceTypeLabel)
                   .join(", ")}
               </Text>
             )}
