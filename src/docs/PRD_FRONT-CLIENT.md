@@ -102,7 +102,9 @@ Antes desta data a arte estava **duplicada**: `assets/icon.png` (que o `app.json
 O `assets/splash.png` **nunca tinha sido trocado** — era o círculo cinza padrão do Expo sobre fundo **branco**. A abertura era: tela branca com um círculo genérico → corte → tela verde do app. Agora:
 
 1. **Splash NATIVO** — o mesmo "V" centralizado sobre o verde do ícone (`#2E432F`), gerado a partir de `assets/icon.png` (mesma arte, sem desenho novo). O `backgroundColor` do splash foi de `#ffffff` para o verde, senão havia um flash branco antes de a imagem aparecer.
-2. **`PreparingServer`** — a primeira coisa que o JS desenha, enquanto o portão de readiness acorda o Render. Repete o **mesmo "V"** no topo (via `BrandMark`) e só então roda a sequência que já existia: *Abrindo o app → Chegando na loja → Na cadeira → Pronto, sem fila*.
+2. **`PreparingServer`** — a primeira coisa que o JS desenha, enquanto o portão de readiness acorda o Render: a sequência *Abrindo o app → Chegando na loja → Na cadeira → Pronto, sem fila*.
+
+> ⚠️ **O "V" chegou a ser posto nesta tela e foi REMOVIDO no mesmo dia** (Andre, device: *"o começo ficou horrível"*). A ideia era emendar com o splash — mas **o splash é NATIVO e não sai por OTA**, então o aparelho recebeu METADE da ideia: um ladrilho verde escuro solto sobre o fundo quase branco desta tela, sem o splash verde que o justificaria. **Lição:** mudança de abertura que dependa do splash **não pode ser entregue por OTA sozinha** — tem de ir junto com o `eas build`. Se a marca voltar aqui, que seja com a tela inteira no verde, não como um selo avulso.
 
 Sem o passo 2 a marca sumia no instante em que o splash saía e voltava depois, dando um piscar. ⚠️ O splash é **nativo**: só aparece num `eas build` novo.
 
@@ -136,6 +138,16 @@ O backend entregou a fatia B em 01/08: `GET /establishment?lat=&lng=` **ordena p
 | Formatação | `formatDistanceKm` **ficou** — saiu o cálculo, não a exibição |
 
 **Ordenação com GPS = distância pura (decisão do Andre, 2026-08-06):** loja **fechada perto vem antes de aberta longe**. Ela carrega o badge âmbar AGENDAR, então o cliente entende que há caminho. Há teste fixando isso.
+
+### 🏷️ Rótulos de categoria — fonte única (2026-08-06)
+
+`SERVICE_TYPE_LABELS` vivia **dentro da `Home.tsx`** (e havia uma **segunda cópia** logo abaixo, nos filtros). Resultado: só a Home traduzia, e a categoria aparecia crua em qualquer outra tela — feedback do device: *"na tela inicial aparece barbearia, salão etc, mas quando clicamos no estabelecimento o tipo fica em inglês"*.
+
+`domain/establishment/serviceType.ts` passou a ser a fonte única:
+
+- **`serviceTypeLabel(v)`** — aceita minúscula/espaço; **valor desconhecido volta intacto**, para nada sumir da tela quando o backend criar uma categoria nova.
+- **`formatSpecialty(raw)`** — a `specialty` do profissional é **texto livre** no backend (`"Corte masculino"`, `"Colorista"`), mas parte dos cadastros veio preenchida com a categoria **em inglês**, e era isso que aparecia embaixo do nome. Traduz o que reconhece e **preserva o resto**: mapear à força apagaria a especialidade de quem escreveu de verdade. Aceita lista por vírgula.
+- Os **filtros da Home são derivados** do mapa — categoria nova entra sozinha nos três lugares e o rótulo do filtro nunca diverge do rótulo do card.
 
 ### 🔌 Diagnóstico do WebSocket no device (2026-08-06)
 
