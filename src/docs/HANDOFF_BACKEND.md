@@ -356,3 +356,56 @@ Tokens de tipografia e acessibilidade valem para os dois apps: **Poppins** (H1/H
 ### 15.5 O que MANDAMOS para o partner nesta rodada
 
 O diagnóstico do WebSocket (§4): **as três suspeitas que viviam no nosso handoff eram falsas** — o servidor sempre funcionou. A causa era `forceBinaryWSFrames` + `appendMissingNULLonIncoming` no cliente. **O código deles é quase idêntico ao nosso**, então provavelmente têm as mesmas flags. A página `src/docs/ws-test.html` está versionada aqui e serve aos dois apps.
+
+---
+
+### 15.6 📍 GPS no FRONT-PARTNER — pedido do Andre (2026-08-06)
+
+> **Para o front-partner.** Pedido do Andre: *"preciso que o front partner também peça o GPS assim que os parceiros acessarem o app, principalmente para os estabelecimentos — é muito importante pegarmos a lat/long deles."*
+>
+> Escrito aqui (handoff do client) porque **não editamos o repositório do partner**. Copiem para o PRD de vocês.
+
+#### Por que isso importa mais do que parece
+
+A coordenada do estabelecimento é o **ativo** da busca por proximidade. Sem ela, a loja simplesmente **não existe** para quem procura por perto: com `?lat&lng&radiusKm`, o backend **remove** da lista quem não tem coordenada (não dá para afirmar que ela cabe no raio). E o dono **está dentro da loja** no momento em que a cadastra — é a fonte mais precisa que vai existir. O CEP resolve a **faixa do logradouro, não a porta**.
+
+#### O que o backend já faz sozinho (não reimplementar)
+
+| Fato | Consequência para vocês |
+|---|---|
+| Sem `latitude`/`longitude` no request, o backend **geocodifica sozinho** depois do commit, em thread de fundo (BrasilAPI CEP v2 → Nominatim) | O cadastro por texto continua funcionando. O GPS **melhora** a precisão, não é pré-requisito |
+| Com `latitude`/`longitude` no request, o backend **NÃO geocodifica** | É o **caminho preferencial**: ele não sobrescreve o dado mais preciso pelo menos preciso |
+| Falha do geocoding **não quebra** o cadastro | Grava sem coordenada e é retentado depois |
+| `PATCH /establishments/{id}/addresses/{addressId}` conserta endereço já cadastrado | Editar só o texto **não** re-geocodifica; endereço **sem** coordenada **é** retentado no update |
+
+#### Contrato (PRD_BACKEND é a fonte da verdade — seções 17 e "GPS fatia A2")
+
+**Enviar a coordenada no cadastro/edição do endereço do establishment:**
+
+```jsonc
+{ "street": "...", "number": "100", "neighborhood": "...", "city": "...", "state": "RJ",
+  "zipCode": "21012000",
+  "latitude": -22.8422, "longitude": -43.2764 }   // opcionais, mas PREFERENCIAIS
+```
+
+- **Tem de ir o PAR.** `422 ADDRESS_INVALID_COORDINATES` quando vem **só uma das duas**, fora do globo, ou **`(0,0)`** — a "ilha nula", que no front costuma ser um objeto de localização **não preenchido**, não um erro de digitação. **As duas ausentes é válido** (cadastro por texto).
+
+**`GET /geocoding/reverse?lat=&lng=`** — coordenada → endereço por extenso, para o dono **conferir**.
+
+- **Autenticado, sem exigir role** (quem cadastra a primeira loja ainda pode não ter `ROLE_OWNER`).
+- A resposta **espelha o `AddressRequest` de propósito** — jogar direto no formulário — e traz `displayName`.
+- ⚠️ **Qualquer campo pode vir `null`** e o front tem de aguentar: o reverso quase nunca sabe o número da casa e às vezes nem o CEP. Só o `displayName` é praticamente sempre presente.
+
+#### Receita de implementação (o que aprendemos fazendo no client)
+
+1. **`expo-location` no `app.json`**, com as strings de permissão em pt-BR explicando o benefício.
+2. **Carregar o módulo nativo com `require` dentro de `try/catch`.** Uma OTA que caia num binário **sem** o módulo nativo derruba o app inteiro no boot. Com o try/catch, o hook simplesmente não faz nada e o cadastro por texto continua valendo. Herdamos essa disciplina do push e ela já nos salvou.
+3. **Pedir na primeira abertura**, marcando um `gpsAsked` persistido para **não re-perguntar**, e sem atropelar quem já definiu algo na mão.
+4. **No formulário de endereço, OFERECER o GPS ativamente** — não basta um botão na tela. Feedback do Andre no device (05/08) sobre o nosso app: o botão existia desde 01/08 e ele **não percebeu que dava para não digitar**. Passamos a perguntar ao abrir o formulário; o botão manual ficou para quem recusar.
+5. **Fluxo completo:** pegar coords → `GET /geocoding/reverse` → **pré-preencher** → o dono **confere e completa** (número, complemento) → salvar **com** `latitude`/`longitude`.
+6. **Campo ausente no reverso NÃO apaga o que o dono já digitou.** No client isso virou uma função pura (`toAddressDraft`) que só devolve o que o aparelho soube dizer; CEP incompleto é descartado. Sem essa regra, um reverso pobre limpa o formulário.
+7. **Editar endereço existente preserva a coordenada já salva**, a menos que o dono peça o GPS de novo.
+
+#### E se vocês exibirem distância em algum lugar
+
+Usem o **`distance_km` do backend**. **Não recalcular** — foi exatamente o erro que o client cometeu e desfez em 06/08: calculávamos Haversine por conta e os dois apps podiam mostrar números diferentes para a **mesma** loja. Ver a regra de fronteira no topo deste documento.
