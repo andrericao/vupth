@@ -223,13 +223,16 @@ Domínio puro em `domain/ws/diagnostics.ts` (17 casos). **C18 feito junto:** `Ap
 ```
 src/screens/
   Home.tsx                  — Lista + busca + filtro por tipo + icone perfil + banner fila ativa + pull-to-refresh
+                              Distancia do card vem do backend (`distance_km`); com GPS a ORDEM e a do backend
   EstablishmentDetail.tsx   — Profissionais + entrar na fila (salva no queueStore)
-  Login.tsx                 — Email + senha + toggle visibilidade
+  Login.tsx                 — Email + senha + toggle visibilidade; "Entrar" solido e "Criar conta" outline
   SignUp.tsx                — Email + senha + confirmar + regras visuais + toggle
   QueueStatus.tsx           — Tempo estimado (countdown), info tooltip, criar attendance, cancelar, voltar
   Profile.tsx               — Menu: Atendimentos + Configuracoes + Sair da conta
   Attendances.tsx           — Secao "Em andamento" (fila ativa) + "Realizados" (placeholder)
-  Settings.tsx              — Nome, E-mail, Senha, Endereco, Deletar conta
+  Settings.tsx              — Nome, E-mail, Senha, Endereco, Deletar conta, OTA,
+                              + PAINEL DE DIAGNOSTICO DO WS (2026-08-06): estado por canal,
+                                `user-name` do CONNECTED (vazio = ANONIMO), heartbeat, recebidas
   EditProfile.tsx           — Nome, sobrenome, telefone, data nasc., genero (PATCH /profile/general-infos)
   EditEmail.tsx             — Troca email + atualiza tokens (PATCH /profile/update-email/me)
   EditPassword.tsx          — Nova senha + regras visuais + atualiza tokens (PATCH /profile/update-password/me)
@@ -260,6 +263,14 @@ src/screens/
 ---
 
 ## 5. Stores e Hooks
+
+### wsDiagnosticsStore.ts (Zustand, **sem** persistencia — 2026-08-06)
+Estado do WebSocket por canal (`public` / `personal`) para o painel de Configuracoes: `status`,
+`info` (do frame CONNECTED), `connects`, `connectedAt`, `lastMessageAt`, `messages`.
+**Nao e persistido de proposito**: e retrato do momento, e um valor de sessao anterior enganaria.
+Alimentado por `useQueueSocket`/`useQueueNotifications` (`markConnecting`/`markConnected`/
+`markMessage`/`markError`/`markClosed`). Logica pura em `domain/ws/diagnostics.ts`.
+
 
 ### authStore.ts (Zustand + SecureStore)
 - `login(email, password)` — POST /auth/login → armazena tokens
@@ -436,7 +447,25 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 
 ## 10. Testes Unitarios e Integracao
 
-### Resumo: 144 testes em 18 suites
+### Resumo: **462 testes em 57 suites** (medido no portao de push, 2026-08-06)
+
+> ⚠️ **A tabela abaixo e um RECORTE historico e envelhece sozinha** — ela parou em "144 testes / 18
+> suites" enquanto a bateria triplicava. A contagem autoritativa sai de `npm test` (o `pre-push` roda
+> e imprime). Nao gastar esforco mantendo a contagem por suite na mao; manter aqui so as suites que
+> documentam uma DECISAO, listadas logo abaixo.
+
+**Suites criadas na rodada de 2026-08-05/06** (cada uma existe para travar uma decisao, nao so para
+cobrir linha):
+
+| Suite | Casos | O que trava |
+|-------|:-----:|-------------|
+| `screens/ForgotPassword.test.tsx` | 4 | Portao de readiness com tentativas CURTAS e cancelavel; cancelar NAO dispara o POST |
+| `screens/EditAddress.test.tsx` | 3 | Abrir o formulario OFERECE o GPS; recusar deixa em branco |
+| `components/ChangeTurnModal.test.tsx` | 6 | As 4 saidas como radio + um Confirmar; "ir para o fim" desabilitado para quem ja e o ultimo |
+| `components/BrandMark.test.tsx` | 5 | A marca aponta para `assets/icon.png` — um `require` de logo avulso em outra tela quebra aqui |
+| `domain/wsDiagnostics.test.ts` | 17 | `user-name` vazio = ANONIMO (o `#31`); heartbeat 0; `shouldReconnectOnForeground` (C18) |
+| `domain/proximity.test.ts` (reescrita) | — | `orderForHome`: com GPS a lista vem INTOCADA do backend; fechada perto antes de aberta longe |
+
 
 | Suite | Testes | Tipo |
 |-------|--------|------|
