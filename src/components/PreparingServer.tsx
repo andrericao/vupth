@@ -8,7 +8,6 @@ import {
   PersonSimpleWalk,
 } from "phosphor-react-native";
 
-import { BrandMark } from "@components/BrandMark";
 
 // Tela do portão de readiness / cold start. Enquanto o backend acorda (Render
 // Free, ~50s), seguramos o app aqui. No lugar do spinner, a animação de ABERTURA
@@ -16,11 +15,12 @@ import { BrandMark } from "@components/BrandMark";
 // cadeira -> sair sem fila. Espelha o front-partner (ServerWarmup/WarmupAnimation).
 // Respeita reduce-motion. Futuro: trocar por Lottie quando o design entregar o JSON.
 //
-// ABERTURA EM DUAS PARTES (Andre 2026-08-06: "no lugar do splash podemos por o V
-// e depois a sequência de imagens que temos"): o splash NATIVO mostra o "V" sobre
-// o verde da marca, e esta tela — a primeira coisa que o JS desenha — repete o
-// mesmo "V" no topo e só então roda a sequência. Sem essa repetição, a marca
-// sumia no instante em que o splash saía e voltava depois, dando um piscar.
+// ⚠️ O "V" JÁ ESTEVE AQUI e foi REMOVIDO (Andre, teste no device 2026-08-06:
+// "o começo ficou horrível"). A ideia era emendar com o splash novo, mas o
+// splash é NATIVO e ainda não chegou ao aparelho — então o que a OTA entregou
+// foi um ladrilho verde escuro solto sobre este fundo quase branco, sem nada
+// que o justificasse. Se a marca voltar a esta tela, que seja junto com o
+// build do splash e com a tela inteira no verde, não como um selo avulso.
 
 const GREEN = "#3B7A3F";
 
@@ -111,9 +111,6 @@ export function PreparingServer() {
   return (
     <Center flex={1} bg="$gray700" px={24}>
       <VStack space="xl" alignItems="center">
-        {/* Continuidade com o splash nativo: a marca é a mesma arte, no mesmo
-            lugar. Ver `BrandMark` — fonte única do logo. */}
-        <BrandMark size={72} />
         <WarmupAnimation />
         <Text size="xs" color="$gray400" textAlign="center">
           Preparando servidor — na primeira vez pode levar até ~50s.
