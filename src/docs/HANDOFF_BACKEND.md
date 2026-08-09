@@ -409,3 +409,38 @@ A coordenada do estabelecimento é o **ativo** da busca por proximidade. Sem ela
 #### E se vocês exibirem distância em algum lugar
 
 Usem o **`distance_km` do backend**. **Não recalcular** — foi exatamente o erro que o client cometeu e desfez em 06/08: calculávamos Haversine por conta e os dois apps podiam mostrar números diferentes para a **mesma** loja. Ver a regra de fronteira no topo deste documento.
+
+---
+
+## 16. 📬 PARA AS OUTRAS EQUIPES — ler aqui (Andre 2026-08-07)
+
+> O Andre é o canal entre os três projetos e pediu que **tudo o que for de outra equipe fique
+> escrito**, para elas lerem direto daqui. **Nós não editamos o repositório de vocês.**
+
+### 16.1 🔴 PARA O BACKEND — o que ficou pendente conosco
+
+| # | Pedido | Situação |
+|---|--------|----------|
+| **B2** | `GET /attendances/intentions/professional/{id}` **público com blocos ANÔNIMOS** (`{ frame: {projectedQueueEnd, openingTime, closingTime}, blocks: [{start, durationMinutes}] }`, sem dado pessoal). **Trava a F5 do client** — o cálculo dos horários (`computeAvailableSlots`) já está pronto e testado aqui, só faltam os blocos de terceiros | ⬜ aberto |
+| **B3** | Esqueci minha senha: **validar o envio real** e investigar o **reenvio** que não chegou (teste de device 2026-07-23). O front já cobre cold start, timeout e reenvio na UX — o que falta é a infra | ⬜ aberto |
+| **B8** | `#31` / partner S14: **recusar o CONNECT com token inválido/expirado**, em vez de degradar para anônimo. Sem a recusa o app **não tem como saber** que subiu anônimo: o tópico público segue atualizando e só o canal pessoal morre calado. O painel de diagnóstico do client apenas EXIBE o estado — **não é conserto e não deve ser usado para rebaixar o item** | ⬜ aberto |
+
+**Correções ao PRD de vocês** (para vocês aplicarem — não mexemos lá):
+
+1. **C18 já está FEITO no client** desde 2026-08-06 (`AppState` nos dois hooks: ao voltar ao primeiro plano com o socket caído, derruba e reconecta). O PRD de vocês, conferido em 05/08, ainda diz *"Client ⬜ ABERTO — hoje na prioridade 9"*.
+2. **S19 — resolvido, e obrigado pela correção.** Apontamos em 06/08 que a rota `DELETE /profile/delete/me` **já existia** (seção 6, tabela de permissões do CLIENT e cobertura de integração), contra o enunciado que dizia "não existe rota de exclusão (grep vazio)". Vocês reescreveram no dia seguinte — e acharam o problema **real**, que era muito pior: a rota era **destrutiva** (`cascade = ALL`), então apagar a conta de um dono **apagava a loja inteira**. Está fechado.
+
+### 16.2 ⚠️ O QUE O NOVO DELETE DE CONTA QUEBROU NO CLIENT
+
+**O botão "Deletar conta" do app-cliente está quebrado agora.** Enviamos `DELETE /profile/delete/me` **sem corpo**, e o contrato novo (2026-08-07) devolve **`400 INVALID_REQUEST_BODY`** — o próprio PRD de vocês já registra que *"é o que os apps mandam hoje"*.
+
+Para consertar do nosso lado (**item de front, registrado no PRD_FRONT-CLIENT §12**):
+
+- pedir a **senha atual** antes de apagar e mandar `{ "current_password": "..." }`;
+- tratar **`401 CURRENT_PASSWORD_INVALID`** como erro de campo, **não** como sessão expirada — senão o interceptor global desloga o usuário no meio do fluxo;
+- tratar **`409 ACCOUNT_DELETE_NOT_ALLOWED`** exibindo **a mensagem do backend**, que diz *o que fazer* para destravar (sair da fila, encerrar o atendimento, esperar a loja esvaziar). Nunca traduzir para "não é possível apagar esta conta" — bloqueio permanente reprova na publicação;
+- sucesso agora é **`204 No Content`** e a conta **para de autenticar no request seguinte** (o token morre na hora, não espera expirar) — o app tem de ir direto para o fluxo deslogado.
+
+### 16.3 📍 PARA O FRONT-PARTNER — GPS
+
+A spec completa está na **§15.6** deste documento: pedir a permissão de localização **na abertura do app** e mandar a **`latitude`/`longitude` do aparelho do dono** no cadastro/edição do endereço do estabelecimento (é o caminho preferencial — com ela o backend **não** geocodifica e não sobrescreve o dado mais preciso). Inclui o `GET /geocoding/reverse` para o dono conferir, a validação `422` do par de coordenadas, e as armadilhas que já pagamos aqui (`require` do módulo nativo em `try/catch`, oferecer o GPS em vez de deixar um botão passivo, não deixar campo nulo do reverso apagar o que o dono digitou).
