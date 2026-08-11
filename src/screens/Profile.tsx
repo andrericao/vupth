@@ -7,6 +7,7 @@ import {
   Center,
   Box,
   HStack,
+  ScrollView,
 } from "@gluestack-ui/themed";
 import {
   ClipboardText,
@@ -74,70 +75,77 @@ export function Profile() {
   }
 
   return (
-    <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-      <Header showBackButton />
+    <ScrollView
+      flex={1}
+      bg="$gray700"
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <VStack flex={1} px={15} pt={60} pb={30}>
+        <Header showBackButton />
 
-      <Center mt="$6">
-        <Box
-          w={80}
-          h={80}
-          borderRadius="$full"
-          bg="$green500"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Text color="$white" fontSize="$3xl" fontFamily="$heading">
-            {user?.email?.charAt(0).toUpperCase() ?? "?"}
-          </Text>
+        <Center mt="$6">
+          <Box
+            w={80}
+            h={80}
+            borderRadius="$full"
+            bg="$green500"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Text color="$white" fontSize="$3xl" fontFamily="$heading">
+              {user?.email?.charAt(0).toUpperCase() ?? "?"}
+            </Text>
+          </Box>
+          <Heading fontFamily="$heading" fontSize="$xl" mt="$3">
+            {isAuthenticated ? (user?.email ?? "Usuário") : "Visitante"}
+          </Heading>
+        </Center>
+
+        <Box borderRadius="$2xl" mt="$8" overflow="hidden" style={cardShadow}>
+          <MenuItem
+            icon={<ClipboardText size={22} color="#3B7A3F" />}
+            label="Atendimentos"
+            onPress={() => navigation.getParent()?.navigate("atendimentosTab", { screen: "attendances" })}
+          />
+          <MenuItem
+            icon={<Gear size={22} color="#3B7A3F" />}
+            label="Configurações"
+            onPress={() => navigation.getParent()?.navigate("settingsTab", { screen: "settings" })}
+          />
         </Box>
-        <Heading fontFamily="$heading" fontSize="$xl" mt="$3">
-          {isAuthenticated ? (user?.email ?? "Usuário") : "Visitante"}
-        </Heading>
-      </Center>
 
-      <Box borderRadius="$2xl" mt="$8" overflow="hidden" style={cardShadow}>
-        <MenuItem
-          icon={<ClipboardText size={22} color="#3B7A3F" />}
-          label="Atendimentos"
-          onPress={() => navigation.getParent()?.navigate("atendimentosTab", { screen: "attendances" })}
-        />
-        <MenuItem
-          icon={<Gear size={22} color="#3B7A3F" />}
-          label="Configurações"
-          onPress={() => navigation.getParent()?.navigate("settingsTab", { screen: "settings" })}
-        />
-      </Box>
-
-      <VStack flex={1} justifyContent="flex-end">
-        {/* Visitante não tem "sair da conta" — vê o convite para entrar/criar
-            conta (boa prática; pedido Andre 2026-07-23). */}
-        {isAuthenticated ? (
-          <TouchableOpacity onPress={handleLogout}>
-            <Box bg="$white" px="$4" py="$4" borderRadius="$2xl" style={cardShadow}>
-              <HStack alignItems="center" gap="$3">
-                <SignOut size={22} color="#E63946" />
-                <Text size="sm" color="$red500">Sair da conta</Text>
-              </HStack>
-            </Box>
-          </TouchableOpacity>
-        ) : (
-          // Para quem ainda não tem conta, CRIAR é a ação que importa: pílula
-          // sólida na frente, "já tenho conta" como secundária (Andre
-          // 2026-08-05: "cadastrar, na tela de visitantes deve ter um peso
-          // maior, pode ser uma pílula").
-          <VStack gap="$3">
-            <Button
-              title="Criar conta grátis"
-              onPress={() => navigation.navigate("signUp", {})}
-            />
-            <Button
-              variant="outline"
-              title="Já tenho conta"
-              onPress={() => navigation.navigate("login", {})}
-            />
-          </VStack>
-        )}
+        <VStack flex={1} justifyContent="flex-end">
+          {/* Visitante não tem "sair da conta" — vê o convite para entrar/criar
+              conta (boa prática; pedido Andre 2026-07-23). */}
+          {isAuthenticated ? (
+            <TouchableOpacity onPress={handleLogout}>
+              <Box bg="$white" px="$4" py="$4" borderRadius="$2xl" style={cardShadow}>
+                <HStack alignItems="center" gap="$3">
+                  <SignOut size={22} color="#E63946" />
+                  <Text size="sm" color="$red500">Sair da conta</Text>
+                </HStack>
+              </Box>
+            </TouchableOpacity>
+          ) : (
+            // Para quem ainda não tem conta, CRIAR é a ação que importa: pílula
+            // sólida na frente, "já tenho conta" como secundária (Andre
+            // 2026-08-05: "cadastrar, na tela de visitantes deve ter um peso
+            // maior, pode ser uma pílula").
+            <VStack gap="$3">
+              <Button
+                title="Criar conta grátis"
+                onPress={() => navigation.navigate("signUp", {})}
+              />
+              <Button
+                variant="outline"
+                title="Já tenho conta"
+                onPress={() => navigation.navigate("login", {})}
+              />
+            </VStack>
+          )}
+        </VStack>
       </VStack>
-    </VStack>
+    </ScrollView>
   );
 }

@@ -8,6 +8,7 @@ import {
   Heading,
   Box,
   HStack,
+  ScrollView,
 } from "@gluestack-ui/themed";
 import {
   User,
@@ -150,127 +151,134 @@ export function Settings() {
     : "bundle embutido (nenhum OTA aplicado)";
 
   return (
-    <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-      <Header showBackButton />
+    <ScrollView
+      flex={1}
+      bg="$gray700"
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <VStack flex={1} px={15} pt={60} pb={30}>
+        <Header showBackButton />
 
-      <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-        Configurações
-      </Heading>
+        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
+          Configurações
+        </Heading>
 
-      {/* Opções de CONTA só para quem tem conta (visitante não vê trocar senha,
-          e-mail, endereço nem deletar — boa prática; pedido Andre 2026-07-23). */}
-      {isAuthenticated ? (
-        <>
-          <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
-            <MenuItem
-              icon={<User size={22} color="#3B7A3F" />}
-              label="Nome"
-              value={displayName}
-              onPress={() => navigation.navigate("editProfile")}
-            />
-            <MenuItem
-              icon={<EnvelopeSimple size={22} color="#3B7A3F" />}
-              label="E-mail"
-              value={user?.email ?? "—"}
-              onPress={() => navigation.navigate("editEmail")}
-            />
-            <MenuItem
-              icon={<Lock size={22} color="#3B7A3F" />}
-              label="Senha"
-              value="••••••"
-              onPress={() => navigation.navigate("editPassword")}
-            />
-            <MenuItem
-              icon={<MapPin size={22} color="#3B7A3F" />}
-              label="Endereço"
-              value={displayAddress}
-              onPress={() => navigation.navigate("editAddress")}
-            />
+        {/* Opções de CONTA só para quem tem conta (visitante não vê trocar senha,
+            e-mail, endereço nem deletar — boa prática; pedido Andre 2026-07-23). */}
+        {isAuthenticated ? (
+          <>
+            <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
+              <MenuItem
+                icon={<User size={22} color="#3B7A3F" />}
+                label="Nome"
+                value={displayName}
+                onPress={() => navigation.navigate("editProfile")}
+              />
+              <MenuItem
+                icon={<EnvelopeSimple size={22} color="#3B7A3F" />}
+                label="E-mail"
+                value={user?.email ?? "—"}
+                onPress={() => navigation.navigate("editEmail")}
+              />
+              <MenuItem
+                icon={<Lock size={22} color="#3B7A3F" />}
+                label="Senha"
+                value="••••••"
+                onPress={() => navigation.navigate("editPassword")}
+              />
+              <MenuItem
+                icon={<MapPin size={22} color="#3B7A3F" />}
+                label="Endereço"
+                value={displayAddress}
+                onPress={() => navigation.navigate("editAddress")}
+              />
+            </Box>
+
+            <VStack mt="$8">
+              <Button
+                title="Deletar conta"
+                variant="outline"
+                onPress={handleDeleteAccount}
+                borderColor="$red500"
+                $active-bg="$red500"
+              />
+            </VStack>
+          </>
+        ) : (
+          <Box bg="$white" borderRadius="$2xl" p="$4" style={cardShadow}>
+            <Text size="sm" color="$gray300" mb="$3">
+              Você está navegando como visitante. Entre ou crie uma conta para
+              gerenciar seu perfil, senha e endereço.
+            </Text>
+            {/* Mesma hierarquia do Perfil: criar conta é a pílula sólida, entrar
+                fica como secundária (Andre 2026-08-05). */}
+            <VStack gap="$3">
+              <Button
+                title="Criar conta grátis"
+                onPress={() =>
+                  navigation.getParent()?.navigate("homeTab", { screen: "signUp", params: {} })
+                }
+              />
+              <Button
+                variant="outline"
+                title="Já tenho conta"
+                onPress={() =>
+                  navigation.getParent()?.navigate("homeTab", { screen: "login", params: {} })
+                }
+              />
+            </VStack>
           </Box>
+        )}
 
+        {awaited.length > 0 && (
           <VStack mt="$8">
-            <Button
-              title="Deletar conta"
-              variant="outline"
-              onPress={handleDeleteAccount}
-              borderColor="$red500"
-              $active-bg="$red500"
-            />
-          </VStack>
-        </>
-      ) : (
-        <Box bg="$white" borderRadius="$2xl" p="$4" style={cardShadow}>
-          <Text size="sm" color="$gray300" mb="$3">
-            Você está navegando como visitante. Entre ou crie uma conta para
-            gerenciar seu perfil, senha e endereço.
-          </Text>
-          {/* Mesma hierarquia do Perfil: criar conta é a pílula sólida, entrar
-              fica como secundária (Andre 2026-08-05). */}
-          <VStack gap="$3">
-            <Button
-              title="Criar conta grátis"
-              onPress={() =>
-                navigation.getParent()?.navigate("homeTab", { screen: "signUp", params: {} })
-              }
-            />
-            <Button
-              variant="outline"
-              title="Já tenho conta"
-              onPress={() =>
-                navigation.getParent()?.navigate("homeTab", { screen: "login", params: {} })
-              }
-            />
-          </VStack>
-        </Box>
-      )}
-
-      {awaited.length > 0 && (
-        <VStack mt="$8">
-          <Heading fontFamily="$heading" fontSize="$md" mb="$1">
-            Funcionalidades aguardadas
-          </Heading>
-          <Text size="xs" color="$gray300" mb="$3">
-            As mais tocadas fizeram mais falta — priorizar quando o backend liberar.
-          </Text>
-          <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
-            {awaited.map(([feature, count]) => (
-              <HStack
-                key={feature}
-                bg="$white"
-                px="$4"
-                py="$3"
-                borderBottomWidth="$1"
-                borderBottomColor="$gray500"
-                alignItems="center"
-              >
-                <Text size="sm" flex={1}>
-                  {COMING_SOON_LABELS[feature as ComingSoonFeature] ?? feature}
-                </Text>
-                <Box bg="$green100" borderRadius="$full" px="$3" py="$1">
-                  <Text size="xs" fontFamily="$heading" color="$green700">
-                    {count}×
+            <Heading fontFamily="$heading" fontSize="$md" mb="$1">
+              Funcionalidades aguardadas
+            </Heading>
+            <Text size="xs" color="$gray300" mb="$3">
+              As mais tocadas fizeram mais falta — priorizar quando o backend liberar.
+            </Text>
+            <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
+              {awaited.map(([feature, count]) => (
+                <HStack
+                  key={feature}
+                  bg="$white"
+                  px="$4"
+                  py="$3"
+                  borderBottomWidth="$1"
+                  borderBottomColor="$gray500"
+                  alignItems="center"
+                >
+                  <Text size="sm" flex={1}>
+                    {COMING_SOON_LABELS[feature as ComingSoonFeature] ?? feature}
                   </Text>
-                </Box>
-              </HStack>
-            ))}
-          </Box>
+                  <Box bg="$green100" borderRadius="$full" px="$3" py="$1">
+                    <Text size="xs" fontFamily="$heading" color="$green700">
+                      {count}×
+                    </Text>
+                  </Box>
+                </HStack>
+              ))}
+            </Box>
+          </VStack>
+        )}
+
+        <WsDiagnostics />
+
+        <VStack mt="$8" alignItems="center" gap="$1">
+          <Text size="xs" color="$gray400">
+            Runtime {Updates.runtimeVersion ?? "—"} · canal {Updates.channel ?? "dev"}
+          </Text>
+          <Text size="xs" color="$gray400">{otaInfo}</Text>
+          <Button
+            title={isChecking ? "Verificando..." : "Verificar atualização"}
+            variant="outline"
+            mt="$2"
+            onPress={handleCheckUpdate}
+          />
         </VStack>
-      )}
-
-      <WsDiagnostics />
-
-      <VStack mt="$8" alignItems="center" gap="$1">
-        <Text size="xs" color="$gray400">
-          Runtime {Updates.runtimeVersion ?? "—"} · canal {Updates.channel ?? "dev"}
-        </Text>
-        <Text size="xs" color="$gray400">{otaInfo}</Text>
-        <Button
-          title={isChecking ? "Verificando..." : "Verificar atualização"}
-          variant="outline"
-          mt="$2"
-          onPress={handleCheckUpdate}
-        />
       </VStack>
-    </VStack>
+    </ScrollView>
   );
 }
