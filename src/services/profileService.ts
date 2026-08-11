@@ -56,8 +56,27 @@ export const profileService = {
     );
   },
 
-  deleteAccount(accessToken: string) {
+  /**
+   * Apaga a conta do titular. **Contrato NOVO desde 2026-08-07** (backend S19):
+   * a rota antiga era destrutiva (`cascade = ALL` — apagar a conta de um dono
+   * apagava a loja inteira) e virou **anonimização**, exigindo a senha atual.
+   *
+   * Mandávamos `DELETE` **sem corpo**, o que passou a devolver
+   * `400 INVALID_REQUEST_BODY`: o botão ficou quebrado em produção.
+   *
+   * Respostas: `204` sucesso · `401 CURRENT_PASSWORD_INVALID` (erro de CAMPO —
+   * o interceptor global não desloga, ver `api.ts`) · `409
+   * ACCOUNT_DELETE_NOT_ALLOWED` (bloqueio TEMPORÁRIO: a mensagem do backend diz
+   * o que fazer para destravar e precisa ser exibida como veio) ·
+   * `422 VALIDATION_ERROR` (senha em branco).
+   *
+   * Depois do 204 a conta **para de autenticar no request seguinte** — o token
+   * na mão do app morre na hora, não espera expirar.
+   */
+  deleteAccount(accessToken: string, currentPassword: string) {
     return api.delete('/profile/delete/me', {
+      // `data` no DELETE: sem corpo o backend responde 400.
+      data: { current_password: currentPassword },
       headers: { Authorization: `Bearer ${accessToken}` },
     });
   },

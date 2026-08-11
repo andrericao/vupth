@@ -22,6 +22,7 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { WsDiagnostics } from "@components/WsDiagnostics";
+import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
@@ -93,31 +94,47 @@ export function Settings() {
     ? `${mainAddress.street}, ${mainAddress.number} — ${mainAddress.neighborhood}`
     : "Não informado";
 
-  function handleDeleteAccount() {
-    Alert.alert(
-      "Deletar conta",
-      "Tem certeza? Esta ação é irreversível e todos os seus dados serão perdidos.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Deletar",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              if (accessToken) {
-                await profileService.deleteAccount(accessToken);
-              }
-              await logout();
-              // Settings vive na aba Config.; volta para a aba Home (pai = tabs).
-              navigation.getParent()?.navigate("homeTab", { screen: "home" });
-            } catch (error: any) {
-              const msg = error.response?.data?.message || error.message || "Erro ao deletar conta";
-              Alert.alert("Erro", msg);
-            }
-          },
-        },
-      ]
-    );
+  const [showDelete, setShowDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  function openDeleteAccount() {
+    setDeleteError(null);
+    setShowDelete(true);
+  }
+
+  // Contrato novo do backend (2026-08-07): exige a senha atual no corpo. Antes
+  // mandávamos DELETE sem corpo e tomávamos 400 — o botão estava quebrado.
+  async function handleDeleteAccount(currentPassword: string) {
+    if (!accessToken) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await profileService.deleteAccount(accessToken, currentPassword);
+      setShowDelete(false);
+      await logout();
+      // Settings vive na aba Config.; volta para a aba Home (pai = tabs).
+      navigation.getParent()?.navigate("homeTab", { screen: "home" });
+    } catch (error: any) {
+      const code = error.response?.data?.code;
+      const msg = error.response?.data?.message;
+
+      if (code === "CURRENT_PASSWORD_INVALID") {
+        // 401 de NEGÓCIO: erro de campo, não sessão expirada. O interceptor
+        // global já isenta este código de deslogar (ver `api.ts`).
+        setDeleteError("Senha incorreta. Confira e tente de novo.");
+      } else if (code === "ACCOUNT_DELETE_NOT_ALLOWED") {
+        // Bloqueio TEMPORÁRIO. A mensagem do backend diz o que fazer para
+        // destravar (sair da fila, encerrar o atendimento, esperar a loja
+        // esvaziar) — exibir como veio. Transformar em "não é possível apagar
+        // esta conta" reprovaria na publicação das lojas de app.
+        setDeleteError(msg ?? "Você tem um atendimento em andamento. Conclua antes de apagar a conta.");
+      } else {
+        setDeleteError(msg || error.message || "Erro ao deletar conta");
+      }
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   const [isChecking, setIsChecking] = useState(false);
@@ -199,7 +216,7 @@ export function Settings() {
               <Button
                 title="Deletar conta"
                 variant="outline"
-                onPress={handleDeleteAccount}
+                onPress={openDeleteAccount}
                 borderColor="$red500"
                 $active-bg="$red500"
               />
@@ -279,6 +296,14 @@ export function Settings() {
           />
         </VStack>
       </VStack>
+
+      <DeleteAccountModal
+        visible={showDelete}
+        isDeleting={isDeleting}
+        error={deleteError}
+        onConfirm={handleDeleteAccount}
+        onClose={() => setShowDelete(false)}
+      />
     </ScrollView>
   );
 }
