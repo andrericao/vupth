@@ -36,6 +36,13 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
     onClose();
   }
 
+  // Guarda no handler, além do botão desabilitado: é o padrão do projeto e evita
+  // depender de o `isDisabled` bloquear o toque de verdade.
+  function confirm() {
+    if (password.length === 0 || isDeleting) return;
+    onConfirm(password);
+  }
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
@@ -73,7 +80,7 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
             $active-bg="$red500"
             isDisabled={password.length === 0 || isDeleting}
             testID="delete-account-confirm"
-            onPress={() => onConfirm(password)}
+            onPress={confirm}
           />
           <Button title="Cancelar" mt="$1" onPress={close} isDisabled={isDeleting} />
         </VStack>
