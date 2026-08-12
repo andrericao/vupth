@@ -8,6 +8,15 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 
 ## 🥇 PRIORIDADES (lista única, renumerada — regra do Andre)
 
+> ⚠️ **NÚMERO DE ITEM DO BACKEND NÃO É REFERÊNCIA ESTÁVEL — leia pelo NOME.** (Avisado pelo backend, 2026-08-07.)
+> O backlog deles **renumera**, então os `#13`, `#6`, `#31`, `#42`… espalhados por este documento
+> apontavam para o item certo **no dia em que foram escritos** e podem apontar para outro hoje.
+> **A fonte é o `PRD_BACKEND.md`**: procure pelo **nome/descrição** do item, não pelo número.
+> Vale nos dois sentidos — quando escrevermos aqui algo sobre um item deles, citar **o nome** e usar
+> o número só como pista datada (ex.: *"recusar token inválido no CONNECT (era o #31 em 08/2026)"*).
+> O mesmo vale para os nossos `B*` e para os `C*`/`S*` do partner: sempre que possível, **nome + data**.
+
+
 > Sempre numerada de 1 a N por prioridade. Ao resolver um item, ele **sai** e a lista **renumera** (o 2 vira 1). Itens concluídos viram histórico nas tabelas/seções abaixo, nunca ficam ocupando número.
 
 | # | Pendência | De quem depende |
