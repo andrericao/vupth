@@ -139,36 +139,75 @@ O backend entregou a fatia B em 01/08: `GET /establishment?lat=&lng=` **ordena p
 
 **Ordenação com GPS = distância pura (decisão do Andre, 2026-08-06):** loja **fechada perto vem antes de aberta longe**. Ela carrega o badge âmbar AGENDAR, então o cliente entende que há caminho. Há teste fixando isso.
 
-### 🧊 CONGELAR O HORÁRIO — recurso novo (Andre, 2026-08-07)
+### 🧊 HORÁRIO CONGELADO + MULTAS — recurso novo (Andre, 2026-08-07)
 
-**O que é:** ao agendar/entrar na fila mirando um horário, o cliente pode **CONGELAR** esse horário. Congelado, ele vira **piso**: aconteça o que acontecer, o cliente **nunca é atendido antes** dele.
+> Refinado pelo Andre depois da primeira redação, que estava **errada** em dois pontos: eu tinha escrito que a fila "passa por cima" do cliente congelado (não passa — **ele sai da fila**) e que ele teria imunidade a atraso (não tem — **a proteção é uma verificação no horário**, não um passe livre).
 
-**O caso que motivou** (palavras do Andre): *"imagina que ele pode cortar para depois das 15:00 e ele CONGELOU este horário… inclusive isso também servirá como ressalva: imagina que ele está na fila e o cliente que está para cortar às 14:15 simplesmente desiste — esse cliente não pode cair e nem ser considerado atrasado, pois ele congelou às 15:00."*
+#### A. SÃO DOIS CASOS DIFERENTES — e o app precisa perguntar qual é
 
-#### ⚠️ Não confundir com o que já existe (conferido no PRD_BACKEND em 2026-08-07)
+O cliente que escolhe um horário pode querer duas coisas **opostas**, e tratá-las igual quebra uma das duas:
 
-| Mecanismo | O que faz | Por que NÃO resolve |
+| | **Caso 1 — ALVO (flexível)** | **Caso 2 — PISO (rígido)** |
 |---|---|---|
-| **Intenção de fila com horário-alvo** (`targetTime` no `POST /attendances`) | Entra na fila viva mirando um horário e **cede a vez** enquanto o previsto for antes do alvo; trava quando encosta | É o mais próximo, mas está **desligado no nosso front** desde 2026-07-15 (o "Agendar" passou a usar a intenção fora da fila). E **não blinda contra o `LATE`** |
-| **Intenção fora da fila** (`desiredTime` no `POST /attendances/intentions`) | Fica fora da fila e é **promovida** a `SCHEDULED` ~15min antes | Depois da promoção vira `SCHEDULED` **comum, na cauda, com `scheduledTime = agora`**. Se a fila drenar, nada impede o atendimento **antes** do horário. O horário é alvo de **promoção**, não piso de **atendimento** |
+| O que o cliente quer dizer | *"Quero por volta das 15:00 — mas se a fila andar e der para cortar antes, ótimo."* | *"Não posso antes das 15:00. Depois, pode."* |
+| Se a estimativa **cair** para antes do horário | **Fica e é atendido antes.** É ganho, não problema | **SAI da fila** e volta a esperar — ele declarou que antes não pode |
+| Se a estimativa **passar** do horário | Espera normalmente | Espera normalmente |
+| Já existe? | ✅ É o comportamento do **horário-alvo** (`targetTime`) | ❌ **É o recurso novo** |
 
-**As duas lacunas que o congelamento fecha:** (1) o horário passa a ser **piso**, não alvo; (2) o cliente fica **imune a `LATE`/strike** enquanto o piso não chegar.
+⚠️ **Consequência de UI:** não dá para escolher um default. Ao marcar um horário, o app tem de perguntar — algo como *"se abrir uma vaga antes, você aceita?"* — porque a resposta muda o que acontece com ele na fila e muda a régua da multa.
 
-#### Regras a valer (a acordar com o backend)
+#### B. O mecanismo do PISO ("não antes das 15:00")
 
-1. **Piso duro.** Com o horário congelado, o atendimento **não pode iniciar antes** dele — nem por drenagem da fila, nem por desistência de quem estava à frente, nem por encaixe do profissional.
-2. **Fila anda, ele não sobe.** Se a vez dele chegar antes do piso, a fila **passa por cima** dele e ele continua esperando — sem cair de posição e sem virar `LATE`.
-3. **Imunidade a atraso e a strike.** Marcar `LATE` num cliente com horário congelado **antes do piso** não pode ser possível; se for, ele não pode contar para os strikes de cancelamento tardio/no-show. Depois do piso, as regras normais voltam a valer.
-4. **Visível para os dois lados.** O profissional precisa **ver que está congelado** e a partir de que horário — senão ele chama o cliente às 14:15, não aparece ninguém, e marca atraso. O cliente precisa ver que congelou.
-5. **Interação com troca de vez.** Um cliente congelado não pode aceitar (nem receber) oferta de troca que o coloque **antes** do piso.
-6. **Viabilidade no ato de congelar.** Se o piso não couber no expediente (fecha antes, ou o serviço não termina até o fechamento), recusar **na hora de congelar** — não deixar o cliente descobrir depois.
-7. **Descongelar** deve ser possível pelo cliente, voltando ao comportamento normal.
+O piso não tira o cliente da fila: **ele sempre acaba indo para a fila** — o que muda é *quando* entra e o que acontece se a fila andar rápido demais.
 
-#### Do nosso lado (front)
+**No exemplo do Andre** (piso = 15:00):
 
-O encanamento do `targetTime` **já existe** e está desligado de propósito em `ServiceSelection.goToQueue()` — o parâmetro segue lá justamente para religar sem retrabalho. Falta a UI de congelar (o gesto vive no `ScheduleModal`/`ChangeTurnModal`) e o selo de "congelado às HH:MM" na `QueueStatus`.
+1. A fila anda. Quando o **tempo estimado cruza o piso** — digamos que fique em **15:10** — ele **entra na fila**.
+2. Alguém à frente **desiste** e a estimativa dele **cai para antes das 15:00**. Aí ele **SAI da fila** e volta a esperar.
+3. Quando a estimativa cruzar o piso de novo, ele entra de novo.
 
-⬜ **Bloqueado no backend** — pedido registrado no HANDOFF §16.1. Ver [[regra de fronteira]]: não construímos contorno.
+**A partir do momento em que ele está legitimamente na fila com estimativa ≥ piso, as regras normais valem:** se **sair da fila**, leva multa; se **não aparecer** no horário que ele mesmo escolheu, leva multa. O piso protege contra ser chamado **cedo demais** — não é imunidade.
+
+#### C. Não chegou e não avisou: notificação + duas multas
+
+Quando a vez do cliente chega e ele **não está lá e não avisou**, o app **manda uma notificação** oferecendo dois caminhos, com **multas diferentes**:
+
+| Escolha | Consequência |
+|---|---|
+| **Sair da fila** | Multa de desistência |
+| **Ainda quero ser atendido** | Multa de outro tipo (fica na fila, remanejado) |
+
+Os valores e a natureza de cada multa **ainda não foram definidos** — falta decidir com o Andre.
+
+#### D. ⚠️ O buraco: o atraso em cascata
+
+Apontado pelo Andre e é o ponto mais delicado do desenho:
+
+> *"se ele não chegar no horário e não avisar, o próximo cliente com certeza chegará atrasado, o que torna injusto notificá-lo como atrasado e multá-lo."*
+
+O cliente seguinte foi informado de um horário **mais tarde**. Quando o da frente não aparece, a fila **anda para trás no relógio** e a vez dele chega **antes** do que lhe foi comunicado. Marcá-lo como atrasado é punir alguém por um atraso que **o sistema criou**.
+
+**Princípio que unifica isto com o piso da seção A:**
+
+> **Ninguém pode ser penalizado por não estar presente antes do horário que lhe foi comunicado.**
+
+O piso é a versão **declarada** disso (o cliente diz o horário); o atraso em cascata é a versão **implícita** (o app disse o horário). O **alvo** (caso 1) fica de fora: quem aceitou ser atendido antes não tem o que reclamar de ser chamado antes. Nos dois casos, a régua da multa é o **horário comunicado**, não a posição na fila.
+
+#### E. O que isso exige
+
+1. **Guardar o horário comunicado** a cada cliente, e não só a posição. É dele que a multa passa a depender.
+2. **Recalcular a entrada/saída da fila** a cada evento que mexa na estimativa (desistência, no-show, encaixe, atraso de terceiro).
+3. **O profissional precisa ver o piso** de quem congelou — senão chama às 14:15, não aparece ninguém, e marca atraso.
+4. **A multa só pode disparar depois** do horário comunicado àquele cliente.
+5. **Descongelar / editar o piso** pelo cliente.
+
+#### F. Relação com o que já existe
+
+- **Cancelamento tardio + strikes/aviso** (era o `#39` do backlog do backend em 08/2026 — conferir o número no PRD deles, ver o aviso no topo do HANDOFF): é a base do sistema de penalidade. As multas aqui são uma evolução dele, com **duas saídas** em vez de uma.
+- **Intenção de fila com horário-alvo** (`targetTime` no `POST /attendances`): cede a vez enquanto o previsto for antes do alvo. É o parente mais próximo do piso, mas **não faz o cliente sair da fila** quando a estimativa cai, e não trata multa. Está **desligado no nosso front** desde 2026-07-15, com o parâmetro preservado em `ServiceSelection.goToQueue()` para religar sem retrabalho.
+- **Intenção fora da fila** (`desiredTime`): promovida ~15min antes e vira `SCHEDULED` comum **na cauda**; se a fila drenar, nada impede o atendimento antes do horário.
+
+⬜ **Bloqueado no backend** — pedido no HANDOFF §16.1 (B9). Não construímos contorno.
 
 ### 🐛 Dois defeitos estruturais achados em 2026-08-07
 
