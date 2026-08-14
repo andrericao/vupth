@@ -139,6 +139,37 @@ O backend entregou a fatia B em 01/08: `GET /establishment?lat=&lng=` **ordena p
 
 **Ordenação com GPS = distância pura (decisão do Andre, 2026-08-06):** loja **fechada perto vem antes de aberta longe**. Ela carrega o badge âmbar AGENDAR, então o cliente entende que há caminho. Há teste fixando isso.
 
+### 🧊 CONGELAR O HORÁRIO — recurso novo (Andre, 2026-08-07)
+
+**O que é:** ao agendar/entrar na fila mirando um horário, o cliente pode **CONGELAR** esse horário. Congelado, ele vira **piso**: aconteça o que acontecer, o cliente **nunca é atendido antes** dele.
+
+**O caso que motivou** (palavras do Andre): *"imagina que ele pode cortar para depois das 15:00 e ele CONGELOU este horário… inclusive isso também servirá como ressalva: imagina que ele está na fila e o cliente que está para cortar às 14:15 simplesmente desiste — esse cliente não pode cair e nem ser considerado atrasado, pois ele congelou às 15:00."*
+
+#### ⚠️ Não confundir com o que já existe (conferido no PRD_BACKEND em 2026-08-07)
+
+| Mecanismo | O que faz | Por que NÃO resolve |
+|---|---|---|
+| **Intenção de fila com horário-alvo** (`targetTime` no `POST /attendances`) | Entra na fila viva mirando um horário e **cede a vez** enquanto o previsto for antes do alvo; trava quando encosta | É o mais próximo, mas está **desligado no nosso front** desde 2026-07-15 (o "Agendar" passou a usar a intenção fora da fila). E **não blinda contra o `LATE`** |
+| **Intenção fora da fila** (`desiredTime` no `POST /attendances/intentions`) | Fica fora da fila e é **promovida** a `SCHEDULED` ~15min antes | Depois da promoção vira `SCHEDULED` **comum, na cauda, com `scheduledTime = agora`**. Se a fila drenar, nada impede o atendimento **antes** do horário. O horário é alvo de **promoção**, não piso de **atendimento** |
+
+**As duas lacunas que o congelamento fecha:** (1) o horário passa a ser **piso**, não alvo; (2) o cliente fica **imune a `LATE`/strike** enquanto o piso não chegar.
+
+#### Regras a valer (a acordar com o backend)
+
+1. **Piso duro.** Com o horário congelado, o atendimento **não pode iniciar antes** dele — nem por drenagem da fila, nem por desistência de quem estava à frente, nem por encaixe do profissional.
+2. **Fila anda, ele não sobe.** Se a vez dele chegar antes do piso, a fila **passa por cima** dele e ele continua esperando — sem cair de posição e sem virar `LATE`.
+3. **Imunidade a atraso e a strike.** Marcar `LATE` num cliente com horário congelado **antes do piso** não pode ser possível; se for, ele não pode contar para os strikes de cancelamento tardio/no-show. Depois do piso, as regras normais voltam a valer.
+4. **Visível para os dois lados.** O profissional precisa **ver que está congelado** e a partir de que horário — senão ele chama o cliente às 14:15, não aparece ninguém, e marca atraso. O cliente precisa ver que congelou.
+5. **Interação com troca de vez.** Um cliente congelado não pode aceitar (nem receber) oferta de troca que o coloque **antes** do piso.
+6. **Viabilidade no ato de congelar.** Se o piso não couber no expediente (fecha antes, ou o serviço não termina até o fechamento), recusar **na hora de congelar** — não deixar o cliente descobrir depois.
+7. **Descongelar** deve ser possível pelo cliente, voltando ao comportamento normal.
+
+#### Do nosso lado (front)
+
+O encanamento do `targetTime` **já existe** e está desligado de propósito em `ServiceSelection.goToQueue()` — o parâmetro segue lá justamente para religar sem retrabalho. Falta a UI de congelar (o gesto vive no `ScheduleModal`/`ChangeTurnModal`) e o selo de "congelado às HH:MM" na `QueueStatus`.
+
+⬜ **Bloqueado no backend** — pedido registrado no HANDOFF §16.1. Ver [[regra de fronteira]]: não construímos contorno.
+
 ### 🐛 Dois defeitos estruturais achados em 2026-08-07
 
 **1. `isDisabled` não bloqueava o toque.** O `Button` fazia `disabled={isLoading}` e espalhava `{...rest}` depois, então o `isDisabled` chegava ao Gluestack como **estado visual apenas**: o botão ficava apagado e o toque continuava disparando o `onPress`. Ninguém tinha notado porque **todas** as telas que usam `isDisabled` têm guarda dentro do handler (`if (!canSend) return`) — escapavam por acaso, não por proteção. Bastou um handler sem guarda (o modal de deletar conta) para o furo aparecer. Corrigido no `Button` (amarra o `disabled` real do `Pressable`) e coberto por `components/Button.test.tsx`. **Achado pelo portão de push**, não no device.
