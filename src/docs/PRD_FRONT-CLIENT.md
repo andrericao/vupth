@@ -309,23 +309,42 @@ Você tinha definido **duas multas diferentes** — uma para *sair da fila* e ou
 
 ---
 
-### ✅ D5 — DECIDIDO (Andre, 2026-08-07): volta a ser INTENÇÃO — e intenção passa a bloquear o fechamento
+### ✅ D5 — DECIDIDO (Andre, 2026-08-07): intenção volta, e nasce o **PENDENTE DE ACEITAÇÃO**
 
-**Estado:** quem sai da fila pelo piso **volta ao estado de intenção**, que já existe. Sem estado novo.
+**Estado de quem sai da fila pelo piso:** volta a ser **intenção**. Sem estado novo para isso.
 
-**⚠️ Mas vem junto uma REGRA NOVA, que muda o comportamento atual do backend:**
+#### O discriminador único
 
-> *"Não é para o profissional poder fechar a loja tendo clientes que manifestaram a intenção de corte… ele não pode fechar tendo cliente agendado para o dia dentro do horário de funcionamento. Ou ele remove todos os clientes antes, ou atende a todos."*
+> **O pedido cabe no expediente, com tempo disponível?**
 
-| Situação | Pode fechar? |
+| Resposta | O que acontece |
 |---|---|
-| Intenção para **outro dia** | ✅ Sim |
-| Intenção para **hoje**, com horário **fora** do expediente (antes de abrir / depois de fechar) | ✅ Sim |
-| Intenção para **hoje, dentro do horário de funcionamento** | ❌ **Não.** Ou remove todos, ou atende todos |
+| **SIM** | **Garantido** — aceitação automática, sem pedir nada ao profissional. **Bloqueia o fechamento da loja** |
+| **NÃO** (fora do expediente, cruza o fechamento, ou não cabe) | **PENDENTE DE ACEITAÇÃO** do profissional. **Não bloqueia** nada |
 
-**🔴 Isto CONTRADIZ o backend de hoje.** O PRD deles diz, sobre a intenção: *"NÃO conta como atendimento ativo (não bloqueia o fechamento da loja)"*. Era decisão deliberada. Agora precisa mudar — registrado como pedido em `PARA_OUTRAS_EQUIPES`.
+Uma pergunta só resolve as três situações — não precisa de regra por caso.
 
-**Por que a mudança faz sentido:** hoje o cliente com intenção para as 15:00 pode ter a loja fechada às 14:00 e ficar sem nada, sem aviso. O bloqueio força o profissional a resolver — ou remove (e aí o cliente é notificado) ou atende.
+#### As três situações, do jeito que o Andre descreveu
+
+**1. Antes de abrir / iniciar a fila.** O profissional vê os clientes que pediram para cortar e **reorganiza a fila do jeito dele**. Aqui o tema é **ordem**, não aceitação: os garantidos já estão dentro; os pendentes ele aceita ou não.
+
+**2. Durante o expediente.** Quem manifestou interesse com horário disponível tem **atendimento garantido**, igual a quem já está na fila. **Esse bloqueia o fechamento:** ou o profissional remove todos, ou atende todos.
+
+**3. Horário que cruza o fechamento.** Fica **pendente de aceitação** e **não bloqueia** a fila. O profissional decide se estica o expediente para atender.
+
+#### 💡 O efeito que isso tem no produto
+
+Hoje o backend **recusa** esses casos com erro:
+- `422 INTENTION_OUTSIDE_BUSINESS_HOURS` — pediu fora do expediente;
+- `409 PROFESSIONAL_AGENDA_FULL` — não cabe antes do fechamento.
+
+Nos dois, o cliente leva um "não" e vai embora. Com o pendente de aceitação, os mesmos casos viram **"vou perguntar ao profissional"** — e quem decide passa a ser quem tem interesse em vender. **Dois erros viram uma oportunidade**, sem mudar nada do fluxo feliz.
+
+#### O que muda para cada equipe
+
+- **Backend:** novo estado de intenção (pendente/aceita), o gate de fechamento passando a considerar as garantidas de hoje, e os dois erros acima deixando de ser recusa.
+- **Front-partner:** tela de triagem antes de abrir (ver e ordenar) e a decisão de aceitar/recusar os pendentes.
+- **Front-client:** mostrar a diferença entre *"agendado"* e *"aguardando o profissional confirmar"* — são expectativas diferentes e não podem parecer a mesma coisa.
 
 ---
 

@@ -121,20 +121,34 @@ Baixo, e **sem dependência de backend**: um store pequeno com o estado por cana
 
 ---
 
-## 6. 🔴 BACKEND — mudança de regra: intenção passa a BLOQUEAR o fechamento da loja
+## 6. 🔴 BACKEND + FRONT-PARTNER — intenção ganha **PENDENTE DE ACEITAÇÃO**, e a garantida bloqueia o fechamento
 
-**Decisão do Andre (2026-08-07).** Hoje o PRD de vocês diz, sobre a `INTENTION`: *"NÃO conta como atendimento ativo (não bloqueia o fechamento da loja — BUG6)"*. Era deliberado. **Precisa mudar.**
+**Decisão do Andre (2026-08-07).** Um discriminador único resolve tudo:
 
-**A regra nova:**
+> **O pedido cabe no expediente, com tempo disponível?**
+> **SIM** → *garantido* (aceite automático) e **bloqueia o fechamento da loja**.
+> **NÃO** → **pendente de aceitação** do profissional e **não bloqueia** nada.
 
-| Situação | Pode fechar a loja? |
+### As três situações
+
+| Momento | Comportamento |
 |---|---|
-| Intenção para **outro dia** | ✅ Sim |
-| Intenção para **hoje**, com horário **fora** do expediente | ✅ Sim |
-| Intenção para **hoje, DENTRO do horário de funcionamento** | ❌ **Não.** Ou remove todos os clientes, ou atende todos |
+| **Antes de abrir a fila** | O profissional vê os pedidos e **reorganiza a ordem** do jeito dele. Aqui o tema é ordem, não aceitação |
+| **Durante o expediente**, horário disponível | **Garantido**, igual a quem já está na fila. **Bloqueia o fechamento**: ou remove todos, ou atende todos |
+| **Horário que cruza o fechamento** | **Pendente de aceitação**, **não bloqueia**. O profissional decide se estica o expediente |
 
-**Por quê:** hoje um cliente com intenção para as 15:00 pode ter a loja fechada às 14:00 e ficar sem nada, **sem aviso nenhum**. O bloqueio força o profissional a resolver explicitamente — remover (e aí o cliente é notificado) ou atender.
+### 🔴 Duas coisas que isto muda no backend
 
-**Cuidado na implementação:** o gate precisa distinguir "intenção de hoje dentro do expediente" das outras. Fechar por causa de intenção de amanhã, ou de uma marcada para depois do `closingTime`, seria prender o profissional sem motivo — e vocês já têm a matemática de janela (`ClosingTimeMath`, `BusinessClock`) para fazer esse recorte.
+**1. O bloqueio de fechamento.** O PRD de vocês diz hoje que a `INTENTION` *"NÃO conta como atendimento ativo (não bloqueia o fechamento da loja — BUG6)"*. Passa a bloquear, **mas só** a intenção **garantida de hoje dentro do expediente** — intenção de amanhã, ou marcada para depois do `closingTime`, não pode prender o profissional. Vocês já têm a matemática de janela (`ClosingTimeMath`, `BusinessClock`) para esse recorte.
 
-**Relacionado:** isto conversa com o **piso de horário** (seção 1, B9): quem sai da fila pelo piso **volta ao estado de intenção**, então passa a contar para este bloqueio enquanto espera o horário chegar.
+**2. 💡 Dois erros deixam de ser recusa e viram oportunidade.** Hoje vocês devolvem:
+- `422 INTENTION_OUTSIDE_BUSINESS_HOURS` — pediu fora do expediente;
+- `409 PROFESSIONAL_AGENDA_FULL` — não cabe antes do fechamento.
+
+Nos dois casos o cliente leva um "não" e vai embora. Com o pendente de aceitação, viram **"vou perguntar ao profissional"** — e quem decide passa a ser quem tem interesse em vender. **O fluxo feliz não muda**; muda só o que hoje é beco sem saída.
+
+### 🟡 Para o front-partner
+
+Duas telas novas: **triagem antes de abrir** (ver os pedidos do dia e ordenar a fila) e **decisão dos pendentes** (aceitar ou recusar quem pediu horário que cruza o fechamento). Sem a segunda, o pendente fica órfão e o cliente espera para sempre.
+
+**Relacionado:** conversa com o **piso de horário** (seção 1, B9) — quem sai da fila pelo piso volta a ser intenção, então passa a contar para este bloqueio enquanto espera o horário chegar.
