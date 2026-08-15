@@ -262,6 +262,120 @@ Domínio puro em `domain/ws/diagnostics.ts` (17 casos). **C18 feito junto:** `Ap
 
 ---
 
+## 1z. 🧭 DECISÕES PENDENTES DO ANDRE — contexto, pergunta e o que o mercado faz
+
+> Tópico criado a pedido do Andre (2026-08-07) para concentrar **o que depende de decisão dele**, não de implementação. Cada item traz: **contexto**, **a pergunta**, e **como o mercado resolve** — para ele analisar e pesquisar. Nada aqui está decidido. Ao decidir, mover a decisão para a seção da feature e **apagar o item daqui**.
+
+---
+
+### D1. A multa é DINHEIRO ou é reputação?
+
+**Contexto.** Você pediu multas para quem não aparece e para quem sai da fila. Hoje o backend já tem **strikes** (cancelamento tardio + escalada de no-show) — punição *reputacional*, sem dinheiro. "Multa" sugere cobrança financeira, e isso é uma mudança de categoria do produto: exige meio de pagamento, guarda de cartão, política de reembolso, contestação, nota fiscal e exposição ao CDC.
+
+**Pergunta.** Multa = **valor cobrado** do cliente, ou = **penalidade sem dinheiro** (perder prioridade, ficar bloqueado por X horas, precisar de depósito na próxima)?
+
+**O que o mercado faz.**
+- **Fresha e Booksy** cobram de verdade — taxa de cancelamento/no-show no cartão em arquivo. É o padrão em salão/barbearia.
+- **Dado que muda a conversa:** a Booksy mediu que **só ter o cartão salvo, sem cobrar nada, já reduz o no-show em 25–30%**. Ou seja, boa parte do efeito vem da *ameaça crível*, não da cobrança.
+- **Depósito na reserva** é comum em serviço longo/caro (o depósito vira a proteção; cancelou tarde, perdeu).
+- **Filas de restaurante** (Waitwhile, QLess, NextMe) quase nunca cobram — usam **tolerância curta + SMS**, e relatam **até 40% menos no-show** só com notificação.
+
+**Meu pitaco, se ajudar:** dado que barbearia tem ticket baixo (o mercado americano usa US$ 15–25 de taxa) e que o VUPTH ainda não tem pagamento, a versão "cartão salvo + penalidade reputacional" entrega quase todo o efeito com uma fração do custo de construção e risco jurídico.
+
+---
+
+### D2. Se for dinheiro: como cobrar?
+
+**Contexto.** Só faz sentido decidir depois do D1. Cobrar exige o cartão **antes** do serviço, o que muda o cadastro e o fluxo de entrada na fila.
+
+**Pergunta.** Cartão salvo no cadastro? Depósito ao entrar na fila? Cobrança na próxima visita? Quem fica com o dinheiro — a loja ou a plataforma?
+
+**O que o mercado faz.** Cartão em arquivo é o dominante (Fresha, Booksy). Depósito aparece em serviço caro. "Cobrar depois" praticamente não existe, porque a taxa de recuperação é baixa.
+
+---
+
+### D3. Quanto vale cada multa?
+
+**Contexto.** São **duas** multas diferentes, por decisão sua: *sair da fila* e *seguir na fila mesmo tendo faltado*.
+
+**Pergunta.** Valor fixo, percentual do serviço, ou escalonado por reincidência? A de "seguir na fila" deve ser **maior** ou **menor** que a de sair?
+
+**O que o mercado faz.** Percentual do serviço (tipicamente 50% do valor, 100% em reincidência) ou valor fixo. Barbearia fica na ponta baixa. Quase ninguém tem a modalidade "faltei mas quero continuar" — **isso é desenho seu**, não há referência pronta.
+
+**Ponto de atenção.** Se a multa de continuar for menor que a de sair, o incentivo é sempre continuar — e a fila vira refém de quem não chega.
+
+---
+
+### D4. Existe tolerância? De quanto?
+
+**Contexto.** Não conversamos sobre isso, e sem tolerância a régua fica dura demais: trânsito, elevador, fila do estacionamento.
+
+**Pergunta.** Há uma janela de graça entre "chegou a vez" e "está atrasado"? Quantos minutos?
+
+**O que o mercado faz.** Restaurante segura a mesa por **10 minutos** — é quase padrão. Salão costuma usar **10 a 15 minutos** antes de liberar o horário.
+
+---
+
+### D5. Para onde vai o cliente que SAI da fila pelo piso?
+
+**Contexto.** No piso ("não posso antes das 15:00"), se a estimativa cair abaixo do piso ele sai da fila e volta a esperar. Falta definir **o que ele é** nesse intervalo.
+
+**Pergunta.** Ele volta a ser intenção fora da fila, ou vira um estado próprio (ex.: "aguardando o horário")?
+
+**Por que importa.** Muda o que o profissional vê, e muda se ele conta como "atendimento ativo" — o que hoje **bloqueia fechar a loja** e bloqueia apagar a conta.
+
+**O que o mercado faz.** Fila de restaurante usa "pausar meu lugar" com estado visível ao staff. Nenhuma referência exata para "sai e volta sozinho" — é específico do seu desenho.
+
+---
+
+### D6. Como o cliente é avisado das transições do piso?
+
+**Contexto.** Ele entra na fila, pode sair, pode reentrar — tudo automático.
+
+**Pergunta.** Notifica nas duas transições? Só na reentrada? Como o app mostra o estado "esperando o horário"?
+
+**Por que importa.** Executado em silêncio, o recurso que existe para **proteger** o cliente parece **punição**: ele abre o app, não se vê na fila e conclui que perdeu a vez.
+
+**O que o mercado faz.** Filas virtuais mostram **posição + espera estimada** o tempo todo numa tela própria, e notificam cada mudança relevante. A regra prática: **se o estado mudou sem o usuário pedir, avise.**
+
+---
+
+### D7. Alvo ou piso: como perguntar sem confundir?
+
+**Contexto.** São dois casos opostos (§ do piso, seção A) e **não pode haver default** — a resposta muda o que acontece na fila e a régua da multa.
+
+**Pergunta.** Como perguntar em uma linha, sem jargão? Ex.: *"Se abrir uma vaga antes das 15:00, você aceita?"* → Sim = alvo · Não = piso.
+
+**O que o mercado faz.** Companhia aérea e consulta médica usam exatamente esse padrão ("aceita antecipar?"). É a formulação mais testada.
+
+---
+
+### D8. Atraso em cascata: qual é a régua?
+
+**Contexto.** Quem não aparece faz a fila andar para trás no relógio, e o próximo chega "atrasado" em relação ao horário que **lhe foi comunicado**.
+
+**Pergunta.** A régua da multa é o **horário comunicado àquele cliente** (a proposta registrada), ou a posição na fila com tolerância?
+
+**Por que importa.** Se for a posição, você multa gente por um atraso que o sistema criou — e essa é a reclamação que destrói a confiança no app.
+
+**O que o mercado faz.** Waitlist não tem esse problema porque não promete horário, só posição. **Ao prometer horário, você herda a obrigação de honrá-lo** — é o mesmo princípio da compensação de voo: quem foi avisado tarde não é o culpado.
+
+---
+
+### D9. NativeWind: quando migrar? (C15)
+
+**Contexto.** O partner saiu do Gluestack; nós ficamos. Não é bump de versão, é troca de arquitetura (~49 arquivos no partner).
+
+**Pergunta.** Migrar agora, depois do lançamento, ou nunca?
+
+**O que o mercado faz.** Migração de sistema de estilo costuma ser feita **entre releases**, nunca durante uma frente de features — o custo é alto e o ganho é invisível ao usuário.
+
+---
+
+> **Fontes da pesquisa (2026-08-07):** [Booksy — no-show policy](https://biz.booksy.com/en-us/blog/no-show-policy-tips) · [Fresha — taxas de no-show](https://www.fresha.com/help-center/knowledge-base/payments/617-charge-no-show-and-cancellation-fees) · [Bookedin — quanto cobrar](https://bookedin.com/blog/how-much-to-charge-for-cancellation-fee/) · [NoShowCost — taxa de 30% em salões](https://noshowcost.com/salons) · [Waitwhile](https://waitwhile.com/restaurant-waitlist/) · [NextMe](https://nextmeapp.com/blog/restaurant-operations/the-best-waitlist-app-for-restaurants-what-to-look-for-in-2026/) · [SevenRooms — waitlist como hospitalidade](https://sevenrooms.com/blog/restaurant-waitlist-hospitality-guide/)
+
+---
+
 ## 2. Endpoints Consumidos — Status
 
 | Endpoint | Metodo | Tela | Status Frontend | Testes |
