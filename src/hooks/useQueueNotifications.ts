@@ -118,9 +118,16 @@ export function useQueueNotifications(enabled: boolean) {
             },
           );
         },
-        onWebSocketError: () => {
-          diag.markError("personal");
+        // Captura o MOTIVO: sem ele o painel so dizia "falhou o handshake", que
+        // nao aponta causa nenhuma (teste do Andre, 2026-08-07).
+        onWebSocketError: (event: any) => {
+          const motivo =
+            event?.message ?? event?.reason ?? event?.type ?? "erro sem descricao";
+          diag.markError("personal", `${motivo} · ${WS_URL}`);
           if (__DEV__) console.log(`[ws] falha no handshake notif (${WS_URL})`);
+        },
+        onStompError: (frame) => {
+          diag.markError("personal", `STOMP: ${frame?.headers?.message ?? "erro"}`);
         },
       });
 

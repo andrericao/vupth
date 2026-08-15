@@ -27,6 +27,10 @@ export type ChannelState = {
   lastMessageAt: number | null;
   /** Mensagens recebidas na sessão — separa "conectado" de "recebendo". */
   messages: number;
+  /** Motivo da última falha + quantas já houve. Sem isso, "falhou o handshake"
+   *  não diz NADA sobre a causa — foi o que aconteceu no teste de 2026-08-07. */
+  lastError: string | null;
+  errors: number;
 };
 
 const EMPTY: ChannelState = {
@@ -36,6 +40,8 @@ const EMPTY: ChannelState = {
   connectedAt: null,
   lastMessageAt: null,
   messages: 0,
+  lastError: null,
+  errors: 0,
 };
 
 interface WsDiagnosticsState {
@@ -44,7 +50,7 @@ interface WsDiagnosticsState {
   markConnecting: (channel: WsChannel) => void;
   markConnected: (channel: WsChannel, headers: Record<string, string>) => void;
   markMessage: (channel: WsChannel) => void;
-  markError: (channel: WsChannel) => void;
+  markError: (channel: WsChannel, detail?: string) => void;
   markClosed: (channel: WsChannel) => void;
   reset: () => void;
 }
@@ -76,8 +82,15 @@ export const useWsDiagnosticsStore = create<WsDiagnosticsState>((set) => ({
       },
     })),
 
-  markError: (channel) =>
-    set((s) => ({ [channel]: { ...s[channel], status: 'error' } })),
+  markError: (channel, detail) =>
+    set((s) => ({
+      [channel]: {
+        ...s[channel],
+        status: 'error',
+        lastError: detail ?? 'sem detalhe',
+        errors: s[channel].errors + 1,
+      },
+    })),
 
   markClosed: (channel) =>
     set((s) => ({ [channel]: { ...s[channel], status: 'idle' } })),

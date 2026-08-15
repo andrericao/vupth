@@ -65,7 +65,16 @@ function Channel({
         {state.messages} recebidas · última {formatSince(state.lastMessageAt, now)} ·{" "}
         {state.connects} {state.connects === 1 ? "conexão" : "conexões"}
         {state.info?.heartBeat ? ` · heart-beat ${state.info.heartBeat}` : ""}
+        {state.errors > 0 ? ` · ${state.errors} falhas` : ""}
       </Text>
+
+      {/* O MOTIVO da falha. Sem isto o painel dizia só "falhou o handshake", que
+          não aponta causa nenhuma — foi o que travou o teste de 2026-08-07. */}
+      {state.lastError && (
+        <Text size="xs" color="$red500" testID={`ws-diag-${channel}-error`}>
+          {state.lastError}
+        </Text>
+      )}
     </VStack>
   );
 }
