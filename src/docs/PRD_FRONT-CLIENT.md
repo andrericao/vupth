@@ -333,15 +333,26 @@ Você tinha definido **duas multas diferentes** — uma para *sair da fila* e ou
 
 ---
 
-### D7. Alvo ou piso: como perguntar sem confundir?
+### ✅ D7 — DECIDIDO (Andre, 2026-08-07): perguntar DEPOIS de confirmar, no padrão "substituição"
 
-**Contexto.** São dois casos opostos (§ do piso, seção A) e **não pode haver default** — a resposta muda o que acontece na fila e a régua da multa.
+**Onde perguntar:** o cliente manifesta a intenção pelo fluxo **que já existe**. **Depois de confirmar**, aparece um aviso de que a fila oscila, com a escolha.
 
-**Pergunta.** Como perguntar em uma linha, sem jargão? Ex.: *"Se abrir uma vaga antes das 15:00, você aceita?"* → Sim = alvo · Não = piso.
+**Como perguntar** (texto do Andre, a lapidar):
 
-**O que o mercado faz.** Companhia aérea e consulta médica usam exatamente esse padrão ("aceita antecipar?"). É a formulação mais testada.
+> *"Caso o tempo estimado da fila diminua para antes das **15:00**, o que deve ser feito?"*
+> 1. **Acompanhar a fila** — aceito ser atendido antes
+> 2. **Não consigo cortar antes desse horário** — me mantenha para depois das 15:00
 
----
+**A referência é o Zé Delivery**, quando o estabelecimento não tem a bebida escolhida e ele pergunta o que fazer. É o **padrão de preferência de substituição**: em vez de o app adivinhar, ele pergunta uma vez, na hora em que a escolha é concreta, e guarda a resposta para quando o caso acontecer.
+
+**Por que esse desenho funciona melhor do que perguntar antes:**
+- Só aparece para quem escolheu horário — não polui quem entra na fila normal.
+- O horário aparece **preenchido** na pergunta ("antes das 15:00"), então ela é concreta, não hipotética.
+- Vem **depois** da confirmação: não adiciona atrito à decisão principal.
+
+**Mapeamento para o modelo:** opção 1 = **alvo** (flexível, comportamento que já existe) · opção 2 = **piso** (rígido, o recurso novo).
+
+**A ajustar na redação:** "diminua" pode ser lido como "diminuir a espera" (bom) em vez de "antecipar o horário". Vale testar algo como *"Se abrir uma vaga antes das 15:00…"*, que é a formulação que companhia aérea e clínica usam.
 
 ### D8. Atraso em cascata: qual é a régua?
 
