@@ -78,3 +78,43 @@ Para consertar do nosso lado (**item de front, registrado no PRD_FRONT-CLIENT §
 ### 4.3 🟡 FRONT-PARTNER — vale conferir os dois acima
 
 O `4.1` afeta vocês igual se o app de vocês também conecta por WebSocket a partir do React Native. O `4.2` afeta a tela de fila: se o mesmo cliente aparecer duas vezes, o profissional vê duplicado e a estimativa dele fica errada.
+
+---
+
+## 5. 📣 PEDIDO AO FRONT-PARTNER — coloquem também um painel de WebSocket nas Configurações
+
+**O pedido em uma linha:** façam no app de vocês o mesmo painel de diagnóstico de tempo real que o front-client colocou em **Configurações → "Tempo real"**.
+
+### Por que isso importa mais do que parece
+
+Passamos semanas discutindo o WebSocket sem conseguir concluir nada, e o motivo era simples: **ninguém conseguia observar a conexão**. "Não chega mensagem" não diz de quem é a culpa — pode ser o servidor não publicando, o socket morto sem avisar, ou a sessão ter subido sem identidade. Os três produzem exatamente o mesmo sintoma: silêncio.
+
+O backend chegou a pedir um "Teste 0" que era imprimir os headers do `CONNECTED` no console. **Isso é inexequível num binário instalado** — só aparece com o aparelho ligado no computador via `adb logcat` ou num dev client, e quem testa está com o celular na mão. Por isso viramos o log em **tela**.
+
+**O resultado prático, no primeiro teste depois de pronto:** o que era "o WebSocket não funciona" virou **"falha no handshake, não chega a conectar, motivo X, nesta URL"**. Isso é acionável; o anterior não era.
+
+### O que o painel mostra (uma linha por canal)
+
+| Dado | A pergunta que ele responde |
+|---|---|
+| `user-name` do frame `CONNECTED` | A sessão subiu **identificada** ou **ANÔNIMA**? Vazio = anônima, e o canal pessoal morre calado (é o `#31` do backlog do backend / S14 de vocês) |
+| `heart-beat` negociado | O servidor manda batida ou `0`? `0` = socket zumbi, a queda passa despercebida (o S17 de vocês) |
+| Mensagens recebidas + hora da última | Separa **"conectado"** de **"recebendo"** — que era exatamente o que nenhum teste anterior distinguia |
+| Nº de conexões | Quantas vezes reconectou (é o que os testes de background e troca de rede medem) |
+| **Motivo do erro + URL tentada** | Quando falha, **por quê** e contra quem |
+
+### O motivo mais forte: só com os dois apps instrumentados dá para isolar a causa
+
+Hoje o front-client falha o handshake no device. **Não dá para saber se é problema do nosso código ou do WebSocket do React Native contra o Render.** Com o painel nos dois apps, o teste vira trivial:
+
+- **Os dois falham** → é servidor/infra, e o backend age.
+- **Só o client falha** → é código nosso, e nós agimos.
+- **Só o partner falha** → é código de vocês.
+
+Sem instrumento nos dois lados, isso continua sendo troca de suposições.
+
+### Custo
+
+Baixo, e **sem dependência de backend**: um store pequeno com o estado por canal, alimentado nos callbacks que vocês já têm (`onConnect`, `onWebSocketError`, `onStompError` e o `subscribe`), mais um componente de leitura na tela de Configurações. No nosso caso a lógica pura ficou em `domain/ws/diagnostics.ts` com 17 casos de teste — a parte que decide se a sessão é anônima e se o heartbeat está zerado.
+
+**Detalhe que custou caro aqui:** capturem o **motivo** do erro, não só o fato de ter falhado. Nossa primeira versão descartava o evento de erro, e o primeiro teste no device voltou com "falhou" sem causa — teste queimado. E capturem também o `onStompError`: erro de **protocolo** (um CONNECT recusado, por exemplo) não passa pelo `onWebSocketError` e, sem ele, uma recusa do servidor aparece como silêncio.

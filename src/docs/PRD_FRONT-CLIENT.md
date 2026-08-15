@@ -268,21 +268,18 @@ Domínio puro em `domain/ws/diagnostics.ts` (17 casos). **C18 feito junto:** `Ap
 
 ---
 
-### D1. A multa é DINHEIRO ou é reputação?
+### ✅ D1 — DECIDIDO (Andre, 2026-08-07): **a multa é DINHEIRO.**
 
-**Contexto.** Você pediu multas para quem não aparece e para quem sai da fila. Hoje o backend já tem **strikes** (cancelamento tardio + escalada de no-show) — punição *reputacional*, sem dinheiro. "Multa" sugere cobrança financeira, e isso é uma mudança de categoria do produto: exige meio de pagamento, guarda de cartão, política de reembolso, contestação, nota fiscal e exposição ao CDC.
+Não é penalidade reputacional: o cliente **paga**. Isso muda a categoria do produto e destrava/força o resto.
 
-**Pergunta.** Multa = **valor cobrado** do cliente, ou = **penalidade sem dinheiro** (perder prioridade, ficar bloqueado por X horas, precisar de depósito na próxima)?
+**O que essa decisão arrasta junto** (não é opinião, é consequência):
+- **Meio de pagamento vira pré-requisito** do fluxo de fila — hoje o app não tem nenhum.
+- **D2 e D3 deixam de ser opcionais** e viram bloqueio: sem definir *como* cobrar e *quanto*, não dá para construir.
+- **Entram regras que não existiam:** reembolso, contestação, comprovante/recibo, e o que acontece quando a cobrança **falha** (cartão recusado, sem saldo).
+- **Exposição ao CDC:** multa a consumidor exige informação prévia, clara e destacada — a regra precisa estar visível **antes** de o cliente entrar na fila, não escondida em termos de uso.
+- **Quem recebe** (loja ou plataforma) tem efeito fiscal e contratual. É a próxima pergunta a fechar, dentro da D2.
 
-**O que o mercado faz.**
-- **Fresha e Booksy** cobram de verdade — taxa de cancelamento/no-show no cartão em arquivo. É o padrão em salão/barbearia.
-- **Dado que muda a conversa:** a Booksy mediu que **só ter o cartão salvo, sem cobrar nada, já reduz o no-show em 25–30%**. Ou seja, boa parte do efeito vem da *ameaça crível*, não da cobrança.
-- **Depósito na reserva** é comum em serviço longo/caro (o depósito vira a proteção; cancelou tarde, perdeu).
-- **Filas de restaurante** (Waitwhile, QLess, NextMe) quase nunca cobram — usam **tolerância curta + SMS**, e relatam **até 40% menos no-show** só com notificação.
-
-**Meu pitaco, se ajudar:** dado que barbearia tem ticket baixo (o mercado americano usa US$ 15–25 de taxa) e que o VUPTH ainda não tem pagamento, a versão "cartão salvo + penalidade reputacional" entrega quase todo o efeito com uma fração do custo de construção e risco jurídico.
-
----
+**Vale manter à vista o dado da pesquisa:** a Booksy mediu que **só ter o cartão salvo já reduz o no-show em 25–30%**, sem cobrar. Isso não contradiz a decisão — mas sugere que **guardar o cartão** é o passo que entrega mais cedo o efeito, e a cobrança em si pode vir depois, já com a infraestrutura montada.
 
 ### D2. Se for dinheiro: como cobrar?
 
