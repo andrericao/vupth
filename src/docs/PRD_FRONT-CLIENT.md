@@ -201,7 +201,28 @@ O piso é a versão **declarada** disso (o cliente diz o horário); o atraso em 
 4. **A multa só pode disparar depois** do horário comunicado àquele cliente.
 5. **Descongelar / editar o piso** pelo cliente.
 
-#### F. Relação com o que já existe
+#### F. Desenho sugerido: orientado a EVENTOS (Andre, 2026-08-07)
+
+> *"seria uma função orientada a eventos que observa cada alteração na fila, aí verifica o horário pretendido"*
+
+É a forma certa, e **o backend já tem esse padrão três vezes**: `IntentionPromotionScheduler`, `CutRequestExpiryScheduler` e `EstablishmentAutoCloseScheduler` — todos com `ThreadPoolTaskScheduler` próprio/daemon e **deliberadamente sem `@Scheduled`**. O reavaliador do piso entra como mais um do mesmo molde: a cada evento, recalcula a estimativa de quem tem piso e decide **entra na fila / sai da fila / fica**.
+
+⚠️ **O gatilho NÃO pode ser só "mudou o tamanho da fila".** Um atendimento que **demora mais que o estimado** empurra a estimativa de todo mundo **sem alterar o tamanho** — e é exatamente o caso em que alguém cruza o piso. A lista de eventos que precisa disparar a reavaliação:
+
+| Evento | Efeito na estimativa |
+|---|---|
+| `start` / `finish` | move para trás **ou** para a frente, conforme a duração real |
+| `cancel` / `leave-queue` / no-show | **antecipa** todo mundo — é o caso do "desistiu às 14:15" |
+| `late` / `undo-late` | reordena |
+| `fit-in` / encaixe / promover ao 1º lugar | **atrasa** quem está atrás |
+| bloco de refeição criado, editado ou pulado | move a janela inteira |
+| profissional pausa / retoma / fica indisponível | idem |
+
+Como o backend **já faz `broadcastQueue` a cada mudança**, o ponto de engate natural é o mesmo caminho — quem já sabe que a fila mudou é quem deve acionar a reavaliação.
+
+**Ainda a decidir:** quando alguém **sai** da fila por causa do piso, ele volta para onde? (fica como intenção fora da fila até cruzar de novo, ou vira um estado próprio?) E o cliente precisa ser **avisado** das duas transições — sair e voltar a entrar —, senão ele abre o app, não se vê na fila e acha que perdeu a vez.
+
+#### G. Relação com o que já existe
 
 - **Cancelamento tardio + strikes/aviso** (era o `#39` do backlog do backend em 08/2026 — conferir o número no PRD deles, ver o aviso no topo do HANDOFF): é a base do sistema de penalidade. As multas aqui são uma evolução dele, com **duas saídas** em vez de uma.
 - **Intenção de fila com horário-alvo** (`targetTime` no `POST /attendances`): cede a vez enquanto o previsto for antes do alvo. É o parente mais próximo do piso, mas **não faz o cliente sair da fila** quando a estimativa cai, e não trata multa. Está **desligado no nosso front** desde 2026-07-15, com o parâmetro preservado em `ServiceSelection.goToQueue()` para religar sem retrabalho.
