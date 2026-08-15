@@ -118,3 +118,23 @@ Sem instrumento nos dois lados, isso continua sendo troca de suposições.
 Baixo, e **sem dependência de backend**: um store pequeno com o estado por canal, alimentado nos callbacks que vocês já têm (`onConnect`, `onWebSocketError`, `onStompError` e o `subscribe`), mais um componente de leitura na tela de Configurações. No nosso caso a lógica pura ficou em `domain/ws/diagnostics.ts` com 17 casos de teste — a parte que decide se a sessão é anônima e se o heartbeat está zerado.
 
 **Detalhe que custou caro aqui:** capturem o **motivo** do erro, não só o fato de ter falhado. Nossa primeira versão descartava o evento de erro, e o primeiro teste no device voltou com "falhou" sem causa — teste queimado. E capturem também o `onStompError`: erro de **protocolo** (um CONNECT recusado, por exemplo) não passa pelo `onWebSocketError` e, sem ele, uma recusa do servidor aparece como silêncio.
+
+---
+
+## 6. 🔴 BACKEND — mudança de regra: intenção passa a BLOQUEAR o fechamento da loja
+
+**Decisão do Andre (2026-08-07).** Hoje o PRD de vocês diz, sobre a `INTENTION`: *"NÃO conta como atendimento ativo (não bloqueia o fechamento da loja — BUG6)"*. Era deliberado. **Precisa mudar.**
+
+**A regra nova:**
+
+| Situação | Pode fechar a loja? |
+|---|---|
+| Intenção para **outro dia** | ✅ Sim |
+| Intenção para **hoje**, com horário **fora** do expediente | ✅ Sim |
+| Intenção para **hoje, DENTRO do horário de funcionamento** | ❌ **Não.** Ou remove todos os clientes, ou atende todos |
+
+**Por quê:** hoje um cliente com intenção para as 15:00 pode ter a loja fechada às 14:00 e ficar sem nada, **sem aviso nenhum**. O bloqueio força o profissional a resolver explicitamente — remover (e aí o cliente é notificado) ou atender.
+
+**Cuidado na implementação:** o gate precisa distinguir "intenção de hoje dentro do expediente" das outras. Fechar por causa de intenção de amanhã, ou de uma marcada para depois do `closingTime`, seria prender o profissional sem motivo — e vocês já têm a matemática de janela (`ClosingTimeMath`, `BusinessClock`) para fazer esse recorte.
+
+**Relacionado:** isto conversa com o **piso de horário** (seção 1, B9): quem sai da fila pelo piso **volta ao estado de intenção**, então passa a contar para este bloqueio enquanto espera o horário chegar.

@@ -309,27 +309,33 @@ Você tinha definido **duas multas diferentes** — uma para *sair da fila* e ou
 
 ---
 
-### D5. Para onde vai o cliente que SAI da fila pelo piso?
+### ✅ D5 — DECIDIDO (Andre, 2026-08-07): volta a ser INTENÇÃO — e intenção passa a bloquear o fechamento
 
-**Contexto.** No piso ("não posso antes das 15:00"), se a estimativa cair abaixo do piso ele sai da fila e volta a esperar. Falta definir **o que ele é** nesse intervalo.
+**Estado:** quem sai da fila pelo piso **volta ao estado de intenção**, que já existe. Sem estado novo.
 
-**Pergunta.** Ele volta a ser intenção fora da fila, ou vira um estado próprio (ex.: "aguardando o horário")?
+**⚠️ Mas vem junto uma REGRA NOVA, que muda o comportamento atual do backend:**
 
-**Por que importa.** Muda o que o profissional vê, e muda se ele conta como "atendimento ativo" — o que hoje **bloqueia fechar a loja** e bloqueia apagar a conta.
+> *"Não é para o profissional poder fechar a loja tendo clientes que manifestaram a intenção de corte… ele não pode fechar tendo cliente agendado para o dia dentro do horário de funcionamento. Ou ele remove todos os clientes antes, ou atende a todos."*
 
-**O que o mercado faz.** Fila de restaurante usa "pausar meu lugar" com estado visível ao staff. Nenhuma referência exata para "sai e volta sozinho" — é específico do seu desenho.
+| Situação | Pode fechar? |
+|---|---|
+| Intenção para **outro dia** | ✅ Sim |
+| Intenção para **hoje**, com horário **fora** do expediente (antes de abrir / depois de fechar) | ✅ Sim |
+| Intenção para **hoje, dentro do horário de funcionamento** | ❌ **Não.** Ou remove todos, ou atende todos |
+
+**🔴 Isto CONTRADIZ o backend de hoje.** O PRD deles diz, sobre a intenção: *"NÃO conta como atendimento ativo (não bloqueia o fechamento da loja)"*. Era decisão deliberada. Agora precisa mudar — registrado como pedido em `PARA_OUTRAS_EQUIPES`.
+
+**Por que a mudança faz sentido:** hoje o cliente com intenção para as 15:00 pode ter a loja fechada às 14:00 e ficar sem nada, sem aviso. O bloqueio força o profissional a resolver — ou remove (e aí o cliente é notificado) ou atende.
 
 ---
 
-### D6. Como o cliente é avisado das transições do piso?
+### 🟡 D6 — PARCIALMENTE DECIDIDO (Andre, 2026-08-07): a tela mostra "AGENDADO"
 
-**Contexto.** Ele entra na fila, pode sair, pode reentrar — tudo automático.
+**Decidido:** enquanto espera fora da fila, o cliente aparece como **intenção / "AGENDADO"** — não como "fora da fila". Isso resolve a maior parte do susto: ele abre o app e vê *"Agendado para 15:00"*, em vez de não se ver em lugar nenhum.
 
-**Pergunta.** Notifica nas duas transições? Só na reentrada? Como o app mostra o estado "esperando o horário"?
+**Ainda aberto:** manda **notificação** nas transições, ou só muda o rótulo em silêncio?
 
-**Por que importa.** Executado em silêncio, o recurso que existe para **proteger** o cliente parece **punição**: ele abre o app, não se vê na fila e conclui que perdeu a vez.
-
-**O que o mercado faz.** Filas virtuais mostram **posição + espera estimada** o tempo todo numa tela própria, e notificam cada mudança relevante. A regra prática: **se o estado mudou sem o usuário pedir, avise.**
+**Minha leitura:** com o rótulo "Agendado" e com a pergunta da D7 já feita (ele *escolheu* a opção "não consigo antes"), o susto praticamente some — ele foi avisado de que isso aconteceria. Sobra **uma** notificação que continua valendo a pena: **quando ele entra na fila de verdade** ("agora você está na fila, faltam X"), porque é a partir daí que ele precisa se deslocar. Sair da fila pode ser silencioso; entrar, não.
 
 ---
 
@@ -354,27 +360,45 @@ Você tinha definido **duas multas diferentes** — uma para *sair da fila* e ou
 
 **A ajustar na redação:** "diminua" pode ser lido como "diminuir a espera" (bom) em vez de "antecipar o horário". Vale testar algo como *"Se abrir uma vaga antes das 15:00…"*, que é a formulação que companhia aérea e clínica usam.
 
-### D8. Atraso em cascata: qual é a régua?
+### 🟡 D8 — EM DESENHO: as três verificações do Andre + a régua
 
-**Contexto.** Quem não aparece faz a fila andar para trás no relógio, e o próximo chega "atrasado" em relação ao horário que **lhe foi comunicado**.
+**Proposta do Andre (2026-08-07)** — disparar verificação quando a fila cair por desistência, olhando três sinais:
 
-**Pergunta.** A régua da multa é o **horário comunicado àquele cliente** (a proposta registrada), ou a posição na fila com tolerância?
+1. queda da estimativa **maior que 10 minutos**;
+2. estimativa de atendimento **menor que 1 hora** (mudança mais delicada);
+3. cliente está em **2º ou 3º** na fila.
 
-**Por que importa.** Se for a posição, você multa gente por um atraso que o sistema criou — e essa é a reclamação que destrói a confiança no app.
+**Minha contribuição: os três sinais medem a MESMA coisa — tempo de reação.**
 
-**O que o mercado faz.** Waitlist não tem esse problema porque não promete horário, só posição. **Ao prometer horário, você herda a obrigação de honrá-lo** — é o mesmo princípio da compensação de voo: quem foi avisado tarde não é o culpado.
+Repare: uma queda de 20 minutos não incomoda quem seria atendido daqui a 3 horas (ele é reavisado e se reprograma). Ela é brutal para quem seria atendido em 40 minutos — que talvez já esteja saindo de casa. E "2º ou 3º na fila" é outra forma de dizer "falta pouco". Ou seja, os três são **proxies de uma pergunta só**:
 
----
+> **O cliente ainda teve tempo de reagir?**
 
-### D9. NativeWind: quando migrar? (C15)
+**Desenho que proponho, usando os sinais dele:**
 
-**Contexto.** O partner saiu do Gluestack; nós ficamos. Não é bump de versão, é troca de arquitetura (~49 arquivos no partner).
+| Camada | Regra |
+|---|---|
+| **Gatilho** | Queda de estimativa **> 10 min** (o sinal 1 do Andre). Abaixo disso é ruído — não faz nada |
+| **Decisão** | `tempo de reação = nova estimativa − agora`. Os sinais 2 e 3 viram este número |
+| **Se o tempo de reação for CURTO** | Notificação **urgente** pedindo confirmação: *"sua vez foi antecipada para 14:20 — você consegue chegar?"* E o **horário comunicado NÃO muda** para efeito de multa |
+| **Se for LONGO** | Atualiza, notifica normal, e o **novo horário passa a valer** como o comunicado |
 
-**Pergunta.** Migrar agora, depois do lançamento, ou nunca?
+**O princípio que fecha a D8:** o horário que serve de régua para a multa **só muda quando o cliente CONFIRMA** — ou quando ele teve folga suficiente para se reprogramar. Sem confirmação e sem folga, a régua continua sendo o horário original. Assim ninguém é multado por uma antecipação que não pediu e não teve como atender.
 
-**O que o mercado faz.** Migração de sistema de estilo costuma ser feita **entre releases**, nunca durante uma frente de features — o custo é alto e o ganho é invisível ao usuário.
+**A definir:** quanto é "curto"? Sugiro amarrar à tolerância da **D4** — se o cliente não tem pelo menos o tempo da tolerância para chegar, é curto.
 
----
+### ✅ D9 — DECIDIDO (Andre, 2026-08-07): **ir para a v2 do Gluestack** (= NativeWind)
+
+**O mal-entendido desfeito:** o Andre queria "atualizar o Gluestack" achando que era mexer no `package.json`. Dois fatos:
+
+1. **Já estamos na última v1.** `@gluestack-ui/themed@1.1.73` — não há para onde atualizar dentro da v1. *(A linha do handoff do partner que diz "se o client ainda está no ^1.1.34" está desatualizada.)*
+2. **A v2 do Gluestack É o NativeWind.** Eles reescreveram a biblioteca em cima dele. Então "quero a v2" e "migrar para NativeWind" são **a mesma decisão** — que é exatamente o C15 do partner.
+
+**Por que não é um bump:** na v2 os componentes passam a ser **copiados para dentro do projeto** (modelo shadcn) e estilizados por **classes**, não por props. Sai `<Button bg="$green500" h={54}>`, entra `className="bg-green-500 h-[54px]"`. Todo componente e toda tela são tocados — no partner deu ~49 arquivos.
+
+**O que joga a favor:** o partner **já fez** e deixou cartilha no handoff deles. Não é caminho desconhecido; é caminho já percorrido por alguém que atende o mesmo backend e usa a mesma paleta.
+
+**Quando:** ⬜ a decidir. Recomendo **depois** de fechar os defeitos abertos de device (handshake do WebSocket e fila duplicada) e **entre** frentes de feature — migração de estilo não entrega nada visível ao usuário e conflita com todo trabalho de UI em andamento.
 
 > **Fontes da pesquisa (2026-08-07):** [Booksy — no-show policy](https://biz.booksy.com/en-us/blog/no-show-policy-tips) · [Fresha — taxas de no-show](https://www.fresha.com/help-center/knowledge-base/payments/617-charge-no-show-and-cancellation-fees) · [Bookedin — quanto cobrar](https://bookedin.com/blog/how-much-to-charge-for-cancellation-fee/) · [NoShowCost — taxa de 30% em salões](https://noshowcost.com/salons) · [Waitwhile](https://waitwhile.com/restaurant-waitlist/) · [NextMe](https://nextmeapp.com/blog/restaurant-operations/the-best-waitlist-app-for-restaurants-what-to-look-for-in-2026/) · [SevenRooms — waitlist como hospitalidade](https://sevenrooms.com/blog/restaurant-waitlist-hospitality-guide/)
 
