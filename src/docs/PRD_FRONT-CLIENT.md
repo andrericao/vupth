@@ -281,27 +281,23 @@ Não é penalidade reputacional: o cliente **paga**. Isso muda a categoria do pr
 
 **Vale manter à vista o dado da pesquisa:** a Booksy mediu que **só ter o cartão salvo já reduz o no-show em 25–30%**, sem cobrar. Isso não contradiz a decisão — mas sugere que **guardar o cartão** é o passo que entrega mais cedo o efeito, e a cobrança em si pode vir depois, já com a infraestrutura montada.
 
-### D2. Se for dinheiro: como cobrar?
+### ✅ D2/D3 — PARCIALMENTE DECIDIDO (Andre, 2026-08-07)
 
-**Contexto.** Só faz sentido decidir depois do D1. Cobrar exige o cartão **antes** do serviço, o que muda o cadastro e o fluxo de entrada na fila.
+**Decidido:**
+- **A PLATAFORMA fica com o dinheiro** da multa (não a loja).
+- **Valor: R$ 3,00**, a princípio. **Valor único, configurável** — *"será apenas o valor deste campo"*. Não é percentual do serviço nem escalonado por reincidência.
 
-**Pergunta.** Cartão salvo no cadastro? Depósito ao entrar na fila? Cobrança na próxima visita? Quem fica com o dinheiro — a loja ou a plataforma?
+**Ainda aberto dentro da D2:** *como* cobrar — cartão salvo no cadastro, cobrança no ato, ou acúmulo para a próxima visita.
 
-**O que o mercado faz.** Cartão em arquivo é o dominante (Fresha, Booksy). Depósito aparece em serviço caro. "Cobrar depois" praticamente não existe, porque a taxa de recuperação é baixa.
+#### ⚠️ Duas consequências que precisam de decisão consciente
 
----
+**1. O profissional é quem perde, e não recebe nada.** Quem sofre o no-show é o profissional: perdeu o horário e o faturamento daquele corte. Com a multa indo **inteira para a plataforma**, ele fica sem compensação — recebe só o transtorno. É sustentável como modelo de receita, mas convém ser escolha explícita, porque **é o profissional que vende o app ao cliente**. Alternativas comuns no mercado: *split* (parte para a loja), ou a multa virar **crédito do cliente naquela loja**.
 
-### D3. Quanto vale cada multa?
+**2. A R$ 3,00, a taxa de pagamento come uma fatia grande.** Transação de cartão no Brasil custa tipicamente **R$ 0,40–1,00 fixos + percentual** — numa multa de R$ 3,00 isso é **15–30% indo para o adquirente**. Duas saídas usadas no mercado: **acumular** e cobrar quando passar de um piso, ou **pré-autorizar sem capturar** — que é justamente o modelo em que a Booksy mediu 25–30% de redução no no-show **sem cobrar nada**.
 
-**Contexto.** São **duas** multas diferentes, por decisão sua: *sair da fila* e *seguir na fila mesmo tendo faltado*.
+#### ❓ Ficou uma pergunta em aberto
 
-**Pergunta.** Valor fixo, percentual do serviço, ou escalonado por reincidência? A de "seguir na fila" deve ser **maior** ou **menor** que a de sair?
-
-**O que o mercado faz.** Percentual do serviço (tipicamente 50% do valor, 100% em reincidência) ou valor fixo. Barbearia fica na ponta baixa. Quase ninguém tem a modalidade "faltei mas quero continuar" — **isso é desenho seu**, não há referência pronta.
-
-**Ponto de atenção.** Se a multa de continuar for menor que a de sair, o incentivo é sempre continuar — e a fila vira refém de quem não chega.
-
----
+Você tinha definido **duas multas diferentes** — uma para *sair da fila* e outra para *seguir na fila mesmo tendo faltado*. Agora falou em *"apenas o valor deste campo"*. É **um valor só para os dois casos**, ou continuam **dois valores**? Muda a modelagem: um campo, ou dois.
 
 ### D4. Existe tolerância? De quanto?
 
