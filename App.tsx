@@ -4,6 +4,8 @@ import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { Poppins_600SemiBold, Poppins_700Bold } from "@expo-google-fonts/poppins";
 import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from "@expo-google-fonts/inter";
+import { Archivo_700Bold, Archivo_800ExtraBold } from "@expo-google-fonts/archivo";
+import { DMMono_500Medium } from "@expo-google-fonts/dm-mono";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -38,6 +40,9 @@ export default function App() {
     Inter_400Regular,
     Inter_500Medium,
     Inter_700Bold,
+    Archivo_700Bold,
+    Archivo_800ExtraBold,
+    DMMono_500Medium,
   });
   const restoreSession = useAuthStore((s) => s.restoreSession);
   const restoreQueue = useQueueStore((s) => s.restoreQueue);

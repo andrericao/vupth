@@ -22,14 +22,14 @@ import {
 //   Conexões       -> quantas vezes reconectou (background, troca de rede).
 
 const LEVEL_COLOR: Record<VerdictLevel, string> = {
-  ok: "$green500",
+  ok: "$forest",
   warn: "$amber800",
-  bad: "$red500",
+  bad: "$brandDanger",
   idle: "$gray300",
 };
 
 const LEVEL_BG: Record<VerdictLevel, string> = {
-  ok: "$green100",
+  ok: "$greenTint",
   warn: "$amber100",
   bad: "$red100",
   idle: "$gray600",
@@ -71,7 +71,7 @@ function Channel({
       {/* O MOTIVO da falha. Sem isto o painel dizia só "falhou o handshake", que
           não aponta causa nenhuma — foi o que travou o teste de 2026-08-07. */}
       {state.lastError && (
-        <Text size="xs" color="$red500" testID={`ws-diag-${channel}-error`}>
+        <Text size="xs" color="$brandDanger" testID={`ws-diag-${channel}-error`}>
           {state.lastError}
         </Text>
       )}

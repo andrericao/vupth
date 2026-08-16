@@ -228,8 +228,8 @@ export function QueueStatus() {
   const { data: acceptableOffers = [] } = useSwapOffers(professionalId, canReshuffle);
   const acceptableCount = acceptableOffers.length;
 
-  const borderColor = isInQueue ? color : "#3B7A3F";
-  const timeColor = isInQueue ? color : "#3B7A3F";
+  const borderColor = isInQueue ? color : "#163300";
+  const timeColor = isInQueue ? color : "#163300";
   // Finalizado: "Finalizado". Em atendimento: tempo decorrido rolando (m:ss).
   // Na fila: countdown ("Aguardando" quando zera).
   const timeLabel = isFinished
@@ -410,7 +410,7 @@ export function QueueStatus() {
   if (isCreating) {
     return (
       <Center flex={1} bg="$gray700" px={15}>
-        <ActivityIndicator size="large" color="#3B7A3F" />
+        <ActivityIndicator size="large" color="#163300" />
         <Text mt="$2" color="$gray300">{createMsg}</Text>
         <Text mt="$1" size="xs" color="$gray400" textAlign="center">
           Na primeira vez pode levar até ~50s para o servidor acordar.
@@ -425,7 +425,7 @@ export function QueueStatus() {
         <Header />
         <Center flex={1}>
           <Text
-            color={canRequestCut ? "$gray500" : "$red500"}
+            color={canRequestCut ? "$gray500" : "$brandDanger"}
             fontSize="$lg"
             fontFamily="$heading"
             textAlign="center"
@@ -485,7 +485,7 @@ export function QueueStatus() {
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#3B7A3F" colors={["#3B7A3F"]} />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#163300" colors={["#163300"]} />
         }
       >
       <Center flex={1}>

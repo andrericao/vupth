@@ -34,8 +34,8 @@ import { cardShadow } from "@utils/styles";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 
 const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Concluído", color: "#3B7A3F" },
-  CANCELLED: { label: "Cancelado", color: "#E63946" },
+  FINISHED: { label: "Concluído", color: "#163300" },
+  CANCELLED: { label: "Cancelado", color: "#B3261E" },
   LATE: { label: "Atrasado", color: "#F59E0B" },
 };
 
@@ -172,7 +172,7 @@ export function Attendances() {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#3B7A3F" colors={["#3B7A3F"]} />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#163300" colors={["#163300"]} />
         }
       >
         <VStack mt="$6" px={15}>
@@ -187,9 +187,9 @@ export function Attendances() {
 
           {activeQueue && (isInQueue || emAtendimento) ? (
             <TouchableOpacity onPress={handleGoToQueue}>
-              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={emAtendimento ? "#3B7A3F" : color}>
+              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={emAtendimento ? "#163300" : color}>
                 <HStack alignItems="center" gap="$3">
-                  <Queue size={24} color={emAtendimento ? "#3B7A3F" : color} />
+                  <Queue size={24} color={emAtendimento ? "#163300" : color} />
                   <VStack flex={1}>
                     <Text fontFamily="$heading" size="sm">
                       {activeQueue.establishmentName}
@@ -198,7 +198,7 @@ export function Attendances() {
                       {activeQueue.professionalName}
                     </Text>
                   </VStack>
-                  <Badge bg={emAtendimento ? "#3B7A3F" : color} borderRadius="$full" px="$3" py="$1">
+                  <Badge bg={emAtendimento ? "#163300" : color} borderRadius="$full" px="$3" py="$1">
                     <BadgeText color="$white" size="xs">
                       {isBeingAttended ? "Em atendimento" : isPaused ? "Pausado" : formatWaitTime(remaining)}
                     </BadgeText>
@@ -226,7 +226,7 @@ export function Attendances() {
               {pendingSwaps.map((s) => (
                 <Box key={s.offerId} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                   <HStack alignItems="center" gap="$3">
-                    <ArrowsLeftRight size={22} color="#3B7A3F" />
+                    <ArrowsLeftRight size={22} color="#163300" />
                     <VStack flex={1}>
                       <Text fontFamily="$heading" size="sm">
                         {s.professionalName}
@@ -242,7 +242,7 @@ export function Attendances() {
                       onPress={() => handleCancelSwap(s.offerId, s.professionalName)}
                       disabled={cancellingSwapId === s.offerId}
                     >
-                      <Text size="xs" color="$red500" fontFamily="$heading">
+                      <Text size="xs" color="$brandDanger" fontFamily="$heading">
                         {cancellingSwapId === s.offerId ? "Cancelando..." : "Cancelar"}
                       </Text>
                     </TouchableOpacity>
@@ -268,7 +268,7 @@ export function Attendances() {
                   {group.items.map((i) => (
                     <Box key={i.id} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
                       <HStack alignItems="center" gap="$3">
-                        <CalendarBlank size={22} color="#3B7A3F" />
+                        <CalendarBlank size={22} color="#163300" />
                         <VStack flex={1}>
                           <Text fontFamily="$heading" size="sm">
                             {i.professionalName}
@@ -287,7 +287,7 @@ export function Attendances() {
                           onPress={() => handleCancelIntention(i.id, i.professionalName)}
                           disabled={cancellingId === i.id}
                         >
-                          <Text size="xs" color="$red500" fontFamily="$heading">
+                          <Text size="xs" color="$brandDanger" fontFamily="$heading">
                             {cancellingId === i.id ? "Cancelando..." : "Cancelar"}
                           </Text>
                         </TouchableOpacity>

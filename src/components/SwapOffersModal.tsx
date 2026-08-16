@@ -96,7 +96,7 @@ export function SwapOffersModal({ visible, professionalId, onClose, onChanged }:
 
           {loading && (
             <HStack alignItems="center" gap="$2" mt="$4">
-              <Spinner color="$green500" />
+              <Spinner color="$forest" />
               <Text size="sm" color="$gray300">Carregando ofertas...</Text>
             </HStack>
           )}

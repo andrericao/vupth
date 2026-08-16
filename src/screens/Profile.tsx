@@ -89,7 +89,7 @@ export function Profile() {
             w={80}
             h={80}
             borderRadius="$full"
-            bg="$green500"
+            bg="$forest"
             alignItems="center"
             justifyContent="center"
           >
@@ -104,12 +104,12 @@ export function Profile() {
 
         <Box borderRadius="$2xl" mt="$8" overflow="hidden" style={cardShadow}>
           <MenuItem
-            icon={<ClipboardText size={22} color="#3B7A3F" />}
+            icon={<ClipboardText size={22} color="#163300" />}
             label="Atendimentos"
             onPress={() => navigation.getParent()?.navigate("atendimentosTab", { screen: "attendances" })}
           />
           <MenuItem
-            icon={<Gear size={22} color="#3B7A3F" />}
+            icon={<Gear size={22} color="#163300" />}
             label="Configurações"
             onPress={() => navigation.getParent()?.navigate("settingsTab", { screen: "settings" })}
           />
@@ -122,8 +122,8 @@ export function Profile() {
             <TouchableOpacity onPress={handleLogout}>
               <Box bg="$white" px="$4" py="$4" borderRadius="$2xl" style={cardShadow}>
                 <HStack alignItems="center" gap="$3">
-                  <SignOut size={22} color="#E63946" />
-                  <Text size="sm" color="$red500">Sair da conta</Text>
+                  <SignOut size={22} color="#B3261E" />
+                  <Text size="sm" color="$brandDanger">Sair da conta</Text>
                 </HStack>
               </Box>
             </TouchableOpacity>

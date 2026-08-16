@@ -90,8 +90,8 @@ export function LocationSelector() {
     <>
       <TouchableOpacity onPress={() => setOpen(true)} accessibilityRole="button">
         <HStack alignItems="center" gap="$2" py="$1">
-          <MapPin size={18} color="#3B7A3F" weight="fill" />
-          <Text size="sm" fontFamily="$heading" color="$green500" flex={1} numberOfLines={1}>
+          <MapPin size={18} color="#163300" weight="fill" />
+          <Text size="sm" fontFamily="$heading" color="$forest" flex={1} numberOfLines={1}>
             {label}
           </Text>
           <CaretRight size={16} color="#9CA3AF" />

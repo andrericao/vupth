@@ -10,7 +10,7 @@ export function TabPill({ focused, children }: { focused: boolean; children: Rea
         paddingHorizontal: 16,
         paddingVertical: 5,
         borderRadius: 999,
-        backgroundColor: focused ? "rgba(0,179,126,0.12)" : "transparent",
+        backgroundColor: focused ? "rgba(22,51,0,0.1)" : "transparent",
       }}
     >
       {children}
@@ -18,7 +18,8 @@ export function TabPill({ focused, children }: { focused: boolean; children: Rea
   );
 }
 
-export const TAB_ACTIVE = "#3B7A3F";
+// [marca-vupth] $forest — nao aceita token (Ionicons `color` cru).
+export const TAB_ACTIVE = "#163300";
 export const TAB_INACTIVE = "#9CA3AF";
 
 // [verde-imersivo] Sombra superior sutil da tab bar (mesclar no tabBarStyle).

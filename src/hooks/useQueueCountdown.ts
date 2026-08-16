@@ -95,7 +95,9 @@ export function useQueueCountdown() {
           data.estimatedWaitingTime,
           Date.now(),
         );
-        if (reconciled) updateQueue(reconciled);
+        const patch: Partial<ActiveQueue> = { ...(reconciled ?? {}) };
+        if (data.position !== q.position) patch.position = data.position;
+        if (Object.keys(patch).length > 0) updateQueue(patch);
       } catch {}
 
       // 2. Status real do atendimento (fallback do WebSocket): reflete

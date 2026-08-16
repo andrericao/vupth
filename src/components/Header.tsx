@@ -27,7 +27,7 @@ export function Header({ showBackButton = false }: Props) {
               rounded={18}
               w={39}
               h={39}
-              bg="$green200"
+              bg="$greenTint"
             >
               <Icon as={ChevronLeftIcon} size="xl" />
             </Box>

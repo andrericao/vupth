@@ -119,7 +119,7 @@ export function Login() {
               value={email}
               onChangeText={(text: string) => { setEmail(text); setErrors({}); }}
             />
-            {errors.email && <Text color="$red500" size="xs">{errors.email}</Text>}
+            {errors.email && <Text color="$brandDanger" size="xs">{errors.email}</Text>}
           </VStack>
 
           <VStack w="$full" gap="$1">
@@ -129,20 +129,20 @@ export function Login() {
               value={password}
               onChangeText={(text: string) => { setPassword(text); setErrors({}); }}
             />
-            {errors.password && <Text color="$red500" size="xs">{errors.password}</Text>}
+            {errors.password && <Text color="$brandDanger" size="xs">{errors.password}</Text>}
           </VStack>
 
           <Button title={isSubmitting ? "Entrando..." : "Entrar"} onPress={handleLogin} />
 
           <TouchableOpacity onPress={() => navigation.navigate("forgotPassword", { email })}>
-            <Text size="sm" color="$green500" fontFamily="$heading">
+            <Text size="sm" color="$forest" fontFamily="$heading">
               Esqueci minha senha
             </Text>
           </TouchableOpacity>
         </Center>
 
         <Center mt={200} flex={1} justifyContent="flex-end">
-          <Text size="md" fontFamily="$heading" color="$green500">
+          <Text size="md" fontFamily="$heading" color="$forest">
             Novo por aqui?
           </Text>
           <Text size="sm" color="$gray300" mb="$3" textAlign="center">

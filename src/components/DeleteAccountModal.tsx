@@ -68,7 +68,7 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
           />
 
           {error && (
-            <Text size="xs" color="$red500" testID="delete-account-error">
+            <Text size="xs" color="$brandDanger" testID="delete-account-error">
               {error}
             </Text>
           )}
@@ -76,7 +76,7 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
           <Button
             title={isDeleting ? "Deletando..." : "Deletar minha conta"}
             variant="outline"
-            borderColor="$red500"
+            borderColor="$brandDanger"
             $active-bg="$red500"
             isDisabled={password.length === 0 || isDeleting}
             testID="delete-account-confirm"

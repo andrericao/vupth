@@ -8,9 +8,11 @@ type Props = Omit<ComponentProps<typeof GluestackButton>, "variant"> & {
   isLoading?: boolean;
 };
 
-// [verde-imersivo] Botao com presenca: pilula (rounded full), altura 54, sombra
-// suave e texto Poppins ($heading). Outline = acoes secundarias; destructive =
-// pilula vermelha vazada (ex.: "Sair da fila").
+// [marca-vupth] Botao com presenca: pilula (rounded full), altura 54, sombra
+// suave e texto Archivo ($heading). Outline = acoes secundarias; destructive =
+// pilula vermelha vazada (ex.: "Sair da fila"). Fundo solido usa $brandGreen
+// (claro) com texto $forest por cima — nunca branco, porque brandGreen e claro
+// demais pra sustentar texto branco (regra de contraste da marca).
 const btnShadow = {
   shadowColor: "#1A281A",
   shadowOffset: { width: 0, height: 6 },
@@ -29,15 +31,15 @@ export function Button({
   const isOutline = variant === "outline";
   const isDestructive = variant === "destructive";
   const isGhost = isOutline || isDestructive; // fundo transparente + borda
-  const accent = isDestructive ? "$red500" : "$green500";
+  const accent = isDestructive ? "$brandDanger" : "$forest";
 
   return (
     <GluestackButton
       w="$full"
       h={54}
       rounded="$full"
-      bg={isGhost ? "transparent" : "$green500"}
-      $active-bg={isDestructive ? "$red100" : isOutline ? "$green100" : "$green600"}
+      bg={isGhost ? "transparent" : "$brandGreen"}
+      $active-bg={isDestructive ? "$red100" : isOutline ? "$greenTint" : "$brandSuccess"}
       borderWidth={isGhost ? "$2" : "$0"}
       borderColor={accent}
       style={isGhost ? undefined : btnShadow}
@@ -51,9 +53,9 @@ export function Button({
       {...rest}
     >
       {isLoading ? (
-        <ButtonSpinner color={isGhost ? accent : "$white"} />
+        <ButtonSpinner color={accent} />
       ) : (
-        <Text fontFamily="$heading" fontSize="$md" color={isGhost ? accent : "$white"}>
+        <Text fontFamily="$heading" fontSize="$md" color={accent}>
           {title}
         </Text>
       )}

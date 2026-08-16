@@ -28,7 +28,7 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
       borderRadius="$xl"
       variant="outline"
       $focus-borderWidth="$2"
-      $focus-borderColor="$green500"
+      $focus-borderColor="$forest"
     >
       <HStack flex={1} alignItems="center">
         <InputField

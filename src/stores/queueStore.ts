@@ -15,6 +15,9 @@ export interface ActiveQueue {
   // duração estimada do serviço (min) — para tempo decorrido + término estimado.
   startedAt?: number;
   serviceMinutes?: number;
+  // Posição na fila (1 = próximo). Vem do mesmo GET que já traz o tempo de
+  // espera; a Home mostra "Faltam N" a partir dela.
+  position?: number;
 }
 
 interface QueueState {

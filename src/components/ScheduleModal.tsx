@@ -55,14 +55,14 @@ export function ScheduleModal({ visible, onClose }: Props) {
 
           {selectedDate != null && (
             <Box
-              bg="$green100"
+              bg="$greenTint"
               borderRadius="$xl"
               px="$4"
               py="$3"
               mt="$4"
             >
               <HStack alignItems="center" gap="$2">
-                <CalendarBlank size={18} color="#3B7A3F" />
+                <CalendarBlank size={18} color="#163300" />
                 <Text size="sm" color="$gray500">
                   A escolha do horário deste dia (barra de encaixe) chega em breve.
                 </Text>

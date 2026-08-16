@@ -42,6 +42,8 @@
     }
   },
   "dependencies": {
+    "@expo-google-fonts/archivo": "^0.4.2",
+    "@expo-google-fonts/dm-mono": "^0.4.2",
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/poppins": "^0.4.1",
     "@expo-google-fonts/roboto": "^0.2.3",

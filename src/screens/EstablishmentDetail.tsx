@@ -75,7 +75,7 @@ function ProfessionalCard({
             })()}
           </VStack>
           <VStack alignItems="flex-end">
-            <Text size="sm" fontFamily="$heading" color="$green500">
+            <Text size="sm" fontFamily="$heading" color="$forest">
               {professional.queue_count ?? 0} na fila
             </Text>
             <Text size="xs" color="$gray300">
@@ -161,7 +161,7 @@ export function EstablishmentDetail() {
         </Heading>
         <HStack mt="$2" gap="$2" alignItems="center">
           <Badge
-            bg={isEffectivelyOpen(establishment) ? "$green500" : "$amber500"}
+            bg={isEffectivelyOpen(establishment) ? "$forest" : "$amber500"}
             borderRadius="$full"
             px="$3"
             py="$1"

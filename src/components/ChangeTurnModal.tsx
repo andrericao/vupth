@@ -52,7 +52,7 @@ const OPTIONS: { value: TurnOption; title: string; description: string }[] = [
 ];
 
 function Radio({ selected, disabled }: { selected: boolean; disabled?: boolean }) {
-  const color = disabled ? "$gray400" : selected ? "$green500" : "$coolGray300";
+  const color = disabled ? "$gray400" : selected ? "$forest" : "$coolGray300";
   return (
     <Box
       w={22}
@@ -63,7 +63,7 @@ function Radio({ selected, disabled }: { selected: boolean; disabled?: boolean }
       alignItems="center"
       justifyContent="center"
     >
-      {selected && <Box w={10} h={10} rounded="$full" bg="$green500" />}
+      {selected && <Box w={10} h={10} rounded="$full" bg="$brandGreen" />}
     </Box>
   );
 }
@@ -147,8 +147,8 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
                     px="$3"
                     borderRadius="$xl"
                     borderWidth="$1"
-                    borderColor={isSelected ? "$green500" : "transparent"}
-                    bg={isSelected ? "$green100" : "transparent"}
+                    borderColor={isSelected ? "$forest" : "transparent"}
+                    bg={isSelected ? "$greenTint" : "transparent"}
                     opacity={disabled ? 0.45 : 1}
                     mb="$2"
                   >

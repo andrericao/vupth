@@ -126,7 +126,7 @@ export function SignUp() {
               value={email}
               onChangeText={(text: string) => { setEmail(text); setErrors({}); }}
             />
-            {errors.email && <Text color="$red500" size="xs">{errors.email}</Text>}
+            {errors.email && <Text color="$brandDanger" size="xs">{errors.email}</Text>}
           </VStack>
 
           <VStack w="$full" gap="$1">
@@ -137,7 +137,7 @@ export function SignUp() {
               onChangeText={(text: string) => { setPassword(text); setErrors({}); }}
             />
             {password.length > 0 && <PasswordRules rules={passwordRules} />}
-            {errors.password && <Text color="$red500" size="xs">{errors.password}</Text>}
+            {errors.password && <Text color="$brandDanger" size="xs">{errors.password}</Text>}
           </VStack>
 
           <VStack w="$full" gap="$1">
@@ -149,14 +149,14 @@ export function SignUp() {
             />
             {passwordsMatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <Check size={14} color="#3B7A3F" weight="bold" />
-                <Text size="xs" color="$green500">Senhas conferem</Text>
+                <Check size={14} color="#163300" weight="bold" />
+                <Text size="xs" color="$forest">Senhas conferem</Text>
               </HStack>
             )}
             {passwordsMismatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <X size={14} color="#E63946" weight="bold" />
-                <Text size="xs" color="$red500">Senhas não conferem</Text>
+                <X size={14} color="#B3261E" weight="bold" />
+                <Text size="xs" color="$brandDanger">Senhas não conferem</Text>
               </HStack>
             )}
           </VStack>

@@ -225,7 +225,7 @@ export function ForgotPassword() {
               isDisabled={!canReset}
             />
             <TouchableOpacity onPress={handleSendCode} disabled={isSubmitting}>
-              <Text size="sm" color="$green500" fontFamily="$heading" textAlign="center">
+              <Text size="sm" color="$forest" fontFamily="$heading" textAlign="center">
                 {isWakingServer
                   ? `Acordando o servidor... ${elapsed}s`
                   : isSubmitting

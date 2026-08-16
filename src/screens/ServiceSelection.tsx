@@ -262,7 +262,7 @@ export function ServiceSelection() {
       <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
         <Header showBackButton />
         <Center flex={1}>
-          <Text color="$red500" textAlign="center">{error}</Text>
+          <Text color="$brandDanger" textAlign="center">{error}</Text>
           <Button title="Voltar" mt="$4" onPress={() => navigation.goBack()} />
         </Center>
       </VStack>
@@ -303,7 +303,7 @@ export function ServiceSelection() {
                       borderRadius="$2xl"
                       style={cardShadow}
                       borderWidth={isSelected ? "$2" : "$0"}
-                      borderColor="$green500"
+                      borderColor="$forest"
                     >
                       <HStack justifyContent="space-between" alignItems="center">
                         <VStack flex={1}>
@@ -315,12 +315,12 @@ export function ServiceSelection() {
                           </Text>
                         </VStack>
                         <HStack alignItems="center" gap="$3">
-                          <Text fontFamily="$heading" color="$green500">
+                          <Text fontFamily="$heading" color="$forest">
                             R$ {service.price.toFixed(2)}
                           </Text>
                           {isSelected && (
                             <Box
-                              bg="$green500"
+                              bg="$forest"
                               borderRadius="$full"
                               w={24}
                               h={24}
@@ -346,7 +346,7 @@ export function ServiceSelection() {
                   <Text size="sm" color="$gray300">
                     {selectedIds.length} serviço(s) — {totalMinutes} min
                   </Text>
-                  <Text fontFamily="$heading" color="$green500">
+                  <Text fontFamily="$heading" color="$forest">
                     R$ {totalPrice.toFixed(2)}
                   </Text>
                 </HStack>
