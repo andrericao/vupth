@@ -9,6 +9,7 @@ import { Button } from "@components/Button";
 import { Header } from "@components/Header";
 import { validateLogin } from "@domain/auth/validateAuth";
 import { useAuthStore } from "@stores/authStore";
+import { useTabBarInset } from "@hooks/useTabBarInset";
 
 type RouteParams = {
   redirectTo?: string;
@@ -32,6 +33,7 @@ export function Login() {
   const route = useRoute();
   const params = (route.params as RouteParams) ?? {};
   const login = useAuthStore((s) => s.login);
+  const tabBarInset = useTabBarInset();
 
   async function handleLogin() {
     const result = validateLogin(email, password);
@@ -103,10 +105,13 @@ export function Login() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} px={15} py={60}>
+      {/* pb reserva a faixa da tab bar: o CTA "Entrar" nunca nasce coberto. */}
+      <VStack flex={1} px={15} pt={60} pb={30 + tabBarInset}>
         <Header showBackButton />
 
-        <Center gap="$6" mt={200}>
+        {/* flex={1} no lugar do mt fixo: o formulario se centraliza no espaco
+            que sobra entre o header e o rodape, em qualquer altura de tela. */}
+        <Center gap="$6" mt="$6" flex={1} justifyContent="center">
           <Text fontFamily="$heading" fontSize="$3xl">
             Acessar a conta
           </Text>
@@ -141,7 +146,7 @@ export function Login() {
           </TouchableOpacity>
         </Center>
 
-        <Center mt={200} flex={1} justifyContent="flex-end">
+        <Center mt="$6">
           <Text size="md" fontFamily="$heading" color="$green500">
             Novo por aqui?
           </Text>

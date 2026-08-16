@@ -11,6 +11,7 @@ import { PasswordRules } from "@components/PasswordRules";
 import { getPasswordRules } from "@domain/auth/validateAuth";
 import { authService } from "@services/authService";
 import { waitForBackend } from "@services/healthService";
+import { useTabBarInset } from "@hooks/useTabBarInset";
 
 const EMAIL_RE = /\S+@\S+\.\S+/;
 
@@ -21,6 +22,7 @@ export function ForgotPassword() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const params = (route.params ?? {}) as NonNullable<AppRoutes["forgotPassword"]>;
+  const tabBarInset = useTabBarInset();
 
   const [step, setStep] = useState<"email" | "reset">("email");
   const [email, setEmail] = useState(params.email ?? "");
@@ -90,7 +92,9 @@ export function ForgotPassword() {
 
   return (
     <ScrollView flex={1} bg="$gray700" contentContainerStyle={{ flexGrow: 1 }}>
-      <VStack flex={1} px={15} pt={60} pb={30}>
+      {/* pb reserva a faixa da tab bar: os CTAs do passo 2 (redefinir/reenviar)
+          continuam alcancaveis mesmo nas telas mais baixas. */}
+      <VStack flex={1} px={15} pt={60} pb={30 + tabBarInset}>
         <Header showBackButton />
 
         <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$2">

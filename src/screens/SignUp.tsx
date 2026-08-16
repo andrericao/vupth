@@ -11,6 +11,7 @@ import { Header } from "@components/Header";
 import { PasswordRules } from "@components/PasswordRules";
 import { validateSignUp, getPasswordRules } from "@domain/auth/validateAuth";
 import { useAuthStore } from "@stores/authStore";
+import { useTabBarInset } from "@hooks/useTabBarInset";
 
 type RouteParams = {
   redirectTo?: string;
@@ -36,6 +37,7 @@ export function SignUp() {
   const params = (route.params as RouteParams) ?? {};
   const register = useAuthStore((s) => s.register);
   const login = useAuthStore((s) => s.login);
+  const tabBarInset = useTabBarInset();
 
   const passwordRules = getPasswordRules(password);
   const passwordsMatch = password.length > 0 && confirmPassword.length > 0 && password === confirmPassword;
@@ -110,10 +112,13 @@ export function SignUp() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} px={15} py={60}>
+      {/* pb reserva a faixa da tab bar: o CTA "Cadastrar" nunca nasce coberto. */}
+      <VStack flex={1} px={15} pt={60} pb={30 + tabBarInset}>
         <Header showBackButton />
 
-        <Center gap="$6" mt={180}>
+        {/* flex={1} no lugar do mt fixo: o formulario se centraliza no espaco
+            que sobra entre o header e o rodape, em qualquer altura de tela. */}
+        <Center gap="$6" mt="$6" flex={1} justifyContent="center">
           <Text fontFamily="$heading" fontSize="$3xl">
             Criar Conta
           </Text>
@@ -164,7 +169,7 @@ export function SignUp() {
           <Button title={isSubmitting ? "Cadastrando..." : "Cadastrar"} onPress={handleSignUp} />
         </Center>
 
-        <Center mt={180} flex={1} justifyContent="flex-end">
+        <Center mt="$6">
           <Text>Já é cadastrado?</Text>
           <Button
             variant="outline"
