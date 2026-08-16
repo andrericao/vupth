@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { FlatList, TouchableOpacity, RefreshControl, Image } from "react-native";
+import { FlatList, TouchableOpacity, RefreshControl, Image, TextInput } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import {
@@ -286,14 +286,14 @@ export function Home() {
         >
           <MagnifyingGlass size={18} color="#454745" />
           <Box flex={1}>
-            <Text
-              fontFamily="$body"
-              fontSize={15}
-              color={search ? "$brandTextPrimary" : "$brandTextSecondary"}
-              onPress={() => {}}
-            >
-              {search || "Buscar serviço ou lugar"}
-            </Text>
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Buscar serviço ou lugar"
+              placeholderTextColor="#454745"
+              style={{ fontFamily: "Inter_400Regular", fontSize: 15, color: "#163300", padding: 0 }}
+              returnKeyType="search"
+            />
           </Box>
           <SlidersHorizontal size={18} color="#163300" />
         </HStack>
