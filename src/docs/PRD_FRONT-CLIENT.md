@@ -274,6 +274,53 @@ Domínio puro em `domain/ws/diagnostics.ts` (17 casos). **C18 feito junto:** `Ap
 
 **✅ Achado deles que corrigimos aqui (2026-08-17):** o `lastError` **não era limpo ao reconectar**, então a falha do boot ficava colada na tela enquanto o `reconnectDelay` reconectava por baixo — o painel mostrava *"conectado"* **e** *"último erro"* ao mesmo tempo, fazendo uma falha **já superada** parecer permanente. Nosso store tinha o mesmo defeito. Corrigido, com teste de regressão; o contador de falhas fica (é histórico útil), o que sai é a exibição do erro como se fosse o estado atual.
 
+### 🎨 NOVA IDENTIDADE VISUAL — achada na branch `design/marca-dev` do partner (2026-08-17)
+
+⚠️ **Nunca foi comunicada por handoff.** A branch mudou **61 arquivos de código e ZERO documentos** — a informação existe só como comentário dentro do código de uma branch **não mergeada**. Encontramos porque o Andre pediu para procurar.
+
+**A paleta é a do Wise:**
+
+| Token | Hex | Papel |
+|---|---|---|
+| `brandGreen` | `#9FE870` | verde limão — **só como FUNDO** |
+| `forest` | `#163300` | verde muito escuro — o par de texto/ícone por cima |
+| `greenTint` | `#E2F6D5` | superfície alternativa |
+| `accentBlue` / `accentPeach` / `accentPink` / `accentPlum` | `#A0E1E1` · `#FFC091` · `#FFD7EF` · `#260A2F` | apoio |
+
+Mais `brandSurface #F3F5F1`, `brandTextSecondary #454745`, `brandBorder #D7DDD3`, raios `card: 20` / `hero: 24`.
+
+**Trocam também as fontes:** **Archivo** (700/800) substitui a **Poppins** em heading/display; **DMMono** entra para números (fila, horários). Hoje estamos em Poppins e com `mono: undefined`.
+
+#### O que eles esperam de nós — está escrito no código deles
+
+> *"Precisa bater 1:1 com **`vupth/config/gluestack-ui.config.ts`** e com `tailwind.config.js` — os três têm que ficar sincronizados **no mesmo commit**."*
+
+E o `BrandButton.tsx` deles diz *"espelha `src/components/brand/Button.tsx` do vupth (client)"* — **arquivo que não existe aqui**. Estavam escrevendo como se a nossa metade já estivesse pronta.
+
+#### ✅ O risco é baixo, e isso muda a conversa
+
+Os tokens são **ADITIVOS, não substitutivos**:
+
+> *"Aditivos: não remapeiam `green50-900` (ainda usado como texto em várias telas), porque `brandGreen` é claro demais para texto/ícone sobre fundo claro — só entra como fundo, com `forest` por cima."*
+
+Ou seja: **acrescentar os tokens não muda nenhuma tela existente.** A paleta "Verde Marca" (`#3B7A3F`) continua válida durante a transição — as duas coexistem de propósito, e o `BrandButton` convive com o `Button` atual. **Sincronizar os tokens é barato e sem efeito visual; adotar os componentes é a decisão cara**, e é separada.
+
+**Armadilha que eles já pagaram e nos avisam:** *"o config do partner nasceu ancorado no teal antigo e login/cadastro renderizaram com um verde diferente do resto do app até alguém notar. Ao criar o `tailwind.config.js` do client, **copie os hexes da fonte da verdade — não escolha um verde parecido**."*
+
+⬜ **A decidir pelo Andre:** a identidade nova é decisão fechada? Se for, sincronizamos os tokens (barato) e definimos quando adotar os componentes (caro, e conversa com a **D9** — migrar para a v2 do Gluestack).
+
+### ⛔ C21 — cada profissional escolhe seu regime: fila OU agenda pura (depende do S24)
+
+*Item do handoff do partner datado de 05/08 que **não constava em nenhum documento nosso**.*
+
+Decisão do Andre: *"o profissional poderá escolher se usará fila (modelo que estamos criando), ou se apenas agenda, onde os horários são fixos."*
+
+**Não confundir com a escolha do cliente** (entrar agora *vs* agendar): o C21 é a escolha do **profissional** sobre como ele trabalha. No modo agenda o horário é **FIXO** — hora marcada, nada empurra.
+
+**Ação nossa:** o card e a tela de cada profissional passam a oferecer **"entrar na fila"** ou **"escolher horário"** conforme o modo **dele** — e **os dois modos convivem no mesmo estabelecimento**. No modo agenda não existe posição nem ETA a mostrar: existe **grade de horários livres**.
+
+> ⚠️ **Registrado agora para a tela da loja não ser desenhada assumindo que todo profissional tem fila** — junto com o C22, que diz para ela não assumir horário único da semana. As duas restrições valem para a mesma tela.
+
 ### ⛔ C22 — horário de funcionamento por DIA da semana (depende do S27)
 
 Hoje o contrato tem **um** `opening_time`/`closing_time` para a semana inteira. O Andre pediu horário **por dia** (domingo fechado, sábado até as 18h). Quando o backend modelar (**S27**: lista de `{dayOfWeek, openingTime, closingTime, closed}`), a **nossa tela da loja muda**: passa a mostrar **o dia corrente** ("hoje 9h–19h", "fechado hoje") e, idealmente, **quando reabre** ("abre amanhã às 9h") — que é a informação útil para quem chega fora do horário.
@@ -745,7 +792,7 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 
 ## 10. Testes Unitarios e Integracao
 
-### Resumo: **462 testes em 57 suites** (medido no portao de push, 2026-08-06)
+### Resumo: **489 testes em 61 suites** (medido no portao de push, 2026-08-17)
 
 > ⚠️ **A tabela abaixo e um RECORTE historico e envelhece sozinha** — ela parou em "144 testes / 18
 > suites" enquanto a bateria triplicava. A contagem autoritativa sai de `npm test` (o `pre-push` roda
