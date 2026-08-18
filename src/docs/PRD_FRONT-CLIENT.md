@@ -262,6 +262,34 @@ Domínio puro em `domain/ws/diagnostics.ts` (17 casos). **C18 feito junto:** `Ap
 
 ---
 
+## 1y. 📥 Recebido do front-partner (leitura de 2026-08-17, handoff deles de 11/08)
+
+### 🔑 C24 — a falha de handshake era COLD START, não código
+
+**Eles mediram** (front-partner, 11/08): com a instância do Render **hibernada**, o readiness levou **35s**; com ela **acordada**, o `/ws/info` responde em **0,5s**. Conclusão: **qualquer handshake feito na janela de boot morre** — e isso vale igual para nós.
+
+> ⚠️ **Consequência direta para o nosso teste:** *"falha no handshake no primeiro acesso"* é **infraestrutura, não bug de app**. **Testar sempre com o backend já quente** — senão o A/B mede o Render, não os apps. Isso reenquadra o resultado do teste de device do Andre em 07/08.
+
+**Eles já estão instrumentados** desde 11/08: o painel deles vive em Configurações do profissional e o store (`wsDiagnostics.store.ts`) **espelha o nosso de propósito** — mesmos canais (`public`/`personal`) e mesmas ações — para a comparação ser maçã com maçã. Ou seja, o A/B que pedimos **está pronto dos dois lados**.
+
+**✅ Achado deles que corrigimos aqui (2026-08-17):** o `lastError` **não era limpo ao reconectar**, então a falha do boot ficava colada na tela enquanto o `reconnectDelay` reconectava por baixo — o painel mostrava *"conectado"* **e** *"último erro"* ao mesmo tempo, fazendo uma falha **já superada** parecer permanente. Nosso store tinha o mesmo defeito. Corrigido, com teste de regressão; o contador de falhas fica (é histórico útil), o que sai é a exibição do erro como se fosse o estado atual.
+
+### ⛔ C22 — horário de funcionamento por DIA da semana (depende do S27)
+
+Hoje o contrato tem **um** `opening_time`/`closing_time` para a semana inteira. O Andre pediu horário **por dia** (domingo fechado, sábado até as 18h). Quando o backend modelar (**S27**: lista de `{dayOfWeek, openingTime, closingTime, closed}`), a **nossa tela da loja muda**: passa a mostrar **o dia corrente** ("hoje 9h–19h", "fechado hoje") e, idealmente, **quando reabre** ("abre amanhã às 9h") — que é a informação útil para quem chega fora do horário.
+
+> **Registrado agora para a tela da loja não ser desenhada assumindo um horário único.**
+
+### ⛔ C23 — "esqueci minha senha": a mensagem também muda aqui (depende do S21)
+
+O Andre testou e **o fluxo passou com um e-mail sem cadastro**, porque o backend responde **200 sempre** (anti-enumeração). Ele decidiu o contrário: passará a devolver **`404 EMAIL_NOT_FOUND`** (S21).
+
+**Ação nossa quando entrar:** trocar a mensagem para a forma **afirmativa** ("Enviamos um código de 6 dígitos para seu e-mail") e tratar o `404` como **erro do próprio campo** ("E-mail não cadastrado"), sem popup.
+
+⚠️ **No mesmo teste o e-mail não chegou** (S7, SMTP) — então, até o envio voltar, o fluxo segue inutilizável nos dois apps mesmo com a mensagem certa.
+
+---
+
 ## 1z. 🧭 DECISÕES PENDENTES DO ANDRE — contexto, pergunta e o que o mercado faz
 
 > Tópico criado a pedido do Andre (2026-08-07) para concentrar **o que depende de decisão dele**, não de implementação. Cada item traz: **contexto**, **a pergunta**, e **como o mercado resolve** — para ele analisar e pesquisar. Nada aqui está decidido. Ao decidir, mover a decisão para a seção da feature e **apagar o item daqui**.

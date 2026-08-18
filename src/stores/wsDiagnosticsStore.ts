@@ -70,6 +70,13 @@ export const useWsDiagnosticsStore = create<WsDiagnosticsState>((set) => ({
         info: parseConnectHeaders(headers),
         connects: s[channel].connects + 1,
         connectedAt: Date.now(),
+        // LIMPA o erro ao conectar. Sem isto a falha do boot (cold start do
+        // Render) ficava colada na tela enquanto o `reconnectDelay` reconectava
+        // por baixo, e o painel mostrava "conectado" E "ultimo erro" ao mesmo
+        // tempo — fazendo uma falha JA SUPERADA parecer permanente.
+        // O front-partner passou por exatamente isso e nos avisou (C24,
+        // 2026-08-11). O contador `errors` fica, que e o historico util.
+        lastError: null,
       },
     })),
 
