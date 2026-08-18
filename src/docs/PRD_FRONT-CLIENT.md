@@ -337,6 +337,55 @@ O Andre testou e **o fluxo passou com um e-mail sem cadastro**, porque o backend
 
 ---
 
+## 1x. 🌐 ACESSO PELO NAVEGADOR (web) — decisão do Andre, 2026-08-17
+
+**Decisão:** vamos ter acesso por URL, como o partner já tem. E a limitação do navegador **é assumida em voz alta**, não escondida:
+
+> *"é provisório; podemos a todo momento solicitar o download do app para aproveitar todas as funcionalidades. Podemos dizer que pelo navegador não tem notificação e logo abaixo oferecer link para baixá-lo."*
+
+Isso **reenquadra o custo do porte**: não estamos prometendo paridade, então os 64 usos de `Alert.alert` deixam de ser bloqueio — deixam de ser dívida e viram *degradação conhecida*.
+
+### O que o partner fez (achado no código; não está em documento deles)
+
+| Peça | O quê |
+|---|---|
+| **Alias no Metro** | `expo-secure-store` → `web-shims/expo-secure-store.js` **só no bundle web**. iOS/Android seguem com o pacote real, **o código-fonte não muda** e os testes continuam mockando o pacote |
+| **O shim** | Usa **`sessionStorage`**, não `localStorage`: o token morre quando a aba fecha, o que apaga o cenário do computador compartilhado. Fallback em memória para navegador com storage bloqueado |
+| **`public/_headers`** | CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS. O Expo copia `public/` para a saída do export; o formato é lido por Cloudflare Pages e Netlify. O CSP ataca o vetor real (XSS) — sem ele, script injetado lê o token |
+
+⚠️ **Aviso deles:** o `connect-src` do CSP lista as URLs da API em `https` **e `wss`**. Se a URL mudar e o CSP não, **a fila para de atualizar sem erro visível**.
+
+### Dimensionamento aqui
+
+- **Fácil (24 arquivos):** o `expo-secure-store` sai de graça — copiar alias + shim, zero mudança de código nosso.
+- **Nativos:** `expo-location` e `expo-notifications` já são carregados com `require` dentro de `try/catch` nos nossos hooks, então **degradam sozinhos** em vez de derrubar o app. Falta tratar o `expo-updates` nas Configurações (id da OTA e "verificar atualização" não fazem sentido no navegador).
+- **`Alert.alert` é no-op no React Native Web** (64 usos). Com a decisão acima, a maioria vira degradação aceitável — **menos um caso**, abaixo.
+
+### 🔴 O ponto que precisa de decisão: entrar na fila pelo navegador
+
+`useQueueNotifications` avisa **"é a sua vez!"** por `Alert.alert`, e **push não existe no web**. Então, no navegador, o único canal seria a própria tela — e só **enquanto a aba estiver aberta e visível**.
+
+**Isso colide com a decisão da multa (D1: dinheiro).** Um cliente que entra na fila pelo navegador pode ser **multado em R$ 3,00 por perder uma vez que nunca lhe foi avisada**. Cobrar de alguém que o próprio produto deixou sem aviso é indefensável.
+
+**Saídas, para o Andre escolher:**
+
+1. **Web só navega** — ver lojas, filas e horários; para **entrar na fila**, baixar o app. É a linha mais limpa e a que o texto dele já sugere ("baixe para aproveitar todas as funcionalidades").
+2. **Web entra na fila, mas não multa** — quem entrou pelo navegador fica isento, com aviso explícito na tela.
+3. **Web entra na fila com aviso duro** — "mantenha esta aba aberta; sem ela você não será avisado". Mais arriscado: transfere para o usuário um problema que é nosso.
+
+**Minha recomendação: a 1.** A vitrine no navegador é o que atrai (ver a fila da barbearia sem instalar nada), e o momento de pedir o download é exatamente quando a pessoa **decide entrar na fila** — que é quando o app passa a valer a pena para ela. Vira conversão, não obstáculo.
+
+### Ordem de implementação sugerida
+
+1. Alias + shim (barato, e permite rodar no navegador para **ver o que quebra de verdade**).
+2. Tratar o `expo-updates` e o que mais só existir no nativo.
+3. Banner honesto de limitação + CTA de download.
+4. CSP por último, **com o `connect-src` apontando para as nossas URLs**.
+
+⬜ **Aguarda:** a decisão sobre entrar na fila pelo navegador (as três saídas acima).
+
+---
+
 ## 1z. 🧭 DECISÕES PENDENTES DO ANDRE — contexto, pergunta e o que o mercado faz
 
 > Tópico criado a pedido do Andre (2026-08-07) para concentrar **o que depende de decisão dele**, não de implementação. Cada item traz: **contexto**, **a pergunta**, e **como o mercado resolve** — para ele analisar e pesquisar. Nada aqui está decidido. Ao decidir, mover a decisão para a seção da feature e **apagar o item daqui**.
