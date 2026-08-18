@@ -361,19 +361,23 @@ Isso **reenquadra o custo do porte**: não estamos prometendo paridade, então o
 - **Nativos:** `expo-location` e `expo-notifications` já são carregados com `require` dentro de `try/catch` nos nossos hooks, então **degradam sozinhos** em vez de derrubar o app. Falta tratar o `expo-updates` nas Configurações (id da OTA e "verificar atualização" não fazem sentido no navegador).
 - **`Alert.alert` é no-op no React Native Web** (64 usos). Com a decisão acima, a maioria vira degradação aceitável — **menos um caso**, abaixo.
 
-### 🔴 O ponto que precisa de decisão: entrar na fila pelo navegador
+### ✅ Escopo do web — DECIDIDO (Andre, 2026-08-17): acesso COMPLETO
 
-`useQueueNotifications` avisa **"é a sua vez!"** por `Alert.alert`, e **push não existe no web**. Então, no navegador, o único canal seria a própria tela — e só **enquanto a aba estiver aberta e visível**.
+**O navegador não é vitrine: é o app.** O visitante pode **se cadastrar e entrar na fila** normalmente. O que muda é que ele **é avisado das limitações**.
 
-**Isso colide com a decisão da multa (D1: dinheiro).** Um cliente que entra na fila pelo navegador pode ser **multado em R$ 3,00 por perder uma vez que nunca lhe foi avisada**. Cobrar de alguém que o próprio produto deixou sem aviso é indefensável.
+> *"ele pode se cadastrar pelo navegador também, só será avisado sobre suas limitações — menos sobre segurança."*
 
-**Saídas, para o Andre escolher:**
+**O que avisamos:** o que ele **perde na prática** — sem notificação fora da aba, então precisa manter o app aberto para ser avisado da vez. Com o CTA de baixar o app logo abaixo.
 
-1. **Web só navega** — ver lojas, filas e horários; para **entrar na fila**, baixar o app. É a linha mais limpa e a que o texto dele já sugere ("baixe para aproveitar todas as funcionalidades").
-2. **Web entra na fila, mas não multa** — quem entrou pelo navegador fica isento, com aviso explícito na tela.
-3. **Web entra na fila com aviso duro** — "mantenha esta aba aberta; sem ela você não será avisado". Mais arriscado: transfere para o usuário um problema que é nosso.
+**O que NÃO avisamos:** nada sobre segurança de sessão. Dizer ao usuário "aqui sua sessão é menos protegida" assusta sem ajudar — ele não tem ação a tomar com essa informação.
 
-**Minha recomendação: a 1.** A vitrine no navegador é o que atrai (ver a fila da barbearia sem instalar nada), e o momento de pedir o download é exatamente quando a pessoa **decide entrar na fila** — que é quando o app passa a valer a pena para ela. Vira conversão, não obstáculo.
+> ⚠️ **Não confundir "não avisar" com "não fazer".** As proteções continuam **todas** implementadas: `sessionStorage` em vez de `localStorage` (a sessão morre ao fechar a aba) e o CSP em `public/_headers` (que é o que barra o XSS, o vetor real). A decisão é sobre **mensagem ao usuário**, não sobre o que se constrói.
+
+#### Onde o aviso precisa aparecer
+
+Não basta uma vez no primeiro acesso. O momento que importa é **quando ele entra na fila** — é ali que a falta de notificação passa a ter consequência, porque é dali em diante que ele pode **perder a vez e ser multado** (D1: a multa é dinheiro).
+
+Com o aviso **no momento certo**, a multa fica defensável: ele foi informado antes de assumir o compromisso. Enterrado num banner do primeiro acesso, não fica.
 
 ### Ordem de implementação sugerida
 
@@ -382,7 +386,7 @@ Isso **reenquadra o custo do porte**: não estamos prometendo paridade, então o
 3. Banner honesto de limitação + CTA de download.
 4. CSP por último, **com o `connect-src` apontando para as nossas URLs**.
 
-⬜ **Aguarda:** a decisão sobre entrar na fila pelo navegador (as três saídas acima).
+Nada aqui aguarda decisão — o escopo está fechado.
 
 ---
 
