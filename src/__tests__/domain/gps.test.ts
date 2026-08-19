@@ -1,5 +1,6 @@
 import {
   toUserLocation,
+  toAddressDraft,
   acquireDeviceLocation,
   LocationProviders,
 } from '@domain/location/gps';
@@ -47,12 +48,13 @@ describe('GPS — reverse geocode → localidade (Fase 3)', () => {
   });
 
   describe('acquireDeviceLocation', () => {
-    it('permissão concedida: devolve coordenadas + localidade', async () => {
+    it('permissão concedida: devolve coordenadas + localidade + resultado cru', async () => {
       const result = await acquireDeviceLocation(providers());
 
       expect(result).toEqual({
         coords,
         location: { city: 'Florianópolis', neighborhood: 'Centro', state: 'SC' },
+        raw: { city: 'Florianópolis', district: 'Centro', region: 'SC' },
       });
     });
 
@@ -66,13 +68,58 @@ describe('GPS — reverse geocode → localidade (Fase 3)', () => {
     it('reverse geocode falhando: mantém as coordenadas (servem ao B7) sem localidade', async () => {
       const p = providers({ reverseGeocode: jest.fn().mockRejectedValue(new Error('offline')) });
 
-      expect(await acquireDeviceLocation(p)).toEqual({ coords, location: null });
+      expect(await acquireDeviceLocation(p)).toEqual({ coords, location: null, raw: null });
     });
 
     it('reverse geocode vazio: idem, coordenadas sem localidade', async () => {
       const p = providers({ reverseGeocode: jest.fn().mockResolvedValue([]) });
 
-      expect(await acquireDeviceLocation(p)).toEqual({ coords, location: null });
+      expect(await acquireDeviceLocation(p)).toEqual({ coords, location: null, raw: null });
+    });
+  });
+
+  // Preenchimento do formulário de endereço pelo GPS (Andre 2026-08-01).
+  describe('toAddressDraft', () => {
+    it('mapeia rua, número, bairro, cidade, UF e CEP', () => {
+      expect(
+        toAddressDraft({
+          street: 'Rua Felipe Schmidt',
+          streetNumber: '150',
+          district: 'Centro',
+          city: 'Florianópolis',
+          region: 'SC',
+          postalCode: '88010-000',
+        }),
+      ).toEqual({
+        street: 'Rua Felipe Schmidt',
+        number: '150',
+        neighborhood: 'Centro',
+        city: 'Florianópolis',
+        state: 'SC',
+        zipCode: '88010000',
+      });
+    });
+
+    it('OMITE o que o aparelho não soube (não apaga o que já foi digitado)', () => {
+      expect(toAddressDraft({ city: 'Recife', region: 'PE' })).toEqual({
+        city: 'Recife',
+        state: 'PE',
+      });
+    });
+
+    it('CEP incompleto não entra no rascunho', () => {
+      expect(toAddressDraft({ city: 'Recife', postalCode: '5001' }).zipCode).toBeUndefined();
+    });
+
+    it('sem street usa o `name` do resultado', () => {
+      expect(toAddressDraft({ name: 'Av. Beira Mar', city: 'Florianópolis' }).street).toBe(
+        'Av. Beira Mar',
+      );
+    });
+
+    it('resultado ausente = rascunho vazio', () => {
+      expect(toAddressDraft(null)).toEqual({});
+      expect(toAddressDraft()).toEqual({});
     });
   });
 });

@@ -81,21 +81,59 @@ describe('ProfileService', () => {
     });
   });
 
+  // Contrato NOVO (backend S19, 2026-08-07): a rota antiga era destrutiva
+  // (`cascade = ALL` — apagar a conta de um dono apagava a loja inteira) e virou
+  // anonimizacao, exigindo a senha atual NO CORPO. Mandavamos DELETE sem corpo
+  // => `400 INVALID_REQUEST_BODY`, e o botao ficou quebrado em producao.
   describe('DELETE /profile/delete/me', () => {
-    it('deve deletar a conta', async () => {
-      mock.onDelete('/profile/delete/me').reply(200);
+    it('MANDA a senha atual no corpo — sem ela o backend responde 400', async () => {
+      let corpo: unknown;
+      mock.onDelete('/profile/delete/me').reply((config) => {
+        corpo = JSON.parse(config.data);
+        return [204, null];
+      });
 
-      const response = await profileService.deleteAccount(token);
-      expect(response.status).toBe(200);
+      const response = await profileService.deleteAccount(token, 'Senha@123');
+
+      expect(corpo).toEqual({ current_password: 'Senha@123' });
+      expect(response.status).toBe(204);
     });
 
     it('deve enviar Authorization header', async () => {
       mock.onDelete('/profile/delete/me').reply((config) => {
         expect(config.headers?.Authorization).toBe('Bearer del-token');
-        return [200, null];
+        return [204, null];
       });
 
-      await profileService.deleteAccount('del-token');
+      await profileService.deleteAccount('del-token', 'Senha@123');
+    });
+
+    it('propaga o 401 de senha errada SEM deslogar (erro de campo)', async () => {
+      // O interceptor global isenta `CURRENT_PASSWORD_INVALID` do fluxo de
+      // sessao expirada; se um dia deixar de isentar, a tela desloga o usuario
+      // no meio do fluxo em vez de dizer "senha incorreta".
+      mock
+        .onDelete('/profile/delete/me')
+        .reply(401, { code: 'CURRENT_PASSWORD_INVALID', message: 'senha incorreta' });
+
+      await expect(
+        profileService.deleteAccount(token, 'errada'),
+      ).rejects.toMatchObject({
+        response: { status: 401, data: { code: 'CURRENT_PASSWORD_INVALID' } },
+      });
+    });
+
+    it('propaga o 409 com a mensagem que diz COMO destravar', async () => {
+      mock.onDelete('/profile/delete/me').reply(409, {
+        code: 'ACCOUNT_DELETE_NOT_ALLOWED',
+        message: 'Saia da fila para apagar a conta.',
+      });
+
+      await expect(
+        profileService.deleteAccount(token, 'Senha@123'),
+      ).rejects.toMatchObject({
+        response: { status: 409, data: { message: 'Saia da fila para apagar a conta.' } },
+      });
     });
   });
 });

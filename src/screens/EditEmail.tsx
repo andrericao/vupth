@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { VStack, Text, Heading } from "@gluestack-ui/themed";
+import { VStack, Text, Heading, ScrollView } from "@gluestack-ui/themed";
 
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
@@ -43,38 +43,45 @@ export function EditEmail() {
   }
 
   return (
-    <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-      <Header showBackButton />
+    <ScrollView
+      flex={1}
+      bg="$gray700"
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <VStack flex={1} px={15} pt={60} pb={30}>
+        <Header showBackButton />
 
-      <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-        Alterar E-mail
-      </Heading>
+        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
+          Alterar E-mail
+        </Heading>
 
-      <VStack gap="$4">
-        <VStack gap="$1">
-          <Text size="sm" color="$gray300">E-mail atual</Text>
-          <Text size="md" fontFamily="$heading">{user?.email}</Text>
+        <VStack gap="$4">
+          <VStack gap="$1">
+            <Text size="sm" color="$gray300">E-mail atual</Text>
+            <Text size="md" fontFamily="$heading">{user?.email}</Text>
+          </VStack>
+
+          <VStack gap="$1">
+            <Text size="sm" color="$gray300">Novo e-mail</Text>
+            <Input2
+              placeholder="novo@email.com"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </VStack>
         </VStack>
 
-        <VStack gap="$1">
-          <Text size="sm" color="$gray300">Novo e-mail</Text>
-          <Input2
-            placeholder="novo@email.com"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+        <VStack mt="$8">
+          <Button
+            title={isSaving ? "Salvando..." : "Salvar"}
+            onPress={handleSave}
+            isDisabled={isSaving}
           />
         </VStack>
       </VStack>
-
-      <VStack mt="$8">
-        <Button
-          title={isSaving ? "Salvando..." : "Salvar"}
-          onPress={handleSave}
-          isDisabled={isSaving}
-        />
-      </VStack>
-    </VStack>
+    </ScrollView>
   );
 }

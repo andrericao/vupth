@@ -8,6 +8,7 @@ import {
   Heading,
   Box,
   HStack,
+  ScrollView,
 } from "@gluestack-ui/themed";
 import {
   User,
@@ -20,6 +21,8 @@ import {
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { WsDiagnostics } from "@components/WsDiagnostics";
+import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
@@ -91,31 +94,47 @@ export function Settings() {
     ? `${mainAddress.street}, ${mainAddress.number} — ${mainAddress.neighborhood}`
     : "Não informado";
 
-  function handleDeleteAccount() {
-    Alert.alert(
-      "Deletar conta",
-      "Tem certeza? Esta ação é irreversível e todos os seus dados serão perdidos.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Deletar",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              if (accessToken) {
-                await profileService.deleteAccount(accessToken);
-              }
-              await logout();
-              // Settings vive na aba Config.; volta para a aba Home (pai = tabs).
-              navigation.getParent()?.navigate("homeTab", { screen: "home" });
-            } catch (error: any) {
-              const msg = error.response?.data?.message || error.message || "Erro ao deletar conta";
-              Alert.alert("Erro", msg);
-            }
-          },
-        },
-      ]
-    );
+  const [showDelete, setShowDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  function openDeleteAccount() {
+    setDeleteError(null);
+    setShowDelete(true);
+  }
+
+  // Contrato novo do backend (2026-08-07): exige a senha atual no corpo. Antes
+  // mandávamos DELETE sem corpo e tomávamos 400 — o botão estava quebrado.
+  async function handleDeleteAccount(currentPassword: string) {
+    if (!accessToken) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await profileService.deleteAccount(accessToken, currentPassword);
+      setShowDelete(false);
+      await logout();
+      // Settings vive na aba Config.; volta para a aba Home (pai = tabs).
+      navigation.getParent()?.navigate("homeTab", { screen: "home" });
+    } catch (error: any) {
+      const code = error.response?.data?.code;
+      const msg = error.response?.data?.message;
+
+      if (code === "CURRENT_PASSWORD_INVALID") {
+        // 401 de NEGÓCIO: erro de campo, não sessão expirada. O interceptor
+        // global já isenta este código de deslogar (ver `api.ts`).
+        setDeleteError("Senha incorreta. Confira e tente de novo.");
+      } else if (code === "ACCOUNT_DELETE_NOT_ALLOWED") {
+        // Bloqueio TEMPORÁRIO. A mensagem do backend diz o que fazer para
+        // destravar (sair da fila, encerrar o atendimento, esperar a loja
+        // esvaziar) — exibir como veio. Transformar em "não é possível apagar
+        // esta conta" reprovaria na publicação das lojas de app.
+        setDeleteError(msg ?? "Você tem um atendimento em andamento. Conclua antes de apagar a conta.");
+      } else {
+        setDeleteError(msg || error.message || "Erro ao deletar conta");
+      }
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   const [isChecking, setIsChecking] = useState(false);
@@ -149,114 +168,142 @@ export function Settings() {
     : "bundle embutido (nenhum OTA aplicado)";
 
   return (
-    <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-      <Header showBackButton />
+    <ScrollView
+      flex={1}
+      bg="$gray700"
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <VStack flex={1} px={15} pt={60} pb={30}>
+        <Header showBackButton />
 
-      <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-        Configurações
-      </Heading>
+        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
+          Configurações
+        </Heading>
 
-      {/* Opções de CONTA só para quem tem conta (visitante não vê trocar senha,
-          e-mail, endereço nem deletar — boa prática; pedido Andre 2026-07-23). */}
-      {isAuthenticated ? (
-        <>
-          <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
-            <MenuItem
-              icon={<User size={22} color="#3B7A3F" />}
-              label="Nome"
-              value={displayName}
-              onPress={() => navigation.navigate("editProfile")}
-            />
-            <MenuItem
-              icon={<EnvelopeSimple size={22} color="#3B7A3F" />}
-              label="E-mail"
-              value={user?.email ?? "—"}
-              onPress={() => navigation.navigate("editEmail")}
-            />
-            <MenuItem
-              icon={<Lock size={22} color="#3B7A3F" />}
-              label="Senha"
-              value="••••••"
-              onPress={() => navigation.navigate("editPassword")}
-            />
-            <MenuItem
-              icon={<MapPin size={22} color="#3B7A3F" />}
-              label="Endereço"
-              value={displayAddress}
-              onPress={() => navigation.navigate("editAddress")}
-            />
+        {/* Opções de CONTA só para quem tem conta (visitante não vê trocar senha,
+            e-mail, endereço nem deletar — boa prática; pedido Andre 2026-07-23). */}
+        {isAuthenticated ? (
+          <>
+            <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
+              <MenuItem
+                icon={<User size={22} color="#3B7A3F" />}
+                label="Nome"
+                value={displayName}
+                onPress={() => navigation.navigate("editProfile")}
+              />
+              <MenuItem
+                icon={<EnvelopeSimple size={22} color="#3B7A3F" />}
+                label="E-mail"
+                value={user?.email ?? "—"}
+                onPress={() => navigation.navigate("editEmail")}
+              />
+              <MenuItem
+                icon={<Lock size={22} color="#3B7A3F" />}
+                label="Senha"
+                value="••••••"
+                onPress={() => navigation.navigate("editPassword")}
+              />
+              <MenuItem
+                icon={<MapPin size={22} color="#3B7A3F" />}
+                label="Endereço"
+                value={displayAddress}
+                onPress={() => navigation.navigate("editAddress")}
+              />
+            </Box>
+
+            <VStack mt="$8">
+              <Button
+                title="Deletar conta"
+                variant="outline"
+                onPress={openDeleteAccount}
+                borderColor="$red500"
+                $active-bg="$red500"
+              />
+            </VStack>
+          </>
+        ) : (
+          <Box bg="$white" borderRadius="$2xl" p="$4" style={cardShadow}>
+            <Text size="sm" color="$gray300" mb="$3">
+              Você está navegando como visitante. Entre ou crie uma conta para
+              gerenciar seu perfil, senha e endereço.
+            </Text>
+            {/* Mesma hierarquia do Perfil: criar conta é a pílula sólida, entrar
+                fica como secundária (Andre 2026-08-05). */}
+            <VStack gap="$3">
+              <Button
+                title="Criar conta grátis"
+                onPress={() =>
+                  navigation.getParent()?.navigate("homeTab", { screen: "signUp", params: {} })
+                }
+              />
+              <Button
+                variant="outline"
+                title="Já tenho conta"
+                onPress={() =>
+                  navigation.getParent()?.navigate("homeTab", { screen: "login", params: {} })
+                }
+              />
+            </VStack>
           </Box>
+        )}
 
+        {awaited.length > 0 && (
           <VStack mt="$8">
-            <Button
-              title="Deletar conta"
-              variant="outline"
-              onPress={handleDeleteAccount}
-              borderColor="$red500"
-              $active-bg="$red500"
-            />
-          </VStack>
-        </>
-      ) : (
-        <Box bg="$white" borderRadius="$2xl" p="$4" style={cardShadow}>
-          <Text size="sm" color="$gray300" mb="$3">
-            Você está navegando como visitante. Entre ou crie uma conta para
-            gerenciar seu perfil, senha e endereço.
-          </Text>
-          <Button
-            title="Entrar ou criar conta"
-            onPress={() =>
-              navigation.getParent()?.navigate("homeTab", { screen: "login", params: {} })
-            }
-          />
-        </Box>
-      )}
-
-      {awaited.length > 0 && (
-        <VStack mt="$8">
-          <Heading fontFamily="$heading" fontSize="$md" mb="$1">
-            Funcionalidades aguardadas
-          </Heading>
-          <Text size="xs" color="$gray300" mb="$3">
-            As mais tocadas fizeram mais falta — priorizar quando o backend liberar.
-          </Text>
-          <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
-            {awaited.map(([feature, count]) => (
-              <HStack
-                key={feature}
-                bg="$white"
-                px="$4"
-                py="$3"
-                borderBottomWidth="$1"
-                borderBottomColor="$gray500"
-                alignItems="center"
-              >
-                <Text size="sm" flex={1}>
-                  {COMING_SOON_LABELS[feature as ComingSoonFeature] ?? feature}
-                </Text>
-                <Box bg="$green100" borderRadius="$full" px="$3" py="$1">
-                  <Text size="xs" fontFamily="$heading" color="$green700">
-                    {count}×
+            <Heading fontFamily="$heading" fontSize="$md" mb="$1">
+              Funcionalidades aguardadas
+            </Heading>
+            <Text size="xs" color="$gray300" mb="$3">
+              As mais tocadas fizeram mais falta — priorizar quando o backend liberar.
+            </Text>
+            <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
+              {awaited.map(([feature, count]) => (
+                <HStack
+                  key={feature}
+                  bg="$white"
+                  px="$4"
+                  py="$3"
+                  borderBottomWidth="$1"
+                  borderBottomColor="$gray500"
+                  alignItems="center"
+                >
+                  <Text size="sm" flex={1}>
+                    {COMING_SOON_LABELS[feature as ComingSoonFeature] ?? feature}
                   </Text>
-                </Box>
-              </HStack>
-            ))}
-          </Box>
-        </VStack>
-      )}
+                  <Box bg="$green100" borderRadius="$full" px="$3" py="$1">
+                    <Text size="xs" fontFamily="$heading" color="$green700">
+                      {count}×
+                    </Text>
+                  </Box>
+                </HStack>
+              ))}
+            </Box>
+          </VStack>
+        )}
 
-      <VStack mt="$8" alignItems="center" gap="$1">
-        <Text size="xs" color="$gray400">
-          Runtime {Updates.runtimeVersion ?? "—"} · canal {Updates.channel ?? "dev"}
-        </Text>
-        <Text size="xs" color="$gray400">{otaInfo}</Text>
-        <Button
-          title={isChecking ? "Verificando..." : "Verificar atualização"}
-          variant="outline"
-          mt="$2"
-          onPress={handleCheckUpdate}
-        />
+        <WsDiagnostics />
+
+        <VStack mt="$8" alignItems="center" gap="$1">
+          <Text size="xs" color="$gray400">
+            Runtime {Updates.runtimeVersion ?? "—"} · canal {Updates.channel ?? "dev"}
+          </Text>
+          <Text size="xs" color="$gray400">{otaInfo}</Text>
+          <Button
+            title={isChecking ? "Verificando..." : "Verificar atualização"}
+            variant="outline"
+            mt="$2"
+            onPress={handleCheckUpdate}
+          />
+        </VStack>
       </VStack>
-    </VStack>
+
+      <DeleteAccountModal
+        visible={showDelete}
+        isDeleting={isDeleting}
+        error={deleteError}
+        onConfirm={handleDeleteAccount}
+        onClose={() => setShowDelete(false)}
+      />
+    </ScrollView>
   );
 }

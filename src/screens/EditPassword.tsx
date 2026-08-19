@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { VStack, Heading } from "@gluestack-ui/themed";
+import { VStack, Heading, ScrollView } from "@gluestack-ui/themed";
 
 import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
@@ -52,50 +52,57 @@ export function EditPassword() {
   }
 
   return (
-    <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-      <Header showBackButton />
+    <ScrollView
+      flex={1}
+      bg="$gray700"
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <VStack flex={1} px={15} pt={60} pb={30}>
+        <Header showBackButton />
 
-      <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-        Alterar Senha
-      </Heading>
+        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
+          Alterar Senha
+        </Heading>
 
-      <VStack gap="$4">
-        <VStack gap="$1">
-          <Input2
-            isPassword
-            placeholder="Senha atual"
-            value={currentPassword}
-            onChangeText={setCurrentPassword}
-          />
+        <VStack gap="$4">
+          <VStack gap="$1">
+            <Input2
+              isPassword
+              placeholder="Senha atual"
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+            />
+          </VStack>
+
+          <VStack gap="$1">
+            <Input2
+              isPassword
+              placeholder="Nova senha"
+              value={password}
+              onChangeText={setPassword}
+            />
+            {password.length > 0 && <PasswordRules rules={rules} />}
+          </VStack>
+
+          <VStack gap="$1">
+            <Input2
+              isPassword
+              placeholder="Confirmar nova senha"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+          </VStack>
         </VStack>
 
-        <VStack gap="$1">
-          <Input2
-            isPassword
-            placeholder="Nova senha"
-            value={password}
-            onChangeText={setPassword}
-          />
-          {password.length > 0 && <PasswordRules rules={rules} />}
-        </VStack>
-
-        <VStack gap="$1">
-          <Input2
-            isPassword
-            placeholder="Confirmar nova senha"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
+        <VStack mt="$8">
+          <Button
+            title={isSaving ? "Salvando..." : "Salvar"}
+            onPress={handleSave}
+            isDisabled={!canSave}
           />
         </VStack>
       </VStack>
-
-      <VStack mt="$8">
-        <Button
-          title={isSaving ? "Salvando..." : "Salvar"}
-          onPress={handleSave}
-          isDisabled={!canSave}
-        />
-      </VStack>
-    </VStack>
+    </ScrollView>
   );
 }

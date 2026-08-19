@@ -3,7 +3,7 @@ import { TouchableOpacity } from "react-native";
 
 import { Link, Icon, ChevronLeftIcon, Center, Box } from "@gluestack-ui/themed";
 
-import Logo from "@assets/vupth-logo/people-waiting.svg";
+import { BrandMark } from "@components/BrandMark";
 
 type Props = {
   showBackButton?: boolean;
@@ -34,8 +34,9 @@ export function Header({ showBackButton = false }: Props) {
           </TouchableOpacity>
         </Link>
       )}
+      {/* A arte da marca não mora aqui: ver `BrandMark` (fonte única). */}
       <TouchableOpacity>
-        <Logo width={50} height={50} />
+        <BrandMark />
       </TouchableOpacity>
     </Center>
   );

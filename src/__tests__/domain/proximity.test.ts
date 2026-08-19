@@ -1,6 +1,11 @@
 import { MOCK_ESTABLISHMENTS } from '@domain/establishment/mockData';
 import { Establishment } from '@domain/establishment/types';
-import { proximityRank, sortByProximity } from '@domain/establishment/proximity';
+import {
+  proximityRank,
+  sortByProximity,
+  formatDistanceKm,
+  orderForHome,
+} from '@domain/establishment/proximity';
 
 function withAddr(
   id: string,
@@ -68,5 +73,77 @@ describe('sortByProximity', () => {
   it('cidade vazia → ordem padrão', () => {
     const list = [withAddr('a', 'X', 'Y', 20)];
     expect(sortByProximity(list, { city: '' }).map((e) => e.id)).toEqual(['a']);
+  });
+});
+
+// ─── Distância real (GPS) — o cálculo é do BACKEND desde 2026-08-06 ──────────
+
+// Coordenada real só para montar cenários de ordenação; a distância em si não é
+// mais calculada aqui.
+const SAO_PAULO = { latitude: -23.5505, longitude: -46.6333 };
+
+function withCoords(id: string, latitude: number, longitude: number, wait = 10): Establishment {
+  const base = withAddr(id, 'Florianópolis', 'Centro', wait);
+  return { ...base, address: { ...base.address!, latitude, longitude } };
+}
+
+describe('distância real (GPS) — quem calcula é o BACKEND', () => {
+  // O Haversine local foi REMOVIDO em 2026-08-06. O backend devolve
+  // `distance_km` por item quando a busca manda lat/lng, e o contrato dele é
+  // explícito: o front não recalcula — senão client e partner mostrariam
+  // números diferentes para a mesma loja.
+
+  describe('formatDistanceKm', () => {
+    it('abaixo de 1 km vira metros arredondados a 50', () => {
+      expect(formatDistanceKm(0.32)).toBe('300 m');
+      expect(formatDistanceKm(0.87)).toBe('850 m');
+    });
+
+    it('nunca mostra menos de 50 m (precisão do GPS)', () => {
+      expect(formatDistanceKm(0.004)).toBe('50 m');
+    });
+
+    it('até 10 km usa uma casa decimal com vírgula', () => {
+      expect(formatDistanceKm(2.34)).toBe('2,3 km');
+    });
+
+    it('acima de 10 km arredonda para inteiro', () => {
+      expect(formatDistanceKm(12.6)).toBe('13 km');
+    });
+  });
+
+  describe('orderForHome', () => {
+    it('COM GPS devolve a lista intocada — a ordem é a do backend', () => {
+      // Decisão do Andre (2026-08-06): distância pura. Reordenar aqui desfaria
+      // o desempate estável por id que o backend faz.
+      const list = [
+        withCoords('longe', SAO_PAULO.latitude, SAO_PAULO.longitude),
+        withCoords('perto', -27.5964, -48.549),
+      ];
+      expect(orderForHome(list, true, null).map((e) => e.id)).toEqual(['longe', 'perto']);
+    });
+
+    it('COM GPS não separa loja fechada — ela some do topo só se estiver longe', () => {
+      const fechada = { ...withCoords('fechada-perto', -27.5964, -48.549), is_open: false };
+      const list = [fechada, withCoords('aberta-longe', SAO_PAULO.latitude, SAO_PAULO.longitude)];
+
+      expect(orderForHome(list, true, null).map((e) => e.id)).toEqual([
+        'fechada-perto',
+        'aberta-longe',
+      ]);
+    });
+
+    it('SEM GPS cai na ordenação por bairro/cidade (Fase 1)', () => {
+      const list = [
+        withAddr('outra-cidade', 'Fortaleza', 'Centro', 5, 'CE'),
+        withAddr('meu-bairro', 'Florianópolis', 'Centro', 30),
+      ];
+      const out = orderForHome(list, false, {
+        city: 'Florianópolis',
+        neighborhood: 'Centro',
+        state: 'SC',
+      });
+      expect(out.map((e) => e.id)).toEqual(['meu-bairro', 'outra-cidade']);
+    });
   });
 });

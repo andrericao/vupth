@@ -65,3 +65,44 @@ export function sortByProximity(
     ...sortEstablishments(groups[2]),
   ];
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DISTÂNCIA REAL (GPS) — fatia B do backend, consumida em 2026-08-06
+//
+// O Haversine que existia AQUI foi REMOVIDO. O backend passou a devolver
+// `distance_km` por item quando a busca manda `lat`/`lng`, e o contrato dele é
+// explícito: o front NÃO recalcula. O motivo é concreto — se cada app fizesse a
+// própria conta (arredondamento, raio da Terra, coordenada de origem), o client
+// e o partner mostrariam números diferentes para a MESMA loja.
+//
+// Junto saiu a ordenação local por distância: com coordenadas, a ordem é a que
+// o backend mandou (distância pura, decisão do Andre 2026-08-06), inclusive
+// misturando lojas fechadas — elas carregam o badge âmbar AGENDAR, então o
+// cliente entende que há caminho.
+
+/** Rótulo curto do card: abaixo de 1 km vira metros arredondados a 50m. */
+export function formatDistanceKm(km: number): string {
+  if (km < 1) {
+    const meters = Math.max(50, Math.round((km * 1000) / 50) * 50);
+    return `${meters} m`;
+  }
+  if (km < 10) return `${km.toFixed(1).replace('.', ',')} km`;
+  return `${Math.round(km)} km`;
+}
+
+/**
+ * Ordem da Home.
+ *
+ * COM GPS: devolve a lista intocada — já veio ordenada por distância do
+ * backend. Reordenar aqui só poderia piorar (e desfaria o desempate estável
+ * por id que o backend faz para a paginação futura).
+ *
+ * SEM GPS: cai na Fase 1, ordenando por bairro/cidade do endereço.
+ */
+export function orderForHome(
+  list: Establishment[],
+  hasCoords: boolean,
+  loc: UserLocation | null,
+): Establishment[] {
+  return hasCoords ? list : sortByProximity(list, loc);
+}

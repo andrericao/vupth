@@ -12,8 +12,8 @@ type Props = ComponentProps<typeof InputField>;
 export function Input({ ...rest }: Props) {
   return (
     <GluestackInput
-      h="$14"
-      px="$4"
+      h="$12"
+      px="$3"
       borderWidth="$1"
       borderColor="$success500"
       borderRadius="$md"

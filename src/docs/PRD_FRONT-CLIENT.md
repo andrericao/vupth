@@ -64,6 +64,8 @@ Entrar na fila (visitante ou logado): Home → Detalhe → **ServiceSelection (v
 
 ## 1b. Estado atual (2026-06-29) — features recentes
 
+> 🎨 **Certificação de design com o partner (2026-08-01).** Li o `HANDOFF_CLIENT.md` do front-partner (o handoff **deles para nós**) e o Guia de Design do PRD partner §13.1. **A paleta está alinhada hex a hex** — o alerta do C7 ("se o client copiou os hexes antigos, está com o verde errado") **não se aplica**: o teal `#00B37E` já saiu daqui há tempos e a Verde Marca nasceu neste projeto. Único desvio encontrado: 4 ícones com `#2F432F` hardcoded (o verde do ÍCONE nativo, não o da UI) em `LocationSelector`, `ScheduleModal` e `Attendances` — **corrigidos para `#3B7A3F`**. Também adotados como regra comum: toque mínimo **48×48px** e contraste **4.5:1**. ⚠️ **NativeWind (partner C15):** o partner saiu do Gluestack; isso **supera** o pedido antigo de atualizar o Gluestack v1 — não gastar esforço nisso. Detalhes, armadilhas e a decisão de "quando migrar" no HANDOFF_BACKEND §15.
+
 **Design "Verde Marca"** (2026-07-06 — "folha vivo" `#3B7A3F` como CTA/primário; alinhado com o front-partner, handoff C7): o verde-floresta escuro do ÍCONE (`#2F432F`) ficava **pesado demais** espalhado pela UI (headers, botões, badges) → o app inteiro escurecia. Escala green re-ancorada no **#3B7A3F** (mesma família do ícone, porém mais claro/saturado, contraste ~5.2:1 com branco) — 50 `#eef5ee` / 100 `#d9ead9` / 300 `#8bbd8d` / 400 `#5c9c60` / **500 `#3b7a3f` (CTA/primário)** / 600 `#316635` / 700 `#26522a` / 900 `#142c17`. O `#2F432F` segue como brand-deep (fundo do 900) e no **ícone NATIVO** do app (só muda com novo `eas build`). Fundo mantido **claro**. amber `#FFB703` (dourado — ratings/atenção; agora também o aviso "a fila hoje termina às HH:MM" no modal Atrasar, cor de **atenção** e não urgência) e red `#E63946` (destructive/erros) **mantidos**. Histórico: teal `#00B37E` → `#2F432F` (2026-07-05, escuro demais) → `#3B7A3F`. Fontes Poppins/Inter. `Button` pilula+sombra; `Input2` raio `$xl` + foco verde; `cardShadow` em cards `$2xl` sem borda; **Skeleton** (SkeletonCard/List) no lugar dos spinners; **TabPill** (pilula verde na aba ativa). **Animacao de abertura** (`PreparingServer`/WarmupAnimation): sequencia de icones (celular→loja→tesoura→saindo) no portao de readiness (cold start), respeita reduce-motion.
 
 **Home:** card mostra **menor tempo de espera** (`estimated_wait_minutes`) + **estrela de avaliacao** (real quando o backend mandar, senao placeholder). **Aberta**: escondida se nao tem profissional com servico (`estimated_wait_minutes === null`). **Fechada**: so aparece se tiver **profissional afiliado com servico** (`available_professionals > 0`), pra o cliente poder **agendar** pra reabertura — nao adianta mostrar loja fechada sem ninguem (regra do Andre 2026-07-10). ✅ **BACKEND ENTREGOU (2026-07-18):** `available_professionals` agora vem na listagem `GET /establishment` (= nº de profissionais afiliados COM servico; `null` fora da listagem). O front **pode parar de esconder todas as fechadas** e passar a exibir as fechadas com `available_professionals > 0` (usar `?includeAll=true` p/ trazer as fechadas). `filterEstablishments` + `getAll()?includeAll=true` (2026-07-10).
@@ -81,6 +83,474 @@ Entrar na fila (visitante ou logado): Home → Detalhe → **ServiceSelection (v
 
 ---
 
+## 1c. Estado atual (2026-08-06) — identidade da marca e rodada de UI do device
+
+### 🎨 A MARCA TEM UMA FONTE ÚNICA: `BrandMark`
+
+**Trocar o logo do VUPTH = trocar `assets/icon.png`.** Nenhuma tela faz `require` de logo.
+
+Antes desta data a arte estava **duplicada**: `assets/icon.png` (que o `app.json` usa como ícone nativo) e `src/assets/vupth-logo/vupth-v.png` (que o `Header` carregava) eram **byte a byte idênticos** (mesmo md5). Quem trocasse a marca teria que lembrar dos dois, e esquecer um faria o ícone do celular divergir do logo de dentro do app. A cópia foi **removida** e `src/components/BrandMark.tsx` passou a apontar para `assets/icon.png` — a arte existe uma vez só. Sem custo de bundle: antes ia a cópia de 945KB, agora vai o original.
+
+`BrandMark` também concentra o **render** (antes embutido no `Header`): `size` opcional com default `BRAND_MARK_SIZE = 50` e arredondamento **proporcional** (24% do lado), de modo que a marca cresce sem deformar. Um teste trava o apontamento para `assets/icon.png`, então um `require` avulso em outra tela não passa despercebido.
+
+**Fronteira honesta — o que NÃO cabe no `BrandMark`:** `assets/adaptive-icon.png`, `assets/splash.png` e `assets/favicon.png` são resolvidos pelo `app.json` em **tempo de build**; não dá para importá-los de um módulo TS e **não saem por OTA**. Estão listados no cabeçalho do `BrandMark` com o aviso de regerar a partir da mesma arte e rodar `eas build`.
+
+**Decisão do Andre (2026-08-06):** dentro do app entra **apenas o "V"** — o nome escrito não acompanha a marca nas telas. Foram estudados lockups com o nome (V + "vupth" em Poppins 700, empilhado e deitado, com e sem fundo) e a conclusão foi manter só o símbolo.
+
+### 🚪 Abertura em duas partes (splash → sequência)
+
+O `assets/splash.png` **nunca tinha sido trocado** — era o círculo cinza padrão do Expo sobre fundo **branco**. A abertura era: tela branca com um círculo genérico → corte → tela verde do app. Agora:
+
+1. **Splash NATIVO** — o mesmo "V" centralizado sobre o verde do ícone (`#2E432F`), gerado a partir de `assets/icon.png` (mesma arte, sem desenho novo). O `backgroundColor` do splash foi de `#ffffff` para o verde, senão havia um flash branco antes de a imagem aparecer.
+2. **`PreparingServer`** — a primeira coisa que o JS desenha, enquanto o portão de readiness acorda o Render: a sequência *Abrindo o app → Chegando na loja → Na cadeira → Pronto, sem fila*.
+
+> ⚠️ **O "V" chegou a ser posto nesta tela e foi REMOVIDO no mesmo dia** (Andre, device: *"o começo ficou horrível"*). A ideia era emendar com o splash — mas **o splash é NATIVO e não sai por OTA**, então o aparelho recebeu METADE da ideia: um ladrilho verde escuro solto sobre o fundo quase branco desta tela, sem o splash verde que o justificaria. **Lição:** mudança de abertura que dependa do splash **não pode ser entregue por OTA sozinha** — tem de ir junto com o `eas build`. Se a marca voltar aqui, que seja com a tela inteira no verde, não como um selo avulso.
+
+Sem o passo 2 a marca sumia no instante em que o splash saía e voltava depois, dando um piscar. ⚠️ O splash é **nativo**: só aparece num `eas build` novo.
+
+### 🔧 Rodada de UI a partir do teste no device (2026-08-05)
+
+| Feedback | O que mudou |
+|---|---|
+| "Esqueci minha senha continua apenas carregando e nada" (passo 1) | **Causa:** `waitForBackend` roda com **60s de timeout por tentativa** e a tela só avisava "Acordando o servidor" a partir da 2ª — que nunca chegava. Com o Render hibernado eram ~50s de "Enviando..." mudo, antes mesmo de o POST sair. **Agora:** `perAttemptMs: 8000`, fases separadas (`sendPhase`: idle/waking/sending), contador de segundos no próprio botão e **"Cancelar espera"** (via `isCancelled` do portão — desistir não dispara o POST). O aviso só aparece após 3s, para não piscar com o servidor quente |
+| GPS ao incluir/editar endereço | O botão existia desde 8332dc17 mas era **passivo**. `handleNew`/`handleEdit` agora **oferecem** o GPS ao abrir o formulário, com texto ajustado ao caso; o botão manual continua para quem recusar |
+| "O V no mesmo lugar que o banco ficava" | O slot no `Header` nunca mudou; o que mudou foi o **tamanho** — o `people-waiting.svg` era 50×50 e o PNG entrou com 46×46. Voltou a 50×50 |
+| "No menu de mudar minha vez quero apenas as opções com select" | `ChangeTurnModal` deixou de ser árvore de telas e virou **uma lista de rádio** (adiantar / trocar com quem está atrás / ir para o fim / agendar) + um único "Confirmar". "Ir para o fim" fica **desabilitado** para quem já é o último, com o motivo na própria linha, no lugar do `Alert` que só aparecia depois do toque. Contrato com o `QueueStatus` inalterado |
+| "Entrar e cadastrar não podem ter o mesmo peso" (Login) | "Criar conta grátis" virou `outline` |
+| "Cadastrar na tela de visitantes deve ter peso maior" | Perfil e Configurações: **"Criar conta grátis"** (pílula sólida, vai direto ao `signUp`) + "Já tenho conta" (outline). Antes era um convite único que levava sempre ao Login — visitante que nunca teve conta caía numa tela de senha |
+| "Formulários do mesmo tamanho dos do partner" | Levantamento entre os repos: os **botões já batiam** (54px / rounded-full nos dois). A diferença estava nos campos — client `h="$14"`/`px="$4"` (56px/16) contra partner `h="$12"`/`px-3` (48px/12). Client passou a **48px/12**. `src/components/Input.tsx` (legado, sem nenhum import) alinhado junto |
+
+**Testes que acompanharam a rodada:** `screens/ForgotPassword.test.tsx` (4 casos), `screens/EditAddress.test.tsx` (3), `components/ChangeTurnModal.test.tsx` (6), `components/BrandMark.test.tsx` (5). Bateria em **55 suítes / 444 testes** no push de 2026-08-06.
+
+### 📍 GPS — a distância passou a ser do BACKEND (2026-08-06)
+
+O backend entregou a fatia B em 01/08: `GET /establishment?lat=&lng=` **ordena por distância** e devolve **`distance_km`** (2 casas) em cada item. O contrato é explícito — **o front NÃO recalcula**, porque se cada app fizesse a própria conta o client e o partner mostrariam números diferentes para a mesma loja.
+
+**Estávamos divergentes** (achado ao ler o PRD deles): calculávamos Haversine em `proximity.ts` e nem mandávamos as coordenadas. O cálculo local foi **removido**.
+
+| O que | Onde |
+|---|---|
+| Manda `lat`/`lng` (sempre em **par** — metade é `422`) | `establishmentService.getAll(coords?)` |
+| **Não** manda `radiusKm` | Não existe raio default (Andre 2026-07-27). Com raio, a loja não geocodificada **sairia** e o cliente leria "não há lojas" onde há |
+| Coordenadas na **query key** | `useEstablishments` — a permissão de GPS resolve *depois* da 1ª busca; sem isso o cache devolveria para sempre a lista sem distância |
+| `distance_km?: number \| null` | `Establishment`. `null` = busca sem coordenada **ou** loja sem coordenada; os dois exibem igual: sem distância |
+| Ordem | `orderForHome(list, hasCoords, loc)` — **com GPS devolve a lista intocada** (reordenar desfaria o desempate estável por id do backend); sem GPS cai na ordenação por bairro/cidade |
+| Formatação | `formatDistanceKm` **ficou** — saiu o cálculo, não a exibição |
+
+**Ordenação com GPS = distância pura (decisão do Andre, 2026-08-06):** loja **fechada perto vem antes de aberta longe**. Ela carrega o badge âmbar AGENDAR, então o cliente entende que há caminho. Há teste fixando isso.
+
+### 🧊 HORÁRIO CONGELADO + MULTAS — recurso novo (Andre, 2026-08-07)
+
+> Refinado pelo Andre depois da primeira redação, que estava **errada** em dois pontos: eu tinha escrito que a fila "passa por cima" do cliente congelado (não passa — **ele sai da fila**) e que ele teria imunidade a atraso (não tem — **a proteção é uma verificação no horário**, não um passe livre).
+
+#### A. SÃO DOIS CASOS DIFERENTES — e o app precisa perguntar qual é
+
+O cliente que escolhe um horário pode querer duas coisas **opostas**, e tratá-las igual quebra uma das duas:
+
+| | **Caso 1 — ALVO (flexível)** | **Caso 2 — PISO (rígido)** |
+|---|---|---|
+| O que o cliente quer dizer | *"Quero por volta das 15:00 — mas se a fila andar e der para cortar antes, ótimo."* | *"Não posso antes das 15:00. Depois, pode."* |
+| Se a estimativa **cair** para antes do horário | **Fica e é atendido antes.** É ganho, não problema | **SAI da fila** e volta a esperar — ele declarou que antes não pode |
+| Se a estimativa **passar** do horário | Espera normalmente | Espera normalmente |
+| Já existe? | ✅ É o comportamento do **horário-alvo** (`targetTime`) | ❌ **É o recurso novo** |
+
+⚠️ **Consequência de UI:** não dá para escolher um default. Ao marcar um horário, o app tem de perguntar — algo como *"se abrir uma vaga antes, você aceita?"* — porque a resposta muda o que acontece com ele na fila e muda a régua da multa.
+
+#### B. O mecanismo do PISO ("não antes das 15:00")
+
+O piso não tira o cliente da fila: **ele sempre acaba indo para a fila** — o que muda é *quando* entra e o que acontece se a fila andar rápido demais.
+
+**No exemplo do Andre** (piso = 15:00):
+
+1. A fila anda. Quando o **tempo estimado cruza o piso** — digamos que fique em **15:10** — ele **entra na fila**.
+2. Alguém à frente **desiste** e a estimativa dele **cai para antes das 15:00**. Aí ele **SAI da fila** e volta a esperar.
+3. Quando a estimativa cruzar o piso de novo, ele entra de novo.
+
+**A partir do momento em que ele está legitimamente na fila com estimativa ≥ piso, as regras normais valem:** se **sair da fila**, leva multa; se **não aparecer** no horário que ele mesmo escolheu, leva multa. O piso protege contra ser chamado **cedo demais** — não é imunidade.
+
+#### C. Não chegou e não avisou: notificação + duas multas
+
+Quando a vez do cliente chega e ele **não está lá e não avisou**, o app **manda uma notificação** oferecendo dois caminhos, com **multas diferentes**:
+
+| Escolha | Consequência |
+|---|---|
+| **Sair da fila** | Multa de desistência |
+| **Ainda quero ser atendido** | Multa de outro tipo (fica na fila, remanejado) |
+
+Os valores e a natureza de cada multa **ainda não foram definidos** — falta decidir com o Andre.
+
+#### D. ⚠️ O buraco: o atraso em cascata
+
+Apontado pelo Andre e é o ponto mais delicado do desenho:
+
+> *"se ele não chegar no horário e não avisar, o próximo cliente com certeza chegará atrasado, o que torna injusto notificá-lo como atrasado e multá-lo."*
+
+O cliente seguinte foi informado de um horário **mais tarde**. Quando o da frente não aparece, a fila **anda para trás no relógio** e a vez dele chega **antes** do que lhe foi comunicado. Marcá-lo como atrasado é punir alguém por um atraso que **o sistema criou**.
+
+**Princípio que unifica isto com o piso da seção A:**
+
+> **Ninguém pode ser penalizado por não estar presente antes do horário que lhe foi comunicado.**
+
+O piso é a versão **declarada** disso (o cliente diz o horário); o atraso em cascata é a versão **implícita** (o app disse o horário). O **alvo** (caso 1) fica de fora: quem aceitou ser atendido antes não tem o que reclamar de ser chamado antes. Nos dois casos, a régua da multa é o **horário comunicado**, não a posição na fila.
+
+#### E. O que isso exige
+
+1. **Guardar o horário comunicado** a cada cliente, e não só a posição. É dele que a multa passa a depender.
+2. **Recalcular a entrada/saída da fila** a cada evento que mexa na estimativa (desistência, no-show, encaixe, atraso de terceiro).
+3. **O profissional precisa ver o piso** de quem congelou — senão chama às 14:15, não aparece ninguém, e marca atraso.
+4. **A multa só pode disparar depois** do horário comunicado àquele cliente.
+5. **Descongelar / editar o piso** pelo cliente.
+
+#### F. Desenho sugerido: orientado a EVENTOS (Andre, 2026-08-07)
+
+> *"seria uma função orientada a eventos que observa cada alteração na fila, aí verifica o horário pretendido"*
+
+É a forma certa, e **o backend já tem esse padrão três vezes**: `IntentionPromotionScheduler`, `CutRequestExpiryScheduler` e `EstablishmentAutoCloseScheduler` — todos com `ThreadPoolTaskScheduler` próprio/daemon e **deliberadamente sem `@Scheduled`**. O reavaliador do piso entra como mais um do mesmo molde: a cada evento, recalcula a estimativa de quem tem piso e decide **entra na fila / sai da fila / fica**.
+
+⚠️ **O gatilho NÃO pode ser só "mudou o tamanho da fila".** Um atendimento que **demora mais que o estimado** empurra a estimativa de todo mundo **sem alterar o tamanho** — e é exatamente o caso em que alguém cruza o piso. A lista de eventos que precisa disparar a reavaliação:
+
+| Evento | Efeito na estimativa |
+|---|---|
+| `start` / `finish` | move para trás **ou** para a frente, conforme a duração real |
+| `cancel` / `leave-queue` / no-show | **antecipa** todo mundo — é o caso do "desistiu às 14:15" |
+| `late` / `undo-late` | reordena |
+| `fit-in` / encaixe / promover ao 1º lugar | **atrasa** quem está atrás |
+| bloco de refeição criado, editado ou pulado | move a janela inteira |
+| profissional pausa / retoma / fica indisponível | idem |
+
+Como o backend **já faz `broadcastQueue` a cada mudança**, o ponto de engate natural é o mesmo caminho — quem já sabe que a fila mudou é quem deve acionar a reavaliação.
+
+**Ainda a decidir:** quando alguém **sai** da fila por causa do piso, ele volta para onde? (fica como intenção fora da fila até cruzar de novo, ou vira um estado próprio?) E o cliente precisa ser **avisado** das duas transições — sair e voltar a entrar —, senão ele abre o app, não se vê na fila e acha que perdeu a vez.
+
+#### G. Relação com o que já existe
+
+- **Cancelamento tardio + strikes/aviso** (era o `#39` do backlog do backend em 08/2026 — conferir o número no PRD deles, ver o aviso no topo do HANDOFF): é a base do sistema de penalidade. As multas aqui são uma evolução dele, com **duas saídas** em vez de uma.
+- **Intenção de fila com horário-alvo** (`targetTime` no `POST /attendances`): cede a vez enquanto o previsto for antes do alvo. É o parente mais próximo do piso, mas **não faz o cliente sair da fila** quando a estimativa cai, e não trata multa. Está **desligado no nosso front** desde 2026-07-15, com o parâmetro preservado em `ServiceSelection.goToQueue()` para religar sem retrabalho.
+- **Intenção fora da fila** (`desiredTime`): promovida ~15min antes e vira `SCHEDULED` comum **na cauda**; se a fila drenar, nada impede o atendimento antes do horário.
+
+⬜ **Bloqueado no backend** — pedido no HANDOFF §16.1 (B9). Não construímos contorno.
+
+### 🐛 Dois defeitos estruturais achados em 2026-08-07
+
+**1. `isDisabled` não bloqueava o toque.** O `Button` fazia `disabled={isLoading}` e espalhava `{...rest}` depois, então o `isDisabled` chegava ao Gluestack como **estado visual apenas**: o botão ficava apagado e o toque continuava disparando o `onPress`. Ninguém tinha notado porque **todas** as telas que usam `isDisabled` têm guarda dentro do handler (`if (!canSend) return`) — escapavam por acaso, não por proteção. Bastou um handler sem guarda (o modal de deletar conta) para o furo aparecer. Corrigido no `Button` (amarra o `disabled` real do `Pressable`) e coberto por `components/Button.test.tsx`. **Achado pelo portão de push**, não no device.
+
+**2. Quatro telas não rolavam.** `Settings`, `Profile`, `EditEmail` e `EditPassword` eram um `VStack flex={1}` seco: conteúdo além da altura da tela ficava **inalcançável**, sem erro nem indicador. Nas Configurações apareceu quando o painel de diagnóstico aumentou a altura; as outras três já estavam assim havia tempo. Todas passaram a `ScrollView` + `contentContainerStyle={{ flexGrow: 1 }}` — o `flexGrow` não é decorativo: sem ele o "Sair da conta" do Perfil sai do rodapé. Guarda: `screens/scrollable.test.ts` varre `src/screens/` e falha se alguma tela não tiver `ScrollView` nem `FlatList`.
+
+### 🏷️ Rótulos de categoria — fonte única (2026-08-06)
+
+`SERVICE_TYPE_LABELS` vivia **dentro da `Home.tsx`** (e havia uma **segunda cópia** logo abaixo, nos filtros). Resultado: só a Home traduzia, e a categoria aparecia crua em qualquer outra tela — feedback do device: *"na tela inicial aparece barbearia, salão etc, mas quando clicamos no estabelecimento o tipo fica em inglês"*.
+
+`domain/establishment/serviceType.ts` passou a ser a fonte única:
+
+- **`serviceTypeLabel(v)`** — aceita minúscula/espaço; **valor desconhecido volta intacto**, para nada sumir da tela quando o backend criar uma categoria nova.
+- **`formatSpecialty(raw)`** — a `specialty` do profissional é **texto livre** no backend (`"Corte masculino"`, `"Colorista"`), mas parte dos cadastros veio preenchida com a categoria **em inglês**, e era isso que aparecia embaixo do nome. Traduz o que reconhece e **preserva o resto**: mapear à força apagaria a especialidade de quem escreveu de verdade. Aceita lista por vírgula.
+- Os **filtros da Home são derivados** do mapa — categoria nova entra sozinha nos três lugares e o rótulo do filtro nunca diverge do rótulo do card.
+
+### 🔌 Diagnóstico do WebSocket no device (2026-08-06)
+
+Configurações → **"Tempo real (diagnóstico)"**, uma linha por canal (pessoal e público). Existe porque o "Teste 0" pedido pelo backend (imprimir os headers do `CONNECTED`) era **inexequível**: num binário instalado, `console.log` só aparece via `adb logcat` ou dev client.
+
+- **`user-name` vazio ⇒ conexão ANÔNIMA** — é o `#31`/S14, e a assinatura do "às vezes não chega": o tópico público segue atualizando a fila e só o canal pessoal morre calado, sem erro. O painel diz isso em uma frase.
+- **`heart-beat`** — mostra o negociado e avisa quando vem `0` (socket zumbi).
+- **Recebidas / última / conexões** — separa "conectado" de "recebendo", e conta reconexões.
+
+Domínio puro em `domain/ws/diagnostics.ts` (17 casos). **C18 feito junto:** `AppState` nos dois hooks reconecta ao voltar do primeiro plano com o socket caído — o cenário piorou desde que o servidor passou a mandar heartbeat, porque a sessão suspensa é derrubada em ~10s.
+
+> ⚠️ **Observabilidade não é contorno.** O painel **exibe** o `#31`, não o conserta — ver a regra de fronteira no HANDOFF.
+
+> ⚠️ **Correção ao §1b:** a linha "WebSocket: `useQueueSocket` / `useQueueNotifications` existem mas **não funcionam no device**" está **desatualizada**. Em 2026-08-01 o diagnóstico virou o jogo: o **servidor sempre esteve certo** e o defeito era do app (flags `forceBinaryWSFrames`/`appendMissingNULLonIncoming` + token lido uma única vez no mount, que ia vencido em toda reconexão). Ambos corrigidos. Ver HANDOFF §4.
+
+---
+
+## 1y. 📥 Recebido do front-partner (leitura de 2026-08-17, handoff deles de 11/08)
+
+### 🔑 C24 — a falha de handshake era COLD START, não código
+
+**Eles mediram** (front-partner, 11/08): com a instância do Render **hibernada**, o readiness levou **35s**; com ela **acordada**, o `/ws/info` responde em **0,5s**. Conclusão: **qualquer handshake feito na janela de boot morre** — e isso vale igual para nós.
+
+> ⚠️ **Consequência direta para o nosso teste:** *"falha no handshake no primeiro acesso"* é **infraestrutura, não bug de app**. **Testar sempre com o backend já quente** — senão o A/B mede o Render, não os apps. Isso reenquadra o resultado do teste de device do Andre em 07/08.
+
+**Eles já estão instrumentados** desde 11/08: o painel deles vive em Configurações do profissional e o store (`wsDiagnostics.store.ts`) **espelha o nosso de propósito** — mesmos canais (`public`/`personal`) e mesmas ações — para a comparação ser maçã com maçã. Ou seja, o A/B que pedimos **está pronto dos dois lados**.
+
+**✅ Achado deles que corrigimos aqui (2026-08-17):** o `lastError` **não era limpo ao reconectar**, então a falha do boot ficava colada na tela enquanto o `reconnectDelay` reconectava por baixo — o painel mostrava *"conectado"* **e** *"último erro"* ao mesmo tempo, fazendo uma falha **já superada** parecer permanente. Nosso store tinha o mesmo defeito. Corrigido, com teste de regressão; o contador de falhas fica (é histórico útil), o que sai é a exibição do erro como se fosse o estado atual.
+
+### 🎨 NOVA IDENTIDADE VISUAL — achada na branch `design/marca-dev` do partner (2026-08-17)
+
+⚠️ **Nunca foi comunicada por handoff.** A branch mudou **61 arquivos de código e ZERO documentos** — a informação existe só como comentário dentro do código de uma branch **não mergeada**. Encontramos porque o Andre pediu para procurar.
+
+**A paleta é a do Wise:**
+
+| Token | Hex | Papel |
+|---|---|---|
+| `brandGreen` | `#9FE870` | verde limão — **só como FUNDO** |
+| `forest` | `#163300` | verde muito escuro — o par de texto/ícone por cima |
+| `greenTint` | `#E2F6D5` | superfície alternativa |
+| `accentBlue` / `accentPeach` / `accentPink` / `accentPlum` | `#A0E1E1` · `#FFC091` · `#FFD7EF` · `#260A2F` | apoio |
+
+Mais `brandSurface #F3F5F1`, `brandTextSecondary #454745`, `brandBorder #D7DDD3`, raios `card: 20` / `hero: 24`.
+
+**Trocam também as fontes:** **Archivo** (700/800) substitui a **Poppins** em heading/display; **DMMono** entra para números (fila, horários). Hoje estamos em Poppins e com `mono: undefined`.
+
+#### O que eles esperam de nós — está escrito no código deles
+
+> *"Precisa bater 1:1 com **`vupth/config/gluestack-ui.config.ts`** e com `tailwind.config.js` — os três têm que ficar sincronizados **no mesmo commit**."*
+
+E o `BrandButton.tsx` deles diz *"espelha `src/components/brand/Button.tsx` do vupth (client)"* — **arquivo que não existe aqui**. Estavam escrevendo como se a nossa metade já estivesse pronta.
+
+#### ✅ O risco é baixo, e isso muda a conversa
+
+Os tokens são **ADITIVOS, não substitutivos**:
+
+> *"Aditivos: não remapeiam `green50-900` (ainda usado como texto em várias telas), porque `brandGreen` é claro demais para texto/ícone sobre fundo claro — só entra como fundo, com `forest` por cima."*
+
+Ou seja: **acrescentar os tokens não muda nenhuma tela existente.** A paleta "Verde Marca" (`#3B7A3F`) continua válida durante a transição — as duas coexistem de propósito, e o `BrandButton` convive com o `Button` atual. **Sincronizar os tokens é barato e sem efeito visual; adotar os componentes é a decisão cara**, e é separada.
+
+**Armadilha que eles já pagaram e nos avisam:** *"o config do partner nasceu ancorado no teal antigo e login/cadastro renderizaram com um verde diferente do resto do app até alguém notar. Ao criar o `tailwind.config.js` do client, **copie os hexes da fonte da verdade — não escolha um verde parecido**."*
+
+⬜ **A decidir pelo Andre:** a identidade nova é decisão fechada? Se for, sincronizamos os tokens (barato) e definimos quando adotar os componentes (caro, e conversa com a **D9** — migrar para a v2 do Gluestack).
+
+### ⛔ C21 — cada profissional escolhe seu regime: fila OU agenda pura (depende do S24)
+
+*Item do handoff do partner datado de 05/08 que **não constava em nenhum documento nosso**.*
+
+Decisão do Andre: *"o profissional poderá escolher se usará fila (modelo que estamos criando), ou se apenas agenda, onde os horários são fixos."*
+
+**Não confundir com a escolha do cliente** (entrar agora *vs* agendar): o C21 é a escolha do **profissional** sobre como ele trabalha. No modo agenda o horário é **FIXO** — hora marcada, nada empurra.
+
+**Ação nossa:** o card e a tela de cada profissional passam a oferecer **"entrar na fila"** ou **"escolher horário"** conforme o modo **dele** — e **os dois modos convivem no mesmo estabelecimento**. No modo agenda não existe posição nem ETA a mostrar: existe **grade de horários livres**.
+
+> ⚠️ **Registrado agora para a tela da loja não ser desenhada assumindo que todo profissional tem fila** — junto com o C22, que diz para ela não assumir horário único da semana. As duas restrições valem para a mesma tela.
+
+### ⛔ C22 — horário de funcionamento por DIA da semana (depende do S27)
+
+Hoje o contrato tem **um** `opening_time`/`closing_time` para a semana inteira. O Andre pediu horário **por dia** (domingo fechado, sábado até as 18h). Quando o backend modelar (**S27**: lista de `{dayOfWeek, openingTime, closingTime, closed}`), a **nossa tela da loja muda**: passa a mostrar **o dia corrente** ("hoje 9h–19h", "fechado hoje") e, idealmente, **quando reabre** ("abre amanhã às 9h") — que é a informação útil para quem chega fora do horário.
+
+> **Registrado agora para a tela da loja não ser desenhada assumindo um horário único.**
+
+### ⛔ C23 — "esqueci minha senha": a mensagem também muda aqui (depende do S21)
+
+O Andre testou e **o fluxo passou com um e-mail sem cadastro**, porque o backend responde **200 sempre** (anti-enumeração). Ele decidiu o contrário: passará a devolver **`404 EMAIL_NOT_FOUND`** (S21).
+
+**Ação nossa quando entrar:** trocar a mensagem para a forma **afirmativa** ("Enviamos um código de 6 dígitos para seu e-mail") e tratar o `404` como **erro do próprio campo** ("E-mail não cadastrado"), sem popup.
+
+⚠️ **No mesmo teste o e-mail não chegou** (S7, SMTP) — então, até o envio voltar, o fluxo segue inutilizável nos dois apps mesmo com a mensagem certa.
+
+---
+
+## 1x. 🌐 ACESSO PELO NAVEGADOR (web) — decisão do Andre, 2026-08-17
+
+**Decisão:** vamos ter acesso por URL, como o partner já tem. E a limitação do navegador **é assumida em voz alta**, não escondida:
+
+> *"é provisório; podemos a todo momento solicitar o download do app para aproveitar todas as funcionalidades. Podemos dizer que pelo navegador não tem notificação e logo abaixo oferecer link para baixá-lo."*
+
+Isso **reenquadra o custo do porte**: não estamos prometendo paridade, então os 64 usos de `Alert.alert` deixam de ser bloqueio — deixam de ser dívida e viram *degradação conhecida*.
+
+### O que o partner fez (achado no código; não está em documento deles)
+
+| Peça | O quê |
+|---|---|
+| **Alias no Metro** | `expo-secure-store` → `web-shims/expo-secure-store.js` **só no bundle web**. iOS/Android seguem com o pacote real, **o código-fonte não muda** e os testes continuam mockando o pacote |
+| **O shim** | Usa **`sessionStorage`**, não `localStorage`: o token morre quando a aba fecha, o que apaga o cenário do computador compartilhado. Fallback em memória para navegador com storage bloqueado |
+| **`public/_headers`** | CSP, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy, HSTS. O Expo copia `public/` para a saída do export; o formato é lido por Cloudflare Pages e Netlify. O CSP ataca o vetor real (XSS) — sem ele, script injetado lê o token |
+
+⚠️ **Aviso deles:** o `connect-src` do CSP lista as URLs da API em `https` **e `wss`**. Se a URL mudar e o CSP não, **a fila para de atualizar sem erro visível**.
+
+### Dimensionamento aqui
+
+- **Fácil (24 arquivos):** o `expo-secure-store` sai de graça — copiar alias + shim, zero mudança de código nosso.
+- **Nativos:** `expo-location` e `expo-notifications` já são carregados com `require` dentro de `try/catch` nos nossos hooks, então **degradam sozinhos** em vez de derrubar o app. Falta tratar o `expo-updates` nas Configurações (id da OTA e "verificar atualização" não fazem sentido no navegador).
+- **`Alert.alert` é no-op no React Native Web** (64 usos). Com a decisão acima, a maioria vira degradação aceitável — **menos um caso**, abaixo.
+
+### ✅ Escopo do web — DECIDIDO (Andre, 2026-08-17): acesso COMPLETO
+
+**O navegador não é vitrine: é o app.** O visitante pode **se cadastrar e entrar na fila** normalmente. O que muda é que ele **é avisado das limitações**.
+
+> *"ele pode se cadastrar pelo navegador também, só será avisado sobre suas limitações — menos sobre segurança."*
+
+**O que avisamos:** o que ele **perde na prática** — sem notificação fora da aba, então precisa manter o app aberto para ser avisado da vez. Com o CTA de baixar o app logo abaixo.
+
+**O que NÃO avisamos:** nada sobre segurança de sessão. Dizer ao usuário "aqui sua sessão é menos protegida" assusta sem ajudar — ele não tem ação a tomar com essa informação.
+
+> ⚠️ **Não confundir "não avisar" com "não fazer".** As proteções continuam **todas** implementadas: `sessionStorage` em vez de `localStorage` (a sessão morre ao fechar a aba) e o CSP em `public/_headers` (que é o que barra o XSS, o vetor real). A decisão é sobre **mensagem ao usuário**, não sobre o que se constrói.
+
+#### Onde o aviso precisa aparecer
+
+Não basta uma vez no primeiro acesso. O momento que importa é **quando ele entra na fila** — é ali que a falta de notificação passa a ter consequência, porque é dali em diante que ele pode **perder a vez e ser multado** (D1: a multa é dinheiro).
+
+Com o aviso **no momento certo**, a multa fica defensável: ele foi informado antes de assumir o compromisso. Enterrado num banner do primeiro acesso, não fica.
+
+### Ordem de implementação sugerida
+
+1. Alias + shim (barato, e permite rodar no navegador para **ver o que quebra de verdade**).
+2. Tratar o `expo-updates` e o que mais só existir no nativo.
+3. Banner honesto de limitação + CTA de download.
+4. CSP por último, **com o `connect-src` apontando para as nossas URLs**.
+
+Nada aqui aguarda decisão — o escopo está fechado.
+
+---
+
+## 1z. 🧭 DECISÕES PENDENTES DO ANDRE — contexto, pergunta e o que o mercado faz
+
+> Tópico criado a pedido do Andre (2026-08-07) para concentrar **o que depende de decisão dele**, não de implementação. Cada item traz: **contexto**, **a pergunta**, e **como o mercado resolve** — para ele analisar e pesquisar. Nada aqui está decidido. Ao decidir, mover a decisão para a seção da feature e **apagar o item daqui**.
+
+---
+
+### ✅ D1 — DECIDIDO (Andre, 2026-08-07): **a multa é DINHEIRO.**
+
+Não é penalidade reputacional: o cliente **paga**. Isso muda a categoria do produto e destrava/força o resto.
+
+**O que essa decisão arrasta junto** (não é opinião, é consequência):
+- **Meio de pagamento vira pré-requisito** do fluxo de fila — hoje o app não tem nenhum.
+- **D2 e D3 deixam de ser opcionais** e viram bloqueio: sem definir *como* cobrar e *quanto*, não dá para construir.
+- **Entram regras que não existiam:** reembolso, contestação, comprovante/recibo, e o que acontece quando a cobrança **falha** (cartão recusado, sem saldo).
+- **Exposição ao CDC:** multa a consumidor exige informação prévia, clara e destacada — a regra precisa estar visível **antes** de o cliente entrar na fila, não escondida em termos de uso.
+- **Quem recebe** (loja ou plataforma) tem efeito fiscal e contratual. É a próxima pergunta a fechar, dentro da D2.
+
+**Vale manter à vista o dado da pesquisa:** a Booksy mediu que **só ter o cartão salvo já reduz o no-show em 25–30%**, sem cobrar. Isso não contradiz a decisão — mas sugere que **guardar o cartão** é o passo que entrega mais cedo o efeito, e a cobrança em si pode vir depois, já com a infraestrutura montada.
+
+### ✅ D2/D3 — PARCIALMENTE DECIDIDO (Andre, 2026-08-07)
+
+**Decidido:**
+- **A PLATAFORMA fica com o dinheiro** da multa (não a loja).
+- **Valor: R$ 3,00**, a princípio. **Valor único, configurável** — *"será apenas o valor deste campo"*. Não é percentual do serviço nem escalonado por reincidência.
+
+**Ainda aberto dentro da D2:** *como* cobrar — cartão salvo no cadastro, cobrança no ato, ou acúmulo para a próxima visita.
+
+#### ⚠️ Duas consequências que precisam de decisão consciente
+
+**1. O profissional é quem perde, e não recebe nada.** Quem sofre o no-show é o profissional: perdeu o horário e o faturamento daquele corte. Com a multa indo **inteira para a plataforma**, ele fica sem compensação — recebe só o transtorno. É sustentável como modelo de receita, mas convém ser escolha explícita, porque **é o profissional que vende o app ao cliente**. Alternativas comuns no mercado: *split* (parte para a loja), ou a multa virar **crédito do cliente naquela loja**.
+
+**2. A R$ 3,00, a taxa de pagamento come uma fatia grande.** Transação de cartão no Brasil custa tipicamente **R$ 0,40–1,00 fixos + percentual** — numa multa de R$ 3,00 isso é **15–30% indo para o adquirente**. Duas saídas usadas no mercado: **acumular** e cobrar quando passar de um piso, ou **pré-autorizar sem capturar** — que é justamente o modelo em que a Booksy mediu 25–30% de redução no no-show **sem cobrar nada**.
+
+#### ❓ Ficou uma pergunta em aberto
+
+Você tinha definido **duas multas diferentes** — uma para *sair da fila* e outra para *seguir na fila mesmo tendo faltado*. Agora falou em *"apenas o valor deste campo"*. É **um valor só para os dois casos**, ou continuam **dois valores**? Muda a modelagem: um campo, ou dois.
+
+### D4. Existe tolerância? De quanto?
+
+**Contexto.** Não conversamos sobre isso, e sem tolerância a régua fica dura demais: trânsito, elevador, fila do estacionamento.
+
+**Pergunta.** Há uma janela de graça entre "chegou a vez" e "está atrasado"? Quantos minutos?
+
+**O que o mercado faz.** Restaurante segura a mesa por **10 minutos** — é quase padrão. Salão costuma usar **10 a 15 minutos** antes de liberar o horário.
+
+---
+
+### ✅ D5 — DECIDIDO (Andre, 2026-08-07): intenção volta, e nasce o **PENDENTE DE ACEITAÇÃO**
+
+**Estado de quem sai da fila pelo piso:** volta a ser **intenção**. Sem estado novo para isso.
+
+#### O discriminador único
+
+> **O pedido cabe no expediente, com tempo disponível?**
+
+| Resposta | O que acontece |
+|---|---|
+| **SIM** | **Garantido** — aceitação automática, sem pedir nada ao profissional. **Bloqueia o fechamento da loja** |
+| **NÃO** (fora do expediente, cruza o fechamento, ou não cabe) | **PENDENTE DE ACEITAÇÃO** do profissional. **Não bloqueia** nada |
+
+Uma pergunta só resolve as três situações — não precisa de regra por caso.
+
+#### As três situações, do jeito que o Andre descreveu
+
+**1. Antes de abrir / iniciar a fila.** O profissional vê os clientes que pediram para cortar e **reorganiza a fila do jeito dele**. Aqui o tema é **ordem**, não aceitação: os garantidos já estão dentro; os pendentes ele aceita ou não.
+
+**2. Durante o expediente.** Quem manifestou interesse com horário disponível tem **atendimento garantido**, igual a quem já está na fila. **Esse bloqueia o fechamento:** ou o profissional remove todos, ou atende todos.
+
+**3. Horário que cruza o fechamento.** Fica **pendente de aceitação** e **não bloqueia** a fila. O profissional decide se estica o expediente para atender.
+
+#### 💡 O efeito que isso tem no produto
+
+Hoje o backend **recusa** esses casos com erro:
+- `422 INTENTION_OUTSIDE_BUSINESS_HOURS` — pediu fora do expediente;
+- `409 PROFESSIONAL_AGENDA_FULL` — não cabe antes do fechamento.
+
+Nos dois, o cliente leva um "não" e vai embora. Com o pendente de aceitação, os mesmos casos viram **"vou perguntar ao profissional"** — e quem decide passa a ser quem tem interesse em vender. **Dois erros viram uma oportunidade**, sem mudar nada do fluxo feliz.
+
+#### O que muda para cada equipe
+
+- **Backend:** novo estado de intenção (pendente/aceita), o gate de fechamento passando a considerar as garantidas de hoje, e os dois erros acima deixando de ser recusa.
+- **Front-partner:** tela de triagem antes de abrir (ver e ordenar) e a decisão de aceitar/recusar os pendentes.
+- **Front-client:** mostrar a diferença entre *"agendado"* e *"aguardando o profissional confirmar"* — são expectativas diferentes e não podem parecer a mesma coisa.
+
+---
+
+### 🟡 D6 — PARCIALMENTE DECIDIDO (Andre, 2026-08-07): a tela mostra "AGENDADO"
+
+**Decidido:** enquanto espera fora da fila, o cliente aparece como **intenção / "AGENDADO"** — não como "fora da fila". Isso resolve a maior parte do susto: ele abre o app e vê *"Agendado para 15:00"*, em vez de não se ver em lugar nenhum.
+
+**Ainda aberto:** manda **notificação** nas transições, ou só muda o rótulo em silêncio?
+
+**Minha leitura:** com o rótulo "Agendado" e com a pergunta da D7 já feita (ele *escolheu* a opção "não consigo antes"), o susto praticamente some — ele foi avisado de que isso aconteceria. Sobra **uma** notificação que continua valendo a pena: **quando ele entra na fila de verdade** ("agora você está na fila, faltam X"), porque é a partir daí que ele precisa se deslocar. Sair da fila pode ser silencioso; entrar, não.
+
+---
+
+### ✅ D7 — DECIDIDO (Andre, 2026-08-07): perguntar DEPOIS de confirmar, no padrão "substituição"
+
+**Onde perguntar:** o cliente manifesta a intenção pelo fluxo **que já existe**. **Depois de confirmar**, aparece um aviso de que a fila oscila, com a escolha.
+
+**Como perguntar** (texto do Andre, a lapidar):
+
+> *"Caso o tempo estimado da fila diminua para antes das **15:00**, o que deve ser feito?"*
+> 1. **Acompanhar a fila** — aceito ser atendido antes
+> 2. **Não consigo cortar antes desse horário** — me mantenha para depois das 15:00
+
+**A referência é o Zé Delivery**, quando o estabelecimento não tem a bebida escolhida e ele pergunta o que fazer. É o **padrão de preferência de substituição**: em vez de o app adivinhar, ele pergunta uma vez, na hora em que a escolha é concreta, e guarda a resposta para quando o caso acontecer.
+
+**Por que esse desenho funciona melhor do que perguntar antes:**
+- Só aparece para quem escolheu horário — não polui quem entra na fila normal.
+- O horário aparece **preenchido** na pergunta ("antes das 15:00"), então ela é concreta, não hipotética.
+- Vem **depois** da confirmação: não adiciona atrito à decisão principal.
+
+**Mapeamento para o modelo:** opção 1 = **alvo** (flexível, comportamento que já existe) · opção 2 = **piso** (rígido, o recurso novo).
+
+**A ajustar na redação:** "diminua" pode ser lido como "diminuir a espera" (bom) em vez de "antecipar o horário". Vale testar algo como *"Se abrir uma vaga antes das 15:00…"*, que é a formulação que companhia aérea e clínica usam.
+
+### 🟡 D8 — EM DESENHO: as três verificações do Andre + a régua
+
+**Proposta do Andre (2026-08-07)** — disparar verificação quando a fila cair por desistência, olhando três sinais:
+
+1. queda da estimativa **maior que 10 minutos**;
+2. estimativa de atendimento **menor que 1 hora** (mudança mais delicada);
+3. cliente está em **2º ou 3º** na fila.
+
+**Minha contribuição: os três sinais medem a MESMA coisa — tempo de reação.**
+
+Repare: uma queda de 20 minutos não incomoda quem seria atendido daqui a 3 horas (ele é reavisado e se reprograma). Ela é brutal para quem seria atendido em 40 minutos — que talvez já esteja saindo de casa. E "2º ou 3º na fila" é outra forma de dizer "falta pouco". Ou seja, os três são **proxies de uma pergunta só**:
+
+> **O cliente ainda teve tempo de reagir?**
+
+**Desenho que proponho, usando os sinais dele:**
+
+| Camada | Regra |
+|---|---|
+| **Gatilho** | Queda de estimativa **> 10 min** (o sinal 1 do Andre). Abaixo disso é ruído — não faz nada |
+| **Decisão** | `tempo de reação = nova estimativa − agora`. Os sinais 2 e 3 viram este número |
+| **Se o tempo de reação for CURTO** | Notificação **urgente** pedindo confirmação: *"sua vez foi antecipada para 14:20 — você consegue chegar?"* E o **horário comunicado NÃO muda** para efeito de multa |
+| **Se for LONGO** | Atualiza, notifica normal, e o **novo horário passa a valer** como o comunicado |
+
+**O princípio que fecha a D8:** o horário que serve de régua para a multa **só muda quando o cliente CONFIRMA** — ou quando ele teve folga suficiente para se reprogramar. Sem confirmação e sem folga, a régua continua sendo o horário original. Assim ninguém é multado por uma antecipação que não pediu e não teve como atender.
+
+**A definir:** quanto é "curto"? Sugiro amarrar à tolerância da **D4** — se o cliente não tem pelo menos o tempo da tolerância para chegar, é curto.
+
+### ✅ D9 — DECIDIDO (Andre, 2026-08-07): **ir para a v2 do Gluestack** (= NativeWind)
+
+**O mal-entendido desfeito:** o Andre queria "atualizar o Gluestack" achando que era mexer no `package.json`. Dois fatos:
+
+1. **Já estamos na última v1.** `@gluestack-ui/themed@1.1.73` — não há para onde atualizar dentro da v1. *(A linha do handoff do partner que diz "se o client ainda está no ^1.1.34" está desatualizada.)*
+2. **A v2 do Gluestack É o NativeWind.** Eles reescreveram a biblioteca em cima dele. Então "quero a v2" e "migrar para NativeWind" são **a mesma decisão** — que é exatamente o C15 do partner.
+
+**Por que não é um bump:** na v2 os componentes passam a ser **copiados para dentro do projeto** (modelo shadcn) e estilizados por **classes**, não por props. Sai `<Button bg="$green500" h={54}>`, entra `className="bg-green-500 h-[54px]"`. Todo componente e toda tela são tocados — no partner deu ~49 arquivos.
+
+**O que joga a favor:** o partner **já fez** e deixou cartilha no handoff deles. Não é caminho desconhecido; é caminho já percorrido por alguém que atende o mesmo backend e usa a mesma paleta.
+
+**Quando:** ⬜ a decidir. Recomendo **depois** de fechar os defeitos abertos de device (handshake do WebSocket e fila duplicada) e **entre** frentes de feature — migração de estilo não entrega nada visível ao usuário e conflita com todo trabalho de UI em andamento.
+
+> **Fontes da pesquisa (2026-08-07):** [Booksy — no-show policy](https://biz.booksy.com/en-us/blog/no-show-policy-tips) · [Fresha — taxas de no-show](https://www.fresha.com/help-center/knowledge-base/payments/617-charge-no-show-and-cancellation-fees) · [Bookedin — quanto cobrar](https://bookedin.com/blog/how-much-to-charge-for-cancellation-fee/) · [NoShowCost — taxa de 30% em salões](https://noshowcost.com/salons) · [Waitwhile](https://waitwhile.com/restaurant-waitlist/) · [NextMe](https://nextmeapp.com/blog/restaurant-operations/the-best-waitlist-app-for-restaurants-what-to-look-for-in-2026/) · [SevenRooms — waitlist como hospitalidade](https://sevenrooms.com/blog/restaurant-waitlist-hospitality-guide/)
+
+---
+
 ## 2. Endpoints Consumidos — Status
 
 | Endpoint | Metodo | Tela | Status Frontend | Testes |
@@ -89,7 +559,7 @@ Entrar na fila (visitante ou logado): Home → Detalhe → **ServiceSelection (v
 | `/auth/login` | POST | Login | Implementado | 14 |
 | `/auth/refresh` | POST | authStore | Implementado | 14 |
 | `/auth/logout` | POST | Home | Implementado | 14 |
-| `/establishment` | GET | Home | Implementado | 2 |
+| `/establishment?includeAll=true[&lat&lng]` | GET | Home | Implementado — **`lat`/`lng` desde 2026-08-06**: o backend ordena por distancia e devolve `distance_km`. O front **nao recalcula** | 2 |
 | `/establishment/id/{id}` | GET | EstablishmentDetail | Implementado | 2 |
 | `/establishment/id/{id}/professionals-with-queue` | GET | EstablishmentDetail | Implementado | 2 |
 | `/attendances` | POST | QueueStatus | Implementado | 2 |
@@ -151,13 +621,16 @@ Entrar na fila (visitante ou logado): Home → Detalhe → **ServiceSelection (v
 ```
 src/screens/
   Home.tsx                  — Lista + busca + filtro por tipo + icone perfil + banner fila ativa + pull-to-refresh
+                              Distancia do card vem do backend (`distance_km`); com GPS a ORDEM e a do backend
   EstablishmentDetail.tsx   — Profissionais + entrar na fila (salva no queueStore)
-  Login.tsx                 — Email + senha + toggle visibilidade
+  Login.tsx                 — Email + senha + toggle visibilidade; "Entrar" solido e "Criar conta" outline
   SignUp.tsx                — Email + senha + confirmar + regras visuais + toggle
   QueueStatus.tsx           — Tempo estimado (countdown), info tooltip, criar attendance, cancelar, voltar
   Profile.tsx               — Menu: Atendimentos + Configuracoes + Sair da conta
   Attendances.tsx           — Secao "Em andamento" (fila ativa) + "Realizados" (placeholder)
-  Settings.tsx              — Nome, E-mail, Senha, Endereco, Deletar conta
+  Settings.tsx              — Nome, E-mail, Senha, Endereco, Deletar conta, OTA,
+                              + PAINEL DE DIAGNOSTICO DO WS (2026-08-06): estado por canal,
+                                `user-name` do CONNECTED (vazio = ANONIMO), heartbeat, recebidas
   EditProfile.tsx           — Nome, sobrenome, telefone, data nasc., genero (PATCH /profile/general-infos)
   EditEmail.tsx             — Troca email + atualiza tokens (PATCH /profile/update-email/me)
   EditPassword.tsx          — Nova senha + regras visuais + atualiza tokens (PATCH /profile/update-password/me)
@@ -188,6 +661,14 @@ src/screens/
 ---
 
 ## 5. Stores e Hooks
+
+### wsDiagnosticsStore.ts (Zustand, **sem** persistencia — 2026-08-06)
+Estado do WebSocket por canal (`public` / `personal`) para o painel de Configuracoes: `status`,
+`info` (do frame CONNECTED), `connects`, `connectedAt`, `lastMessageAt`, `messages`.
+**Nao e persistido de proposito**: e retrato do momento, e um valor de sessao anterior enganaria.
+Alimentado por `useQueueSocket`/`useQueueNotifications` (`markConnecting`/`markConnected`/
+`markMessage`/`markError`/`markClosed`). Logica pura em `domain/ws/diagnostics.ts`.
+
 
 ### authStore.ts (Zustand + SecureStore)
 - `login(email, password)` — POST /auth/login → armazena tokens
@@ -364,7 +845,25 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 
 ## 10. Testes Unitarios e Integracao
 
-### Resumo: 144 testes em 18 suites
+### Resumo: **489 testes em 61 suites** (medido no portao de push, 2026-08-17)
+
+> ⚠️ **A tabela abaixo e um RECORTE historico e envelhece sozinha** — ela parou em "144 testes / 18
+> suites" enquanto a bateria triplicava. A contagem autoritativa sai de `npm test` (o `pre-push` roda
+> e imprime). Nao gastar esforco mantendo a contagem por suite na mao; manter aqui so as suites que
+> documentam uma DECISAO, listadas logo abaixo.
+
+**Suites criadas na rodada de 2026-08-05/06** (cada uma existe para travar uma decisao, nao so para
+cobrir linha):
+
+| Suite | Casos | O que trava |
+|-------|:-----:|-------------|
+| `screens/ForgotPassword.test.tsx` | 4 | Portao de readiness com tentativas CURTAS e cancelavel; cancelar NAO dispara o POST |
+| `screens/EditAddress.test.tsx` | 3 | Abrir o formulario OFERECE o GPS; recusar deixa em branco |
+| `components/ChangeTurnModal.test.tsx` | 6 | As 4 saidas como radio + um Confirmar; "ir para o fim" desabilitado para quem ja e o ultimo |
+| `components/BrandMark.test.tsx` | 5 | A marca aponta para `assets/icon.png` — um `require` de logo avulso em outra tela quebra aqui |
+| `domain/wsDiagnostics.test.ts` | 17 | `user-name` vazio = ANONIMO (o `#31`); heartbeat 0; `shouldReconnectOnForeground` (C18) |
+| `domain/proximity.test.ts` (reescrita) | — | `orderForHome`: com GPS a lista vem INTOCADA do backend; fechada perto antes de aberta longe |
+
 
 | Suite | Testes | Tipo |
 |-------|--------|------|
@@ -430,9 +929,10 @@ Os antigos `CORTE_FEMININO`/`MASSAGEM` (inexistentes no backend) já foram remov
 |---|------|-----------|--------|
 | 1 | ~~Interceptor 401 → refresh → retry~~ | Implementado em api.ts — auto-token, refresh, fila de requests, logout automatico | **FEITO** |
 | 2 | ~~Tela Attendances — historico real~~ | Implementado: `attendanceService.listClientHistory` + hook `useClientAttendances` (TanStack Query) consomem `GET /attendances/client/me` (filtros opcionais status/dateFrom/dateTo, clientId do JWT). Attendances.tsx renderiza secao REALIZADOS (FINISHED/CANCELLED/LATE) com profissional, servicos, data, duracao, valor e badge de status; loading + empty state | **FEITO** |
+| 0 | ~~Deletar conta quebrado~~ | ✅ **CORRIGIDO 2026-08-07** (`b17282e5`). O backend reescreveu a rota (S19): a antiga era **destrutiva** (`cascade = ALL` — apagar a conta de um dono apagava a loja inteira) e virou **anonimização**, exigindo `{ current_password }` no corpo; mandávamos `DELETE` sem corpo → `400`. Agora: modal próprio pedindo a senha (`Alert.prompt` só existe no iOS), **`401 CURRENT_PASSWORD_INVALID` tratado como erro de CAMPO** (o interceptor já o isenta — senão o usuário seria deslogado por errar a própria senha), **`409` exibindo a mensagem do backend** que diz como destravar (bloqueio permanente reprova na publicação), e o texto corrigido: dizia "todos os seus dados serão perdidos", o que virou mentira com a anonimização. ⬜ **Falta testar no device** — em especial o 409 | ✅ Feito, a validar |
 | 3 | Visualizacao do atendimento atual | Cliente ve detalhes do atendimento IN_PROGRESS (profissional, servicos, tempo decorrido). Dados vem do `GET /client-queue/{attendanceId}/wait-time` + `GET /attendances/{id}` | Pendente |
 | 4 | ~~Selecao de servicos obrigatoria~~ | Implementado: ServiceSelection.tsx — lista servicos, multi-selecao, preco, confirmar antes de entrar na fila. Endpoint: `GET /professional-queue/{id}/service-items` | **FEITO** |
-| 5 | Tempo real via WebSocket (STOMP) | **Backend pronto (2026-06-14, PRD_BACKEND 18b)** — handoff C3. **Fatias 1-2 FEITAS:** `@stomp/stompjs` + `WS_URL` (`/ws/websocket`); `useQueueSocket` assina `/topic/establishment/{id}/queue` (atualiza cache, polling vira fallback) em EstablishmentDetail; `useQueueNotifications` (alerta "é a sua vez!"/concluido) agora **app-wide** via `App.tsx`, dirigido por `activeQueue` do store — vale em qualquer tela enquanto houver fila ativa; workarounds RN (`forceBinaryWSFrames`+`appendMissingNULLonIncoming`). (3) `/ws` confirmado no Render (`/ws/info` → `{"websocket":true}`, `/ws/websocket` → 400 = existe). **Falta so:** (4) testar no device os eventos `ATTENDANCE_STARTED/FINISHED`. **⏬ REPRIORIZADO: ULTIMA prioridade (Andre 2026-07-04) — o polling cobre; WS fica por ultimo** | Ultima prioridade |
+| 5 | Tempo real via WebSocket (STOMP) | ✅ **Servidor PROVADO em producao pelo backend (06/08)**: heartbeat `10000,10000`, entrega no canal pessoal e conexao ociosa de 40s sobrevivendo ao proxy do Render. **No front (2026-08-06):** flags do stompjs removidas, token renovado a cada conexao (`beforeConnect`), **C18 feito** (`AppState` reconecta ao voltar do background) e **painel de diagnostico** em Configuracoes. ⚠️ **A entrega no canal PESSOAL segue sem prova de device** — o poll do `getWaitTime` (30s) mascara: o status muda na tela mesmo com o canal mudo. Nao ha sintoma aberto; o que falta e medicao, e o painel resolve em 10s. Fica aberto do lado do backend o **B8** (`#31`: token invalido conecta anonimo em vez de ser recusado) | 🔄 **Sem sintoma; prova pendente** |
 | 6 | Consumir ETA estavel (meal-aware lock) | **Backend pronto (item 37, 2026-06-22)** — `GET /client-queue/{attendanceId}/wait-time` ja retorna estimativa estavel (refeicoes travadas no ingresso). O client ja consome esse endpoint em `useQueueCountdown`; validar que usa o `estimatedWaitingTime` estavel e nao recalcula por fora | Validar |
 
 ### Media prioridade — Funcionalidades
@@ -484,7 +984,7 @@ Lista viva dos handoffs abertos do front-client para o backend. Detalhe em `HAND
 | H3 | **Avaliacao (Item 6)** — ✅ **VALIDADO NO DEVICE (2026-07-04, OTA `019f2b2f`): ver a nota real E avaliar funcionam.** Backend manda `rating_average`/`rating_count` no `professionals-with-queue`; front consome (`resolveRating`). **Melhorias opcionais (nao bloqueiam):** rollup por ESTABELECIMENTO no `GET /establishment` (cards da Home) + `rated`/`establishmentName` no `/attendances/client/me` | 3 | — | ✅ **Feito (device)** |
 | H4 | **WebSocket** nao funciona no device (backend compartilhado) — coberto por polling | 4 | — | **Ultima prioridade** (Andre 2026-07-04) |
 | H5 | **Estender strike #39** a `reschedule` e `move-to-end` com ETA < 1h (hoje so no `cancel`) | 6 | — | Aguarda backend |
-| H6 | **Adiantar/Atrasar = TROCA aberta** (modelo fechado 2026-07-15): `POST /swap-offers {attendanceId\|professionalId+serviceItemIds, direction EARLIER\|LATER}`, `GET /swap-offers?professionalId=` (elegíveis por direção/posição), `PATCH .../{id}/accept` (troca 1-por-1; solicitante de fora entra na fila), `DELETE .../{id}`. Bidirecional; solicitante pode estar fora da fila; **expira só quando é atendido**; nunca multa. `#42` direcionado mantido em paralelo.✅ **F8 COMPLETA.** *Na fila (2026-07-24):* `swapOfferService` + `ChangeTurnModal` (Adiantar=EARLIER/Atrasar-trocar=LATER publica oferta) + botão "Trocar de lugar (N)" com contador (`useSwapOffers`) + `SwapOffersModal` (aceitar/cancelar) + WS `SWAP_OFFER_ACCEPTED`. *Fora da fila (2026-07-29; fatia 2 do backend entregue em 27/07):* **"Entrar por troca"** no menu "Mais opções" da tela de serviços publica `{professionalId, serviceItemIds, direction: EARLIER}`; **sem WS fora da fila**, o aceite é detectado por **poll** (`useOutOfQueueSwap`, 30s: a oferta some do `/swap-offers/me` + o atendimento aparece no `client/me`) e o app entra na fila sozinho com o contexto do `pendingSwapStore`; seção **PEDIDOS DE TROCA** na aba Atendimentos acompanha/cancela. `#42` direcionado mantido em paralelo | 7 | **C13** (partner passivo) | ✅ **FEITA (na fila + fora da fila)** |
+| H6 | **Adiantar/Atrasar = TROCA aberta** (modelo fechado 2026-07-15): `POST /swap-offers {attendanceId\|professionalId+serviceItemIds, direction EARLIER\|LATER}`, `GET /swap-offers?professionalId=` (elegíveis por direção/posição), `PATCH .../{id}/accept` (troca 1-por-1; solicitante de fora entra na fila), `DELETE .../{id}`. Bidirecional; solicitante pode estar fora da fila; **expira só quando é atendido**; nunca multa. `#42` direcionado mantido em paralelo.✅ **F8 COMPLETA.** *Na fila (2026-07-24):* `swapOfferService` + `ChangeTurnModal` (Adiantar=EARLIER/Atrasar-trocar=LATER publica oferta) + botão "Trocar de lugar (N)" com contador (`useSwapOffers`) + `SwapOffersModal` (aceitar/cancelar) + WS `SWAP_OFFER_ACCEPTED`. *Fora da fila (2026-08-01; fatia 2 do backend entregue em 27/07):* **"Entrar por troca"** no menu "Mais opções" da tela de serviços publica `{professionalId, serviceItemIds, direction: EARLIER}`; **sem WS fora da fila**, o aceite é detectado por **poll** (`useOutOfQueueSwap`, 30s: a oferta some do `/swap-offers/me` + o atendimento aparece no `client/me`) e o app entra na fila sozinho com o contexto do `pendingSwapStore`; seção **PEDIDOS DE TROCA** na aba Atendimentos acompanha/cancela. `#42` direcionado mantido em paralelo | 7 | **C13** (partner passivo) | ✅ **FEITA (na fila + fora da fila)** |
 | H7b | **Agendar = INTENÇÃO** — `intentionsService` + seletor de dia ✅ no front (2026-07-15); backend entregou (2026-07-22) **promoção event-driven** (`ATTENDANCE_PROMOTED` a tratar) + **visão de agenda** (`GET /attendances/intentions/client/me` = frames c/ `projectedQueueEnd`+`opening/closingTime` + intenções). **Resta backend:** endpoint público `professional/{id}` c/ **blocos anônimos** (barra ao agendar). **Resta front:** meus agendamentos, tratar promoted, barra de encaixe | 12 | **S2** | Quase destravado (falta blocos anônimos) |
 | H7 | **Barreira de horario ao agendar**: **fechamento BLOQUEIA** (novo erro); **refeicao NAO bloqueia** — agenda pos-intervalo + **estimado meal-aware contando quem ja pediu pos-almoco** (so o backend calcula; resposta traz `scheduledTime` real + ex. `placedAfterBreak`) | 8 | ~BUG5/BUG6 / S4 | Aguarda backend |
 | H8 | **Cliente adicionar mais servico JA na fila** — endpoint CLIENT (ex.: `PATCH /attendances/{id}/service-items`), so dono + SCHEDULED, acrescenta serviceItemIds e recalcula `totalValue`/`estimatedTotalMinutes`. Hoje so existe `add-service-items` PROFESSIONAL (catalogo, nao o atendimento) | 9 | — | Aguarda backend |
@@ -583,7 +1083,7 @@ Lista viva dos handoffs abertos do front-client para o backend. Detalhe em `HAND
 | # | Item | Descricao | Status |
 |---|------|-----------|--------|
 | 10 | Trocar lugar na fila (remanejar #43) | **Backend entregou (handoff #43, 2026-07-03)** via `PATCH /attendances/{id}/reschedule` + `PATCH /attendances/{id}/move-to-end`. Consolidado no **Item 16** — **front FEITO** (aguarda teste device). Ver callout "Backend PRONTO (handoff #43)" | Front FEITO (ver Item 16) |
-| 10b | **Adiantar/Atrasar = TROCA de posicao, OFERTA ABERTA** | ✅ **MODELO FECHADO 2026-07-15 — ver a secao "Trocar de posicao (Adiantar/Atrasar) + Agendar (Intencao)"** (contrato completo: troca 1-por-1 bidirecional; solicitante pode estar fora da fila; expira so quando ele e atendido; nunca multa; `POST/GET/PATCH-accept/DELETE /swap-offers`). **Backend NOVO** (o `#42`/`/swap-requests` direcionado nao atende, fica mantido em paralelo). UI **CONSTRUIDA**: na fila = botao "Trocar de lugar (N)" + dot + `ChangeTurnModal` (Adiantar/Atrasar) + `SwapOffersModal`; **fora da fila (2026-07-29)** = "Entrar por troca" no menu **"Mais opcoes"** da tela de servicos + secao **PEDIDOS DE TROCA** na aba Atendimentos + entrada automatica na fila ao ser aceito (poll `useOutOfQueueSwap`, ja que fora da fila nao ha WS). **= C13 no partner** (confirmado 2026-07-15: NÃO é S2 nem S4 — a troca é mecanismo proprio do cliente; o **partner é PASSIVO**, só reflete a fila pos-troca via `professionals-with-queue`/WS, nao marca LATE, sem acao nova) | ✅ **FEITO (backend fatias 1+2 entregues)** |
+| 10b | **Adiantar/Atrasar = TROCA de posicao, OFERTA ABERTA** | ✅ **MODELO FECHADO 2026-07-15 — ver a secao "Trocar de posicao (Adiantar/Atrasar) + Agendar (Intencao)"** (contrato completo: troca 1-por-1 bidirecional; solicitante pode estar fora da fila; expira so quando ele e atendido; nunca multa; `POST/GET/PATCH-accept/DELETE /swap-offers`). **Backend NOVO** (o `#42`/`/swap-requests` direcionado nao atende, fica mantido em paralelo). UI **CONSTRUIDA**: na fila = botao "Trocar de lugar (N)" + dot + `ChangeTurnModal` (Adiantar/Atrasar) + `SwapOffersModal`; **fora da fila (2026-08-01)** = "Entrar por troca" no menu **"Mais opcoes"** da tela de servicos + secao **PEDIDOS DE TROCA** na aba Atendimentos + entrada automatica na fila ao ser aceito (poll `useOutOfQueueSwap`, ja que fora da fila nao ha WS). **= C13 no partner** (confirmado 2026-07-15: NÃO é S2 nem S4 — a troca é mecanismo proprio do cliente; o **partner é PASSIVO**, só reflete a fila pos-troca via `professionals-with-queue`/WS, nao marca LATE, sem acao nova) | ✅ **FEITO (backend fatias 1+2 entregues)** |
 | 11 | Filtro por bairro/localidade (C1) — **3 FASES (Andre 2026-07-23)** | **Fase 1 ✅ FEITA (front-only):** `LocationSelector` na Home (define localidade por "meu endereco" logado OU CEP via ViaCEP, persiste em `locationStore` com flag `resolved`; **logado auto-preenche do endereco principal** — proximidade sem tocar em nada; quem limpa o filtro nao o ve voltar); `sortByProximity` ordena **mesmo bairro → mesma cidade → resto** (chave = cidade+bairro, exige UF igual p/ homonimas), reusando o `address` que ja vem na listagem. Testes: `proximity`/`locationStore`/`LocationSelector`. Limitacao: ainda baixa a lista toda e ordena no device (ok enquanto a base e pequena). **Fase 2 ⬜ backend:** `GET /establishment?uf=&city=&neighborhood=` p/ escopar server-side (escala). **Fase 3 ⬜ backend+build:** GPS/Haversine — geocodar os enderecos no cadastro (CEP→lat/long) + `GET /establishment?lat=&lng=&radiusKm=` + `expo-location` no client (**modulo NATIVO → eas build**). Ver HANDOFF secao "Filtro por localidade". | **Fase 1 FEITA / Fases 2-3 aguardam backend** |
 | 12 | Testes de componente/tela | React Native Testing Library | Pendente |
 | 13 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |

@@ -8,7 +8,9 @@ import { Header } from "@components/Header";
 import { Input2 } from "@components/Input2";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
-import { sortByProximity } from "@domain/establishment/proximity";
+// Rotulos das categorias: fonte unica, compartilhada com a tela do estabelecimento.
+import { SERVICE_TYPE_LABELS, serviceTypeLabel } from "@domain/establishment/serviceType";
+import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useAuthStore } from "@stores/authStore";
@@ -20,32 +22,27 @@ import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
 import { formatWaitTime } from "@domain/queue/types";
-import { UserCircle, Queue, Clock, Star } from "phosphor-react-native";
+import { UserCircle, Queue, Clock, Star, MapPin } from "phosphor-react-native";
 
-const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
-  BARBER: "Barbearia",
-  BEAUTY_SALON: "Salão",
-  EYEBROW: "Sobrancelha",
-  NAIL_SALON: "Manicure",
-  SPA: "Spa",
-  CLINIC: "Clínica",
-};
-
+// Derivado da fonte unica: categoria nova entra aqui sozinha, e o rotulo do
+// filtro nunca diverge do rotulo do card.
 const SERVICE_FILTERS: { key: ServiceType | "ALL"; label: string }[] = [
   { key: "ALL", label: "Todos" },
-  { key: "BARBER", label: "Barbearia" },
-  { key: "BEAUTY_SALON", label: "Salão" },
-  { key: "EYEBROW", label: "Sobrancelha" },
-  { key: "NAIL_SALON", label: "Manicure" },
-  { key: "SPA", label: "Spa" },
-  { key: "CLINIC", label: "Clínica" },
+  ...(Object.keys(SERVICE_TYPE_LABELS) as ServiceType[]).map((key) => ({
+    key,
+    label: SERVICE_TYPE_LABELS[key],
+  })),
 ];
 
 function EstablishmentCard({
   establishment,
+  distanceKm,
   onPress,
 }: {
   establishment: Establishment;
+  // Distancia real (GPS). null = device sem coordenada ou loja ainda nao
+  // geocodificada pelo backend — o card so omite a linha, nunca some da lista.
+  distanceKm: number | null;
   onPress: () => void;
 }) {
   // "Aberta AGORA" efetiva (inclui horario de funcionamento) — loja OPEN fora
@@ -69,14 +66,18 @@ function EstablishmentCard({
             {establishment.services?.length > 0 && (
               <Text size="sm" color="$gray300" mt="$1">
                 {establishment.services
-                  .map((s) => SERVICE_TYPE_LABELS[s as ServiceType] ?? s)
+                  .map(serviceTypeLabel)
                   .join(", ")}
               </Text>
             )}
             {establishment.address && (
-              <Text size="xs" color="$gray400" mt="$1">
-                {establishment.address.neighborhood}, {establishment.address.city}
-              </Text>
+              <HStack alignItems="center" gap="$1" mt="$1">
+                <MapPin size={12} color={distanceKm != null ? "#3B7A3F" : "#9CA3AF"} weight="fill" />
+                <Text size="xs" color="$gray400" flex={1} numberOfLines={1}>
+                  {distanceKm != null ? `${formatDistanceKm(distanceKm)} · ` : ""}
+                  {establishment.address.neighborhood}, {establishment.address.city}
+                </Text>
+              </HStack>
             )}
             <HStack alignItems="center" gap="$3" mt="$2">
               {establishment.estimated_wait_minutes != null && (
@@ -170,8 +171,13 @@ export function Home() {
       .catch(() => {});
   }, [isAuthenticated, accessToken, locationResolved, setLocation]);
 
-  const filteredEstablishments = sortByProximity(
+  // GPS: quando ha coordenadas, `useEstablishments` ja pediu a lista com
+  // `lat`/`lng` e o BACKEND devolveu ordenada por distancia — nao reordenamos.
+  // Sem coordenadas, cai na ordenacao por bairro/cidade (Fase 1).
+  const coords = useLocationStore((s) => s.coords);
+  const filteredEstablishments = orderForHome(
     filterEstablishments(establishments, search, selectedFilter),
+    coords != null,
     location,
   );
 
@@ -289,6 +295,7 @@ export function Home() {
           renderItem={({ item }) => (
             <EstablishmentCard
               establishment={item}
+              distanceKm={item.distance_km ?? null}
               onPress={() => handleEstablishmentPress(item)}
             />
           )}

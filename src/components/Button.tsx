@@ -19,7 +19,13 @@ const btnShadow = {
   elevation: 4,
 };
 
-export function Button({ title, variant = "solid", isLoading = false, ...rest }: Props) {
+export function Button({
+  title,
+  variant = "solid",
+  isLoading = false,
+  isDisabled = false,
+  ...rest
+}: Props) {
   const isOutline = variant === "outline";
   const isDestructive = variant === "destructive";
   const isGhost = isOutline || isDestructive; // fundo transparente + borda
@@ -35,7 +41,13 @@ export function Button({ title, variant = "solid", isLoading = false, ...rest }:
       borderWidth={isGhost ? "$2" : "$0"}
       borderColor={accent}
       style={isGhost ? undefined : btnShadow}
-      disabled={isLoading}
+      // `isDisabled` do Gluestack e so ESTADO VISUAL: deixa o botao apagado mas
+      // o toque continua disparando o `onPress` (descoberto em 2026-08-07, pelo
+      // teste do DeleteAccountModal). Quem escapou disso ate hoje escapou por
+      // acaso, porque os handlers tinham guarda interna. Aqui o `disabled` de
+      // verdade (o do Pressable) e amarrado junto, entao desabilitado nao clica.
+      isDisabled={isDisabled}
+      disabled={isLoading || isDisabled}
       {...rest}
     >
       {isLoading ? (

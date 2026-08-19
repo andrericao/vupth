@@ -1,10 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { establishmentService } from '../services/establishmentService';
+import { useLocationStore } from '@stores/locationStore';
 
 export function useEstablishments() {
+  const coords = useLocationStore((s) => s.coords);
+
   return useQuery({
-    queryKey: ['establishments'],
-    queryFn: () => establishmentService.getAll().then((res) => res.data),
+    // As coordenadas entram na CHAVE: o GPS costuma chegar depois da primeira
+    // busca (a permissão é assíncrona) e, sem isso, o React Query devolveria
+    // para sempre a lista sem distância que já estava em cache.
+    queryKey: ['establishments', coords?.latitude ?? null, coords?.longitude ?? null],
+    queryFn: () => establishmentService.getAll(coords).then((res) => res.data),
     staleTime: 60000,
     // WebSocket ainda não funciona no device → polling para atualizar sozinho
     // (tempos de espera) sem puxar. Só roda com o app em foreground.

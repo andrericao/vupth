@@ -83,13 +83,10 @@ export default function App() {
   // nativo de push (expo-notifications).
   usePushRegistration();
 
-  // Troca publicada de FORA da fila (F8 fatia 2): sem WS conectado, o aceite
-  // chega por poll — o hook entra na fila local e avisa quando alguem ceder.
-  useOutOfQueueSwap();
-
   // GPS (Fase 3): na 1a abertura pede a localizacao e deriva bairro/cidade por
   // reverse geocode, para a Home ja abrir com as lojas perto. Guardado com
-  // try/catch — inerte num binario sem expo-location.
+  // try/catch — inerte num binario sem expo-location. NAO usa react-query, pode
+  // ficar aqui.
   useDeviceLocation();
 
   return (
@@ -97,8 +94,19 @@ export default function App() {
       <GluestackUIProvider config={config}>
         <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
 
+        <QueryScopedHooks />
         {!fontsLoaded ? <Loading /> : !backendReady ? <PreparingServer /> : <Routes />}
       </GluestackUIProvider>
     </QueryClientProvider>
   );
+}
+
+// Hooks app-wide que dependem do React Query TEM que rodar DENTRO do
+// QueryClientProvider — no corpo do App eles ficam ACIMA do provider e o
+// `useQuery` estoura "No QueryClient set" no boot (app fecha / tela branca).
+function QueryScopedHooks() {
+  // Troca publicada de FORA da fila (F8 fatia 2): sem WS conectado, o aceite
+  // chega por poll — entra na fila local e avisa quando alguem ceder.
+  useOutOfQueueSwap();
+  return null;
 }

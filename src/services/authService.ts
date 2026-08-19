@@ -58,8 +58,13 @@ export const authService = {
   // Esqueci minha senha (backend 2026-07-22, fatia 1). Público; SEMPRE 200,
   // exista o e-mail ou não (anti-enumeração). Envia código de 6 dígitos por
   // e-mail (validade 15min, uso único, máx 5 tentativas).
+  //
+  // ⏱️ Timeout PRÓPRIO de 20s (o global é 90s, dimensionado p/ o cold start do
+  // Render): o backend envia o e-mail DENTRO do request, por SMTP síncrono, e
+  // com o servidor já quente ele penou até o teto sem responder (device Andre
+  // 2026-08-01). Um SMTP que trava não pode prender a tela por 90s.
   forgotPassword(email: string) {
-    return api.post('/auth/forgot-password', { email });
+    return api.post('/auth/forgot-password', { email }, { timeout: 20000 });
   },
 
   // Confere o código e troca a senha (queima o código). Erros:

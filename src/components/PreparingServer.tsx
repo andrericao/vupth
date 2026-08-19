@@ -8,11 +8,19 @@ import {
   PersonSimpleWalk,
 } from "phosphor-react-native";
 
+
 // Tela do portão de readiness / cold start. Enquanto o backend acorda (Render
 // Free, ~50s), seguramos o app aqui. No lugar do spinner, a animação de ABERTURA
 // (marca): sequência que remete a RAPIDEZ — abrir app -> chegar na loja -> na
 // cadeira -> sair sem fila. Espelha o front-partner (ServerWarmup/WarmupAnimation).
 // Respeita reduce-motion. Futuro: trocar por Lottie quando o design entregar o JSON.
+//
+// ⚠️ O "V" JÁ ESTEVE AQUI e foi REMOVIDO (Andre, teste no device 2026-08-06:
+// "o começo ficou horrível"). A ideia era emendar com o splash novo, mas o
+// splash é NATIVO e ainda não chegou ao aparelho — então o que a OTA entregou
+// foi um ladrilho verde escuro solto sobre este fundo quase branco, sem nada
+// que o justificasse. Se a marca voltar a esta tela, que seja junto com o
+// build do splash e com a tela inteira no verde, não como um selo avulso.
 
 const GREEN = "#3B7A3F";
 

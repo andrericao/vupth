@@ -19,6 +19,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { resolveRating } from "@domain/establishment/rating";
+import { formatSpecialty } from "@domain/establishment/serviceType";
 import { isEffectivelyOpen } from "@domain/establishment/types";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
@@ -49,8 +50,12 @@ function ProfessionalCard({
             <Heading size="sm" fontFamily="$heading">
               {professional.name}
             </Heading>
+            {/* `specialty` e texto livre no backend, mas parte dos cadastros
+                veio com a categoria em INGLES — era isso que aparecia aqui
+                (Andre 2026-08-06). `formatSpecialty` traduz o que reconhece e
+                preserva quem escreveu a especialidade de verdade. */}
             <Text size="xs" color="$gray300" mt="$1">
-              {professional.specialty}
+              {formatSpecialty(professional.specialty)}
             </Text>
             {(() => {
               const r = resolveRating(

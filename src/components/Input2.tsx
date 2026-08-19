@@ -16,9 +16,12 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
   const hasValue = typeof value === "string" && value.length > 0;
 
   return (
+    // Mesma altura/padding dos campos do PARTNER (`h="$12"` / `px-3`), para os
+    // dois apps terem formularios do mesmo tamanho (Andre 2026-08-05). Os
+    // botoes ja batiam (54px nos dois).
     <GluestackInput2
-      h="$14"
-      px="$4"
+      h="$12"
+      px="$3"
       bg="$white"
       borderWidth="$1"
       borderColor="$coolGray300"
