@@ -11,8 +11,6 @@ import { Button } from "@components/Button";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import {
   QueueDisclaimerModal,
-  QUEUE_DISCLAIMER_TITLE,
-  QUEUE_DISCLAIMER_TEXT,
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
@@ -608,8 +606,11 @@ export function QueueStatus() {
             </Center>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => Alert.alert(QUEUE_DISCLAIMER_TITLE, QUEUE_DISCLAIMER_TEXT)}
+            onPress={() => setShowDisclaimer(true)}
             testID="queue-info"
+            accessibilityRole="button"
+            accessibilityLabel="Sobre o tempo estimado"
+            hitSlop={8}
           >
             <Center width={40} height={40} borderRadius="$full" bg="#16330014">
               <Info size={20} color="#163300" />
@@ -818,9 +819,16 @@ export function QueueStatus() {
               </Text>
               {!isBeingAttended && (
                 <TouchableOpacity
-                  onPress={() => Alert.alert(QUEUE_DISCLAIMER_TITLE, QUEUE_DISCLAIMER_TEXT)}
+                  onPress={() => setShowDisclaimer(true)}
+                  testID="queue-info-inline"
+                  accessibilityRole="button"
+                  accessibilityLabel="Sobre o tempo estimado"
+                  // 16px de icone e alvo pequeno demais pra dedo; o hitSlop
+                  // leva a area de toque pros 32.
+                  hitSlop={8}
                 >
-                  <Info size={16} color="#9CA3AF" />
+                  {/* #9CA3AF da 2,85:1 no claro e reprova no AA. */}
+                  <Info size={16} color="#454745" />
                 </TouchableOpacity>
               )}
             </HStack>
