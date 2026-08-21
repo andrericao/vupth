@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Text, Center, VStack, HStack, ScrollView } from "@gluestack-ui/themed";
-import { ChevronLeft } from "lucide-react-native";
+import { Text, VStack, HStack, ScrollView } from "@gluestack-ui/themed";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { validateLogin } from "@domain/auth/validateAuth";
 import { useAuthStore } from "@stores/authStore";
@@ -104,14 +104,13 @@ export function Login() {
       showsVerticalScrollIndicator={false}
       style={{ backgroundColor: "#FFFFFF" }}
     >
-      <VStack flex={1} pt={56} pb={32} px={20}>
-        <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
-          <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
-            <ChevronLeft size={20} color="#163300" />
-          </Center>
-        </TouchableOpacity>
+      <VStack flex={1} pb={32} px={16}>
+        {/* Sem titulo: "OLA DE NOVO" e o heroi da tela, em 34px no corpo. O
+            cabecalho aqui existe pelo voltar — e pra que o topo respeite o
+            safe-area como em todas as outras telas. */}
+        <ScreenHeader />
 
-        <VStack gap="$2" mt="$7">
+        <VStack gap="$2" mt="$3">
           <Text
             fontFamily="$display"
             fontSize={34}

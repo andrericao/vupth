@@ -3,14 +3,16 @@ import { Alert, TouchableOpacity, ScrollView } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   VStack,
+  Box,
   Text,
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Check, ChevronLeft, Calendar, Scissors, Repeat2 } from "lucide-react-native";
+import { Check, Calendar, Scissors, Repeat2 } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ScheduleModal } from "@components/ScheduleModal";
 import { MoreOptionsModal, MoreOption } from "@components/MoreOptionsModal";
@@ -267,7 +269,7 @@ export function ServiceSelection() {
 
   if (isLoading) {
     return (
-      <VStack flex={1} px={20} pt={60} pb={30} bg="$brandBackground">
+      <VStack flex={1} px={16} pt={60} pb={30} bg="$brandBackground">
         <VStack mt="$6">
           <SkeletonList count={4} />
         </VStack>
@@ -277,7 +279,7 @@ export function ServiceSelection() {
 
   if (error) {
     return (
-      <VStack flex={1} px={20} pt={60} pb={30} bg="$brandBackground">
+      <VStack flex={1} px={16} pt={60} pb={30} bg="$brandBackground">
         <Center flex={1}>
           <Text color="$brandDanger" textAlign="center">{error}</Text>
           <Button title="Voltar" mt="$4" onPress={() => navigation.goBack()} />
@@ -287,29 +289,16 @@ export function ServiceSelection() {
   }
 
   return (
-    <VStack flex={1} pt={56} pb={30} bg="$brandBackground">
-      <VStack px={20} gap="$1.5">
-        <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
-          <Center width={40} height={40} borderRadius="$full" bg="$greenTint" mb="$2">
-            <ChevronLeft size={20} color="#163300" />
-          </Center>
-        </TouchableOpacity>
-        <Text
-          fontFamily="$display"
-          fontSize={28}
-          lineHeight={30}
-          letterSpacing={-1.2}
-          color="$forest"
-        >
-          O QUE VOCÊ QUER?
-        </Text>
-        <Text size="sm" color="$brandTextSecondary">
-          Com {professionalName} · {establishmentName}
-        </Text>
-      </VStack>
+    <VStack flex={1} pb={30} bg="$brandBackground">
+      <Box px={16}>
+        <ScreenHeader
+          title="O QUE VOCÊ QUER?"
+          subtitle={`Com ${professionalName} · ${establishmentName}`}
+        />
+      </Box>
 
       {services.length === 0 ? (
-        <Center flex={1} px={20}>
+        <Center flex={1} px={16}>
           <Text color="$brandTextSecondary" textAlign="center">
             Nenhum serviço disponível para este profissional
           </Text>
@@ -319,7 +308,7 @@ export function ServiceSelection() {
         <>
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 200 }}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 200 }}
           >
             <VStack gap="$2.5">
               {services.map((service) => {

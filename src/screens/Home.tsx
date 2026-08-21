@@ -10,6 +10,7 @@ import { filterEstablishments } from "@domain/establishment/filter";
 import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity";
 import { serviceTypeLabel } from "@domain/establishment/serviceType";
 import { useEstablishments } from "@hooks/useEstablishments";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { useAuthStore } from "@stores/authStore";
 import { useLocationStore } from "@stores/locationStore";
@@ -199,50 +200,36 @@ export function Home() {
   const firstName = user?.first_name?.trim().split(/\s+/)[0];
 
   return (
-    <VStack flex={1} bg="$brandBackground" pt={54}>
-      {/* Topo: saudacao + avatar */}
-      <HStack px={20} pt={8} justifyContent="space-between" alignItems="center">
-        {isAuthenticated && firstName ? (
-          <VStack gap={2}>
-            <Text fontFamily="$body" fontSize={14} color="$brandTextSecondary">
-              {greetingForHour(new Date().getHours())},
-            </Text>
-            <Text
-              fontFamily="$display"
-              fontSize={22}
-              fontWeight="$extrabold"
-              letterSpacing={-0.5}
-              color="$brandTextPrimary"
-            >
-              {firstName}
-            </Text>
-          </VStack>
-        ) : (
-          <Text
-            fontFamily="$display"
-            fontSize={22}
-            fontWeight="$extrabold"
-            letterSpacing={-0.5}
-            color="$brandTextPrimary"
-          >
-            Estabelecimentos
-          </Text>
-        )}
-        {isAuthenticated ? (
-          <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
-            <PlaceAvatar name={firstName ?? "?"} />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
-            <Text fontFamily="$display" fontSize={14} fontWeight="$bold" color="$forest">
-              Cadastrar
-            </Text>
-          </TouchableOpacity>
-        )}
-      </HStack>
+    <VStack flex={1} bg="$brandBackground">
+      {/* A saudacao e o TITULO da Home, nao um par sobreposto: como eyebrow
+          (linha pequena por cima) ela empurrava o nome pra baixo e a Home
+          comecava numa altura diferente de todas as outras telas. */}
+      <Box px={16}>
+        <ScreenHeader
+          root
+          title={
+            isAuthenticated && firstName
+              ? `${greetingForHour(new Date().getHours())}, ${firstName}`
+              : "Estabelecimentos"
+          }
+          action={
+            isAuthenticated ? (
+              <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
+                <PlaceAvatar name={firstName ?? "?"} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
+                <Text fontFamily="$display" fontSize={14} fontWeight="$bold" color="$forest">
+                  Cadastrar
+                </Text>
+              </TouchableOpacity>
+            )
+          }
+        />
+      </Box>
 
       {/* Busca */}
-      <Box px={20} pt={16}>
+      <Box px={16} pt={16}>
         <HStack
           bg="$brandSurface"
           borderRadius="$full"
@@ -293,7 +280,7 @@ export function Home() {
 
       {/* Fila ativa */}
       {isInQueue && activeQueue && (
-        <Box px={20} pt={20}>
+        <Box px={16} pt={20}>
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("queueStatus", {
@@ -362,7 +349,7 @@ export function Home() {
 
       {/* Seu de sempre */}
       {lastVisit && (
-        <VStack px={20} pt={22} gap={12}>
+        <VStack px={16} pt={22} gap={12}>
           <Text
             fontFamily="$display"
             fontSize={17}
@@ -405,7 +392,7 @@ export function Home() {
       )}
 
       {/* Livres agora */}
-      <VStack flex={1} px={20} pt={22} gap={12}>
+      <VStack flex={1} px={16} pt={22} gap={12}>
         <HStack justifyContent="space-between" alignItems="center">
           <Text
             fontFamily="$display"

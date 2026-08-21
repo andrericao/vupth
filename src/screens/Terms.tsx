@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { VStack, HStack, Text, Center, ScrollView } from "@gluestack-ui/themed";
-import { ChevronLeft } from "lucide-react-native";
+import { VStack, HStack, Text, Box, Center, ScrollView } from "@gluestack-ui/themed";
+
+import { ScreenHeader } from "@components/ScreenHeader";
 
 type Aba = "uso" | "privacidade";
 
@@ -76,7 +76,6 @@ const PRIVACIDADE: Secao[] = [
 ];
 
 export function Terms() {
-  const navigation = useNavigation();
   const [aba, setAba] = useState<Aba>("uso");
   const secoes = aba === "uso" ? TERMOS : PRIVACIDADE;
 
@@ -87,18 +86,11 @@ export function Terms() {
       contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }}
       showsVerticalScrollIndicator={false}
     >
-      <HStack px={20} pt={56} gap="$3.5" alignItems="center">
-        <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
-          <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
-            <ChevronLeft size={20} color="#163300" />
-          </Center>
-        </TouchableOpacity>
-        <Text fontFamily="$display" fontSize={18} letterSpacing={-0.3} color="$forest">
-          Termos e Privacidade
-        </Text>
-      </HStack>
+      <Box px={16}>
+        <ScreenHeader title="Termos e Privacidade" />
+      </Box>
 
-      <HStack px={20} pt={20} gap="$2">
+      <HStack px={16} gap="$2">
         {(
           [
             ["uso", "Termos de Uso"],
@@ -132,7 +124,7 @@ export function Terms() {
         })}
       </HStack>
 
-      <VStack px={20} pt={24} gap="$4.5">
+      <VStack px={16} pt={24} gap="$4.5">
         {secoes.map((s) => (
           <VStack key={s.titulo} gap="$1.5">
             <Text fontFamily="$heading" fontSize={15} color="$brandTextPrimary">

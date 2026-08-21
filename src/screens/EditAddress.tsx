@@ -220,9 +220,9 @@ export function EditAddress() {
   if (mode === "form") {
     return (
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <VStack flex={1} pb={30} bg="$brandBackground">
+        <VStack flex={1} pb={30} px={16} bg="$brandBackground">
           <ScreenHeader title={editingId ? "EDITAR ENDEREÇO" : "NOVO ENDEREÇO"} />
-          <VStack px={20} pt={24} flex={1}>
+          <VStack pt={24} flex={1}>
 
           <Button
             title={gpsLoading ? "Localizando..." : "Usar minha localização (GPS)"}
@@ -292,9 +292,9 @@ export function EditAddress() {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} pb={30} bg="$brandBackground">
+      <VStack flex={1} pb={30} px={16} bg="$brandBackground">
         <ScreenHeader title="ENDEREÇOS" />
-        <VStack px={20} pt={24} flex={1}>
+        <VStack pt={24} flex={1}>
         {isLoading ? (
           <SkeletonList count={3} />
         ) : addresses.length === 0 ? (

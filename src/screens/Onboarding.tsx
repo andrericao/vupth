@@ -49,13 +49,13 @@ export function Onboarding() {
           imagem por conta propria seria escolher a cara da marca sem combinar.
           No lugar, o painel usa o "V" sobre o verde-claro: e material que ja
           e nosso. Quando a arte existir, ela entra neste Box. */}
-      <Box px={20} pt={8}>
+      <Box px={16} pt={8}>
         <Center height={330} borderRadius={28} overflow="hidden" bg="$greenTint">
           <BrandMark size={104} />
         </Center>
       </Box>
 
-      <VStack flex={1} px={20} pt="$7" gap="$3">
+      <VStack flex={1} px={16} pt="$7" gap="$3">
         <Text
           fontFamily="$display"
           fontSize={38}
@@ -80,7 +80,7 @@ export function Onboarding() {
         )}
       </VStack>
 
-      <VStack px={20} pb={32} gap="$3.5" alignItems="center">
+      <VStack px={16} pb={32} gap="$3.5" alignItems="center">
         <Button title="Ver filas perto de mim" onPress={() => go("home")} testID="onboarding-start" />
         <HStack gap="$1.5" alignItems="center">
           <Text size="sm" color="$brandTextSecondary">

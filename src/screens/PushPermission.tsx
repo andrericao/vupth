@@ -45,13 +45,13 @@ export function PushPermission() {
       showsVerticalScrollIndicator={false}
     >
       <VStack flex={1} bg="$brandBackground">
-      <Center flex={1} px={20}>
+      <Center flex={1} px={16}>
         <Center width={260} height={260} borderRadius={130} bg="$greenTint">
           <BellRing size={92} color="#163300" />
         </Center>
       </Center>
 
-      <VStack px={20} gap="$3">
+      <VStack px={16} gap="$3">
         <Text
           fontFamily="$display"
           fontSize={32}
@@ -76,7 +76,7 @@ export function PushPermission() {
         </VStack>
       </VStack>
 
-      <VStack px={20} pt="$7" pb={32} gap="$3" alignItems="center">
+      <VStack px={16} pt="$7" pb={32} gap="$3" alignItems="center">
         {/* Nao pedimos a permissao aqui: quem pede e o `usePushRegistration`,
             no login, que e onde o token faz sentido. Esta tela so prepara o
             terreno e marca que a conversa ja aconteceu. */}

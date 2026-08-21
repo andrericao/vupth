@@ -58,10 +58,10 @@ export function EditPassword() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} pb={30} bg="$brandBackground">
+      <VStack flex={1} pb={30} px={16} bg="$brandBackground">
         <ScreenHeader title="ALTERAR SENHA" />
 
-        <VStack px={20} pt={24} flex={1}>
+        <VStack pt={24} flex={1}>
 
         <VStack gap="$4">
           <VStack gap="$1">

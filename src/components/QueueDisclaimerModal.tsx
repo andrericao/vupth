@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { Modal, TouchableOpacity } from "react-native";
-import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
+import { VStack, HStack, Box, Text, Center } from "@gluestack-ui/themed";
 import { Info, Check } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
 
 export const QUEUE_DISCLAIMER_TITLE = "Sobre o tempo estimado";
+// [marca-vupth] Texto do Pencil (CLIENT · 08), duas linhas. O anterior tinha
+// cinco e listava as CAUSAS da variacao ("desistencias de clientes e
+// imprevistos") — quem esta na fila nao precisa do porque, precisa saber que o
+// numero move e que vale acompanhar. Aviso que ninguem le nao avisa nada.
 export const QUEUE_DISCLAIMER_TEXT =
-  "O tempo mostrado é apenas uma estimativa e pode mudar: o atendimento pode ser " +
-  "antecipado ou adiado. Há desistências de clientes e imprevistos. Recomendamos " +
-  "acompanhar o app para não perder a sua vez.";
+  "É uma estimativa e pode mudar. Fique de olho no app para não perder a vez.";
 
 type Props = {
   visible: boolean;
@@ -30,33 +32,55 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
       onRequestClose={() => onClose(dontShow)}
     >
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
-          <HStack alignItems="center" gap="$2" mb="$3">
+        <VStack bg="$brandBackground" borderRadius="$hero" p="$6" style={floatingShadow}>
+          <HStack alignItems="center" gap="$2.5" mb="$3">
             <Info size={24} color="#163300" />
-            <Heading fontFamily="$heading" fontSize="$lg" flex={1}>
+            {/* Titulo em `forest`, nao no preto padrao do Heading: o Pencil
+                nao usa preto em lugar nenhum. */}
+            <Text
+              fontFamily="$display"
+              fontSize={19}
+              lineHeight={23}
+              letterSpacing={-0.4}
+              color="$forest"
+              flex={1}
+            >
               {QUEUE_DISCLAIMER_TITLE}
-            </Heading>
+            </Text>
           </HStack>
 
-          <Text size="sm" color="$gray300">
+          <Text size="sm" lineHeight={22} color="$brandTextSecondary">
             {QUEUE_DISCLAIMER_TEXT}
           </Text>
 
-          <TouchableOpacity onPress={() => setDontShow((v) => !v)} hitSlop={8}>
-            <HStack alignItems="center" gap="$2" mt="$4">
-              <Box
-                w={22}
-                h={22}
+          <TouchableOpacity
+            onPress={() => setDontShow((v) => !v)}
+            hitSlop={8}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: dontShow }}
+            accessibilityLabel="Não mostrar novamente"
+            testID="dont-show-again"
+          >
+            <HStack alignItems="center" gap="$2.5" mt="$4">
+              {/* Marcado = quadrado CHEIO de brand-green com o check em
+                  forest. Era forest com check branco: branco sobre
+                  verde-escuro e a paleta anterior, e o par da marca sobre
+                  qualquer verde e sempre forest/brand-green. */}
+              <Center
+                w={26}
+                h={26}
                 borderRadius="$sm"
-                borderWidth="$2"
-                borderColor={dontShow ? "$forest" : "$coolGray300"}
-                bg={dontShow ? "$forest" : "transparent"}
-                alignItems="center"
-                justifyContent="center"
+                borderWidth={dontShow ? 0 : 2}
+                borderColor="$brandBorder"
+                bg={dontShow ? "$brandGreen" : "transparent"}
               >
-                {dontShow && <Check size={14} color="#FFFFFF" />}
-              </Box>
-              <Text size="sm" color="$gray300">
+                {dontShow && <Check size={16} color="#163300" strokeWidth={3} />}
+              </Center>
+              <Text
+                size="sm"
+                fontWeight={dontShow ? "$semibold" : "$normal"}
+                color={dontShow ? "$forest" : "$brandTextSecondary"}
+              >
                 Não mostrar novamente
               </Text>
             </HStack>

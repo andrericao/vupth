@@ -1,6 +1,7 @@
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { BrandMark, BRAND_MARK_SIZE } from '@components/BrandMark';
-import { Header } from '@components/Header';
+import fs from 'fs';
+import path from 'path';
 
 // Andre 2026-08-06: "no app quero apenas o V mesmo, veja se consegue criar a
 // referência para quando houver mudanças essa seja em apenas um lugar".
@@ -52,10 +53,32 @@ describe('BrandMark', () => {
   });
 });
 
-describe('Header', () => {
-  it('mostra a marca através do BrandMark, sem require próprio', () => {
-    const { getByTestId } = renderWithProviders(<Header />);
+// O teste antigo checava isso pelo `Header`, que renderizava a marca em toda
+// tela. O Header foi REMOVIDO (a linha da marca saiu do cabeçalho — decisão
+// Alexia 2026-08-21), mas a garantia que ele protegia continua valendo: o
+// `require` da arte tem de viver num lugar só. Agora é verificação estática,
+// que cobre o app inteiro em vez de um componente.
+describe('marca: require do logo mora só no BrandMark', () => {
+  it('nenhum outro arquivo carrega assets/icon.png', () => {
+    const raiz = path.join(__dirname, '..', '..');
+    const infratores: string[] = [];
 
-    expect(getByTestId('brand-mark')).toBeTruthy();
+    const varrer = (dir: string) => {
+      for (const nome of fs.readdirSync(dir)) {
+        const full = path.join(dir, nome);
+        if (fs.statSync(full).isDirectory()) {
+          if (nome !== '__tests__' && nome !== 'node_modules') varrer(full);
+          continue;
+        }
+        if (!/\.tsx?$/.test(nome)) continue;
+        if (nome === 'BrandMark.tsx') continue;
+        if (/require\([^)]*assets\/icon\.png/.test(fs.readFileSync(full, 'utf8'))) {
+          infratores.push(path.relative(raiz, full));
+        }
+      }
+    };
+    varrer(raiz);
+
+    expect(infratores).toEqual([]);
   });
 });

@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { ScrollView, Text, Center, VStack, HStack } from "@gluestack-ui/themed";
-import { Check, X, ChevronLeft, TriangleAlert } from "lucide-react-native";
+import { ScrollView, Text, VStack, HStack } from "@gluestack-ui/themed";
+import { Check, X, TriangleAlert } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { PasswordRules } from "@components/PasswordRules";
 import { validateSignUp, getPasswordRules } from "@domain/auth/validateAuth";
@@ -115,26 +116,24 @@ export function SignUp() {
       showsVerticalScrollIndicator={false}
       style={{ backgroundColor: "#FFFFFF" }}
     >
-      <VStack flex={1} pt={56} pb={32} px={20}>
-        <HStack justifyContent="space-between" alignItems="center">
-          <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
-            <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
-              <ChevronLeft size={20} color="#163300" />
-            </Center>
-          </TouchableOpacity>
-          {/* "Agora nao" so no fluxo da fila: e a saida de quem foi
-              interrompido no meio de uma acao. Quem veio pela Home ja tem o
-              voltar, e um segundo escape ali so polui. */}
-          {fromQueue && (
-            <TouchableOpacity onPress={() => navigation.goBack()} testID="skip-signup">
-              <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
-                Agora não
-              </Text>
-            </TouchableOpacity>
-          )}
-        </HStack>
+      <VStack flex={1} pb={32} px={16}>
+        {/* Sem titulo: o heroi ("NAO PERCA SUA VEZ") fica no corpo, em 32px.
+            "Agora nao" so no fluxo da fila: e a saida de quem foi interrompido
+            no meio de uma acao. Quem veio pela Home ja tem o voltar, e um
+            segundo escape ali so polui. */}
+        <ScreenHeader
+          action={
+            fromQueue ? (
+              <TouchableOpacity onPress={() => navigation.goBack()} testID="skip-signup">
+                <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
+                  Agora não
+                </Text>
+              </TouchableOpacity>
+            ) : undefined
+          }
+        />
 
-        <VStack gap="$2.5" mt="$5">
+        <VStack gap="$2.5" mt="$1">
           {/* O aviso da fila e o motivo de a pessoa estar aqui — sem ele o
               titulo "nao perca sua vez" nao teria a que se referir. */}
           {fromQueue && (

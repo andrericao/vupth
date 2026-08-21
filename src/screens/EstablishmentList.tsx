@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
-import { Search, ChevronLeft, ChevronRight, Zap, ArrowUpDown, Star } from "lucide-react-native";
+import { Search, ChevronRight, Zap, ArrowUpDown, Star } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
@@ -11,6 +11,7 @@ import { serviceTypeTitle } from "@domain/establishment/serviceType";
 import { formatDistanceKm } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { formatWaitTime } from "@domain/queue/types";
@@ -157,23 +158,11 @@ export function EstablishmentList() {
 
   return (
     <VStack flex={1} bg="$brandBackground">
-      <VStack px={20} pt={56} gap="$3.5">
-        <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
-          <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
-            <ChevronLeft size={20} color="#163300" />
-          </Center>
-        </TouchableOpacity>
+      <Box px={16}>
+        <ScreenHeader title={serviceTypeTitle(filter).toUpperCase()} />
+      </Box>
 
-        <Text
-          fontFamily="$display"
-          fontSize={28}
-          letterSpacing={-1.2}
-          color="$forest"
-          textTransform="uppercase"
-        >
-          {serviceTypeTitle(filter)}
-        </Text>
-
+      <VStack px={16} gap="$3.5">
         <HStack
           bg="$brandSurface"
           borderRadius="$full"
@@ -251,7 +240,7 @@ export function EstablishmentList() {
         </HStack>
       </VStack>
 
-      <VStack flex={1} px={20} pt="$4">
+      <VStack flex={1} px={16} pt="$4">
         {isLoading ? (
           <SkeletonList count={5} />
         ) : isError ? (

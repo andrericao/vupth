@@ -6,7 +6,7 @@ import { Info, ChevronLeft, Repeat2, Check, ChevronRight } from "lucide-react-na
 import * as SecureStore from "expo-secure-store";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import {
@@ -409,7 +409,7 @@ export function QueueStatus() {
 
   if (isCreating) {
     return (
-      <Center flex={1} bg="$brandBackground" px={15}>
+      <Center flex={1} bg="$brandBackground" px={16}>
         <ActivityIndicator size="large" color="#163300" />
         <Text mt="$2" color="$gray300">{createMsg}</Text>
         <Text mt="$1" size="xs" color="$brandTextSecondary" textAlign="center">
@@ -421,8 +421,8 @@ export function QueueStatus() {
 
   if (createError) {
     return (
-      <VStack flex={1} px={15} pt={60} pb={30} bg="$brandBackground">
-        <Header />
+      <VStack flex={1} px={16} pb={30} bg="$brandBackground">
+        <ScreenHeader title="NÃO DEU CERTO" onBack={() => navigation.goBack()} />
         <Center flex={1}>
           <Text
             color={canRequestCut ? "$gray500" : "$brandDanger"}
@@ -504,7 +504,7 @@ export function QueueStatus() {
         showsVerticalScrollIndicator={false}
       >
         <VStack flex={1} bg="$brandBackground">
-          <VStack pt={56} px={20} gap="$4" alignItems="center">
+          <VStack pt={56} px={16} gap="$4" alignItems="center">
             <Center width={96} height={96} borderRadius={48} bg="$brandGreen">
               <Check size={48} color="#163300" />
             </Center>
@@ -523,7 +523,7 @@ export function QueueStatus() {
             </Text>
           </VStack>
 
-          <VStack flex={1} px={20} pt="$8" gap="$4">
+          <VStack flex={1} px={16} pt="$8" gap="$4">
             {/* O convite pra avaliar so aparece se ainda nao avaliou — depois
                 de enviar, insistir e so ruido. */}
             {attendanceId && !jaAvaliou && (
@@ -575,7 +575,7 @@ export function QueueStatus() {
             )}
           </VStack>
 
-          <VStack px={20} pt="$6" gap="$3" alignItems="center">
+          <VStack px={16} pt="$6" gap="$3" alignItems="center">
             <Button
               title="Voltar ao início"
               variant="outline"
@@ -601,7 +601,7 @@ export function QueueStatus() {
   if (waitingInQueue) {
     return (
       <VStack flex={1} bg="$brandGreen">
-        <HStack px={20} pt={56} justifyContent="space-between" alignItems="center">
+        <HStack px={16} pt={56} justifyContent="space-between" alignItems="center">
           <TouchableOpacity onPress={() => navigation.navigate("home")} testID="back-button">
             <Center width={40} height={40} borderRadius="$full" bg="#16330014">
               <ChevronLeft size={20} color="#163300" />
@@ -706,7 +706,7 @@ export function QueueStatus() {
           )}
         </ScrollView>
 
-        <VStack px={20} pb={28} gap="$3.5" alignItems="center">
+        <VStack px={16} pb={28} gap="$3.5" alignItems="center">
           {canReshuffle && (
             <TouchableOpacity
               onPress={handleOpenChangeTurn}
@@ -780,8 +780,8 @@ export function QueueStatus() {
   }
 
   return (
-    <VStack flex={1} px={15} pt={60} pb={30} bg="$brandBackground">
-      <Header />
+    <VStack flex={1} px={16} pb={30} bg="$brandBackground">
+      <ScreenHeader title="SUA VEZ" onBack={() => navigation.navigate("home")} />
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}

@@ -8,7 +8,9 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Star, Info, ChevronLeft, Heart, ChevronRight } from "lucide-react-native";
+import { Star, Info, Heart, ChevronRight } from "lucide-react-native";
+
+import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
@@ -142,7 +144,7 @@ export function EstablishmentDetail() {
 
   if (isLoading) {
     return (
-      <VStack flex={1} px={20} pt={60} pb={30} bg="$brandBackground">
+      <VStack flex={1} px={16} pt={60} pb={30} bg="$brandBackground">
         <VStack mt="$6">
           <SkeletonList count={4} />
         </VStack>
@@ -170,6 +172,22 @@ export function EstablishmentDetail() {
     establishment.id,
   );
 
+  // Um so botao de favorito pros dois ramos (com foto e sem): antes cada ramo
+  // desenhava o proprio, e eles ja tinham saido com tamanhos diferentes.
+  const favorito = (
+    <HeaderIconButton
+      onPress={handleToggleFavorite}
+      overlay={showPhoto}
+      testID="favorite-button"
+      accessibilityLabel={isFavorite ? "Remover dos favoritos" : "Salvar nos favoritos"}
+      accessibilityState={{ selected: isFavorite }}
+    >
+      {/* Favoritado ENCHE o coracao: o estado nao pode depender so de uma
+          diferenca sutil de cor. */}
+      <Heart size={20} color="#163300" fill={isFavorite ? "#163300" : "none"} />
+    </HeaderIconButton>
+  );
+
   return (
     <VStack flex={1} bg="$brandBackground">
       {/* O hero existe pra FOTO. Sem foto — ou com `urlImage` quebrada, que e
@@ -185,32 +203,32 @@ export function EstablishmentDetail() {
             resizeMode="cover"
             onError={() => setHeroFailed(true)}
           >
-            <HeroNav
-              onBack={() => navigation.goBack()}
-              onPhoto
-              isFavorite={isFavorite}
-              onToggleFavorite={handleToggleFavorite}
-            />
+            <Box px={16}>
+              <ScreenHeader overlay action={favorito} />
+            </Box>
           </ImageBackground>
         </Box>
       ) : (
-        <HeroNav
-          onBack={() => navigation.goBack()}
-          isFavorite={isFavorite}
-          onToggleFavorite={handleToggleFavorite}
-        />
+        // SEM foto o nome da loja e o titulo do cabecalho — voltar · nome ·
+        // favoritar na mesma linha, como nas demais telas. Com foto ele nao
+        // cabe ali (ficaria por cima da imagem) e desce pro corpo.
+        <Box px={16}>
+          <ScreenHeader title={establishment.name} action={favorito} />
+        </Box>
       )}
 
-      <VStack px={20} pt="$5" gap="$1.5">
-        <Text
-          fontFamily="$display"
-          fontSize={26}
-          lineHeight={30}
-          letterSpacing={-1}
-          color="$forest"
-        >
-          {establishment.name}
-        </Text>
+      <VStack px={16} pt={showPhoto ? "$5" : "$0"} gap="$1.5">
+        {showPhoto && (
+          <Text
+            fontFamily="$display"
+            fontSize={26}
+            lineHeight={30}
+            letterSpacing={-1}
+            color="$forest"
+          >
+            {establishment.name}
+          </Text>
+        )}
         <HStack alignItems="center" gap="$2">
           <Star size={14} color="#163300" fill="#163300" />
           <Text size="sm" fontFamily="$heading" color="$brandTextPrimary">
@@ -251,7 +269,7 @@ export function EstablishmentDetail() {
         </HStack>
       </VStack>
 
-      <VStack flex={1} px={20} pt="$5">
+      <VStack flex={1} px={16} pt="$5">
         <HStack justifyContent="space-between" alignItems="center" mb="$3">
           <Text fontFamily="$display" fontSize="$lg" color="$forest">
             Quem está atendendo
@@ -287,7 +305,7 @@ export function EstablishmentDetail() {
         />
       </VStack>
 
-      <VStack px={20} pb={32}>
+      <VStack px={16} pb={32}>
         {isOpen && professionals.length > 0 && (
           <Button title="Entrar com menor espera" onPress={handleSelectShortestQueue} />
         )}
@@ -324,41 +342,5 @@ export function EstablishmentDetail() {
         )}
       </VStack>
     </VStack>
-  );
-}
-
-function HeroNav({
-  onBack,
-  onPhoto,
-  isFavorite,
-  onToggleFavorite,
-}: {
-  onBack: () => void;
-  onPhoto?: boolean;
-  isFavorite: boolean;
-  onToggleFavorite: () => void;
-}) {
-  return (
-    <HStack justifyContent="space-between" alignItems="center" px={20} pt={56}>
-      <TouchableOpacity onPress={onBack} testID="back-button">
-        <Center width={40} height={40} borderRadius="$full" bg={onPhoto ? "#FFFFFFE6" : "$greenTint"}>
-          <ChevronLeft size={20} color="#163300" />
-        </Center>
-      </TouchableOpacity>
-      {/* Era um `Center` SOLTO: parecia botao e nao fazia nada (QA Alexia).
-          Favoritado enche o coracao — o estado nao pode depender so de uma
-          diferenca sutil de cor. */}
-      <TouchableOpacity
-        onPress={onToggleFavorite}
-        testID="favorite-button"
-        accessibilityRole="button"
-        accessibilityState={{ selected: isFavorite }}
-        accessibilityLabel={isFavorite ? "Remover dos favoritos" : "Salvar nos favoritos"}
-      >
-        <Center width={40} height={40} borderRadius="$full" bg={onPhoto ? "#FFFFFFE6" : "$greenTint"}>
-          <Heart size={20} color="#163300" fill={isFavorite ? "#163300" : "none"} />
-        </Center>
-      </TouchableOpacity>
-    </HStack>
   );
 }

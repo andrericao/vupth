@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Alert, TouchableOpacity } from "react-native";
 import * as Updates from "expo-updates";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   VStack,
   Text,
@@ -14,6 +15,7 @@ import {
 import { User, Mail, Lock, MapPin, ChevronRight, LogOut, RefreshCw } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { WsDiagnostics } from "@components/WsDiagnostics";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
@@ -59,6 +61,8 @@ function MenuItem({
 }
 
 export function Settings() {
+  const insets = useSafeAreaInsets();
+  const [toquesNaVersao, setToquesNaVersao] = useState(0);
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const user = useAuthStore((s) => s.user);
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -197,7 +201,7 @@ export function Settings() {
           loja. Sem conta, o cabecalho e o mesmo da aba Atendimentos: titulo
           em Archivo sobre o fundo claro. */}
       {isAuthenticated ? (
-        <VStack bg="$forest" pt={56} pb={32} px={20} gap="$3" alignItems="center">
+        <VStack bg="$forest" style={{ paddingTop: insets.top + 24 }} pb={32} px={16} gap="$3" alignItems="center">
           <Center width={88} height={88} borderRadius={44} bg="$brandGreen">
             <Text fontFamily="$display" fontSize={32} color="$forest">
               {initials}
@@ -215,14 +219,12 @@ export function Settings() {
           </VStack>
         </VStack>
       ) : (
-        <VStack px={20} pt={56} pb={16}>
-          <Text fontFamily="$display" fontSize={26} letterSpacing={-0.8} color="$forest">
-            Sua conta
-          </Text>
-        </VStack>
+        <Box px={16}>
+          <ScreenHeader root title="Sua conta" />
+        </Box>
       )}
 
-      <VStack flex={1} px={20} pt={20} pb={30}>
+      <VStack flex={1} px={16} pt={20} pb={30}>
 
         {/* Opções de CONTA só para quem tem conta (visitante não vê trocar senha,
             e-mail, endereço nem deletar — boa prática; pedido Andre 2026-07-23). */}
@@ -335,14 +337,12 @@ export function Settings() {
           </VStack>
         )}
 
-        <WsDiagnostics />
-
         <VStack mt="$8" alignItems="center" gap="$3">
           <TouchableOpacity onPress={handleCheckUpdate} testID="check-update">
             <HStack
               bg="$brandSurface"
               borderRadius="$full"
-              px={20}
+              px={16}
               py={12}
               gap="$2"
               alignItems="center"
@@ -355,9 +355,26 @@ export function Settings() {
           </TouchableOpacity>
           {/* Versao em DM Mono: e numero de build, nao prosa — o token `mono`
               existe pra isso. */}
+          {/* [QA] 7 toques aqui abrem o diagnostico de WebSocket. Ele nasceu
+              porque os logs sao gated por `__DEV__` e o QA roda bundle de
+              producao, mas estava SOLTO nesta tela: o usuario final via
+              "falhou o handshake", contagem de erros e a URL do servidor —
+              ruido tecnico pra quem so quer mexer na conta (Alexia
+              2026-08-21). Gesto de "modo desenvolvedor": segue acessivel em
+              producao, some da vista de quem nao procura. */}
+          <TouchableOpacity
+            onPress={() => setToquesNaVersao((n) => n + 1)}
+            accessibilityRole="button"
+            accessibilityLabel="Informações da versão"
+            testID="version-line"
+          >
           <Text fontFamily="$mono" fontSize={10} color="$brandTextSecondary" textAlign="center">
             {Updates.runtimeVersion ?? "—"} · {Updates.channel ?? "dev"} · {otaInfo}
           </Text>
+          </TouchableOpacity>
+
+          {toquesNaVersao >= 7 && <WsDiagnostics />}
+
           {/* Deletar conta desce pra ca como LINK: e irreversivel, entao nao
               disputa atencao com o resto — mas continua alcancavel por quem
               procura (era um botao de mesmo peso que "sair"). */}

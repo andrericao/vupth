@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Modal, TouchableOpacity } from "react-native";
-import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
-import { Clock } from "lucide-react-native";
+import { VStack, HStack, Box, Text, Center } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
@@ -25,29 +24,50 @@ type TurnOption = "earlier" | "later" | "end" | "schedule";
 
 // Todas as saídas em UMA lista de escolha, em vez de telas encadeadas de botões
 // (Andre 2026-08-05: "no menu de mudar minha vez, ir para o final etc, quero
-// apenas as opções com a opção de select"). Ordem = do mais cedo ao mais tarde.
-const OPTIONS: { value: TurnOption; title: string; description: string }[] = [
+// apenas as opções com a opção de select").
+//
+// [marca-vupth] As opções vêm AGRUPADAS por intenção (Pencil CLIENT · 09) —
+// quem abre este modal já sabe se quer ser atendido mais cedo ou mais tarde, e
+// a pergunta some quando cada grupo é rotulado. As descrições encurtaram para
+// UMA linha: no desenho elas são a legenda da escolha, não o contrato.
+//
+// ⚠️ Divergência DELIBERADA do Pencil: lá "Trocar com alguém atrás" aparece em
+// "quero ser atendido mais cedo". A mecânica é o contrário — ceder seu lugar a
+// quem está atrás te joga para DEPOIS —, então ela mora no grupo de mais
+// tempo. Agrupar pela intenção errada é pior do que não agrupar.
+const GRUPOS: {
+  titulo: string;
+  opcoes: { value: TurnOption; title: string; description: string }[];
+}[] = [
   {
-    value: "earlier",
-    title: "Adiantar minha vez",
-    description:
-      "Publicamos seu pedido para quem está à frente. Se alguém aceitar, vocês trocam de lugar — sem custo.",
+    titulo: "QUERO SER ATENDIDO MAIS CEDO",
+    opcoes: [
+      {
+        value: "earlier",
+        title: "Adiantar minha vez",
+        description: "Publicamos seu pedido para quem está à frente",
+      },
+    ],
   },
   {
-    value: "later",
-    title: "Trocar com alguém atrás",
-    description:
-      "Publicamos seu pedido para quem está atrás. A troca é entre vocês dois e você pode cancelar quando quiser.",
-  },
-  {
-    value: "end",
-    title: "Ir para o fim da fila",
-    description: "Você passa a ser o último da fila de hoje.",
-  },
-  {
-    value: "schedule",
-    title: "Agendar para depois",
-    description: "Escolha um horário e saia da fila de espera.",
+    titulo: "PRECISO DE MAIS TEMPO",
+    opcoes: [
+      {
+        value: "later",
+        title: "Trocar com alguém atrás",
+        description: "A troca é entre vocês dois e dá para cancelar",
+      },
+      {
+        value: "end",
+        title: "Ir para o fim da fila",
+        description: "Sua vez passa para depois de quem espera",
+      },
+      {
+        value: "schedule",
+        title: "Agendar para depois",
+        description: "Escolha um horário fora da fila de espera",
+      },
+    ],
   },
 ];
 
@@ -57,19 +77,11 @@ function Radio({ selected, disabled }: { selected: boolean; disabled?: boolean }
   // de contraste — baixo contraste e justamente o sinal de "indisponivel" (a
   // linha inteira ainda leva opacity 0.45). Nao trocar por token de texto: em
   // qualquer OUTRO lugar esse cinza reprova e ja foi substituido.
-  const color = disabled ? "$gray400" : selected ? "$forest" : "$coolGray300";
+  const color = disabled ? "$gray400" : selected ? "$forest" : "$brandBorder";
   return (
-    <Box
-      w={22}
-      h={22}
-      rounded="$full"
-      borderWidth="$2"
-      borderColor={color}
-      alignItems="center"
-      justifyContent="center"
-    >
-      {selected && <Box w={10} h={10} rounded="$full" bg="$brandGreen" />}
-    </Box>
+    <Center w={22} h={22} rounded="$full" borderWidth="$2" borderColor={color}>
+      {selected && <Box w={10} h={10} rounded="$full" bg="$forest" />}
+    </Center>
   );
 }
 
@@ -102,88 +114,103 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
-          <Heading fontFamily="$heading" fontSize="$lg">
-            Mudar minha vez
-          </Heading>
-          <Text size="sm" color="$gray300" mt="$1">
-            Escolha o que você quer fazer:
-          </Text>
-
-          {tailEtaMs != null && (
-            <Box
-              bg="$amber100"
-              borderRadius="$xl"
-              borderWidth="$1"
-              borderColor="$amber500"
-              px="$4"
-              py="$3"
-              mt="$3"
+        <VStack bg="$brandBackground" borderRadius="$hero" p="$6" gap="$4" style={floatingShadow}>
+          <VStack gap="$1">
+            <Text
+              fontFamily="$display"
+              fontSize={22}
+              lineHeight={26}
+              letterSpacing={-0.6}
+              color="$forest"
             >
-              <HStack alignItems="center" gap="$2">
-                <Clock size={18} color="#B45309" />
-                <Text fontFamily="$heading" size="md" color="$amber800">
-                  A fila hoje termina às {formatClockTime(new Date(tailEtaMs))}
-                </Text>
-              </HStack>
-              <Text size="xs" color="$gray300" mt="$1">
-                Use como referência: ir para o fim te deixa após esse horário; ou agende para depois dele.
-              </Text>
-            </Box>
-          )}
-
-          <VStack mt="$4">
-            {OPTIONS.map((option) => {
-              const disabled = isDisabled(option.value);
-              const isSelected = selected === option.value;
-              return (
-                <TouchableOpacity
-                  key={option.value}
-                  testID={`change-turn-${option.value}`}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected: isSelected, disabled }}
-                  disabled={disabled}
-                  onPress={() => setSelected(option.value)}
-                >
-                  <HStack
-                    alignItems="flex-start"
-                    gap="$3"
-                    py="$3"
-                    px="$3"
-                    borderRadius="$xl"
-                    borderWidth="$1"
-                    borderColor={isSelected ? "$forest" : "transparent"}
-                    bg={isSelected ? "$greenTint" : "transparent"}
-                    opacity={disabled ? 0.45 : 1}
-                    mb="$2"
-                  >
-                    <Box mt="$1">
-                      <Radio selected={isSelected} disabled={disabled} />
-                    </Box>
-                    <VStack flex={1}>
-                      <Text fontFamily="$heading" size="sm">
-                        {option.title}
-                      </Text>
-                      <Text size="xs" color="$gray300">
-                        {disabled && option.value === "end"
-                          ? "Você já é o último da fila."
-                          : option.description}
-                      </Text>
-                    </VStack>
-                  </HStack>
-                </TouchableOpacity>
-              );
-            })}
+              Mudar minha vez
+            </Text>
+            <Text size="sm" color="$brandTextSecondary">
+              Escolha o que você quer fazer:
+            </Text>
           </VStack>
 
-          <Button
-            title={swapBusy ? "Publicando..." : "Confirmar"}
-            mt="$3"
-            isDisabled={!selected || swapBusy}
-            testID="change-turn-confirm"
-            onPress={handleConfirm}
-          />
-          <Button title="Cancelar" variant="outline" mt="$3" onPress={close} />
+          {GRUPOS.map((grupo) => (
+            <VStack key={grupo.titulo} gap="$2">
+              <Text
+                fontFamily="$body"
+                fontSize={11}
+                fontWeight="$bold"
+                letterSpacing={0.8}
+                color="$brandTextSecondary"
+              >
+                {grupo.titulo}
+              </Text>
+
+              {/* O fim da fila de hoje só importa para quem quer ADIAR — era
+                  uma caixa amarela do tamanho de meio modal, na paleta
+                  anterior, acima de tudo. Vira a legenda do grupo a que ela
+                  se refere. */}
+              {grupo.titulo === "PRECISO DE MAIS TEMPO" && tailEtaMs != null && (
+                <Text size="xs" color="$brandTextSecondary" mt={-4}>
+                  A fila de hoje termina às {formatClockTime(new Date(tailEtaMs))}.
+                </Text>
+              )}
+
+              {grupo.opcoes.map((option) => {
+                const disabled = isDisabled(option.value);
+                const isSelected = selected === option.value;
+                return (
+                  <TouchableOpacity
+                    key={option.value}
+                    testID={`change-turn-${option.value}`}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: isSelected, disabled }}
+                    disabled={disabled}
+                    onPress={() => setSelected(option.value)}
+                  >
+                    {/* A borda existe SEMPRE: no desenho a opção é um cartão,
+                        e cartão que só ganha contorno ao ser marcado faz a
+                        lista inteira pular. Marcado muda o FUNDO. */}
+                    <HStack
+                      alignItems="center"
+                      gap="$3"
+                      py="$3"
+                      px="$3.5"
+                      borderRadius="$card"
+                      borderWidth="$1"
+                      borderColor={isSelected ? "$forest" : "$brandBorder"}
+                      bg={isSelected ? "$greenTint" : "$brandBackground"}
+                      opacity={disabled ? 0.45 : 1}
+                    >
+                      <Radio selected={isSelected} disabled={disabled} />
+                      <VStack flex={1} gap="$0.5">
+                        <Text fontFamily="$heading" fontSize={14} color="$forest">
+                          {option.title}
+                        </Text>
+                        <Text size="xs" color="$brandTextSecondary">
+                          {disabled && option.value === "end"
+                            ? "Você já é o último da fila."
+                            : option.description}
+                        </Text>
+                      </VStack>
+                    </HStack>
+                  </TouchableOpacity>
+                );
+              })}
+            </VStack>
+          ))}
+
+          <VStack gap="$3" alignItems="center">
+            <Button
+              title={swapBusy ? "Publicando..." : "Confirmar"}
+              isDisabled={!selected || swapBusy}
+              testID="change-turn-confirm"
+              onPress={handleConfirm}
+            />
+            {/* Cancelar vira LINK: era um botão contornado do mesmo tamanho do
+                Confirmar, e dois pesos iguais fazem hesitar na saída errada. */}
+            <TouchableOpacity onPress={close} testID="change-turn-cancel">
+              <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
+                Cancelar
+              </Text>
+            </TouchableOpacity>
+          </VStack>
         </VStack>
       </Box>
     </Modal>

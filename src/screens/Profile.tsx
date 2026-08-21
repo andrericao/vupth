@@ -12,7 +12,7 @@ import {
 import { ClipboardList, Settings, ChevronRight, LogOut } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 
@@ -75,8 +75,8 @@ export function Profile() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} px={15} pt={60} pb={30}>
-        <Header showBackButton />
+      <VStack flex={1} px={16} pb={30}>
+        <ScreenHeader title="PERFIL" />
 
         <Center mt="$6">
           <Box

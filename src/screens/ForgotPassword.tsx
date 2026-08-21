@@ -143,7 +143,7 @@ export function ForgotPassword() {
 
   return (
     <ScrollView flex={1} bg="$brandBackground" contentContainerStyle={{ flexGrow: 1 }}>
-      <VStack flex={1} pb={30} bg="$brandBackground">
+      <VStack flex={1} pb={30} px={16} bg="$brandBackground">
         {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta mais
             "esquecendo a senha", esta criando uma nova. */}
         <ScreenHeader
@@ -155,7 +155,7 @@ export function ForgotPassword() {
           }
         />
 
-        <VStack px={20} pt={24} flex={1}>
+        <VStack pt={24} flex={1}>
 
         {step === "email" && (
           <VStack gap="$4">

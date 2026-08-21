@@ -14,6 +14,7 @@ import {
 import { Users, Clock, ChevronRight, Calendar, Repeat2 } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { useClientIntentions } from "@hooks/useIntentions";
@@ -165,11 +166,9 @@ export function Attendances() {
 
   return (
     <VStack flex={1} bg="$brandBackground">
-      <VStack px={20} pt={56} pb={16}>
-        <Text fontFamily="$display" fontSize={26} letterSpacing={-0.8} color="$forest">
-          Atendimentos
-        </Text>
-      </VStack>
+      <Box px={16}>
+        <ScreenHeader root title="Atendimentos" />
+      </Box>
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
@@ -177,7 +176,7 @@ export function Attendances() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#163300" colors={["#163300"]} />
         }
       >
-        <VStack mt="$6" px={20}>
+        <VStack mt="$6" px={16}>
           <Text
             fontFamily="$body"
             fontSize={11}
@@ -241,7 +240,7 @@ export function Attendances() {
         </VStack>
 
         {pendingSwaps.length > 0 && (
-          <VStack mt="$6" px={20}>
+          <VStack mt="$6" px={16}>
             <Text
               fontFamily="$body"
               fontSize={11}
@@ -285,7 +284,7 @@ export function Attendances() {
         )}
 
         {intentionGroups.length > 0 && (
-          <VStack mt="$6" px={20}>
+          <VStack mt="$6" px={16}>
             <Text
               fontFamily="$body"
               fontSize={11}
@@ -338,7 +337,7 @@ export function Attendances() {
           </VStack>
         )}
 
-        <VStack mt="$6" px={20}>
+        <VStack mt="$6" px={16}>
           <Text
             fontFamily="$body"
             fontSize={11}
