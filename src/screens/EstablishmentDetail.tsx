@@ -166,27 +166,25 @@ export function EstablishmentDetail() {
 
   return (
     <VStack flex={1} bg="$brandBackground">
-      {/* Hero: foto da loja quando existe E carrega. Sem foto (ou com foto
-          quebrada — varias lojas tem `urlImage` de placeholder que nao
-          resolve), vira um cabecalho COMPACTO em vez de 210px de faixa lisa:
-          altura cheia e pra foto, que e conteudo; barra de cor nao merece o
-          mesmo espaco. Sem o `onError` ficava um buraco branco. */}
-      <Box height={showPhoto ? 210 : 108} width="$full">
-        {showPhoto ? (
+      {/* O hero existe pra FOTO. Sem foto — ou com `urlImage` quebrada, que e
+          comum nos cadastros — nao vira faixa de cor: cai no mesmo cabecalho
+          simples das outras telas (voltar sobre o fundo claro). Faixa verde
+          lisa nao carrega informacao nenhuma e so empurrava o conteudo pra
+          baixo. */}
+      {showPhoto ? (
+        <Box height={210} width="$full">
           <ImageBackground
             source={{ uri: establishment.urlImage! }}
             style={{ flex: 1 }}
             resizeMode="cover"
             onError={() => setHeroFailed(true)}
           >
-            <HeroNav onBack={() => navigation.goBack()} />
+            <HeroNav onBack={() => navigation.goBack()} onPhoto />
           </ImageBackground>
-        ) : (
-          <Box flex={1} bg="$greenTint">
-            <HeroNav onBack={() => navigation.goBack()} />
-          </Box>
-        )}
-      </Box>
+        </Box>
+      ) : (
+        <HeroNav onBack={() => navigation.goBack()} />
+      )}
 
       <VStack px={20} pt="$5" gap="$1.5">
         <Text
@@ -314,15 +312,15 @@ export function EstablishmentDetail() {
   );
 }
 
-function HeroNav({ onBack }: { onBack: () => void }) {
+function HeroNav({ onBack, onPhoto }: { onBack: () => void; onPhoto?: boolean }) {
   return (
     <HStack justifyContent="space-between" alignItems="center" px={20} pt={56}>
       <TouchableOpacity onPress={onBack} testID="back-button">
-        <Center width={40} height={40} borderRadius="$full" bg="#FFFFFFE6">
+        <Center width={40} height={40} borderRadius="$full" bg={onPhoto ? "#FFFFFFE6" : "$greenTint"}>
           <CaretLeft size={20} color="#163300" weight="bold" />
         </Center>
       </TouchableOpacity>
-      <Center width={40} height={40} borderRadius="$full" bg="#FFFFFFE6">
+      <Center width={40} height={40} borderRadius="$full" bg={onPhoto ? "#FFFFFFE6" : "$greenTint"}>
         <Heart size={20} color="#163300" />
       </Center>
     </HStack>

@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Text, Center, VStack, ScrollView } from "@gluestack-ui/themed";
+import { Text, Center, VStack, HStack, ScrollView } from "@gluestack-ui/themed";
+import { CaretLeft } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
-import { Header } from "@components/Header";
 import { validateLogin } from "@domain/auth/validateAuth";
 import { useAuthStore } from "@stores/authStore";
 
@@ -102,16 +102,37 @@ export function Login() {
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      style={{ backgroundColor: "#FFFFFF" }}
     >
-      <VStack flex={1} px={15} py={60}>
-        <Header showBackButton />
+      <VStack flex={1} pt={56} pb={32} px={20}>
+        <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
+          <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
+            <CaretLeft size={20} color="#163300" weight="bold" />
+          </Center>
+        </TouchableOpacity>
 
-        <Center gap="$6" mt={200}>
-          <Text fontFamily="$heading" fontSize="$3xl">
-            Acessar a conta
+        <VStack gap="$2" mt="$7">
+          <Text
+            fontFamily="$display"
+            fontSize={34}
+            lineHeight={36}
+            letterSpacing={-1.5}
+            color="$forest"
+          >
+            OLÁ DE NOVO
           </Text>
+          <Text size="md" color="$brandTextSecondary">
+            Entre para acompanhar sua fila.
+          </Text>
+        </VStack>
 
-          <VStack w="$full" gap="$1">
+        {/* O Pencil desenha "Continuar com Google/Apple" aqui. Nao entrou: o
+            backend nao tem OAuth (so /auth/login com e-mail e senha), e botao
+            que nao funciona e pior do que botao ausente. Quando o login social
+            existir, e neste ponto que ele entra, acima do divisor. */}
+
+        <VStack gap="$3" mt="$7">
+          <VStack gap="$1">
             <Input2
               keyboardType="email-address"
               autoCapitalize="none"
@@ -122,7 +143,7 @@ export function Login() {
             {errors.email && <Text color="$brandDanger" size="xs">{errors.email}</Text>}
           </VStack>
 
-          <VStack w="$full" gap="$1">
+          <VStack gap="$1">
             <Input2
               isPassword
               placeholder="Senha"
@@ -132,32 +153,37 @@ export function Login() {
             {errors.password && <Text color="$brandDanger" size="xs">{errors.password}</Text>}
           </VStack>
 
-          <Button title={isSubmitting ? "Entrando..." : "Entrar"} onPress={handleLogin} />
+          <HStack justifyContent="flex-end">
+            <TouchableOpacity onPress={() => navigation.navigate("forgotPassword", { email })}>
+              <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
+                Esqueci minha senha
+              </Text>
+            </TouchableOpacity>
+          </HStack>
+        </VStack>
 
-          <TouchableOpacity onPress={() => navigation.navigate("forgotPassword", { email })}>
-            <Text size="sm" color="$forest" fontFamily="$heading">
-              Esqueci minha senha
-            </Text>
-          </TouchableOpacity>
-        </Center>
-
-        <Center mt={200} flex={1} justifyContent="flex-end">
-          <Text size="md" fontFamily="$heading" color="$forest">
-            Novo por aqui?
-          </Text>
-          <Text size="sm" color="$gray300" mb="$3" textAlign="center">
-            Crie sua conta em segundos para entrar na fila.
-          </Text>
-          {/* Ação SECUNDÁRIA: "Entrar" é o que a tela pede: se os dois botões
-              forem sólidos verdes, quem já tem conta hesita (Andre 2026-08-05:
-              "entrar e cadastrar não podem ter o mesmo peso"). */}
+        <VStack flex={1} justifyContent="flex-end" gap="$4">
           <Button
-            mt="$1"
-            variant="outline"
-            title="Criar conta grátis"
-            onPress={handleSignUp}
+            title={isSubmitting ? "Entrando..." : "Entrar"}
+            onPress={handleLogin}
+            testID="primary-login"
           />
-        </Center>
+          {/* "Criar conta" vira LINK, nao botao: entrar e o que esta tela pede.
+              Dois botoes de peso parecido fazem quem ja tem conta hesitar
+              (Andre 2026-08-05: "entrar e cadastrar nao podem ter o mesmo
+              peso") — o link leva a decisao ainda mais longe do caminho
+              principal, sem esconder. */}
+          <HStack justifyContent="center" gap="$1.5" alignItems="center">
+            <Text size="sm" color="$brandTextSecondary">
+              Ainda não tem conta?
+            </Text>
+            <TouchableOpacity onPress={handleSignUp} testID="go-signup">
+              <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                Criar conta
+              </Text>
+            </TouchableOpacity>
+          </HStack>
+        </VStack>
       </VStack>
     </ScrollView>
   );
