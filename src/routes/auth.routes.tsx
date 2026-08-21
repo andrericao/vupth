@@ -8,6 +8,7 @@ import { House, ClipboardText, Gear } from "phosphor-react-native";
 
 import { Home } from "@screens/Home";
 import { EstablishmentDetail } from "@screens/EstablishmentDetail";
+import { EstablishmentList } from "@screens/EstablishmentList";
 import { Login } from "@screens/Login";
 import { SignUp } from "@screens/SignUp";
 import { ForgotPassword } from "@screens/ForgotPassword";
@@ -25,6 +26,7 @@ import { ServiceType } from "@domain/establishment/types";
 
 export type AppRoutes = {
   home: { filter?: ServiceType | "ALL" } | undefined;
+  establishmentList: { filter?: ServiceType | "ALL" } | undefined;
   establishmentDetail: { establishmentId: string };
   login: {
     redirectTo?: string;
@@ -89,6 +91,7 @@ function HomeStack() {
   return (
     <HomeStackNav.Navigator screenOptions={{ headerShown: false }}>
       <HomeStackNav.Screen name="home" component={Home} />
+      <HomeStackNav.Screen name="establishmentList" component={EstablishmentList} />
       <HomeStackNav.Screen name="establishmentDetail" component={EstablishmentDetail} />
       <HomeStackNav.Screen name="serviceSelection" component={ServiceSelection} />
       <HomeStackNav.Screen name="queueStatus" component={QueueStatus} />

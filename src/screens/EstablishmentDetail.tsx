@@ -12,6 +12,7 @@ import { Star, Info, CaretLeft, Heart, CaretRight } from "phosphor-react-native"
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
+import { PlaceAvatar } from "@components/PlaceAvatar";
 import { cardShadow } from "@utils/styles";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { resolveRating } from "@domain/establishment/rating";
@@ -24,23 +25,6 @@ import { useQueueSocket } from "@hooks/useQueueSocket";
 type RouteParams = {
   establishmentId: string;
 };
-
-function InitialsAvatar({ name, size = 44 }: { name: string; size?: number }) {
-  const initials =
-    name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((w) => w[0]?.toUpperCase())
-      .join("") || "?";
-  return (
-    <Center width={size} height={size} borderRadius="$full" bg="$greenTint">
-      <Text fontFamily="$display" fontSize={size * 0.36} color="$forest">
-        {initials}
-      </Text>
-    </Center>
-  );
-}
 
 // Linha do profissional (Pencil CLIENT · 08 Estabelecimento).
 //
@@ -68,7 +52,7 @@ function ProfessionalRow({
     <TouchableOpacity onPress={onPress} testID={`professional-${professional.id}`}>
       <Box bg="$white" p="$3" mb="$3" borderRadius="$card" style={cardShadow}>
         <HStack alignItems="center" gap="$3">
-          <InitialsAvatar name={professional.name} />
+          <PlaceAvatar name={professional.name} />
           <VStack flex={1}>
             <Text fontFamily="$heading" fontSize="$sm" color="$forest">
               {professional.name}

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { FlatList, TouchableOpacity, RefreshControl, Image, TextInput } from "react-native";
+import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import {
@@ -20,6 +20,7 @@ import { addressService } from "@services/addressService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
+import { PlaceAvatar } from "@components/PlaceAvatar";
 import { formatWaitTime } from "@domain/queue/types";
 
 // [marca-vupth] Saudacao por horario do dia (Pencil CLIENT · 06 Home).
@@ -41,48 +42,6 @@ function timeAgoLabel(iso: string | null | undefined): string | null {
   if (weeks < 5) return `há ${weeks} semana${weeks > 1 ? "s" : ""}`;
   const months = Math.floor(days / 30);
   return `há ${months} ${months > 1 ? "meses" : "mês"}`;
-}
-
-function Avatar({
-  name,
-  size = 52,
-  photoUrl,
-  bg = "$greenTint",
-}: {
-  name: string;
-  size?: number;
-  // Foto real quando existe (`urlImage`); cai pras iniciais quando ausente OU
-  // quando a URL nao carrega — varias lojas tem urlImage de placeholder que
-  // nao existe (ex.: "https://img.com/x.jpg"), e sem esse fallback o avatar
-  // fica um buraco branco.
-  photoUrl?: string | null;
-  bg?: string;
-}) {
-  const [imageFailed, setImageFailed] = useState(false);
-
-  if (photoUrl && !imageFailed) {
-    return (
-      <Image
-        source={{ uri: photoUrl }}
-        onError={() => setImageFailed(true)}
-        style={{ width: size, height: size, borderRadius: size / 2 }}
-      />
-    );
-  }
-  const initials =
-    name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((w) => w[0]?.toUpperCase())
-      .join("") || "?";
-  return (
-    <Center width={size} height={size} borderRadius={size / 2} bg={bg}>
-      <Text fontFamily="$display" fontSize={size * 0.34} color="$forest">
-        {initials}
-      </Text>
-    </Center>
-  );
 }
 
 // Pilula de status: fundo brand-green + texto/ponto forest (Pencil).
@@ -137,7 +96,7 @@ function EstablishmentRow({
         mb={12}
         alignItems="center"
       >
-        <Avatar name={establishment.name} photoUrl={establishment.urlImage} />
+        <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} />
         <VStack flex={1} gap={4}>
           <Text fontFamily="$display" fontSize={15} fontWeight="$bold" color="$brandTextPrimary">
             {establishment.name}
@@ -263,7 +222,7 @@ export function Home() {
         )}
         {isAuthenticated ? (
           <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
-            <Avatar name={firstName ?? "?"} />
+            <PlaceAvatar name={firstName ?? "?"} />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
@@ -388,7 +347,7 @@ export function Home() {
             }
           >
             <HStack bg="$brandSurface" borderRadius={18} gap={14} p={14} alignItems="center">
-              <Avatar name={lastVisit.professionalName} bg="$accentPeach" />
+              <PlaceAvatar name={lastVisit.professionalName} bg="$accentPeach" />
               <VStack flex={1} gap={3}>
                 <Text fontFamily="$display" fontSize={15} fontWeight="$bold" color="$brandTextPrimary">
                   {lastVisit.professionalName}
@@ -424,7 +383,13 @@ export function Home() {
           >
             Livres agora
           </Text>
-          <TouchableOpacity onPress={() => navigation.navigate("home", {})}>
+          {/* Leva a lista cheia (Pencil CLIENT · 07), carregando o filtro de
+              categoria que estiver ativo aqui. Antes apontava para a propria
+              Home — era um link morto. */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate("establishmentList", { filter: selectedFilter })}
+            testID="see-all"
+          >
             <Text fontFamily="$body" fontSize={14} fontWeight="$semibold" color="$brandTextSecondary">
               Ver todos
             </Text>
