@@ -200,41 +200,36 @@ export function Settings() {
       {/* Cabecalho forest com a identidade (Pencil CLIENT · 14 Perfil): o
           avatar em brand-green e o unico ponto de verde-limao da tela, e ele
           esta sobre fundo escuro — a regra de contraste da marca. */}
-      <VStack
-        bg="$forest"
-        pt={56}
-        pb={isAuthenticated ? 32 : 20}
-        px={20}
-        gap="$3"
-        alignItems="center"
-      >
-        {/* Visitante nao tem identidade pra mostrar — o avatar grande viraria
-            um "?" gigante ocupando meia tela. Cabecalho encolhe e o card de
-            criar conta, que e a acao real, sobe. */}
-        {isAuthenticated ? (
-          <>
-            <Center width={88} height={88} borderRadius={44} bg="$brandGreen">
-              <Text fontFamily="$display" fontSize={32} color="$forest">
-                {initials}
+      {/* O bloco forest so se justifica quando ha IDENTIDADE pra mostrar
+          (avatar, nome, e-mail). Pra visitante ele virava uma faixa escura
+          carregando so um titulo — mesmo problema da faixa verde da tela da
+          loja. Sem conta, o cabecalho e o mesmo da aba Atendimentos: titulo
+          em Archivo sobre o fundo claro. */}
+      {isAuthenticated ? (
+        <VStack bg="$forest" pt={56} pb={32} px={20} gap="$3" alignItems="center">
+          <Center width={88} height={88} borderRadius={44} bg="$brandGreen">
+            <Text fontFamily="$display" fontSize={32} color="$forest">
+              {initials}
+            </Text>
+          </Center>
+          <VStack gap="$1" alignItems="center">
+            <Text fontFamily="$display" fontSize={24} letterSpacing={-0.8} color="$white">
+              {displayName}
+            </Text>
+            {user?.email && (
+              <Text size="sm" color="$brandGreen">
+                {user.email}
               </Text>
-            </Center>
-            <VStack gap="$1" alignItems="center">
-              <Text fontFamily="$display" fontSize={24} letterSpacing={-0.8} color="$white">
-                {displayName}
-              </Text>
-              {user?.email && (
-                <Text size="sm" color="$brandGreen">
-                  {user.email}
-                </Text>
-              )}
-            </VStack>
-          </>
-        ) : (
-          <Text fontFamily="$display" fontSize={22} letterSpacing={-0.6} color="$white">
+            )}
+          </VStack>
+        </VStack>
+      ) : (
+        <VStack px={20} pt={56} pb={16}>
+          <Text fontFamily="$display" fontSize={26} letterSpacing={-0.8} color="$forest">
             Sua conta
           </Text>
-        )}
-      </VStack>
+        </VStack>
+      )}
 
       <VStack flex={1} px={20} pt={20} pb={30}>
 

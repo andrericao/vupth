@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { VStack, Heading, Text, ScrollView } from "@gluestack-ui/themed";
+import { VStack, Text, ScrollView } from "@gluestack-ui/themed";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { PasswordRules } from "@components/PasswordRules";
@@ -142,20 +142,23 @@ export function ForgotPassword() {
   }
 
   return (
-    <ScrollView flex={1} bg="$gray700" contentContainerStyle={{ flexGrow: 1 }}>
-      <VStack flex={1} px={15} pt={60} pb={30}>
-        <Header showBackButton />
+    <ScrollView flex={1} bg="$brandBackground" contentContainerStyle={{ flexGrow: 1 }}>
+      <VStack flex={1} pb={30} bg="$brandBackground">
+        {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta mais
+            "esquecendo a senha", esta criando uma nova. */}
+        <ScreenHeader
+          title={step === "email" ? "ESQUECEU A SENHA?" : "NOVA SENHA"}
+          subtitle={
+            step === "email"
+              ? "Manda o e-mail — te ajudamos a voltar em menos de 1 minuto."
+              : "Use o código que enviamos e escolha uma senha nova."
+          }
+        />
 
-        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$2">
-          Esqueci minha senha
-        </Heading>
+        <VStack px={20} pt={24} flex={1}>
 
         {step === "email" && (
           <VStack gap="$4">
-            <Text size="sm" color="$gray300">
-              Informe o e-mail da sua conta. Enviaremos um código de 6 dígitos para
-              redefinir a senha.
-            </Text>
             <Input2
               placeholder="E-mail"
               value={email}
@@ -235,6 +238,7 @@ export function ForgotPassword() {
             </TouchableOpacity>
           </VStack>
         )}
+        </VStack>
       </VStack>
     </ScrollView>
   );
