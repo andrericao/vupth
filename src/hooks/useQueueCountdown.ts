@@ -97,6 +97,9 @@ export function useQueueCountdown() {
         );
         const patch: Partial<ActiveQueue> = { ...(reconciled ?? {}) };
         if (data.position !== q.position) patch.position = data.position;
+        // Ancora do progresso: grava a posição só na PRIMEIRA leitura. Se
+        // fosse reescrita a cada poll, "já passou N" seria sempre zero.
+        if (q.initialPosition == null) patch.initialPosition = data.position;
         if (Object.keys(patch).length > 0) updateQueue(patch);
       } catch {}
 

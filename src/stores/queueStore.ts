@@ -18,6 +18,10 @@ export interface ActiveQueue {
   // Posição na fila (1 = próximo). Vem do mesmo GET que já traz o tempo de
   // espera; a Home mostra "Faltam N" a partir dela.
   position?: number;
+  // Posição na PRIMEIRA leitura desta fila. Guardada uma vez e nunca mais
+  // mexida: é o que permite dizer "você já passou N pessoas" (progresso feito),
+  // e não só quantas faltam. Sem ela a tela só sabe o que resta.
+  initialPosition?: number;
 }
 
 interface QueueState {

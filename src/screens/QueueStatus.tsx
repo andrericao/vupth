@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
-import { Info } from "phosphor-react-native";
+import { Info, CaretLeft, Repeat } from "phosphor-react-native";
 import * as SecureStore from "expo-secure-store";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
@@ -477,8 +477,201 @@ export function QueueStatus() {
     );
   }
 
+  // Estado ESPERANDO = tela cheia no verde da marca (Pencil CLIENT · 11). Os
+  // outros estados (em atendimento, pausado, concluido) ficam no fundo claro:
+  // o verde cheio e o sinal de "voce esta esperando a sua vez" e perde o
+  // sentido se valer para tudo.
+  const waitingInQueue = isInQueue && !isBeingAttended && !isPaused && !isFinished;
+  const position = activeQueue?.position;
+  const peopleAhead = position != null ? Math.max(0, position - 1) : null;
+  const initial = activeQueue?.initialPosition;
+  // Progresso feito. So existe depois de andar na fila — no primeiro poll
+  // `initial` e igual a posicao atual e nao ha nada a comemorar ainda.
+  const passed = initial != null && position != null ? Math.max(0, initial - position) : 0;
+
+  if (waitingInQueue) {
+    return (
+      <VStack flex={1} bg="$brandGreen">
+        <HStack px={20} pt={56} justifyContent="space-between" alignItems="center">
+          <TouchableOpacity onPress={() => navigation.navigate("home")} testID="back-button">
+            <Center width={40} height={40} borderRadius="$full" bg="#16330014">
+              <CaretLeft size={20} color="#163300" weight="bold" />
+            </Center>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => Alert.alert(QUEUE_DISCLAIMER_TITLE, QUEUE_DISCLAIMER_TEXT)}
+            testID="queue-info"
+          >
+            <Center width={40} height={40} borderRadius="$full" bg="#16330014">
+              <Info size={20} color="#163300" />
+            </Center>
+          </TouchableOpacity>
+        </HStack>
+
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 20 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#163300" colors={["#163300"]} />
+          }
+        >
+          <Text
+            fontFamily="$body"
+            fontSize={13}
+            fontWeight="$bold"
+            letterSpacing={1}
+            color="$forest"
+          >
+            PARA A SUA VEZ
+          </Text>
+
+          {/* O numero grande e a POSICAO, nao o relogio: "quantas pessoas na
+              minha frente" e concreto e nao oscila como a estimativa. Sem a
+              posicao (backend nao respondeu ainda), o tempo assume o lugar. */}
+          {peopleAhead != null ? (
+            <>
+              <Text
+                fontFamily="$display"
+                fontSize={110}
+                lineHeight={112}
+                letterSpacing={-6}
+                color="$forest"
+                testID="queue-position"
+              >
+                {peopleAhead}
+              </Text>
+              <Text
+                fontFamily="$display"
+                fontSize={26}
+                letterSpacing={-0.8}
+                color="$forest"
+                textAlign="center"
+              >
+                {peopleAhead === 0
+                  ? "você é o próximo"
+                  : peopleAhead === 1
+                    ? "pessoa na frente"
+                    : "pessoas na frente"}
+              </Text>
+            </>
+          ) : (
+            <Text
+              fontFamily="$display"
+              fontSize={72}
+              lineHeight={78}
+              letterSpacing={-3}
+              color="$forest"
+              testID="queue-time"
+            >
+              {timeLabel}
+            </Text>
+          )}
+
+          <Text fontFamily="$body" fontSize={15} color="#16330099" mt="$1">
+            {remaining <= 0 ? "a qualquer momento" : `~${formatWaitTime(remaining)} de espera`}
+          </Text>
+
+          {/* Progresso: pontos cheios pelo que ja andou, apagados pelo que
+              falta. So aparece depois de andar de verdade — mostrar a barra
+              zerada no primeiro segundo nao informa nada. */}
+          {passed > 0 && initial != null && (
+            <>
+              <HStack gap="$2" alignItems="center" mt="$6">
+                {Array.from({ length: Math.min(initial, 8) }).map((_, i) => {
+                  const done = i < Math.min(passed, 8);
+                  return (
+                    <Center
+                      key={i}
+                      width={done ? 12 : 8}
+                      height={done ? 12 : 8}
+                      borderRadius="$full"
+                      bg={done ? "$forest" : "#16330040"}
+                    />
+                  );
+                })}
+              </HStack>
+              <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="#163300B3" mt="$3">
+                Você já passou {passed} {passed === 1 ? "pessoa" : "pessoas"}
+              </Text>
+            </>
+          )}
+        </ScrollView>
+
+        <VStack px={20} pb={28} gap="$3.5" alignItems="center">
+          {canReshuffle && (
+            <TouchableOpacity
+              onPress={handleOpenChangeTurn}
+              disabled={isRemanejando}
+              style={{ width: "100%" }}
+              testID="change-turn"
+            >
+              <HStack
+                bg="$forest"
+                borderRadius="$full"
+                gap="$2"
+                px={24}
+                py={15}
+                justifyContent="center"
+                alignItems="center"
+                opacity={isRemanejando ? 0.6 : 1}
+              >
+                <Repeat size={17} color="#9FE870" />
+                <Text fontFamily="$heading" fontSize={15} color="$brandGreen">
+                  {isRemanejando ? "Um instante..." : "Mudar minha vez"}
+                </Text>
+              </HStack>
+            </TouchableOpacity>
+          )}
+          {/* "Sair da fila" NAO e botao vermelho aqui (era, antes): sair e uma
+              saida legitima, nao um erro. Fica como link discreto — presente
+              para quem procura, sem gritar para quem nao esta procurando. */}
+          {canCancel && (
+            <TouchableOpacity onPress={handleCancel} disabled={isRemanejando} testID="leave-queue">
+              <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="#163300B3">
+                Sair da fila
+              </Text>
+            </TouchableOpacity>
+          )}
+        </VStack>
+
+        <RescheduleModal
+          visible={showReschedule}
+          baseMs={rescheduleBaseMs}
+          tailEtaMs={tailEtaMs}
+          penalty={penalty}
+          loading={isRemanejando}
+          onConfirm={submitReschedule}
+          onClose={() => setShowReschedule(false)}
+        />
+        <ChangeTurnModal
+          visible={showChangeTurn}
+          tailEtaMs={tailEtaMs}
+          isLast={isLastInQueue}
+          swapBusy={isPublishingSwap}
+          onMoveToEnd={() => {
+            setShowChangeTurn(false);
+            handleMoveToEnd();
+          }}
+          onReschedule={() => {
+            setShowChangeTurn(false);
+            setShowReschedule(true);
+          }}
+          onCreateSwapOffer={handleCreateSwapOffer}
+          onClose={() => setShowChangeTurn(false)}
+        />
+        <SwapOffersModal
+          visible={showSwapOffers}
+          professionalId={professionalId}
+          onClose={() => setShowSwapOffers(false)}
+          onChanged={refresh}
+        />
+        <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
+      </VStack>
+    );
+  }
+
   return (
-    <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
+    <VStack flex={1} px={15} pt={60} pb={30} bg="$brandBackground">
       <Header />
 
       <ScrollView
