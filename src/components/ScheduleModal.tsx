@@ -63,7 +63,11 @@ export function ScheduleModal({ visible, onClose }: Props) {
             >
               <HStack alignItems="center" gap="$2">
                 <Calendar size={18} color="#163300" />
-                <Text size="sm" color="$gray500">
+                {/* [contraste] Era `$gray500` (#DDDEDF) sobre `$greenTint`
+                    (#E2F6D5) — dois tons claríssimos, texto praticamente
+                    invisível. Sobre greenTint o par da marca é `$forest`,
+                    o mesmo do ícone ao lado. */}
+                <Text size="sm" color="$forest" flex={1}>
                   A escolha do horário deste dia (barra de encaixe) chega em breve.
                 </Text>
               </HStack>

@@ -259,7 +259,7 @@ export function Attendances() {
                       <Text size="xs" color="$gray300">
                         {s.establishmentName}
                       </Text>
-                      <Text size="xs" color="$gray400" mt="$1">
+                      <Text size="xs" color="$brandTextSecondary" mt="$1">
                         Aguardando alguém da fila ceder o lugar
                       </Text>
                     </VStack>
@@ -294,7 +294,7 @@ export function Attendances() {
             <VStack gap="$3">
               {intentionGroups.map((group) => (
                 <VStack key={group.day.toISOString()} gap="$2">
-                  <Text size="xs" color="$gray400" fontFamily="$heading">
+                  <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
                     {group.dayLabel}
                   </Text>
                   {group.items.map((i) => (
@@ -308,7 +308,7 @@ export function Attendances() {
                           <Text size="xs" color="$gray300">
                             {i.services.map((s) => s.customName).join(", ") || i.establishmentName}
                           </Text>
-                          <Text size="xs" color="$gray400" mt="$1">
+                          <Text size="xs" color="$brandTextSecondary" mt="$1">
                             Pedido para às {formatClockTime(new Date(i.desiredTime))}
                             {i.estimatedStartTime && i.estimatedStartTime !== i.desiredTime
                               ? ` · previsto ~${formatClockTime(new Date(i.estimatedStartTime))}`
@@ -372,7 +372,7 @@ export function Attendances() {
                           <Text size="xs" color="$gray300">
                             {a.services.map((s) => s.customName).join(", ") || "—"}
                           </Text>
-                          <Text size="xs" color="$gray400" mt="$1">
+                          <Text size="xs" color="$brandTextSecondary" mt="$1">
                             {formatDateTime(a.startTime ?? a.scheduledTime)}
                           </Text>
                         </VStack>

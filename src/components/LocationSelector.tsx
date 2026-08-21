@@ -128,7 +128,7 @@ export function LocationSelector() {
 
             <HStack alignItems="center" gap="$3" my="$4">
               <Divider flex={1} bg="$gray500" />
-              <Text size="xs" color="$gray400">ou pelo CEP</Text>
+              <Text size="xs" color="$brandTextSecondary">ou pelo CEP</Text>
               <Divider flex={1} bg="$gray500" />
             </HStack>
 

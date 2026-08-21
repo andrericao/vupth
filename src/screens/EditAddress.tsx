@@ -235,7 +235,7 @@ export function EditAddress() {
           />
           <HStack alignItems="center" gap="$1" mb="$4">
             <MapPin size={12} color="#9CA3AF" />
-            <Text size="xs" color="$gray400" flex={1}>
+            <Text size="xs" color="$brandTextSecondary" flex={1}>
               Com o GPS a gente já preenche o endereço e calcula sua distância até os estabelecimentos.
             </Text>
           </HStack>

@@ -180,7 +180,7 @@ export function ForgotPassword() {
             />
             {isWakingServer && (
               <VStack gap="$3">
-                <Text size="xs" color="$gray400" textAlign="center">
+                <Text size="xs" color="$brandTextSecondary" textAlign="center">
                   O servidor hiberna quando fica sem uso e pode levar até 1 minuto para
                   responder. Não feche o app.
                 </Text>

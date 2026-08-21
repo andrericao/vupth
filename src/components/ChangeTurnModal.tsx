@@ -52,6 +52,11 @@ const OPTIONS: { value: TurnOption; title: string; description: string }[] = [
 ];
 
 function Radio({ selected, disabled }: { selected: boolean; disabled?: boolean }) {
+  // [contraste] `$gray400` (#B9BBBC, 1.93:1) fica AQUI de proposito: e a borda
+  // de um radio DESABILITADO, e a WCAG isenta controle desabilitado do minimo
+  // de contraste — baixo contraste e justamente o sinal de "indisponivel" (a
+  // linha inteira ainda leva opacity 0.45). Nao trocar por token de texto: em
+  // qualquer OUTRO lugar esse cinza reprova e ja foi substituido.
   const color = disabled ? "$gray400" : selected ? "$forest" : "$coolGray300";
   return (
     <Box
