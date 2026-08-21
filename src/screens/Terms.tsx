@@ -1,0 +1,152 @@
+import { useState } from "react";
+import { TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { VStack, HStack, Text, Center, ScrollView } from "@gluestack-ui/themed";
+import { CaretLeft } from "phosphor-react-native";
+
+type Aba = "uso" | "privacidade";
+
+type Secao = { titulo: string; corpo: string };
+
+/**
+ * ⚠️ TEXTO JURIDICO — nao e copy de produto.
+ *
+ * O conteudo abaixo veio do desenho (Pencil CLIENT · 15) e serve de ESTRUTURA.
+ * Antes de publicar nas lojas, precisa passar por quem responde juridicamente
+ * pelo produto: termos e politica de privacidade tem exigencia legal (LGPD,
+ * politicas da App Store e da Play Store) que nao se resolve no design.
+ *
+ * Nao mexer no texto por motivo de estilo — encurtar clausula por concisao
+ * troca um problema (texto longo) por outro pior (garantia incompleta).
+ */
+const TERMOS: Secao[] = [
+  {
+    titulo: "1. Aceitação",
+    corpo:
+      "Ao usar a Vupth você concorda com estes termos. Se não concordar, não utilize o aplicativo.",
+  },
+  {
+    titulo: "2. O serviço",
+    corpo:
+      "A Vupth conecta clientes a barbearias, salões e estúdios de beleza, permitindo entrar em filas de atendimento de forma remota.",
+  },
+  {
+    titulo: "3. Sua conta",
+    corpo:
+      "Você é responsável por manter seus dados corretos e pela segurança da sua senha.",
+  },
+  {
+    titulo: "4. Uso da fila",
+    corpo:
+      "A posição na fila é gerenciada pelo estabelecimento. A Vupth não garante horários e não se responsabiliza por atrasos ou cancelamentos.",
+  },
+  {
+    titulo: "5. Cancelamento",
+    corpo:
+      "Você pode sair da fila ou excluir sua conta a qualquer momento pelo aplicativo.",
+  },
+];
+
+const PRIVACIDADE: Secao[] = [
+  {
+    titulo: "1. O que coletamos",
+    corpo:
+      "E-mail e senha para a sua conta; nome, telefone e endereço quando você preenche; e sua localização, se autorizar, para mostrar os lugares mais perto.",
+  },
+  {
+    titulo: "2. Para que usamos",
+    corpo:
+      "Para colocar você na fila, avisar quando for sua vez e mostrar seu histórico de atendimentos. Não vendemos seus dados.",
+  },
+  {
+    titulo: "3. O que o estabelecimento vê",
+    corpo:
+      "O profissional que vai te atender vê seu nome e os serviços escolhidos — é o que ele precisa para te atender.",
+  },
+  {
+    titulo: "4. Notificações",
+    corpo:
+      "Se você autorizar, enviamos avisos sobre a sua vez na fila. Você pode desligar a qualquer momento nas configurações do celular.",
+  },
+  {
+    titulo: "5. Seus direitos",
+    corpo:
+      "Você pode corrigir seus dados no app e apagar sua conta quando quiser — apagar a conta remove seus dados pessoais.",
+  },
+];
+
+export function Terms() {
+  const navigation = useNavigation();
+  const [aba, setAba] = useState<Aba>("uso");
+  const secoes = aba === "uso" ? TERMOS : PRIVACIDADE;
+
+  return (
+    <ScrollView
+      flex={1}
+      bg="$brandBackground"
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <HStack px={20} pt={56} gap="$3.5" alignItems="center">
+        <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
+          <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
+            <CaretLeft size={20} color="#163300" weight="bold" />
+          </Center>
+        </TouchableOpacity>
+        <Text fontFamily="$display" fontSize={18} letterSpacing={-0.3} color="$forest">
+          Termos e Privacidade
+        </Text>
+      </HStack>
+
+      <HStack px={20} pt={20} gap="$2">
+        {(
+          [
+            ["uso", "Termos de Uso"],
+            ["privacidade", "Privacidade"],
+          ] as [Aba, string][]
+        ).map(([key, label]) => {
+          const ativa = aba === key;
+          return (
+            <TouchableOpacity
+              key={key}
+              onPress={() => setAba(key)}
+              style={{ flex: 1 }}
+              testID={`tab-${key}`}
+            >
+              <Center
+                bg={ativa ? "$forest" : "$brandSurface"}
+                borderRadius="$full"
+                py={11}
+                px={16}
+              >
+                <Text
+                  fontFamily="$heading"
+                  fontSize={14}
+                  color={ativa ? "$brandGreen" : "$brandTextSecondary"}
+                >
+                  {label}
+                </Text>
+              </Center>
+            </TouchableOpacity>
+          );
+        })}
+      </HStack>
+
+      <VStack px={20} pt={24} gap="$4.5">
+        {secoes.map((s) => (
+          <VStack key={s.titulo} gap="$1.5">
+            <Text fontFamily="$heading" fontSize={15} color="$brandTextPrimary">
+              {s.titulo}
+            </Text>
+            <Text size="xs" color="$brandTextSecondary" lineHeight={20}>
+              {s.corpo}
+            </Text>
+          </VStack>
+        ))}
+        <Text fontFamily="$mono" fontSize={11} color="$brandTextSecondary" mt="$2">
+          Atualizado em 21 de agosto de 2026
+        </Text>
+      </VStack>
+    </ScrollView>
+  );
+}

@@ -2,12 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
-import { Info, CaretLeft, Repeat } from "phosphor-react-native";
+import { Info, CaretLeft, Repeat, Check, CaretRight } from "phosphor-react-native";
 import * as SecureStore from "expo-secure-store";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { PlaceAvatar } from "@components/PlaceAvatar";
 import {
   QueueDisclaimerModal,
   QUEUE_DISCLAIMER_TITLE,
@@ -488,6 +489,115 @@ export function QueueStatus() {
   // Progresso feito. So existe depois de andar na fila — no primeiro poll
   // `initial` e igual a posicao atual e nao ha nada a comemorar ainda.
   const passed = initial != null && position != null ? Math.max(0, initial - position) : 0;
+
+  // Estado CONCLUIDO em tela cheia (Pencil CLIENT · 13 Fim do atendimento).
+  // Nao virou rota nova: o Pencil desenha uma "tela" separada, mas isso e o
+  // desfecho DESTE fluxo — criar uma rota orfa significaria alguem ter de
+  // navegar ate ela, e o app ja esta aqui quando o atendimento termina.
+  if (isFinished) {
+    const servicos = activeQueue?.serviceMinutes;
+    const jaAvaliou = !!attendanceId && ratedIds.includes(attendanceId);
+
+    return (
+      <ScrollView
+        style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <VStack flex={1} bg="$brandBackground">
+          <VStack pt={56} px={20} gap="$4" alignItems="center">
+            <Center width={96} height={96} borderRadius={48} bg="$brandGreen">
+              <Check size={48} color="#163300" weight="bold" />
+            </Center>
+            <Text
+              fontFamily="$display"
+              fontSize={32}
+              letterSpacing={-1.4}
+              color="$forest"
+              textAlign="center"
+            >
+              PRONTO!
+            </Text>
+            <Text size="sm" color="$brandTextSecondary" textAlign="center">
+              {activeQueue?.professionalName ?? paramProfName ?? "Atendimento"}
+              {servicos != null ? ` · ${formatWaitTime(servicos)}` : ""}
+            </Text>
+          </VStack>
+
+          <VStack flex={1} px={20} pt="$8" gap="$4">
+            {/* O convite pra avaliar so aparece se ainda nao avaliou — depois
+                de enviar, insistir e so ruido. */}
+            {attendanceId && !jaAvaliou && (
+              <VStack bg="$brandSurface" borderRadius={20} p={20} gap="$4" alignItems="center">
+                <Text
+                  fontFamily="$display"
+                  fontSize={17}
+                  letterSpacing={-0.3}
+                  color="$brandTextPrimary"
+                  textAlign="center"
+                >
+                  Como foi o atendimento?
+                </Text>
+                <Button title="Avaliar atendimento" onPress={() => setShowRating(true)} />
+                <Text size="xs" color="$brandTextSecondary" textAlign="center">
+                  Sua nota aparece para outros clientes
+                </Text>
+              </VStack>
+            )}
+
+            {/* "Marcar de novo": o caminho de volta pro mesmo profissional, que
+                e o desfecho util de um atendimento bom. */}
+            {activeQueue?.establishmentId && (
+              <TouchableOpacity
+                onPress={() => {
+                  const establishmentId = activeQueue.establishmentId;
+                  leaveQueue();
+                  navigation.navigate("establishmentDetail", { establishmentId });
+                }}
+                testID="book-again"
+              >
+                <HStack bg="$greenTint" borderRadius={18} p={16} gap="$3.5" alignItems="center">
+                  <PlaceAvatar
+                    name={activeQueue.professionalName ?? "?"}
+                    size={52}
+                    bg="$brandGreen"
+                  />
+                  <VStack flex={1} gap="$0.5">
+                    <Text fontFamily="$heading" fontSize={15} color="$forest">
+                      Marcar de novo com {activeQueue.professionalName ?? "o profissional"}
+                    </Text>
+                    <Text size="xs" color="$forest">
+                      {activeQueue.establishmentName ?? ""}
+                    </Text>
+                  </VStack>
+                  <CaretRight size={20} color="#163300" />
+                </HStack>
+              </TouchableOpacity>
+            )}
+          </VStack>
+
+          <VStack px={20} pt="$6" gap="$3" alignItems="center">
+            <Button
+              title="Voltar ao início"
+              variant="outline"
+              onPress={() => {
+                leaveQueue();
+                navigation.navigate("home");
+              }}
+              testID="finish-home"
+            />
+          </VStack>
+        </VStack>
+
+        <RatingModal
+          visible={showRating}
+          attendanceId={attendanceId}
+          professionalName={activeQueue?.professionalName ?? paramProfName}
+          onClose={() => setShowRating(false)}
+        />
+      </ScrollView>
+    );
+  }
 
   if (waitingInQueue) {
     return (

@@ -370,13 +370,20 @@ export function Settings() {
           {/* Deletar conta desce pra ca como LINK: e irreversivel, entao nao
               disputa atencao com o resto — mas continua alcancavel por quem
               procura (era um botao de mesmo peso que "sair"). */}
-          {isAuthenticated && (
-            <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
-              <Text size="xs" fontWeight="$semibold" color="$brandDanger">
-                Deletar minha conta
+          <HStack gap="$4" alignItems="center">
+            <TouchableOpacity onPress={() => navigation.navigate("terms")} testID="terms">
+              <Text size="xs" color="$brandTextSecondary">
+                Termos e Privacidade
               </Text>
             </TouchableOpacity>
-          )}
+            {isAuthenticated && (
+              <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
+                <Text size="xs" fontWeight="$semibold" color="$brandDanger">
+                  Deletar minha conta
+                </Text>
+              </TouchableOpacity>
+            )}
+          </HStack>
         </VStack>
       </VStack>
 
