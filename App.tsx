@@ -21,6 +21,7 @@ import { useRatedStore } from "@stores/ratedStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
 import { useLocationStore } from "@stores/locationStore";
+import { useFirstRunStore } from "@stores/firstRunStore";
 import { useQueueNotifications } from "@hooks/useQueueNotifications";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
@@ -49,6 +50,7 @@ export default function App() {
   const restoreRated = useRatedStore((s) => s.restoreRated);
   const restoreComingSoon = useComingSoonStore((s) => s.restore);
   const restoreLocation = useLocationStore((s) => s.restoreLocation);
+  const restoreFirstRun = useFirstRunStore((s) => s.restoreFirstRun);
   const restorePendingSwap = usePendingSwapStore((s) => s.restorePending);
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
@@ -60,6 +62,7 @@ export default function App() {
     restoreComingSoon();
     restoreLocation();
     restorePendingSwap();
+    restoreFirstRun();
     // Portao de readiness (cold start do Render): acorda o backend ANTES de liberar
     // login/cadastro/listagem. A 1a cutucada acorda a instancia; segue mesmo se
     // estourar o teto (chamadas seguintes ja pegam a instancia quente). CLAUDE.md 18c.
@@ -77,6 +80,7 @@ export default function App() {
     restoreComingSoon,
     restoreLocation,
     restorePendingSwap,
+    restoreFirstRun,
   ]);
 
   // Notificacao pessoal "é a sua vez" (WebSocket) app-wide: vale em qualquer
