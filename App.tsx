@@ -19,6 +19,7 @@ import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
+import { useFavoritesStore } from "@stores/favoritesStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
 import { useLocationStore } from "@stores/locationStore";
 import { useFirstRunStore } from "@stores/firstRunStore";
@@ -52,6 +53,7 @@ export default function App() {
   const restoreLocation = useLocationStore((s) => s.restoreLocation);
   const restoreFirstRun = useFirstRunStore((s) => s.restoreFirstRun);
   const restorePendingSwap = usePendingSwapStore((s) => s.restorePending);
+  const restoreFavorites = useFavoritesStore((s) => s.restoreFavorites);
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
 
@@ -63,6 +65,7 @@ export default function App() {
     restoreLocation();
     restorePendingSwap();
     restoreFirstRun();
+    restoreFavorites();
     // Portao de readiness (cold start do Render): acorda o backend ANTES de liberar
     // login/cadastro/listagem. A 1a cutucada acorda a instancia; segue mesmo se
     // estourar o teto (chamadas seguintes ja pegam a instancia quente). CLAUDE.md 18c.
@@ -77,6 +80,7 @@ export default function App() {
     restoreSession,
     restoreQueue,
     restoreRated,
+    restoreFavorites,
     restoreComingSoon,
     restoreLocation,
     restorePendingSwap,

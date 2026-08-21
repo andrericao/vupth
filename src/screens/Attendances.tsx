@@ -31,10 +31,15 @@ import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 
-const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Concluído", color: "#163300" },
-  CANCELLED: { label: "Cancelado", color: "#B3261E" },
-  LATE: { label: "Atrasado", color: "#F59E0B" },
+// [marca-vupth] Cada status e um PAR (fundo, texto). Antes era so uma cor de
+// FUNDO com texto branco fixo por cima, e "Atrasado" (#F59E0B + branco) dava
+// 2,15:1 — abaixo do minimo WCAG de 4,5:1. Os pares abaixo usam tokens da
+// marca: fundo claro com `forest` por cima, que e a regra de contraste da
+// identidade (accentPeach + forest = 8,76:1).
+const HISTORY_STATUS: Record<string, { label: string; bg: string; fg: string }> = {
+  FINISHED: { label: "Concluído", bg: "#E2F6D5", fg: "#163300" },   // greenTint
+  CANCELLED: { label: "Cancelado", bg: "#F3F5F1", fg: "#B3261E" },  // surface + danger
+  LATE: { label: "Atrasado", bg: "#FFC091", fg: "#163300" },        // accentPeach
 };
 
 function formatDateTime(iso: string): string {
@@ -359,7 +364,8 @@ export function Attendances() {
               {realizados.map((a) => {
                 const st = HISTORY_STATUS[a.status] ?? {
                   label: a.status,
-                  color: "#9CA3AF",
+                  bg: "#F3F5F1",
+                  fg: "#454745",
                 };
                 const canRate = a.status === "FINISHED" && !ratedIds.includes(a.id);
                 return (
@@ -378,8 +384,8 @@ export function Attendances() {
                           </Text>
                         </VStack>
                         <VStack alignItems="flex-end" gap="$1">
-                          <Badge bg={st.color} borderRadius="$full" px="$3" py="$1">
-                            <BadgeText color="$white" size="xs">
+                          <Badge bg={st.bg} borderRadius="$full" px="$3" py="$1">
+                            <BadgeText color={st.fg} size="xs" fontFamily="$heading">
                               {st.label}
                             </BadgeText>
                           </Badge>
@@ -389,7 +395,7 @@ export function Attendances() {
                         </VStack>
                       </HStack>
                       <HStack alignItems="center" gap="$1" mt="$3">
-                        <ChevronRight size={13} color={canRate ? "#FFB703" : "#9CA3AF"} />
+                        <ChevronRight size={13} color={canRate ? "#163300" : "#454745"} />
                         <Text size="xs" color="$gray300" fontFamily="$heading">
                           {canRate ? "Toque para detalhes e avaliar" : "Toque para ver detalhes"}
                         </Text>

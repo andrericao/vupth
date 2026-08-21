@@ -10,16 +10,6 @@ type Props = Omit<ComponentProps<typeof GluestackButton>, "variant"> & {
   isLoading?: boolean;
 };
 
-const btnShadow = {
-  // [bug] Era `"$forest"`: token do gluestack NAO resolve dentro de um objeto
-  // de estilo CRU do React Native — a cor simplesmente nunca era aplicada.
-  shadowColor: "#163300",
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.16,
-  shadowRadius: 10,
-  elevation: 3,
-};
-
 export function BrandButton({
   title,
   variant = "primary",
@@ -46,7 +36,6 @@ export function BrandButton({
       $active-bg={variant === "primary" ? "$brandSuccess" : variant === "secondary" ? "$brandSurfaceAlt" : "transparent"}
       borderWidth={isOutline ? "$2" : "$0"}
       borderColor="$forest"
-      style={variant === "primary" ? btnShadow : undefined}
       // `isDisabled` do Gluestack e so visual; o `disabled` de verdade (Pressable)
       // vai amarrado junto — ver nota no Button.tsx original.
       isDisabled={isDisabled}

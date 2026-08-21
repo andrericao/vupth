@@ -20,6 +20,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
 import { FilterSheet } from "@components/FilterSheet";
+import { useFavoritesStore } from "@stores/favoritesStore";
 import { formatWaitTime } from "@domain/queue/types";
 
 // [marca-vupth] Saudacao por horario do dia (Pencil CLIENT · 06 Home).
@@ -177,10 +178,14 @@ export function Home() {
   // GPS: quando ha coordenadas, `useEstablishments` ja pediu a lista com
   // `lat`/`lng` e o BACKEND devolveu ordenada por distancia — nao reordenamos.
   const coords = useLocationStore((s) => s.coords);
+  // Favoritos sobem ao topo — e o que faz o coracao da tela da loja valer
+  // alguma coisa (do contrario ele preenche um icone e nao muda nada).
+  const favoriteIds = useFavoritesStore((s) => s.ids);
   const filteredEstablishments = orderForHome(
     filterEstablishments(establishments, search, selectedFilter),
     coords != null,
     location,
+    favoriteIds,
   );
 
   const onRefresh = useCallback(() => {

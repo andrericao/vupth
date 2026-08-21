@@ -22,6 +22,7 @@ import { isEffectivelyOpen } from "@domain/establishment/types";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { useQueueSocket } from "@hooks/useQueueSocket";
+import { useFavoritesStore } from "@stores/favoritesStore";
 
 type RouteParams = {
   establishmentId: string;
@@ -78,7 +79,7 @@ function ProfessionalRow({
                 {formatSpecialty(professional.specialty)}
               </Text>
               <HStack alignItems="center" gap="$1">
-                <Star size={11} color="#FFB703" fill="#FFB703" />
+                <Star size={11} color="#163300" fill="#163300" />
                 <Text size="2xs" color="$brandTextSecondary" fontFamily="$heading">
                   {r.value.toFixed(1)}
                 </Text>
@@ -104,6 +105,11 @@ export function EstablishmentDetail() {
   useQueueSocket(establishmentId);
 
   const [heroFailed, setHeroFailed] = useState(false);
+
+  const favoriteIds = useFavoritesStore((s) => s.ids);
+  const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
+  const isFavorite = favoriteIds.includes(establishmentId);
+  const handleToggleFavorite = () => toggleFavorite(establishmentId);
 
   function handleSelectProfessional(professionalId: string) {
     const prof = professionals.find((p) => p.id === professionalId);
@@ -179,11 +185,20 @@ export function EstablishmentDetail() {
             resizeMode="cover"
             onError={() => setHeroFailed(true)}
           >
-            <HeroNav onBack={() => navigation.goBack()} onPhoto />
+            <HeroNav
+              onBack={() => navigation.goBack()}
+              onPhoto
+              isFavorite={isFavorite}
+              onToggleFavorite={handleToggleFavorite}
+            />
           </ImageBackground>
         </Box>
       ) : (
-        <HeroNav onBack={() => navigation.goBack()} />
+        <HeroNav
+          onBack={() => navigation.goBack()}
+          isFavorite={isFavorite}
+          onToggleFavorite={handleToggleFavorite}
+        />
       )}
 
       <VStack px={20} pt="$5" gap="$1.5">
@@ -312,7 +327,17 @@ export function EstablishmentDetail() {
   );
 }
 
-function HeroNav({ onBack, onPhoto }: { onBack: () => void; onPhoto?: boolean }) {
+function HeroNav({
+  onBack,
+  onPhoto,
+  isFavorite,
+  onToggleFavorite,
+}: {
+  onBack: () => void;
+  onPhoto?: boolean;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+}) {
   return (
     <HStack justifyContent="space-between" alignItems="center" px={20} pt={56}>
       <TouchableOpacity onPress={onBack} testID="back-button">
@@ -320,9 +345,20 @@ function HeroNav({ onBack, onPhoto }: { onBack: () => void; onPhoto?: boolean })
           <ChevronLeft size={20} color="#163300" />
         </Center>
       </TouchableOpacity>
-      <Center width={40} height={40} borderRadius="$full" bg={onPhoto ? "#FFFFFFE6" : "$greenTint"}>
-        <Heart size={20} color="#163300" />
-      </Center>
+      {/* Era um `Center` SOLTO: parecia botao e nao fazia nada (QA Alexia).
+          Favoritado enche o coracao — o estado nao pode depender so de uma
+          diferenca sutil de cor. */}
+      <TouchableOpacity
+        onPress={onToggleFavorite}
+        testID="favorite-button"
+        accessibilityRole="button"
+        accessibilityState={{ selected: isFavorite }}
+        accessibilityLabel={isFavorite ? "Remover dos favoritos" : "Salvar nos favoritos"}
+      >
+        <Center width={40} height={40} borderRadius="$full" bg={onPhoto ? "#FFFFFFE6" : "$greenTint"}>
+          <Heart size={20} color="#163300" fill={isFavorite ? "#163300" : "none"} />
+        </Center>
+      </TouchableOpacity>
     </HStack>
   );
 }

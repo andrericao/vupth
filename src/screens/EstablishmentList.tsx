@@ -57,7 +57,7 @@ function OpenRow({
               )}
               <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
               <HStack alignItems="center" gap="$1">
-                <Star size={11} color="#FFB703" fill="#FFB703" />
+                <Star size={11} color="#163300" fill="#163300" />
                 <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
                   {r.value.toFixed(1)}
                 </Text>

@@ -315,8 +315,8 @@ export function EditAddress() {
                     <Text size="xs" color="$gray300">CEP: {addr.zipCode}</Text>
                     {addr.isMain && (
                       <HStack alignItems="center" gap="$1" mt="$1">
-                        <Star size={14} color="#F59E0B" fill="#F59E0B" />
-                        <Text size="xs" color="$yellow500">Principal</Text>
+                        <Star size={14} color="#163300" fill="#163300" />
+                        <Text size="xs" color="$forest" fontFamily="$heading">Principal</Text>
                       </HStack>
                     )}
                   </VStack>
