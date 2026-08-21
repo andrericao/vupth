@@ -77,7 +77,7 @@ export function Profile() {
   return (
     <ScrollView
       flex={1}
-      bg="$gray700"
+      bg="$brandBackground"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >

@@ -410,7 +410,7 @@ export function QueueStatus() {
 
   if (isCreating) {
     return (
-      <Center flex={1} bg="$gray700" px={15}>
+      <Center flex={1} bg="$brandBackground" px={15}>
         <ActivityIndicator size="large" color="#163300" />
         <Text mt="$2" color="$gray300">{createMsg}</Text>
         <Text mt="$1" size="xs" color="$gray400" textAlign="center">
@@ -422,7 +422,7 @@ export function QueueStatus() {
 
   if (createError) {
     return (
-      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
+      <VStack flex={1} px={15} pt={60} pb={30} bg="$brandBackground">
         <Header />
         <Center flex={1}>
           <Text
