@@ -11,7 +11,7 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Queue, Clock, CaretRight, CalendarBlank, ArrowsLeftRight } from "phosphor-react-native";
+import { Users, Clock, ChevronRight, Calendar, Repeat2 } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
@@ -198,7 +198,7 @@ export function Attendances() {
                 gap="$2"
               >
                 <HStack alignItems="center" gap="$2.5">
-                  <Queue size={20} color="#163300" />
+                  <Users size={20} color="#163300" />
                   <VStack flex={1} gap="$0.5">
                     <Text fontFamily="$display" fontSize={16} letterSpacing={-0.4} color="$forest">
                       {activeQueue.establishmentName}
@@ -207,7 +207,7 @@ export function Attendances() {
                       {activeQueue.professionalName}
                     </Text>
                   </VStack>
-                  <CaretRight size={18} color="#454745" />
+                  <ChevronRight size={18} color="#454745" />
                 </HStack>
                 <HStack
                   bg="$brandGreen"
@@ -251,7 +251,7 @@ export function Attendances() {
               {pendingSwaps.map((s) => (
                 <Box key={s.offerId} bg="$brandSurface" p="$4" borderRadius="$card">
                   <HStack alignItems="center" gap="$3">
-                    <ArrowsLeftRight size={22} color="#163300" />
+                    <Repeat2 size={22} color="#163300" />
                     <VStack flex={1}>
                       <Text fontFamily="$heading" size="sm">
                         {s.professionalName}
@@ -300,7 +300,7 @@ export function Attendances() {
                   {group.items.map((i) => (
                     <Box key={i.id} bg="$brandSurface" p="$4" borderRadius="$card">
                       <HStack alignItems="center" gap="$3">
-                        <CalendarBlank size={22} color="#163300" />
+                        <Calendar size={22} color="#163300" />
                         <VStack flex={1}>
                           <Text fontFamily="$heading" size="sm">
                             {i.professionalName}
@@ -388,7 +388,7 @@ export function Attendances() {
                         </VStack>
                       </HStack>
                       <HStack alignItems="center" gap="$1" mt="$3">
-                        <CaretRight size={13} color={canRate ? "#FFB703" : "#9CA3AF"} weight="bold" />
+                        <ChevronRight size={13} color={canRate ? "#FFB703" : "#9CA3AF"} />
                         <Text size="xs" color="$gray300" fontFamily="$heading">
                           {canRate ? "Toque para detalhes e avaliar" : "Toque para ver detalhes"}
                         </Text>

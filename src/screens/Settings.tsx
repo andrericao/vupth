@@ -11,15 +11,7 @@ import {
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import {
-  User,
-  EnvelopeSimple,
-  Lock,
-  MapPin,
-  CaretRight,
-  SignOut,
-  ArrowsClockwise,
-} from "phosphor-react-native";
+import { User, Mail, Lock, MapPin, ChevronRight, LogOut, RefreshCw } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
@@ -60,7 +52,7 @@ function MenuItem({
             </Text>
           )}
         </VStack>
-        <CaretRight size={18} color="#454745" />
+        <ChevronRight size={18} color="#454745" />
       </HStack>
       {!last && <Box height={1} bg="$brandBorder" />}
     </TouchableOpacity>
@@ -245,7 +237,7 @@ export function Settings() {
                 onPress={() => navigation.navigate("editProfile")}
               />
               <MenuItem
-                icon={<EnvelopeSimple size={20} color="#163300" />}
+                icon={<Mail size={20} color="#163300" />}
                 label="E-mail"
                 value={user?.email ?? "—"}
                 onPress={() => navigation.navigate("editEmail")}
@@ -278,7 +270,7 @@ export function Settings() {
                 gap="$2.5"
                 alignItems="center"
               >
-                <SignOut size={19} color="#163300" />
+                <LogOut size={19} color="#163300" />
                 <Text size="sm" fontWeight="$semibold" color="$forest">
                   Sair da conta
                 </Text>
@@ -356,7 +348,7 @@ export function Settings() {
               gap="$2"
               alignItems="center"
             >
-              <ArrowsClockwise size={15} color="#163300" />
+              <RefreshCw size={15} color="#163300" />
               <Text fontFamily="$heading" fontSize={13} color="$forest">
                 {isChecking ? "Verificando..." : "Verificar atualização"}
               </Text>

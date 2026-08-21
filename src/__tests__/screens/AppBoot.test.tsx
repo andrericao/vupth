@@ -8,7 +8,7 @@ import App from '../../../App';
 // pegou porque os testes de hook montam o provider por conta. Este smoke monta o
 // App de verdade: qualquer hook app-wide fora do seu provider derruba aqui.
 jest.mock('expo-secure-store');
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@routes/index', () => ({ Routes: () => null }));
 jest.mock('expo-font', () => ({ useFonts: () => [true, null] }));
 jest.mock('@expo-google-fonts/poppins', () => ({

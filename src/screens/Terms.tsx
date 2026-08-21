@@ -2,7 +2,7 @@ import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { VStack, HStack, Text, Center, ScrollView } from "@gluestack-ui/themed";
-import { CaretLeft } from "phosphor-react-native";
+import { ChevronLeft } from "lucide-react-native";
 
 type Aba = "uso" | "privacidade";
 
@@ -90,7 +90,7 @@ export function Terms() {
       <HStack px={20} pt={56} gap="$3.5" alignItems="center">
         <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
           <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
-            <CaretLeft size={20} color="#163300" weight="bold" />
+            <ChevronLeft size={20} color="#163300" />
           </Center>
         </TouchableOpacity>
         <Text fontFamily="$display" fontSize={18} letterSpacing={-0.3} color="$forest">

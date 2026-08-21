@@ -1,7 +1,7 @@
 import { TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { VStack, HStack, Text, Center, ScrollView } from "@gluestack-ui/themed";
-import { BellRinging, Check } from "phosphor-react-native";
+import { BellRing, Check } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
@@ -47,7 +47,7 @@ export function PushPermission() {
       <VStack flex={1} bg="$brandBackground">
       <Center flex={1} px={20}>
         <Center width={260} height={260} borderRadius={130} bg="$greenTint">
-          <BellRinging size={92} color="#163300" weight="fill" />
+          <BellRing size={92} color="#163300" />
         </Center>
       </Center>
 
@@ -67,7 +67,7 @@ export function PushPermission() {
         <VStack gap="$2.5" mt="$1.5">
           {PROMESSAS.map((p) => (
             <HStack key={p} gap="$2.5" alignItems="center">
-              <Check size={16} color="#163300" weight="bold" />
+              <Check size={16} color="#163300" />
               <Text size="sm" fontWeight="$medium" color="$brandTextPrimary">
                 {p}
               </Text>

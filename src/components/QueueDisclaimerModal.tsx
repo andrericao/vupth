@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal, TouchableOpacity } from "react-native";
 import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
-import { Info, Check } from "phosphor-react-native";
+import { Info, Check } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";
@@ -32,7 +32,7 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
         <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
           <HStack alignItems="center" gap="$2" mb="$3">
-            <Info size={24} color="#163300" weight="fill" />
+            <Info size={24} color="#163300" />
             <Heading fontFamily="$heading" fontSize="$lg" flex={1}>
               {QUEUE_DISCLAIMER_TITLE}
             </Heading>
@@ -54,7 +54,7 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
                 alignItems="center"
                 justifyContent="center"
               >
-                {dontShow && <Check size={14} color="#FFFFFF" weight="bold" />}
+                {dontShow && <Check size={14} color="#FFFFFF" />}
               </Box>
               <Text size="sm" color="$gray300">
                 Não mostrar novamente

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal, TouchableOpacity } from "react-native";
 import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
-import { Clock } from "phosphor-react-native";
+import { Clock } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";

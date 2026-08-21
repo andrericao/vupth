@@ -12,7 +12,7 @@ import { useAuthStore } from '@stores/authStore';
 // existia, mas era passivo — abrir o formulário agora OFERECE o GPS.
 
 jest.mock('expo-secure-store');
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
   useRoute: () => ({ params: {} }),

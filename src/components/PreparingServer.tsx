@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { Animated, AccessibilityInfo, Easing } from "react-native";
 import { Center, Text, VStack, HStack } from "@gluestack-ui/themed";
-import {
-  DeviceMobile,
-  Storefront,
-  Scissors,
-  PersonSimpleWalk,
-} from "phosphor-react-native";
+import { Smartphone, Store, Scissors, Footprints } from "lucide-react-native";
 
 // Tela do portão de readiness / cold start (Pencil CLIENT · 23 Preparando
 // Servidor). Enquanto o backend acorda (Render Free, ~50s), seguramos o app
@@ -21,11 +16,16 @@ import {
 // horrível"). Por isso o fundo aqui continua claro/neutro — o verde entra só
 // no badge pequeno do icone, nunca como fundo cheio da tela.
 
+// [marca-vupth] So "Chegando na loja" (Store) e literal do Pencil (CLIENT ·
+// 23 Preparando Servidor, unico icone do mockup estatico) — os outros 3
+// passos sao uma sequencia propria do app (a tela anima entre eles; um
+// mockup estatico so mostra um passo por vez) escolhidos pra manter a
+// mesma linguagem "objeto concreto" do original em phosphor.
 const STEPS = [
-  { Icon: DeviceMobile, title: "Abrindo o app" },
-  { Icon: Storefront, title: "Chegando na loja" },
+  { Icon: Smartphone, title: "Abrindo o app" },
+  { Icon: Store, title: "Chegando na loja" },
   { Icon: Scissors, title: "Na cadeira" },
-  { Icon: PersonSimpleWalk, title: "Pronto, sem fila" },
+  { Icon: Footprints, title: "Pronto, sem fila" },
 ];
 
 const ICON_MS = 800;
@@ -115,7 +115,7 @@ function WarmupAnimation() {
     <VStack alignItems="center" space="lg">
       <Animated.View style={{ opacity, transform: [{ scale }, { translateX: shiftX }] }}>
         <Center width={88} height={88} borderRadius="$full" bg="$greenTint">
-          <Step size={38} color="#163300" weight="fill" />
+          <Step size={38} color="#163300" />
         </Center>
       </Animated.View>
       <VStack space="xs" alignItems="center">

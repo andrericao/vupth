@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal } from "react-native";
 import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
-import { CalendarBlank } from "phosphor-react-native";
+import { Calendar } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { DaySelector } from "@components/DaySelector";
@@ -62,7 +62,7 @@ export function ScheduleModal({ visible, onClose }: Props) {
               mt="$4"
             >
               <HStack alignItems="center" gap="$2">
-                <CalendarBlank size={18} color="#163300" />
+                <Calendar size={18} color="#163300" />
                 <Text size="sm" color="$gray500">
                   A escolha do horário deste dia (barra de encaixe) chega em breve.
                 </Text>

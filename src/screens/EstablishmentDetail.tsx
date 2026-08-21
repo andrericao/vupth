@@ -8,7 +8,7 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Star, Info, CaretLeft, Heart, CaretRight } from "phosphor-react-native";
+import { Star, Info, ChevronLeft, Heart, ChevronRight } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
@@ -78,14 +78,14 @@ function ProfessionalRow({
                 {formatSpecialty(professional.specialty)}
               </Text>
               <HStack alignItems="center" gap="$1">
-                <Star size={11} color="#FFB703" weight="fill" />
+                <Star size={11} color="#FFB703" fill="#FFB703" />
                 <Text size="2xs" color="$brandTextSecondary" fontFamily="$heading">
                   {r.value.toFixed(1)}
                 </Text>
               </HStack>
             </HStack>
           </VStack>
-          <CaretRight size={18} color="#454745" />
+          <ChevronRight size={18} color="#454745" />
         </HStack>
       </Box>
     </TouchableOpacity>
@@ -197,7 +197,7 @@ export function EstablishmentDetail() {
           {establishment.name}
         </Text>
         <HStack alignItems="center" gap="$2">
-          <Star size={14} color="#163300" weight="fill" />
+          <Star size={14} color="#163300" fill="#163300" />
           <Text size="sm" fontFamily="$heading" color="$brandTextPrimary">
             {rating.value.toFixed(1)}
           </Text>
@@ -317,7 +317,7 @@ function HeroNav({ onBack, onPhoto }: { onBack: () => void; onPhoto?: boolean })
     <HStack justifyContent="space-between" alignItems="center" px={20} pt={56}>
       <TouchableOpacity onPress={onBack} testID="back-button">
         <Center width={40} height={40} borderRadius="$full" bg={onPhoto ? "#FFFFFFE6" : "$greenTint"}>
-          <CaretLeft size={20} color="#163300" weight="bold" />
+          <ChevronLeft size={20} color="#163300" />
         </Center>
       </TouchableOpacity>
       <Center width={40} height={40} borderRadius="$full" bg={onPhoto ? "#FFFFFFE6" : "$greenTint"}>

@@ -1,7 +1,7 @@
 import { ComponentProps, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Input as GluestackInput2, InputField, HStack } from "@gluestack-ui/themed";
-import { Eye, EyeSlash, MagnifyingGlass, XCircle } from "phosphor-react-native";
+import { Eye, EyeOff, Search, CircleX } from "lucide-react-native";
 
 type Props = ComponentProps<typeof InputField> & {
   isPassword?: boolean;
@@ -44,16 +44,16 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
             {visible ? (
               <Eye size={22} color="#6B7280" />
             ) : (
-              <EyeSlash size={22} color="#6B7280" />
+              <EyeOff size={22} color="#6B7280" />
             )}
           </TouchableOpacity>
         )}
         {showSearchIcon && !hasValue && (
-          <MagnifyingGlass size={20} color="#9CA3AF" />
+          <Search size={20} color="#9CA3AF" />
         )}
         {showSearchIcon && hasValue && onClear && (
           <TouchableOpacity onPress={onClear} hitSlop={8}>
-            <XCircle size={22} color="#9CA3AF" weight="fill" />
+            <CircleX size={22} color="#9CA3AF" />
           </TouchableOpacity>
         )}
       </HStack>

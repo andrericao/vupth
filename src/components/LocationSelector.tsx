@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal, Alert, TouchableOpacity } from "react-native";
 import { VStack, HStack, Box, Text, Heading, Divider } from "@gluestack-ui/themed";
-import { MapPin, CaretRight } from "phosphor-react-native";
+import { MapPin, ChevronRight } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { Input2 } from "@components/Input2";
@@ -90,11 +90,11 @@ export function LocationSelector() {
     <>
       <TouchableOpacity onPress={() => setOpen(true)} accessibilityRole="button">
         <HStack alignItems="center" gap="$2" py="$1">
-          <MapPin size={18} color="#163300" weight="fill" />
+          <MapPin size={18} color="#163300" />
           <Text size="sm" fontFamily="$heading" color="$forest" flex={1} numberOfLines={1}>
             {label}
           </Text>
-          <CaretRight size={16} color="#9CA3AF" />
+          <ChevronRight size={16} color="#9CA3AF" />
         </HStack>
       </TouchableOpacity>
 

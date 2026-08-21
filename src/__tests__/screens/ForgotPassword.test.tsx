@@ -13,7 +13,7 @@ import { authService } from '@services/authService';
 // espera é o servidor acordando, e uma desistência que NÃO dispara o POST.
 
 jest.mock('expo-secure-store');
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
   useRoute: () => ({ params: {} }),

@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 
-// [verde-imersivo] Pilula da aba ativa: fundo verde-claro arredondado atras do
-// icone quando focado. Usado no tabBarIcon (espelha o front-partner).
+// [marca-vupth] Pilula da aba ativa: fundo greenTint atras do icone quando
+// focado. Era um forest translucido (rgba) — o Pencil (Tab Bar Client v3)
+// especifica o token solido $green-tint, mesmo par usado nas pilulas de
+// selecao em outras telas (ex.: chip "Hoje" do relatorio no partner).
 export function TabPill({ focused, children }: { focused: boolean; children: ReactNode }) {
   return (
     <View
@@ -10,7 +12,7 @@ export function TabPill({ focused, children }: { focused: boolean; children: Rea
         paddingHorizontal: 16,
         paddingVertical: 5,
         borderRadius: 999,
-        backgroundColor: focused ? "rgba(22,51,0,0.1)" : "transparent",
+        backgroundColor: focused ? "#E2F6D5" : "transparent",
       }}
     >
       {children}
@@ -18,7 +20,26 @@ export function TabPill({ focused, children }: { focused: boolean; children: Rea
   );
 }
 
-// [marca-vupth] $forest — nao aceita token (Ionicons `color` cru).
+// [marca-vupth] Rotulo da aba: peso 700 ativo / 500 inativo (Pencil, mesma
+// ref). tabBarLabelStyle do React Navigation e ESTATICO (nao recebe
+// `focused`) — por isso o rotulo vira render function como o icone, em vez
+// de tabBarLabel:"string" + estilo compartilhado.
+export function TabLabel({ focused, children }: { focused: boolean; children: string }) {
+  return (
+    <Text
+      style={{
+        fontSize: 11,
+        marginTop: 2,
+        fontWeight: focused ? "700" : "500",
+        color: focused ? TAB_ACTIVE : TAB_INACTIVE,
+      }}
+    >
+      {children}
+    </Text>
+  );
+}
+
+// [marca-vupth] $forest — nao aceita token (icone `color` cru).
 export const TAB_ACTIVE = "#163300";
 export const TAB_INACTIVE = "#9CA3AF";
 

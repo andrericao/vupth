@@ -8,7 +8,7 @@ import { Header } from '@components/Header';
 // Os testes abaixo existem para que um `require` avulso de logo em outra tela
 // não passe despercebido.
 
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ goBack: jest.fn(), navigate: jest.fn() }),
 }));

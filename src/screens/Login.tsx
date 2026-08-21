@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Text, Center, VStack, HStack, ScrollView } from "@gluestack-ui/themed";
-import { CaretLeft } from "phosphor-react-native";
+import { ChevronLeft } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
@@ -107,7 +107,7 @@ export function Login() {
       <VStack flex={1} pt={56} pb={32} px={20}>
         <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
           <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
-            <CaretLeft size={20} color="#163300" weight="bold" />
+            <ChevronLeft size={20} color="#163300" />
           </Center>
         </TouchableOpacity>
 

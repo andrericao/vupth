@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, Text, Center, VStack, HStack } from "@gluestack-ui/themed";
-import { Check, X, CaretLeft, Warning } from "phosphor-react-native";
+import { Check, X, ChevronLeft, TriangleAlert } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
@@ -119,7 +119,7 @@ export function SignUp() {
         <HStack justifyContent="space-between" alignItems="center">
           <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
             <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
-              <CaretLeft size={20} color="#163300" weight="bold" />
+              <ChevronLeft size={20} color="#163300" />
             </Center>
           </TouchableOpacity>
           {/* "Agora nao" so no fluxo da fila: e a saida de quem foi
@@ -147,7 +147,7 @@ export function SignUp() {
               alignItems="center"
               alignSelf="flex-start"
             >
-              <Warning size={15} color="#163300" weight="fill" />
+              <TriangleAlert size={15} color="#163300" />
               <Text fontFamily="$heading" fontSize={12} color="$forest">
                 {params.professionalName
                   ? `ENTRANDO NA FILA · ${params.professionalName.toUpperCase()}`
@@ -206,13 +206,13 @@ export function SignUp() {
             />
             {passwordsMatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <Check size={14} color="#163300" weight="bold" />
+                <Check size={14} color="#163300" />
                 <Text size="xs" color="$forest">Senhas conferem</Text>
               </HStack>
             )}
             {passwordsMismatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <X size={14} color="#B3261E" weight="bold" />
+                <X size={14} color="#B3261E" />
                 <Text size="xs" color="$brandDanger">Senhas não conferem</Text>
               </HStack>
             )}

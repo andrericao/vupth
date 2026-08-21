@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal, TouchableOpacity, TextInput, Alert } from "react-native";
 import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
-import { Star } from "phosphor-react-native";
+import { Star } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";
@@ -89,7 +89,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
                 <Star
                   size={36}
                   color={n <= score ? "#FFB703" : "#D1D5DB"}
-                  weight={n <= score ? "fill" : "regular"}
+                  fill={n <= score ? "#FFB703" : "none"}
                 />
               </TouchableOpacity>
             ))}

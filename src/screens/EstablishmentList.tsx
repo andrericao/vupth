@@ -2,14 +2,7 @@ import { useState } from "react";
 import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
-import {
-  MagnifyingGlass,
-  CaretLeft,
-  CaretRight,
-  Lightning,
-  ArrowsDownUp,
-  Star,
-} from "phosphor-react-native";
+import { Search, ChevronLeft, ChevronRight, Zap, ArrowUpDown, Star } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
@@ -65,7 +58,7 @@ function OpenRow({
               )}
               <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
               <HStack alignItems="center" gap="$1">
-                <Star size={11} color="#FFB703" weight="fill" />
+                <Star size={11} color="#FFB703" fill="#FFB703" />
                 <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
                   {r.value.toFixed(1)}
                 </Text>
@@ -168,7 +161,7 @@ export function EstablishmentList() {
       <VStack px={20} pt={56} gap="$3.5">
         <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
           <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
-            <CaretLeft size={20} color="#163300" weight="bold" />
+            <ChevronLeft size={20} color="#163300" />
           </Center>
         </TouchableOpacity>
 
@@ -190,7 +183,7 @@ export function EstablishmentList() {
           py={13}
           alignItems="center"
         >
-          <MagnifyingGlass size={18} color="#454745" />
+          <Search size={18} color="#454745" />
           <Box flex={1}>
             <TextInput
               value={search}
@@ -215,7 +208,7 @@ export function EstablishmentList() {
               alignItems="center"
             >
               <Center width={38} height={38} borderRadius="$full" bg="$brandGreen">
-                <Lightning size={20} color="#163300" weight="fill" />
+                <Zap size={20} color="#163300" />
               </Center>
               <VStack flex={1} gap={2}>
                 <Text fontFamily="$heading" fontSize={15} color="$white">
@@ -225,7 +218,7 @@ export function EstablishmentList() {
                   {best.name} · {waitLabel(best).replace("~", "")}
                 </Text>
               </VStack>
-              <CaretRight size={20} color="#9FE870" />
+              <ChevronRight size={20} color="#9FE870" />
             </HStack>
           </TouchableOpacity>
         )}
@@ -249,7 +242,7 @@ export function EstablishmentList() {
                 py={7}
                 alignItems="center"
               >
-                <ArrowsDownUp size={13} color="#163300" />
+                <ArrowUpDown size={13} color="#163300" />
                 <Text fontFamily="$heading" fontSize={12} color="$brandTextPrimary">
                   {sortBy === "wait" ? "Menor espera" : "Mais perto"}
                 </Text>

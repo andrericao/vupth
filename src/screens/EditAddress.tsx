@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Alert, ScrollView, TouchableOpacity } from "react-native";
 import { VStack, Text, Box, HStack } from "@gluestack-ui/themed";
-import { Star, Trash, PencilSimple, MapPin } from "phosphor-react-native";
+import { Star, Trash2, Pencil, MapPin } from "lucide-react-native";
 
 import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
@@ -234,7 +234,7 @@ export function EditAddress() {
             onPress={handleUseGps}
           />
           <HStack alignItems="center" gap="$1" mb="$4">
-            <MapPin size={12} color="#9CA3AF" weight="fill" />
+            <MapPin size={12} color="#9CA3AF" />
             <Text size="xs" color="$gray400" flex={1}>
               Com o GPS a gente já preenche o endereço e calcula sua distância até os estabelecimentos.
             </Text>
@@ -316,7 +316,7 @@ export function EditAddress() {
                     <Text size="xs" color="$gray300">CEP: {addr.zipCode}</Text>
                     {addr.isMain && (
                       <HStack alignItems="center" gap="$1" mt="$1">
-                        <Star size={14} color="#F59E0B" weight="fill" />
+                        <Star size={14} color="#F59E0B" fill="#F59E0B" />
                         <Text size="xs" color="$yellow500">Principal</Text>
                       </HStack>
                     )}
@@ -328,10 +328,10 @@ export function EditAddress() {
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity onPress={() => handleEdit(addr)}>
-                      <PencilSimple size={20} color="#163300" />
+                      <Pencil size={20} color="#163300" />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)}>
-                      <Trash size={20} color="#B3261E" />
+                      <Trash2 size={20} color="#B3261E" />
                     </TouchableOpacity>
                   </HStack>
                 </HStack>

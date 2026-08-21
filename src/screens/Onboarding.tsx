@@ -1,6 +1,6 @@
 import { TouchableOpacity } from "react-native";
 import { VStack, HStack, Text, Box, Center, ScrollView } from "@gluestack-ui/themed";
-import { Users } from "phosphor-react-native";
+import { Users } from "lucide-react-native";
 
 import { goToLoginAfterOnboarding } from "@routes/navigationRef";
 import { Button } from "@components/Button";
@@ -70,7 +70,7 @@ export function Onboarding() {
         </Text>
         {openNow > 0 && (
           <HStack gap="$2" alignItems="center" mt="$1">
-            <Users size={16} color="#163300" weight="fill" />
+            <Users size={16} color="#163300" />
             <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary">
               {openNow === 1
                 ? "1 lugar aberto agora perto de você"

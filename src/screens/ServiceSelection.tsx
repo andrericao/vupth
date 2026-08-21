@@ -7,7 +7,7 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Check, CaretLeft } from "phosphor-react-native";
+import { Check, ChevronLeft } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
@@ -286,7 +286,7 @@ export function ServiceSelection() {
       <VStack px={20} gap="$1.5">
         <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
           <Center width={40} height={40} borderRadius="$full" bg="$greenTint" mb="$2">
-            <CaretLeft size={20} color="#163300" weight="bold" />
+            <ChevronLeft size={20} color="#163300" />
           </Center>
         </TouchableOpacity>
         <Text
@@ -344,7 +344,7 @@ export function ServiceSelection() {
                         borderWidth={isSelected ? 0 : 1.5}
                         borderColor="$brandBorder"
                       >
-                        {isSelected && <Check size={14} color="#FFFFFF" weight="bold" />}
+                        {isSelected && <Check size={14} color="#FFFFFF" />}
                       </Center>
                       <VStack flex={1} gap="$0.5">
                         <Text fontFamily="$heading" fontSize="$sm" color="$forest">

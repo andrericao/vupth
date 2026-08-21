@@ -20,7 +20,7 @@ const OPEN_PARAMS = {
 const mockRouteParams: Record<string, unknown> = { ...OPEN_PARAMS };
 
 jest.mock('expo-secure-store');
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate, goBack: jest.fn() }),
   useRoute: () => ({ params: mockRouteParams }),

@@ -1,7 +1,7 @@
 import { TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { VStack, HStack, Text, Center } from "@gluestack-ui/themed";
-import { CaretLeft } from "phosphor-react-native";
+import { ChevronLeft } from "lucide-react-native";
 
 type Props = {
   /** Titulo grande da tela. Sai em CAIXA ALTA, como no Pencil. */
@@ -32,7 +32,7 @@ export function ScreenHeader({ title, subtitle, action, onBack }: Props) {
           testID="back-button"
         >
           <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
-            <CaretLeft size={20} color="#163300" weight="bold" />
+            <ChevronLeft size={20} color="#163300" />
           </Center>
         </TouchableOpacity>
         {action}

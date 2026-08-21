@@ -9,12 +9,7 @@ import {
   HStack,
   ScrollView,
 } from "@gluestack-ui/themed";
-import {
-  ClipboardText,
-  Gear,
-  CaretRight,
-  SignOut,
-} from "phosphor-react-native";
+import { ClipboardList, Settings, ChevronRight, LogOut } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
@@ -43,7 +38,7 @@ function MenuItem({
         <HStack alignItems="center" gap="$3">
           {icon}
           <Text size="sm" flex={1}>{label}</Text>
-          <CaretRight size={18} color="#9CA3AF" />
+          <ChevronRight size={18} color="#9CA3AF" />
         </HStack>
       </Box>
     </TouchableOpacity>
@@ -104,12 +99,12 @@ export function Profile() {
 
         <Box borderRadius="$2xl" mt="$8" overflow="hidden" style={cardShadow}>
           <MenuItem
-            icon={<ClipboardText size={22} color="#163300" />}
+            icon={<ClipboardList size={22} color="#163300" />}
             label="Atendimentos"
             onPress={() => navigation.getParent()?.navigate("atendimentosTab", { screen: "attendances" })}
           />
           <MenuItem
-            icon={<Gear size={22} color="#163300" />}
+            icon={<Settings size={22} color="#163300" />}
             label="Configurações"
             onPress={() => navigation.getParent()?.navigate("settingsTab", { screen: "settings" })}
           />
@@ -122,7 +117,7 @@ export function Profile() {
             <TouchableOpacity onPress={handleLogout}>
               <Box bg="$white" px="$4" py="$4" borderRadius="$2xl" style={cardShadow}>
                 <HStack alignItems="center" gap="$3">
-                  <SignOut size={22} color="#B3261E" />
+                  <LogOut size={22} color="#B3261E" />
                   <Text size="sm" color="$brandDanger">Sair da conta</Text>
                 </HStack>
               </Box>

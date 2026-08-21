@@ -2,11 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
-import {
-  MagnifyingGlass,
-  SlidersHorizontal,
-  CaretRight,
-} from "phosphor-react-native";
+import { Search, SlidersHorizontal, ChevronRight } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
@@ -243,7 +239,7 @@ export function Home() {
           py={13}
           alignItems="center"
         >
-          <MagnifyingGlass size={18} color="#454745" />
+          <Search size={18} color="#454745" />
           <Box flex={1}>
             <TextInput
               value={search}
@@ -320,7 +316,7 @@ export function Home() {
                     ~{formatWaitTime(remaining)} · {activeQueue.establishmentName}
                   </Text>
                 </VStack>
-                <CaretRight size={24} color="#163300" />
+                <ChevronRight size={24} color="#163300" />
               </HStack>
             </VStack>
           </TouchableOpacity>

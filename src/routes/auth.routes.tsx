@@ -4,7 +4,7 @@ import {
 } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { House, ClipboardText, Gear } from "phosphor-react-native";
+import { House, ClipboardList, User } from "lucide-react-native";
 
 import { Home } from "@screens/Home";
 import { EstablishmentDetail } from "@screens/EstablishmentDetail";
@@ -22,7 +22,7 @@ import { EditPassword } from "@screens/EditPassword";
 import { EditAddress } from "@screens/EditAddress";
 import { Terms } from "@screens/Terms";
 import { ServiceSelection } from "@screens/ServiceSelection";
-import { TabPill, TAB_ACTIVE, TAB_INACTIVE, tabBarShadow } from "@components/TabPill";
+import { TabPill, TabLabel, TAB_ACTIVE, TAB_INACTIVE, tabBarShadow } from "@components/TabPill";
 import { ServiceType } from "@domain/establishment/types";
 
 export type AppRoutes = {
@@ -149,7 +149,6 @@ export function AuthRoutes() {
         headerShown: false,
         tabBarActiveTintColor: TAB_ACTIVE,
         tabBarInactiveTintColor: TAB_INACTIVE,
-        tabBarLabelStyle: { fontSize: 11, marginTop: 2 },
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
           borderTopWidth: 0,
@@ -165,10 +164,10 @@ export function AuthRoutes() {
         name="homeTab"
         component={HomeStack}
         options={{
-          tabBarLabel: "Início",
+          tabBarLabel: ({ focused }) => <TabLabel focused={focused}>Início</TabLabel>,
           tabBarIcon: ({ focused, color }) => (
             <TabPill focused={focused}>
-              <House size={24} color={color} weight={focused ? "fill" : "regular"} />
+              <House size={24} color={color} />
             </TabPill>
           ),
         }}
@@ -177,10 +176,10 @@ export function AuthRoutes() {
         name="atendimentosTab"
         component={AttendancesStack}
         options={{
-          tabBarLabel: "Atendimentos",
+          tabBarLabel: ({ focused }) => <TabLabel focused={focused}>Atendimentos</TabLabel>,
           tabBarIcon: ({ focused, color }) => (
             <TabPill focused={focused}>
-              <ClipboardText size={24} color={color} weight={focused ? "fill" : "regular"} />
+              <ClipboardList size={24} color={color} />
             </TabPill>
           ),
         }}
@@ -189,10 +188,13 @@ export function AuthRoutes() {
         name="settingsTab"
         component={SettingsStack}
         options={{
-          tabBarLabel: "Config.",
+          // [marca-vupth] Pencil chama essa aba "Perfil" (Tab Bar Client v3),
+          // nao "Config." — o glifo tambem e "user", nao um icone de
+          // engrenagem (a tela de destino, Settings.tsx, e a Perfil do .pen).
+          tabBarLabel: ({ focused }) => <TabLabel focused={focused}>Perfil</TabLabel>,
           tabBarIcon: ({ focused, color }) => (
             <TabPill focused={focused}>
-              <Gear size={24} color={color} weight={focused ? "fill" : "regular"} />
+              <User size={24} color={color} />
             </TabPill>
           ),
         }}

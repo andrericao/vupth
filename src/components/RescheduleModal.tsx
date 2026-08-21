@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal, TextInput } from "react-native";
 import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
-import { Clock, Warning } from "phosphor-react-native";
+import { Clock, TriangleAlert } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { cardShadow } from "@utils/styles";
@@ -80,7 +80,7 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
 
           {penalty && (
             <HStack alignItems="center" gap="$2" mt="$4" bg="$red100" borderRadius="$xl" px="$3" py="$2">
-              <Warning size={18} color="#B3261E" />
+              <TriangleAlert size={18} color="#B3261E" />
               <Text size="xs" color="$brandDanger" flex={1}>
                 Você está perto de ser atendido. Reagendar agora gera multa de R$ {CANCELLATION_PENALTY_VALUE},00 no
                 seu próximo atendimento.

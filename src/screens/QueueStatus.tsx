@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
-import { Info, CaretLeft, Repeat, Check, CaretRight } from "phosphor-react-native";
+import { Info, ChevronLeft, Repeat2, Check, ChevronRight } from "lucide-react-native";
 import * as SecureStore from "expo-secure-store";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
@@ -507,7 +507,7 @@ export function QueueStatus() {
         <VStack flex={1} bg="$brandBackground">
           <VStack pt={56} px={20} gap="$4" alignItems="center">
             <Center width={96} height={96} borderRadius={48} bg="$brandGreen">
-              <Check size={48} color="#163300" weight="bold" />
+              <Check size={48} color="#163300" />
             </Center>
             <Text
               fontFamily="$display"
@@ -570,7 +570,7 @@ export function QueueStatus() {
                       {activeQueue.establishmentName ?? ""}
                     </Text>
                   </VStack>
-                  <CaretRight size={20} color="#163300" />
+                  <ChevronRight size={20} color="#163300" />
                 </HStack>
               </TouchableOpacity>
             )}
@@ -605,7 +605,7 @@ export function QueueStatus() {
         <HStack px={20} pt={56} justifyContent="space-between" alignItems="center">
           <TouchableOpacity onPress={() => navigation.navigate("home")} testID="back-button">
             <Center width={40} height={40} borderRadius="$full" bg="#16330014">
-              <CaretLeft size={20} color="#163300" weight="bold" />
+              <ChevronLeft size={20} color="#163300" />
             </Center>
           </TouchableOpacity>
           <TouchableOpacity
@@ -725,7 +725,7 @@ export function QueueStatus() {
                 alignItems="center"
                 opacity={isRemanejando ? 0.6 : 1}
               >
-                <Repeat size={17} color="#9FE870" />
+                <Repeat2 size={17} color="#9FE870" />
                 <Text fontFamily="$heading" fontSize={15} color="$brandGreen">
                   {isRemanejando ? "Um instante..." : "Mudar minha vez"}
                 </Text>
