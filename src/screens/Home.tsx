@@ -17,6 +17,7 @@ import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
+import { LiveDot } from "@components/LiveDot";
 import { formatWaitTime } from "@domain/queue/types";
 
 // [marca-vupth] Saudacao por horario do dia (Pencil CLIENT · 06 Home).
@@ -41,7 +42,10 @@ function timeAgoLabel(iso: string | null | undefined): string | null {
 }
 
 // Pilula de status: fundo brand-green + texto/ponto forest (Pencil).
-function StatusPill({ label }: { label: string }) {
+// `live` = a loja esta ABERTA agora, e so entao o ponto pisca. Com ela
+// fechada a mesma pilula diz "Agendar" — ponto piscando ali sinalizaria
+// movimento que nao existe.
+function StatusPill({ label, live }: { label: string; live: boolean }) {
   return (
     <HStack
       bg="$brandGreen"
@@ -51,7 +55,7 @@ function StatusPill({ label }: { label: string }) {
       py={6}
       alignItems="center"
     >
-      <Center width={8} height={8} borderRadius={4} bg="$forest" />
+      <LiveDot size={8} color="#163300" pulsing={live} />
       <Text fontFamily="$display" fontSize={12} fontWeight="$bold" color="$forest">
         {label}
       </Text>
@@ -112,7 +116,7 @@ function EstablishmentRow({
           </HStack>
         </VStack>
         {/* Fechada nao e beco sem saida: ainda da pra agendar (Andre 2026-07-23). */}
-        <StatusPill label={isOpen ? (wait ? "Aberto" : "Livre") : "Agendar"} />
+        <StatusPill label={isOpen ? (wait ? "Aberto" : "Livre") : "Agendar"} live={isOpen} />
       </HStack>
     </TouchableOpacity>
   );
@@ -288,7 +292,7 @@ export function Home() {
                   py={6}
                   alignItems="center"
                 >
-                  <Center width={8} height={8} borderRadius={4} bg="$brandGreen" />
+                  <LiveDot size={8} color="#9FE870" />
                   <Text fontFamily="$display" fontSize={12} fontWeight="$bold" color="$brandGreen">
                     Ao vivo
                   </Text>

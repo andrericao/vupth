@@ -14,6 +14,7 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
+import { LiveDot } from "@components/LiveDot";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
@@ -243,7 +244,7 @@ export function EstablishmentDetail() {
           {isOpen && (
             <Box bg="$greenTint" borderRadius="$full" px="$3" py="$1">
               <HStack alignItems="center" gap="$1">
-                <Center width={5} height={5} borderRadius="$full" bg="$forest" />
+                <LiveDot size={5} color="#163300" />
                 <Text size="2xs" fontFamily="$heading" color="$forest">
                   Ao vivo
                 </Text>

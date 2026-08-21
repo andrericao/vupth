@@ -20,6 +20,7 @@ import { useClientIntentions } from "@hooks/useIntentions";
 import { useAuthStore } from "@stores/authStore";
 import { useRatedStore } from "@stores/ratedStore";
 import { SkeletonList } from "@components/Skeleton";
+import { LiveDot } from "@components/LiveDot";
 import { RatingModal } from "@components/RatingModal";
 import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
 import { ClientAttendance } from "@services/attendanceService";
@@ -216,7 +217,9 @@ export function Attendances() {
                   alignItems="center"
                   alignSelf="flex-start"
                 >
-                  <Center width={8} height={8} borderRadius="$full" bg="$forest" />
+                  {/* Pausado NAO pisca: o atendimento esta parado, e ponto
+                      piscando sinalizaria movimento. */}
+                  <LiveDot size={8} color="#163300" pulsing={!isPaused} />
                   <Text size="xs" fontWeight="$semibold" color="$forest">
                     {isBeingAttended ? "Em atendimento" : isPaused ? "Pausado" : formatWaitTime(remaining)}
                   </Text>
