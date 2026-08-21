@@ -9,6 +9,7 @@ import {
   Box,
   HStack,
   ScrollView,
+  Center,
 } from "@gluestack-ui/themed";
 import {
   User,
@@ -16,10 +17,11 @@ import {
   Lock,
   MapPin,
   CaretRight,
+  SignOut,
+  ArrowsClockwise,
 } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
-import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { WsDiagnostics } from "@components/WsDiagnostics";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
@@ -35,32 +37,32 @@ function MenuItem({
   label,
   value,
   onPress,
+  last,
 }: {
   icon: React.ReactNode;
   label: string;
   value?: string;
   onPress: () => void;
+  /** Ultima linha do card nao leva divisor. */
+  last?: boolean;
 }) {
   return (
     <TouchableOpacity onPress={onPress}>
-      <Box
-        bg="$white"
-        px="$4"
-        py="$4"
-        borderBottomWidth="$1"
-        borderBottomColor="$gray500"
-      >
-        <HStack alignItems="center" gap="$3">
-          {icon}
-          <VStack flex={1}>
-            <Text size="xs" color="$gray300">{label}</Text>
-            {value && (
-              <Text size="sm" fontFamily="$heading">{value}</Text>
-            )}
-          </VStack>
-          <CaretRight size={18} color="#9CA3AF" />
-        </HStack>
-      </Box>
+      <HStack px={16} py={15} gap="$3" alignItems="center">
+        {icon}
+        <VStack flex={1} gap="$0.5">
+          <Text size="xs" color="$brandTextSecondary">
+            {label}
+          </Text>
+          {value && (
+            <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary" numberOfLines={1}>
+              {value}
+            </Text>
+          )}
+        </VStack>
+        <CaretRight size={18} color="#454745" />
+      </HStack>
+      {!last && <Box height={1} bg="$brandBorder" />}
     </TouchableOpacity>
   );
 }
@@ -93,6 +95,27 @@ export function Settings() {
   const displayAddress = mainAddress
     ? `${mainAddress.street}, ${mainAddress.number} — ${mainAddress.neighborhood}`
     : "Não informado";
+  // Iniciais do nome; sem nome cadastrado, a primeira letra do e-mail — nunca
+  // um circulo vazio.
+  const initials =
+    [user?.first_name, user?.last_name]
+      .filter(Boolean)
+      .map((n) => n![0]?.toUpperCase())
+      .join("") || user?.email?.[0]?.toUpperCase() || "?";
+
+  function handleLogout() {
+    Alert.alert("Sair da conta", "Tem certeza que deseja sair da sua conta?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          navigation.getParent()?.navigate("homeTab", { screen: "home" });
+        },
+      },
+    ]);
+  }
 
   const [showDelete, setShowDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -170,57 +193,102 @@ export function Settings() {
   return (
     <ScrollView
       flex={1}
-      bg="$gray700"
+      bg="$brandBackground"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} px={15} pt={60} pb={30}>
-        <Header showBackButton />
+      {/* Cabecalho forest com a identidade (Pencil CLIENT · 14 Perfil): o
+          avatar em brand-green e o unico ponto de verde-limao da tela, e ele
+          esta sobre fundo escuro — a regra de contraste da marca. */}
+      <VStack
+        bg="$forest"
+        pt={56}
+        pb={isAuthenticated ? 32 : 20}
+        px={20}
+        gap="$3"
+        alignItems="center"
+      >
+        {/* Visitante nao tem identidade pra mostrar — o avatar grande viraria
+            um "?" gigante ocupando meia tela. Cabecalho encolhe e o card de
+            criar conta, que e a acao real, sobe. */}
+        {isAuthenticated ? (
+          <>
+            <Center width={88} height={88} borderRadius={44} bg="$brandGreen">
+              <Text fontFamily="$display" fontSize={32} color="$forest">
+                {initials}
+              </Text>
+            </Center>
+            <VStack gap="$1" alignItems="center">
+              <Text fontFamily="$display" fontSize={24} letterSpacing={-0.8} color="$white">
+                {displayName}
+              </Text>
+              {user?.email && (
+                <Text size="sm" color="$brandGreen">
+                  {user.email}
+                </Text>
+              )}
+            </VStack>
+          </>
+        ) : (
+          <Text fontFamily="$display" fontSize={22} letterSpacing={-0.6} color="$white">
+            Sua conta
+          </Text>
+        )}
+      </VStack>
 
-        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-          Configurações
-        </Heading>
+      <VStack flex={1} px={20} pt={20} pb={30}>
 
         {/* Opções de CONTA só para quem tem conta (visitante não vê trocar senha,
             e-mail, endereço nem deletar — boa prática; pedido Andre 2026-07-23). */}
         {isAuthenticated ? (
           <>
-            <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
+            <Box borderRadius="$card" overflow="hidden" bg="$brandSurface">
               <MenuItem
-                icon={<User size={22} color="#163300" />}
-                label="Nome"
+                icon={<User size={20} color="#163300" />}
+                label="Dados pessoais"
                 value={displayName}
                 onPress={() => navigation.navigate("editProfile")}
               />
               <MenuItem
-                icon={<EnvelopeSimple size={22} color="#163300" />}
+                icon={<EnvelopeSimple size={20} color="#163300" />}
                 label="E-mail"
                 value={user?.email ?? "—"}
                 onPress={() => navigation.navigate("editEmail")}
               />
               <MenuItem
-                icon={<Lock size={22} color="#163300" />}
+                icon={<Lock size={20} color="#163300" />}
                 label="Senha"
                 value="••••••"
                 onPress={() => navigation.navigate("editPassword")}
               />
               <MenuItem
-                icon={<MapPin size={22} color="#163300" />}
-                label="Endereço"
+                icon={<MapPin size={20} color="#163300" />}
+                label="Endereços"
                 value={displayAddress}
                 onPress={() => navigation.navigate("editAddress")}
+                last
               />
             </Box>
 
-            <VStack mt="$8">
-              <Button
-                title="Deletar conta"
-                variant="outline"
-                onPress={openDeleteAccount}
-                borderColor="$brandDanger"
-                $active-bg="$red100"
-              />
-            </VStack>
+            {/* Sair NAO e vermelho: e uma saida legitima, nao um erro. O
+                vermelho fica reservado pro que e irreversivel (deletar), la
+                embaixo. */}
+            <TouchableOpacity onPress={handleLogout} testID="logout">
+              <HStack
+                bg="$brandSurface"
+                borderRadius="$card"
+                px={16}
+                py={15}
+                mt="$4"
+                gap="$2.5"
+                alignItems="center"
+              >
+                <SignOut size={19} color="#163300" />
+                <Text size="sm" fontWeight="$semibold" color="$forest">
+                  Sair da conta
+                </Text>
+              </HStack>
+            </TouchableOpacity>
           </>
         ) : (
           <Box bg="$white" borderRadius="$2xl" p="$4" style={cardShadow}>
@@ -283,17 +351,37 @@ export function Settings() {
 
         <WsDiagnostics />
 
-        <VStack mt="$8" alignItems="center" gap="$1">
-          <Text size="xs" color="$gray400">
-            Runtime {Updates.runtimeVersion ?? "—"} · canal {Updates.channel ?? "dev"}
+        <VStack mt="$8" alignItems="center" gap="$3">
+          <TouchableOpacity onPress={handleCheckUpdate} testID="check-update">
+            <HStack
+              bg="$brandSurface"
+              borderRadius="$full"
+              px={20}
+              py={12}
+              gap="$2"
+              alignItems="center"
+            >
+              <ArrowsClockwise size={15} color="#163300" />
+              <Text fontFamily="$heading" fontSize={13} color="$forest">
+                {isChecking ? "Verificando..." : "Verificar atualização"}
+              </Text>
+            </HStack>
+          </TouchableOpacity>
+          {/* Versao em DM Mono: e numero de build, nao prosa — o token `mono`
+              existe pra isso. */}
+          <Text fontFamily="$mono" fontSize={10} color="$brandTextSecondary" textAlign="center">
+            {Updates.runtimeVersion ?? "—"} · {Updates.channel ?? "dev"} · {otaInfo}
           </Text>
-          <Text size="xs" color="$gray400">{otaInfo}</Text>
-          <Button
-            title={isChecking ? "Verificando..." : "Verificar atualização"}
-            variant="outline"
-            mt="$2"
-            onPress={handleCheckUpdate}
-          />
+          {/* Deletar conta desce pra ca como LINK: e irreversivel, entao nao
+              disputa atencao com o resto — mas continua alcancavel por quem
+              procura (era um botao de mesmo peso que "sair"). */}
+          {isAuthenticated && (
+            <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
+              <Text size="xs" fontWeight="$semibold" color="$brandDanger">
+                Deletar minha conta
+              </Text>
+            </TouchableOpacity>
+          )}
         </VStack>
       </VStack>
 
