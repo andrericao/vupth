@@ -4,7 +4,6 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import {
   VStack,
   Text,
-  Heading,
   Box,
   HStack,
   Center,
@@ -15,7 +14,6 @@ import {
 import { Queue, Clock, CaretRight, CalendarBlank, ArrowsLeftRight } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
-import { Header } from "@components/Header";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { useClientIntentions } from "@hooks/useIntentions";
@@ -50,7 +48,7 @@ function formatDateTime(iso: string): string {
 
 export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const { activeQueue, remaining, color, isInQueue, isBeingAttended, isPaused } = useQueueCountdown();
+  const { activeQueue, remaining, isInQueue, isBeingAttended, isPaused } = useQueueCountdown();
   // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
   const emAtendimento = isBeingAttended || isPaused;
   const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
@@ -161,12 +159,11 @@ export function Attendances() {
   }
 
   return (
-    <VStack flex={1} bg="$gray700">
-      <VStack px={15} pt={60}>
-        <Header />
-        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4">
+    <VStack flex={1} bg="$brandBackground">
+      <VStack px={20} pt={56} pb={16}>
+        <Text fontFamily="$display" fontSize={26} letterSpacing={-0.8} color="$forest">
           Atendimentos
-        </Heading>
+        </Text>
       </VStack>
 
       <ScrollView
@@ -175,41 +172,62 @@ export function Attendances() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#163300" colors={["#163300"]} />
         }
       >
-        <VStack mt="$6" px={15}>
+        <VStack mt="$6" px={20}>
           <Text
-            size="xs"
-            color="$gray300"
-            fontFamily="$heading"
-            mb="$2"
+            fontFamily="$body"
+            fontSize={11}
+            fontWeight="$bold"
+            letterSpacing={0.8}
+            color="$brandTextSecondary"
+            mb="$2.5"
           >
             EM ANDAMENTO
           </Text>
 
           {activeQueue && (isInQueue || emAtendimento) ? (
             <TouchableOpacity onPress={handleGoToQueue}>
-              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={emAtendimento ? "#163300" : color}>
-                <HStack alignItems="center" gap="$3">
-                  <Queue size={24} color={emAtendimento ? "#163300" : color} />
-                  <VStack flex={1}>
-                    <Text fontFamily="$heading" size="sm">
+              {/* Unico card com borda verde-marca da tela: e o atendimento
+                  VIVO, o que a pessoa abriu o app pra ver. */}
+              <VStack
+                bg="$brandBackground"
+                p="$4"
+                borderRadius="$card"
+                style={cardShadow}
+                borderWidth={2}
+                borderColor="$brandGreen"
+                gap="$2"
+              >
+                <HStack alignItems="center" gap="$2.5">
+                  <Queue size={20} color="#163300" />
+                  <VStack flex={1} gap="$0.5">
+                    <Text fontFamily="$display" fontSize={16} letterSpacing={-0.4} color="$forest">
                       {activeQueue.establishmentName}
                     </Text>
-                    <Text size="xs" color="$gray300">
+                    <Text size="xs" color="$brandTextSecondary">
                       {activeQueue.professionalName}
                     </Text>
                   </VStack>
-                  <Badge bg={emAtendimento ? "#163300" : color} borderRadius="$full" px="$3" py="$1">
-                    <BadgeText color="$white" size="xs">
-                      {isBeingAttended ? "Em atendimento" : isPaused ? "Pausado" : formatWaitTime(remaining)}
-                    </BadgeText>
-                  </Badge>
-                  <CaretRight size={18} color="#9CA3AF" />
+                  <CaretRight size={18} color="#454745" />
                 </HStack>
-              </Box>
+                <HStack
+                  bg="$brandGreen"
+                  borderRadius="$full"
+                  px={12}
+                  py={6}
+                  gap="$1.5"
+                  alignItems="center"
+                  alignSelf="flex-start"
+                >
+                  <Center width={8} height={8} borderRadius="$full" bg="$forest" />
+                  <Text size="xs" fontWeight="$semibold" color="$forest">
+                    {isBeingAttended ? "Em atendimento" : isPaused ? "Pausado" : formatWaitTime(remaining)}
+                  </Text>
+                </HStack>
+              </VStack>
             </TouchableOpacity>
           ) : (
-            <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-              <Text size="sm" color="$gray300" textAlign="center">
+            <Box bg="$brandSurface" p="$4" borderRadius="$card">
+              <Text size="sm" color="$brandTextSecondary" textAlign="center">
                 Nenhum atendimento em andamento
               </Text>
             </Box>
@@ -217,14 +235,21 @@ export function Attendances() {
         </VStack>
 
         {pendingSwaps.length > 0 && (
-          <VStack mt="$6" px={15}>
-            <Text size="xs" color="$gray300" fontFamily="$heading" mb="$2">
+          <VStack mt="$6" px={20}>
+            <Text
+              fontFamily="$body"
+              fontSize={11}
+              fontWeight="$bold"
+              letterSpacing={0.8}
+              color="$brandTextSecondary"
+              mb="$2.5"
+            >
               PEDIDOS DE TROCA
             </Text>
 
             <VStack gap="$3">
               {pendingSwaps.map((s) => (
-                <Box key={s.offerId} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                <Box key={s.offerId} bg="$brandSurface" p="$4" borderRadius="$card">
                   <HStack alignItems="center" gap="$3">
                     <ArrowsLeftRight size={22} color="#163300" />
                     <VStack flex={1}>
@@ -254,8 +279,15 @@ export function Attendances() {
         )}
 
         {intentionGroups.length > 0 && (
-          <VStack mt="$6" px={15}>
-            <Text size="xs" color="$gray300" fontFamily="$heading" mb="$2">
+          <VStack mt="$6" px={20}>
+            <Text
+              fontFamily="$body"
+              fontSize={11}
+              fontWeight="$bold"
+              letterSpacing={0.8}
+              color="$brandTextSecondary"
+              mb="$2.5"
+            >
               AGENDAMENTOS
             </Text>
 
@@ -266,7 +298,7 @@ export function Attendances() {
                     {group.dayLabel}
                   </Text>
                   {group.items.map((i) => (
-                    <Box key={i.id} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                    <Box key={i.id} bg="$brandSurface" p="$4" borderRadius="$card">
                       <HStack alignItems="center" gap="$3">
                         <CalendarBlank size={22} color="#163300" />
                         <VStack flex={1}>
@@ -300,12 +332,14 @@ export function Attendances() {
           </VStack>
         )}
 
-        <VStack mt="$6" px={15}>
+        <VStack mt="$6" px={20}>
           <Text
-            size="xs"
-            color="$gray300"
-            fontFamily="$heading"
-            mb="$2"
+            fontFamily="$body"
+            fontSize={11}
+            fontWeight="$bold"
+            letterSpacing={0.8}
+            color="$brandTextSecondary"
+            mb="$2.5"
           >
             REALIZADOS
           </Text>
@@ -329,7 +363,7 @@ export function Attendances() {
                 const canRate = a.status === "FINISHED" && !ratedIds.includes(a.id);
                 return (
                   <TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => setDetailFor(a)}>
-                    <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                    <Box bg="$brandSurface" p="$4" borderRadius="$card">
                       <HStack justifyContent="space-between" alignItems="flex-start">
                         <VStack flex={1} pr="$2">
                           <Text fontFamily="$heading" size="sm">
