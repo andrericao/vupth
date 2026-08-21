@@ -81,7 +81,12 @@ export function ScreenHeader({ title, subtitle, action, onBack, root, overlay }:
 
   return (
     <VStack style={{ paddingTop: insets.top + 12 }} pb="$4">
-      <HStack alignItems="center" gap="$3" style={{ minHeight: 44 }}>
+      {/* `flex-start`, nao `center`: centrado, um titulo de DUAS linhas (60px)
+          estourava os 44 da linha e comecava no topo, enquanto um de uma linha
+          (30px) ficava centrado 7px abaixo — medido no navegador: 12px contra
+          19px. Ancorado no topo, a 1a linha do titulo comeca sempre na mesma
+          altura, quebre ele ou nao. */}
+      <HStack alignItems="flex-start" gap="$3" style={{ minHeight: 44 }}>
         {showBack && (
           <HeaderIconButton
             onPress={onBack ?? (() => navigation.goBack())}
@@ -93,31 +98,43 @@ export function ScreenHeader({ title, subtitle, action, onBack, root, overlay }:
           </HeaderIconButton>
         )}
 
-        {/* Titulo e subtitulo na MESMA coluna: com o voltar presente o texto
-            desloca junto, entao os dois seguem alinhados entre si. O `flex`
-            fica mesmo sem titulo — e o que empurra a acao pra direita. */}
-        <VStack flex={1} gap="$0.5">
-          {!!title && (
-            <Text
-              numberOfLines={2}
-              fontFamily="$display"
-              fontSize={26}
-              lineHeight={30}
-              letterSpacing={-1}
-              color="$forest"
-            >
-              {title}
-            </Text>
-          )}
-          {!!subtitle && (
-            <Text numberOfLines={2} size="sm" color="$brandTextSecondary">
-              {subtitle}
-            </Text>
-          )}
-        </VStack>
+        {/* So o TITULO divide a linha com os botoes. O `flex` fica mesmo sem
+            titulo — e o que empurra a acao pra direita. */}
+        {/* Os 5 do topo centram a 1a linha do titulo (30 de entrelinha) no
+            botao redondo (40): (40 − 30) / 2. */}
+        <Text
+          flex={1}
+          mt={5}
+          numberOfLines={2}
+          fontFamily="$display"
+          fontSize={26}
+          lineHeight={30}
+          letterSpacing={-1}
+          color="$forest"
+        >
+          {title}
+        </Text>
 
         {action}
       </HStack>
+
+      {/* Subtitulo FORA da linha do titulo. Dentro dela, a coluna
+          titulo+subtitulo ficava centrada no eixo e empurrava o titulo ~7px
+          pra baixo so nas telas que tem subtitulo — medido no navegador: 12px
+          sem, 19px com. O titulo tem de comecar na MESMA altura em toda tela.
+          O recuo alinha o subtitulo com o titulo, saltando o botao voltar
+          (40 de botao + 12 de gap). */}
+      {!!subtitle && (
+        <Text
+          numberOfLines={2}
+          size="sm"
+          color="$brandTextSecondary"
+          mt="$1"
+          ml={showBack ? 52 : 0}
+        >
+          {subtitle}
+        </Text>
+      )}
     </VStack>
   );
 }
