@@ -117,6 +117,7 @@ export function EstablishmentDetail() {
       establishmentName: establishment?.name ?? "",
       estimatedWaitMinutes: prof?.estimated_wait_minutes ?? 0,
       establishmentOpen: isEffectivelyOpen(establishment),
+      queueCount: prof?.queue_count ?? 0,
     });
   }
 

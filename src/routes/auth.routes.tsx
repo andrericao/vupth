@@ -63,6 +63,10 @@ export type AppRoutes = {
     establishmentOpen?: boolean;
     // Seleção de serviços restaurada ao voltar do portão de auth.
     serviceItemIds?: string[];
+    // Quantos já esperam na fila deste profissional — a posição do cliente é
+    // este número + 1 (ele entra no fim). Opcional: fluxos que não sabem (ex.:
+    // volta do login) simplesmente não mostram a linha de posição.
+    queueCount?: number;
   };
   queueStatus: {
     professionalId: string;
