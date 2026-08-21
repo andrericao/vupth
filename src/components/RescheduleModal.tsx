@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Modal, TextInput } from "react-native";
-import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
+import { Modal, TextInput, TouchableOpacity } from "react-native";
+import { VStack, HStack, Box, Text, Center } from "@gluestack-ui/themed";
 import { Clock, TriangleAlert } from "lucide-react-native";
 
 import { Button } from "@components/Button";
@@ -26,6 +26,42 @@ type Props = {
 };
 
 const onlyDigits = (s: string) => s.replace(/\D/g, "").slice(0, 2);
+
+// Campo de hora: quadrado de `brandSurface`, sem borda. Antes era um Box com
+// borda `$coolGray300` em volta de um TextInput de largura minima — no
+// navegador ele nao encolhia e as bordas VAZAVAM pra fora do cartao branco do
+// modal (visivel no print). Sem borda o problema nao existe, e o quadrado
+// chapado e o mesmo tratamento dos outros campos do app.
+function CampoHora({
+  value,
+  onChangeText,
+  placeholder,
+}: {
+  value: string;
+  onChangeText: (t: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <Center bg="$brandSurface" borderRadius="$card" px={14} py={10}>
+      <TextInput
+        placeholder={placeholder}
+        placeholderTextColor="#454745"
+        keyboardType="number-pad"
+        value={value}
+        onChangeText={onChangeText}
+        // DM Mono: e numero, e o token `mono` existe justamente pra hora.
+        style={{
+          fontFamily: "DMMono_500Medium",
+          fontSize: 26,
+          width: 46,
+          textAlign: "center",
+          color: "#163300",
+          padding: 0,
+        }}
+      />
+    </Center>
+  );
+}
 
 // Item 16 — "Agendar": o cliente DIGITA o horário desejado (sem sugestões). A
 // validação de fechamento/refeição é autoritativa no backend; aqui cobrimos o
@@ -60,66 +96,77 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
-          <Heading fontFamily="$heading" fontSize="$lg">
-            Agendar minha vez
-          </Heading>
+        <VStack bg="$brandBackground" borderRadius="$hero" p="$6" gap="$4" style={floatingShadow}>
+          <VStack gap="$1.5">
+            <Text
+              fontFamily="$display"
+              fontSize={22}
+              lineHeight={26}
+              letterSpacing={-0.6}
+              color="$forest"
+            >
+              Agendar minha vez
+            </Text>
 
-          {tailEtaMs != null && (
-            <HStack alignItems="center" gap="$1" mt="$1">
-              <Clock size={16} color="#6B7280" />
-              <Text size="sm" color="$gray300">
-                A fila hoje deve ir até {formatClockTime(new Date(tailEtaMs))}
-              </Text>
-            </HStack>
-          )}
-          <Text size="xs" color="$gray300" mt="$2">
-            Digite a que horas você quer ser atendido. É uma estimativa e pode variar. Precisa estar
-            dentro do horário de funcionamento; se cair em um intervalo, você será atendido após ele.
-          </Text>
+            {tailEtaMs != null && (
+              <HStack alignItems="center" gap="$1.5">
+                <Clock size={15} color="#454745" />
+                <Text size="sm" color="$brandTextSecondary">
+                  A fila hoje deve ir até {formatClockTime(new Date(tailEtaMs))}
+                </Text>
+              </HStack>
+            )}
+
+            {/* Quatro linhas viraram uma. O que saiu: "e uma estimativa e pode
+                variar" (a linha do relogio acima ja diz "deve ir ate") e o
+                caso do intervalo, que so importa quando acontece — e ai quem
+                avisa e a mensagem de erro, com o horario real. */}
+            <Text size="sm" lineHeight={20} color="$brandTextSecondary">
+              Escolha o horário — precisa estar dentro do funcionamento da loja.
+            </Text>
+          </VStack>
 
           {penalty && (
-            <HStack alignItems="center" gap="$2" mt="$4" bg="$red100" borderRadius="$xl" px="$3" py="$2">
-              <TriangleAlert size={18} color="#B3261E" />
-              <Text size="xs" color="$brandDanger" flex={1}>
-                Você está perto de ser atendido. Reagendar agora gera multa de R$ {CANCELLATION_PENALTY_VALUE},00 no
-                seu próximo atendimento.
+            <HStack
+              alignItems="center"
+              gap="$2"
+              bg="$brandDangerTint"
+              borderRadius="$card"
+              px="$3.5"
+              py="$2.5"
+            >
+              <TriangleAlert size={16} color="#B3261E" />
+              <Text fontFamily="$heading" fontSize={13} lineHeight={18} color="$brandDanger" flex={1}>
+                Perto de ser atendido: reagendar agora gera multa de R${" "}
+                {CANCELLATION_PENALTY_VALUE},00.
               </Text>
             </HStack>
           )}
 
-          <HStack alignItems="center" justifyContent="center" gap="$2" mt="$5">
-            <Box borderWidth="$1" borderColor="$coolGray300" borderRadius="$xl" px="$4" py="$2">
-              <TextInput
-                placeholder="HH"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="number-pad"
-                value={hour}
-                onChangeText={(t) => setHour(onlyDigits(t))}
-                style={{ fontSize: 24, minWidth: 44, textAlign: "center", color: "#111827" }}
-              />
-            </Box>
-            <Text fontFamily="$heading" fontSize="$2xl">:</Text>
-            <Box borderWidth="$1" borderColor="$coolGray300" borderRadius="$xl" px="$4" py="$2">
-              <TextInput
-                placeholder="MM"
-                placeholderTextColor="#9CA3AF"
-                keyboardType="number-pad"
-                value={minute}
-                onChangeText={(t) => setMinute(onlyDigits(t))}
-                style={{ fontSize: 24, minWidth: 44, textAlign: "center", color: "#111827" }}
-              />
-            </Box>
+          <HStack alignItems="center" justifyContent="center" gap="$2">
+            <CampoHora placeholder="HH" value={hour} onChangeText={(t) => setHour(onlyDigits(t))} />
+            <Text fontFamily="$display" fontSize={22} color="$forest">
+              :
+            </Text>
+            <CampoHora placeholder="MM" value={minute} onChangeText={(t) => setMinute(onlyDigits(t))} />
           </HStack>
 
           {error && (
-            <Text size="xs" color="$brandDanger" mt="$3" textAlign="center">
+            <Text size="xs" color="$brandDanger" textAlign="center" mt={-8}>
               {error}
             </Text>
           )}
 
-          <Button title="Agendar" mt="$5" isLoading={loading} onPress={handleConfirm} />
-          <Button title="Cancelar" variant="outline" mt="$3" isDisabled={loading} onPress={close} />
+          <VStack gap="$3" alignItems="center">
+            <Button title="Agendar" isLoading={loading} onPress={handleConfirm} />
+            {/* Cancelar vira LINK: era um botao contornado do mesmo tamanho do
+                "Agendar", e dois pesos iguais fazem hesitar na saida errada. */}
+            <TouchableOpacity onPress={close} disabled={loading} testID="reschedule-cancel">
+              <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
+                Cancelar
+              </Text>
+            </TouchableOpacity>
+          </VStack>
         </VStack>
       </Box>
     </Modal>

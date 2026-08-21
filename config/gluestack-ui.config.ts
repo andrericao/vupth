@@ -459,6 +459,10 @@ export const gluestackUIConfig = createConfig({
       brandTextSecondary: '#454745',
       brandBorder: '#D7DDD3',
       brandDanger: '#B3261E',
+      // Fundo do aviso de multa: `brandDanger` diluido no branco. Existia como
+      // `$red100` (#fee2e2), da escala generica do gluestack, que puxa pro rosa
+      // e nao e parente da nossa cor de perigo.
+      brandDangerTint: '#F7E4E2',
       brandWarning: '#FFC091',
       brandSuccess: '#9FE870',
     },
