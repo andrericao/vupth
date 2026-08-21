@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FlatList, TouchableOpacity, Alert, ImageBackground } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -102,6 +103,8 @@ export function EstablishmentDetail() {
   // Tempo real: atualiza a fila via WebSocket; o polling vira fallback (backend 18b)
   useQueueSocket(establishmentId);
 
+  const [heroFailed, setHeroFailed] = useState(false);
+
   function handleSelectProfessional(professionalId: string) {
     const prof = professionals.find((p) => p.id === professionalId);
     if (!establishment) return;
@@ -150,6 +153,7 @@ export function EstablishmentDetail() {
   }
 
   const isOpen = isEffectivelyOpen(establishment);
+  const showPhoto = !!establishment.urlImage && !heroFailed;
   const minWait =
     professionals.length > 0
       ? Math.min(...professionals.map((p) => p.estimated_wait_minutes ?? 0))
@@ -162,14 +166,18 @@ export function EstablishmentDetail() {
 
   return (
     <VStack flex={1} bg="$brandBackground">
-      {/* Hero: foto da loja quando existe; sem foto, faixa verde-clara da marca
-          (nunca um buraco branco). */}
-      <Box height={210} width="$full">
-        {establishment.urlImage ? (
+      {/* Hero: foto da loja quando existe E carrega. Sem foto (ou com foto
+          quebrada — varias lojas tem `urlImage` de placeholder que nao
+          resolve), vira um cabecalho COMPACTO em vez de 210px de faixa lisa:
+          altura cheia e pra foto, que e conteudo; barra de cor nao merece o
+          mesmo espaco. Sem o `onError` ficava um buraco branco. */}
+      <Box height={showPhoto ? 210 : 108} width="$full">
+        {showPhoto ? (
           <ImageBackground
-            source={{ uri: establishment.urlImage }}
+            source={{ uri: establishment.urlImage! }}
             style={{ flex: 1 }}
             resizeMode="cover"
+            onError={() => setHeroFailed(true)}
           >
             <HeroNav onBack={() => navigation.goBack()} />
           </ImageBackground>
