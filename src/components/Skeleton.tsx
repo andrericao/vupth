@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Animated } from "react-native";
 import { VStack, HStack } from "@gluestack-ui/themed";
 
-import { cardShadow } from "@utils/styles";
 
 // [verde-imersivo] Skeleton loading: placeholders com a forma do conteudo, no
 // lugar dos Spinner. Pulso de opacidade (Animated nativo, sem dep extra).
@@ -42,11 +41,11 @@ function Block({
   );
 }
 
-/** Um card "fantasma" com a mesma forma dos cards reais (cantos $2xl + cardShadow). */
+/** Um card "fantasma" com a mesma forma dos cards reais (surface, raio 20, plano). */
 export function SkeletonCard() {
   const opacity = usePulse();
   return (
-    <VStack bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} mb="$3">
+    <VStack bg="$brandSurface" p="$4" borderRadius="$card" mb="$3">
       <HStack justifyContent="space-between" alignItems="center">
         <Block opacity={opacity} w="45%" h={14} />
         <Block opacity={opacity} w={64} h={22} r={999} />

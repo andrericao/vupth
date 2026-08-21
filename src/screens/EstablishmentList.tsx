@@ -13,7 +13,6 @@ import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
-import { cardShadow } from "@utils/styles";
 import { formatWaitTime } from "@domain/queue/types";
 
 type SortBy = "wait" | "distance";
@@ -37,7 +36,7 @@ function OpenRow({
   );
   return (
     <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>
-      <Box bg="$white" p="$3" mb="$3" borderRadius="$card" style={cardShadow}>
+      <Box bg="$brandSurface" p="$3" mb="$3" borderRadius="$card">
         <HStack alignItems="center" gap="$3">
           <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} />
           <VStack flex={1}>

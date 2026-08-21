@@ -23,8 +23,10 @@ import { swapOfferService } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 
-// Sombra do card de resumo (verde escuro sobre fundo claro) — o `cardShadow`
-// do projeto e pensado para card branco e some sobre o forest.
+// Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
+// POUCOS lugares com sombra legitima: no Pencil o "Resumo" sobre `forest` e um
+// dos 13 elementos que a tem. Nao usa a `floatingShadow` compartilhada porque
+// aquela e calibrada p/ superficie clara e some sobre o forest.
 const summaryShadow = {
   shadowColor: "#163300",
   shadowOffset: { width: 0, height: 4 },

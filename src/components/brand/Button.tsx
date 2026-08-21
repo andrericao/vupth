@@ -11,7 +11,9 @@ type Props = Omit<ComponentProps<typeof GluestackButton>, "variant"> & {
 };
 
 const btnShadow = {
-  shadowColor: "$forest",
+  // [bug] Era `"$forest"`: token do gluestack NAO resolve dentro de um objeto
+  // de estilo CRU do React Native — a cor simplesmente nunca era aplicada.
+  shadowColor: "#163300",
   shadowOffset: { width: 0, height: 6 },
   shadowOpacity: 0.16,
   shadowRadius: 10,

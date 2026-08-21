@@ -3,7 +3,7 @@ import { Modal, Alert } from "react-native";
 import { VStack, HStack, Box, Text, Heading, Divider, Spinner } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 import { acceptOfferText, myOfferText } from "@domain/queue/swap";
 import { swapOfferService, SwapOfferResponse } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
@@ -89,7 +89,7 @@ export function SwapOffersModal({ visible, professionalId, onClose, onChanged }:
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
+        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
             Trocar de lugar
           </Heading>

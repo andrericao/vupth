@@ -2,7 +2,7 @@ import { Modal } from "react-native";
 import { VStack, HStack, Box, Text, Heading, Badge, BadgeText, ScrollView } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 import { ClientAttendance } from "@services/attendanceService";
 import { formatClockTime } from "@domain/queue/types";
 
@@ -61,7 +61,7 @@ export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = t
     <Modal visible={!!a} transparent animationType="fade" onRequestClose={onClose}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
         {a && st && (
-          <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow} maxHeight="80%">
+          <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow} maxHeight="80%">
             <HStack justifyContent="space-between" alignItems="center" mb="$4">
               <Heading fontFamily="$heading" fontSize="$lg" flex={1}>
                 Detalhes do atendimento

@@ -4,7 +4,7 @@ import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
 import { Star } from "lucide-react-native";
 
 import { Button } from "@components/Button";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 import { ratingService } from "@services/ratingService";
 import { useAuthStore } from "@stores/authStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -73,7 +73,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={() => onClose(false)}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
+        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
             Como foi seu atendimento?
           </Heading>

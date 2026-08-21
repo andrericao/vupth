@@ -5,7 +5,7 @@ import { Calendar } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { DaySelector } from "@components/DaySelector";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 import { notifyComingSoon } from "@domain/comingSoon";
 import { isSameDay } from "@domain/schedule/days";
 
@@ -40,7 +40,7 @@ export function ScheduleModal({ visible, onClose }: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
+        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
             Agendar atendimento
           </Heading>

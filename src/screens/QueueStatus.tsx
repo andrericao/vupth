@@ -39,7 +39,6 @@ import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService, SwapOfferDirection } from "@services/swapOfferService";
 import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
-import { cardShadow } from "@utils/styles";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 
 type RouteParams = {
@@ -803,13 +802,12 @@ export function QueueStatus() {
         </Heading>
 
         <Box
-          bg="$white"
+          bg="$brandSurface"
           p="$6"
           mt="$6"
-          borderRadius="$2xl"
+          borderRadius="$card"
           borderWidth="$2"
           borderColor={borderColor}
-          style={cardShadow}
           w="$full"
           alignItems="center"
         >

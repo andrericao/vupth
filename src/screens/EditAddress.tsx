@@ -11,7 +11,6 @@ import { addressService, AddressResponse, AddressRequest } from "@services/addre
 import { maskCEP, unmask } from "@utils/masks";
 import { lookupCep } from "@utils/cep";
 import { SkeletonList } from "@components/Skeleton";
-import { cardShadow } from "@utils/styles";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
 
 type Mode = "list" | "form";
@@ -303,7 +302,7 @@ export function EditAddress() {
         ) : (
           <VStack gap="$3">
             {addresses.map((addr) => (
-              <Box key={addr.userAddressId} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+              <Box key={addr.userAddressId} bg="$brandSurface" p="$4" borderRadius="$card">
                 <HStack justifyContent="space-between" alignItems="flex-start">
                   <VStack flex={1} mr="$2">
                     <Text fontFamily="$heading" size="sm">

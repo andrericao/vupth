@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
 
-import { cardShadow } from "@utils/styles";
 import { useWsDiagnosticsStore, ChannelState } from "@stores/wsDiagnosticsStore";
 import {
   WsChannel,
@@ -102,7 +101,7 @@ export function WsDiagnostics() {
         </Text>
       </VStack>
 
-      <Box bg="$white" borderRadius="$2xl" p="$4" style={cardShadow}>
+      <Box bg="$brandSurface" borderRadius="$card" p="$4">
         <VStack gap="$4">
           <Channel
             channel="personal"

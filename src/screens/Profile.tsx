@@ -14,7 +14,6 @@ import { ClipboardList, Settings, ChevronRight, LogOut } from "lucide-react-nati
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Header } from "@components/Header";
 import { Button } from "@components/Button";
-import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
 
 function MenuItem({
@@ -29,7 +28,7 @@ function MenuItem({
   return (
     <TouchableOpacity onPress={onPress}>
       <Box
-        bg="$white"
+        bg="$brandSurface"
         px="$4"
         py="$4"
         borderBottomWidth="$1"
@@ -97,7 +96,7 @@ export function Profile() {
           </Heading>
         </Center>
 
-        <Box borderRadius="$2xl" mt="$8" overflow="hidden" style={cardShadow}>
+        <Box borderRadius="$card" mt="$8" overflow="hidden">
           <MenuItem
             icon={<ClipboardList size={22} color="#163300" />}
             label="Atendimentos"
@@ -115,7 +114,7 @@ export function Profile() {
               conta (boa prática; pedido Andre 2026-07-23). */}
           {isAuthenticated ? (
             <TouchableOpacity onPress={handleLogout}>
-              <Box bg="$white" px="$4" py="$4" borderRadius="$2xl" style={cardShadow}>
+              <Box bg="$brandSurface" px="$4" py="$4" borderRadius="$card">
                 <HStack alignItems="center" gap="$3">
                   <LogOut size={22} color="#B3261E" />
                   <Text size="sm" color="$brandDanger">Sair da conta</Text>

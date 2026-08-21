@@ -14,7 +14,6 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
-import { cardShadow } from "@utils/styles";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
@@ -51,7 +50,7 @@ function ProfessionalRow({
 
   return (
     <TouchableOpacity onPress={onPress} testID={`professional-${professional.id}`}>
-      <Box bg="$white" p="$3" mb="$3" borderRadius="$card" style={cardShadow}>
+      <Box bg="$brandSurface" p="$3" mb="$3" borderRadius="$card">
         <HStack alignItems="center" gap="$3">
           <PlaceAvatar name={professional.name} />
           <VStack flex={1}>

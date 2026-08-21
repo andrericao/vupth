@@ -5,7 +5,7 @@ import { MapPin, ChevronRight } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { Input2 } from "@components/Input2";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 import { maskCEP } from "@utils/masks";
 import { lookupCep } from "@utils/cep";
 import { addressService } from "@services/addressService";
@@ -100,7 +100,7 @@ export function LocationSelector() {
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-          <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
+          <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
             <Heading fontFamily="$heading" fontSize="$lg">
               Sua localização
             </Heading>

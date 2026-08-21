@@ -17,7 +17,6 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
 import { WsDiagnostics } from "@components/WsDiagnostics";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
-import { cardShadow } from "@utils/styles";
 import { useAuthStore } from "@stores/authStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
 import { COMING_SOON_LABELS, ComingSoonFeature } from "@domain/comingSoon";
@@ -278,7 +277,7 @@ export function Settings() {
             </TouchableOpacity>
           </>
         ) : (
-          <Box bg="$white" borderRadius="$2xl" p="$4" style={cardShadow}>
+          <Box bg="$brandSurface" borderRadius="$card" p="$4">
             <Text size="sm" color="$gray300" mb="$3">
               Você está navegando como visitante. Entre ou crie uma conta para
               gerenciar seu perfil, senha e endereço.
@@ -311,11 +310,11 @@ export function Settings() {
             <Text size="xs" color="$gray300" mb="$3">
               As mais tocadas fizeram mais falta — priorizar quando o backend liberar.
             </Text>
-            <Box borderRadius="$2xl" overflow="hidden" style={cardShadow}>
+            <Box borderRadius="$card" overflow="hidden">
               {awaited.map(([feature, count]) => (
                 <HStack
                   key={feature}
-                  bg="$white"
+                  bg="$brandSurface"
                   px="$4"
                   py="$3"
                   borderBottomWidth="$1"

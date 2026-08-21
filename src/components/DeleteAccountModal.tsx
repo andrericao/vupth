@@ -4,7 +4,7 @@ import { VStack, Box, Text, Heading } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
 import { Input2 } from "@components/Input2";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 
 type Props = {
   visible: boolean;
@@ -46,7 +46,7 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$2xl" p="$6" gap="$3" style={cardShadow}>
+        <VStack bg="$white" borderRadius="$card" p="$6" gap="$3" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
             Deletar conta
           </Heading>

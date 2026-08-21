@@ -28,7 +28,6 @@ import { swapOfferService } from "@services/swapOfferService";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
-import { cardShadow } from "@utils/styles";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 
 const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
@@ -192,7 +191,6 @@ export function Attendances() {
                 bg="$brandBackground"
                 p="$4"
                 borderRadius="$card"
-                style={cardShadow}
                 borderWidth={2}
                 borderColor="$brandGreen"
                 gap="$2"
