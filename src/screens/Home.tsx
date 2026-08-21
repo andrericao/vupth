@@ -8,6 +8,7 @@ import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
 import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity";
+import { serviceTypeLabel } from "@domain/establishment/serviceType";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { useAuthStore } from "@stores/authStore";
@@ -18,6 +19,7 @@ import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
+import { FilterSheet } from "@components/FilterSheet";
 import { formatWaitTime } from "@domain/queue/types";
 
 // [marca-vupth] Saudacao por horario do dia (Pencil CLIENT · 06 Home).
@@ -125,6 +127,7 @@ function EstablishmentRow({
 export function Home() {
   const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<ServiceType | "ALL">("ALL");
+  const [showFilter, setShowFilter] = useState(false);
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute<RouteProp<AppRoutes, "home">>();
@@ -254,7 +257,32 @@ export function Home() {
               returnKeyType="search"
             />
           </Box>
-          <SlidersHorizontal size={18} color="#163300" />
+          {/* Era um icone SOLTO: parecia botao e nao fazia nada (QA Alexia).
+              Agora abre o filtro e MOSTRA quando ha um ativo — lista filtrada
+              sem indicacao visivel e o usuario achando que sumiu loja. */}
+          <TouchableOpacity
+            onPress={() => setShowFilter(true)}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={
+              selectedFilter === "ALL"
+                ? "Filtrar por categoria"
+                : `Filtro ativo: ${serviceTypeLabel(selectedFilter)}. Tocar para mudar`
+            }
+            testID="open-filter"
+          >
+            <Box
+              bg={selectedFilter === "ALL" ? "transparent" : "$forest"}
+              borderRadius="$full"
+              px={selectedFilter === "ALL" ? 0 : 8}
+              py={selectedFilter === "ALL" ? 0 : 6}
+            >
+              <SlidersHorizontal
+                size={18}
+                color={selectedFilter === "ALL" ? "#163300" : "#9FE870"}
+              />
+            </Box>
+          </TouchableOpacity>
         </HStack>
       </Box>
 
@@ -431,6 +459,13 @@ export function Home() {
           />
         )}
       </VStack>
+
+      <FilterSheet
+        visible={showFilter}
+        value={selectedFilter}
+        onSelect={setSelectedFilter}
+        onClose={() => setShowFilter(false)}
+      />
     </VStack>
   );
 }

@@ -7,7 +7,7 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Check, ChevronLeft } from "lucide-react-native";
+import { Check, ChevronLeft, Calendar, Scissors, Repeat2 } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
@@ -236,6 +236,7 @@ export function ServiceSelection() {
       ? [
           {
             key: "schedule",
+            icon: Calendar,
             title: "Agendar para depois",
             description: "Escolha outro dia ou horário com este profissional.",
             onPress: () => {
@@ -247,6 +248,7 @@ export function ServiceSelection() {
       : [
           {
             key: "cut",
+            icon: Scissors,
             title: isRequestingCut ? "Enviando pedido..." : "Solicitar corte",
             description: "A loja está fechada — o profissional tem 5 minutos para responder.",
             disabled: isRequestingCut,
@@ -255,6 +257,7 @@ export function ServiceSelection() {
         ]),
     {
       key: "swap",
+      icon: Repeat2,
       title: isPublishingSwap ? "Publicando..." : "Entrar por troca",
       description: "Alguém que já está na fila pode ceder o lugar para você — sem custo.",
       disabled: isPublishingSwap,
@@ -443,7 +446,9 @@ export function ServiceSelection() {
 
       <MoreOptionsModal
         visible={showMoreOptions}
-        subtitle={`${professionalName} — ${selectedIds.length} serviço(s) selecionado(s)`}
+        subtitle={`${professionalName} · ${selectedIds.length} ${
+          selectedIds.length === 1 ? "serviço selecionado" : "serviços selecionados"
+        }`}
         options={moreOptions}
         onClose={() => setShowMoreOptions(false)}
       />
