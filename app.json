@@ -49,6 +49,7 @@
     },
     "updates": {
       "url": "https://u.expo.dev/fcf3142f-eed1-45a6-a9a6-e4ff8a4e9d85"
-    }
+    },
+    "backgroundColor": "#FFFFFF"
   }
 }
