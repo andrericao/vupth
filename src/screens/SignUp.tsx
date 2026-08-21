@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { ScrollView, Text, Center, VStack, HStack } from "@gluestack-ui/themed";
-import { Check, X } from "phosphor-react-native";
+import { Check, X, CaretLeft, Warning } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
-import { Header } from "@components/Header";
 import { PasswordRules } from "@components/PasswordRules";
 import { validateSignUp, getPasswordRules } from "@domain/auth/validateAuth";
 import { useAuthStore } from "@stores/authStore";
@@ -36,6 +35,11 @@ export function SignUp() {
   const params = (route.params as RouteParams) ?? {};
   const register = useAuthStore((s) => s.register);
   const login = useAuthStore((s) => s.login);
+
+  // Veio do fluxo da fila? Muda titulo, CTA e o aviso do topo. Sem isso, a
+  // tela abriria "NAO PERCA SUA VEZ" pra quem so clicou em "Cadastrar" na
+  // Home e nao tem vez nenhuma pra perder.
+  const fromQueue = !!params.professionalId || params.redirectTo === "queueStatus";
 
   const passwordRules = getPasswordRules(password);
   const passwordsMatch = password.length > 0 && confirmPassword.length > 0 && password === confirmPassword;
@@ -109,16 +113,69 @@ export function SignUp() {
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      style={{ backgroundColor: "#FFFFFF" }}
     >
-      <VStack flex={1} px={15} py={60}>
-        <Header showBackButton />
+      <VStack flex={1} pt={56} pb={32} px={20}>
+        <HStack justifyContent="space-between" alignItems="center">
+          <TouchableOpacity onPress={() => navigation.goBack()} testID="back-button">
+            <Center width={40} height={40} borderRadius="$full" bg="$greenTint">
+              <CaretLeft size={20} color="#163300" weight="bold" />
+            </Center>
+          </TouchableOpacity>
+          {/* "Agora nao" so no fluxo da fila: e a saida de quem foi
+              interrompido no meio de uma acao. Quem veio pela Home ja tem o
+              voltar, e um segundo escape ali so polui. */}
+          {fromQueue && (
+            <TouchableOpacity onPress={() => navigation.goBack()} testID="skip-signup">
+              <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
+                Agora não
+              </Text>
+            </TouchableOpacity>
+          )}
+        </HStack>
 
-        <Center gap="$6" mt={180}>
-          <Text fontFamily="$heading" fontSize="$3xl">
-            Criar Conta
+        <VStack gap="$2.5" mt="$5">
+          {/* O aviso da fila e o motivo de a pessoa estar aqui — sem ele o
+              titulo "nao perca sua vez" nao teria a que se referir. */}
+          {fromQueue && (
+            <HStack
+              bg="$brandSurfaceAlt"
+              borderRadius="$full"
+              px={14}
+              py={8}
+              gap="$2"
+              alignItems="center"
+              alignSelf="flex-start"
+            >
+              <Warning size={15} color="#163300" weight="fill" />
+              <Text fontFamily="$heading" fontSize={12} color="$forest">
+                {params.professionalName
+                  ? `ENTRANDO NA FILA · ${params.professionalName.toUpperCase()}`
+                  : "VOCÊ ESTÁ ENTRANDO NA FILA"}
+              </Text>
+            </HStack>
+          )}
+          <Text
+            fontFamily="$display"
+            fontSize={fromQueue ? 32 : 34}
+            lineHeight={fromQueue ? 34 : 36}
+            letterSpacing={-1.4}
+            color="$forest"
+          >
+            {fromQueue ? "NÃO PERCA SUA VEZ" : "CRIAR CONTA"}
           </Text>
+          <Text size="md" color="$brandTextSecondary">
+            {fromQueue
+              ? "Guarde seu lugar na fila e receba avisos, mesmo trocando de celular."
+              : "Em segundos você entra na fila e acompanha sua vez pelo app."}
+          </Text>
+        </VStack>
 
-          <VStack w="$full" gap="$1">
+        {/* O Pencil desenha "Continuar com Google/Apple" aqui — nao entrou:
+            o backend so tem /auth/register com e-mail e senha. */}
+
+        <VStack gap="$3" mt="$6">
+          <VStack gap="$1">
             <Input2
               keyboardType="email-address"
               autoCapitalize="none"
@@ -129,10 +186,10 @@ export function SignUp() {
             {errors.email && <Text color="$brandDanger" size="xs">{errors.email}</Text>}
           </VStack>
 
-          <VStack w="$full" gap="$1">
+          <VStack gap="$1">
             <Input2
               isPassword
-              placeholder="Senha"
+              placeholder="Crie uma senha"
               value={password}
               onChangeText={(text: string) => { setPassword(text); setErrors({}); }}
             />
@@ -140,7 +197,7 @@ export function SignUp() {
             {errors.password && <Text color="$brandDanger" size="xs">{errors.password}</Text>}
           </VStack>
 
-          <VStack w="$full" gap="$1">
+          <VStack gap="$1">
             <Input2
               isPassword
               placeholder="Confirmar senha"
@@ -160,19 +217,39 @@ export function SignUp() {
               </HStack>
             )}
           </VStack>
+        </VStack>
 
-          <Button title={isSubmitting ? "Cadastrando..." : "Cadastrar"} onPress={handleSignUp} />
-        </Center>
-
-        <Center mt={180} flex={1} justifyContent="flex-end">
-          <Text>Já é cadastrado?</Text>
+        <VStack flex={1} justifyContent="flex-end" gap="$3" mt="$6">
           <Button
-            variant="outline"
-            mt="$3"
-            title="Login"
-            onPress={handleLogin}
+            title={
+              isSubmitting
+                ? "Criando..."
+                : fromQueue
+                  ? "Guardar meu lugar"
+                  : "Criar conta"
+            }
+            onPress={handleSignUp}
+            testID="primary-signup"
           />
-        </Center>
+          <Text
+            size="2xs"
+            color="$brandTextSecondary"
+            textAlign="center"
+            lineHeight={15}
+          >
+            Ao continuar você concorda com os Termos de Uso e a Política de Privacidade.
+          </Text>
+          <HStack justifyContent="center" gap="$1.5" alignItems="center">
+            <Text size="sm" color="$brandTextSecondary">
+              Já tem conta?
+            </Text>
+            <TouchableOpacity onPress={handleLogin} testID="go-login">
+              <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                Entrar
+              </Text>
+            </TouchableOpacity>
+          </HStack>
+        </VStack>
       </VStack>
     </ScrollView>
   );
