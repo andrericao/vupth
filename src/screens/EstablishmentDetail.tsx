@@ -1,19 +1,15 @@
-import { FlatList, TouchableOpacity, Alert } from "react-native";
+import { FlatList, TouchableOpacity, Alert, ImageBackground } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   VStack,
   Box,
   Text,
-  Heading,
   HStack,
   Center,
-  Badge,
-  BadgeText,
 } from "@gluestack-ui/themed";
-import { Star, Info } from "phosphor-react-native";
+import { Star, Info, CaretLeft, Heart, CaretRight } from "phosphor-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
-import { Header } from "@components/Header";
 import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { cardShadow } from "@utils/styles";
@@ -29,59 +25,82 @@ type RouteParams = {
   establishmentId: string;
 };
 
-function ProfessionalCard({
+function InitialsAvatar({ name, size = 44 }: { name: string; size?: number }) {
+  const initials =
+    name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase())
+      .join("") || "?";
+  return (
+    <Center width={size} height={size} borderRadius="$full" bg="$greenTint">
+      <Text fontFamily="$display" fontSize={size * 0.36} color="$forest">
+        {initials}
+      </Text>
+    </Center>
+  );
+}
+
+// Linha do profissional (Pencil CLIENT · 08 Estabelecimento).
+//
+// ⚠️ C21 (PRD do client): cada profissional escolhe o REGIME dele — fila ou
+// agenda pura — e os dois convivem na mesma loja. No modo agenda nao existe
+// posicao nem ETA pra mostrar: existe grade de horarios. O backend ainda NAO
+// expoe esse campo (depende do S24), entao hoje toda linha e de fila, que e o
+// unico regime que existe no contrato atual. Quando o campo chegar, e aqui que
+// a linha passa a alternar entre "N na fila · ~X min" e "So agenda · livre HH:MM".
+function ProfessionalRow({
   professional,
   onPress,
 }: {
   professional: ProfessionalWithQueue;
   onPress: () => void;
 }) {
+  const queueCount = professional.queue_count ?? 0;
+  const r = resolveRating(
+    professional.rating_average,
+    professional.rating_count,
+    professional.id,
+  );
+
   return (
     <TouchableOpacity onPress={onPress} testID={`professional-${professional.id}`}>
-      <Box
-        bg="$white"
-        p="$4"
-        mb="$3"
-        borderRadius="$2xl"
-        style={cardShadow}
-      >
-        <HStack justifyContent="space-between" alignItems="center">
+      <Box bg="$white" p="$3" mb="$3" borderRadius="$card" style={cardShadow}>
+        <HStack alignItems="center" gap="$3">
+          <InitialsAvatar name={professional.name} />
           <VStack flex={1}>
-            <Heading size="sm" fontFamily="$heading">
+            <Text fontFamily="$heading" fontSize="$sm" color="$forest">
               {professional.name}
-            </Heading>
-            {/* `specialty` e texto livre no backend, mas parte dos cadastros
-                veio com a categoria em INGLES — era isso que aparecia aqui
-                (Andre 2026-08-06). `formatSpecialty` traduz o que reconhece e
-                preserva quem escreveu a especialidade de verdade. */}
-            <Text size="xs" color="$gray300" mt="$1">
-              {formatSpecialty(professional.specialty)}
             </Text>
-            {(() => {
-              const r = resolveRating(
-                professional.rating_average,
-                professional.rating_count,
-                professional.id,
-              );
-              return (
-                <HStack alignItems="center" gap="$1" mt="$1">
-                  <Star size={13} color="#FFB703" weight="fill" />
-                  <Text size="xs" color="$gray400" fontFamily="$heading">
-                    {r.value.toFixed(1)}
-                    {r.real && r.count != null ? ` (${r.count})` : ""}
-                  </Text>
-                </HStack>
-              );
-            })()}
+            <HStack alignItems="center" gap="$2" mt="$0.5">
+              <Text size="xs" color="$brandTextPrimary" fontFamily="$heading">
+                {queueCount === 0 ? "Sem fila" : `${queueCount} na fila`}
+              </Text>
+              <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
+              <Text size="xs" color="$brandTextSecondary">
+                {queueCount === 0
+                  ? "Agora"
+                  : `~${formatWaitTime(professional.estimated_wait_minutes ?? 0)}`}
+              </Text>
+            </HStack>
+            <HStack alignItems="center" gap="$2" mt="$0.5">
+              {/* `specialty` e texto livre no backend, mas parte dos cadastros
+                  veio com a categoria em INGLES — era isso que aparecia aqui
+                  (Andre 2026-08-06). `formatSpecialty` traduz o que reconhece e
+                  preserva quem escreveu a especialidade de verdade. */}
+              <Text size="2xs" color="$brandTextSecondary" numberOfLines={1} flex={1}>
+                {formatSpecialty(professional.specialty)}
+              </Text>
+              <HStack alignItems="center" gap="$1">
+                <Star size={11} color="#FFB703" weight="fill" />
+                <Text size="2xs" color="$brandTextSecondary" fontFamily="$heading">
+                  {r.value.toFixed(1)}
+                </Text>
+              </HStack>
+            </HStack>
           </VStack>
-          <VStack alignItems="flex-end">
-            <Text size="sm" fontFamily="$heading" color="$forest">
-              {professional.queue_count ?? 0} na fila
-            </Text>
-            <Text size="xs" color="$gray300">
-              {formatWaitTime(professional.estimated_wait_minutes ?? 0)}
-            </Text>
-          </VStack>
+          <CaretRight size={18} color="#454745" />
         </HStack>
       </Box>
     </TouchableOpacity>
@@ -129,8 +148,7 @@ export function EstablishmentDetail() {
 
   if (isLoading) {
     return (
-      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-        <Header showBackButton />
+      <VStack flex={1} px={20} pt={60} pb={30} bg="$brandBackground">
         <VStack mt="$6">
           <SkeletonList count={4} />
         </VStack>
@@ -140,102 +158,180 @@ export function EstablishmentDetail() {
 
   if (isError || !establishment) {
     return (
-      <Center flex={1}>
-        <Text>Estabelecimento não encontrado</Text>
+      <Center flex={1} bg="$brandBackground">
+        <Text color="$brandTextSecondary">Estabelecimento não encontrado</Text>
       </Center>
     );
   }
 
+  const isOpen = isEffectivelyOpen(establishment);
   const minWait =
     professionals.length > 0
       ? Math.min(...professionals.map((p) => p.estimated_wait_minutes ?? 0))
       : 0;
+  const rating = resolveRating(
+    establishment.rating_best ?? establishment.rating_average,
+    establishment.rating_count,
+    establishment.id,
+  );
 
   return (
-    <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-      <Header showBackButton />
-
-      <Center mt="$4">
-        <Heading fontFamily="$heading" fontSize="$3xl">
-          {establishment.name}
-        </Heading>
-        <HStack mt="$2" gap="$2" alignItems="center">
-          <Badge
-            bg={isEffectivelyOpen(establishment) ? "$forest" : "$amber500"}
-            borderRadius="$full"
-            px="$3"
-            py="$1"
+    <VStack flex={1} bg="$brandBackground">
+      {/* Hero: foto da loja quando existe; sem foto, faixa verde-clara da marca
+          (nunca um buraco branco). */}
+      <Box height={210} width="$full">
+        {establishment.urlImage ? (
+          <ImageBackground
+            source={{ uri: establishment.urlImage }}
+            style={{ flex: 1 }}
+            resizeMode="cover"
           >
-            <BadgeText color={isEffectivelyOpen(establishment) ? "$white" : "#1A281A"} size="xs">
-              {isEffectivelyOpen(establishment) ? "Aberto" : "AGENDAR"}
-            </BadgeText>
-          </Badge>
-          <Text size="sm" color="$gray300">
-            Espera mínima: {formatWaitTime(minWait)}
+            <HeroNav onBack={() => navigation.goBack()} />
+          </ImageBackground>
+        ) : (
+          <Box flex={1} bg="$greenTint">
+            <HeroNav onBack={() => navigation.goBack()} />
+          </Box>
+        )}
+      </Box>
+
+      <VStack px={20} pt="$5" gap="$1.5">
+        <Text
+          fontFamily="$display"
+          fontSize={26}
+          lineHeight={30}
+          letterSpacing={-1}
+          color="$forest"
+        >
+          {establishment.name}
+        </Text>
+        <HStack alignItems="center" gap="$2">
+          <Star size={14} color="#163300" weight="fill" />
+          <Text size="sm" fontFamily="$heading" color="$brandTextPrimary">
+            {rating.value.toFixed(1)}
+          </Text>
+          <Text size="sm" color="$brandTextSecondary">
+            {rating.real && rating.count != null ? `(${rating.count} avaliações)` : ""}
+            {establishment.distance_km != null
+              ? `${rating.real && rating.count != null ? " · " : ""}${establishment.distance_km.toFixed(1)} km`
+              : ""}
           </Text>
         </HStack>
-      </Center>
-
-      <Heading size="sm" fontFamily="$heading" mt="$4" mb="$2">
-        Profissionais: {professionals.length}
-      </Heading>
-
-      <FlatList
-        data={professionals}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <ProfessionalCard
-            professional={item}
-            onPress={() => handleSelectProfessional(item.id)}
+        {/* ⚠️ C22 (PRD do client): o horario e por DIA da semana e a tela deveria
+            mostrar o dia corrente ("Hoje 9h-19h") e quando reabre. O contrato de
+            hoje so tem o booleano `is_open` — sem opening/closing time — entao
+            mostramos o estado, que e o que existe. A grade por dia depende do
+            backend (S27). */}
+        <HStack alignItems="center" gap="$2" mt="$0.5">
+          <Center
+            width={7}
+            height={7}
+            borderRadius="$full"
+            bg={isOpen ? "$brandGreen" : "$amber500"}
           />
-        )}
-        ListEmptyComponent={
-          <Center mt="$4">
-            <Text color="$gray300">Nenhum profissional disponível</Text>
-          </Center>
-        }
-      />
-
-      {isEffectivelyOpen(establishment) && professionals.length > 0 && (
-        <Button
-          title="Entrar na fila (menor espera)"
-          onPress={handleSelectShortestQueue}
-          mt="$3"
-        />
-      )}
-
-      {/* Loja fechada agora (inclui OPEN fora do horário): no lugar do botão de
-          fila, banner âmbar acionável (Andre 2026-07-23) — o fluxo segue pelo
-          profissional, onde as ações são Agendar / Solicitar corte. */}
-      {!isEffectivelyOpen(establishment) && (
-        <TouchableOpacity
-          onPress={() =>
-            Alert.alert(
-              "Fila fechada agora",
-              "A fila não está recebendo clientes neste momento. Escolha um profissional para AGENDAR um horário ou SOLICITAR um corte (o profissional responde em até 5 minutos).",
-            )
-          }
-        >
-          <Box
-            bg="$amber100"
-            borderWidth="$1"
-            borderColor="$amber500"
-            borderRadius="$2xl"
-            px="$4"
-            py="$3"
-            mt="$3"
-          >
-            <HStack alignItems="center" gap="$2">
-              <Info size={18} color="#92400e" />
-              <Text size="xs" color="$amber800" fontFamily="$heading" flex={1}>
-                Fila fechada agora — escolha um profissional para agendar ou
-                solicitar um corte.
+          <Text size="sm" color="$brandTextSecondary" fontFamily="$heading">
+            {isOpen ? "Aberto agora" : "Fila fechada agora"}
+          </Text>
+          {isOpen && professionals.length > 0 && (
+            <>
+              <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
+              {/* `formatWaitTime(0)` devolve "Agora" — "menor espera Agora" fica
+                  estranho, entao sem fila vira "sem espera". */}
+              <Text size="sm" color="$brandTextSecondary">
+                {minWait < 1 ? "sem espera" : `menor espera ${formatWaitTime(minWait)}`}
               </Text>
-            </HStack>
-          </Box>
-        </TouchableOpacity>
-      )}
+            </>
+          )}
+        </HStack>
+      </VStack>
+
+      <VStack flex={1} px={20} pt="$5">
+        <HStack justifyContent="space-between" alignItems="center" mb="$3">
+          <Text fontFamily="$display" fontSize="$lg" color="$forest">
+            Quem está atendendo
+          </Text>
+          {isOpen && (
+            <Box bg="$greenTint" borderRadius="$full" px="$3" py="$1">
+              <HStack alignItems="center" gap="$1">
+                <Center width={5} height={5} borderRadius="$full" bg="$forest" />
+                <Text size="2xs" fontFamily="$heading" color="$forest">
+                  Ao vivo
+                </Text>
+              </HStack>
+            </Box>
+          )}
+        </HStack>
+
+        <FlatList
+          data={professionals}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 12 }}
+          renderItem={({ item }) => (
+            <ProfessionalRow
+              professional={item}
+              onPress={() => handleSelectProfessional(item.id)}
+            />
+          )}
+          ListEmptyComponent={
+            <Center mt="$4">
+              <Text color="$brandTextSecondary">Nenhum profissional disponível</Text>
+            </Center>
+          }
+        />
+      </VStack>
+
+      <VStack px={20} pb={32}>
+        {isOpen && professionals.length > 0 && (
+          <Button title="Entrar com menor espera" onPress={handleSelectShortestQueue} />
+        )}
+
+        {/* Loja fechada agora (inclui OPEN fora do horário): no lugar do botão de
+            fila, banner âmbar acionável (Andre 2026-07-23) — o fluxo segue pelo
+            profissional, onde as ações são Agendar / Solicitar corte. */}
+        {!isOpen && (
+          <TouchableOpacity
+            onPress={() =>
+              Alert.alert(
+                "Fila fechada agora",
+                "A fila não está recebendo clientes neste momento. Escolha um profissional para AGENDAR um horário ou SOLICITAR um corte (o profissional responde em até 5 minutos).",
+              )
+            }
+          >
+            <Box
+              bg="$amber100"
+              borderWidth="$1"
+              borderColor="$amber500"
+              borderRadius="$card"
+              px="$4"
+              py="$3"
+            >
+              <HStack alignItems="center" gap="$2">
+                <Info size={18} color="#92400e" />
+                <Text size="xs" color="$amber800" fontFamily="$heading" flex={1}>
+                  Fila fechada agora — escolha um profissional para agendar ou
+                  solicitar um corte.
+                </Text>
+              </HStack>
+            </Box>
+          </TouchableOpacity>
+        )}
+      </VStack>
     </VStack>
+  );
+}
+
+function HeroNav({ onBack }: { onBack: () => void }) {
+  return (
+    <HStack justifyContent="space-between" alignItems="center" px={20} pt={56}>
+      <TouchableOpacity onPress={onBack} testID="back-button">
+        <Center width={40} height={40} borderRadius="$full" bg="#FFFFFFE6">
+          <CaretLeft size={20} color="#163300" weight="bold" />
+        </Center>
+      </TouchableOpacity>
+      <Center width={40} height={40} borderRadius="$full" bg="#FFFFFFE6">
+        <Heart size={20} color="#163300" />
+      </Center>
+    </HStack>
   );
 }
