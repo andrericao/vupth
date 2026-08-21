@@ -214,7 +214,16 @@ export function Home() {
           }
           action={
             isAuthenticated ? (
-              <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
+              // O avatar vai DIRETO pra aba Perfil. Antes ele abria uma tela
+              // intermediaria (`Profile`) cujos dois atalhos — "Atendimentos" e
+              // "Configuracoes" — ja eram abas da barra de baixo: o avatar
+              // levava a uma tela cujo trabalho era te mandar pra outra tela.
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.getParent()?.navigate("settingsTab", { screen: "settings" })
+                }
+                testID="profile-icon"
+              >
                 <PlaceAvatar name={firstName ?? "?"} />
               </TouchableOpacity>
             ) : (

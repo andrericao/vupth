@@ -13,7 +13,6 @@ import { Login } from "@screens/Login";
 import { SignUp } from "@screens/SignUp";
 import { ForgotPassword } from "@screens/ForgotPassword";
 import { QueueStatus } from "@screens/QueueStatus";
-import { Profile } from "@screens/Profile";
 import { Attendances } from "@screens/Attendances";
 import { Settings } from "@screens/Settings";
 import { EditProfile } from "@screens/EditProfile";
@@ -79,7 +78,6 @@ export type AppRoutes = {
     // Agendar (#40): quando presente, cria o atendimento como intenção com alvo.
     targetTime?: string;
   };
-  profile: undefined;
   attendances: undefined;
   services: undefined;
   settings: undefined;
@@ -101,7 +99,6 @@ function HomeStack() {
       <HomeStackNav.Screen name="establishmentDetail" component={EstablishmentDetail} />
       <HomeStackNav.Screen name="serviceSelection" component={ServiceSelection} />
       <HomeStackNav.Screen name="queueStatus" component={QueueStatus} />
-      <HomeStackNav.Screen name="profile" component={Profile} />
       <HomeStackNav.Screen name="login" component={Login} />
       <HomeStackNav.Screen name="signUp" component={SignUp} />
       <HomeStackNav.Screen name="forgotPassword" component={ForgotPassword} />

@@ -86,7 +86,17 @@ export function Settings() {
     }, [accessToken]),
   );
 
-  const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(" ") || "Não informado";
+  // Duas leituras diferentes do mesmo dado, por isso duas variaveis:
+  //  · como VALOR da linha "Dados pessoais", vazio e "Não informado" — o campo
+  //    existe e esta em branco, e dizer isso e o certo.
+  //  · como NOME no topo, "Não informado" vira um nome falso: a pessoa le o
+  //    proprio cartao de identidade e nao se reconhece. Sem nome cadastrado o
+  //    topo cai no apelido do e-mail, que e sempre alguma coisa dela.
+  // (O nome nunca chega a ser pedido: nao existe tela de completar perfil
+  //  depois do cadastro. Enquanto ela nao existir, este e o menor mal.)
+  const nomeCadastrado = [user?.first_name, user?.last_name].filter(Boolean).join(" ");
+  const displayName = nomeCadastrado || "Não informado";
+  const nomeDoTopo = nomeCadastrado || user?.email?.split("@")[0] || "Sua conta";
   const displayAddress = mainAddress
     ? `${mainAddress.street}, ${mainAddress.number} — ${mainAddress.neighborhood}`
     : "Não informado";
@@ -209,7 +219,7 @@ export function Settings() {
           </Center>
           <VStack gap="$1" alignItems="center">
             <Text fontFamily="$display" fontSize={24} letterSpacing={-0.8} color="$white">
-              {displayName}
+              {nomeDoTopo}
             </Text>
             {user?.email && (
               <Text size="sm" color="$brandGreen">
@@ -220,7 +230,7 @@ export function Settings() {
         </VStack>
       ) : (
         <Box px={16}>
-          <ScreenHeader root title="Sua conta" />
+          <ScreenHeader root title="Perfil" />
         </Box>
       )}
 
