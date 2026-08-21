@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Alert, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { VStack, Text, Heading } from "@gluestack-ui/themed";
+import { VStack, Text } from "@gluestack-ui/themed";
 
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
@@ -64,12 +64,10 @@ export function EditProfile() {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-        <Header showBackButton />
+      <VStack flex={1} pb={30} bg="$brandBackground">
+        <ScreenHeader title="DADOS PESSOAIS" />
 
-        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-          Editar Perfil
-        </Heading>
+        <VStack px={20} pt={24} flex={1}>
 
         <VStack gap="$4">
           <VStack gap="$1">
@@ -123,6 +121,7 @@ export function EditProfile() {
             onPress={handleSave}
             isDisabled={isSaving}
           />
+        </VStack>
         </VStack>
       </VStack>
     </ScrollView>

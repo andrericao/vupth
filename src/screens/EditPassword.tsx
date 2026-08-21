@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { VStack, Heading, ScrollView } from "@gluestack-ui/themed";
+import { VStack, ScrollView } from "@gluestack-ui/themed";
 
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { PasswordRules } from "@components/PasswordRules";
@@ -54,16 +54,14 @@ export function EditPassword() {
   return (
     <ScrollView
       flex={1}
-      bg="$gray700"
+      bg="$brandBackground"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} px={15} pt={60} pb={30}>
-        <Header showBackButton />
+      <VStack flex={1} pb={30} bg="$brandBackground">
+        <ScreenHeader title="ALTERAR SENHA" />
 
-        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-          Alterar Senha
-        </Heading>
+        <VStack px={20} pt={24} flex={1}>
 
         <VStack gap="$4">
           <VStack gap="$1">
@@ -101,6 +99,7 @@ export function EditPassword() {
             onPress={handleSave}
             isDisabled={!canSave}
           />
+        </VStack>
         </VStack>
       </VStack>
     </ScrollView>

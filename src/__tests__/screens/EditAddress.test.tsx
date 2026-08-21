@@ -103,6 +103,8 @@ describe('EditAddress — oferta de GPS ao abrir o formulário', () => {
     });
 
     expect(mockCapture).not.toHaveBeenCalled();
-    expect(await findByText('Novo Endereço')).toBeTruthy();
+    // Titulo em CAIXA ALTA desde o redesenho ("NOVO ENDERECO"); o que o teste
+    // garante e que a tela ficou no FORMULARIO depois de recusar o GPS.
+    expect(await findByText(/novo endere/i)).toBeTruthy();
   });
 });

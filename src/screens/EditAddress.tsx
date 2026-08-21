@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { Alert, ScrollView, TouchableOpacity } from "react-native";
-import { VStack, Text, Heading, Box, HStack } from "@gluestack-ui/themed";
+import { VStack, Text, Box, HStack } from "@gluestack-ui/themed";
 import { Star, Trash, PencilSimple, MapPin } from "phosphor-react-native";
 
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
@@ -221,12 +221,9 @@ export function EditAddress() {
   if (mode === "form") {
     return (
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-          <Header showBackButton />
-
-          <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-            {editingId ? "Editar Endereço" : "Novo Endereço"}
-          </Heading>
+        <VStack flex={1} pb={30} bg="$brandBackground">
+          <ScreenHeader title={editingId ? "EDITAR ENDEREÇO" : "NOVO ENDEREÇO"} />
+          <VStack px={20} pt={24} flex={1}>
 
           <Button
             title={gpsLoading ? "Localizando..." : "Usar minha localização (GPS)"}
@@ -288,6 +285,7 @@ export function EditAddress() {
             <Button title={isSaving ? "Salvando..." : "Salvar"} onPress={handleSave} isDisabled={isSaving} />
             <Button title="Cancelar" variant="outline" onPress={() => setMode("list")} />
           </VStack>
+          </VStack>
         </VStack>
       </ScrollView>
     );
@@ -295,13 +293,9 @@ export function EditAddress() {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-        <Header showBackButton />
-
-        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-          Endereços
-        </Heading>
-
+      <VStack flex={1} pb={30} bg="$brandBackground">
+        <ScreenHeader title="ENDEREÇOS" />
+        <VStack px={20} pt={24} flex={1}>
         {isLoading ? (
           <SkeletonList count={3} />
         ) : addresses.length === 0 ? (
@@ -348,6 +342,7 @@ export function EditAddress() {
 
         <VStack mt="$6">
           <Button title="Adicionar endereço" onPress={handleNew} />
+        </VStack>
         </VStack>
       </VStack>
     </ScrollView>
