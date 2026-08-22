@@ -1,5 +1,8 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import * as SecureStore from "expo-secure-store";
+import * as Updates from "expo-updates";
+
+import { resolveApiEnv } from "./apiEnv";
 
 interface RefreshResponse {
 	access_token: string;
@@ -22,13 +25,23 @@ const BASE_URLS: Record<string, string> = {
 	prod: "https://vupth-backend-ia-production.up.railway.app",
 };
 
-const env = (process.env.EXPO_PUBLIC_API_ENV || "local") as keyof typeof BASE_URLS;
+// O CANAL manda quando existe (bundle publicado); o `.env` so vale rodando
+// local. Ver `apiEnv.ts` pro porque — em resumo, o `.env` de quem publica
+// vazava pro app de todo mundo.
+const canalDoBundle = (() => {
+	try {
+		return Updates.channel;
+	} catch {
+		return null;
+	}
+})();
+const env = resolveApiEnv(canalDoBundle, process.env.EXPO_PUBLIC_API_ENV);
 
 // Base URL HTTP resolvida e env atual — usados pelo portao de readiness (cold start Render).
-// O `??` importa: sem ele, um nome fora do mapa virava `undefined` e o app
-// subia sem baseURL nenhuma — toda chamada falhava sem dizer por que. Cair no
-// host de teste e ruim, mas e visivel; `undefined` nao aparece em lugar nenhum.
-export const API_BASE_URL = BASE_URLS[env] ?? BASE_URLS.dev;
+// Sem indexacao defensiva aqui de proposito: `resolveApiEnv` so devolve chave
+// que existe neste mapa. Antes, um nome fora do mapa virava `undefined` e o
+// app subia sem baseURL — toda chamada falhava sem dizer por que.
+export const API_BASE_URL = BASE_URLS[env];
 export const API_ENV = env;
 
 // WebSocket (STOMP) — deriva ws(s) do baseURL HTTP. `/ws/websocket` e o transporte
