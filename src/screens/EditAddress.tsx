@@ -241,41 +241,41 @@ export function EditAddress() {
 
           <VStack gap="$3">
             <VStack gap="$1">
-              <Text size="sm" color="$gray300">Rua *</Text>
+              <Text size="sm" color="$brandTextSecondary">Rua *</Text>
               <Input2 placeholder="Rua das Flores" value={form.street} onChangeText={(v: string) => updateField("street", v)} />
             </VStack>
             <HStack gap="$3">
               <VStack gap="$1" flex={1}>
-                <Text size="sm" color="$gray300">Número *</Text>
+                <Text size="sm" color="$brandTextSecondary">Número *</Text>
                 <Input2 placeholder="123" value={form.number} onChangeText={(v: string) => updateField("number", v)} />
               </VStack>
               <VStack gap="$1" flex={1}>
-                <Text size="sm" color="$gray300">Complemento</Text>
+                <Text size="sm" color="$brandTextSecondary">Complemento</Text>
                 <Input2 placeholder="Apt 4B" value={form.complement} onChangeText={(v: string) => updateField("complement", v)} />
               </VStack>
             </HStack>
             <VStack gap="$1">
-              <Text size="sm" color="$gray300">Bairro *</Text>
+              <Text size="sm" color="$brandTextSecondary">Bairro *</Text>
               <Input2 placeholder="Centro" value={form.neighborhood} onChangeText={(v: string) => updateField("neighborhood", v)} />
             </VStack>
             <HStack gap="$3">
               <VStack gap="$1" flex={2}>
-                <Text size="sm" color="$gray300">Cidade *</Text>
+                <Text size="sm" color="$brandTextSecondary">Cidade *</Text>
                 <Input2 placeholder="São Paulo" value={form.city} onChangeText={(v: string) => updateField("city", v)} />
               </VStack>
               <VStack gap="$1" flex={1}>
-                <Text size="sm" color="$gray300">UF *</Text>
+                <Text size="sm" color="$brandTextSecondary">UF *</Text>
                 <Input2 placeholder="SP" value={form.state} onChangeText={(v: string) => updateField("state", v)} autoCapitalize="characters" maxLength={2} />
               </VStack>
             </HStack>
             <VStack gap="$1">
-              <Text size="sm" color="$gray300">
+              <Text size="sm" color="$brandTextSecondary">
                 CEP *{cepLoading ? " — buscando endereço..." : ""}
               </Text>
               <Input2 placeholder="01310-100" value={form.zipCode} onChangeText={handleCepChange} keyboardType="numeric" maxLength={9} />
             </VStack>
             <VStack gap="$1">
-              <Text size="sm" color="$gray300">Referência</Text>
+              <Text size="sm" color="$brandTextSecondary">Referência</Text>
               <Input2 placeholder="Próximo ao metrô" value={form.reference} onChangeText={(v: string) => updateField("reference", v)} />
             </VStack>
           </VStack>
@@ -298,7 +298,7 @@ export function EditAddress() {
         {isLoading ? (
           <SkeletonList count={3} />
         ) : addresses.length === 0 ? (
-          <Text color="$gray300">Nenhum endereço cadastrado</Text>
+          <Text color="$brandTextSecondary">Nenhum endereço cadastrado</Text>
         ) : (
           <VStack gap="$3">
             {addresses.map((addr) => (
@@ -309,10 +309,10 @@ export function EditAddress() {
                       {addr.street}, {addr.number}
                       {addr.complement ? ` - ${addr.complement}` : ""}
                     </Text>
-                    <Text size="xs" color="$gray300">
+                    <Text size="xs" color="$brandTextSecondary">
                       {addr.neighborhood} — {addr.city}/{addr.state}
                     </Text>
-                    <Text size="xs" color="$gray300">CEP: {addr.zipCode}</Text>
+                    <Text size="xs" color="$brandTextSecondary">CEP: {addr.zipCode}</Text>
                     {addr.isMain && (
                       <HStack alignItems="center" gap="$1" mt="$1">
                         <Star size={14} color="#163300" fill="#163300" />

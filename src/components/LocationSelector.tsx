@@ -104,7 +104,7 @@ export function LocationSelector() {
             <Heading fontFamily="$heading" fontSize="$lg">
               Sua localização
             </Heading>
-            <Text size="sm" color="$gray300" mt="$1">
+            <Text size="sm" color="$brandTextSecondary" mt="$1">
               Mostramos primeiro os estabelecimentos do seu bairro e cidade.
             </Text>
 
@@ -127,9 +127,9 @@ export function LocationSelector() {
             )}
 
             <HStack alignItems="center" gap="$3" my="$4">
-              <Divider flex={1} bg="$gray500" />
+              <Divider flex={1} bg="$brandBorder" />
               <Text size="xs" color="$brandTextSecondary">ou pelo CEP</Text>
-              <Divider flex={1} bg="$gray500" />
+              <Divider flex={1} bg="$brandBorder" />
             </HStack>
 
             <Input2
@@ -149,7 +149,7 @@ export function LocationSelector() {
 
             {location && (
               <TouchableOpacity onPress={() => { clearLocation(); setOpen(false); }} disabled={busy}>
-                <Text size="sm" color="$gray300" textAlign="center" mt="$4">
+                <Text size="sm" color="$brandTextSecondary" textAlign="center" mt="$4">
                   Ver todos (remover filtro)
                 </Text>
               </TouchableOpacity>

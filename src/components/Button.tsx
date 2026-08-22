@@ -35,7 +35,7 @@ export function Button({
       h={54}
       rounded="$full"
       bg={isGhost ? "transparent" : "$brandGreen"}
-      $active-bg={isDestructive ? "$red100" : isOutline ? "$greenTint" : "$brandSuccess"}
+      $active-bg={isDestructive ? "$brandDangerTint" : isOutline ? "$greenTint" : "$brandSuccess"}
       borderWidth={isGhost ? "$2" : "$0"}
       borderColor={accent}
       // `isDisabled` do Gluestack e so ESTADO VISUAL: deixa o botao apagado mas

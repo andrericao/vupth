@@ -44,7 +44,7 @@ export function ScheduleModal({ visible, onClose }: Props) {
           <Heading fontFamily="$heading" fontSize="$lg">
             Agendar atendimento
           </Heading>
-          <Text size="sm" color="$gray300" mt="$1">
+          <Text size="sm" color="$brandTextSecondary" mt="$1">
             Não vai dar para esperar na fila agora? Escolha o dia para manifestar
             sua intenção.
           </Text>

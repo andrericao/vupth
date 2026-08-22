@@ -409,7 +409,7 @@ export function QueueStatus() {
     return (
       <Center flex={1} bg="$brandBackground" px={16}>
         <ActivityIndicator size="large" color="#163300" />
-        <Text mt="$2" color="$gray300">{createMsg}</Text>
+        <Text mt="$2" color="$brandTextSecondary">{createMsg}</Text>
         <Text mt="$1" size="xs" color="$brandTextSecondary" textAlign="center">
           Na primeira vez pode levar até ~50s para o servidor acordar.
         </Text>
@@ -423,7 +423,9 @@ export function QueueStatus() {
         <ScreenHeader title="NÃO DEU CERTO" onBack={() => navigation.goBack()} />
         <Center flex={1}>
           <Text
-            color={canRequestCut ? "$gray500" : "$brandDanger"}
+            // [contraste] Era `$gray500` (#DDDEDF, 1,35:1 no branco) — a mensagem
+            // sumia justo no caso NAO-erro. O neutro da marca e brandTextSecondary.
+            color={canRequestCut ? "$brandTextSecondary" : "$brandDanger"}
             fontSize="$lg"
             fontFamily="$heading"
             textAlign="center"
@@ -814,7 +816,7 @@ export function QueueStatus() {
         >
           {!isFinished && (
             <HStack alignItems="center" gap="$1">
-              <Text size="sm" color="$gray300">
+              <Text size="sm" color="$brandTextSecondary">
                 {isBeingAttended ? "Tempo de atendimento" : "Duração estimada"}
               </Text>
               {!isBeingAttended && (
@@ -842,11 +844,11 @@ export function QueueStatus() {
             {timeLabel}
           </Heading>
 
-          <Box w="$full" h="$px" bg="$gray500" my="$4" />
+          <Box w="$full" h="$px" bg="$brandBorder" my="$4" />
 
           {isInQueue && (
             <HStack w="$full" justifyContent="space-between" mb="$3">
-              <Text size="sm" color="$gray300">Previsão de início</Text>
+              <Text size="sm" color="$brandTextSecondary">Previsão de início</Text>
               <Text size="sm" fontFamily="$heading">
                 {remaining <= 0 ? "A qualquer momento" : startTimeLabel}
               </Text>
@@ -855,7 +857,7 @@ export function QueueStatus() {
 
           {isBeingAttended && activeQueue?.serviceMinutes != null && (
             <HStack w="$full" justifyContent="space-between" mb="$3">
-              <Text size="sm" color="$gray300">Duração estimada</Text>
+              <Text size="sm" color="$brandTextSecondary">Duração estimada</Text>
               <Text size="sm" fontFamily="$heading">
                 {formatWaitTime(activeQueue.serviceMinutes)}
               </Text>
@@ -864,34 +866,34 @@ export function QueueStatus() {
 
           {endTimeLabel && (
             <HStack w="$full" justifyContent="space-between" mb="$3">
-              <Text size="sm" color="$gray300">Horário de término</Text>
+              <Text size="sm" color="$brandTextSecondary">Horário de término</Text>
               <Text size="sm" fontFamily="$heading">{endTimeLabel}</Text>
             </HStack>
           )}
 
           <HStack w="$full" justifyContent="space-between" mb="$3">
-            <Text size="sm" color="$gray300">Estabelecimento</Text>
+            <Text size="sm" color="$brandTextSecondary">Estabelecimento</Text>
             <Text size="sm" fontFamily="$heading">
               {activeQueue?.establishmentName ?? paramEstName ?? "..."}
             </Text>
           </HStack>
 
           <HStack w="$full" justifyContent="space-between" mb="$3">
-            <Text size="sm" color="$gray300">Profissional</Text>
+            <Text size="sm" color="$brandTextSecondary">Profissional</Text>
             <Text size="sm" fontFamily="$heading">
               {activeQueue?.professionalName ?? paramProfName ?? "..."}
             </Text>
           </HStack>
 
           <HStack w="$full" justifyContent="space-between">
-            <Text size="sm" color="$gray300">Status</Text>
+            <Text size="sm" color="$brandTextSecondary">Status</Text>
             <Text size="sm" fontFamily="$heading">
               {STATUS_LABELS[status] ?? status}
             </Text>
           </HStack>
         </Box>
 
-        <Text size="xs" color="$gray300" mt="$4" textAlign="center">
+        <Text size="xs" color="$brandTextSecondary" mt="$4" textAlign="center">
           A fila atualiza sozinha — arraste para baixo para atualizar agora
         </Text>
       </Center>
@@ -900,7 +902,7 @@ export function QueueStatus() {
       <VStack gap="$3" mt="$4">
         {canReshuffle && (
           <>
-            <Text size="xs" color="$gray300" textAlign="center">
+            <Text size="xs" color="$brandTextSecondary" textAlign="center">
               Não pode esperar agora? Você pode adiantar ou atrasar a sua vez.
             </Text>
             <Button

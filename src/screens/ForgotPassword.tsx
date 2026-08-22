@@ -185,7 +185,7 @@ export function ForgotPassword() {
                   responder. Não feche o app.
                 </Text>
                 <TouchableOpacity onPress={handleCancel} testID="forgot-cancel-wait">
-                  <Text size="sm" color="$gray300" fontFamily="$heading" textAlign="center">
+                  <Text size="sm" color="$brandTextSecondary" fontFamily="$heading" textAlign="center">
                     Cancelar espera
                   </Text>
                 </TouchableOpacity>
@@ -196,7 +196,7 @@ export function ForgotPassword() {
 
         {step === "reset" && (
           <VStack gap="$4">
-            <Text size="sm" color="$gray300">
+            <Text size="sm" color="$brandTextSecondary">
               Se o e-mail estiver cadastrado, você receberá um código de 6 dígitos
               (vale 15 minutos). Digite-o abaixo com a nova senha.
             </Text>

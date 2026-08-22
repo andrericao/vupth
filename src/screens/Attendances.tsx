@@ -261,7 +261,7 @@ export function Attendances() {
                       <Text fontFamily="$heading" size="sm">
                         {s.professionalName}
                       </Text>
-                      <Text size="xs" color="$gray300">
+                      <Text size="xs" color="$brandTextSecondary">
                         {s.establishmentName}
                       </Text>
                       <Text size="xs" color="$brandTextSecondary" mt="$1">
@@ -310,7 +310,7 @@ export function Attendances() {
                           <Text fontFamily="$heading" size="sm">
                             {i.professionalName}
                           </Text>
-                          <Text size="xs" color="$gray300">
+                          <Text size="xs" color="$brandTextSecondary">
                             {i.services.map((s) => s.customName).join(", ") || i.establishmentName}
                           </Text>
                           <Text size="xs" color="$brandTextSecondary" mt="$1">
@@ -354,7 +354,7 @@ export function Attendances() {
           ) : realizados.length === 0 ? (
             <Center py="$8">
               <Clock size={40} color="#9CA3AF" />
-              <Text size="sm" color="$gray300" mt="$2">
+              <Text size="sm" color="$brandTextSecondary" mt="$2">
                 Nenhum atendimento realizado ainda
               </Text>
             </Center>
@@ -375,7 +375,7 @@ export function Attendances() {
                           <Text fontFamily="$heading" size="sm">
                             {a.professionalName}
                           </Text>
-                          <Text size="xs" color="$gray300">
+                          <Text size="xs" color="$brandTextSecondary">
                             {a.services.map((s) => s.customName).join(", ") || "—"}
                           </Text>
                           <Text size="xs" color="$brandTextSecondary" mt="$1">
@@ -388,14 +388,14 @@ export function Attendances() {
                               {st.label}
                             </BadgeText>
                           </Badge>
-                          <Text size="xs" color="$gray300">
+                          <Text size="xs" color="$brandTextSecondary">
                             R$ {a.totalValue.toFixed(2)}
                           </Text>
                         </VStack>
                       </HStack>
                       <HStack alignItems="center" gap="$1" mt="$3">
                         <ChevronRight size={13} color={canRate ? "#163300" : "#454745"} />
-                        <Text size="xs" color="$gray300" fontFamily="$heading">
+                        <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
                           {canRate ? "Toque para detalhes e avaliar" : "Toque para ver detalhes"}
                         </Text>
                       </HStack>

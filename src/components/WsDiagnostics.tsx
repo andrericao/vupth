@@ -22,16 +22,16 @@ import {
 
 const LEVEL_COLOR: Record<VerdictLevel, string> = {
   ok: "$forest",
-  warn: "$amber800",
+  warn: "$brandWarning",
   bad: "$brandDanger",
-  idle: "$gray300",
+  idle: "$brandTextSecondary",
 };
 
 const LEVEL_BG: Record<VerdictLevel, string> = {
   ok: "$greenTint",
-  warn: "$amber100",
-  bad: "$red100",
-  idle: "$gray600",
+  warn: "$brandWarning",
+  bad: "$brandDangerTint",
+  idle: "$brandSurface",
 };
 
 function Channel({
@@ -56,11 +56,11 @@ function Channel({
         </Text>
       </HStack>
       <Box bg={LEVEL_BG[verdict.level]} borderRadius="$lg" px="$3" py="$2">
-        <Text size="xs" color={verdict.level === "idle" ? "$gray300" : "$gray100"}>
+        <Text size="xs" color={verdict.level === "idle" ? "$brandTextSecondary" : "$forest"}>
           {verdict.message}
         </Text>
       </Box>
-      <Text size="xs" color="$gray300">
+      <Text size="xs" color="$brandTextSecondary">
         {state.messages} recebidas · última {formatSince(state.lastMessageAt, now)} ·{" "}
         {state.connects} {state.connects === 1 ? "conexão" : "conexões"}
         {state.info?.heartBeat ? ` · heart-beat ${state.info.heartBeat}` : ""}
@@ -96,7 +96,7 @@ export function WsDiagnostics() {
         <Heading fontFamily="$heading" fontSize="$md" mb="$1">
           Tempo real (diagnóstico)
         </Heading>
-        <Text size="xs" color="$gray300">
+        <Text size="xs" color="$brandTextSecondary">
           Estado das conexões que trazem sua vez na fila sem precisar recarregar.
         </Text>
       </VStack>
@@ -109,7 +109,7 @@ export function WsDiagnostics() {
             state={personalState}
             now={now}
           />
-          <Box h={1} bg="$gray600" />
+          <Box h={1} bg="$brandBorder" />
           <Channel
             channel="public"
             label="Fila do estabelecimento"

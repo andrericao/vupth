@@ -78,7 +78,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
             Como foi seu atendimento?
           </Heading>
           {professionalName ? (
-            <Text size="sm" color="$gray300" mt="$1">
+            <Text size="sm" color="$brandTextSecondary" mt="$1">
               {professionalName}
             </Text>
           ) : null}
@@ -96,7 +96,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
           </HStack>
 
           {SHOW_COMMENT && (
-            <Box borderWidth="$1" borderColor="$coolGray300" borderRadius="$xl" px="$3" py="$2" mt="$4">
+            <Box borderWidth="$1" borderColor="$brandBorder" borderRadius="$xl" px="$3" py="$2" mt="$4">
               <TextInput
                 placeholder="Comentário (opcional)"
                 placeholderTextColor="#9CA3AF"

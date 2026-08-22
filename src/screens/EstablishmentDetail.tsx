@@ -251,7 +251,7 @@ export function EstablishmentDetail() {
             width={7}
             height={7}
             borderRadius="$full"
-            bg={isOpen ? "$brandGreen" : "$amber500"}
+            bg={isOpen ? "$brandGreen" : "$brandWarning"}
           />
           <Text size="sm" color="$brandTextSecondary" fontFamily="$heading">
             {isOpen ? "Aberto agora" : "Fila fechada agora"}
@@ -323,16 +323,14 @@ export function EstablishmentDetail() {
             }
           >
             <Box
-              bg="$amber100"
-              borderWidth="$1"
-              borderColor="$amber500"
+              bg="$brandWarning"
               borderRadius="$card"
               px="$4"
               py="$3"
             >
               <HStack alignItems="center" gap="$2">
-                <Info size={18} color="#92400e" />
-                <Text size="xs" color="$amber800" fontFamily="$heading" flex={1}>
+                <Info size={18} color="#163300" />
+                <Text size="xs" color="$forest" fontFamily="$heading" flex={1}>
                   Fila fechada agora — escolha um profissional para agendar ou
                   solicitar um corte.
                 </Text>

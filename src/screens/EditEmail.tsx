@@ -56,12 +56,12 @@ export function EditEmail() {
 
         <VStack gap="$4">
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">E-mail atual</Text>
+            <Text size="sm" color="$brandTextSecondary">E-mail atual</Text>
             <Text size="md" fontFamily="$heading">{user?.email}</Text>
           </VStack>
 
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Novo e-mail</Text>
+            <Text size="sm" color="$brandTextSecondary">Novo e-mail</Text>
             <Input2
               placeholder="novo@email.com"
               value={email}

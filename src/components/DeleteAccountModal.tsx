@@ -51,11 +51,11 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
             Deletar conta
           </Heading>
 
-          <Text size="sm" color="$gray300">
+          <Text size="sm" color="$brandTextSecondary">
             Seus dados pessoais serão apagados e você sairá do app. Os atendimentos
             que você já fez continuam no histórico do profissional, sem o seu nome.
           </Text>
-          <Text size="sm" color="$gray300">
+          <Text size="sm" color="$brandTextSecondary">
             Para confirmar que é você, digite sua senha atual.
           </Text>
 
@@ -77,7 +77,7 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
             title={isDeleting ? "Deletando..." : "Deletar minha conta"}
             variant="outline"
             borderColor="$brandDanger"
-            $active-bg="$red500"
+            $active-bg="$brandDangerTint"
             isDisabled={password.length === 0 || isDeleting}
             testID="delete-account-confirm"
             onPress={confirm}

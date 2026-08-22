@@ -35,7 +35,7 @@ function timeOnly(iso: string | null): string {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <HStack w="$full" justifyContent="space-between" mb="$2" alignItems="flex-start">
-      <Text size="sm" color="$gray300">{label}</Text>
+      <Text size="sm" color="$brandTextSecondary">{label}</Text>
       <Text size="sm" fontFamily="$heading" flex={1} textAlign="right" ml="$3">
         {value}
       </Text>

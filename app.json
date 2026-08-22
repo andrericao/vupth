@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#2E432F"
+      "backgroundColor": "#163300"
     },
     "ios": {
       "supportsTablet": true,
@@ -19,7 +19,7 @@
       "package": "com.vupth.client",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#304430"
+        "backgroundColor": "#163300"
       }
     },
     "web": {

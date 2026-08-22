@@ -24,7 +24,7 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
       px="$3"
       bg="$white"
       borderWidth="$1"
-      borderColor="$coolGray300"
+      borderColor="$brandBorder"
       borderRadius="$xl"
       variant="outline"
       $focus-borderWidth="$2"
@@ -32,7 +32,9 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
     >
       <HStack flex={1} alignItems="center">
         <InputField
-          color="$coolGray900"
+          // O valor digitado e conteudo PRIMARIO: fica em brandTextPrimary, nao
+          // no brandTextSecondary dos rotulos, senao rotulo e resposta pesam igual.
+          color="$brandTextPrimary"
           fontFamily="$body"
           secureTextEntry={isSecure}
           flex={1}

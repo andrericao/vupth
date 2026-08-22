@@ -71,17 +71,17 @@ export function EditProfile() {
 
         <VStack gap="$4">
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Nome</Text>
+            <Text size="sm" color="$brandTextSecondary">Nome</Text>
             <Input2 placeholder="Nome" value={firstName} onChangeText={setFirstName} />
           </VStack>
 
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Sobrenome</Text>
+            <Text size="sm" color="$brandTextSecondary">Sobrenome</Text>
             <Input2 placeholder="Sobrenome" value={lastName} onChangeText={setLastName} />
           </VStack>
 
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Telefone</Text>
+            <Text size="sm" color="$brandTextSecondary">Telefone</Text>
             <Input2
               placeholder="11999998888"
               value={phone}
@@ -91,7 +91,7 @@ export function EditProfile() {
           </VStack>
 
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Data de nascimento</Text>
+            <Text size="sm" color="$brandTextSecondary">Data de nascimento</Text>
             <Input2
               placeholder="1990-01-15"
               value={birthDate}
@@ -100,7 +100,7 @@ export function EditProfile() {
           </VStack>
 
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Gênero</Text>
+            <Text size="sm" color="$brandTextSecondary">Gênero</Text>
             <VStack gap="$2">
               {GENDER_OPTIONS.map((g) => (
                 <Button

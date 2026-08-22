@@ -290,7 +290,7 @@ export function Settings() {
           </>
         ) : (
           <Box bg="$brandSurface" borderRadius="$card" p="$4">
-            <Text size="sm" color="$gray300" mb="$3">
+            <Text size="sm" color="$brandTextSecondary" mb="$3">
               Você está navegando como visitante. Entre ou crie uma conta para
               gerenciar seu perfil, senha e endereço.
             </Text>
@@ -319,7 +319,7 @@ export function Settings() {
             <Heading fontFamily="$heading" fontSize="$md" mb="$1">
               Funcionalidades aguardadas
             </Heading>
-            <Text size="xs" color="$gray300" mb="$3">
+            <Text size="xs" color="$brandTextSecondary" mb="$3">
               As mais tocadas fizeram mais falta — priorizar quando o backend liberar.
             </Text>
             <Box borderRadius="$card" overflow="hidden">
@@ -330,7 +330,7 @@ export function Settings() {
                   px="$4"
                   py="$3"
                   borderBottomWidth="$1"
-                  borderBottomColor="$gray500"
+                  borderBottomColor="$brandBorder"
                   alignItems="center"
                 >
                   <Text size="sm" flex={1}>

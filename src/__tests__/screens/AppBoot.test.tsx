@@ -11,10 +11,6 @@ jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@routes/index', () => ({ Routes: () => null }));
 jest.mock('expo-font', () => ({ useFonts: () => [true, null] }));
-jest.mock('@expo-google-fonts/poppins', () => ({
-  Poppins_600SemiBold: 'Poppins_600SemiBold',
-  Poppins_700Bold: 'Poppins_700Bold',
-}));
 jest.mock('@expo-google-fonts/inter', () => ({
   Inter_400Regular: 'Inter_400Regular',
   Inter_500Medium: 'Inter_500Medium',
