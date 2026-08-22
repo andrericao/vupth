@@ -86,10 +86,15 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
           <HStack justifyContent="center" gap="$2" mt="$5" mb="$2">
             {[1, 2, 3, 4, 5].map((n) => (
               <TouchableOpacity key={n} testID={`star-${n}`} onPress={() => setScore(n)} hitSlop={6}>
+                {/* [marca-vupth] A marca nao tem dourado, e o pessego
+                    ($brandWarning) so existe como FUNDO — sobre branco da
+                    1,59:1. A estrela CHEIA carrega a nota, entao vai em
+                    $forest (13,93:1); a vazia e so o contorno do que falta
+                    escolher e fica em $brandBorder. */}
                 <Star
                   size={36}
-                  color={n <= score ? "#FFB703" : "#D1D5DB"}
-                  fill={n <= score ? "#FFB703" : "none"}
+                  color={n <= score ? "#163300" : "#D7DDD3"}
+                  fill={n <= score ? "#163300" : "none"}
                 />
               </TouchableOpacity>
             ))}
@@ -99,12 +104,12 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
             <Box borderWidth="$1" borderColor="$brandBorder" borderRadius="$xl" px="$3" py="$2" mt="$4">
               <TextInput
                 placeholder="Comentário (opcional)"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#454745"
                 value={comment}
                 onChangeText={setComment}
                 multiline
                 maxLength={300}
-                style={{ minHeight: 60, textAlignVertical: "top", color: "#111827" }}
+                style={{ minHeight: 60, textAlignVertical: "top", color: "#163300" }}
               />
             </Box>
           )}

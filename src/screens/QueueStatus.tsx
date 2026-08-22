@@ -679,7 +679,11 @@ export function QueueStatus() {
             </Text>
           )}
 
-          <Text fontFamily="$body" fontSize={15} color="#16330099" mt="$1">
+          {/* [contraste] Forest TRANSLUCIDO de proposito: sobre o $brandGreen
+              da tela ele hierarquiza sem virar uma segunda cor. So o ALPHA
+              subiu — 0x99 dava 3,40:1 sobre o verde e reprovava no AA; 0xBF da
+              4,99:1 e continua mais leve que o forest chapado do numero. */}
+          <Text fontFamily="$body" fontSize={15} color="#163300BF" mt="$1">
             {remaining <= 0 ? "a qualquer momento" : `~${formatWaitTime(remaining)} de espera`}
           </Text>
 
@@ -697,12 +701,18 @@ export function QueueStatus() {
                       width={done ? 12 : 8}
                       height={done ? 12 : 8}
                       borderRadius="$full"
+                      // O ponto apagado e TRILHA (decoracao), nao informacao:
+                      // quem informa e o ponto cheio, em $forest e maior. Por
+                      // isso o alpha baixo fica.
                       bg={done ? "$forest" : "#16330040"}
                     />
                   );
                 })}
               </HStack>
-              <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="#163300B3" mt="$3">
+              {/* [contraste] Mesma logica do subtitulo acima: alpha 0xB3 dava
+                  4,38:1 sobre o verde, 0xCC da 5,69:1. Fica um degrau ACIMA do
+                  subtitulo, como era antes. */}
+              <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="#163300CC" mt="$3">
                 Você já passou {passed} {passed === 1 ? "pessoa" : "pessoas"}
               </Text>
             </>
@@ -739,7 +749,7 @@ export function QueueStatus() {
               para quem procura, sem gritar para quem nao esta procurando. */}
           {canCancel && (
             <TouchableOpacity onPress={handleCancel} disabled={isRemanejando} testID="leave-queue">
-              <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="#163300B3">
+              <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="#163300CC">
                 Sair da fila
               </Text>
             </TouchableOpacity>

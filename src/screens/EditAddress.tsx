@@ -233,7 +233,7 @@ export function EditAddress() {
             onPress={handleUseGps}
           />
           <HStack alignItems="center" gap="$1" mb="$4">
-            <MapPin size={12} color="#9CA3AF" />
+            <MapPin size={12} color="#454745" />
             <Text size="xs" color="$brandTextSecondary" flex={1}>
               Com o GPS a gente já preenche o endereço e calcula sua distância até os estabelecimentos.
             </Text>
@@ -323,7 +323,7 @@ export function EditAddress() {
                   <HStack gap="$3">
                     {!addr.isMain && (
                       <TouchableOpacity onPress={() => handleSetMain(addr.userAddressId)}>
-                        <Star size={20} color="#9CA3AF" />
+                        <Star size={20} color="#454745" />
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity onPress={() => handleEdit(addr)}>

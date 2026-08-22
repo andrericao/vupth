@@ -6,7 +6,9 @@ import { VStack, HStack } from "@gluestack-ui/themed";
 // [verde-imersivo] Skeleton loading: placeholders com a forma do conteudo, no
 // lugar dos Spinner. Pulso de opacidade (Animated nativo, sem dep extra).
 
-const BASE = "#E2E9E5";
+// [marca-vupth] $brandBorder. E DECORACAO (nao carrega informacao), entao nao
+// tem minimo de contraste — precisa so aparecer sobre o $brandSurface do card.
+const BASE = "#D7DDD3";
 
 function usePulse() {
   const [v] = useState(() => new Animated.Value(0.45));

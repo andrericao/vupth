@@ -22,7 +22,7 @@ export function OfflineBanner() {
         paddingTop: insets.top + 4,
         paddingBottom: 6,
         paddingHorizontal: 12,
-        backgroundColor: "#E63946",
+        backgroundColor: "#B3261E",
         alignItems: "center",
         zIndex: 9999,
         elevation: 9999,

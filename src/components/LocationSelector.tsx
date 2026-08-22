@@ -94,7 +94,7 @@ export function LocationSelector() {
           <Text size="sm" fontFamily="$heading" color="$forest" flex={1} numberOfLines={1}>
             {label}
           </Text>
-          <ChevronRight size={16} color="#9CA3AF" />
+          <ChevronRight size={16} color="#454745" />
         </HStack>
       </TouchableOpacity>
 

@@ -6,12 +6,21 @@ import { floatingShadow } from "@utils/styles";
 import { ClientAttendance } from "@services/attendanceService";
 import { formatClockTime } from "@domain/queue/types";
 
-const STATUS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Concluído", color: "#3B7A3F" },
-  CANCELLED: { label: "Cancelado", color: "#E63946" },
-  LATE: { label: "Atrasado", color: "#F59E0B" },
-  IN_PROGRESS: { label: "Em atendimento", color: "#3B7A3F" },
-  SCHEDULED: { label: "Aguardando", color: "#F59E0B" },
+// [marca-vupth] Este era o ultimo lugar do app na paleta ANTERIOR (#3B7A3F,
+// #E63946, #F59E0B) e a unica cor por status, com texto branco fixo por cima.
+// Agora cada status e um PAR (fundo, texto), IGUAL ao `HISTORY_STATUS` de
+// `screens/Attendances.tsx` — o mesmo atendimento aparece la na lista e aqui no
+// detalhe, e com duas tabelas ele sairia com duas caras. Os dois status que so
+// existem aqui seguem o que o app ja mostra: IN_PROGRESS usa o par da pilula
+// "Em atendimento" da Attendances ($brandGreen + $forest) e SCHEDULED fica no
+// par neutro (o mesmo do fallback), porque "Aguardando" e estado normal — o
+// pessego e reservado pro LATE, que e o que pede atencao.
+const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
+  FINISHED: { label: "Concluído", bg: "#E2F6D5", fg: "#163300" },       // greenTint
+  CANCELLED: { label: "Cancelado", bg: "#F3F5F1", fg: "#B3261E" },      // surface + danger
+  LATE: { label: "Atrasado", bg: "#FFC091", fg: "#163300" },            // accentPeach
+  IN_PROGRESS: { label: "Em atendimento", bg: "#9FE870", fg: "#163300" }, // brandGreen
+  SCHEDULED: { label: "Aguardando", bg: "#F3F5F1", fg: "#454745" },     // surface + neutro
 };
 
 function dateOnly(iso: string | null): string {
@@ -55,7 +64,7 @@ type Props = {
 // opção de avaliar (quando FINISHED e ainda não avaliado).
 export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = true }: Props) {
   const a = attendance;
-  const st = a ? STATUS[a.status] ?? { label: a.status, color: "#9CA3AF" } : null;
+  const st = a ? STATUS[a.status] ?? { label: a.status, bg: "#F3F5F1", fg: "#454745" } : null;
 
   return (
     <Modal visible={!!a} transparent animationType="fade" onRequestClose={onClose}>
@@ -66,8 +75,8 @@ export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = t
               <Heading fontFamily="$heading" fontSize="$lg" flex={1}>
                 Detalhes do atendimento
               </Heading>
-              <Badge bg={st.color} borderRadius="$full" px="$3" py="$1">
-                <BadgeText color="$white" size="xs">{st.label}</BadgeText>
+              <Badge bg={st.bg} borderRadius="$full" px="$3" py="$1">
+                <BadgeText color={st.fg} size="xs">{st.label}</BadgeText>
               </Badge>
             </HStack>
 

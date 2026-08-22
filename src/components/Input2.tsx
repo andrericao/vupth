@@ -44,18 +44,18 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
         {isPassword && (
           <TouchableOpacity onPress={() => setVisible((v) => !v)} hitSlop={8}>
             {visible ? (
-              <Eye size={22} color="#6B7280" />
+              <Eye size={22} color="#454745" />
             ) : (
-              <EyeOff size={22} color="#6B7280" />
+              <EyeOff size={22} color="#454745" />
             )}
           </TouchableOpacity>
         )}
         {showSearchIcon && !hasValue && (
-          <Search size={20} color="#9CA3AF" />
+          <Search size={20} color="#454745" />
         )}
         {showSearchIcon && hasValue && onClear && (
           <TouchableOpacity onPress={onClear} hitSlop={8}>
-            <CircleX size={22} color="#9CA3AF" />
+            <CircleX size={22} color="#454745" />
           </TouchableOpacity>
         )}
       </HStack>
