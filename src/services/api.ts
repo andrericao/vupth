@@ -9,16 +9,26 @@ interface RefreshResponse {
 
 const localIp = process.env.EXPO_PUBLIC_API_LOCAL_IP || "localhost";
 
+// Render = ambiente de TESTE; Railway = PRODUCAO, e e no Railway que o time
+// testa em device (Andre 2026-08-22).
+//
+// `dev` e `staging` sao o MESMO host de proposito: este app batizou de `dev` o
+// que o partner batizou de `staging`, e o mesmo `.env` circula entre os dois
+// repos. Sem o apelido, `EXPO_PUBLIC_API_ENV=staging` aqui nao resolvia nada.
 const BASE_URLS: Record<string, string> = {
 	local: `http://${localIp}:8080`,
 	dev: "https://vupth-backend-ia.onrender.com",
+	staging: "https://vupth-backend-ia.onrender.com",
 	prod: "https://vupth-backend-ia-production.up.railway.app",
 };
 
 const env = (process.env.EXPO_PUBLIC_API_ENV || "local") as keyof typeof BASE_URLS;
 
 // Base URL HTTP resolvida e env atual — usados pelo portao de readiness (cold start Render).
-export const API_BASE_URL = BASE_URLS[env];
+// O `??` importa: sem ele, um nome fora do mapa virava `undefined` e o app
+// subia sem baseURL nenhuma — toda chamada falhava sem dizer por que. Cair no
+// host de teste e ruim, mas e visivel; `undefined` nao aparece em lugar nenhum.
+export const API_BASE_URL = BASE_URLS[env] ?? BASE_URLS.dev;
 export const API_ENV = env;
 
 // WebSocket (STOMP) — deriva ws(s) do baseURL HTTP. `/ws/websocket` e o transporte
@@ -27,7 +37,7 @@ export function deriveWsUrl(baseUrl: string): string {
 	return `${baseUrl.replace(/^http/, "ws")}/ws/websocket`;
 }
 
-export const WS_URL = deriveWsUrl(BASE_URLS[env]);
+export const WS_URL = deriveWsUrl(API_BASE_URL);
 
 const TOKEN_KEY = "vupth_access_token";
 const REFRESH_KEY = "vupth_refresh_token";
