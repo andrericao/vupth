@@ -21,10 +21,22 @@
  */
 export type ApiEnv = "local" | "dev" | "staging" | "prod";
 
-/** Canal do EAS -> ambiente. Mesma tabela do `eas.json` dos dois apps. */
+/**
+ * Canal do EAS -> ambiente. Mesma tabela do `eas.json` dos dois apps.
+ *
+ * `preview` aponta pro RAILWAY (producao), nao pro Render, e isso e
+ * deliberado: `preview` e o UNICO canal que existe nos dois projetos, os
+ * builds do time sao perfil `preview` com distribuicao interna, e e no Railway
+ * que o time testa em device (Andre 2026-08-22). Mandar `preview` pro Render
+ * significaria que o teste de device nunca bate no backend que eles conferem.
+ *
+ * ⚠️ A consequencia esta assumida: teste em device grava no banco de
+ * PRODUCAO. Se um dia existir um canal so de teste, e aqui que ele entra,
+ * apontando pro `dev`.
+ */
 export const CANAL_PARA_ENV: Record<string, ApiEnv> = {
   development: "dev",
-  preview: "dev",
+  preview: "prod",
   production: "prod",
 };
 

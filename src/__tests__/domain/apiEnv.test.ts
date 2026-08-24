@@ -8,7 +8,10 @@ describe('de qual backend o bundle fala', () => {
   describe('bundle publicado (tem canal)', () => {
     it('o canal decide, e o .env da maquina de quem publicou e IGNORADO', () => {
       expect(resolveApiEnv('production', 'local')).toBe('prod');
-      expect(resolveApiEnv('preview', 'local')).toBe('dev');
+      // `preview` vai pro Railway: e o unico canal que existe e e onde o time
+      // testa em device. Ver CANAL_PARA_ENV.
+      expect(resolveApiEnv('preview', 'local')).toBe('prod');
+      expect(resolveApiEnv('development', 'local')).toBe('dev');
       expect(resolveApiEnv('production', 'dev')).toBe('prod');
     });
 
