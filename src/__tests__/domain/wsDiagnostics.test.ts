@@ -4,6 +4,7 @@ import {
   shouldReconnectOnForeground,
   formatSince,
 } from '@domain/ws/diagnostics';
+import { useWsDiagnosticsStore } from '@stores/wsDiagnosticsStore';
 
 // Backend pediu o "Teste 0" (ler os headers do frame CONNECTED) como
 // pré-requisito de todos os testes de WebSocket. Estes casos travam a leitura,
@@ -104,5 +105,29 @@ describe('formatSince', () => {
 
   it('diz "nunca" quando nada chegou — o caso que interessa no teste', () => {
     expect(formatSince(null, now)).toBe('nunca');
+  });
+});
+
+// ─── Regressão avisada pelo front-partner (C24, 2026-08-11) ──────────────────
+// O painel deles mostrava "conectado" E "último erro" ao mesmo tempo: o
+// `lastError` não era limpo ao reconectar, então a falha do boot (cold start do
+// Render) ficava colada e uma falha JÁ SUPERADA parecia permanente. O nosso
+// store tinha o mesmo defeito.
+describe('wsDiagnosticsStore — erro não pode sobreviver à reconexão', () => {
+  it('limpa o lastError ao conectar, mas preserva o contador de falhas', () => {
+    const store = useWsDiagnosticsStore.getState();
+    store.reset();
+
+    store.markError('personal', 'cold start do Render');
+    expect(useWsDiagnosticsStore.getState().personal.lastError).toBe('cold start do Render');
+
+    store.markConnected('personal', { 'heart-beat': '10000,10000', 'user-name': 'cliente-1' });
+
+    const depois = useWsDiagnosticsStore.getState().personal;
+    expect(depois.lastError).toBeNull();
+    expect(depois.status).toBe('connected');
+    // O histórico continua: saber que houve 1 falha é útil; exibi-la como se
+    // fosse o estado atual é que enganava.
+    expect(depois.errors).toBe(1);
   });
 });

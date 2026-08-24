@@ -118,3 +118,67 @@ Sem instrumento nos dois lados, isso continua sendo troca de suposições.
 Baixo, e **sem dependência de backend**: um store pequeno com o estado por canal, alimentado nos callbacks que vocês já têm (`onConnect`, `onWebSocketError`, `onStompError` e o `subscribe`), mais um componente de leitura na tela de Configurações. No nosso caso a lógica pura ficou em `domain/ws/diagnostics.ts` com 17 casos de teste — a parte que decide se a sessão é anônima e se o heartbeat está zerado.
 
 **Detalhe que custou caro aqui:** capturem o **motivo** do erro, não só o fato de ter falhado. Nossa primeira versão descartava o evento de erro, e o primeiro teste no device voltou com "falhou" sem causa — teste queimado. E capturem também o `onStompError`: erro de **protocolo** (um CONNECT recusado, por exemplo) não passa pelo `onWebSocketError` e, sem ele, uma recusa do servidor aparece como silêncio.
+
+---
+
+## 6. 🔴 BACKEND + FRONT-PARTNER — intenção ganha **PENDENTE DE ACEITAÇÃO**, e a garantida bloqueia o fechamento
+
+**Decisão do Andre (2026-08-07).** Um discriminador único resolve tudo:
+
+> **O pedido cabe no expediente, com tempo disponível?**
+> **SIM** → *garantido* (aceite automático) e **bloqueia o fechamento da loja**.
+> **NÃO** → **pendente de aceitação** do profissional e **não bloqueia** nada.
+
+### As três situações
+
+| Momento | Comportamento |
+|---|---|
+| **Antes de abrir a fila** | O profissional vê os pedidos e **reorganiza a ordem** do jeito dele. Aqui o tema é ordem, não aceitação |
+| **Durante o expediente**, horário disponível | **Garantido**, igual a quem já está na fila. **Bloqueia o fechamento**: ou remove todos, ou atende todos |
+| **Horário que cruza o fechamento** | **Pendente de aceitação**, **não bloqueia**. O profissional decide se estica o expediente |
+
+### 🔴 Duas coisas que isto muda no backend
+
+**1. O bloqueio de fechamento.** O PRD de vocês diz hoje que a `INTENTION` *"NÃO conta como atendimento ativo (não bloqueia o fechamento da loja — BUG6)"*. Passa a bloquear, **mas só** a intenção **garantida de hoje dentro do expediente** — intenção de amanhã, ou marcada para depois do `closingTime`, não pode prender o profissional. Vocês já têm a matemática de janela (`ClosingTimeMath`, `BusinessClock`) para esse recorte.
+
+**2. 💡 Dois erros deixam de ser recusa e viram oportunidade.** Hoje vocês devolvem:
+- `422 INTENTION_OUTSIDE_BUSINESS_HOURS` — pediu fora do expediente;
+- `409 PROFESSIONAL_AGENDA_FULL` — não cabe antes do fechamento.
+
+Nos dois casos o cliente leva um "não" e vai embora. Com o pendente de aceitação, viram **"vou perguntar ao profissional"** — e quem decide passa a ser quem tem interesse em vender. **O fluxo feliz não muda**; muda só o que hoje é beco sem saída.
+
+### 🟡 Para o front-partner
+
+Duas telas novas: **triagem antes de abrir** (ver os pedidos do dia e ordenar a fila) e **decisão dos pendentes** (aceitar ou recusar quem pediu horário que cruza o fechamento). Sem a segunda, o pendente fica órfão e o cliente espera para sempre.
+
+**Relacionado:** conversa com o **piso de horário** (seção 1, B9) — quem sai da fila pelo piso volta a ser intenção, então passa a contar para este bloqueio enquanto espera o horário chegar.
+
+---
+
+## 7. 🎨 FRONT-PARTNER — a identidade nova não chegou por handoff
+
+**Achado em 2026-08-17**, procurando na branch `design/marca-dev` a pedido do Andre.
+
+A branch aplica uma **identidade visual nova** (Pencil / `pencil-new.pen`) — paleta `brandGreen #9FE870` + `forest #163300` com pastéis de apoio, e **Archivo** substituindo a Poppins, mais **DMMono** para números.
+
+**O problema não é a marca — é o canal.** A branch mudou **61 arquivos de código e nenhum documento**. O que vocês esperam de nós está escrito **dentro de um comentário de código**, numa branch **não mergeada**:
+
+> *"Precisa bater 1:1 com `vupth/config/gluestack-ui.config.ts` e com `tailwind.config.js` — os três têm que ficar sincronizados **no mesmo commit**."*
+
+E o `BrandButton.tsx` de vocês diz *"espelha `src/components/brand/Button.tsx` do vupth (client)"* — **esse arquivo não existe aqui**. Ficamos sem saber que havia algo esperando por nós.
+
+**O que pedimos:** quando a marca for decidida, **registrem no handoff de vocês** (nem que seja um parágrafo) com os hexes, as fontes e a expectativa sobre o client. Comentário em código de branch não mergeada não chega em ninguém — e a regra de "sincronizar no mesmo commit" é justamente a que mais precisa ser combinada com antecedência.
+
+**O que já fizemos:** registramos a paleta, as fontes e a regra de contraste (`brandGreen` só como fundo, `forest` por cima) no nosso PRD, e anotamos que os tokens são **aditivos** — então sincronizá-los aqui não muda tela nenhuma. **Aguardando a decisão do Andre** sobre adotar.
+
+**Obrigado pela armadilha documentada:** a do config nascido no teal antigo, com login/cadastro renderizando um verde diferente do resto do app. Vamos copiar os hexes da fonte da verdade em vez de escolher um verde parecido.
+
+---
+
+## 8. 📌 FRONT-PARTNER — o C21 não estava em nenhum documento nosso
+
+O **C21** (cada profissional escolhe fila **ou** agenda pura) está no handoff de vocês desde **05/08** e **não constava em nenhum documento do client** até hoje. Registramos agora.
+
+É uma dependência forte da nossa tela da loja: junto com o **C22** (horário por dia da semana), as duas dizem que aquela tela **não pode assumir nem regime único nem horário único**. Se tivéssemos redesenhado a tela nesse meio-tempo, teríamos que refazer.
+
+Sem cobrança — o registro é para lembrar que **item que muda tela do outro app precisa de um empurrão ativo**, não só de estar escrito no handoff.
