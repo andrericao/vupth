@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Alert, TouchableOpacity, ScrollView } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   VStack,
@@ -51,6 +52,7 @@ type RouteParams = {
 };
 
 export function ServiceSelection() {
+  const insets = useSafeAreaInsets();
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const {
@@ -268,8 +270,11 @@ export function ServiceSelection() {
   ];
 
   if (isLoading) {
+    // O esqueleto tem de comecar na MESMA altura da tela pronta, senao o
+    // conteudo PULA quando carrega. `pt={60}` era chute; o cabecalho real usa
+    // `safe-area + 12`.
     return (
-      <VStack flex={1} px={16} pt={60} pb={30} bg="$brandBackground">
+      <VStack flex={1} px={16} style={{ paddingTop: insets.top + 12 }} pb={30} bg="$brandBackground">
         <VStack mt="$6">
           <SkeletonList count={4} />
         </VStack>
@@ -278,8 +283,11 @@ export function ServiceSelection() {
   }
 
   if (error) {
+    // O esqueleto tem de comecar na MESMA altura da tela pronta, senao o
+    // conteudo PULA quando carrega. `pt={60}` era chute; o cabecalho real usa
+    // `safe-area + 12`.
     return (
-      <VStack flex={1} px={16} pt={60} pb={30} bg="$brandBackground">
+      <VStack flex={1} px={16} style={{ paddingTop: insets.top + 12 }} pb={30} bg="$brandBackground">
         <Center flex={1}>
           <Text color="$brandDanger" textAlign="center">{error}</Text>
           <Button title="Voltar" mt="$4" onPress={() => navigation.goBack()} />
