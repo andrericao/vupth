@@ -9,6 +9,7 @@ import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establish
 import { filterEstablishments } from "@domain/establishment/filter";
 import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity";
 import { serviceTypeLabel } from "@domain/establishment/serviceType";
+import { primeiroNome } from "@domain/auth/displayName";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useClientAttendances } from "@hooks/useAttendances";
@@ -197,7 +198,11 @@ export function Home() {
     navigation.navigate("establishmentDetail", { establishmentId: establishment.id });
   }
 
-  const firstName = user?.first_name?.trim().split(/\s+/)[0];
+  // Sem nome cadastrado, cai no apelido do e-mail — NUNCA no texto de
+  // visitante. "Estabelecimentos" e o que quem nao entrou ve; usar o mesmo
+  // titulo pra quem entrou fazia o login parecer que nao funcionou (aconteceu
+  // no teste visual de 2026-08-26). Ver `domain/auth/displayName`.
+  const firstName = primeiroNome(user);
 
   return (
     <VStack flex={1} bg="$brandBackground">

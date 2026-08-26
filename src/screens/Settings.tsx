@@ -16,6 +16,7 @@ import { User, Mail, Lock, MapPin, ChevronRight, LogOut, RefreshCw } from "lucid
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
+import { nomeDeExibicao } from "@domain/auth/displayName";
 import { Button } from "@components/Button";
 import { WsDiagnostics } from "@components/WsDiagnostics";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
@@ -96,7 +97,9 @@ export function Settings() {
   //  depois do cadastro. Enquanto ela nao existir, este e o menor mal.)
   const nomeCadastrado = [user?.first_name, user?.last_name].filter(Boolean).join(" ");
   const displayName = nomeCadastrado || "Não informado";
-  const nomeDoTopo = nomeCadastrado || user?.email?.split("@")[0] || "Sua conta";
+  // Mesma regra da Home, numa funcao so — eram duas copias que ja divergiam
+  // (aqui caia no e-mail, la caia no texto de visitante).
+  const nomeDoTopo = nomeDeExibicao(user);
   const displayAddress = mainAddress
     ? `${mainAddress.street}, ${mainAddress.number} — ${mainAddress.neighborhood}`
     : "Não informado";

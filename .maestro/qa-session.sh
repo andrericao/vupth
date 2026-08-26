@@ -51,7 +51,8 @@ if "tokens" not in d:
 u, t = d["user"], d["tokens"]
 print("✓ sessao de", u["email"])
 print()
-print("Cole no console do app web (localhost:8081):")
+print("Cole no console do app do CLIENTE — http://localhost:8081")
+print("(8082 e o app do PARCEIRO; 8080 e o backend, sem tela)")
 print()
 print("(() => {")
 print("  localStorage.setItem(" + json.dumps("vupth_access_token") + ", " + json.dumps(t["access_token"]) + ");")
