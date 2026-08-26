@@ -1,9 +1,31 @@
 # Contas de Teste — VUPTH
 
-> Credenciais dos usuarios criados pelo seed do partner e pelos testes E2E.
-> Backend: Render (https://vupth-backend-ia.onrender.com)
+> ⚠️ **ESTE ARQUIVO ESTA DESATUALIZADO — verificado em 2026-08-26.**
 >
-> **Ultima atualizacao:** 2026-06-02
+> As contas abaixo **NAO EXISTEM MAIS**. Conferi loja por loja (`Corte Real`,
+> `Tesoura de Ouro`, `Unhas de Cristal`, `Zen Vida Nova`) nos DOIS backends e
+> nenhuma responde. O seed de 02/06 se foi.
+>
+> **O que existe hoje:**
+>
+> | backend | quem aponta pra la | lojas |
+> |---|---|---|
+> | Railway `vupth-backend-ia-production.up.railway.app` | app do **cliente** (canal `preview`) | Barbearia Premium ×2, Barbearia do Ricardo, Studio Beleza Total |
+> | Render `vupth-backend-ia.onrender.com` | app do **parceiro** | 17, quase todas "Barbearia Premium" |
+>
+> **As duas contas que o time usa de fato** (achadas na sessao guardada dos
+> apps em dev — as SENHAS nao estao em lugar nenhum do repo):
+>
+> | app | e-mail | papeis |
+> |---|---|---|
+> | cliente | `cliente.teste@vupth.dev` | — |
+> | parceiro | `parceiro.teste@vupth.dev` | `ROLE_OWNER`, `ROLE_CLIENT` |
+>
+> Pra recriar contas com credencial conhecida, rode `seed_clients.sh` (senha
+> `Teste@123`). ⚠️ Ele grava no backend que o `.env` apontar — e o Railway e
+> **producao**.
+>
+> **Ultima atualizacao do conteudo abaixo:** 2026-06-02 (morto)
 
 ## Owners (app partner — login pelo partner)
 
