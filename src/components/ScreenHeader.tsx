@@ -115,7 +115,16 @@ export function ScreenHeader({ title, subtitle, action, onBack, root, overlay }:
           {title}
         </Text>
 
-        {action}
+        {/* A acao ocupa uma faixa de 40 e se centra nela — a mesma altura do
+            botao redondo do voltar. Sem isso, com a linha ancorada no topo
+            (`flex-start`), um link de texto ficava colado no topo enquanto o
+            titulo descia os 5 do respiro optico: "Cadastrar" nascia acima de
+            "Estabelecimentos". Botao de 40 ja preenche a faixa e nao muda. */}
+        {!!action && (
+          <Center style={{ minHeight: 40 }}>
+            {action}
+          </Center>
+        )}
       </HStack>
 
       {/* Subtitulo FORA da linha do titulo. Dentro dela, a coluna

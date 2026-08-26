@@ -72,7 +72,12 @@ export function registerAuthStore(setter: AuthStoreSetter) {
 
 export const api = axios.create({
 	baseURL: BASE_URLS[env],
-	timeout: env === "local" ? 10000 : 90000,
+	// O `/establishment` leva ~11,7s (medido em 2026-08-26, e o MESMO tempo com
+	// 4 ou 13 lojas — custo fixo, nao proporcional). Com 10s o app estourava na
+	// PRIMEIRA tela em dev: "Erro ao carregar estabelecimentos", com o backend
+	// respondendo 200 logo depois. 30s cobre a lentidao sem esconder falha real.
+	// ⚠️ Isto MASCARA um problema de backend, nao conserta: ver S35.
+	timeout: env === "local" ? 30000 : 90000,
 	headers: {
 		"Content-Type": "application/json",
 	},
