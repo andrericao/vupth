@@ -144,21 +144,40 @@ export function ForgotPassword() {
   return (
     <ScrollView flex={1} bg="$brandBackground" contentContainerStyle={{ flexGrow: 1 }}>
       <VStack flex={1} pb={30} px={16} bg="$brandBackground">
-        {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta mais
-            "esquecendo a senha", esta criando uma nova. */}
-        <ScreenHeader
-          title={step === "email" ? "ESQUECEU A SENHA?" : "NOVA SENHA"}
-          subtitle={
-            step === "email"
+        {/* Sem titulo no cabecalho: esta e uma tela de ENTRADA, e as tres do
+            fluxo (login, cadastro, esqueci a senha) tem o mesmo desenho — o
+            voltar sozinho em cima, o heroi em 34px no corpo. Antes o titulo
+            morava DENTRO do cabecalho, entao esta era a unica das tres com o
+            texto recuado ao lado do botao. */}
+        <ScreenHeader />
+
+        <VStack gap="$2" mt="$3">
+          {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta
+              mais "esquecendo a senha", esta criando uma nova. */}
+          <Text
+            fontFamily="$display"
+            fontSize={34}
+            lineHeight={36}
+            letterSpacing={-1.5}
+            color="$forest"
+          >
+            {step === "email" ? "ESQUECEU A SENHA?" : "NOVA SENHA"}
+          </Text>
+          <Text size="md" color="$brandTextSecondary">
+            {step === "email"
               ? "Manda o e-mail — te ajudamos a voltar em menos de 1 minuto."
-              : "Use o código que enviamos e escolha uma senha nova."
-          }
-        />
+              : "Use o código que enviamos e escolha uma senha nova."}
+          </Text>
+        </VStack>
 
         <VStack pt={24} flex={1}>
 
         {step === "email" && (
-          <VStack gap="$4">
+          /* Campo em cima, CTA ANCORADO no rodape — o mesmo desenho do login e
+             do cadastro. Colado no campo, ele deixava metade da tela vazia
+             embaixo e a tela parecia inacabada. O `flex-end` interno empurra
+             so o botao; o campo fica onde esta. */
+          <VStack flex={1} gap="$4">
             <Input2
               placeholder="E-mail"
               value={email}
@@ -166,6 +185,7 @@ export function ForgotPassword() {
               autoCapitalize="none"
               keyboardType="email-address"
             />
+            <VStack flex={1} justifyContent="flex-end" gap="$4">
             <Button
               title={
                 isWakingServer
@@ -191,6 +211,7 @@ export function ForgotPassword() {
                 </TouchableOpacity>
               </VStack>
             )}
+            </VStack>
           </VStack>
         )}
 
