@@ -15,6 +15,10 @@
 
 set -euo pipefail
 
+# Funciona de qualquer diretorio: o script se ancora na propria pasta, entao
+# nao precisa de `cd` antes nem importa de onde voce chamou.
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 ENV="${1:-local}"
 EMAIL="${2:-qa.visual@vupth.dev}"
 SENHA="${3:-Teste@123}"
@@ -39,7 +43,7 @@ RESP=$(curl -s -m 60 -X POST "$URL/auth/login" \
   -H "Content-Type: application/json" \
   -d "{\"email\":\"$EMAIL\",\"password\":\"$SENHA\"}")
 
-echo "$RESP" | python3 -c '
+SAIDA=$(echo "$RESP" | python3 -c '
 import json, sys
 try:
     d = json.load(sys.stdin)
@@ -62,3 +66,14 @@ print("  localStorage.setItem(" + json.dumps("vupth_onboarding_seen") + ", " + j
 print("  location.reload();")
 print("})()")
 '
+)
+
+echo "$SAIDA"
+
+# macOS: manda o JS direto pro clipboard, pra nao ter de selecionar na tela.
+if command -v pbcopy > /dev/null 2>&1; then
+  echo "$SAIDA" | sed -n '/^(() => {/,/^})()/p' | pbcopy
+  echo
+  echo "📋 Ja esta na sua area de transferencia."
+  echo "   Abra http://localhost:8081, aperte Cmd+Option+J e cole (Cmd+V)."
+fi
