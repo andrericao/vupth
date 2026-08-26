@@ -432,7 +432,10 @@ export function Home() {
         </VStack>
       )}
 
-      {/* Livres agora */}
+      {/* A secao lista o que esta PERTO, aberto ou nao — a ordem e distancia
+          pura (decisao do Andre, 2026-08-06). "Livres agora" prometia so as
+          abertas e listava fechada logo abaixo; quem diz quem esta aberto e a
+          tag de cada linha. */}
       <VStack flex={1} px={16} pt={22} gap={12}>
         <HStack justifyContent="space-between" alignItems="center">
           <Text
@@ -442,7 +445,7 @@ export function Home() {
             letterSpacing={-0.3}
             color="$brandTextPrimary"
           >
-            Livres agora
+            Perto de você
           </Text>
           {/* Leva a lista cheia (Pencil CLIENT · 07), carregando o filtro de
               categoria que estiver ativo aqui. Antes apontava para a propria

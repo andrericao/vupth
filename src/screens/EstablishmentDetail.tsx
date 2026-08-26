@@ -254,7 +254,10 @@ export function EstablishmentDetail() {
             bg={isOpen ? "$brandGreen" : "$brandWarning"}
           />
           <Text size="sm" color="$brandTextSecondary" fontFamily="$heading">
-            {isOpen ? "Aberto agora" : "Fila fechada agora"}
+            {/* `isOpen` e a LOJA, nao a fila. Dizer "fila fechada" aqui
+                misturava dois estados que o app trata separado (a loja pode
+                estar aberta com a fila drenando). */}
+            {isOpen ? "Aberto agora" : "Fechada agora"}
           </Text>
           {isOpen && professionals.length > 0 && (
             <>
@@ -317,8 +320,8 @@ export function EstablishmentDetail() {
           <TouchableOpacity
             onPress={() =>
               Alert.alert(
-                "Fila fechada agora",
-                "A fila não está recebendo clientes neste momento. Escolha um profissional para AGENDAR um horário ou SOLICITAR um corte (o profissional responde em até 5 minutos).",
+                "Fechada agora",
+                "A loja não está recebendo clientes neste momento. Escolha um profissional para AGENDAR um horário ou SOLICITAR um corte (o profissional responde em até 5 minutos).",
               )
             }
           >
@@ -331,7 +334,7 @@ export function EstablishmentDetail() {
               <HStack alignItems="center" gap="$2">
                 <Info size={18} color="#163300" />
                 <Text size="xs" color="$forest" fontFamily="$heading" flex={1}>
-                  Fila fechada agora — escolha um profissional para agendar ou
+                  Fechada agora — escolha um profissional para agendar ou
                   solicitar um corte.
                 </Text>
               </HStack>
