@@ -98,13 +98,13 @@ function ClosedRow({
 }) {
   return (
     <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>
-      {/* ⚠️ SEM `opacity`. A linha fechada continua TOCAVEL — e o proposito da
-          decisao de 2026-07-23, "com o caminho ainda aberto" —, e apagar a
-          linha inteira e o vocabulario de DESABILITADO: diz o oposto do que a
-          tela quer. O avatar apagado + a tag contornada ja dizem "nao e
-          agora" sem mentir sobre poder tocar. E a opacidade ainda derrubava o
-          contraste de tudo junto (o avatar caia de 6,77:1 pra ~4,7:1). */}
-      <Box bg="$brandSurface" p="$3" mb="$3" borderRadius="$card">
+      {/* Fechada entra APAGADA (decisao da design, 2026-08-26) — o mesmo
+          tratamento da Home.
+
+          0,8 e nao 0,7: medido, `opacity` multiplica sobre TUDO, inclusive o
+          texto que ja tinha passado no contraste. A 0,7 o nome da loja cai pra
+          3,82:1 e reprova no AA; a 0,8 fica em 4,92:1. */}
+      <Box bg="$brandSurface" p="$3" mb="$3" borderRadius="$card" opacity={0.8}>
         <HStack alignItems="center" gap="$3">
           <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} bg="$brandBorder" color="$brandTextSecondary" />
           <VStack flex={1}>
