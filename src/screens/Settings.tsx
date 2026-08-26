@@ -292,7 +292,10 @@ export function Settings() {
             </TouchableOpacity>
           </>
         ) : (
-          <Box bg="$brandSurface" borderRadius="$card" p="$4">
+          /* Pro VISITANTE o convite e o UNICO conteudo da tela. Encostado no
+             topo, ele deixava um vazio grande no meio que fazia a tela parecer
+             inacabada; centrado, o espaco vira respiro em vez de falta. */
+          <Box bg="$brandSurface" borderRadius="$card" p="$4" mt="$6">
             <Text size="sm" color="$brandTextSecondary" mb="$3">
               Você está navegando como visitante. Entre ou crie uma conta para
               gerenciar seu perfil, senha e endereço.
@@ -317,7 +320,12 @@ export function Settings() {
           </Box>
         )}
 
-        {awaited.length > 0 && (
+        {/* [QA] Contador de toques em "em breve" — instrumentacao do TIME
+            ("as mais tocadas fizeram mais falta, priorizar quando o backend
+            liberar"). Estava na cara do usuario, contando pra ele o backlog
+            interno. Vai pro mesmo gesto do diagnostico de WS: 7 toques na
+            versao. */}
+        {toquesNaVersao >= 7 && awaited.length > 0 && (
           <VStack mt="$8">
             <Heading fontFamily="$heading" fontSize="$md" mb="$1">
               Funcionalidades aguardadas
@@ -350,7 +358,11 @@ export function Settings() {
           </VStack>
         )}
 
-        <VStack mt="$8" alignItems="center" gap="$3">
+        {/* `flex-end` empurra o rodape pro fim: antes ele vinha logo abaixo do
+            conteudo e sobrava um vazio grande embaixo, que fazia a tela
+            parecer inacabada — principalmente pro VISITANTE, que so tem o
+            convite de conta acima. */}
+        <VStack flex={1} justifyContent="flex-end" mt="$10" alignItems="center" gap="$3">
           <TouchableOpacity onPress={handleCheckUpdate} testID="check-update">
             <HStack
               bg="$brandSurface"
@@ -381,8 +393,11 @@ export function Settings() {
             accessibilityLabel="Informações da versão"
             testID="version-line"
           >
+          {/* Junta so o que EXISTE: em dev o runtime e o canal vem vazios, e o
+              template fixo imprimia "· · bundle embutido", com dois pontos
+              orfaos na frente. */}
           <Text fontFamily="$mono" fontSize={10} color="$brandTextSecondary" textAlign="center">
-            {Updates.runtimeVersion ?? "—"} · {Updates.channel ?? "dev"} · {otaInfo}
+            {[Updates.runtimeVersion, Updates.channel, otaInfo].filter(Boolean).join(" · ")}
           </Text>
           </TouchableOpacity>
 
