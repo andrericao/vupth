@@ -161,13 +161,23 @@ export function AuthRoutes() {
         headerShown: false,
         tabBarActiveTintColor: TAB_ACTIVE,
         tabBarInactiveTintColor: TAB_INACTIVE,
+        // O rotulo fica SEMPRE embaixo do icone. Sem isto o React Navigation
+        // decide sozinho e, com a barra baixa, joga o rotulo AO LADO — que com
+        // a pilula (larga, 16px de padding horizontal) cai por cima do icone.
+        // Foi o que aconteceu: "Início" impresso sobre a casinha.
+        tabBarLabelPosition: "below-icon",
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
           borderTopWidth: 0,
-          // soma o inset inferior do device para a barra nao ficar sob os botoes do sistema
-          height: 62 + insets.bottom,
-          paddingBottom: 8 + insets.bottom,
-          paddingTop: 8,
+          // A altura tem de caber PILULA + ROTULO, medidos: 34 + 13 + 2 de
+          // respiro = 49. Com 6 de padding em cima e embaixo, 61 — arredondado
+          // pra 64 de folga. Era 62 com padding 8+8, sobrando 46 pra 47 de
+          // conteudo: faltava 1px, e o layout colapsava em vez de crescer.
+          // O inset inferior entra por cima, pra barra nao ficar sob os botoes
+          // do sistema.
+          height: 64 + insets.bottom,
+          paddingBottom: 6 + insets.bottom,
+          paddingTop: 6,
           ...tabBarShadow,
         },
       }}
