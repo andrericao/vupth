@@ -16,8 +16,16 @@ describe('a tag de status diz o que a pessoa faria com a informação', () => {
   });
 
   it('aberta COM fila: o número, NOMEANDO a fila', () => {
-    expect(statusTag(loja(true, 120))).toEqual({ label: 'Fila 2h', live: true });
-    expect(statusTag(loja(true, 30)).label).toBe('Fila 30 min');
+    expect(statusTag(loja(true, 120))).toEqual({ label: 'Fila de 2h', live: true });
+    expect(statusTag(loja(true, 30)).label).toBe('Fila de 30 min');
+  });
+
+  it('cabe na pílula — o pior caso tem 16 caracteres', () => {
+    // "Fila de 1h 30min" é o mais largo que a regra consegue produzir, contra
+    // 8 de "Agendar". Se o formato de tempo crescer, este teste avisa antes de
+    // a pílula estourar a linha.
+    const maiores = [90, 200, 359].map((m) => statusTag(loja(true, m)).label);
+    maiores.forEach((l) => expect(l.length).toBeLessThanOrEqual(16));
   });
 
   it('as duas respostas abertas nomeiam a MESMA coisa — não dependem de contraste', () => {

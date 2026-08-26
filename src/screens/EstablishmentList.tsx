@@ -7,7 +7,7 @@ import { Search, ChevronRight, Zap, ArrowUpDown, Star } from "lucide-react-nativ
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
-import { serviceTypeTitle } from "@domain/establishment/serviceType";
+import { serviceTypeTitle, serviceTypeLabel } from "@domain/establishment/serviceType";
 import { formatDistanceKm } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
@@ -106,15 +106,24 @@ function ClosedRow({
               {establishment.name}
             </Text>
             <Text size="xs" color="$brandTextSecondary" mt="$0.5">
-              Toque para agendar
+              {serviceTypeLabel(establishment.serviceType ?? "")}
               {establishment.distance_km != null
                 ? ` · ${formatDistanceKm(establishment.distance_km)}`
                 : ""}
             </Text>
           </VStack>
-          <Box bg="$brandBorder" borderRadius="$full" px="$3" py="$1">
+          {/* Mesma tag das outras duas telas. Aqui ela dizia "Fechada" e o
+              subtitulo dizia "Toque para agendar" — o estado e a acao
+              separados, com vocabulario que so existia nesta tela. */}
+          <Box
+            borderWidth={1}
+            borderColor="$brandBorder"
+            borderRadius="$full"
+            px="$3"
+            py="$1.5"
+          >
             <Text size="2xs" fontFamily="$heading" color="$brandTextSecondary">
-              Fechada
+              {statusTag(establishment).label}
             </Text>
           </Box>
         </HStack>

@@ -40,9 +40,13 @@ type RouteParams = {
 // a linha passa a alternar entre "N na fila · ~X min" e "So agenda · livre HH:MM".
 function ProfessionalRow({
   professional,
+  lojaAberta,
   onPress,
 }: {
   professional: ProfessionalWithQueue;
+  /** Loja fechada: ninguem esta sendo atendido, entao a linha nao pode falar
+      de fila nem de "agora". Ver o mesmo conserto na Home. */
+  lojaAberta: boolean;
   onPress: () => void;
 }) {
   const queueCount = professional.queue_count ?? 0;
@@ -61,16 +65,27 @@ function ProfessionalRow({
             <Text fontFamily="$heading" fontSize="$sm" color="$forest">
               {professional.name}
             </Text>
+            {/* ⚠️ Com a LOJA FECHADA, "Sem fila · Agora" convidava a ir agora
+                dentro de uma tela que diz "Fechada agora" — o mesmo defeito ja
+                corrigido na Home. Fechada, a linha diz o que da pra fazer. */}
             <HStack alignItems="center" gap="$2" mt="$0.5">
-              <Text size="xs" color="$brandTextPrimary" fontFamily="$heading">
-                {queueCount === 0 ? "Sem fila" : `${queueCount} na fila`}
-              </Text>
-              <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
-              <Text size="xs" color="$brandTextSecondary">
-                {queueCount === 0
-                  ? "Agora"
-                  : `~${formatWaitTime(professional.estimated_wait_minutes ?? 0)}`}
-              </Text>
+              {lojaAberta ? (
+                <>
+                  <Text size="xs" color="$brandTextPrimary" fontFamily="$heading">
+                    {queueCount === 0 ? "Sem fila" : `${queueCount} na fila`}
+                  </Text>
+                  <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
+                  <Text size="xs" color="$brandTextSecondary">
+                    {queueCount === 0
+                      ? "Agora"
+                      : `~${formatWaitTime(professional.estimated_wait_minutes ?? 0)}`}
+                  </Text>
+                </>
+              ) : (
+                <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
+                  Agendar
+                </Text>
+              )}
             </HStack>
             <HStack alignItems="center" gap="$2" mt="$0.5">
               {/* `specialty` e texto livre no backend, mas parte dos cadastros
@@ -177,7 +192,7 @@ export function EstablishmentDetail() {
   const favorito = (
     <HeaderIconButton
       onPress={handleToggleFavorite}
-      overlay={showPhoto}
+      ground={showPhoto ? "foto" : "claro"}
       testID="favorite-button"
       accessibilityLabel={isFavorite ? "Remover dos favoritos" : "Salvar nos favoritos"}
       accessibilityState={{ selected: isFavorite }}
@@ -204,7 +219,7 @@ export function EstablishmentDetail() {
             onError={() => setHeroFailed(true)}
           >
             <Box px={16}>
-              <ScreenHeader overlay action={favorito} />
+              <ScreenHeader ground="foto" action={favorito} />
             </Box>
           </ImageBackground>
         </Box>
@@ -297,6 +312,7 @@ export function EstablishmentDetail() {
           renderItem={({ item }) => (
             <ProfessionalRow
               professional={item}
+              lojaAberta={isOpen}
               onPress={() => handleSelectProfessional(item.id)}
             />
           )}

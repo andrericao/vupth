@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
-import { Info, ChevronLeft, Repeat2, Check, ChevronRight } from "lucide-react-native";
+import { Info, Repeat2, Check, ChevronRight } from "lucide-react-native";
 import * as SecureStore from "expo-secure-store";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
-import { ScreenHeader } from "@components/ScreenHeader";
+import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import {
@@ -58,6 +59,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function QueueStatus() {
+  const insets = useSafeAreaInsets();
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const {
@@ -504,7 +506,9 @@ export function QueueStatus() {
         showsVerticalScrollIndicator={false}
       >
         <VStack flex={1} bg="$brandBackground">
-          <VStack pt={56} px={16} gap="$4" alignItems="center">
+          {/* Sem cabecalho: e um heroi de sucesso, sem voltar. Mas o topo vem
+              do safe-area, nao de um 56 chutado. */}
+          <VStack style={{ paddingTop: insets.top + 12 }} px={16} gap="$4" alignItems="center">
             <Center width={96} height={96} borderRadius={48} bg="$brandGreen">
               <Check size={48} color="#163300" />
             </Center>
@@ -601,24 +605,24 @@ export function QueueStatus() {
   if (waitingInQueue) {
     return (
       <VStack flex={1} bg="$brandGreen">
-        <HStack px={16} pt={56} justifyContent="space-between" alignItems="center">
-          <TouchableOpacity onPress={() => navigation.navigate("home")} testID="back-button">
-            <Center width={40} height={40} borderRadius="$full" bg="#16330014">
-              <ChevronLeft size={20} color="#163300" />
-            </Center>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setShowDisclaimer(true)}
-            testID="queue-info"
-            accessibilityRole="button"
-            accessibilityLabel="Sobre o tempo estimado"
-            hitSlop={8}
-          >
-            <Center width={40} height={40} borderRadius="$full" bg="#16330014">
-              <Info size={20} color="#163300" />
-            </Center>
-          </TouchableOpacity>
-        </HStack>
+        {/* `ground="marca"` porque o hero e brand-green: os botoes vao de
+            forest translucido. O verde-claro padrao sumiria sobre o verde. */}
+        <Box px={16}>
+          <ScreenHeader
+            ground="marca"
+            onBack={() => navigation.navigate("home")}
+            action={
+              <HeaderIconButton
+                onPress={() => setShowDisclaimer(true)}
+                ground="marca"
+                testID="queue-info"
+                accessibilityLabel="Sobre o tempo estimado"
+              >
+                <Info size={20} color="#163300" />
+              </HeaderIconButton>
+            }
+          />
+        </Box>
 
         <ScrollView
           contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 20 }}

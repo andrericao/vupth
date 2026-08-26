@@ -18,13 +18,22 @@ type Props = {
   onBack?: () => void;
   /** Tela RAIZ de aba (Home, Atendimentos, Perfil): sem botao voltar. */
   root?: boolean;
-  /** Sobre FOTO: os botoes trocam o verde-claro por branco translucido. */
-  overlay?: boolean;
+  /**
+   * Em que FUNDO o cabecalho esta. Decide so a cor dos botoes redondos —
+   * o titulo e sempre forest, porque os tres fundos sao claros.
+   *
+   *  claro  telas normais (branco/surface)  -> botao em verde-claro
+   *  foto   hero com imagem                 -> branco translucido, pra vazar
+   *  marca  hero em brand-green             -> forest translucido; verde-claro
+   *         sobre verde-claro sumiria
+   */
+  ground?: "claro" | "foto" | "marca";
 };
 
-/** Fundo dos botoes do cabecalho — chapado no claro, translucido sobre foto. */
-function buttonBg(overlay?: boolean) {
-  return overlay ? "#FFFFFFE6" : "$greenTint";
+function buttonBg(ground: Props["ground"]) {
+  if (ground === "foto") return "#FFFFFFE6";
+  if (ground === "marca") return "#16330014";
+  return "$greenTint";
 }
 
 /**
@@ -35,19 +44,19 @@ function buttonBg(overlay?: boolean) {
 export function HeaderIconButton({
   onPress,
   children,
-  overlay,
+  ground,
   ...rest
 }: {
   onPress: () => void;
   children: React.ReactNode;
-  overlay?: boolean;
+  ground?: Props["ground"];
   testID?: string;
   accessibilityLabel?: string;
   accessibilityState?: { selected?: boolean };
 }) {
   return (
     <TouchableOpacity onPress={onPress} accessibilityRole="button" {...rest}>
-      <Center width={40} height={40} borderRadius="$full" bg={buttonBg(overlay)}>
+      <Center width={40} height={40} borderRadius="$full" bg={buttonBg(ground)}>
         {children}
       </Center>
     </TouchableOpacity>
@@ -74,7 +83,7 @@ export function HeaderIconButton({
  * inclusive o `safe-area` (antes era um `pt={56}` chutado, que ficava curto em
  * aparelho com notch alto e sobrava em tela sem entalhe).
  */
-export function ScreenHeader({ title, subtitle, action, onBack, root, overlay }: Props) {
+export function ScreenHeader({ title, subtitle, action, onBack, root, ground }: Props) {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const showBack = !root;
@@ -90,7 +99,7 @@ export function ScreenHeader({ title, subtitle, action, onBack, root, overlay }:
         {showBack && (
           <HeaderIconButton
             onPress={onBack ?? (() => navigation.goBack())}
-            overlay={overlay}
+            ground={ground}
             testID="back-button"
             accessibilityLabel="Voltar"
           >

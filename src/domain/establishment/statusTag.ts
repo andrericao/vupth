@@ -16,8 +16,8 @@ import { formatWaitTime } from "@domain/queue/types";
  *
  * A TAG RESPONDE "POSSO IR AGORA?", e as tres respostas nomeiam a FILA:
  *
- *    Sem fila   aberta, fila zero  -> entra agora, sem esperar
- *    Fila 2h    aberta com fila    -> entra agora, esperando isso
+ *    Sem fila     aberta, fila zero  -> entra agora, sem esperar
+ *    Fila de 2h   aberta com fila    -> entra agora, esperando isso
  *    Agendar    fechada            -> so da pra marcar depois
  *
  * ⚠️ POR QUE NAO "Livre" NEM "~2h" (as duas primeiras tentativas):
@@ -30,8 +30,10 @@ import { formatWaitTime } from "@domain/queue/types";
  *    Tambem so funciona por comparacao.
  *
  * Nomear a fila nas duas resolve sem depender de contraste: "Sem fila" e
- * "Fila 2h" sao a mesma pergunta respondida de dois jeitos, e cada uma se
- * explica sozinha na primeira leitura. A linha larga a espera e fica com o que
+ * "Fila de 2h" sao a mesma pergunta respondida de dois jeitos, e cada uma se
+ * explica sozinha na primeira leitura. O "de" e como a pessoa FALA — "fila de
+ * duas horas" —, e telegrafar ("Fila 2h") economiza dois caracteres a custo de
+ * soar como etiqueta de sistema. Pior caso: "Fila de 1h 30min", 16 caracteres. A linha larga a espera e fica com o que
  * ela sabe melhor: onde fica e que tipo de lugar e.
  */
 export type StatusTag = {
@@ -46,5 +48,5 @@ export function statusTag(e: Establishment): StatusTag {
   const espera = e.estimated_wait_minutes;
   if (espera == null || espera === 0) return { label: "Sem fila", live: true };
 
-  return { label: `Fila ${formatWaitTime(espera)}`, live: true };
+  return { label: `Fila de ${formatWaitTime(espera)}`, live: true };
 }
