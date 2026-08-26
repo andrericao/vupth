@@ -8,6 +8,7 @@ import { Input2 } from "@components/Input2";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { validateLogin } from "@domain/auth/validateAuth";
+import { postAuthRoute } from "@domain/auth/postAuthRoute";
 import { useAuthStore } from "@stores/authStore";
 
 type RouteParams = {
@@ -47,34 +48,14 @@ export function Login() {
     try {
       await login(email, password);
 
-      // Ações que NÃO entram na fila (solicitar corte / entrar por troca)
-      // devolvem o visitante à seleção de serviços, com a escolha preservada.
-      if (
-        params.redirectTo === "serviceSelection" &&
-        params.establishmentId &&
-        params.professionalId
-      ) {
-        navigation.replace("serviceSelection", {
-          establishmentId: params.establishmentId,
-          professionalId: params.professionalId,
-          professionalName: params.professionalName ?? "",
-          establishmentName: params.establishmentName ?? "",
-          estimatedWaitMinutes: params.estimatedWaitMinutes ?? 0,
-          serviceItemIds: params.serviceItemIds,
-          establishmentOpen: params.establishmentOpen,
-        });
-      } else if (params.redirectTo === "queueStatus" && params.establishmentId && params.professionalId) {
-        navigation.replace("queueStatus", {
-          establishmentId: params.establishmentId,
-          professionalId: params.professionalId,
-          professionalName: params.professionalName,
-          establishmentName: params.establishmentName,
-          estimatedWaitMinutes: params.estimatedWaitMinutes,
-          serviceItemIds: params.serviceItemIds,
-          targetTime: params.targetTime,
-        });
-      } else {
+      // Mesma regra do cadastro, agora numa funcao so (`postAuthRoute`):
+      // quem foi interrompido no meio de entrar numa fila volta pro ponto
+      // exato, com a selecao intacta. Eram duas copias que podiam divergir.
+      const destino = postAuthRoute(params);
+      if (destino.tipo === "reset") {
         navigation.reset({ index: 0, routes: [{ name: "home" }] });
+      } else {
+        navigation.replace(destino.rota as never, destino.params as never);
       }
     } catch (error: any) {
       const message = error.response?.data?.message || "Erro ao fazer login";

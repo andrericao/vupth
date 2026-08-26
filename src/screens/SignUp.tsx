@@ -61,34 +61,22 @@ export function SignUp() {
       await register(email, password);
       await login(email, password);
 
-      // Mesmo retorno do Login: corte/troca voltam pra seleção de serviços.
-      if (
-        params.redirectTo === "serviceSelection" &&
-        params.establishmentId &&
-        params.professionalId
-      ) {
-        navigation.replace("serviceSelection", {
-          establishmentId: params.establishmentId,
-          professionalId: params.professionalId,
-          professionalName: params.professionalName ?? "",
-          establishmentName: params.establishmentName ?? "",
-          estimatedWaitMinutes: params.estimatedWaitMinutes ?? 0,
-          serviceItemIds: params.serviceItemIds,
-          establishmentOpen: params.establishmentOpen,
-        });
-      } else if (params.redirectTo === "queueStatus" && params.establishmentId && params.professionalId) {
-        navigation.replace("queueStatus", {
-          establishmentId: params.establishmentId,
-          professionalId: params.professionalId,
-          professionalName: params.professionalName,
-          establishmentName: params.establishmentName,
-          estimatedWaitMinutes: params.estimatedWaitMinutes,
-          serviceItemIds: params.serviceItemIds,
-          targetTime: params.targetTime,
-        });
-      } else {
-        navigation.reset({ index: 0, routes: [{ name: "home" }] });
-      }
+      // Antes de mandar pro destino, PEDE O NOME. O cadastro so coleta
+      // e-mail e senha, e nenhuma tela depois pergunta — sem isso a pessoa
+      // chega na fila e o profissional ve "Cliente" no card, sem saber quem
+      // chamar. A tela e pulavel; o destino original vai junto nos params e
+      // ela termina exatamente onde este cadastro terminaria.
+      navigation.replace("completeProfile", {
+        redirectTo: params.redirectTo,
+        establishmentId: params.establishmentId,
+        professionalId: params.professionalId,
+        professionalName: params.professionalName,
+        establishmentName: params.establishmentName,
+        estimatedWaitMinutes: params.estimatedWaitMinutes,
+        serviceItemIds: params.serviceItemIds,
+        targetTime: params.targetTime,
+        establishmentOpen: params.establishmentOpen,
+      });
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Erro ao cadastrar";
       Alert.alert("Erro", message);

@@ -11,6 +11,7 @@ import { EstablishmentDetail } from "@screens/EstablishmentDetail";
 import { EstablishmentList } from "@screens/EstablishmentList";
 import { Login } from "@screens/Login";
 import { SignUp } from "@screens/SignUp";
+import { CompleteProfile } from "@screens/CompleteProfile";
 import { ForgotPassword } from "@screens/ForgotPassword";
 import { QueueStatus } from "@screens/QueueStatus";
 import { Attendances } from "@screens/Attendances";
@@ -78,6 +79,19 @@ export type AppRoutes = {
     // Agendar (#40): quando presente, cria o atendimento como intenção com alvo.
     targetTime?: string;
   };
+  // Pede o nome logo depois do cadastro. Carrega o destino ORIGINAL, pra
+  // terminar exatamente onde o cadastro terminaria (ver `postAuthRoute`).
+  completeProfile: {
+    redirectTo?: string;
+    establishmentId?: string;
+    professionalId?: string;
+    professionalName?: string;
+    establishmentName?: string;
+    estimatedWaitMinutes?: number;
+    serviceItemIds?: string[];
+    targetTime?: string;
+    establishmentOpen?: boolean;
+  };
   attendances: undefined;
   services: undefined;
   settings: undefined;
@@ -101,6 +115,7 @@ function HomeStack() {
       <HomeStackNav.Screen name="queueStatus" component={QueueStatus} />
       <HomeStackNav.Screen name="login" component={Login} />
       <HomeStackNav.Screen name="signUp" component={SignUp} />
+      <HomeStackNav.Screen name="completeProfile" component={CompleteProfile} />
       <HomeStackNav.Screen name="forgotPassword" component={ForgotPassword} />
     </HomeStackNav.Navigator>
   );
