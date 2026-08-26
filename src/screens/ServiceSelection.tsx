@@ -182,7 +182,7 @@ export function ServiceSelection() {
       });
       setShowMoreOptions(false);
       Alert.alert(
-        "Pedido publicado! 🔄",
+        "Pedido publicado",
         "Quem está na fila pode ceder o lugar para você. Se alguém aceitar, você entra na fila naquela posição — acompanhe em Atendimentos.",
       );
       navigation.navigate("home");

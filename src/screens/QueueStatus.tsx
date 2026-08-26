@@ -373,7 +373,7 @@ export function QueueStatus() {
       await swapOfferService.create({ attendanceId, direction }, accessToken);
       setShowChangeTurn(false);
       Alert.alert(
-        "Pedido publicado! 🔄",
+        "Pedido publicado",
         direction === "EARLIER"
           ? "Se alguém à sua frente aceitar, vocês trocam de lugar. Você será avisado aqui."
           : "Se alguém atrás de você aceitar, vocês trocam de lugar. Você será avisado aqui.",

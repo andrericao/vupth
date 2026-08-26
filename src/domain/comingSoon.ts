@@ -32,5 +32,5 @@ export const COMING_SOON_FEATURES = Object.keys(COMING_SOON_LABELS) as ComingSoo
 /** Registra o toque e avisa "em breve". Ponto único a trocar quando o endpoint vier. */
 export function notifyComingSoon(feature: ComingSoonFeature) {
   void useComingSoonStore.getState().tap(feature);
-  Alert.alert('Em breve 🚧', `${COMING_SOON_LABELS[feature]} estará disponível em breve.`);
+  Alert.alert('Em breve', `${COMING_SOON_LABELS[feature]} estará disponível em breve.`);
 }

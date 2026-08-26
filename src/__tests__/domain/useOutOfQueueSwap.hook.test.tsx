@@ -70,7 +70,7 @@ describe('useOutOfQueueSwap (F8 fatia 2)', () => {
     expect(active.professionalName).toBe('Carlos');
     expect(active.estimatedMinutes).toBe(25);
     expect(usePendingSwapStore.getState().offers).toEqual([]);
-    expect(Alert.alert).toHaveBeenCalledWith('Troca aceita! 🔄', expect.stringMatching(/Carlos/));
+    expect(Alert.alert).toHaveBeenCalledWith('Troca aceita', expect.stringMatching(/Carlos/));
   });
 
   it('oferta sumiu sem atendimento novo (cancelada/expirada): só limpa o pedido', async () => {

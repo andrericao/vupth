@@ -27,14 +27,14 @@ export function handleQueueNotification(
   switch (notif.type) {
     case 'ATTENDANCE_STARTED':
       fx.updateQueue({ status: 'IN_PROGRESS' });
-      fx.alert('É a sua vez! 🎉', notif.message);
+      fx.alert('É a sua vez', notif.message);
       break;
     case 'ATTENDANCE_FINISHED':
       fx.updateQueue({ status: 'FINISHED' });
       fx.alert('Atendimento concluído', notif.message);
       break;
     case 'ATTENDANCE_PROMOTED':
-      fx.alert('Você entrou na fila! 🎉', notif.message);
+      fx.alert('Você entrou na fila', notif.message);
       break;
     case 'ATTENDANCE_CANCELLED':
       if (fx.activeAttendanceId && notif.attendanceId === fx.activeAttendanceId) {
@@ -45,7 +45,7 @@ export function handleQueueNotification(
     // Solicitar corte (BUG5 C2): o atendimento aceito entra na fila (o poll de
     // Atendimentos reflete); recusado/expirado é só informação.
     case 'CUT_ACCEPTED':
-      fx.alert('Pedido aceito! 🎉', notif.message);
+      fx.alert('Pedido aceito', notif.message);
       break;
     case 'CUT_REFUSED':
       fx.alert('Pedido recusado', notif.message);
@@ -56,7 +56,7 @@ export function handleQueueNotification(
     // Troca aceita (C13): a posição na fila mudou. O poll da fila/QueueStatus
     // reflete; aqui só avisa.
     case 'SWAP_OFFER_ACCEPTED':
-      fx.alert('Troca feita! 🔄', notif.message);
+      fx.alert('Troca feita', notif.message);
       break;
   }
 }

@@ -183,7 +183,7 @@ export function EditAddress() {
       }));
       if (!draft.street || !draft.number) {
         Alert.alert(
-          "Localização capturada 📍",
+          "Localização capturada",
           "Confira os campos e complete o que faltar (número, complemento).",
         );
       }
