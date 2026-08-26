@@ -46,22 +46,43 @@ function timeAgoLabel(iso: string | null | undefined): string | null {
   return `há ${months} ${months > 1 ? "meses" : "mês"}`;
 }
 
-// Pilula de status: fundo brand-green + texto/ponto forest (Pencil).
-// `live` = a loja esta ABERTA agora, e so entao o ponto pisca. Com ela
-// fechada a mesma pilula diz "Agendar" — ponto piscando ali sinalizaria
-// movimento que nao existe.
+/**
+ * Pilula de status da loja na lista.
+ *
+ * ABERTA agora  -> brand-green solido, ponto piscando: "da pra entrar JA".
+ * FECHADA       -> contornada e quieta: "so agendar".
+ *
+ * As duas usavam o MESMO brand-green, e a unica diferenca era o ponto piscar —
+ * que nao aparece num relance nem num print. Numa lista de cinco lojas, TODAS
+ * carregavam o acento maximo da marca, abertas ou fechadas, e o verde parava
+ * de significar "pode ir agora" (a regra do C25 e 1-2 acentos por tela).
+ *
+ * A fechada nao pode ser `brandSurface`: o CARTAO da linha ja e surface, e a
+ * pilula sumiria nele (1,00:1). Contornada resolve — a borda agrupa e o TEXTO
+ * carrega o sentido, a 8,54:1 sobre o cartao.
+ *
+ * E sem ponto quando fechada: ponto e sinal de "ao vivo"; parado numa loja
+ * fechada e ruido.
+ */
 function StatusPill({ label, live }: { label: string; live: boolean }) {
   return (
     <HStack
-      bg="$brandGreen"
+      bg={live ? "$brandGreen" : "transparent"}
+      borderWidth={live ? 0 : 1}
+      borderColor="$brandBorder"
       borderRadius="$full"
       gap={6}
       px={12}
       py={6}
       alignItems="center"
     >
-      <LiveDot size={8} color="#163300" pulsing={live} />
-      <Text fontFamily="$display" fontSize={12} fontWeight="$bold" color="$forest">
+      {live && <LiveDot size={8} color="#163300" pulsing />}
+      <Text
+        fontFamily="$display"
+        fontSize={12}
+        fontWeight="$bold"
+        color={live ? "$forest" : "$brandTextSecondary"}
+      >
         {label}
       </Text>
     </HStack>
@@ -85,10 +106,22 @@ function EstablishmentRow({
   const wait = establishment.estimated_wait_minutes;
   // Sem contagem de pessoas na listagem (o backend so expoe tempo estimado):
   // "Sem fila" quando zero, senao o tempo. Nao inventamos "N na fila".
-  const queueLabel = wait == null || wait === 0 ? "Sem fila" : formatWaitTime(wait);
+  // ⚠️ FECHADA nao pode falar de espera. O backend devolve
+  // `estimated_wait_minutes: null` pra loja fechada, e a regra abaixo lia isso
+  // como "sem fila / Agora" — a linha convidava a ir AGORA bem ao lado da
+  // pilula dizendo "Agendar". Aberta e fechada diziam a mesma coisa.
+  //
+  // Nao inventamos o horario de abertura aqui: o contrato so tem UM
+  // `opening_time` pra semana inteira (ver C22), entao "abre as 9h" seria
+  // chute em dia fechado. "Fechada" e o que da pra afirmar.
+  const queueLabel = !isOpen
+    ? "Fechada"
+    : wait == null || wait === 0
+      ? "Sem fila"
+      : formatWaitTime(wait);
   const timeLabel = wait == null || wait === 0 ? "Agora" : `~${formatWaitTime(wait)}`;
 
-  const meta: string[] = [timeLabel];
+  const meta: string[] = isOpen ? [timeLabel] : [];
   if (distanceKm != null) meta.push(formatDistanceKm(distanceKm));
 
   return (
