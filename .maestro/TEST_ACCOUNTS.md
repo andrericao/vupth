@@ -21,9 +21,22 @@
 > | cliente | `cliente.teste@vupth.dev` | — |
 > | parceiro | `parceiro.teste@vupth.dev` | `ROLE_OWNER`, `ROLE_CLIENT` |
 >
-> Pra recriar contas com credencial conhecida, rode `seed_clients.sh` (senha
-> `Teste@123`). ⚠️ Ele grava no backend que o `.env` apontar — e o Railway e
-> **producao**.
+> ## Como logar pra TESTE VISUAL, sem digitar senha em formulario
+>
+> ```bash
+> ./.maestro/qa-session.sh local
+> ```
+>
+> Ele cria (ou reusa) `qa.visual@vupth.dev` / `Teste@123`, faz login pela API e
+> imprime um trecho de JavaScript. Cole no console do app web (`localhost:8081`)
+> e a sessao esta de pe — o app le a sessao do `localStorage`, entao plantar as
+> chaves ali equivale a ter logado.
+>
+> Aceita `local` (padrao), `dev` (Render) e `prod`. ⚠️ **`prod` e o Railway, que
+> e producao** — o script avisa e espera antes de gravar.
+>
+> Pra recriar varios clientes de uma vez, `seed_clients.sh` continua valendo
+> (senha `Teste@123`).
 >
 > **Ultima atualizacao do conteudo abaixo:** 2026-06-02 (morto)
 
