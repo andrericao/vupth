@@ -24,16 +24,26 @@
 > ## Como logar pra TESTE VISUAL, sem digitar senha em formulario
 >
 > ```bash
-> ./.maestro/qa-session.sh local
+> ./.maestro/qa-session.sh            # cliente  -> localhost:8081
+> ./.maestro/qa-session.sh parceiro   # parceiro -> localhost:8082
 > ```
 >
-> Ele cria (ou reusa) `qa.visual@vupth.dev` / `Teste@123`, faz login pela API e
-> imprime um trecho de JavaScript. Cole no console do app web (`localhost:8081`)
-> e a sessao esta de pe — o app le a sessao do `localStorage`, entao plantar as
-> chaves ali equivale a ter logado.
+> Cria (ou reusa) a conta, loga pela API e **copia o JavaScript pro
+> clipboard**. Abra a porta do app, `Cmd+Option+J`, cole. Rode de qualquer
+> pasta.
 >
-> Aceita `local` (padrao), `dev` (Render) e `prod`. ⚠️ **`prod` e o Railway, que
-> e producao** — o script avisa e espera antes de gravar.
+> Contas: `qa.visual@vupth.dev` e `qa.prof@vupth.dev`, senha `Teste@123`. No
+> modo `parceiro` o script ainda cria o PERFIL PROFISSIONAL e VINCULA a uma
+> loja aberta — sem os dois a tela da Fila nao tem o que mostrar.
+>
+> ⚠️ **Os dois apps guardam a sessao em lugares DIFERENTES:** o cliente no
+> `localStorage`, o parceiro no `sessionStorage` (o shim de expo-secure-store
+> do partner, mitigacao do D8). Plantar no lugar errado nao loga **e nao da
+> erro** — foi o que me custou uma rodada. O script ja acerta o de cada um.
+>
+> Ambiente: `local` (padrao), `dev` (Render), `prod`. ⚠️ **`prod` e o Railway,
+> que e producao** — o script avisa e espera antes de gravar. Ex.:
+> `./.maestro/qa-session.sh cliente dev`
 >
 > Pra recriar varios clientes de uma vez, `seed_clients.sh` continua valendo
 > (senha `Teste@123`).

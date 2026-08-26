@@ -1,27 +1,25 @@
 #!/usr/bin/env bash
 # Sessao de QA visual, SEM digitar senha em formulario.
 #
-# Cria (ou reusa) uma conta de teste, faz login pela API e imprime um trecho de
-# JavaScript pra colar no console do app web. O app le a sessao do
-# localStorage, entao plantar as chaves ali equivale a ter logado.
+# Cria (ou reusa) a conta de teste, faz login pela API e imprime um trecho de
+# JavaScript pra colar no console do app web. Os apps leem a sessao do
+# armazenamento do navegador, entao plantar as chaves ali equivale a ter logado.
+#
+#   ./qa-session.sh                    # cliente, backend local
+#   ./qa-session.sh parceiro           # parceiro (cria profissional + vincula)
+#   ./qa-session.sh cliente dev        # cliente, contra o Render
+#
+# ⚠️ O ambiente padrao e `local` DE PROPOSITO: `prod` e o Railway, producao.
 #
 # POR QUE ISTO EXISTE: o `TEST_ACCOUNTS.md` documentava contas de um seed de
-# junho que nao existe mais em backend nenhum (conferido em 2026-08-26), e
-# ninguem tinha como abrir as telas atras de login pra conferir o visual.
-#
-#   ./qa-session.sh [local|dev|prod] [email] [senha]
-#
-# ⚠️ O padrao e `local` DE PROPOSITO: `prod` e o Railway, que e producao.
+# junho que nao existe mais em backend nenhum (conferido em 2026-08-26), e as
+# telas atras de login nunca tinham sido conferidas visualmente.
 
 set -euo pipefail
-
-# Funciona de qualquer diretorio: o script se ancora na propria pasta, entao
-# nao precisa de `cd` antes nem importa de onde voce chamou.
 cd "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-ENV="${1:-local}"
-EMAIL="${2:-qa.visual@vupth.dev}"
-SENHA="${3:-Teste@123}"
+APP="${1:-cliente}"
+ENV="${2:-local}"
 
 case "$ENV" in
   local) URL="http://localhost:8080" ;;
@@ -32,48 +30,85 @@ case "$ENV" in
   *) echo "ambiente invalido: $ENV (use local|dev|prod)"; exit 1 ;;
 esac
 
-echo "→ $ENV ($URL)"
+case "$APP" in
+  cliente)  EMAIL="qa.visual@vupth.dev"; PORTA=8081 ;;
+  parceiro) EMAIL="qa.prof@vupth.dev";   PORTA=8082 ;;
+  *) echo "app invalido: $APP (use cliente|parceiro)"; exit 1 ;;
+esac
+SENHA="Teste@123"
+
+echo "→ $APP em $ENV ($URL)"
+
+api() { curl -s -m 90 "$@"; }
 
 # Registro e idempotente na pratica: se ja existir, o login abaixo resolve.
-curl -s -m 60 -X POST "$URL/auth/register" \
-  -H "Content-Type: application/json" \
+api -X POST "$URL/auth/register" -H "Content-Type: application/json" \
   -d "{\"email\":\"$EMAIL\",\"password\":\"$SENHA\"}" > /dev/null 2>&1 || true
 
-RESP=$(curl -s -m 60 -X POST "$URL/auth/login" \
-  -H "Content-Type: application/json" \
+RESP=$(api -X POST "$URL/auth/login" -H "Content-Type: application/json" \
   -d "{\"email\":\"$EMAIL\",\"password\":\"$SENHA\"}")
 
-SAIDA=$(echo "$RESP" | python3 -c '
-import json, sys
-try:
-    d = json.load(sys.stdin)
-except Exception:
-    print("✗ login falhou — resposta nao e JSON"); sys.exit(1)
-if "tokens" not in d:
-    print("✗ login falhou:", d.get("message") or d); sys.exit(1)
+TOKEN=$(echo "$RESP" | python3 -c 'import json,sys
+try: print(json.load(sys.stdin)["tokens"]["access_token"])
+except Exception: pass')
 
+if [ -z "$TOKEN" ]; then
+  echo "✗ login falhou:"; echo "$RESP" | head -c 300; echo; exit 1
+fi
+
+# O parceiro precisa de PERFIL PROFISSIONAL e de VINCULO — sem os dois a tela
+# da Fila nao tem o que mostrar.
+if [ "$APP" = "parceiro" ]; then
+  api -X POST "$URL/professional/register" -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $TOKEN" \
+    -d '{"name":"QA Visual","specialty":"BARBER"}' > /dev/null 2>&1 || true
+
+  LOJA=$(api "$URL/establishment" | python3 -c 'import json,sys
+d=json.load(sys.stdin); l = d if isinstance(d,list) else d.get("content",[])
+abertas=[e for e in l if e.get("is_open")]
+print((abertas or l)[0]["id"] if l else "")')
+
+  if [ -n "$LOJA" ]; then
+    api -X POST "$URL/professional/affiliate" -H "Content-Type: application/json" \
+      -H "Authorization: Bearer $TOKEN" -d "{\"establishmentId\":\"$LOJA\"}" > /dev/null 2>&1 || true
+  fi
+
+  # Relogar: o papel PROFESSIONAL so entra no JWT no token seguinte.
+  RESP=$(api -X POST "$URL/auth/login" -H "Content-Type: application/json" \
+    -d "{\"email\":\"$EMAIL\",\"password\":\"$SENHA\"}")
+fi
+
+SAIDA=$(APP="$APP" PORTA="$PORTA" python3 -c '
+import json, os, sys
+d = json.load(sys.stdin)
 u, t = d["user"], d["tokens"]
-print("✓ sessao de", u["email"])
+app, porta = os.environ["APP"], os.environ["PORTA"]
+
+# ⚠️ Armazenamento DIFERENTE por app: o parceiro tem um shim de
+# expo-secure-store que usa sessionStorage (mitigacao do D8); o cliente usa
+# localStorage. Plantar no lugar errado nao loga e nao da erro.
+store = "sessionStorage" if app == "parceiro" else "localStorage"
+J = json.dumps
+
+print("\u2713 sessao de " + u["email"])
 print()
-print("Cole no console do app do CLIENTE — http://localhost:8081")
-print("(8082 e o app do PARCEIRO; 8080 e o backend, sem tela)")
+print("Cole no console do app do " + app.upper() + " \u2014 http://localhost:" + porta)
 print()
 print("(() => {")
-print("  localStorage.setItem(" + json.dumps("vupth_access_token") + ", " + json.dumps(t["access_token"]) + ");")
-print("  localStorage.setItem(" + json.dumps("vupth_refresh_token") + ", " + json.dumps(t["refresh_token"]) + ");")
-print("  localStorage.setItem(" + json.dumps("vupth_user") + ", " + json.dumps(json.dumps(u)) + ");")
-print("  localStorage.setItem(" + json.dumps("vupth_onboarding_seen") + ", " + json.dumps("1") + ");")
+print("  " + store + ".setItem(" + J("vupth_access_token") + ", " + J(t["access_token"]) + ");")
+print("  " + store + ".setItem(" + J("vupth_refresh_token") + ", " + J(t["refresh_token"]) + ");")
+if app == "cliente":
+    print("  localStorage.setItem(" + J("vupth_user") + ", " + J(json.dumps(u)) + ");")
+    print("  localStorage.setItem(" + J("vupth_onboarding_seen") + ", " + J("1") + ");")
 print("  location.reload();")
 print("})()")
-'
-)
+' <<< "$RESP")
 
 echo "$SAIDA"
 
-# macOS: manda o JS direto pro clipboard, pra nao ter de selecionar na tela.
 if command -v pbcopy > /dev/null 2>&1; then
   echo "$SAIDA" | sed -n '/^(() => {/,/^})()/p' | pbcopy
   echo
   echo "📋 Ja esta na sua area de transferencia."
-  echo "   Abra http://localhost:8081, aperte Cmd+Option+J e cole (Cmd+V)."
+  echo "   Abra http://localhost:$PORTA, aperte Cmd+Option+J e cole (Cmd+V)."
 fi
