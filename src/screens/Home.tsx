@@ -111,6 +111,8 @@ function EstablishmentRow({
   // agora?" e a linha responde "que lugar e esse, e onde fica".
   // `serviceType` e opcional no contrato — sem ele a linha fica so com a
   // distancia, em vez de imprimir "undefined".
+  const tag = statusTag(establishment);
+
   const meta: string[] = establishment.serviceType
     ? [serviceTypeLabel(establishment.serviceType)]
     : [];
@@ -126,7 +128,15 @@ function EstablishmentRow({
         mb={12}
         alignItems="center"
       >
-        <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} />
+        {/* Avatar APAGADO quando fechada — o mesmo sinal da lista cheia. Era
+            verde nas duas situacoes, entao a linha fechada so se distinguia
+            pela tag no canto oposto. */}
+        <PlaceAvatar
+          name={establishment.name}
+          photoUrl={establishment.urlImage}
+          bg={tag.live ? "$greenTint" : "$brandBorder"}
+          color={tag.live ? "$forest" : "$brandTextSecondary"}
+        />
         <VStack flex={1} gap={4}>
           <Text fontFamily="$display" fontSize={15} fontWeight="$bold" color="$brandTextPrimary">
             {establishment.name}
@@ -148,7 +158,7 @@ function EstablishmentRow({
           </HStack>
         </VStack>
         {/* Fechada nao e beco sem saida: ainda da pra agendar (Andre 2026-07-23). */}
-        <StatusPill {...statusTag(establishment)} />
+        <StatusPill {...tag} />
       </HStack>
     </TouchableOpacity>
   );
