@@ -5,9 +5,10 @@ import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import { Search, SlidersHorizontal, ChevronRight } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
-import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
+import { Establishment, ServiceType } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
 import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity";
+import { statusTag } from "@domain/establishment/statusTag";
 import { serviceTypeLabel } from "@domain/establishment/serviceType";
 import { primeiroNome } from "@domain/auth/displayName";
 import { useEstablishments } from "@hooks/useEstablishments";
@@ -102,26 +103,17 @@ function EstablishmentRow({
 }) {
   // "Aberta AGORA" efetiva (inclui horario de funcionamento) — loja OPEN fora
   // do horario mostra fechada (feedback Andre 2026-07-22).
-  const isOpen = isEffectivelyOpen(establishment);
-  const wait = establishment.estimated_wait_minutes;
   // Sem contagem de pessoas na listagem (o backend so expoe tempo estimado):
   // "Sem fila" quando zero, senao o tempo. Nao inventamos "N na fila".
-  // ⚠️ FECHADA nao pode falar de espera. O backend devolve
-  // `estimated_wait_minutes: null` pra loja fechada, e a regra abaixo lia isso
-  // como "sem fila / Agora" — a linha convidava a ir AGORA bem ao lado da
-  // pilula dizendo "Agendar". Aberta e fechada diziam a mesma coisa.
-  //
-  // Nao inventamos o horario de abertura aqui: o contrato so tem UM
-  // `opening_time` pra semana inteira (ver C22), entao "abre as 9h" seria
-  // chute em dia fechado. "Fechada" e o que da pra afirmar.
-  const queueLabel = !isOpen
-    ? "Fechada"
-    : wait == null || wait === 0
-      ? "Sem fila"
-      : formatWaitTime(wait);
-  const timeLabel = wait == null || wait === 0 ? "Agora" : `~${formatWaitTime(wait)}`;
-
-  const meta: string[] = isOpen ? [timeLabel] : [];
+  // A ESPERA MORA NA TAG, nao aqui. A linha imprimia `queueLabel` +
+  // `timeLabel`, que diziam a mesma coisa duas vezes: "Sem fila · Agora" ou,
+  // pior, "2h · ~2h" — o mesmo numero repetido. Agora a tag responde "posso ir
+  // agora?" e a linha responde "que lugar e esse, e onde fica".
+  // `serviceType` e opcional no contrato — sem ele a linha fica so com a
+  // distancia, em vez de imprimir "undefined".
+  const meta: string[] = establishment.serviceType
+    ? [serviceTypeLabel(establishment.serviceType)]
+    : [];
   if (distanceKm != null) meta.push(formatDistanceKm(distanceKm));
 
   return (
@@ -140,12 +132,14 @@ function EstablishmentRow({
             {establishment.name}
           </Text>
           <HStack gap={8} alignItems="center">
-            <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="$brandTextPrimary">
-              {queueLabel}
-            </Text>
-            {meta.map((m) => (
+            {/* O ponto SEPARA, entao nao vem antes do primeiro item. Antes a
+                linha comecava com o `queueLabel` e a meta so completava; sem
+                ele, o separador virou um "·" orfao no comeco. */}
+            {meta.map((m, i) => (
               <HStack key={m} gap={8} alignItems="center">
-                <Center width={3} height={3} borderRadius={1.5} bg="$brandTextSecondary" />
+                {i > 0 && (
+                  <Center width={3} height={3} borderRadius={1.5} bg="$brandTextSecondary" />
+                )}
                 <Text fontFamily="$body" fontSize={13} color="$brandTextSecondary">
                   {m}
                 </Text>
@@ -154,7 +148,7 @@ function EstablishmentRow({
           </HStack>
         </VStack>
         {/* Fechada nao e beco sem saida: ainda da pra agendar (Andre 2026-07-23). */}
-        <StatusPill label={isOpen ? (wait ? "Aberto" : "Livre") : "Agendar"} live={isOpen} />
+        <StatusPill {...statusTag(establishment)} />
       </HStack>
     </TouchableOpacity>
   );

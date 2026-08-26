@@ -12,6 +12,7 @@ import { formatDistanceKm } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { ScreenHeader } from "@components/ScreenHeader";
+import { statusTag } from "@domain/establishment/statusTag";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { formatWaitTime } from "@domain/queue/types";
@@ -44,19 +45,20 @@ function OpenRow({
             <Text fontFamily="$heading" fontSize="$sm" color="$forest">
               {establishment.name}
             </Text>
+            {/* A ESPERA MORA NA TAG. Ela estava aqui E na pilula ao lado, que
+                dizia "Livre"/"Aberto" — duas palavras que nao carregavam a
+                diferenca (aberta com fila x sem fila) e repetiam o que esta
+                linha ja dizia melhor. A linha fica com onde fica e o quanto
+                vale. */}
             <HStack alignItems="center" gap="$2" mt="$0.5">
-              <Text size="xs" color="$brandTextPrimary" fontFamily="$heading">
-                {waitLabel(establishment)}
-              </Text>
               {establishment.distance_km != null && (
                 <>
-                  <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
                   <Text size="xs" color="$brandTextSecondary">
                     {formatDistanceKm(establishment.distance_km)}
                   </Text>
+                  <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
                 </>
               )}
-              <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
               <HStack alignItems="center" gap="$1">
                 <Star size={11} color="#163300" fill="#163300" />
                 <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
@@ -65,9 +67,12 @@ function OpenRow({
               </HStack>
             </HStack>
           </VStack>
-          <Box bg="$greenTint" borderRadius="$full" px="$3" py="$1">
+          {/* Mesma tag da Home — uma regra so pras duas telas. Aqui so chega
+              loja ABERTA (a fechada tem linha propria), entao ela sai "Livre"
+              ou com o tempo. */}
+          <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
             <Text size="2xs" fontFamily="$heading" color="$forest">
-              {waitLabel(establishment) === "Sem fila" ? "Livre" : "Aberto"}
+              {statusTag(establishment).label}
             </Text>
           </Box>
         </HStack>
