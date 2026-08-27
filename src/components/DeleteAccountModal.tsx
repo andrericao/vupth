@@ -4,7 +4,7 @@ import { VStack, Box, Text, Heading } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
 import { Input2 } from "@components/Input2";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 
 type Props = {
   visible: boolean;
@@ -46,16 +46,16 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$2xl" p="$6" gap="$3" style={cardShadow}>
+        <VStack bg="$white" borderRadius="$card" p="$6" gap="$3" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
             Deletar conta
           </Heading>
 
-          <Text size="sm" color="$gray300">
+          <Text size="sm" color="$brandTextSecondary">
             Seus dados pessoais serão apagados e você sairá do app. Os atendimentos
             que você já fez continuam no histórico do profissional, sem o seu nome.
           </Text>
-          <Text size="sm" color="$gray300">
+          <Text size="sm" color="$brandTextSecondary">
             Para confirmar que é você, digite sua senha atual.
           </Text>
 
@@ -68,7 +68,7 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
           />
 
           {error && (
-            <Text size="xs" color="$red500" testID="delete-account-error">
+            <Text size="xs" color="$brandDanger" testID="delete-account-error">
               {error}
             </Text>
           )}
@@ -76,8 +76,8 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
           <Button
             title={isDeleting ? "Deletando..." : "Deletar minha conta"}
             variant="outline"
-            borderColor="$red500"
-            $active-bg="$red500"
+            borderColor="$brandDanger"
+            $active-bg="$brandDangerTint"
             isDisabled={password.length === 0 || isDeleting}
             testID="delete-account-confirm"
             onPress={confirm}

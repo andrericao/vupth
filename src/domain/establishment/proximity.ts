@@ -98,11 +98,24 @@ export function formatDistanceKm(km: number): string {
  * por id que o backend faz para a paginação futura).
  *
  * SEM GPS: cai na Fase 1, ordenando por bairro/cidade do endereço.
+ *
+ * FAVORITOS sobem ao topo em qualquer um dos dois casos. É o que dá sentido ao
+ * coração da tela do estabelecimento: sem isso, favoritar preenche um ícone e
+ * não muda nada em lugar nenhum — meia funcionalidade. A partição é ESTÁVEL,
+ * então dentro de cada grupo a ordem (distância ou proximidade) é preservada.
  */
 export function orderForHome(
   list: Establishment[],
   hasCoords: boolean,
   loc: UserLocation | null,
+  favoriteIds: string[] = [],
 ): Establishment[] {
-  return hasCoords ? list : sortByProximity(list, loc);
+  const ordenada = hasCoords ? list : sortByProximity(list, loc);
+  if (favoriteIds.length === 0) return ordenada;
+
+  const favoritos = new Set(favoriteIds);
+  const topo: Establishment[] = [];
+  const resto: Establishment[] = [];
+  for (const e of ordenada) (favoritos.has(e.id) ? topo : resto).push(e);
+  return [...topo, ...resto];
 }

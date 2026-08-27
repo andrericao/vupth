@@ -12,7 +12,7 @@ import { useAuthStore } from '@stores/authStore';
 // existia, mas era passivo — abrir o formulário agora OFERECE o GPS.
 
 jest.mock('expo-secure-store');
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
   useRoute: () => ({ params: {} }),
@@ -103,6 +103,8 @@ describe('EditAddress — oferta de GPS ao abrir o formulário', () => {
     });
 
     expect(mockCapture).not.toHaveBeenCalled();
-    expect(await findByText('Novo Endereço')).toBeTruthy();
+    // Titulo em CAIXA ALTA desde o redesenho ("NOVO ENDERECO"); o que o teste
+    // garante e que a tela ficou no FORMULARIO depois de recusar o GPS.
+    expect(await findByText(/novo endere/i)).toBeTruthy();
   });
 });

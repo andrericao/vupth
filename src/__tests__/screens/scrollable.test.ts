@@ -4,7 +4,8 @@ import { join } from 'path';
 // Feedback de device (Andre 2026-08-07): "em algumas telas (principalmente nas
 // configuracoes) o scroll nao esta funcionando".
 //
-// Quatro telas (Settings, Profile, EditEmail, EditPassword) eram um `VStack
+// Quatro telas (Settings, Profile — depois removida —, EditEmail e
+// EditPassword) eram um `VStack
 // flex={1}` seco: o conteudo que passasse da altura da tela simplesmente ficava
 // inalcancavel, sem nenhum sinal de erro. Nas Configuracoes ficou obvio porque o
 // painel de diagnostico do WS aumentou a altura, mas as outras tres ja estavam

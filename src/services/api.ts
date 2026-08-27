@@ -1,5 +1,8 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import * as SecureStore from "expo-secure-store";
+import * as Updates from "expo-updates";
+
+import { resolveApiEnv } from "./apiEnv";
 
 interface RefreshResponse {
 	access_token: string;
@@ -9,15 +12,35 @@ interface RefreshResponse {
 
 const localIp = process.env.EXPO_PUBLIC_API_LOCAL_IP || "localhost";
 
+// Render = ambiente de TESTE; Railway = PRODUCAO, e e no Railway que o time
+// testa em device (Andre 2026-08-22).
+//
+// `dev` e `staging` sao o MESMO host de proposito: este app batizou de `dev` o
+// que o partner batizou de `staging`, e o mesmo `.env` circula entre os dois
+// repos. Sem o apelido, `EXPO_PUBLIC_API_ENV=staging` aqui nao resolvia nada.
 const BASE_URLS: Record<string, string> = {
 	local: `http://${localIp}:8080`,
 	dev: "https://vupth-backend-ia.onrender.com",
+	staging: "https://vupth-backend-ia.onrender.com",
 	prod: "https://vupth-backend-ia-production.up.railway.app",
 };
 
-const env = (process.env.EXPO_PUBLIC_API_ENV || "local") as keyof typeof BASE_URLS;
+// O CANAL manda quando existe (bundle publicado); o `.env` so vale rodando
+// local. Ver `apiEnv.ts` pro porque — em resumo, o `.env` de quem publica
+// vazava pro app de todo mundo.
+const canalDoBundle = (() => {
+	try {
+		return Updates.channel;
+	} catch {
+		return null;
+	}
+})();
+const env = resolveApiEnv(canalDoBundle, process.env.EXPO_PUBLIC_API_ENV);
 
 // Base URL HTTP resolvida e env atual — usados pelo portao de readiness (cold start Render).
+// Sem indexacao defensiva aqui de proposito: `resolveApiEnv` so devolve chave
+// que existe neste mapa. Antes, um nome fora do mapa virava `undefined` e o
+// app subia sem baseURL — toda chamada falhava sem dizer por que.
 export const API_BASE_URL = BASE_URLS[env];
 export const API_ENV = env;
 
@@ -27,7 +50,7 @@ export function deriveWsUrl(baseUrl: string): string {
 	return `${baseUrl.replace(/^http/, "ws")}/ws/websocket`;
 }
 
-export const WS_URL = deriveWsUrl(BASE_URLS[env]);
+export const WS_URL = deriveWsUrl(API_BASE_URL);
 
 const TOKEN_KEY = "vupth_access_token";
 const REFRESH_KEY = "vupth_refresh_token";
@@ -49,7 +72,12 @@ export function registerAuthStore(setter: AuthStoreSetter) {
 
 export const api = axios.create({
 	baseURL: BASE_URLS[env],
-	timeout: env === "local" ? 10000 : 90000,
+	// O `/establishment` leva ~11,7s (medido em 2026-08-26, e o MESMO tempo com
+	// 4 ou 13 lojas — custo fixo, nao proporcional). Com 10s o app estourava na
+	// PRIMEIRA tela em dev: "Erro ao carregar estabelecimentos", com o backend
+	// respondendo 200 logo depois. 30s cobre a lentidao sem esconder falha real.
+	// ⚠️ Isto MASCARA um problema de backend, nao conserta: ver S35.
+	timeout: env === "local" ? 30000 : 90000,
 	headers: {
 		"Content-Type": "application/json",
 	},

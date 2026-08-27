@@ -1,9 +1,54 @@
 # Contas de Teste — VUPTH
 
-> Credenciais dos usuarios criados pelo seed do partner e pelos testes E2E.
-> Backend: Render (https://vupth-backend-ia.onrender.com)
+> ⚠️ **ESTE ARQUIVO ESTA DESATUALIZADO — verificado em 2026-08-26.**
 >
-> **Ultima atualizacao:** 2026-06-02
+> As contas abaixo **NAO EXISTEM MAIS**. Conferi loja por loja (`Corte Real`,
+> `Tesoura de Ouro`, `Unhas de Cristal`, `Zen Vida Nova`) nos DOIS backends e
+> nenhuma responde. O seed de 02/06 se foi.
+>
+> **O que existe hoje:**
+>
+> | backend | quem aponta pra la | lojas |
+> |---|---|---|
+> | Railway `vupth-backend-ia-production.up.railway.app` | app do **cliente** (canal `preview`) | Barbearia Premium ×2, Barbearia do Ricardo, Studio Beleza Total |
+> | Render `vupth-backend-ia.onrender.com` | app do **parceiro** | 17, quase todas "Barbearia Premium" |
+>
+> **As duas contas que o time usa de fato** (achadas na sessao guardada dos
+> apps em dev — as SENHAS nao estao em lugar nenhum do repo):
+>
+> | app | e-mail | papeis |
+> |---|---|---|
+> | cliente | `cliente.teste@vupth.dev` | — |
+> | parceiro | `parceiro.teste@vupth.dev` | `ROLE_OWNER`, `ROLE_CLIENT` |
+>
+> ## Como logar pra TESTE VISUAL, sem digitar senha em formulario
+>
+> ```bash
+> ./.maestro/qa-session.sh            # cliente  -> localhost:8081
+> ./.maestro/qa-session.sh parceiro   # parceiro -> localhost:8082
+> ```
+>
+> Cria (ou reusa) a conta, loga pela API e **copia o JavaScript pro
+> clipboard**. Abra a porta do app, `Cmd+Option+J`, cole. Rode de qualquer
+> pasta.
+>
+> Contas: `qa.visual@vupth.dev` e `qa.prof@vupth.dev`, senha `Teste@123`. No
+> modo `parceiro` o script ainda cria o PERFIL PROFISSIONAL e VINCULA a uma
+> loja aberta — sem os dois a tela da Fila nao tem o que mostrar.
+>
+> ⚠️ **Os dois apps guardam a sessao em lugares DIFERENTES:** o cliente no
+> `localStorage`, o parceiro no `sessionStorage` (o shim de expo-secure-store
+> do partner, mitigacao do D8). Plantar no lugar errado nao loga **e nao da
+> erro** — foi o que me custou uma rodada. O script ja acerta o de cada um.
+>
+> Ambiente: `local` (padrao), `dev` (Render), `prod`. ⚠️ **`prod` e o Railway,
+> que e producao** — o script avisa e espera antes de gravar. Ex.:
+> `./.maestro/qa-session.sh cliente dev`
+>
+> Pra recriar varios clientes de uma vez, `seed_clients.sh` continua valendo
+> (senha `Teste@123`).
+>
+> **Ultima atualizacao do conteudo abaixo:** 2026-06-02 (morto)
 
 ## Owners (app partner — login pelo partner)
 

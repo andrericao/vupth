@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Modal } from "react-native";
 import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
-import { CalendarBlank } from "phosphor-react-native";
+import { Calendar } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { DaySelector } from "@components/DaySelector";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 import { notifyComingSoon } from "@domain/comingSoon";
 import { isSameDay } from "@domain/schedule/days";
 
@@ -40,11 +40,11 @@ export function ScheduleModal({ visible, onClose }: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
+        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
             Agendar atendimento
           </Heading>
-          <Text size="sm" color="$gray300" mt="$1">
+          <Text size="sm" color="$brandTextSecondary" mt="$1">
             Não vai dar para esperar na fila agora? Escolha o dia para manifestar
             sua intenção.
           </Text>
@@ -55,15 +55,19 @@ export function ScheduleModal({ visible, onClose }: Props) {
 
           {selectedDate != null && (
             <Box
-              bg="$green100"
+              bg="$greenTint"
               borderRadius="$xl"
               px="$4"
               py="$3"
               mt="$4"
             >
               <HStack alignItems="center" gap="$2">
-                <CalendarBlank size={18} color="#3B7A3F" />
-                <Text size="sm" color="$gray500">
+                <Calendar size={18} color="#163300" />
+                {/* [contraste] Era `$gray500` (#DDDEDF) sobre `$greenTint`
+                    (#E2F6D5) — dois tons claríssimos, texto praticamente
+                    invisível. Sobre greenTint o par da marca é `$forest`,
+                    o mesmo do ícone ao lado. */}
+                <Text size="sm" color="$forest" flex={1}>
                   A escolha do horário deste dia (barra de encaixe) chega em breve.
                 </Text>
               </HStack>

@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { Alert, ScrollView, TouchableOpacity } from "react-native";
-import { VStack, Text, Heading, Box, HStack } from "@gluestack-ui/themed";
-import { Star, Trash, PencilSimple, MapPin } from "phosphor-react-native";
+import { VStack, Text, Box, HStack } from "@gluestack-ui/themed";
+import { Star, Trash2, Pencil, MapPin } from "lucide-react-native";
 
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
@@ -11,7 +11,6 @@ import { addressService, AddressResponse, AddressRequest } from "@services/addre
 import { maskCEP, unmask } from "@utils/masks";
 import { lookupCep } from "@utils/cep";
 import { SkeletonList } from "@components/Skeleton";
-import { cardShadow } from "@utils/styles";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
 
 type Mode = "list" | "form";
@@ -221,12 +220,9 @@ export function EditAddress() {
   if (mode === "form") {
     return (
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-          <Header showBackButton />
-
-          <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-            {editingId ? "Editar Endereço" : "Novo Endereço"}
-          </Heading>
+        <VStack flex={1} pb={30} px={16} bg="$brandBackground">
+          <ScreenHeader title={editingId ? "EDITAR ENDEREÇO" : "NOVO ENDEREÇO"} />
+          <VStack pt={24} flex={1}>
 
           <Button
             title={gpsLoading ? "Localizando..." : "Usar minha localização (GPS)"}
@@ -237,49 +233,49 @@ export function EditAddress() {
             onPress={handleUseGps}
           />
           <HStack alignItems="center" gap="$1" mb="$4">
-            <MapPin size={12} color="#9CA3AF" weight="fill" />
-            <Text size="xs" color="$gray400" flex={1}>
+            <MapPin size={12} color="#454745" />
+            <Text size="xs" color="$brandTextSecondary" flex={1}>
               Com o GPS a gente já preenche o endereço e calcula sua distância até os estabelecimentos.
             </Text>
           </HStack>
 
           <VStack gap="$3">
             <VStack gap="$1">
-              <Text size="sm" color="$gray300">Rua *</Text>
+              <Text size="sm" color="$brandTextSecondary">Rua *</Text>
               <Input2 placeholder="Rua das Flores" value={form.street} onChangeText={(v: string) => updateField("street", v)} />
             </VStack>
             <HStack gap="$3">
               <VStack gap="$1" flex={1}>
-                <Text size="sm" color="$gray300">Número *</Text>
+                <Text size="sm" color="$brandTextSecondary">Número *</Text>
                 <Input2 placeholder="123" value={form.number} onChangeText={(v: string) => updateField("number", v)} />
               </VStack>
               <VStack gap="$1" flex={1}>
-                <Text size="sm" color="$gray300">Complemento</Text>
+                <Text size="sm" color="$brandTextSecondary">Complemento</Text>
                 <Input2 placeholder="Apt 4B" value={form.complement} onChangeText={(v: string) => updateField("complement", v)} />
               </VStack>
             </HStack>
             <VStack gap="$1">
-              <Text size="sm" color="$gray300">Bairro *</Text>
+              <Text size="sm" color="$brandTextSecondary">Bairro *</Text>
               <Input2 placeholder="Centro" value={form.neighborhood} onChangeText={(v: string) => updateField("neighborhood", v)} />
             </VStack>
             <HStack gap="$3">
               <VStack gap="$1" flex={2}>
-                <Text size="sm" color="$gray300">Cidade *</Text>
+                <Text size="sm" color="$brandTextSecondary">Cidade *</Text>
                 <Input2 placeholder="São Paulo" value={form.city} onChangeText={(v: string) => updateField("city", v)} />
               </VStack>
               <VStack gap="$1" flex={1}>
-                <Text size="sm" color="$gray300">UF *</Text>
+                <Text size="sm" color="$brandTextSecondary">UF *</Text>
                 <Input2 placeholder="SP" value={form.state} onChangeText={(v: string) => updateField("state", v)} autoCapitalize="characters" maxLength={2} />
               </VStack>
             </HStack>
             <VStack gap="$1">
-              <Text size="sm" color="$gray300">
+              <Text size="sm" color="$brandTextSecondary">
                 CEP *{cepLoading ? " — buscando endereço..." : ""}
               </Text>
               <Input2 placeholder="01310-100" value={form.zipCode} onChangeText={handleCepChange} keyboardType="numeric" maxLength={9} />
             </VStack>
             <VStack gap="$1">
-              <Text size="sm" color="$gray300">Referência</Text>
+              <Text size="sm" color="$brandTextSecondary">Referência</Text>
               <Input2 placeholder="Próximo ao metrô" value={form.reference} onChangeText={(v: string) => updateField("reference", v)} />
             </VStack>
           </VStack>
@@ -288,6 +284,7 @@ export function EditAddress() {
             <Button title={isSaving ? "Salvando..." : "Salvar"} onPress={handleSave} isDisabled={isSaving} />
             <Button title="Cancelar" variant="outline" onPress={() => setMode("list")} />
           </VStack>
+          </VStack>
         </VStack>
       </ScrollView>
     );
@@ -295,49 +292,45 @@ export function EditAddress() {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-        <Header showBackButton />
-
-        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-          Endereços
-        </Heading>
-
+      <VStack flex={1} pb={30} px={16} bg="$brandBackground">
+        <ScreenHeader title="ENDEREÇOS" />
+        <VStack pt={24} flex={1}>
         {isLoading ? (
           <SkeletonList count={3} />
         ) : addresses.length === 0 ? (
-          <Text color="$gray300">Nenhum endereço cadastrado</Text>
+          <Text color="$brandTextSecondary">Nenhum endereço cadastrado</Text>
         ) : (
           <VStack gap="$3">
             {addresses.map((addr) => (
-              <Box key={addr.userAddressId} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+              <Box key={addr.userAddressId} bg="$brandSurface" p="$4" borderRadius="$card">
                 <HStack justifyContent="space-between" alignItems="flex-start">
                   <VStack flex={1} mr="$2">
                     <Text fontFamily="$heading" size="sm">
                       {addr.street}, {addr.number}
                       {addr.complement ? ` - ${addr.complement}` : ""}
                     </Text>
-                    <Text size="xs" color="$gray300">
+                    <Text size="xs" color="$brandTextSecondary">
                       {addr.neighborhood} — {addr.city}/{addr.state}
                     </Text>
-                    <Text size="xs" color="$gray300">CEP: {addr.zipCode}</Text>
+                    <Text size="xs" color="$brandTextSecondary">CEP: {addr.zipCode}</Text>
                     {addr.isMain && (
                       <HStack alignItems="center" gap="$1" mt="$1">
-                        <Star size={14} color="#F59E0B" weight="fill" />
-                        <Text size="xs" color="$yellow500">Principal</Text>
+                        <Star size={14} color="#163300" fill="#163300" />
+                        <Text size="xs" color="$forest" fontFamily="$heading">Principal</Text>
                       </HStack>
                     )}
                   </VStack>
                   <HStack gap="$3">
                     {!addr.isMain && (
                       <TouchableOpacity onPress={() => handleSetMain(addr.userAddressId)}>
-                        <Star size={20} color="#9CA3AF" />
+                        <Star size={20} color="#454745" />
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity onPress={() => handleEdit(addr)}>
-                      <PencilSimple size={20} color="#3B7A3F" />
+                      <Pencil size={20} color="#163300" />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)}>
-                      <Trash size={20} color="#E63946" />
+                      <Trash2 size={20} color="#B3261E" />
                     </TouchableOpacity>
                   </HStack>
                 </HStack>
@@ -348,6 +341,7 @@ export function EditAddress() {
 
         <VStack mt="$6">
           <Button title="Adicionar endereço" onPress={handleNew} />
+        </VStack>
         </VStack>
       </VStack>
     </ScrollView>

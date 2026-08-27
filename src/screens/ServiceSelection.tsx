@@ -1,23 +1,23 @@
 import { useState, useEffect } from "react";
 import { Alert, TouchableOpacity, ScrollView } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
   VStack,
   Box,
   Text,
-  Heading,
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Check } from "phosphor-react-native";
+import { Check, Calendar, Scissors, Repeat2 } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
-import { Header } from "@components/Header";
 import { Button } from "@components/Button";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ScheduleModal } from "@components/ScheduleModal";
 import { MoreOptionsModal, MoreOption } from "@components/MoreOptionsModal";
-import { cardShadow } from "@utils/styles";
+import { formatWaitTime, estimatedStartTime } from "@domain/queue/types";
 import { ServiceItemResponse } from "@domain/professional/types";
 import { outOfQueueOfferErrorMessage } from "@domain/queue/swap";
 import { establishmentService } from "@services/establishmentService";
@@ -25,6 +25,18 @@ import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
+
+// Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
+// POUCOS lugares com sombra legitima: no Pencil o "Resumo" sobre `forest` e um
+// dos 13 elementos que a tem. Nao usa a `floatingShadow` compartilhada porque
+// aquela e calibrada p/ superficie clara e some sobre o forest.
+const summaryShadow = {
+  shadowColor: "#163300",
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.15,
+  shadowRadius: 16,
+  elevation: 4,
+};
 
 type RouteParams = {
   professionalId: string;
@@ -35,9 +47,12 @@ type RouteParams = {
   establishmentOpen?: boolean;
   // Seleção restaurada ao voltar do portão de auth (visitante que logou).
   serviceItemIds?: string[];
+  // Tamanho da fila do profissional: a posição do cliente é este número + 1.
+  queueCount?: number;
 };
 
 export function ServiceSelection() {
+  const insets = useSafeAreaInsets();
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const {
@@ -48,6 +63,7 @@ export function ServiceSelection() {
     estimatedWaitMinutes,
     establishmentOpen,
     serviceItemIds,
+    queueCount,
   } = route.params as RouteParams;
   // Ausente = aberta (fluxos legados). false = fila fechada agora.
   const storeOpen = establishmentOpen ?? true;
@@ -64,6 +80,10 @@ export function ServiceSelection() {
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [isRequestingCut, setIsRequestingCut] = useState(false);
   const [isPublishingSwap, setIsPublishingSwap] = useState(false);
+  // "Agora" ancorado na ABERTURA da tela: Date.now() no render e impuro
+  // (react-hooks/purity) e faria a previsao pular a cada re-render. Mesmo
+  // padrao do QueueStatus.
+  const [openedAt] = useState(() => Date.now());
 
   useEffect(() => {
     establishmentService
@@ -220,6 +240,7 @@ export function ServiceSelection() {
       ? [
           {
             key: "schedule",
+            icon: Calendar,
             title: "Agendar para depois",
             description: "Escolha outro dia ou horário com este profissional.",
             onPress: () => {
@@ -231,6 +252,7 @@ export function ServiceSelection() {
       : [
           {
             key: "cut",
+            icon: Scissors,
             title: isRequestingCut ? "Enviando pedido..." : "Solicitar corte",
             description: "A loja está fechada — o profissional tem 5 minutos para responder.",
             disabled: isRequestingCut,
@@ -239,6 +261,7 @@ export function ServiceSelection() {
         ]),
     {
       key: "swap",
+      icon: Repeat2,
       title: isPublishingSwap ? "Publicando..." : "Entrar por troca",
       description: "Alguém que já está na fila pode ceder o lugar para você — sem custo.",
       disabled: isPublishingSwap,
@@ -247,9 +270,11 @@ export function ServiceSelection() {
   ];
 
   if (isLoading) {
+    // O esqueleto tem de comecar na MESMA altura da tela pronta, senao o
+    // conteudo PULA quando carrega. `pt={60}` era chute; o cabecalho real usa
+    // `safe-area + 12`.
     return (
-      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-        <Header showBackButton />
+      <VStack flex={1} px={16} style={{ paddingTop: insets.top + 12 }} pb={30} bg="$brandBackground">
         <VStack mt="$6">
           <SkeletonList count={4} />
         </VStack>
@@ -258,11 +283,13 @@ export function ServiceSelection() {
   }
 
   if (error) {
+    // O esqueleto tem de comecar na MESMA altura da tela pronta, senao o
+    // conteudo PULA quando carrega. `pt={60}` era chute; o cabecalho real usa
+    // `safe-area + 12`.
     return (
-      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-        <Header showBackButton />
+      <VStack flex={1} px={16} style={{ paddingTop: insets.top + 12 }} pb={30} bg="$brandBackground">
         <Center flex={1}>
-          <Text color="$red500" textAlign="center">{error}</Text>
+          <Text color="$brandDanger" textAlign="center">{error}</Text>
           <Button title="Voltar" mt="$4" onPress={() => navigation.goBack()} />
         </Center>
       </VStack>
@@ -270,25 +297,28 @@ export function ServiceSelection() {
   }
 
   return (
-    <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-      <Header showBackButton />
-
-      <Heading fontFamily="$heading" fontSize="$2xl" mt="$4">
-        Selecione os serviços
-      </Heading>
-      <Text size="sm" color="$gray300" mt="$1" mb="$4">
-        {professionalName} — {establishmentName}
-      </Text>
+    <VStack flex={1} pb={30} bg="$brandBackground">
+      <Box px={16}>
+        <ScreenHeader
+          title="O QUE VOCÊ QUER?"
+          subtitle={`Com ${professionalName} · ${establishmentName}`}
+        />
+      </Box>
 
       {services.length === 0 ? (
-        <Center flex={1}>
-          <Text color="$gray300">Nenhum serviço disponível para este profissional</Text>
+        <Center flex={1} px={16}>
+          <Text color="$brandTextSecondary" textAlign="center">
+            Nenhum serviço disponível para este profissional
+          </Text>
           <Button title="Voltar" mt="$4" onPress={() => navigation.goBack()} />
         </Center>
       ) : (
         <>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-            <VStack gap="$3">
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 200 }}
+          >
+            <VStack gap="$2.5">
               {services.map((service) => {
                 const isSelected = selectedIds.includes(service.id);
                 return (
@@ -297,89 +327,125 @@ export function ServiceSelection() {
                     onPress={() => toggleService(service.id)}
                     testID={`service-${service.id}`}
                   >
-                    <Box
-                      bg="$white"
+                    <HStack
+                      bg={isSelected ? "$greenTint" : "$brandSurface"}
                       p="$4"
-                      borderRadius="$2xl"
-                      style={cardShadow}
-                      borderWidth={isSelected ? "$2" : "$0"}
-                      borderColor="$green500"
+                      borderRadius={16}
+                      borderWidth={isSelected ? 1.5 : 0}
+                      borderColor="$forest"
+                      gap="$3"
+                      alignItems="center"
                     >
-                      <HStack justifyContent="space-between" alignItems="center">
-                        <VStack flex={1}>
-                          <Text fontFamily="$heading" size="sm">
-                            {service.customName}
-                          </Text>
-                          <Text size="xs" color="$gray300" mt="$1">
-                            {service.weeklyAverageDurationInMinutes ?? 30} min
-                          </Text>
-                        </VStack>
-                        <HStack alignItems="center" gap="$3">
-                          <Text fontFamily="$heading" color="$green500">
-                            R$ {service.price.toFixed(2)}
-                          </Text>
-                          {isSelected && (
-                            <Box
-                              bg="$green500"
-                              borderRadius="$full"
-                              w={24}
-                              h={24}
-                              alignItems="center"
-                              justifyContent="center"
-                            >
-                              <Check size={16} color="#FFFFFF" weight="bold" />
-                            </Box>
-                          )}
-                        </HStack>
-                      </HStack>
-                    </Box>
+                      {/* Caixa de selecao: cheia quando marcado, contorno quando
+                          nao — o estado tem de ler sem depender so da cor. */}
+                      <Center
+                        width={22}
+                        height={22}
+                        borderRadius={6}
+                        bg={isSelected ? "$forest" : "transparent"}
+                        borderWidth={isSelected ? 0 : 1.5}
+                        borderColor="$brandBorder"
+                      >
+                        {isSelected && <Check size={14} color="#FFFFFF" />}
+                      </Center>
+                      <VStack flex={1} gap="$0.5">
+                        <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                          {service.customName}
+                        </Text>
+                        <Text size="xs" color="$brandTextSecondary">
+                          {service.weeklyAverageDurationInMinutes ?? 30} min
+                        </Text>
+                      </VStack>
+                      <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                        R$ {service.price.toFixed(2)}
+                      </Text>
+                    </HStack>
                   </TouchableOpacity>
                 );
               })}
             </VStack>
+
+            {/* Resumo (Pencil): o que a escolha significa em tempo e posicao,
+                ANTES de confirmar. So aparece com servico marcado — sem selecao
+                nao ha duracao nem preco a resumir. */}
+            {selectedIds.length > 0 && (
+              <VStack
+                bg="$forest"
+                borderRadius={18}
+                gap="$2.5"
+                p="$4.5"
+                mt="$4"
+                style={summaryShadow}
+              >
+                <HStack justifyContent="space-between" alignItems="center">
+                  <Text size="sm" color="#FFFFFFB3">
+                    Duração estimada
+                  </Text>
+                  <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
+                    {formatWaitTime(totalMinutes)}
+                  </Text>
+                </HStack>
+                {/* Posicao so entra quando a tela sabe o tamanho da fila. Quem
+                    chega aqui por outro caminho (volta do login) nao recebe o
+                    dado — melhor omitir a linha do que chutar um numero. */}
+                {queueCount != null && storeOpen && (
+                  <HStack justifyContent="space-between" alignItems="center">
+                    <Text size="sm" color="#FFFFFFB3">
+                      Sua posição
+                    </Text>
+                    <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
+                      {queueCount + 1}º da fila
+                    </Text>
+                  </HStack>
+                )}
+                {storeOpen && (
+                  <HStack justifyContent="space-between" alignItems="center">
+                    <Text size="sm" color="#FFFFFFB3">
+                      Começa por volta de
+                    </Text>
+                    <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
+                      {estimatedStartTime(openedAt, estimatedWaitMinutes)}
+                    </Text>
+                  </HStack>
+                )}
+              </VStack>
+            )}
           </ScrollView>
 
           {selectedIds.length > 0 && (
-            <Box position="absolute" bottom={30} left={15} right={15}>
-              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} mb="$3">
-                <HStack justifyContent="space-between">
-                  <Text size="sm" color="$gray300">
-                    {selectedIds.length} serviço(s) — {totalMinutes} min
-                  </Text>
-                  <Text fontFamily="$heading" color="$green500">
-                    R$ {totalPrice.toFixed(2)}
-                  </Text>
-                </HStack>
-              </Box>
+            <VStack position="absolute" bottom={30} left={20} right={20} gap="$2">
               {/* Uma ação primária só (Andre 2026-08-01): loja aberta = entrar na
                   fila; fechada = agendar (badge AGENDAR). O resto — solicitar
                   corte, entrar por troca — vive no menu "Mais opções". */}
               {storeOpen ? (
                 <Button
-                  title="Confirmar e entrar na fila"
+                  title={`Entrar na fila · R$ ${totalPrice.toFixed(2)}`}
+                  testID="primary-queue"
                   onPress={handleConfirm}
                 />
               ) : (
                 <Button
-                  title="Agendar para depois"
+                  title={`Agendar para depois · R$ ${totalPrice.toFixed(2)}`}
+                  testID="primary-schedule"
                   onPress={() => setShowSchedule(true)}
                 />
               )}
               <Button
                 title="Mais opções"
                 variant="outline"
-                mt="$2"
                 testID="more-options"
                 onPress={() => setShowMoreOptions(true)}
               />
-            </Box>
+            </VStack>
           )}
         </>
       )}
 
       <MoreOptionsModal
         visible={showMoreOptions}
-        subtitle={`${professionalName} — ${selectedIds.length} serviço(s) selecionado(s)`}
+        subtitle={`${professionalName} · ${selectedIds.length} ${
+          selectedIds.length === 1 ? "serviço selecionado" : "serviços selecionados"
+        }`}
         options={moreOptions}
         onClose={() => setShowMoreOptions(false)}
       />

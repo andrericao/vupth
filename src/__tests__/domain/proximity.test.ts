@@ -112,6 +112,34 @@ describe('distância real (GPS) — quem calcula é o BACKEND', () => {
     });
   });
 
+  describe('orderForHome — favoritos', () => {
+    const lista = [
+      withCoords('a', -27.5, -48.5),
+      withCoords('b', -27.6, -48.6),
+      withCoords('c', -27.7, -48.7),
+    ];
+
+    it('sobe os favoritos ao topo', () => {
+      const r = orderForHome(lista, true, null, ['c']);
+      expect(r.map((e) => e.id)).toEqual(['c', 'a', 'b']);
+    });
+
+    it('a particao e ESTAVEL — dentro de cada grupo a ordem original fica', () => {
+      const r = orderForHome(lista, true, null, ['c', 'a']);
+      expect(r.map((e) => e.id)).toEqual(['a', 'c', 'b']);
+    });
+
+    it('sem favorito devolve a ordem intocada', () => {
+      const r = orderForHome(lista, true, null, []);
+      expect(r.map((e) => e.id)).toEqual(['a', 'b', 'c']);
+    });
+
+    it('favorito que nao esta na lista e ignorado', () => {
+      const r = orderForHome(lista, true, null, ['inexistente']);
+      expect(r.map((e) => e.id)).toEqual(['a', 'b', 'c']);
+    });
+  });
+
   describe('orderForHome', () => {
     it('COM GPS devolve a lista intocada — a ordem é a do backend', () => {
       // Decisão do Andre (2026-08-06): distância pura. Reordenar aqui desfaria

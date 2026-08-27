@@ -7,7 +7,7 @@ import { useAuthStore } from '@stores/authStore';
 import { useRatedStore } from '@stores/ratedStore';
 
 jest.mock('expo-secure-store');
-jest.mock('phosphor-react-native', () => ({ Star: () => null }));
+jest.mock('lucide-react-native', () => ({ Star: () => null }));
 jest.mock('@services/ratingService', () => ({ ratingService: { submit: jest.fn() } }));
 
 const mockSubmit = ratingService.submit as jest.Mock;

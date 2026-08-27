@@ -8,16 +8,14 @@ type Props = Omit<ComponentProps<typeof GluestackButton>, "variant"> & {
   isLoading?: boolean;
 };
 
-// [verde-imersivo] Botao com presenca: pilula (rounded full), altura 54, sombra
-// suave e texto Poppins ($heading). Outline = acoes secundarias; destructive =
-// pilula vermelha vazada (ex.: "Sair da fila").
-const btnShadow = {
-  shadowColor: "#1A281A",
-  shadowOffset: { width: 0, height: 6 },
-  shadowOpacity: 0.18,
-  shadowRadius: 10,
-  elevation: 4,
-};
+// [marca-vupth] Botao: pilula (rounded full), altura 54, texto Archivo
+// ($heading). Outline = acoes secundarias; destructive = pilula vermelha
+// vazada (ex.: "Sair da fila"). Fundo solido usa $brandGreen (claro) com texto
+// $forest por cima — nunca branco, porque brandGreen e claro demais pra
+// sustentar texto branco (regra de contraste da marca).
+//
+// SEM SOMBRA: o `Button/Primary` do Pencil tem `effect: NENHUMA`. A pilula ja
+// tem presenca pela cor e pelo tamanho; sombra em botao era invencao nossa.
 
 export function Button({
   title,
@@ -29,18 +27,17 @@ export function Button({
   const isOutline = variant === "outline";
   const isDestructive = variant === "destructive";
   const isGhost = isOutline || isDestructive; // fundo transparente + borda
-  const accent = isDestructive ? "$red500" : "$green500";
+  const accent = isDestructive ? "$brandDanger" : "$forest";
 
   return (
     <GluestackButton
       w="$full"
       h={54}
       rounded="$full"
-      bg={isGhost ? "transparent" : "$green500"}
-      $active-bg={isDestructive ? "$red100" : isOutline ? "$green100" : "$green600"}
+      bg={isGhost ? "transparent" : "$brandGreen"}
+      $active-bg={isDestructive ? "$brandDangerTint" : isOutline ? "$greenTint" : "$brandSuccess"}
       borderWidth={isGhost ? "$2" : "$0"}
       borderColor={accent}
-      style={isGhost ? undefined : btnShadow}
       // `isDisabled` do Gluestack e so ESTADO VISUAL: deixa o botao apagado mas
       // o toque continua disparando o `onPress` (descoberto em 2026-08-07, pelo
       // teste do DeleteAccountModal). Quem escapou disso ate hoje escapou por
@@ -51,9 +48,9 @@ export function Button({
       {...rest}
     >
       {isLoading ? (
-        <ButtonSpinner color={isGhost ? accent : "$white"} />
+        <ButtonSpinner color={accent} />
       ) : (
-        <Text fontFamily="$heading" fontSize="$md" color={isGhost ? accent : "$white"}>
+        <Text fontFamily="$heading" fontSize="$md" color={accent}>
           {title}
         </Text>
       )}

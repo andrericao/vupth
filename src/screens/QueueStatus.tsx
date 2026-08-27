@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
-import { Info } from "phosphor-react-native";
+import { Info, Repeat2, Check, ChevronRight } from "lucide-react-native";
 import * as SecureStore from "expo-secure-store";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
-import { Header } from "@components/Header";
+import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
+import { PlaceAvatar } from "@components/PlaceAvatar";
 import {
   QueueDisclaimerModal,
-  QUEUE_DISCLAIMER_TITLE,
-  QUEUE_DISCLAIMER_TEXT,
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
@@ -38,7 +38,6 @@ import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService, SwapOfferDirection } from "@services/swapOfferService";
 import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
-import { cardShadow } from "@utils/styles";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 
 type RouteParams = {
@@ -60,6 +59,7 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 export function QueueStatus() {
+  const insets = useSafeAreaInsets();
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const {
@@ -228,8 +228,8 @@ export function QueueStatus() {
   const { data: acceptableOffers = [] } = useSwapOffers(professionalId, canReshuffle);
   const acceptableCount = acceptableOffers.length;
 
-  const borderColor = isInQueue ? color : "#3B7A3F";
-  const timeColor = isInQueue ? color : "#3B7A3F";
+  const borderColor = isInQueue ? color : "#163300";
+  const timeColor = isInQueue ? color : "#163300";
   // Finalizado: "Finalizado". Em atendimento: tempo decorrido rolando (m:ss).
   // Na fila: countdown ("Aguardando" quando zera).
   const timeLabel = isFinished
@@ -409,10 +409,10 @@ export function QueueStatus() {
 
   if (isCreating) {
     return (
-      <Center flex={1} bg="$gray700" px={15}>
-        <ActivityIndicator size="large" color="#3B7A3F" />
-        <Text mt="$2" color="$gray300">{createMsg}</Text>
-        <Text mt="$1" size="xs" color="$gray400" textAlign="center">
+      <Center flex={1} bg="$brandBackground" px={16}>
+        <ActivityIndicator size="large" color="#163300" />
+        <Text mt="$2" color="$brandTextSecondary">{createMsg}</Text>
+        <Text mt="$1" size="xs" color="$brandTextSecondary" textAlign="center">
           Na primeira vez pode levar até ~50s para o servidor acordar.
         </Text>
       </Center>
@@ -421,11 +421,13 @@ export function QueueStatus() {
 
   if (createError) {
     return (
-      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-        <Header />
+      <VStack flex={1} px={16} pb={30} bg="$brandBackground">
+        <ScreenHeader title="NÃO DEU CERTO" onBack={() => navigation.goBack()} />
         <Center flex={1}>
           <Text
-            color={canRequestCut ? "$gray500" : "$red500"}
+            // [contraste] Era `$gray500` (#DDDEDF, 1,35:1 no branco) — a mensagem
+            // sumia justo no caso NAO-erro. O neutro da marca e brandTextSecondary.
+            color={canRequestCut ? "$brandTextSecondary" : "$brandDanger"}
             fontSize="$lg"
             fontFamily="$heading"
             textAlign="center"
@@ -477,15 +479,332 @@ export function QueueStatus() {
     );
   }
 
+  // Estado ESPERANDO = tela cheia no verde da marca (Pencil CLIENT · 11). Os
+  // outros estados (em atendimento, pausado, concluido) ficam no fundo claro:
+  // o verde cheio e o sinal de "voce esta esperando a sua vez" e perde o
+  // sentido se valer para tudo.
+  const waitingInQueue = isInQueue && !isBeingAttended && !isPaused && !isFinished;
+  const position = activeQueue?.position;
+  const peopleAhead = position != null ? Math.max(0, position - 1) : null;
+  const initial = activeQueue?.initialPosition;
+  // Progresso feito. So existe depois de andar na fila — no primeiro poll
+  // `initial` e igual a posicao atual e nao ha nada a comemorar ainda.
+  const passed = initial != null && position != null ? Math.max(0, initial - position) : 0;
+
+  // Estado CONCLUIDO em tela cheia (Pencil CLIENT · 13 Fim do atendimento).
+  // Nao virou rota nova: o Pencil desenha uma "tela" separada, mas isso e o
+  // desfecho DESTE fluxo — criar uma rota orfa significaria alguem ter de
+  // navegar ate ela, e o app ja esta aqui quando o atendimento termina.
+  if (isFinished) {
+    const servicos = activeQueue?.serviceMinutes;
+    const jaAvaliou = !!attendanceId && ratedIds.includes(attendanceId);
+
+    return (
+      <ScrollView
+        style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <VStack flex={1} bg="$brandBackground">
+          {/* Sem cabecalho: e um heroi de sucesso, sem voltar. Mas o topo vem
+              do safe-area, nao de um 56 chutado. */}
+          <VStack style={{ paddingTop: insets.top + 12 }} px={16} gap="$4" alignItems="center">
+            <Center width={96} height={96} borderRadius={48} bg="$brandGreen">
+              <Check size={48} color="#163300" />
+            </Center>
+            <Text
+              fontFamily="$display"
+              fontSize={32}
+              letterSpacing={-1.4}
+              color="$forest"
+              textAlign="center"
+            >
+              PRONTO!
+            </Text>
+            <Text size="sm" color="$brandTextSecondary" textAlign="center">
+              {activeQueue?.professionalName ?? paramProfName ?? "Atendimento"}
+              {servicos != null ? ` · ${formatWaitTime(servicos)}` : ""}
+            </Text>
+          </VStack>
+
+          <VStack flex={1} px={16} pt="$8" gap="$4">
+            {/* O convite pra avaliar so aparece se ainda nao avaliou — depois
+                de enviar, insistir e so ruido. */}
+            {attendanceId && !jaAvaliou && (
+              <VStack bg="$brandSurface" borderRadius={20} p={20} gap="$4" alignItems="center">
+                <Text
+                  fontFamily="$display"
+                  fontSize={17}
+                  letterSpacing={-0.3}
+                  color="$brandTextPrimary"
+                  textAlign="center"
+                >
+                  Como foi o atendimento?
+                </Text>
+                <Button title="Avaliar atendimento" onPress={() => setShowRating(true)} />
+                <Text size="xs" color="$brandTextSecondary" textAlign="center">
+                  Sua nota aparece para outros clientes
+                </Text>
+              </VStack>
+            )}
+
+            {/* "Marcar de novo": o caminho de volta pro mesmo profissional, que
+                e o desfecho util de um atendimento bom. */}
+            {activeQueue?.establishmentId && (
+              <TouchableOpacity
+                onPress={() => {
+                  const establishmentId = activeQueue.establishmentId;
+                  leaveQueue();
+                  navigation.navigate("establishmentDetail", { establishmentId });
+                }}
+                testID="book-again"
+              >
+                <HStack bg="$greenTint" borderRadius={18} p={16} gap="$3.5" alignItems="center">
+                  <PlaceAvatar
+                    name={activeQueue.professionalName ?? "?"}
+                    size={52}
+                    bg="$brandGreen"
+                  />
+                  <VStack flex={1} gap="$0.5">
+                    <Text fontFamily="$heading" fontSize={15} color="$forest">
+                      Marcar de novo com {activeQueue.professionalName ?? "o profissional"}
+                    </Text>
+                    <Text size="xs" color="$forest">
+                      {activeQueue.establishmentName ?? ""}
+                    </Text>
+                  </VStack>
+                  <ChevronRight size={20} color="#163300" />
+                </HStack>
+              </TouchableOpacity>
+            )}
+          </VStack>
+
+          <VStack px={16} pt="$6" gap="$3" alignItems="center">
+            <Button
+              title="Voltar ao início"
+              variant="outline"
+              onPress={() => {
+                leaveQueue();
+                navigation.navigate("home");
+              }}
+              testID="finish-home"
+            />
+          </VStack>
+        </VStack>
+
+        <RatingModal
+          visible={showRating}
+          attendanceId={attendanceId}
+          professionalName={activeQueue?.professionalName ?? paramProfName}
+          onClose={() => setShowRating(false)}
+        />
+      </ScrollView>
+    );
+  }
+
+  if (waitingInQueue) {
+    return (
+      <VStack flex={1} bg="$brandGreen">
+        {/* `ground="marca"` porque o hero e brand-green: os botoes vao de
+            forest translucido. O verde-claro padrao sumiria sobre o verde. */}
+        <Box px={16}>
+          <ScreenHeader
+            ground="marca"
+            onBack={() => navigation.navigate("home")}
+            action={
+              <HeaderIconButton
+                onPress={() => setShowDisclaimer(true)}
+                ground="marca"
+                testID="queue-info"
+                accessibilityLabel="Sobre o tempo estimado"
+              >
+                <Info size={20} color="#163300" />
+              </HeaderIconButton>
+            }
+          />
+        </Box>
+
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 20 }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#163300" colors={["#163300"]} />
+          }
+        >
+          <Text
+            fontFamily="$body"
+            fontSize={13}
+            fontWeight="$bold"
+            letterSpacing={1}
+            color="$forest"
+          >
+            PARA A SUA VEZ
+          </Text>
+
+          {/* O numero grande e a POSICAO, nao o relogio: "quantas pessoas na
+              minha frente" e concreto e nao oscila como a estimativa. Sem a
+              posicao (backend nao respondeu ainda), o tempo assume o lugar. */}
+          {peopleAhead != null ? (
+            <>
+              <Text
+                fontFamily="$display"
+                fontSize={110}
+                lineHeight={112}
+                letterSpacing={-6}
+                color="$forest"
+                testID="queue-position"
+              >
+                {peopleAhead}
+              </Text>
+              <Text
+                fontFamily="$display"
+                fontSize={26}
+                letterSpacing={-0.8}
+                color="$forest"
+                textAlign="center"
+              >
+                {peopleAhead === 0
+                  ? "você é o próximo"
+                  : peopleAhead === 1
+                    ? "pessoa na frente"
+                    : "pessoas na frente"}
+              </Text>
+            </>
+          ) : (
+            <Text
+              fontFamily="$display"
+              fontSize={72}
+              lineHeight={78}
+              letterSpacing={-3}
+              color="$forest"
+              testID="queue-time"
+            >
+              {timeLabel}
+            </Text>
+          )}
+
+          {/* [contraste] Forest TRANSLUCIDO de proposito: sobre o $brandGreen
+              da tela ele hierarquiza sem virar uma segunda cor. So o ALPHA
+              subiu — 0x99 dava 3,40:1 sobre o verde e reprovava no AA; 0xBF da
+              4,99:1 e continua mais leve que o forest chapado do numero. */}
+          <Text fontFamily="$body" fontSize={15} color="#163300BF" mt="$1">
+            {remaining <= 0 ? "a qualquer momento" : `~${formatWaitTime(remaining)} de espera`}
+          </Text>
+
+          {/* Progresso: pontos cheios pelo que ja andou, apagados pelo que
+              falta. So aparece depois de andar de verdade — mostrar a barra
+              zerada no primeiro segundo nao informa nada. */}
+          {passed > 0 && initial != null && (
+            <>
+              <HStack gap="$2" alignItems="center" mt="$6">
+                {Array.from({ length: Math.min(initial, 8) }).map((_, i) => {
+                  const done = i < Math.min(passed, 8);
+                  return (
+                    <Center
+                      key={i}
+                      width={done ? 12 : 8}
+                      height={done ? 12 : 8}
+                      borderRadius="$full"
+                      // O ponto apagado e TRILHA (decoracao), nao informacao:
+                      // quem informa e o ponto cheio, em $forest e maior. Por
+                      // isso o alpha baixo fica.
+                      bg={done ? "$forest" : "#16330040"}
+                    />
+                  );
+                })}
+              </HStack>
+              {/* [contraste] Mesma logica do subtitulo acima: alpha 0xB3 dava
+                  4,38:1 sobre o verde, 0xCC da 5,69:1. Fica um degrau ACIMA do
+                  subtitulo, como era antes. */}
+              <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="#163300CC" mt="$3">
+                Você já passou {passed} {passed === 1 ? "pessoa" : "pessoas"}
+              </Text>
+            </>
+          )}
+        </ScrollView>
+
+        <VStack px={16} pb={28} gap="$3.5" alignItems="center">
+          {canReshuffle && (
+            <TouchableOpacity
+              onPress={handleOpenChangeTurn}
+              disabled={isRemanejando}
+              style={{ width: "100%" }}
+              testID="change-turn"
+            >
+              <HStack
+                bg="$forest"
+                borderRadius="$full"
+                gap="$2"
+                px={24}
+                py={15}
+                justifyContent="center"
+                alignItems="center"
+                opacity={isRemanejando ? 0.6 : 1}
+              >
+                <Repeat2 size={17} color="#9FE870" />
+                <Text fontFamily="$heading" fontSize={15} color="$brandGreen">
+                  {isRemanejando ? "Um instante..." : "Mudar minha vez"}
+                </Text>
+              </HStack>
+            </TouchableOpacity>
+          )}
+          {/* "Sair da fila" NAO e botao vermelho aqui (era, antes): sair e uma
+              saida legitima, nao um erro. Fica como link discreto — presente
+              para quem procura, sem gritar para quem nao esta procurando. */}
+          {canCancel && (
+            <TouchableOpacity onPress={handleCancel} disabled={isRemanejando} testID="leave-queue">
+              <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="#163300CC">
+                Sair da fila
+              </Text>
+            </TouchableOpacity>
+          )}
+        </VStack>
+
+        <RescheduleModal
+          visible={showReschedule}
+          baseMs={rescheduleBaseMs}
+          tailEtaMs={tailEtaMs}
+          penalty={penalty}
+          loading={isRemanejando}
+          onConfirm={submitReschedule}
+          onClose={() => setShowReschedule(false)}
+        />
+        <ChangeTurnModal
+          visible={showChangeTurn}
+          tailEtaMs={tailEtaMs}
+          isLast={isLastInQueue}
+          swapBusy={isPublishingSwap}
+          onMoveToEnd={() => {
+            setShowChangeTurn(false);
+            handleMoveToEnd();
+          }}
+          onReschedule={() => {
+            setShowChangeTurn(false);
+            setShowReschedule(true);
+          }}
+          onCreateSwapOffer={handleCreateSwapOffer}
+          onClose={() => setShowChangeTurn(false)}
+        />
+        <SwapOffersModal
+          visible={showSwapOffers}
+          professionalId={professionalId}
+          onClose={() => setShowSwapOffers(false)}
+          onChanged={refresh}
+        />
+        <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
+      </VStack>
+    );
+  }
+
   return (
-    <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-      <Header />
+    <VStack flex={1} px={16} pb={30} bg="$brandBackground">
+      <ScreenHeader title="SUA VEZ" onBack={() => navigation.navigate("home")} />
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#3B7A3F" colors={["#3B7A3F"]} />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#163300" colors={["#163300"]} />
         }
       >
       <Center flex={1}>
@@ -500,26 +819,32 @@ export function QueueStatus() {
         </Heading>
 
         <Box
-          bg="$white"
+          bg="$brandSurface"
           p="$6"
           mt="$6"
-          borderRadius="$2xl"
+          borderRadius="$card"
           borderWidth="$2"
           borderColor={borderColor}
-          style={cardShadow}
           w="$full"
           alignItems="center"
         >
           {!isFinished && (
             <HStack alignItems="center" gap="$1">
-              <Text size="sm" color="$gray300">
+              <Text size="sm" color="$brandTextSecondary">
                 {isBeingAttended ? "Tempo de atendimento" : "Duração estimada"}
               </Text>
               {!isBeingAttended && (
                 <TouchableOpacity
-                  onPress={() => Alert.alert(QUEUE_DISCLAIMER_TITLE, QUEUE_DISCLAIMER_TEXT)}
+                  onPress={() => setShowDisclaimer(true)}
+                  testID="queue-info-inline"
+                  accessibilityRole="button"
+                  accessibilityLabel="Sobre o tempo estimado"
+                  // 16px de icone e alvo pequeno demais pra dedo; o hitSlop
+                  // leva a area de toque pros 32.
+                  hitSlop={8}
                 >
-                  <Info size={16} color="#9CA3AF" />
+                  {/* #9CA3AF da 2,85:1 no claro e reprova no AA. */}
+                  <Info size={16} color="#454745" />
                 </TouchableOpacity>
               )}
             </HStack>
@@ -533,11 +858,11 @@ export function QueueStatus() {
             {timeLabel}
           </Heading>
 
-          <Box w="$full" h="$px" bg="$gray500" my="$4" />
+          <Box w="$full" h="$px" bg="$brandBorder" my="$4" />
 
           {isInQueue && (
             <HStack w="$full" justifyContent="space-between" mb="$3">
-              <Text size="sm" color="$gray300">Previsão de início</Text>
+              <Text size="sm" color="$brandTextSecondary">Previsão de início</Text>
               <Text size="sm" fontFamily="$heading">
                 {remaining <= 0 ? "A qualquer momento" : startTimeLabel}
               </Text>
@@ -546,7 +871,7 @@ export function QueueStatus() {
 
           {isBeingAttended && activeQueue?.serviceMinutes != null && (
             <HStack w="$full" justifyContent="space-between" mb="$3">
-              <Text size="sm" color="$gray300">Duração estimada</Text>
+              <Text size="sm" color="$brandTextSecondary">Duração estimada</Text>
               <Text size="sm" fontFamily="$heading">
                 {formatWaitTime(activeQueue.serviceMinutes)}
               </Text>
@@ -555,34 +880,34 @@ export function QueueStatus() {
 
           {endTimeLabel && (
             <HStack w="$full" justifyContent="space-between" mb="$3">
-              <Text size="sm" color="$gray300">Horário de término</Text>
+              <Text size="sm" color="$brandTextSecondary">Horário de término</Text>
               <Text size="sm" fontFamily="$heading">{endTimeLabel}</Text>
             </HStack>
           )}
 
           <HStack w="$full" justifyContent="space-between" mb="$3">
-            <Text size="sm" color="$gray300">Estabelecimento</Text>
+            <Text size="sm" color="$brandTextSecondary">Estabelecimento</Text>
             <Text size="sm" fontFamily="$heading">
               {activeQueue?.establishmentName ?? paramEstName ?? "..."}
             </Text>
           </HStack>
 
           <HStack w="$full" justifyContent="space-between" mb="$3">
-            <Text size="sm" color="$gray300">Profissional</Text>
+            <Text size="sm" color="$brandTextSecondary">Profissional</Text>
             <Text size="sm" fontFamily="$heading">
               {activeQueue?.professionalName ?? paramProfName ?? "..."}
             </Text>
           </HStack>
 
           <HStack w="$full" justifyContent="space-between">
-            <Text size="sm" color="$gray300">Status</Text>
+            <Text size="sm" color="$brandTextSecondary">Status</Text>
             <Text size="sm" fontFamily="$heading">
               {STATUS_LABELS[status] ?? status}
             </Text>
           </HStack>
         </Box>
 
-        <Text size="xs" color="$gray300" mt="$4" textAlign="center">
+        <Text size="xs" color="$brandTextSecondary" mt="$4" textAlign="center">
           A fila atualiza sozinha — arraste para baixo para atualizar agora
         </Text>
       </Center>
@@ -591,7 +916,7 @@ export function QueueStatus() {
       <VStack gap="$3" mt="$4">
         {canReshuffle && (
           <>
-            <Text size="xs" color="$gray300" textAlign="center">
+            <Text size="xs" color="$brandTextSecondary" textAlign="center">
               Não pode esperar agora? Você pode adiantar ou atrasar a sua vez.
             </Text>
             <Button

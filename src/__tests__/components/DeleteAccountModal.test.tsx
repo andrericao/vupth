@@ -8,7 +8,7 @@ import { DeleteAccountModal } from '@components/DeleteAccountModal';
 // e virou anonimização, exigindo a senha atual no corpo. Mandávamos DELETE sem
 // corpo => `400 INVALID_REQUEST_BODY`: o botão estava QUEBRADO em produção.
 
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 
 function setup(overrides: Partial<React.ComponentProps<typeof DeleteAccountModal>> = {}) {
   const props = {

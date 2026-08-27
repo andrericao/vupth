@@ -41,3 +41,24 @@ export function formatSpecialty(raw: string | null | undefined): string {
     .filter((part) => part.length > 0)
     .join(', ');
 }
+
+/**
+ * Categorias no PLURAL, para titulo de lista ("BARBEARIAS").
+ *
+ * Mapa proprio em vez de somar "s": "Salão" vira "Salões", nao "Salãos". Fica
+ * aqui pelo mesmo motivo do singular — categoria nova entra num lugar so.
+ */
+export const SERVICE_TYPE_LABELS_PLURAL: Record<ServiceType, string> = {
+  BARBER: 'Barbearias',
+  BEAUTY_SALON: 'Salões',
+  EYEBROW: 'Sobrancelhas',
+  NAIL_SALON: 'Manicures',
+  SPA: 'Spas',
+  CLINIC: 'Clínicas',
+};
+
+/** Titulo da lista para uma categoria; "ALL"/desconhecido cai em "Estabelecimentos". */
+export function serviceTypeTitle(value: string | null | undefined): string {
+  if (!value || value === 'ALL') return 'Estabelecimentos';
+  return SERVICE_TYPE_LABELS_PLURAL[value as ServiceType] ?? 'Estabelecimentos';
+}

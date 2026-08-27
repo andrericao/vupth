@@ -1,127 +1,173 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { FlatList, TouchableOpacity, RefreshControl } from "react-native";
+import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import { VStack, Box, Text, Heading, HStack, Badge, BadgeText, Center } from "@gluestack-ui/themed";
+import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
+import { Search, SlidersHorizontal, ChevronRight } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
-import { Header } from "@components/Header";
-import { Input2 } from "@components/Input2";
-import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
+import { Establishment, ServiceType } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
-// Rotulos das categorias: fonte unica, compartilhada com a tela do estabelecimento.
-import { SERVICE_TYPE_LABELS, serviceTypeLabel } from "@domain/establishment/serviceType";
 import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity";
-import { resolveRating } from "@domain/establishment/rating";
+import { statusTag } from "@domain/establishment/statusTag";
+import { serviceTypeLabel } from "@domain/establishment/serviceType";
+import { primeiroNome } from "@domain/auth/displayName";
 import { useEstablishments } from "@hooks/useEstablishments";
+import { ScreenHeader } from "@components/ScreenHeader";
+import { useClientAttendances } from "@hooks/useAttendances";
 import { useAuthStore } from "@stores/authStore";
 import { useLocationStore } from "@stores/locationStore";
-import { LocationSelector } from "@components/LocationSelector";
 import { addressService } from "@services/addressService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
-import { cardShadow } from "@utils/styles";
+import { PlaceAvatar } from "@components/PlaceAvatar";
+import { LiveDot } from "@components/LiveDot";
+import { FilterSheet } from "@components/FilterSheet";
+import { useFavoritesStore } from "@stores/favoritesStore";
 import { formatWaitTime } from "@domain/queue/types";
-import { UserCircle, Queue, Clock, Star, MapPin } from "phosphor-react-native";
 
-// Derivado da fonte unica: categoria nova entra aqui sozinha, e o rotulo do
-// filtro nunca diverge do rotulo do card.
-const SERVICE_FILTERS: { key: ServiceType | "ALL"; label: string }[] = [
-  { key: "ALL", label: "Todos" },
-  ...(Object.keys(SERVICE_TYPE_LABELS) as ServiceType[]).map((key) => ({
-    key,
-    label: SERVICE_TYPE_LABELS[key],
-  })),
-];
+// [marca-vupth] Saudacao por horario do dia (Pencil CLIENT · 06 Home).
+function greetingForHour(hour: number): string {
+  if (hour < 12) return "Bom dia";
+  if (hour < 18) return "Boa tarde";
+  return "Boa noite";
+}
 
-function EstablishmentCard({
+// "há N dias/semanas/meses" — so usado no card "Seu de sempre", nao vale um
+// util compartilhado ainda (uso unico).
+function timeAgoLabel(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (days <= 0) return "hoje";
+  if (days === 1) return "ontem";
+  if (days < 7) return `há ${days} dias`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return `há ${weeks} semana${weeks > 1 ? "s" : ""}`;
+  const months = Math.floor(days / 30);
+  return `há ${months} ${months > 1 ? "meses" : "mês"}`;
+}
+
+/**
+ * Pilula de status da loja na lista.
+ *
+ * ABERTA agora  -> brand-green solido, ponto piscando: "da pra entrar JA".
+ * FECHADA       -> contornada e quieta: "so agendar".
+ *
+ * As duas usavam o MESMO brand-green, e a unica diferenca era o ponto piscar —
+ * que nao aparece num relance nem num print. Numa lista de cinco lojas, TODAS
+ * carregavam o acento maximo da marca, abertas ou fechadas, e o verde parava
+ * de significar "pode ir agora" (a regra do C25 e 1-2 acentos por tela).
+ *
+ * A fechada nao pode ser `brandSurface`: o CARTAO da linha ja e surface, e a
+ * pilula sumiria nele (1,00:1). Contornada resolve — a borda agrupa e o TEXTO
+ * carrega o sentido, a 8,54:1 sobre o cartao.
+ *
+ * E sem ponto quando fechada: ponto e sinal de "ao vivo"; parado numa loja
+ * fechada e ruido.
+ */
+function StatusPill({ label, live }: { label: string; live: boolean }) {
+  return (
+    <HStack
+      bg={live ? "$brandGreen" : "transparent"}
+      borderWidth={live ? 0 : 1}
+      borderColor="$brandBorder"
+      borderRadius="$full"
+      gap={6}
+      px={12}
+      py={6}
+      alignItems="center"
+    >
+      {live && <LiveDot size={8} color="#163300" pulsing />}
+      <Text
+        fontFamily="$display"
+        fontSize={12}
+        fontWeight="$bold"
+        color={live ? "$forest" : "$brandTextSecondary"}
+      >
+        {label}
+      </Text>
+    </HStack>
+  );
+}
+
+function EstablishmentRow({
   establishment,
   distanceKm,
   onPress,
 }: {
   establishment: Establishment;
   // Distancia real (GPS). null = device sem coordenada ou loja ainda nao
-  // geocodificada pelo backend — o card so omite a linha, nunca some da lista.
+  // geocodificada pelo backend — a linha some, a loja nunca some da lista.
   distanceKm: number | null;
   onPress: () => void;
 }) {
   // "Aberta AGORA" efetiva (inclui horario de funcionamento) — loja OPEN fora
-  // do horario mostra "Fechado" (feedback Andre 2026-07-22).
-  const isOpen = isEffectivelyOpen(establishment);
+  // do horario mostra fechada (feedback Andre 2026-07-22).
+  // Sem contagem de pessoas na listagem (o backend so expoe tempo estimado):
+  // "Sem fila" quando zero, senao o tempo. Nao inventamos "N na fila".
+  // A ESPERA MORA NA TAG, nao aqui. A linha imprimia `queueLabel` +
+  // `timeLabel`, que diziam a mesma coisa duas vezes: "Sem fila · Agora" ou,
+  // pior, "2h · ~2h" — o mesmo numero repetido. Agora a tag responde "posso ir
+  // agora?" e a linha responde "que lugar e esse, e onde fica".
+  // `serviceType` e opcional no contrato — sem ele a linha fica so com a
+  // distancia, em vez de imprimir "undefined".
+  const tag = statusTag(establishment);
+
+  const meta: string[] = establishment.serviceType
+    ? [serviceTypeLabel(establishment.serviceType)]
+    : [];
+  if (distanceKm != null) meta.push(formatDistanceKm(distanceKm));
 
   return (
     <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>
-      <Box
-        bg="$white"
-        p="$4"
-        mb="$3"
-        borderRadius="$2xl"
-        style={cardShadow}
+      {/* Fechada entra APAGADA (decisao da design, 2026-08-26) — o mesmo
+          tratamento nas duas listas.
+
+          0,8 e nao 0,7: medido, `opacity` multiplica sobre TUDO, inclusive o
+          texto que ja tinha passado no contraste. A 0,7 o nome da loja cai pra
+          3,82:1 e reprova no AA; a 0,8 fica em 4,92:1. E o apagado mais forte
+          que ainda deixa ler. */}
+      <HStack
+        bg="$brandSurface"
+        borderRadius={18}
+        gap={14}
+        p={14}
+        mb={12}
+        alignItems="center"
+        opacity={tag.live ? 1 : 0.8}
       >
-        <HStack justifyContent="space-between" alignItems="center">
-          <VStack flex={1}>
-            <Heading size="md" fontFamily="$heading">
-              {establishment.name}
-            </Heading>
-            {establishment.services?.length > 0 && (
-              <Text size="sm" color="$gray300" mt="$1">
-                {establishment.services
-                  .map(serviceTypeLabel)
-                  .join(", ")}
-              </Text>
-            )}
-            {establishment.address && (
-              <HStack alignItems="center" gap="$1" mt="$1">
-                <MapPin size={12} color={distanceKm != null ? "#3B7A3F" : "#9CA3AF"} weight="fill" />
-                <Text size="xs" color="$gray400" flex={1} numberOfLines={1}>
-                  {distanceKm != null ? `${formatDistanceKm(distanceKm)} · ` : ""}
-                  {establishment.address.neighborhood}, {establishment.address.city}
+        {/* Avatar APAGADO quando fechada — o mesmo sinal da lista cheia. Era
+            verde nas duas situacoes, entao a linha fechada so se distinguia
+            pela tag no canto oposto. */}
+        <PlaceAvatar
+          name={establishment.name}
+          photoUrl={establishment.urlImage}
+          bg={tag.live ? "$greenTint" : "$brandBorder"}
+          color={tag.live ? "$forest" : "$brandTextSecondary"}
+        />
+        <VStack flex={1} gap={4}>
+          <Text fontFamily="$display" fontSize={15} fontWeight="$bold" color="$brandTextPrimary">
+            {establishment.name}
+          </Text>
+          <HStack gap={8} alignItems="center">
+            {/* O ponto SEPARA, entao nao vem antes do primeiro item. Antes a
+                linha comecava com o `queueLabel` e a meta so completava; sem
+                ele, o separador virou um "·" orfao no comeco. */}
+            {meta.map((m, i) => (
+              <HStack key={m} gap={8} alignItems="center">
+                {i > 0 && (
+                  <Center width={3} height={3} borderRadius={1.5} bg="$brandTextSecondary" />
+                )}
+                <Text fontFamily="$body" fontSize={13} color="$brandTextSecondary">
+                  {m}
                 </Text>
               </HStack>
-            )}
-            <HStack alignItems="center" gap="$3" mt="$2">
-              {establishment.estimated_wait_minutes != null && (
-                <HStack alignItems="center" gap="$1">
-                  <Clock size={14} color="#3B7A3F" weight="fill" />
-                  <Text size="xs" color="$green700" fontFamily="$heading">
-                    {formatWaitTime(establishment.estimated_wait_minutes)}
-                  </Text>
-                </HStack>
-              )}
-              {(() => {
-                // Card destaca a MAIOR estrela (melhor avaliado); cai na média
-                // agregada e, por fim, no placeholder até o backend mandar.
-                const r = resolveRating(
-                  establishment.rating_best ?? establishment.rating_average,
-                  establishment.rating_count,
-                  establishment.id,
-                );
-                return (
-                  <HStack alignItems="center" gap="$1">
-                    <Star size={14} color="#FFB703" weight="fill" />
-                    <Text size="xs" color="$gray300" fontFamily="$heading">
-                      {r.value.toFixed(1)}
-                      {r.real && r.count != null ? ` (${r.count})` : ""}
-                    </Text>
-                  </HStack>
-                );
-              })()}
-            </HStack>
-          </VStack>
-          {/* Fechada não é beco sem saída: badge âmbar "AGENDAR" sinaliza que a
-              fila está fechada mas dá pra agendar/solicitar (Andre 2026-07-23). */}
-          <Badge
-            bg={isOpen ? "$green500" : "$amber500"}
-            borderRadius="$full"
-            px="$3"
-            py="$1"
-          >
-            <BadgeText color={isOpen ? "$white" : "#1A281A"} size="xs">
-              {isOpen ? "Aberto" : "AGENDAR"}
-            </BadgeText>
-          </Badge>
-        </HStack>
-      </Box>
+            ))}
+          </HStack>
+        </VStack>
+        {/* Fechada nao e beco sem saida: ainda da pra agendar (Andre 2026-07-23). */}
+        <StatusPill {...tag} />
+      </HStack>
     </TouchableOpacity>
   );
 }
@@ -129,12 +175,18 @@ function EstablishmentCard({
 export function Home() {
   const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<ServiceType | "ALL">("ALL");
+  const [showFilter, setShowFilter] = useState(false);
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute<RouteProp<AppRoutes, "home">>();
   const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const { activeQueue, remaining, color, isInQueue } = useQueueCountdown();
+  const user = useAuthStore((s) => s.user);
+  const { activeQueue, remaining, isInQueue } = useQueueCountdown();
+  // "Seu de sempre": ultimo atendimento CONCLUIDO de verdade. O backend nao tem
+  // "favorito", entao usamos o historico. Sem historico, a secao nao aparece.
+  const { data: history = [] } = useClientAttendances({ status: "FINISHED" });
+  const lastVisit = history[0];
 
   // Home é a raiz do stack: evita que um único "voltar" do Android feche o app.
   useDoubleBackExit();
@@ -147,16 +199,15 @@ export function Home() {
   }, [filterParam]);
 
   // Ordena por proximidade (bairro→cidade→resto) quando o cliente definiu uma
-  // localização; senão, ordem padrão (menor espera). Ver LocationSelector.
+  // localização; senão, ordem padrão (menor espera).
   const location = useLocationStore((s) => s.location);
   const locationResolved = useLocationStore((s) => s.resolved);
   const setLocation = useLocationStore((s) => s.setLocation);
   const accessToken = useAuthStore((s) => s.accessToken);
 
   // Polimento: cliente logado sem localidade ainda resolvida → usa o endereço
-  // principal dele automaticamente (proximidade funciona sem tocar em nada). Uma
-  // vez por sessão; quem limpou o filtro ("Ver todos") já está `resolved` e não
-  // tem a localidade de volta sozinho.
+  // principal dele automaticamente. Uma vez por sessão; quem limpou o filtro
+  // ("Ver todos") já está `resolved` e não tem a localidade de volta sozinho.
   const didAutoLocate = useRef(false);
   useEffect(() => {
     if (didAutoLocate.current || !isAuthenticated || !accessToken || locationResolved) return;
@@ -173,12 +224,15 @@ export function Home() {
 
   // GPS: quando ha coordenadas, `useEstablishments` ja pediu a lista com
   // `lat`/`lng` e o BACKEND devolveu ordenada por distancia — nao reordenamos.
-  // Sem coordenadas, cai na ordenacao por bairro/cidade (Fase 1).
   const coords = useLocationStore((s) => s.coords);
+  // Favoritos sobem ao topo — e o que faz o coracao da tela da loja valer
+  // alguma coisa (do contrario ele preenche um icone e nao muda nada).
+  const favoriteIds = useFavoritesStore((s) => s.ids);
   const filteredEstablishments = orderForHome(
     filterEstablishments(establishments, search, selectedFilter),
     coords != null,
     location,
+    favoriteIds,
   );
 
   const onRefresh = useCallback(() => {
@@ -189,123 +243,283 @@ export function Home() {
     navigation.navigate("establishmentDetail", { establishmentId: establishment.id });
   }
 
+  // Sem nome cadastrado, cai no apelido do e-mail — NUNCA no texto de
+  // visitante. "Estabelecimentos" e o que quem nao entrou ve; usar o mesmo
+  // titulo pra quem entrou fazia o login parecer que nao funcionou (aconteceu
+  // no teste visual de 2026-08-26). Ver `domain/auth/displayName`.
+  const firstName = primeiroNome(user);
+
   return (
-    <VStack flex={1} px={15} pt={60} bg="$gray700">
-      <Header />
-
-      <HStack justifyContent="flex-end" mt="$2">
-        {isAuthenticated ? (
-          <TouchableOpacity onPress={() => navigation.navigate("profile")} testID="profile-icon">
-            <UserCircle size={32} color="#3B7A3F" weight="fill" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
-            <Text size="sm" color="$green500" fontFamily="$heading">Cadastrar</Text>
-          </TouchableOpacity>
-        )}
-      </HStack>
-
-      {isInQueue && activeQueue && (
-        <TouchableOpacity
-          onPress={() => navigation.navigate("queueStatus", {
-            professionalId: activeQueue.professionalId,
-            professionalName: activeQueue.professionalName,
-            establishmentId: activeQueue.establishmentId,
-            establishmentName: activeQueue.establishmentName,
-            estimatedWaitMinutes: activeQueue.estimatedMinutes,
-            serviceItemIds: [],
-          })}
-        >
-          <Box bg={color} p="$3" mt="$2" borderRadius="$lg">
-            <HStack alignItems="center" gap="$2">
-              <Queue size={20} color="#FFFFFF" />
-              <Text color="$white" fontFamily="$heading" size="sm" flex={1}>
-                Em fila {formatWaitTime(remaining)}
-              </Text>
-              <Text color="$white" size="xs">
-                {activeQueue.establishmentName}
-              </Text>
-            </HStack>
-          </Box>
-        </TouchableOpacity>
-      )}
-
-      <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$1">
-        Estabelecimentos
-      </Heading>
-
-      <LocationSelector />
-
-      <Input2
-        placeholder="Buscar estabelecimento..."
-        value={search}
-        onChangeText={setSearch}
-        showSearchIcon
-        onClear={() => setSearch("")}
-      />
-
-      <Box mt="$3" mb="$2">
-        <FlatList
-          data={SERVICE_FILTERS}
-          keyExtractor={(item) => item.key}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => setSelectedFilter(item.key)}
-              testID={`filter-${item.key}`}
-            >
-              <Box
-                px="$4"
-                py="$2"
-                mr="$2"
-                borderRadius="$full"
-                bg={selectedFilter === item.key ? "$green500" : "$white"}
-                borderWidth="$1"
-                borderColor="$green500"
+    <VStack flex={1} bg="$brandBackground">
+      {/* A saudacao e o TITULO da Home, nao um par sobreposto: como eyebrow
+          (linha pequena por cima) ela empurrava o nome pra baixo e a Home
+          comecava numa altura diferente de todas as outras telas. */}
+      <Box px={16}>
+        <ScreenHeader
+          root
+          title={
+            isAuthenticated && firstName
+              ? `${greetingForHour(new Date().getHours())}, ${firstName}`
+              : "Estabelecimentos"
+          }
+          action={
+            isAuthenticated ? (
+              // O avatar vai DIRETO pra aba Perfil. Antes ele abria uma tela
+              // intermediaria (`Profile`) cujos dois atalhos — "Atendimentos" e
+              // "Configuracoes" — ja eram abas da barra de baixo: o avatar
+              // levava a uma tela cujo trabalho era te mandar pra outra tela.
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.getParent()?.navigate("settingsTab", { screen: "settings" })
+                }
+                testID="profile-icon"
               >
-                <Text
-                  size="sm"
-                  color={selectedFilter === item.key ? "$white" : "$green500"}
-                  fontFamily="$heading"
-                >
-                  {item.label}
+                <PlaceAvatar name={firstName ?? "?"} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
+                <Text fontFamily="$display" fontSize={14} fontWeight="$bold" color="$forest">
+                  Cadastrar
                 </Text>
-              </Box>
-            </TouchableOpacity>
-          )}
+              </TouchableOpacity>
+            )
+          }
         />
       </Box>
 
-      {isLoading ? (
-        <SkeletonList count={4} />
-      ) : isError ? (
-        <Center mt="$10">
-          <Text color="$red500">Erro ao carregar estabelecimentos</Text>
-        </Center>
-      ) : (
-        <FlatList
-          data={filteredEstablishments}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} colors={["#3B7A3F"]} tintColor="#3B7A3F" />
-          }
-          renderItem={({ item }) => (
-            <EstablishmentCard
-              establishment={item}
-              distanceKm={item.distance_km ?? null}
-              onPress={() => handleEstablishmentPress(item)}
+      {/* Busca */}
+      <Box px={16} pt={16}>
+        <HStack
+          bg="$brandSurface"
+          borderRadius="$full"
+          gap={10}
+          px={16}
+          py={13}
+          alignItems="center"
+        >
+          <Search size={18} color="#454745" />
+          <Box flex={1}>
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Buscar serviço ou lugar"
+              placeholderTextColor="#454745"
+              style={{ fontFamily: "Inter_400Regular", fontSize: 15, color: "#163300", padding: 0 }}
+              returnKeyType="search"
             />
-          )}
-          ListEmptyComponent={
-            <Center mt="$10">
-              <Text color="$gray300">Nenhum estabelecimento encontrado</Text>
-            </Center>
-          }
-        />
+          </Box>
+          {/* Era um icone SOLTO: parecia botao e nao fazia nada (QA Alexia).
+              Agora abre o filtro e MOSTRA quando ha um ativo — lista filtrada
+              sem indicacao visivel e o usuario achando que sumiu loja. */}
+          <TouchableOpacity
+            onPress={() => setShowFilter(true)}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={
+              selectedFilter === "ALL"
+                ? "Filtrar por categoria"
+                : `Filtro ativo: ${serviceTypeLabel(selectedFilter)}. Tocar para mudar`
+            }
+            testID="open-filter"
+          >
+            <Box
+              bg={selectedFilter === "ALL" ? "transparent" : "$forest"}
+              borderRadius="$full"
+              px={selectedFilter === "ALL" ? 0 : 8}
+              py={selectedFilter === "ALL" ? 0 : 6}
+            >
+              <SlidersHorizontal
+                size={18}
+                color={selectedFilter === "ALL" ? "#163300" : "#9FE870"}
+              />
+            </Box>
+          </TouchableOpacity>
+        </HStack>
+      </Box>
+
+      {/* Fila ativa */}
+      {isInQueue && activeQueue && (
+        <Box px={16} pt={20}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("queueStatus", {
+                professionalId: activeQueue.professionalId,
+                professionalName: activeQueue.professionalName,
+                establishmentId: activeQueue.establishmentId,
+                establishmentName: activeQueue.establishmentName,
+                estimatedWaitMinutes: activeQueue.estimatedMinutes,
+                serviceItemIds: [],
+              })
+            }
+          >
+            <VStack bg="$brandGreen" borderRadius={24} gap={14} p={20}>
+              <HStack justifyContent="space-between" alignItems="center">
+                <Text
+                  fontFamily="$body"
+                  fontSize={12}
+                  fontWeight="$bold"
+                  letterSpacing={0.8}
+                  color="$forest"
+                >
+                  VOCÊ ESTÁ NA FILA
+                </Text>
+                <HStack
+                  bg="$forest"
+                  borderRadius="$full"
+                  gap={6}
+                  px={12}
+                  py={6}
+                  alignItems="center"
+                >
+                  <LiveDot size={8} color="#9FE870" />
+                  <Text fontFamily="$display" fontSize={12} fontWeight="$bold" color="$brandGreen">
+                    Ao vivo
+                  </Text>
+                </HStack>
+              </HStack>
+              <HStack gap={16} alignItems="center">
+                <VStack flex={1}>
+                  <Text
+                    fontFamily="$display"
+                    fontSize={46}
+                    fontWeight="$extrabold"
+                    letterSpacing={-2}
+                    lineHeight={46}
+                    color="$forest"
+                  >
+                    {/* Posicao real (GET wait-time). Ate o 1o poll chegar, cai no
+                        tempo — nunca inventa um numero de pessoas. */}
+                    {activeQueue.position != null
+                      ? activeQueue.position <= 1
+                        ? "É a sua vez"
+                        : `Faltam ${activeQueue.position - 1}`
+                      : formatWaitTime(remaining)}
+                  </Text>
+                  <Text fontFamily="$body" fontSize={14} color="$forest">
+                    ~{formatWaitTime(remaining)} · {activeQueue.establishmentName}
+                  </Text>
+                </VStack>
+                <ChevronRight size={24} color="#163300" />
+              </HStack>
+            </VStack>
+          </TouchableOpacity>
+        </Box>
       )}
+
+      {/* Seu de sempre */}
+      {lastVisit && (
+        <VStack px={16} pt={22} gap={12}>
+          <Text
+            fontFamily="$display"
+            fontSize={17}
+            fontWeight="$bold"
+            letterSpacing={-0.3}
+            color="$brandTextPrimary"
+          >
+            Seu de sempre
+          </Text>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("establishmentDetail", {
+                establishmentId: lastVisit.establishmentId,
+              })
+            }
+          >
+            <HStack bg="$brandSurface" borderRadius={18} gap={14} p={14} alignItems="center">
+              <PlaceAvatar name={lastVisit.professionalName} bg="$accentPeach" />
+              <VStack flex={1} gap={3}>
+                <Text fontFamily="$display" fontSize={15} fontWeight="$bold" color="$brandTextPrimary">
+                  {lastVisit.professionalName}
+                  {lastVisit.services?.length
+                    ? ` · ${lastVisit.services.map((s) => s.customName).join(" + ")}`
+                    : ""}
+                </Text>
+                {timeAgoLabel(lastVisit.endTime ?? lastVisit.scheduledTime) && (
+                  <Text fontFamily="$body" fontSize={13} color="$brandTextSecondary">
+                    Última vez {timeAgoLabel(lastVisit.endTime ?? lastVisit.scheduledTime)}
+                  </Text>
+                )}
+              </VStack>
+              <Box bg="$forest" borderRadius="$full" px={14} py={9}>
+                <Text fontFamily="$display" fontSize={13} fontWeight="$bold" color="$brandGreen">
+                  Repetir
+                </Text>
+              </Box>
+            </HStack>
+          </TouchableOpacity>
+        </VStack>
+      )}
+
+      {/* A secao lista o que esta PERTO, aberto ou nao — a ordem e distancia
+          pura (decisao do Andre, 2026-08-06). "Livres agora" prometia so as
+          abertas e listava fechada logo abaixo; quem diz quem esta aberto e a
+          tag de cada linha. */}
+      <VStack flex={1} px={16} pt={22} gap={12}>
+        <HStack justifyContent="space-between" alignItems="center">
+          <Text
+            fontFamily="$display"
+            fontSize={17}
+            fontWeight="$bold"
+            letterSpacing={-0.3}
+            color="$brandTextPrimary"
+          >
+            Perto de você
+          </Text>
+          {/* Leva a lista cheia (Pencil CLIENT · 07), carregando o filtro de
+              categoria que estiver ativo aqui. Antes apontava para a propria
+              Home — era um link morto. */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate("establishmentList", { filter: selectedFilter })}
+            testID="see-all"
+          >
+            <Text fontFamily="$body" fontSize={14} fontWeight="$semibold" color="$brandTextSecondary">
+              Ver todos
+            </Text>
+          </TouchableOpacity>
+        </HStack>
+
+        {isLoading ? (
+          <SkeletonList count={4} />
+        ) : isError ? (
+          <Center mt={40}>
+            <Text color="$brandDanger">Erro ao carregar estabelecimentos</Text>
+          </Center>
+        ) : (
+          <FlatList
+            data={filteredEstablishments}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={onRefresh}
+                colors={["#163300"]}
+                tintColor="#163300"
+              />
+            }
+            renderItem={({ item }) => (
+              <EstablishmentRow
+                establishment={item}
+                distanceKm={item.distance_km ?? null}
+                onPress={() => handleEstablishmentPress(item)}
+              />
+            )}
+            ListEmptyComponent={
+              <Center mt={40}>
+                <Text color="$brandTextSecondary">Nenhum estabelecimento encontrado</Text>
+              </Center>
+            }
+          />
+        )}
+      </VStack>
+
+      <FilterSheet
+        visible={showFilter}
+        value={selectedFilter}
+        onSelect={setSelectedFilter}
+        onClose={() => setShowFilter(false)}
+      />
     </VStack>
   );
 }

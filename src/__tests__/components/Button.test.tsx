@@ -11,7 +11,7 @@ import { Button } from '@components/Button';
 //
 // Estes casos existem para que ninguém precise descobrir isso de novo.
 
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 
 describe('Button', () => {
   it('dispara o onPress quando habilitado', () => {

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Modal, Alert, TouchableOpacity } from "react-native";
 import { VStack, HStack, Box, Text, Heading, Divider } from "@gluestack-ui/themed";
-import { MapPin, CaretRight } from "phosphor-react-native";
+import { MapPin, ChevronRight } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { Input2 } from "@components/Input2";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 import { maskCEP } from "@utils/masks";
 import { lookupCep } from "@utils/cep";
 import { addressService } from "@services/addressService";
@@ -90,21 +90,21 @@ export function LocationSelector() {
     <>
       <TouchableOpacity onPress={() => setOpen(true)} accessibilityRole="button">
         <HStack alignItems="center" gap="$2" py="$1">
-          <MapPin size={18} color="#3B7A3F" weight="fill" />
-          <Text size="sm" fontFamily="$heading" color="$green500" flex={1} numberOfLines={1}>
+          <MapPin size={18} color="#163300" />
+          <Text size="sm" fontFamily="$heading" color="$forest" flex={1} numberOfLines={1}>
             {label}
           </Text>
-          <CaretRight size={16} color="#9CA3AF" />
+          <ChevronRight size={16} color="#454745" />
         </HStack>
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-          <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
+          <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
             <Heading fontFamily="$heading" fontSize="$lg">
               Sua localização
             </Heading>
-            <Text size="sm" color="$gray300" mt="$1">
+            <Text size="sm" color="$brandTextSecondary" mt="$1">
               Mostramos primeiro os estabelecimentos do seu bairro e cidade.
             </Text>
 
@@ -127,9 +127,9 @@ export function LocationSelector() {
             )}
 
             <HStack alignItems="center" gap="$3" my="$4">
-              <Divider flex={1} bg="$gray500" />
-              <Text size="xs" color="$gray400">ou pelo CEP</Text>
-              <Divider flex={1} bg="$gray500" />
+              <Divider flex={1} bg="$brandBorder" />
+              <Text size="xs" color="$brandTextSecondary">ou pelo CEP</Text>
+              <Divider flex={1} bg="$brandBorder" />
             </HStack>
 
             <Input2
@@ -149,7 +149,7 @@ export function LocationSelector() {
 
             {location && (
               <TouchableOpacity onPress={() => { clearLocation(); setOpen(false); }} disabled={busy}>
-                <Text size="sm" color="$gray300" textAlign="center" mt="$4">
+                <Text size="sm" color="$brandTextSecondary" textAlign="center" mt="$4">
                   Ver todos (remover filtro)
                 </Text>
               </TouchableOpacity>

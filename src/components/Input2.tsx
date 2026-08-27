@@ -1,7 +1,7 @@
 import { ComponentProps, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { Input as GluestackInput2, InputField, HStack } from "@gluestack-ui/themed";
-import { Eye, EyeSlash, MagnifyingGlass, XCircle } from "phosphor-react-native";
+import { Eye, EyeOff, Search, CircleX } from "lucide-react-native";
 
 type Props = ComponentProps<typeof InputField> & {
   isPassword?: boolean;
@@ -24,15 +24,17 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
       px="$3"
       bg="$white"
       borderWidth="$1"
-      borderColor="$coolGray300"
+      borderColor="$brandBorder"
       borderRadius="$xl"
       variant="outline"
       $focus-borderWidth="$2"
-      $focus-borderColor="$green500"
+      $focus-borderColor="$forest"
     >
       <HStack flex={1} alignItems="center">
         <InputField
-          color="$coolGray900"
+          // O valor digitado e conteudo PRIMARIO: fica em brandTextPrimary, nao
+          // no brandTextSecondary dos rotulos, senao rotulo e resposta pesam igual.
+          color="$brandTextPrimary"
           fontFamily="$body"
           secureTextEntry={isSecure}
           flex={1}
@@ -42,18 +44,18 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
         {isPassword && (
           <TouchableOpacity onPress={() => setVisible((v) => !v)} hitSlop={8}>
             {visible ? (
-              <Eye size={22} color="#6B7280" />
+              <Eye size={22} color="#454745" />
             ) : (
-              <EyeSlash size={22} color="#6B7280" />
+              <EyeOff size={22} color="#454745" />
             )}
           </TouchableOpacity>
         )}
         {showSearchIcon && !hasValue && (
-          <MagnifyingGlass size={20} color="#9CA3AF" />
+          <Search size={20} color="#454745" />
         )}
         {showSearchIcon && hasValue && onClear && (
           <TouchableOpacity onPress={onClear} hitSlop={8}>
-            <XCircle size={22} color="#9CA3AF" weight="fill" />
+            <CircleX size={22} color="#454745" />
           </TouchableOpacity>
         )}
       </HStack>

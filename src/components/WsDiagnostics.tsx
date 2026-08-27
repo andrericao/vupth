@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
 
-import { cardShadow } from "@utils/styles";
 import { useWsDiagnosticsStore, ChannelState } from "@stores/wsDiagnosticsStore";
 import {
   WsChannel,
@@ -22,17 +21,17 @@ import {
 //   Conexões       -> quantas vezes reconectou (background, troca de rede).
 
 const LEVEL_COLOR: Record<VerdictLevel, string> = {
-  ok: "$green500",
-  warn: "$amber800",
-  bad: "$red500",
-  idle: "$gray300",
+  ok: "$forest",
+  warn: "$brandWarning",
+  bad: "$brandDanger",
+  idle: "$brandTextSecondary",
 };
 
 const LEVEL_BG: Record<VerdictLevel, string> = {
-  ok: "$green100",
-  warn: "$amber100",
-  bad: "$red100",
-  idle: "$gray600",
+  ok: "$greenTint",
+  warn: "$brandWarning",
+  bad: "$brandDangerTint",
+  idle: "$brandSurface",
 };
 
 function Channel({
@@ -57,11 +56,11 @@ function Channel({
         </Text>
       </HStack>
       <Box bg={LEVEL_BG[verdict.level]} borderRadius="$lg" px="$3" py="$2">
-        <Text size="xs" color={verdict.level === "idle" ? "$gray300" : "$gray100"}>
+        <Text size="xs" color={verdict.level === "idle" ? "$brandTextSecondary" : "$forest"}>
           {verdict.message}
         </Text>
       </Box>
-      <Text size="xs" color="$gray300">
+      <Text size="xs" color="$brandTextSecondary">
         {state.messages} recebidas · última {formatSince(state.lastMessageAt, now)} ·{" "}
         {state.connects} {state.connects === 1 ? "conexão" : "conexões"}
         {state.info?.heartBeat ? ` · heart-beat ${state.info.heartBeat}` : ""}
@@ -71,7 +70,7 @@ function Channel({
       {/* O MOTIVO da falha. Sem isto o painel dizia só "falhou o handshake", que
           não aponta causa nenhuma — foi o que travou o teste de 2026-08-07. */}
       {state.lastError && (
-        <Text size="xs" color="$red500" testID={`ws-diag-${channel}-error`}>
+        <Text size="xs" color="$brandDanger" testID={`ws-diag-${channel}-error`}>
           {state.lastError}
         </Text>
       )}
@@ -97,12 +96,12 @@ export function WsDiagnostics() {
         <Heading fontFamily="$heading" fontSize="$md" mb="$1">
           Tempo real (diagnóstico)
         </Heading>
-        <Text size="xs" color="$gray300">
+        <Text size="xs" color="$brandTextSecondary">
           Estado das conexões que trazem sua vez na fila sem precisar recarregar.
         </Text>
       </VStack>
 
-      <Box bg="$white" borderRadius="$2xl" p="$4" style={cardShadow}>
+      <Box bg="$brandSurface" borderRadius="$card" p="$4">
         <VStack gap="$4">
           <Channel
             channel="personal"
@@ -110,7 +109,7 @@ export function WsDiagnostics() {
             state={personalState}
             now={now}
           />
-          <Box h={1} bg="$gray600" />
+          <Box h={1} bg="$brandBorder" />
           <Channel
             channel="public"
             label="Fila do estabelecimento"

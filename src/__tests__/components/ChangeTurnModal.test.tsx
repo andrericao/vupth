@@ -7,7 +7,7 @@ import { ChangeTurnModal } from '@components/ChangeTurnModal';
 // apenas as opções com a opção de select". As saídas deixaram de ser telas
 // encadeadas de botões e viraram UMA lista de escolha + Confirmar.
 
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 
 function setup(overrides: Partial<React.ComponentProps<typeof ChangeTurnModal>> = {}) {
   const props = {
