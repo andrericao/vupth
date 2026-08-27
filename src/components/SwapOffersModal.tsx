@@ -53,7 +53,7 @@ export function SwapOffersModal({ visible, professionalId, onClose, onChanged }:
     setBusyId(id);
     try {
       await swapOfferService.accept(id, accessToken);
-      Alert.alert("Troca feita! 🔄", "Sua posição na fila foi atualizada.");
+      Alert.alert("Troca feita", "Sua posição na fila foi atualizada.");
       onChanged();
       onClose();
     } catch (error: any) {

@@ -69,7 +69,7 @@ export function useOutOfQueueSwap() {
           status: 'SCHEDULED',
         });
         Alert.alert(
-          'Troca aceita! 🔄',
+          'Troca aceita',
           `Alguém cedeu o lugar na fila de ${ctx.professionalName}. Você já está na fila — acompanhe o seu tempo em Atendimentos.`,
         );
       }

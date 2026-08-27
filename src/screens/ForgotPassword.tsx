@@ -96,7 +96,7 @@ export function ForgotPassword() {
       await authService.forgotPassword(email.trim());
       // Sempre 200 (anti-enumeração) — não revelamos se o e-mail existe.
       if (isResend) {
-        Alert.alert("Código reenviado! ✉️", "Confira seu e-mail (vale 15 minutos).");
+        Alert.alert("Código reenviado", "Confira seu e-mail (vale 15 minutos).");
       } else {
         setStep("reset");
       }
@@ -125,7 +125,7 @@ export function ForgotPassword() {
     setIsSubmitting(true);
     try {
       await authService.resetPassword(email.trim(), code.trim(), password);
-      Alert.alert("Senha redefinida! 🎉", "Faça login com a sua nova senha.");
+      Alert.alert("Senha redefinida", "Faça login com a sua nova senha.");
       navigation.navigate("login", {});
     } catch (error: any) {
       const codeErr = error.response?.data?.code;

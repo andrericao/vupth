@@ -49,7 +49,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
         accessToken,
       );
       await useRatedStore.getState().markRated(attendanceId);
-      Alert.alert("Obrigado! 🙏", "Sua avaliação foi registrada.");
+      Alert.alert("Obrigado", "Sua avaliação foi registrada.");
       reset();
       onClose(true);
     } catch (e: any) {
