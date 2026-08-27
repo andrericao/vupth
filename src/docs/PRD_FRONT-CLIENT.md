@@ -429,6 +429,12 @@ usamos cookie, e não dependemos de `allowCredentials(true)`.
 dois endpoints. Nós tínhamos registrado como pendência; **estava errado e foi retirado**
 (`PARA_OUTRAS_EQUIPES.md` §9.1).
 
+⚠️ **Antes de culpar o CORS, confirmar o alvo do bundle.** O fallback do `resolveApiEnv` é
+**`local`**: build web sem `EXPO_PUBLIC_API_ENV` sai apontando para um IP de rede local e **não dá
+erro que explique** — sintoma idêntico ao do CORS. **Verificado em 27/08 que o Production está
+certo** (`resolveApiEnv(canal,"prod")` → Railway); **o Preview ainda não foi conferido**, e a
+Cloudflare não herda variáveis entre os dois ambientes. Detalhe em `PARA_OUTRAS_EQUIPES.md` §10.7.
+
 ⚠️ **Divergência interna a corrigir antes de publicar:** o nosso `web-shims/expo-secure-store.js`
 usa **`localStorage`**; o do partner usa **`sessionStorage`**. O C26 deles diz explicitamente que
 isso **não pode divergir** — e a decisão desta seção ("a sessão morre ao fechar a aba") é a do

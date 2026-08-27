@@ -4,7 +4,7 @@
 > **outra equipe** fica aqui, num lugar só. O Andre é o canal entre os três projetos: nós **não
 > editamos o repositório de ninguém** — registramos aqui e ele repassa.
 >
-> Última atualização: **2026-08-26** · branch `dev` do front-client.
+> Última atualização: **2026-08-27** · branch `dev` do front-client.
 
 > ⚠️ **NÚMERO DE ITEM NÃO É REFERÊNCIA ESTÁVEL.** Os backlogs renumeram, então os `#N` citados aqui
 > valiam **na data em que foram escritos**. Procure o item pelo **NOME** no PRD da equipe dona; o
@@ -351,11 +351,34 @@ Achado ao montar o Pages. Os três projetos usam as mesmas palavras para coisas 
 não quebra nada porque o client tem o apelido `staging` apontando para o mesmo host — mas é um
 apelido que **esconde** o desencontro em vez de resolvê-lo, e o nome `local` já cobre o caso local.
 
-**Modelo acordado com o Andre:** `local`/`dev` = **Docker local** · `staging` = **Render** ·
-`prod` = **Railway**. Sob esse modelo o `dev` do client está apontando para o lugar errado.
+✅ **CORREÇÃO (27/08).** Uma versão anterior desta seção propunha `local`/`dev` = Docker local ·
+`staging` = Render · `prod` = Railway. **Estava errado, e o erro é nosso:** o acordo já existia e é
+outro. Quem leu a tabela antiga, desconsidere.
 
-**Pedido:** que os três repos usem essa mesma tabela. É barato agora e caro depois — hoje o custo de
-errar é alguém achar que testou contra o Render e ter testado contra o Railway.
+**Vocabulário acordado: `local` · `test` · `prod`.** Três nomes, não quatro — o par `dev`/`staging`
+some, e some junto o motivo dele existir (era só o mesmo `.env` circulando entre os repos).
+Registrado em [vupth-partner#18](https://github.com/andrericao/vupth-partner/pull/18#issuecomment-5437931194).
+
+| Nome | Onde roda |
+|---|---|
+| `local` | Docker na máquina |
+| `test` | **Render** |
+| `prod` | **Railway** |
+
+**Estado das três pontas:** front-client ✅ concorda · front-partner ✅ concorda · **backend ⬜ falta**.
+
+**O renome está TRAVADO POR DATA de propósito** — fazer fora de sincronia é o único jeito de isso
+custar caro. No client são quatro pontos, todos no mesmo arquivo, mais os `.env` e o `eas.json`:
+
+| onde | hoje | vira |
+|---|---|---|
+| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "test" \| "prod"` |
+| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | uma chave `test` |
+| `CANAL_PARA_ENV` | `development: "dev"` | `development: "test"` |
+| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","test","prod"]` |
+
+📣 **Backend:** é a ponta que falta. O custo aqui já está levantado e é pequeno; o que trava é o
+acordo, não o trabalho.
 
 ### 10.6 ⚠️ FRONT-PARTNER — o canal `preview` grava em **PRODUÇÃO**
 
@@ -375,3 +398,44 @@ Registramos por dois motivos: (1) é a resposta à dúvida *"se preview já visu
 suja o banco?"* — **suja, e foi uma escolha**; (2) some com a distinção Render/Railway justamente no
 canal que mais parece seguro pelo nome. Se um dia o `staging` passar a ter dado de teste que
 importa, **este é o primeiro lugar a mexer.**
+
+### 10.7 ⚠️ O "link não funciona" que se DISFARÇA de CORS — e a medição que separa os dois
+
+Alerta do **front-partner** (PR #16 do client, 27/08), e ele procede: o fallback do `resolveApiEnv`
+é **`local`**. Num build web **sem** `EXPO_PUBLIC_API_ENV` declarada, o site sai apontando para um
+**IP de rede local** — e **não dá erro que explique**, só não conecta.
+
+**São dois "o link não funciona" com causas diferentes, e o segundo imita o primeiro.**
+
+✅ **Verificado no bundle que está no ar** (`https://vupth.pages.dev`, 27/08). A variável **está**
+cravada no ambiente **Production**:
+
+```js
+const l = {local:"http://192.168.0.16:8080", dev:"https://vupth-backend-ia.onrender.com",
+           staging:"https://vupth-backend-ia.onrender.com",
+           prod:"https://vupth-backend-ia-production.up.railway.app"},
+      f = (0,u.resolveApiEnv)(h,"prod"), p = l[f];
+```
+
+`resolveApiEnv(canal, "prod")` → `"prod"` → **Railway**. **Confirmado que o bloqueio do link público
+é o CORS**, e não o fallback.
+
+⚠️ **Falta conferir o ambiente Preview.** A Cloudflare **não herda** as variáveis entre Production e
+Preview — são dois conjuntos. Sem `EXPO_PUBLIC_API_ENV` no Preview, **toda preview da `dev` sai
+apontando para `192.168.0.16:8080`** e o sintoma é idêntico ao do CORS.
+
+**Como distinguir, em 10 segundos:** abrir o bundle publicado e procurar o argumento do
+`resolveApiEnv`. Se for `"prod"`/`"staging"`, o alvo está certo e a causa é CORS. Se o segundo
+argumento vier vazio/ausente, é o fallback `local` — e aí nenhum CORS do mundo resolve.
+
+### 10.8 ✅ A guarda do build web já está na `dev` (PR #16)
+
+Mergeada em 27/08. `tsconfig.json` ganhou `exclude` (`dist`, `web-build`, …) e o `eslint.config.js`
+ganhou `dist/` e `web-build/` nos `ignores`, travados por `src/__tests__/projeto/buildOutputIgnorado.test.ts`
+— que também barra o erro oposto, um `exclude` engolindo `src` (typecheck verde por não ter olhado
+o app).
+
+**Por que importa para quem for mexer aqui:** o client ainda **não tem `build:web`**. A guarda entrou
+**antes** do problema. Sem ela, rodar `expo export --platform web` e depois o portão dá duas falhas
+que **não apontam para a causa** — `tsc` com *"Maximum call stack size exceeded"* sem citar arquivo,
+e lint reprovando por milhares de problemas vindos do bundle.
