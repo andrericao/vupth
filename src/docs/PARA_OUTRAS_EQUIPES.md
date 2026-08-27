@@ -278,3 +278,100 @@ min tolera ZERO falhas** antes dos 15 min de ociosidade. Com **cron-job.org a ca
 
 Sem pedido nosso aqui: é configuração do Andre, e o `readiness` (não o `/actuator/health` agregado)
 já é o que o nosso portão `waitForBackend` usa.
+
+---
+
+## 10. 🌐 ESTADO DO ACESSO POR LINK — o que já fizemos, e onde travou
+
+> Para **backend** e **front-partner**. Este é o relato completo do que foi tentado do lado do
+> client, para ninguém refazer o caminho nem esperar por algo que já está pronto.
+
+### 10.1 ✅ Cloudflare Pages — projeto criado e no ar
+
+**O link do client existe: https://vupth.pages.dev** — responde **200**, a página carrega.
+
+Montado no padrão que o partner já usava, com **dois ambientes dentro do MESMO projeto** do Pages
+(não são dois projetos):
+
+| Ambiente do Pages | Branch | Backend |
+|---|---|---|
+| **Production** | `main` | **Railway** (prod) |
+| **Preview** | `dev` | **Render** (staging) |
+
+A variável `EXPO_PUBLIC_API_ENV` é **cravada no build**, por ambiente — não dá para trocar depois
+sem rebuildar. Foi criada nos dois.
+
+### 10.2 ✅ Merge na `main` — feito
+
+O merge para a `main` **foi feito** e o build de Production saiu. É de lá que sai o link público.
+
+⚠️ **A `main` ainda não tem tudo:** há **54 commits na `dev` fora da `main`**, na PR **#15**
+(`dev` → `main`), ainda aberta. O link de hoje reflete a `main`, não a `dev`.
+
+### 10.3 🔴 …e o link **não funciona**, por causa do CORS do backend
+
+**A página abre, e nenhuma chamada completa.** Não é bug do porte web nem do Cloudflare: é o CORS
+inexistente no backend, medido nos dois ambientes (detalhe e números na **§9.3**).
+
+Este é **o único bloqueio** do acesso por link hoje. Está pedido ao backend na **§9.2** — e o pedido
+tem duas partes que precisam ir juntas: **incluir as origens do client** (o §18e do PRD deles cita
+só as do partner) e **configurar nos dois painéis**, Render e Railway, porque `CORS_ALLOWED_ORIGINS`
+é env var por ambiente.
+
+**Assim que essa barreira cair, seguimos com o teste por link.** Está parado esperando isso, não
+esperando trabalho nosso.
+
+### 10.4 🟡 Render vivo — em teste agora, antes de seguir
+
+O motivo é concreto: **na hora de testar com usuários o app ficava lento demais**, porque o servidor
+hiberna e o primeiro request leva ~50s. A intenção é o Andre testar em casa contra o **Render** e só
+mostrar aos testadores quando estiver com o mínimo de atrito.
+
+- ❌ **Cron do GitHub Actions não funciona** — sofre throttling e atrasa. Além disso, **intervalo de
+  10–13 min tolera ZERO falhas** antes dos 15 min de ociosidade.
+- ✅ **Adotado o desenho do §18e:** **cron-job.org**, `/actuator/health/readiness` (não o
+  `/actuator/health` agregado), **5 min**, com **janela de horário** — que é o único parâmetro que
+  protege a cota das **750 h/mês** somadas entre todos os serviços free da conta.
+
+**Em teste agora. O resultado sai antes de seguirmos** — se o keep-warm não segurar, o portão
+`waitForBackend` continua sendo o que salva o primeiro acesso.
+
+### 10.5 🔴 INCONSISTÊNCIA DE AMBIENTES — `dev` significa **duas máquinas diferentes**
+
+Achado ao montar o Pages. Os três projetos usam as mesmas palavras para coisas diferentes:
+
+| Nome | Backend (`application-*.properties`) | Front-client (`api.ts`) |
+|---|---|---|
+| `local` | — | `http://<ip>:8080` |
+| **`dev`** | **Docker local** | **Render** ⚠️ |
+| `staging` | **Render** | **Render** (apelido de `dev`) |
+| `prod` | **Railway** | **Railway** |
+
+⚠️ **`dev` é Docker local no backend e Render no client.** Mesma palavra, máquinas diferentes. Hoje
+não quebra nada porque o client tem o apelido `staging` apontando para o mesmo host — mas é um
+apelido que **esconde** o desencontro em vez de resolvê-lo, e o nome `local` já cobre o caso local.
+
+**Modelo acordado com o Andre:** `local`/`dev` = **Docker local** · `staging` = **Render** ·
+`prod` = **Railway**. Sob esse modelo o `dev` do client está apontando para o lugar errado.
+
+**Pedido:** que os três repos usem essa mesma tabela. É barato agora e caro depois — hoje o custo de
+errar é alguém achar que testou contra o Render e ter testado contra o Railway.
+
+### 10.6 ⚠️ FRONT-PARTNER — o canal `preview` grava em **PRODUÇÃO**
+
+No `apiEnv.ts` (compartilhado no desenho entre os dois apps):
+
+```ts
+export const CANAL_PARA_ENV: Record<string, ApiEnv> = {
+  development: "dev", preview: "prod", production: "prod",
+};
+```
+
+O canal **`preview` resolve para `prod`** — ou seja, **build de preview em device grava no banco de
+PRODUÇÃO**. Está documentado como **deliberado**, com a consequência assumida por escrito, então
+**não é bug e não estamos pedindo mudança**.
+
+Registramos por dois motivos: (1) é a resposta à dúvida *"se preview já visualiza a prod, isso não
+suja o banco?"* — **suja, e foi uma escolha**; (2) some com a distinção Render/Railway justamente no
+canal que mais parece seguro pelo nome. Se um dia o `staging` passar a ter dado de teste que
+importa, **este é o primeiro lugar a mexer.**
