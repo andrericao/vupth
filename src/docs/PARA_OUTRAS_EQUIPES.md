@@ -4,7 +4,7 @@
 > **outra equipe** fica aqui, num lugar só. O Andre é o canal entre os três projetos: nós **não
 > editamos o repositório de ninguém** — registramos aqui e ele repassa.
 >
-> Última atualização: **2026-08-07** · branch `dev` do front-client.
+> Última atualização: **2026-08-26** · branch `dev` do front-client.
 
 > ⚠️ **NÚMERO DE ITEM NÃO É REFERÊNCIA ESTÁVEL.** Os backlogs renumeram, então os `#N` citados aqui
 > valiam **na data em que foram escritos**. Procure o item pelo **NOME** no PRD da equipe dona; o
@@ -182,3 +182,99 @@ O **C21** (cada profissional escolhe fila **ou** agenda pura) está no handoff d
 É uma dependência forte da nossa tela da loja: junto com o **C22** (horário por dia da semana), as duas dizem que aquela tela **não pode assumir nem regime único nem horário único**. Se tivéssemos redesenhado a tela nesse meio-tempo, teríamos que refazer.
 
 Sem cobrança — o registro é para lembrar que **item que muda tela do outro app precisa de um empurrão ativo**, não só de estar escrito no handoff.
+
+---
+
+## 9. 🔴 BACKEND — resposta ao 18e (CORS / WebSocket / keep-warm) do PRD de 26/08
+
+Lemos a seção **18e. Acesso por link (build web) — CORS, WebSocket e keep-warm** do `PRD_BACKEND.md`
+(atualizada em 26/08 22h10). O desenho está certo e é o que destrava o acesso por link. Três coisas:
+uma em que **vocês têm razão e nós erramos**, uma **inconsistência que deixa o client de fora**, e
+uma **medição** que confirma o diagnóstico de vocês.
+
+### 9.1 ✅ WebSocket — vocês estão certos, o pedido era nosso erro
+
+Levantamos que autorizar só o HTTPS deixaria a fila em tempo real morta. **Não deixa.** Fomos ao
+código de vocês e confirmamos: `WebSocketConfig:68-69` já tem `setAllowedOriginPatterns("*")` nos
+dois endpoints (nativo e SockJS), com `/ws/**` em `permitAll()`. **Não há nada a fazer, e retiramos
+o pedido.**
+
+A observação de vocês procede — *"o front descreve como bloqueio de backend algo que já está
+liberado"* — e vale para nós aqui exatamente como valeu para vocês no S19. Registrado como
+aprendizado: **antes de escrever "bloqueio do backend", abrir o código do backend.**
+
+⚠️ **Concordamos também com a inversão do risco:** apertar o CORS do HTTP e apertar junto a origem
+do WS quebraria o que hoje funciona. **O commit do CORS não deve tocar no `*` do WS.** Se e quando
+a decisão registrada (alinhar o WS à lista do HTTP) for executada, **é commit separado, e queremos
+saber antes** — é o único ponto do 18e que pode derrubar tela nossa que hoje está de pé.
+
+### 9.2 🔴 A inconsistência: **o client não está na lista de origens**
+
+O 18e cita **apenas** `https://vupth-partner.pages.dev` e `https://*.vupth-partner.pages.dev`.
+**O client é outro projeto do Cloudflare Pages, com outro domínio.** Se o `CORS_ALLOWED_ORIGINS`
+subir com o que está documentado, o CORS entra, **o link do partner funciona e o do client
+continua quebrado — com o mesmíssimo modo de falha mudo.** E a leitura natural seria *"o backend já
+fez o CORS, então o problema é do client"*, que é falsa.
+
+**Origens do client, para entrar na env var:**
+
+| Origem | De onde vem | Fala com |
+|---|---|---|
+| `https://vupth.pages.dev` | Pages **Production**, build da branch `main` | **Railway** (prod) |
+| `https://*.vupth.pages.dev` | Pages **Preview**, builds da branch `dev` | **Render** (staging) |
+
+⚠️ **Segundo furo, que decorre do primeiro: `CORS_ALLOWED_ORIGINS` é env var POR AMBIENTE, e as duas
+origens do client falam com backends DIFERENTES.** O 18e trata o CORS como uma coisa só, mas não
+existe "a lista" — existe a lista do Render e a lista do Railway. Configurar só uma delas resolve
+metade. E a metade que costuma ser esquecida é **prod/Railway**, que é justamente **a que os
+testadores abrem** (o link público sai da `main`).
+
+Sugestão concreta — **as duas linhas**, uma em cada painel:
+
+```
+# Render (staging)  — atende as previews da branch dev
+CORS_ALLOWED_ORIGINS=https://*.vupth.pages.dev,https://*.vupth-partner.pages.dev
+
+# Railway (prod)    — atende o link público, é o que os testadores abrem
+CORS_ALLOWED_ORIGINS=https://vupth.pages.dev,https://vupth-partner.pages.dev
+```
+
+O curinga no meio (`https://*.vupth.pages.dev`) confirma a escolha de vocês por
+`setAllowedOriginPatterns` em vez de `allowedOrigins` — sem ela, **nenhuma preview de branch
+funciona**, nos dois apps.
+
+📣 **Do lado do client, nada muda no código:** já mandamos o JWT em `Authorization: Bearer`, não
+usamos cookie em lugar nenhum, e não temos nada que dependa de `allowCredentials(true)`.
+`allowCredentials(false)` está ok para nós.
+
+### 9.3 📐 Medição externa que confirma o diagnóstico de vocês (26/08)
+
+Vocês auditaram por dentro (`SecurityConfig` sem `.cors(...)`). Medimos por fora, nos **dois**
+backends, e o resultado bate com a previsão do 18e — inclusive o **401 no preflight**:
+
+| Backend | `OPTIONS /auth/login` com `Origin` + `Access-Control-Request-*` | `GET /actuator/health/readiness` com `Origin` |
+|---|---|---|
+| Railway (prod) | **401** | 200, **sem nenhum header `access-control-*`** |
+| Render (staging) | **401** | 200, **sem nenhum header `access-control-*`** |
+
+Ou seja: o preflight cai em `anyRequest().authenticated()` exatamente como vocês descreveram, e
+como preflight não carrega `Authorization`, o navegador nunca chega à chamada real. **Confirmado
+que não é "falta autorizar a origem" — não existe CORS nenhum, nos dois ambientes.**
+
+✅ **Corrigimos um registro nosso:** havíamos anotado *"OPTIONS sem resposta"*. Era artefato de cold
+start do Render. **O comportamento real é 401**, como o 18e diz.
+
+### 9.4 ✅ Keep-warm — a conta das 750h resolve uma dúvida que era nossa
+
+A conta que vocês fizeram (**750 horas/mês somadas entre todos os serviços free da conta**; ping
+24/7 ≈ 744h ⇒ risco de **suspensão até o próximo ciclo**, que é pior que cold start; janela 08–22
+em dias úteis ≈ 308h) responde algo que estava aberto do nosso lado e que **não tínhamos
+considerado**. Adotado.
+
+Também explica o fracasso que o Andre relatou (*"esse keep-alive não funciona, ele é obliterado
+toda vez"*): era cron do **GitHub Actions**, que sofre throttling e atrasa — e **intervalo de 10–13
+min tolera ZERO falhas** antes dos 15 min de ociosidade. Com **cron-job.org a cada 5 min**, cabem
+**duas** falhas consecutivas. A troca de ferramenta é o conserto, não o ajuste do intervalo.
+
+Sem pedido nosso aqui: é configuração do Andre, e o `readiness` (não o `/actuator/health` agregado)
+já é o que o nosso portão `waitForBackend` usa.
