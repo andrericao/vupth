@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Modal, TouchableOpacity, TextInput, Alert } from "react-native";
 import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
-import { Star } from "phosphor-react-native";
+import { Star } from "lucide-react-native";
 
 import { Button } from "@components/Button";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 import { ratingService } from "@services/ratingService";
 import { useAuthStore } from "@stores/authStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -73,12 +73,12 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={() => onClose(false)}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
+        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
             Como foi seu atendimento?
           </Heading>
           {professionalName ? (
-            <Text size="sm" color="$gray300" mt="$1">
+            <Text size="sm" color="$brandTextSecondary" mt="$1">
               {professionalName}
             </Text>
           ) : null}
@@ -86,25 +86,30 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
           <HStack justifyContent="center" gap="$2" mt="$5" mb="$2">
             {[1, 2, 3, 4, 5].map((n) => (
               <TouchableOpacity key={n} testID={`star-${n}`} onPress={() => setScore(n)} hitSlop={6}>
+                {/* [marca-vupth] A marca nao tem dourado, e o pessego
+                    ($brandWarning) so existe como FUNDO — sobre branco da
+                    1,59:1. A estrela CHEIA carrega a nota, entao vai em
+                    $forest (13,93:1); a vazia e so o contorno do que falta
+                    escolher e fica em $brandBorder. */}
                 <Star
                   size={36}
-                  color={n <= score ? "#FFB703" : "#D1D5DB"}
-                  weight={n <= score ? "fill" : "regular"}
+                  color={n <= score ? "#163300" : "#D7DDD3"}
+                  fill={n <= score ? "#163300" : "none"}
                 />
               </TouchableOpacity>
             ))}
           </HStack>
 
           {SHOW_COMMENT && (
-            <Box borderWidth="$1" borderColor="$coolGray300" borderRadius="$xl" px="$3" py="$2" mt="$4">
+            <Box borderWidth="$1" borderColor="$brandBorder" borderRadius="$xl" px="$3" py="$2" mt="$4">
               <TextInput
                 placeholder="Comentário (opcional)"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor="#454745"
                 value={comment}
                 onChangeText={setComment}
                 multiline
                 maxLength={300}
-                style={{ minHeight: 60, textAlignVertical: "top", color: "#111827" }}
+                style={{ minHeight: 60, textAlignVertical: "top", color: "#163300" }}
               />
             </Box>
           )}

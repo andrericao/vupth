@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { ScrollView, Text, Center, VStack, HStack } from "@gluestack-ui/themed";
-import { Check, X } from "phosphor-react-native";
+import { ScrollView, Text, VStack, HStack } from "@gluestack-ui/themed";
+import { Check, X, TriangleAlert } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
-import { Header } from "@components/Header";
 import { PasswordRules } from "@components/PasswordRules";
 import { validateSignUp, getPasswordRules } from "@domain/auth/validateAuth";
 import { useAuthStore } from "@stores/authStore";
@@ -37,6 +37,11 @@ export function SignUp() {
   const register = useAuthStore((s) => s.register);
   const login = useAuthStore((s) => s.login);
 
+  // Veio do fluxo da fila? Muda titulo, CTA e o aviso do topo. Sem isso, a
+  // tela abriria "NAO PERCA SUA VEZ" pra quem so clicou em "Cadastrar" na
+  // Home e nao tem vez nenhuma pra perder.
+  const fromQueue = !!params.professionalId || params.redirectTo === "queueStatus";
+
   const passwordRules = getPasswordRules(password);
   const passwordsMatch = password.length > 0 && confirmPassword.length > 0 && password === confirmPassword;
   const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
@@ -56,34 +61,22 @@ export function SignUp() {
       await register(email, password);
       await login(email, password);
 
-      // Mesmo retorno do Login: corte/troca voltam pra seleção de serviços.
-      if (
-        params.redirectTo === "serviceSelection" &&
-        params.establishmentId &&
-        params.professionalId
-      ) {
-        navigation.replace("serviceSelection", {
-          establishmentId: params.establishmentId,
-          professionalId: params.professionalId,
-          professionalName: params.professionalName ?? "",
-          establishmentName: params.establishmentName ?? "",
-          estimatedWaitMinutes: params.estimatedWaitMinutes ?? 0,
-          serviceItemIds: params.serviceItemIds,
-          establishmentOpen: params.establishmentOpen,
-        });
-      } else if (params.redirectTo === "queueStatus" && params.establishmentId && params.professionalId) {
-        navigation.replace("queueStatus", {
-          establishmentId: params.establishmentId,
-          professionalId: params.professionalId,
-          professionalName: params.professionalName,
-          establishmentName: params.establishmentName,
-          estimatedWaitMinutes: params.estimatedWaitMinutes,
-          serviceItemIds: params.serviceItemIds,
-          targetTime: params.targetTime,
-        });
-      } else {
-        navigation.reset({ index: 0, routes: [{ name: "home" }] });
-      }
+      // Antes de mandar pro destino, PEDE O NOME. O cadastro so coleta
+      // e-mail e senha, e nenhuma tela depois pergunta — sem isso a pessoa
+      // chega na fila e o profissional ve "Cliente" no card, sem saber quem
+      // chamar. A tela e pulavel; o destino original vai junto nos params e
+      // ela termina exatamente onde este cadastro terminaria.
+      navigation.replace("completeProfile", {
+        redirectTo: params.redirectTo,
+        establishmentId: params.establishmentId,
+        professionalId: params.professionalId,
+        professionalName: params.professionalName,
+        establishmentName: params.establishmentName,
+        estimatedWaitMinutes: params.estimatedWaitMinutes,
+        serviceItemIds: params.serviceItemIds,
+        targetTime: params.targetTime,
+        establishmentOpen: params.establishmentOpen,
+      });
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Erro ao cadastrar";
       Alert.alert("Erro", message);
@@ -109,16 +102,67 @@ export function SignUp() {
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      style={{ backgroundColor: "#FFFFFF" }}
     >
-      <VStack flex={1} px={15} py={60}>
-        <Header showBackButton />
+      <VStack flex={1} pb={32} px={16}>
+        {/* Sem titulo: o heroi ("NAO PERCA SUA VEZ") fica no corpo, em 32px.
+            "Agora nao" so no fluxo da fila: e a saida de quem foi interrompido
+            no meio de uma acao. Quem veio pela Home ja tem o voltar, e um
+            segundo escape ali so polui. */}
+        <ScreenHeader
+          action={
+            fromQueue ? (
+              <TouchableOpacity onPress={() => navigation.goBack()} testID="skip-signup">
+                <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
+                  Agora não
+                </Text>
+              </TouchableOpacity>
+            ) : undefined
+          }
+        />
 
-        <Center gap="$6" mt={180}>
-          <Text fontFamily="$heading" fontSize="$3xl">
-            Criar Conta
+        <VStack gap="$2.5" mt="$1">
+          {/* O aviso da fila e o motivo de a pessoa estar aqui — sem ele o
+              titulo "nao perca sua vez" nao teria a que se referir. */}
+          {fromQueue && (
+            <HStack
+              bg="$brandSurfaceAlt"
+              borderRadius="$full"
+              px={14}
+              py={8}
+              gap="$2"
+              alignItems="center"
+              alignSelf="flex-start"
+            >
+              <TriangleAlert size={15} color="#163300" />
+              <Text fontFamily="$heading" fontSize={12} color="$forest">
+                {params.professionalName
+                  ? `ENTRANDO NA FILA · ${params.professionalName.toUpperCase()}`
+                  : "VOCÊ ESTÁ ENTRANDO NA FILA"}
+              </Text>
+            </HStack>
+          )}
+          <Text
+            fontFamily="$display"
+            fontSize={fromQueue ? 32 : 34}
+            lineHeight={fromQueue ? 34 : 36}
+            letterSpacing={-1.4}
+            color="$forest"
+          >
+            {fromQueue ? "NÃO PERCA SUA VEZ" : "CRIAR CONTA"}
           </Text>
+          <Text size="md" color="$brandTextSecondary">
+            {fromQueue
+              ? "Guarde seu lugar na fila e receba avisos, mesmo trocando de celular."
+              : "Em segundos você entra na fila e acompanha sua vez pelo app."}
+          </Text>
+        </VStack>
 
-          <VStack w="$full" gap="$1">
+        {/* O Pencil desenha "Continuar com Google/Apple" aqui — nao entrou:
+            o backend so tem /auth/register com e-mail e senha. */}
+
+        <VStack gap="$3" mt="$6">
+          <VStack gap="$1">
             <Input2
               keyboardType="email-address"
               autoCapitalize="none"
@@ -126,21 +170,21 @@ export function SignUp() {
               value={email}
               onChangeText={(text: string) => { setEmail(text); setErrors({}); }}
             />
-            {errors.email && <Text color="$red500" size="xs">{errors.email}</Text>}
+            {errors.email && <Text color="$brandDanger" size="xs">{errors.email}</Text>}
           </VStack>
 
-          <VStack w="$full" gap="$1">
+          <VStack gap="$1">
             <Input2
               isPassword
-              placeholder="Senha"
+              placeholder="Crie uma senha"
               value={password}
               onChangeText={(text: string) => { setPassword(text); setErrors({}); }}
             />
             {password.length > 0 && <PasswordRules rules={passwordRules} />}
-            {errors.password && <Text color="$red500" size="xs">{errors.password}</Text>}
+            {errors.password && <Text color="$brandDanger" size="xs">{errors.password}</Text>}
           </VStack>
 
-          <VStack w="$full" gap="$1">
+          <VStack gap="$1">
             <Input2
               isPassword
               placeholder="Confirmar senha"
@@ -149,30 +193,50 @@ export function SignUp() {
             />
             {passwordsMatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <Check size={14} color="#3B7A3F" weight="bold" />
-                <Text size="xs" color="$green500">Senhas conferem</Text>
+                <Check size={14} color="#163300" />
+                <Text size="xs" color="$forest">Senhas conferem</Text>
               </HStack>
             )}
             {passwordsMismatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <X size={14} color="#E63946" weight="bold" />
-                <Text size="xs" color="$red500">Senhas não conferem</Text>
+                <X size={14} color="#B3261E" />
+                <Text size="xs" color="$brandDanger">Senhas não conferem</Text>
               </HStack>
             )}
           </VStack>
+        </VStack>
 
-          <Button title={isSubmitting ? "Cadastrando..." : "Cadastrar"} onPress={handleSignUp} />
-        </Center>
-
-        <Center mt={180} flex={1} justifyContent="flex-end">
-          <Text>Já é cadastrado?</Text>
+        <VStack flex={1} justifyContent="flex-end" gap="$3" mt="$6">
           <Button
-            variant="outline"
-            mt="$3"
-            title="Login"
-            onPress={handleLogin}
+            title={
+              isSubmitting
+                ? "Criando..."
+                : fromQueue
+                  ? "Guardar meu lugar"
+                  : "Criar conta"
+            }
+            onPress={handleSignUp}
+            testID="primary-signup"
           />
-        </Center>
+          <Text
+            size="2xs"
+            color="$brandTextSecondary"
+            textAlign="center"
+            lineHeight={15}
+          >
+            Ao continuar você concorda com os Termos de Uso e a Política de Privacidade.
+          </Text>
+          <HStack justifyContent="center" gap="$1.5" alignItems="center">
+            <Text size="sm" color="$brandTextSecondary">
+              Já tem conta?
+            </Text>
+            <TouchableOpacity onPress={handleLogin} testID="go-login">
+              <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                Entrar
+              </Text>
+            </TouchableOpacity>
+          </HStack>
+        </VStack>
       </VStack>
     </ScrollView>
   );

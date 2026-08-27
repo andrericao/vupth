@@ -437,6 +437,34 @@ export const gluestackUIConfig = createConfig({
       backgroundDarkMuted: '#252526',
       white: '#FFFFFF',
       black: '#000000',
+
+      // [marca-vupth] Tokens da nova identidade (Pencil, doc pencil-new.pen).
+      // Aditivos: nao remapeiam green50-900 acima (ainda usado como texto em
+      // varias telas) porque brandGreen e claro demais pra texto/icone sobre
+      // fundo claro — so entra como FUNDO, com forest por cima. Ver CLAUDE
+      // memory "vupth-marca": o par certo e sempre brandGreen (fundo) + forest
+      // (texto/icone), nunca o inverso.
+      brandGreen: '#9FE870',
+      forest: '#163300',
+      forestSoft: '#223D0D',
+      greenTint: '#E2F6D5',
+      accentBlue: '#A0E1E1',
+      accentPeach: '#FFC091',
+      accentPink: '#FFD7EF',
+      accentPlum: '#260A2F',
+      brandBackground: '#FFFFFF',
+      brandSurface: '#F3F5F1',
+      brandSurfaceAlt: '#E2F6D5',
+      brandTextPrimary: '#163300',
+      brandTextSecondary: '#454745',
+      brandBorder: '#D7DDD3',
+      brandDanger: '#B3261E',
+      // Fundo do aviso de multa: `brandDanger` diluido no branco. Existia como
+      // `$red100` (#fee2e2), da escala generica do gluestack, que puxa pro rosa
+      // e nao e parente da nossa cor de perigo.
+      brandDangerTint: '#F7E4E2',
+      brandWarning: '#FFC091',
+      brandSuccess: '#9FE870',
     },
     space: {
       'px': '1px',
@@ -502,6 +530,9 @@ export const gluestackUIConfig = createConfig({
       'md': 6,
       'lg': 8,
       'xl': 12,
+      // [marca-vupth] radii do Pencil, nomeados igual ao doc de design.
+      'card': 20,
+      'hero': 24,
       '2xl': 16,
       '3xl': 24,
       'full': 9999,
@@ -556,10 +587,14 @@ export const gluestackUIConfig = createConfig({
       extraBlack: '950',
     },
     fonts: {
-      // [verde-imersivo] Poppins p/ titulos/botoes (heading), Inter p/ texto (body).
-      heading: 'Poppins_700Bold',
+      // [marca-vupth] Archivo substitui Poppins nos titulos/botoes (heading),
+      // Inter segue igual no corpo (body ja batia com o Pencil). `display` e
+      // pro peso 800 usado nos titulos de tela/modal no Pencil; `mono` pros
+      // numeros (posicao na fila, horarios) — preenchido agora, nao tinha uso.
+      heading: 'Archivo_700Bold',
       body: 'Inter_400Regular',
-      mono: undefined,
+      display: 'Archivo_800ExtraBold',
+      mono: 'DMMono_500Medium',
     },
     fontSizes: {
       '2xs': 10,

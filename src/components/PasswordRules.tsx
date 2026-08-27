@@ -1,5 +1,5 @@
 import { VStack, HStack, Text } from "@gluestack-ui/themed";
-import { Check, X } from "phosphor-react-native";
+import { Check, X } from "lucide-react-native";
 import { PasswordRule } from "@domain/auth/validateAuth";
 
 type Props = {
@@ -12,11 +12,11 @@ export function PasswordRules({ rules }: Props) {
       {rules.map((rule) => (
         <HStack key={rule.label} alignItems="center" gap="$1">
           {rule.passed ? (
-            <Check size={14} color="#3B7A3F" weight="bold" />
+            <Check size={14} color="#163300" />
           ) : (
-            <X size={14} color="#E63946" weight="bold" />
+            <X size={14} color="#B3261E" />
           )}
-          <Text size="xs" color={rule.passed ? "$green500" : "$red500"}>
+          <Text size="xs" color={rule.passed ? "$forest" : "$brandDanger"}>
             {rule.label}
           </Text>
         </HStack>

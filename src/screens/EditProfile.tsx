@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Alert, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { VStack, Text, Heading } from "@gluestack-ui/themed";
+import { VStack, Text } from "@gluestack-ui/themed";
 
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
@@ -64,26 +64,24 @@ export function EditProfile() {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} px={15} pt={60} pb={30} bg="$gray700">
-        <Header showBackButton />
+      <VStack flex={1} pb={30} px={16} bg="$brandBackground">
+        <ScreenHeader title="DADOS PESSOAIS" />
 
-        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4" mb="$6">
-          Editar Perfil
-        </Heading>
+        <VStack pt={24} flex={1}>
 
         <VStack gap="$4">
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Nome</Text>
+            <Text size="sm" color="$brandTextSecondary">Nome</Text>
             <Input2 placeholder="Nome" value={firstName} onChangeText={setFirstName} />
           </VStack>
 
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Sobrenome</Text>
+            <Text size="sm" color="$brandTextSecondary">Sobrenome</Text>
             <Input2 placeholder="Sobrenome" value={lastName} onChangeText={setLastName} />
           </VStack>
 
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Telefone</Text>
+            <Text size="sm" color="$brandTextSecondary">Telefone</Text>
             <Input2
               placeholder="11999998888"
               value={phone}
@@ -93,7 +91,7 @@ export function EditProfile() {
           </VStack>
 
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Data de nascimento</Text>
+            <Text size="sm" color="$brandTextSecondary">Data de nascimento</Text>
             <Input2
               placeholder="1990-01-15"
               value={birthDate}
@@ -102,7 +100,7 @@ export function EditProfile() {
           </VStack>
 
           <VStack gap="$1">
-            <Text size="sm" color="$gray300">Gênero</Text>
+            <Text size="sm" color="$brandTextSecondary">Gênero</Text>
             <VStack gap="$2">
               {GENDER_OPTIONS.map((g) => (
                 <Button
@@ -123,6 +121,7 @@ export function EditProfile() {
             onPress={handleSave}
             isDisabled={isSaving}
           />
+        </VStack>
         </VStack>
       </VStack>
     </ScrollView>

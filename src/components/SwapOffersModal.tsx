@@ -3,7 +3,7 @@ import { Modal, Alert } from "react-native";
 import { VStack, HStack, Box, Text, Heading, Divider, Spinner } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
-import { cardShadow } from "@utils/styles";
+import { floatingShadow } from "@utils/styles";
 import { acceptOfferText, myOfferText } from "@domain/queue/swap";
 import { swapOfferService, SwapOfferResponse } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
@@ -89,20 +89,20 @@ export function SwapOffersModal({ visible, professionalId, onClose, onChanged }:
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$2xl" p="$6" style={cardShadow}>
+        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
             Trocar de lugar
           </Heading>
 
           {loading && (
             <HStack alignItems="center" gap="$2" mt="$4">
-              <Spinner color="$green500" />
-              <Text size="sm" color="$gray300">Carregando ofertas...</Text>
+              <Spinner color="$forest" />
+              <Text size="sm" color="$brandTextSecondary">Carregando ofertas...</Text>
             </HStack>
           )}
 
           {empty && (
-            <Text size="sm" color="$gray300" mt="$3">
+            <Text size="sm" color="$brandTextSecondary" mt="$3">
               Nenhuma oferta de troca no momento. Publique a sua tocando em Mudar
               minha vez.
             </Text>
@@ -110,10 +110,10 @@ export function SwapOffersModal({ visible, professionalId, onClose, onChanged }:
 
           {acceptable.length > 0 && (
             <VStack gap="$3" mt="$4">
-              <Text size="xs" color="$gray300" fontFamily="$heading">PODE ACEITAR</Text>
+              <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">PODE ACEITAR</Text>
               {acceptable.map((o) => (
-                <Box key={o.id} bg="$gray700" borderRadius="$xl" p="$3">
-                  <Text size="sm" color="$gray100">{acceptOfferText(o.direction)}</Text>
+                <Box key={o.id} bg="$brandSurface" borderRadius="$card" p="$3">
+                  <Text size="sm" color="$brandTextPrimary">{acceptOfferText(o.direction)}</Text>
                   <Button
                     title={busyId === o.id ? "Aceitando..." : "Aceitar troca"}
                     mt="$2"
@@ -127,11 +127,11 @@ export function SwapOffersModal({ visible, professionalId, onClose, onChanged }:
 
           {mine.length > 0 && (
             <VStack gap="$3" mt="$4">
-              <Divider bg="$gray500" />
-              <Text size="xs" color="$gray300" fontFamily="$heading">MEUS PEDIDOS</Text>
+              <Divider bg="$brandBorder" />
+              <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">MEUS PEDIDOS</Text>
               {mine.map((o) => (
                 <HStack key={o.id} alignItems="center" justifyContent="space-between">
-                  <Text size="sm" color="$gray100" flex={1}>{myOfferText(o.direction)}</Text>
+                  <Text size="sm" color="$brandTextPrimary" flex={1}>{myOfferText(o.direction)}</Text>
                   <Button
                     title={busyId === o.id ? "..." : "Cancelar"}
                     variant="outline"

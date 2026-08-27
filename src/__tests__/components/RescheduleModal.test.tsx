@@ -2,7 +2,7 @@ import { fireEvent } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { RescheduleModal } from '@components/RescheduleModal';
 
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 
 const BASE = new Date(2026, 0, 1, 10, 0, 0).getTime(); // 01/01/2026 10:00 (piso)
 

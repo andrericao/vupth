@@ -33,22 +33,28 @@ export function DaySelector({ selectedDate, onSelect, from, count = SCHEDULE_HOR
             accessibilityRole="button"
             accessibilityState={{ selected }}
             accessibilityLabel={day.isToday ? "Hoje" : `Dia ${day.dayNumber}`}
-            bg={selected ? "$green500" : "$white"}
-            borderWidth="$1"
-            borderColor={selected ? "$green500" : "$gray200"}
+            // [contraste] O chip nao-selecionado era INVISIVEL: fundo branco,
+            // borda `$gray200` (#F2F3F3, 1.11:1) e o NUMERO DO DIA em
+            // `$gray500` (#DDDEDF, 1.35:1) — o conteudo principal do chip,
+            // abaixo do minimo WCAG de 4.5:1. Fundo passou pro `$brandSurface`
+            // (o cinza da marca ja separa do branco, sem depender de borda) e
+            // os textos pros tokens da marca. Selecionado segue forest, com
+            // `$brandGreen` por cima — o par da marca sobre fundo escuro
+            // (era `$green100`/`$white`, da paleta antiga).
+            bg={selected ? "$forest" : "$brandSurface"}
             borderRadius="$xl"
             px="$4"
             py="$3"
             minWidth={64}
           >
             <VStack alignItems="center" gap="$1">
-              <Text size="xs" color={selected ? "$green100" : "$gray400"}>
+              <Text size="xs" color={selected ? "$brandGreen" : "$brandTextSecondary"}>
                 {day.weekday}
               </Text>
               <Text
                 fontFamily="$heading"
                 size={day.isToday ? "sm" : "md"}
-                color={selected ? "$white" : "$gray500"}
+                color={selected ? "$brandGreen" : "$forest"}
               >
                 {day.label}
               </Text>

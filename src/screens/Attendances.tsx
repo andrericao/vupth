@@ -4,7 +4,6 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import {
   VStack,
   Text,
-  Heading,
   Box,
   HStack,
   Center,
@@ -12,16 +11,17 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Queue, Clock, CaretRight, CalendarBlank, ArrowsLeftRight } from "phosphor-react-native";
+import { Users, Clock, ChevronRight, Calendar, Repeat2 } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
-import { Header } from "@components/Header";
+import { ScreenHeader } from "@components/ScreenHeader";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { useClientIntentions } from "@hooks/useIntentions";
 import { useAuthStore } from "@stores/authStore";
 import { useRatedStore } from "@stores/ratedStore";
 import { SkeletonList } from "@components/Skeleton";
+import { LiveDot } from "@components/LiveDot";
 import { RatingModal } from "@components/RatingModal";
 import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
 import { ClientAttendance } from "@services/attendanceService";
@@ -30,13 +30,17 @@ import { swapOfferService } from "@services/swapOfferService";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
-import { cardShadow } from "@utils/styles";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 
-const HISTORY_STATUS: Record<string, { label: string; color: string }> = {
-  FINISHED: { label: "Concluído", color: "#3B7A3F" },
-  CANCELLED: { label: "Cancelado", color: "#E63946" },
-  LATE: { label: "Atrasado", color: "#F59E0B" },
+// [marca-vupth] Cada status e um PAR (fundo, texto). Antes era so uma cor de
+// FUNDO com texto branco fixo por cima, e "Atrasado" (#F59E0B + branco) dava
+// 2,15:1 — abaixo do minimo WCAG de 4,5:1. Os pares abaixo usam tokens da
+// marca: fundo claro com `forest` por cima, que e a regra de contraste da
+// identidade (accentPeach + forest = 8,76:1).
+const HISTORY_STATUS: Record<string, { label: string; bg: string; fg: string }> = {
+  FINISHED: { label: "Concluído", bg: "#E2F6D5", fg: "#163300" },   // greenTint
+  CANCELLED: { label: "Cancelado", bg: "#F3F5F1", fg: "#B3261E" },  // surface + danger
+  LATE: { label: "Atrasado", bg: "#FFC091", fg: "#163300" },        // accentPeach
 };
 
 function formatDateTime(iso: string): string {
@@ -50,7 +54,7 @@ function formatDateTime(iso: string): string {
 
 export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const { activeQueue, remaining, color, isInQueue, isBeingAttended, isPaused } = useQueueCountdown();
+  const { activeQueue, remaining, isInQueue, isBeingAttended, isPaused } = useQueueCountdown();
   // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
   const emAtendimento = isBeingAttended || isPaused;
   const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
@@ -161,55 +165,74 @@ export function Attendances() {
   }
 
   return (
-    <VStack flex={1} bg="$gray700">
-      <VStack px={15} pt={60}>
-        <Header />
-        <Heading fontFamily="$heading" fontSize="$2xl" mt="$4">
-          Atendimentos
-        </Heading>
-      </VStack>
+    <VStack flex={1} bg="$brandBackground">
+      <Box px={16}>
+        <ScreenHeader root title="Atendimentos" />
+      </Box>
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#3B7A3F" colors={["#3B7A3F"]} />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#163300" colors={["#163300"]} />
         }
       >
-        <VStack mt="$6" px={15}>
+        <VStack mt="$6" px={16}>
           <Text
-            size="xs"
-            color="$gray300"
-            fontFamily="$heading"
-            mb="$2"
+            fontFamily="$body"
+            fontSize={11}
+            fontWeight="$bold"
+            letterSpacing={0.8}
+            color="$brandTextSecondary"
+            mb="$2.5"
           >
             EM ANDAMENTO
           </Text>
 
           {activeQueue && (isInQueue || emAtendimento) ? (
             <TouchableOpacity onPress={handleGoToQueue}>
-              <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow} borderWidth="$1" borderColor={emAtendimento ? "#3B7A3F" : color}>
-                <HStack alignItems="center" gap="$3">
-                  <Queue size={24} color={emAtendimento ? "#3B7A3F" : color} />
-                  <VStack flex={1}>
-                    <Text fontFamily="$heading" size="sm">
+              {/* Unico card com borda verde-marca da tela: e o atendimento
+                  VIVO, o que a pessoa abriu o app pra ver. */}
+              <VStack
+                bg="$brandBackground"
+                p="$4"
+                borderRadius="$card"
+                borderWidth={2}
+                borderColor="$brandGreen"
+                gap="$2"
+              >
+                <HStack alignItems="center" gap="$2.5">
+                  <Users size={20} color="#163300" />
+                  <VStack flex={1} gap="$0.5">
+                    <Text fontFamily="$display" fontSize={16} letterSpacing={-0.4} color="$forest">
                       {activeQueue.establishmentName}
                     </Text>
-                    <Text size="xs" color="$gray300">
+                    <Text size="xs" color="$brandTextSecondary">
                       {activeQueue.professionalName}
                     </Text>
                   </VStack>
-                  <Badge bg={emAtendimento ? "#3B7A3F" : color} borderRadius="$full" px="$3" py="$1">
-                    <BadgeText color="$white" size="xs">
-                      {isBeingAttended ? "Em atendimento" : isPaused ? "Pausado" : formatWaitTime(remaining)}
-                    </BadgeText>
-                  </Badge>
-                  <CaretRight size={18} color="#9CA3AF" />
+                  <ChevronRight size={18} color="#454745" />
                 </HStack>
-              </Box>
+                <HStack
+                  bg="$brandGreen"
+                  borderRadius="$full"
+                  px={12}
+                  py={6}
+                  gap="$1.5"
+                  alignItems="center"
+                  alignSelf="flex-start"
+                >
+                  {/* Pausado NAO pisca: o atendimento esta parado, e ponto
+                      piscando sinalizaria movimento. */}
+                  <LiveDot size={8} color="#163300" pulsing={!isPaused} />
+                  <Text size="xs" fontWeight="$semibold" color="$forest">
+                    {isBeingAttended ? "Em atendimento" : isPaused ? "Pausado" : formatWaitTime(remaining)}
+                  </Text>
+                </HStack>
+              </VStack>
             </TouchableOpacity>
           ) : (
-            <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
-              <Text size="sm" color="$gray300" textAlign="center">
+            <Box bg="$brandSurface" p="$4" borderRadius="$card">
+              <Text size="sm" color="$brandTextSecondary" textAlign="center">
                 Nenhum atendimento em andamento
               </Text>
             </Box>
@@ -217,24 +240,31 @@ export function Attendances() {
         </VStack>
 
         {pendingSwaps.length > 0 && (
-          <VStack mt="$6" px={15}>
-            <Text size="xs" color="$gray300" fontFamily="$heading" mb="$2">
+          <VStack mt="$6" px={16}>
+            <Text
+              fontFamily="$body"
+              fontSize={11}
+              fontWeight="$bold"
+              letterSpacing={0.8}
+              color="$brandTextSecondary"
+              mb="$2.5"
+            >
               PEDIDOS DE TROCA
             </Text>
 
             <VStack gap="$3">
               {pendingSwaps.map((s) => (
-                <Box key={s.offerId} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                <Box key={s.offerId} bg="$brandSurface" p="$4" borderRadius="$card">
                   <HStack alignItems="center" gap="$3">
-                    <ArrowsLeftRight size={22} color="#3B7A3F" />
+                    <Repeat2 size={22} color="#163300" />
                     <VStack flex={1}>
                       <Text fontFamily="$heading" size="sm">
                         {s.professionalName}
                       </Text>
-                      <Text size="xs" color="$gray300">
+                      <Text size="xs" color="$brandTextSecondary">
                         {s.establishmentName}
                       </Text>
-                      <Text size="xs" color="$gray400" mt="$1">
+                      <Text size="xs" color="$brandTextSecondary" mt="$1">
                         Aguardando alguém da fila ceder o lugar
                       </Text>
                     </VStack>
@@ -242,7 +272,7 @@ export function Attendances() {
                       onPress={() => handleCancelSwap(s.offerId, s.professionalName)}
                       disabled={cancellingSwapId === s.offerId}
                     >
-                      <Text size="xs" color="$red500" fontFamily="$heading">
+                      <Text size="xs" color="$brandDanger" fontFamily="$heading">
                         {cancellingSwapId === s.offerId ? "Cancelando..." : "Cancelar"}
                       </Text>
                     </TouchableOpacity>
@@ -254,29 +284,36 @@ export function Attendances() {
         )}
 
         {intentionGroups.length > 0 && (
-          <VStack mt="$6" px={15}>
-            <Text size="xs" color="$gray300" fontFamily="$heading" mb="$2">
+          <VStack mt="$6" px={16}>
+            <Text
+              fontFamily="$body"
+              fontSize={11}
+              fontWeight="$bold"
+              letterSpacing={0.8}
+              color="$brandTextSecondary"
+              mb="$2.5"
+            >
               AGENDAMENTOS
             </Text>
 
             <VStack gap="$3">
               {intentionGroups.map((group) => (
                 <VStack key={group.day.toISOString()} gap="$2">
-                  <Text size="xs" color="$gray400" fontFamily="$heading">
+                  <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
                     {group.dayLabel}
                   </Text>
                   {group.items.map((i) => (
-                    <Box key={i.id} bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                    <Box key={i.id} bg="$brandSurface" p="$4" borderRadius="$card">
                       <HStack alignItems="center" gap="$3">
-                        <CalendarBlank size={22} color="#3B7A3F" />
+                        <Calendar size={22} color="#163300" />
                         <VStack flex={1}>
                           <Text fontFamily="$heading" size="sm">
                             {i.professionalName}
                           </Text>
-                          <Text size="xs" color="$gray300">
+                          <Text size="xs" color="$brandTextSecondary">
                             {i.services.map((s) => s.customName).join(", ") || i.establishmentName}
                           </Text>
-                          <Text size="xs" color="$gray400" mt="$1">
+                          <Text size="xs" color="$brandTextSecondary" mt="$1">
                             Pedido para às {formatClockTime(new Date(i.desiredTime))}
                             {i.estimatedStartTime && i.estimatedStartTime !== i.desiredTime
                               ? ` · previsto ~${formatClockTime(new Date(i.estimatedStartTime))}`
@@ -287,7 +324,7 @@ export function Attendances() {
                           onPress={() => handleCancelIntention(i.id, i.professionalName)}
                           disabled={cancellingId === i.id}
                         >
-                          <Text size="xs" color="$red500" fontFamily="$heading">
+                          <Text size="xs" color="$brandDanger" fontFamily="$heading">
                             {cancellingId === i.id ? "Cancelando..." : "Cancelar"}
                           </Text>
                         </TouchableOpacity>
@@ -300,12 +337,14 @@ export function Attendances() {
           </VStack>
         )}
 
-        <VStack mt="$6" px={15}>
+        <VStack mt="$6" px={16}>
           <Text
-            size="xs"
-            color="$gray300"
-            fontFamily="$heading"
-            mb="$2"
+            fontFamily="$body"
+            fontSize={11}
+            fontWeight="$bold"
+            letterSpacing={0.8}
+            color="$brandTextSecondary"
+            mb="$2.5"
           >
             REALIZADOS
           </Text>
@@ -315,7 +354,7 @@ export function Attendances() {
           ) : realizados.length === 0 ? (
             <Center py="$8">
               <Clock size={40} color="#9CA3AF" />
-              <Text size="sm" color="$gray300" mt="$2">
+              <Text size="sm" color="$brandTextSecondary" mt="$2">
                 Nenhum atendimento realizado ainda
               </Text>
             </Center>
@@ -324,38 +363,39 @@ export function Attendances() {
               {realizados.map((a) => {
                 const st = HISTORY_STATUS[a.status] ?? {
                   label: a.status,
-                  color: "#9CA3AF",
+                  bg: "#F3F5F1",
+                  fg: "#454745",
                 };
                 const canRate = a.status === "FINISHED" && !ratedIds.includes(a.id);
                 return (
                   <TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => setDetailFor(a)}>
-                    <Box bg="$white" p="$4" borderRadius="$2xl" style={cardShadow}>
+                    <Box bg="$brandSurface" p="$4" borderRadius="$card">
                       <HStack justifyContent="space-between" alignItems="flex-start">
                         <VStack flex={1} pr="$2">
                           <Text fontFamily="$heading" size="sm">
                             {a.professionalName}
                           </Text>
-                          <Text size="xs" color="$gray300">
+                          <Text size="xs" color="$brandTextSecondary">
                             {a.services.map((s) => s.customName).join(", ") || "—"}
                           </Text>
-                          <Text size="xs" color="$gray400" mt="$1">
+                          <Text size="xs" color="$brandTextSecondary" mt="$1">
                             {formatDateTime(a.startTime ?? a.scheduledTime)}
                           </Text>
                         </VStack>
                         <VStack alignItems="flex-end" gap="$1">
-                          <Badge bg={st.color} borderRadius="$full" px="$3" py="$1">
-                            <BadgeText color="$white" size="xs">
+                          <Badge bg={st.bg} borderRadius="$full" px="$3" py="$1">
+                            <BadgeText color={st.fg} size="xs" fontFamily="$heading">
                               {st.label}
                             </BadgeText>
                           </Badge>
-                          <Text size="xs" color="$gray300">
+                          <Text size="xs" color="$brandTextSecondary">
                             R$ {a.totalValue.toFixed(2)}
                           </Text>
                         </VStack>
                       </HStack>
                       <HStack alignItems="center" gap="$1" mt="$3">
-                        <CaretRight size={13} color={canRate ? "#FFB703" : "#9CA3AF"} weight="bold" />
-                        <Text size="xs" color="$gray300" fontFamily="$heading">
+                        <ChevronRight size={13} color={canRate ? "#163300" : "#454745"} />
+                        <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
                           {canRate ? "Toque para detalhes e avaliar" : "Toque para ver detalhes"}
                         </Text>
                       </HStack>

@@ -20,7 +20,7 @@ const OPEN_PARAMS = {
 const mockRouteParams: Record<string, unknown> = { ...OPEN_PARAMS };
 
 jest.mock('expo-secure-store');
-jest.mock('phosphor-react-native', () => new Proxy({}, { get: () => () => null }));
+jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate, goBack: jest.fn() }),
   useRoute: () => ({ params: mockRouteParams }),
@@ -59,12 +59,12 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
 
   it('VISITANTE: confirmar manda pro login levando a seleção (redirectTo queueStatus)', async () => {
     useAuthStore.setState({ isAuthenticated: false });
-    const { getByText, findByTestId } = renderWithProviders(<ServiceSelection />);
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
 
     // findByTestId default é 1s; o 1º mount do Gluestack pode passar disso sob
     // carga (flaky) — dá 15s (jest.setTimeout acima cobre).
     fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
-    fireEvent.press(getByText('Confirmar e entrar na fila'));
+    fireEvent.press(getByTestId('primary-queue'));
 
     expect(mockNavigate).toHaveBeenCalledWith(
       'login',
@@ -78,10 +78,10 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
 
   it('LOGADO: confirmar vai direto pra queueStatus', async () => {
     useAuthStore.setState({ isAuthenticated: true });
-    const { getByText, findByTestId } = renderWithProviders(<ServiceSelection />);
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
 
     fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
-    fireEvent.press(getByText('Confirmar e entrar na fila'));
+    fireEvent.press(getByTestId('primary-queue'));
 
     expect(mockNavigate).toHaveBeenCalledWith(
       'queueStatus',
@@ -164,13 +164,16 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     setRouteParams({ ...OPEN_PARAMS, establishmentOpen: false });
     mockCreateCut.mockResolvedValue({ data: { id: 'cut-1' } });
 
-    const { getByTestId, getByText, queryByText, findByTestId } = renderWithProviders(
+    const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(
       <ServiceSelection />,
     );
     fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
 
-    expect(getByText('Agendar para depois')).toBeTruthy();
-    expect(queryByText('Confirmar e entrar na fila')).toBeNull();
+    // Por testID, nao pelo texto: o rotulo carrega o preco ("Agendar para
+    // depois · R$ 50") e mudou junto com o desenho novo — o que o teste
+    // garante e QUAL acao e a primaria, nao como ela se chama.
+    expect(getByTestId('primary-schedule')).toBeTruthy();
+    expect(queryByTestId('primary-queue')).toBeNull();
 
     fireEvent.press(getByTestId('more-options'));
     fireEvent.press(getByTestId('more-option-cut'));

@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 
 import { useFonts } from "expo-font";
-import { Poppins_600SemiBold, Poppins_700Bold } from "@expo-google-fonts/poppins";
 import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from "@expo-google-fonts/inter";
+import { Archivo_700Bold, Archivo_800ExtraBold } from "@expo-google-fonts/archivo";
+import { DMMono_500Medium } from "@expo-google-fonts/dm-mono";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -17,8 +18,10 @@ import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
+import { useFavoritesStore } from "@stores/favoritesStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
 import { useLocationStore } from "@stores/locationStore";
+import { useFirstRunStore } from "@stores/firstRunStore";
 import { useQueueNotifications } from "@hooks/useQueueNotifications";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
@@ -33,18 +36,21 @@ const queryClient = new QueryClient();
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    Poppins_600SemiBold,
-    Poppins_700Bold,
     Inter_400Regular,
     Inter_500Medium,
     Inter_700Bold,
+    Archivo_700Bold,
+    Archivo_800ExtraBold,
+    DMMono_500Medium,
   });
   const restoreSession = useAuthStore((s) => s.restoreSession);
   const restoreQueue = useQueueStore((s) => s.restoreQueue);
   const restoreRated = useRatedStore((s) => s.restoreRated);
   const restoreComingSoon = useComingSoonStore((s) => s.restore);
   const restoreLocation = useLocationStore((s) => s.restoreLocation);
+  const restoreFirstRun = useFirstRunStore((s) => s.restoreFirstRun);
   const restorePendingSwap = usePendingSwapStore((s) => s.restorePending);
+  const restoreFavorites = useFavoritesStore((s) => s.restoreFavorites);
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
 
@@ -55,6 +61,8 @@ export default function App() {
     restoreComingSoon();
     restoreLocation();
     restorePendingSwap();
+    restoreFirstRun();
+    restoreFavorites();
     // Portao de readiness (cold start do Render): acorda o backend ANTES de liberar
     // login/cadastro/listagem. A 1a cutucada acorda a instancia; segue mesmo se
     // estourar o teto (chamadas seguintes ja pegam a instancia quente). CLAUDE.md 18c.
@@ -69,9 +77,11 @@ export default function App() {
     restoreSession,
     restoreQueue,
     restoreRated,
+    restoreFavorites,
     restoreComingSoon,
     restoreLocation,
     restorePendingSwap,
+    restoreFirstRun,
   ]);
 
   // Notificacao pessoal "é a sua vez" (WebSocket) app-wide: vale em qualquer
