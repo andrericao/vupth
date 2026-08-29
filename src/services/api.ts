@@ -70,6 +70,9 @@ export function registerAuthStore(setter: AuthStoreSetter) {
 	_setAuthState = setter;
 }
 
+// axios 1.17+ tipa `create` tambem como export nomeado e a regra de import
+// passa a avisar aqui; o uso via objeto default e intencional.
+// eslint-disable-next-line import/no-named-as-default-member
 export const api = axios.create({
 	baseURL: BASE_URLS[env],
 	// O `/establishment` leva ~11,7s (medido em 2026-08-26, e o MESMO tempo com
