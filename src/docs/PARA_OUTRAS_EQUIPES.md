@@ -261,6 +261,8 @@ Ou seja: o preflight cai em `anyRequest().authenticated()` exatamente como você
 como preflight não carrega `Authorization`, o navegador nunca chega à chamada real. **Confirmado
 que não é "falta autorizar a origem" — não existe CORS nenhum, nos dois ambientes.**
 
+> ⏱️ **Medição de 26/08 — SUPERADA em 28/08.** O backend implementou o CORS. Estado atual na **§11**.
+
 ✅ **Corrigimos um registro nosso:** havíamos anotado *"OPTIONS sem resposta"*. Era artefato de cold
 start do Render. **O comportamento real é 401**, como o 18e diz.
 
@@ -312,6 +314,8 @@ O merge para a `main` **foi feito** e o build de Production saiu. É de lá que 
 
 **A página abre, e nenhuma chamada completa.** Não é bug do porte web nem do Cloudflare: é o CORS
 inexistente no backend, medido nos dois ambientes (detalhe e números na **§9.3**).
+
+> ⏱️ **Escrito em 27/08 — SUPERADO. Ver §11.**
 
 Este é **o único bloqueio** do acesso por link hoje. Está pedido ao backend na **§9.2** — e o pedido
 tem duas partes que precisam ir juntas: **incluir as origens do client** (o §18e do PRD deles cita
@@ -445,3 +449,82 @@ o app).
 **antes** do problema. Sem ela, rodar `expo export --platform web` e depois o portão dá duas falhas
 que **não apontam para a causa** — `tsc` com *"Maximum call stack size exceeded"* sem citar arquivo,
 e lint reprovando por milhares de problemas vindos do bundle.
+
+---
+
+## 11. 📍 ESTADO EM 2026-08-28 — o CORS entrou, e o que ainda falta
+
+> Esta seção **supera** o que as §9.3 e §10.3 dizem sobre "não existe CORS". Elas ficam como
+> registro datado; a verdade de hoje é esta.
+
+### ✅ O backend implementou o CORS
+
+Commit `4320108` na `dev` deles (*"CORS para o acesso por link, e o /actuator para de entregar
+metrics sem token"*). O `PRD_BACKEND.md` §18e foi reescrito: **CORS ✅ implementado**.
+
+**Faz o que foi combinado, inclusive o cuidado que pedimos com o WebSocket:** o
+`CorsConfigurationSource` retorna **`null`** para `/ws` e `/ws/**`, então o `CorsFilter` passa reto e
+o `setAllowedOriginPatterns("*")` do `WebSocketConfig` fica **intacto**. O tempo real não foi tocado.
+
+### 🪜 A escada de diagnóstico (serve para os dois apps)
+
+A env var vazia produz um sintoma **diferente** de "sem CORS", e isso permite localizar o problema
+sem acesso a painel nenhum:
+
+| `OPTIONS` de preflight | Significa |
+|---|---|
+| **401**, sem `vary` | código **não deployado** — o preflight cai em `anyRequest().authenticated()` |
+| **403** + `vary: Access-Control-Request-*` | código **no ar**, mas a **origem não está autorizada** |
+| **200** + `access-control-allow-origin` | **pronto** |
+
+⚠️ **`curl` sem o header `Origin` NÃO testa CORS** — não é requisição CORS, e responde 200 sempre.
+O comando que testa de verdade:
+
+```bash
+curl -i -X OPTIONS https://vupth-backend-ia.onrender.com/auth/login \
+  -H "Origin: https://vupth.pages.dev" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: authorization,content-type"
+```
+
+### 📐 Medido em 28/08
+
+| Backend | Origem | Resultado |
+|---|---|---|
+| **Render** (staging) | `https://vupth-partner.pages.dev` | **200** ✅ |
+| **Render** | `https://x.vupth-partner.pages.dev` | **200** ✅ — o curinga de subdomínio funciona |
+| **Render** | `https://vupth.pages.dev` | **403** ❌ |
+| **Render** | `https://dev.vupth.pages.dev` | **403** ❌ |
+| **Railway** (prod) | `https://vupth.pages.dev` | **401** ❌ — código não deployado |
+
+### 🔴 O que falta, e de quem é
+
+1. **Origens do client no `CORS_ALLOWED_ORIGINS` do Render** (+ restart). A variável já está no ar e
+   funcionando — só foi preenchida com a lista do §18e, que **citava apenas o partner**. É
+   exatamente o risco levantado na §9.2, e ele se concretizou.
+   ```
+   https://vupth-partner.pages.dev,https://*.vupth-partner.pages.dev,https://vupth.pages.dev,https://*.vupth.pages.dev
+   ```
+2. **Backend: merge `dev` → `main`** (agendado para 28/08 às 23:00) **+ a mesma variável no Railway.**
+   Antes do merge não adianta configurar o painel do Railway: não há código lá para ler a variável.
+   O §18e deles fala em *"a env var no Render"* — **no singular**; o link público sai do Railway.
+
+⚠️ **O 403 pega o `readiness` também.** Não é só o login: com a origem não autorizada, o portão
+`waitForBackend` da build web nunca passa, e o sintoma é *"preparando servidor…"* para sempre — sem
+erro que explique. É o mesmo modo de falha mudo de antes, com outro código HTTP.
+
+### 🟡 Cloudflare — a ponta staging do client ainda não existe
+
+`https://dev.vupth.pages.dev` devolve **404**: nunca houve deploy de preview da `dev`, e o alias
+`<branch>.<projeto>.pages.dev` só nasce depois do primeiro. O *branch control* foi ajustado para
+`dev` em 28/08, mas ele vale **daqui pra frente** — não reconstrói o que já passou. Resolve com
+*"Create deployment"* no painel ou com o próximo push na `dev`.
+
+✅ **Não precisa de código para ligar a preview ao Render:** o `BASE_URLS` já tem `staging` →
+Render e o `resolveApiEnv` já aceita `"staging"`. Basta `EXPO_PUBLIC_API_ENV=staging` no ambiente
+**Preview** da Cloudflare.
+
+⚠️ **A produção segue vindo da `main`** (conferido: `vupth.pages.dev` → 200, `main` em `cb329119`).
+A `dev` está **8 commits à frente**, incluindo a PR #16 inteira — então a preview, quando subir, vai
+mostrar coisa que o link público ainda não tem.
+

@@ -461,6 +461,9 @@ qualquer chamada real. No console do navegador aparece só o erro genérico de C
 status útil. **Sintoma: o link abre bonito e nenhuma chamada completa.** É por isso que este item
 não é diagnosticável a partir do nosso lado — e por isso está escrito aqui.
 
+> ⏱️ **28/08: o backend IMPLEMENTOU o CORS.** O parágrafo abaixo é registro de 27/08.
+> Estado atual, com a escada de diagnóstico e o que falta: `PARA_OUTRAS_EQUIPES.md` **§11**.
+
 **Estado do backend** (`PRD_BACKEND.md` §18e, 26/08): CORS 🟠 **especificado, não implementado** ·
 WebSocket ✅ **já aberto** · keep-warm = configuração do Andre. O desenho aprovado lá usa
 `setAllowedOriginPatterns` + env var `CORS_ALLOWED_ORIGINS` (default vazio), `allowCredentials(false)`.
