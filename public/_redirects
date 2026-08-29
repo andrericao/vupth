@@ -1,0 +1,11 @@
+# Fallback de SPA (espelho do partner, D8).
+#
+# O export web gera UM index.html. Hoje o client so navega em "/" (React
+# Navigation sem `linking`), mas sem esta regra qualquer rota que um dia
+# exista — ou um F5 numa URL compartilhada — devolveria 404 do host em vez
+# da tela. Custo zero agora, e a dupla client/partner fica identica.
+#
+# O 200 e o que faz o host SERVIR o index sem trocar a URL da barra
+# (301/302 mandariam o usuario para "/" e ele perderia a rota).
+
+/*    /index.html   200

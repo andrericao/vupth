@@ -1,0 +1,30 @@
+# Cabecalhos de seguranca do build WEB (mitigacao 2 do D8, 2026-08-12 —
+# espelho do arquivo do partner; o C26 exige que a dupla nao divirja).
+#
+# Formato lido por Cloudflare Pages e Netlify sem configuracao extra: o Expo
+# copia o conteudo de `public/` para a saida do `expo export --platform web`.
+#
+# Por que isto importa AQUI: na web o token nao mora em cofre do sistema, e sim
+# no `sessionStorage` (ver web-shims/expo-secure-store.js) — legivel por
+# qualquer JavaScript da mesma origem. O vetor real e XSS, e o CSP e a defesa
+# mais eficaz contra ele. As duas coisas andam juntas: sessionStorage encurta a
+# janela, o CSP evita que o script injetado exista.
+
+/*
+  # Sem CSP, um <script> injetado le o token e o manda p/ fora. Com ele, o
+  # navegador simplesmente nao executa o que nao veio da nossa origem.
+  # 'unsafe-inline' em style-src: o React Native Web injeta estilos inline —
+  # sem isso a pagina sobe sem CSS nenhum.
+  # connect-src precisa listar o backend E o WebSocket (wss:), senao a fila
+  # para de atualizar sem erro visivel.
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://vupth-backend-ia.onrender.com https://vupth-backend-ia-production.up.railway.app wss://vupth-backend-ia.onrender.com wss://vupth-backend-ia-production.up.railway.app; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  # Impede que o app seja embutido em iframe de terceiro (clickjacking).
+  X-Frame-Options: DENY
+  # Nao deixa o navegador "adivinhar" o tipo de um arquivo servido.
+  X-Content-Type-Options: nosniff
+  # Nao vaza a URL interna (com ids) ao clicar p/ fora.
+  Referrer-Policy: strict-origin-when-cross-origin
+  # A web nao usa camera/microfone/GPS por enquanto — negar por padrao.
+  Permissions-Policy: geolocation=(), camera=(), microphone=()
+  # Forca HTTPS nas proximas visitas.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
