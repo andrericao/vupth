@@ -2,7 +2,7 @@
 
 Pendências do app **cliente** que dependem do backend. O front já está pronto (ou pronto para consumir) em cada caso. Detalhe completo nos callouts do `PRD_FRONT-CLIENT.md`.
 
-Última atualização: **2026-08-28** · branch `dev` do front-client.
+Última atualização: **2026-08-29** · branch `dev` do front-client.
 
 ---
 
@@ -76,6 +76,7 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 | B7 | ✅ **ENTREGUE E CONSUMIDO (2026-08-06)** — ~~Filtro por localidade — Fase 3 (GPS) — PRIORIDADE 1 do client (Andre 2026-08-01)**: **geocodar** o endereço de cada estabelecimento no cadastro (CEP/endereço → `latitude`/`longitude`, campos que o `Address` já tem) + `GET /establishment?lat=&lng=&radiusKm=` ordenado por distância (Haversine). ✅ **O LADO DO CLIENT JÁ ESTÁ FEITO (2026-08-01):** `expo-location` instalado + permissão pedida **na primeira abertura** + **reverse geocode no device** (nativo, sem API paga) preenchendo bairro/cidade/UF, e as **coordenadas já ficam guardadas** (`locationStore.coords`) esperando o endpoint. Enquanto o backend não vem, isso já melhora a Fase 1 (a Home abre ordenada pelo bairro do cliente **sem ele digitar CEP**); com o B7 vira **distância real** ("2,3 km"). ⚠️ Ativa só no binário 1.0.1 (módulo nativo) | 14 / PRD 11 | 🟡 **front pronto / backend é o gargalo** |
 | B8 | 🔴 **`#31` / partner S14 — token inválido conecta ANÔNIMO em vez de ser recusado.** O `StompAuthChannelInterceptor` loga `warn` e segue. Com access token de 1h e `reconnectDelay` reconectando sozinho, uma reconexão com token vencido sobe anônima: o tópico público continua atualizando a fila e **só o canal pessoal morre calado**, sem erro em nenhuma ponta. **Só o backend fecha** — sem a recusa, o app não tem como saber que está anônimo. O painel de diagnóstico do client (2026-08-06) apenas EXIBE o estado; não substitui a correção. Pedido: recusar o CONNECT com token inválido/expirado (erro STOMP), em vez de degradar para anônimo | 18b | ⬜ aberto |
 | B10 | 🔴 **`GET /establishment` leva ~11-12s em TODO ambiente, e o custo NÃO vem do volume.** Medido pelo front-partner em 26/08 (item **"`GET /establishment` leva ~12s em todo ambiente"** no handoff deles — citar pelo nome, o número renumera) e conferido por nós no código. **Já é falha visível, não é só lentidão:** o client estourava o timeout na PRIMEIRA tela ("Erro ao carregar estabelecimentos") com o backend respondendo 200 logo depois. Detalhe, medições e a pista que estreita a busca na **seção 17** | — | ⬜ **ABERTO — desempenho** |
+| B11 | ✅ **RESOLVIDO PELO BACKEND ANTES DE PEDIRMOS.** Iamos pedir que o §18e deixasse de falar so do Render — o link publico sai do **Railway**. Eles ja criaram uma **lista de tarefas de PAINEL (P1–P4)** na §18e, e o **P2** traz os dois paineis e a string completa, **com as origens do client**. Nada a pedir | 18e P2 | ✅ nada a fazer |
 
 **🔗 Regras cross-cutting novas (partner/backend, o client precisa saber):**
 - **ETA com buffer de −10min (S10 partner, regra GLOBAL):** o **backend** calcula o tempo de espera **já com −10min** (piso 0) para o cliente chegar antes; **client e partner só EXIBEM o número** que vier — **NÃO subtrair no front** (evita divergência). O client já mostra `estimated_wait_minutes` como veio (nenhuma lógica de buffer a adicionar). Só ficar atento se o backend expuser `display_wait` vs `raw_eta` em campos separados.
@@ -490,4 +491,75 @@ isso que a tela "funciona": ela só demora ~12s para pintar.
 
 ⚠️ **Não vamos empilhar contorno.** Enquanto o custo fixo existir, qualquer coisa que a gente faça
 aqui esconde o defeito e duplica trabalho.
+
+---
+
+## 18. 📚 Leitura dos documentos das outras equipes — 2026-08-29
+
+Registro do que lemos, para não pedir o que já foi respondido.
+
+### Backend — o que mudou desde 26/08
+
+| Commit | O quê | Efeito aqui |
+|---|---|---|
+| `4320108` | **CORS implementado** (`setAllowedOriginPatterns`, env var, `allowCredentials(false)`, `/ws` isento) | ✅ destravou o staging. Ver `PARA_OUTRAS_EQUIPES.md` §11 |
+| `f32454c` | **e-mail passou a sair pela API HTTP do Brevo (porta 443)**, não mais por SMTP | 🟢 **destrava o B3.** ⚠️ **Mas atenção ao ambiente:** o `P1` marca `MAIL_PROVIDER=brevo` + `BREVO_API_KEY` como feito **no Railway**. No **Render**, eles mediram e **confirmaram que a porta 587 está bloqueada** — se a chave da API não estiver no painel do Render, **nenhum e-mail sai do staging**. A UX daqui já está pronta; **retestar em device, e saber contra qual ambiente** |
+| `686c88f` | **D10 e D11 decididos** — papel é o que a pessoa já foi, e **escopo nunca entra no token** | 📌 encosta no nosso S34, abaixo |
+| `2d58036` | os cinco pedidos do Partner que nunca chegaram até lá — **três já respondidos pelo código** | ⚠️ mesmo padrão do nosso S19/WebSocket: **ir ao código antes de pedir** |
+| `d9fe98e` | a §18c pedia o portão de readiness que **os dois fronts já têm** | ✅ nada a fazer |
+
+⚠️ **`d9fe98e` merece nota:** a §18c pedia aos fronts algo **já implementado dos dois lados**. É a
+terceira vez que um documento pede o que o código já resolve — o inverso do que costuma acontecer.
+Reforça a Regra 3 do `VUPTH_DOCS` (toda afirmação vem com **como se verifica**).
+
+### 🆕 A lista de tarefas de PAINEL do backend (§18e, P1–P4)
+
+Novidade de 29/08 e **muito útil para nós**: eles separaram o que é **configuração de painel** do que
+é código, porque tarefa de painel vivia solta na prosa — foi assim que o PRD afirmou por meses haver
+um `keep-alive.yml` que tinha sido deletado.
+
+| # | Tarefa | Painel | Estado |
+|---|---|---|---|
+| P1 | Transporte de e-mail | Railway | ✅ feito 29/08 |
+| **P2** | **Origens do CORS** | Render ✅ / **Railway ⬜** | 🟡 **é o que falta para o link público** |
+| P3 | Keep-warm (cron-job.org, 5 min, em janela) | — | ⬜ aberto |
+| **P4** | **Health Check Path do Render** = `/actuator/health/readiness` | Render | ⬜ **aberto** |
+
+🔴 **O P4 explica um erro que veríamos e culparíamos o app.** Com o campo **vazio** (estado de hoje),
+o Render dá o serviço como no ar **assim que a porta abre** — e numa app Spring Boot a porta abre
+**antes** de o Liquibase terminar. Ou seja: **a cada deploy há uma janela em que o Render roteia
+tráfego real para uma instância com o banco ainda não pronto, e o usuário toma 500.**
+
+📣 **Para nós isso importa duas vezes:** é exatamente a janela que o nosso portão `waitForBackend`
+existe para cobrir — e é a explicação para 500 esporádico logo após deploy, que não é bug do client.
+
+### Front-partner — `VUPTH_DOCS.md`, proposta de 27/08
+
+Proposta de **regra de roteamento de documentos**: uma fonte por assunto, o resto **referencia** em
+vez de repetir. Motivada por três casos reais de cópia envelhecida (o keep-alive que não existia, a
+paleta teal no C7, a identidade em 55 arquivos e zero documentos).
+
+**Impacto direto aqui:**
+
+- 🟡 **Ambientes deveriam morar num `AMBIENTES.md` compartilhado**, que **ainda não existe**. Nós
+  documentamos os nomes no `PRD_FRONT-CLIENT.md` §1w em 28/08. **Enquanto o arquivo comum não
+  nascer, o §1w é a nossa fonte**; quando nascer, o §1w vira referência e o conteúdo migra. Uma das
+  perguntas abertas da proposta é justamente **quem escreve a primeira versão**.
+- ✅ **Regra 2 (o que pode virar teste, vira teste)** — já seguimos: `buildOutputIgnorado.test.ts` e
+  `fontesForaDoNodeModules.test.ts`.
+- ✅ **Regra 3 (todo documento diz como se verifica)** — adotada. O §1x do nosso PRD já traz os
+  comandos de verificação da seção de fontes.
+- ✅ **Regra 4 (item do backend se cita pelo NOME)** — já era a nossa regra desde 07/08.
+- 📌 **Regra 5** — o `DESIGN.md` vale para os dois fronts mas vive só no partner. Enquanto os tokens
+  não virarem pacote versionado, seguimos lendo cópia. **Decisão do Andre**, não nossa.
+
+### S34 — o que muda com D10/D11
+
+O backend decidiu que **papel é o que a pessoa já foi** e que **escopo nunca entra no token**. Isso
+não conserta o nosso defeito de tipo, que continua sendo **nosso**: declaramos `user.roles: string[]`
+para um campo que se chama **`user_roles`** e contém `[{role_type, is_active}]` — logo `user.roles` é
+**sempre `undefined`**.
+
+✅ **Sem defeito ativo** (nada no client lê `roles` — grepado). Decisão do Andre em 29/08: **não
+mexer agora**, fica para quando encostarmos em auth. Registrado para não se perder.
 

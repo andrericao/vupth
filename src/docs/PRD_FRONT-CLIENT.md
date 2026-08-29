@@ -442,6 +442,46 @@ Com o aviso **no momento certo**, a multa fica defensável: ele foi informado an
 Nada aqui aguarda **decisão** — o escopo está fechado. O que falta é **implementação de terceiro**, abaixo.
 
 
+### 🔤 As FONTES da marca e o deploy web — resolvido em 2026-08-29
+
+**O que acontecia.** O `expo export --platform web` grava cada asset **espelhando o caminho de
+origem**. Com as fontes importadas de `@expo-google-fonts/*`, os TTFs saíam em
+`dist/assets/node_modules/@expo-google-fonts/...` — e a **Cloudflare Pages descarta `node_modules`
+do deploy, por design e sem avisar**.
+
+Somado a isso, o portão do `App.tsx` segurava a tela **só** no `fontsLoaded`, descartando o segundo
+elemento do `useFonts`. Resultado: **spinner eterno**. Não era CORS, não era backend.
+
+⚠️ **Por que passou despercebido, e a lição que vale para tudo:** com o fallback de SPA, **o arquivo
+ausente responde `200`**, devolvendo o `index.html`. Quem testa por status code vê verde.
+**`200` não significa que o arquivo existe — o que distingue é o `content-type`.**
+
+**Como está agora.** Os 6 TTFs que usamos vivem em `assets/fonts/` e entram por `require()`. O
+portão é `fontsLoaded || Boolean(fontError)`: fonte que falha **degrada para a do sistema** em vez de
+prender o app. De brinde, o export caiu de **42 fontes para 6** — antes o pacote inteiro do
+`@expo-google-fonts` entrava no bundle.
+
+**📐 COMO SE VERIFICA** *(medido em 29/08 — se der outro resultado, esta seção está mentindo)*:
+
+```bash
+# 1. pegue o bundle publicado
+curl -s https://dev.vupth.pages.dev/ | grep -o '/_expo/static/js/web/[^"]*\.js'
+
+# 2. no bundle, NAO pode haver caminho sob node_modules:
+grep -c 'assets/node_modules/@expo-google-fonts' bundle.js     # esperado: 0  (era 42)
+
+# 3. e a fonte tem de existir DE VERDADE — olhe o content-type, nao o status:
+curl -sI https://dev.vupth.pages.dev/assets/assets/fonts/Archivo_700Bold.<hash>.ttf | grep -i content-type
+# ✅ font/ttf   ❌ text/html  = nao existe, quem respondeu foi o fallback de SPA
+```
+
+🔒 **Travado por teste:** `src/__tests__/projeto/fontesForaDoNodeModules.test.ts` verifica as **três**
+condições juntas — nenhum import de `@expo-google-fonts`, os TTFs existem em `assets/fonts/`, e o
+portão considera o erro (inclusive que o render não voltou a usar `{!fontsLoaded ?`).
+
+> 🙏 **Crédito:** achado pelo **front-partner** em 29/08, que perdeu o app publicado para isso e nos
+> avisou antes de a gente descobrir sozinho. Eles corrigiram do mesmo jeito (`f310297`).
+
 ### 🔴 O bloqueio real do acesso por link: **CORS** (medido em 26/08, nos dois backends)
 
 O porte web em si não é o gargalo. **Nada do que está escrito acima funciona no navegador enquanto

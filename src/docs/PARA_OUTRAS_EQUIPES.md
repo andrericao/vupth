@@ -4,7 +4,7 @@
 > **outra equipe** fica aqui, num lugar só. O Andre é o canal entre os três projetos: nós **não
 > editamos o repositório de ninguém** — registramos aqui e ele repassa.
 >
-> Última atualização: **2026-08-28** · branch `dev` do front-client.
+> Última atualização: **2026-08-29** · branch `dev` do front-client.
 
 > ⚠️ **NÚMERO DE ITEM NÃO É REFERÊNCIA ESTÁVEL.** Os backlogs renumeram, então os `#N` citados aqui
 > valiam **na data em que foram escritos**. Procure o item pelo **NOME** no PRD da equipe dona; o
@@ -528,3 +528,85 @@ Render e o `resolveApiEnv` já aceita `"staging"`. Basta `EXPO_PUBLIC_API_ENV=st
 A `dev` está **8 commits à frente**, incluindo a PR #16 inteira — então a preview, quando subir, vai
 mostrar coisa que o link público ainda não tem.
 
+
+### 11.1 ✅ 2026-08-29 — o staging FUNCIONA, e o que faltava não era o CORS
+
+Depois que as origens entraram no Render, o link de staging **ainda não abria**. A causa era outra, e
+vale registrar porque **não estava no radar de ninguém**.
+
+**https://dev.vupth.pages.dev está funcionando.**
+
+#### 🙏 O achado é do front-partner
+
+Eles perderam o app publicado para isto, diagnosticaram e **nos avisaram antes de a gente descobrir
+sozinho** — inclusive medindo o **nosso** site e mandando a evidência pronta. Sem esse aviso,
+teríamos gasto o dia procurando no lugar errado (CORS, backend), que é exatamente onde o sintoma
+aponta.
+
+#### O defeito
+
+O `expo export --platform web` grava cada asset **espelhando o caminho de origem**. Com as fontes
+vindo de `@expo-google-fonts/*`, os TTFs saíam sob `dist/assets/node_modules/...` — e a **Cloudflare
+Pages descarta `node_modules` do deploy, por design e em silêncio**. Somado a um portão que segurava
+a tela só no `fontsLoaded`, dava **spinner eterno**.
+
+#### 🔴 A armadilha que vale generalizar: **`200` não significa que o arquivo existe**
+
+Com o fallback de SPA, **todo caminho responde 200** — o ausente devolve o `index.html`. Quem testa
+por status code vê verde e conclui que está tudo certo. **O que distingue é o `content-type`.**
+
+**É a mesma família da armadilha do `curl` sem `Origin`** (§11): teste que parece verde **sem ter
+verificado nada**. Vale para os três projetos:
+
+| Verificação | ❌ O que engana | ✅ O que prova |
+|---|---|---|
+| Arquivo estático existe | status `200` | `content-type` do recurso |
+| CORS autorizado | `curl` sem `Origin` → 200 | `curl` **com** `Origin` → `access-control-allow-origin` |
+
+**Teste de controle que fecha qualquer dúvida:** peça um caminho **inventado**. Se ele responder
+igual ao recurso real, o recurso real não existe.
+
+```bash
+curl -sI https://SEU-DOMINIO.pages.dev/nao-existe-mesmo-12345.ttf | grep -i content-type
+```
+
+#### 📐 Estado medido em 29/08
+
+| | Antes | Depois |
+|---|---|---|
+| Fontes sob `assets/node_modules/` no bundle | **42** | **0** |
+| Fontes em `assets/assets/fonts/` | 0 | **6** |
+| `content-type` do TTF | `text/html` ❌ | **`font/ttf`** ✅ |
+
+#### O que corrigimos (client)
+
+1. Os 6 TTFs saíram do `node_modules` para `assets/fonts/`, carregados por `require()`.
+2. O portão virou `fontsLoaded || Boolean(fontError)` — **esta é a mais importante**: sem ela,
+   qualquer falha futura de fonte volta a prender o app, em **qualquer** plataforma.
+3. 🔒 As três condições ficam travadas em `src/__tests__/projeto/fontesForaDoNodeModules.test.ts`.
+
+⚠️ **Correção ao relato do partner sobre nós:** eles supuseram que o nosso caso era silencioso
+("como vocês não travam no `useFonts`"). **Nós travávamos** — o `App.tsx` segurava a tela no
+`fontsLoaded`. Era a versão dura do defeito, não a discreta.
+
+### 11.2 📍 O que ainda falta para o LINK PÚBLICO
+
+O staging está resolvido. O público (`vupth.pages.dev` → Railway) depende de **uma linha de painel**:
+
+```
+CORS_ALLOWED_ORIGINS=https://vupth-partner.pages.dev,https://*.vupth-partner.pages.dev,https://vupth.pages.dev,https://*.vupth.pages.dev
+```
+
+O código de CORS **já está no Railway** — o preflight saiu de `401` para `403`, o que pela escada da
+§11 significa "no ar, origem não autorizada". A variável está **vazia** lá: hoje o Railway recusa
+**todas** as origens, inclusive as do partner.
+
+✅ **O backend já corrigiu isso antes de pedirmos.** A §18e ganhou uma **lista de tarefas de painel
+(P1–P4)**, e o **P2** traz **os dois painéis** e a string completa, **já com as origens do client**.
+Íamos abrir pedido; não há o que pedir. Estado deles: **Render ✅ feito 29/08 · Railway ⬜ pendente**.
+
+🔴 **E lá tem um item que nos afeta e não estava no nosso radar — o `P4`:** o *Health Check Path* do
+Render está **vazio**, então o Render dá o serviço como no ar **assim que a porta abre** — e no Spring
+Boot a porta abre **antes** de o Liquibase terminar. **A cada deploy há uma janela em que trafego real
+vai para uma instância com o banco não pronto, e o usuário toma 500.** É a janela que o nosso portão
+`waitForBackend` cobre, e a explicação para 500 esporádico logo após deploy: **não é bug de app**.
