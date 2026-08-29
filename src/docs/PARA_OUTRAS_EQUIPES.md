@@ -4,7 +4,7 @@
 > **outra equipe** fica aqui, num lugar só. O Andre é o canal entre os três projetos: nós **não
 > editamos o repositório de ninguém** — registramos aqui e ele repassa.
 >
-> Última atualização: **2026-08-27** · branch `dev` do front-client.
+> Última atualização: **2026-08-28** · branch `dev` do front-client.
 
 > ⚠️ **NÚMERO DE ITEM NÃO É REFERÊNCIA ESTÁVEL.** Os backlogs renumeram, então os `#N` citados aqui
 > valiam **na data em que foram escritos**. Procure o item pelo **NOME** no PRD da equipe dona; o
@@ -355,15 +355,21 @@ apelido que **esconde** o desencontro em vez de resolvê-lo, e o nome `local` j�
 `staging` = Render · `prod` = Railway. **Estava errado, e o erro é nosso:** o acordo já existia e é
 outro. Quem leu a tabela antiga, desconsidere.
 
-**Vocabulário acordado: `local` · `test` · `prod`.** Três nomes, não quatro — o par `dev`/`staging`
-some, e some junto o motivo dele existir (era só o mesmo `.env` circulando entre os repos).
-Registrado em [vupth-partner#18](https://github.com/andrericao/vupth-partner/pull/18#issuecomment-5437931194).
+**Vocabulário DECIDIDO pelo Andre em 28/08: `local` · `staging` · `prod`.** Três nomes, não quatro —
+o par `dev`/`staging` some, e some junto o motivo dele existir (era só o mesmo `.env` circulando
+entre os repos).
 
-| Nome | Onde roda |
-|---|---|
-| `local` | Docker na máquina |
-| `test` | **Render** |
-| `prod` | **Railway** |
+| Nome | Onde roda | Quem publica ali |
+|---|---|---|
+| `local` | Docker na máquina | ninguém |
+| `staging` | **Render** | branch `dev` |
+| `prod` | **Railway** | branch `main` |
+
+⚠️ **Mudou em relação ao que foi acordado em 27/08.** A rodada anterior fechou em `local` · **`test`**
+· `prod` ([vupth-partner#18](https://github.com/andrericao/vupth-partner/pull/18#issuecomment-5437931194)).
+O Andre trocou `test` por **`staging`** por dois motivos: "test" carrega junto a ideia de teste
+automatizado, e **`staging` é o nome que o backend JÁ usa** no `application-staging.properties`
+apontando para o Render — menos renome em todo mundo. **Quem já tinha anotado `test`, corrija.**
 
 **Estado das três pontas:** front-client ✅ concorda · front-partner ✅ concorda · **backend ⬜ falta**.
 
@@ -372,10 +378,10 @@ custar caro. No client são quatro pontos, todos no mesmo arquivo, mais os `.env
 
 | onde | hoje | vira |
 |---|---|---|
-| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "test" \| "prod"` |
-| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | uma chave `test` |
-| `CANAL_PARA_ENV` | `development: "dev"` | `development: "test"` |
-| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","test","prod"]` |
+| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "staging" \| "prod"` |
+| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | **apaga a chave `dev`** — o `staging` já está certo |
+| `CANAL_PARA_ENV` | `development: "dev"` | `development: "staging"` |
+| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","staging","prod"]` |
 
 📣 **Backend:** é a ponta que falta. O custo aqui já está levantado e é pequeno; o que trava é o
 acordo, não o trabalho.

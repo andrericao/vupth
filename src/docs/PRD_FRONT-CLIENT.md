@@ -29,6 +29,8 @@
 11. [Testes E2E — Maestro](#11-testes-e2e--maestro)
 12. [Pendente de Implementacao](#12-pendente-de-implementacao)
 
+> Seções fora da numeração: **1w** (nomes dos ambientes) · **1x** (acesso web) · **1z** (decisões pendentes do Andre).
+
 ---
 
 ## 1. Visao Geral do App
@@ -334,6 +336,57 @@ O Andre testou e **o fluxo passou com um e-mail sem cadastro**, porque o backend
 **Ação nossa quando entrar:** trocar a mensagem para a forma **afirmativa** ("Enviamos um código de 6 dígitos para seu e-mail") e tratar o `404` como **erro do próprio campo** ("E-mail não cadastrado"), sem popup.
 
 ⚠️ **No mesmo teste o e-mail não chegou** (S7, SMTP) — então, até o envio voltar, o fluxo segue inutilizável nos dois apps mesmo com a mensagem certa.
+
+---
+
+## 1w. 🌍 NOMES DOS AMBIENTES — `local` · `staging` · `prod` (decidido pelo Andre, 2026-08-28)
+
+> 📣 **Vocabulário único para os TRÊS projetos** (backend, front-client, front-partner). Esta é a
+> tabela válida. Qualquer outro nome que apareça em documento, `.env` ou painel está desatualizado.
+
+| Nome | Onde roda | Quem publica ali |
+|---|---|---|
+| **`local`** | Docker na máquina do dev | ninguém — é a máquina |
+| **`staging`** | **Render** | branch **`dev`** |
+| **`prod`** | **Railway** | branch **`main`** |
+
+### Por que três nomes, e por que estes
+
+O problema que isto resolve é **uma palavra significando duas máquinas**: `dev` era Docker local no
+backend e Render no client. Pior, a branch `dev` **publica no Render** — então "testa na dev" não
+distinguia branch de notebook.
+
+**`dev` sai do vocabulário.** É a única palavra que colidia com nome de branch. Os três nomes que
+ficam não colidem com nada: nem com branch, nem com os ambientes da Cloudflare Pages
+(*Production*/*Preview*), nem com os canais do EAS (`development`/`preview`/`production`).
+
+⚠️ **`staging` foi preferido a `test`** (que chegou a ser acordado em 27/08): "test" carrega junto a
+ideia de teste automatizado, e `staging` é o nome que o backend **já usa** no
+`application-staging.properties` apontando para o Render. Menos renome, menos ambiguidade.
+
+### O que muda no client
+
+Nada de comportamento — é renome. Quatro pontos, todos em `apiEnv.ts`/`api.ts`, mais os `.env` das
+máquinas e o `eas.json`:
+
+| onde | hoje | vira |
+|---|---|---|
+| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "staging" \| "prod"` |
+| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | **apaga a chave `dev`** (o `staging` já está certo) |
+| `CANAL_PARA_ENV` | `development: "dev"` | `development: "staging"` |
+| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","staging","prod"]` |
+
+✅ **Do nosso lado é DELEÇÃO, não renome** — a chave `staging` já existe e já aponta para o Render.
+O par `dev`/`staging` era duplicata que só existia porque o mesmo `.env` circulava entre os repos;
+ela some, e some o motivo dela.
+
+⚠️ **O renome está TRAVADO POR DATA, de propósito.** Fazer fora de sincronia entre os três repos é o
+único jeito de isto custar caro. O levantamento acima existe para o dia ser de execução, não de
+descoberta.
+
+⚠️ **O que NÃO é renome e morde antes:** o fallback do `resolveApiEnv` é **`local`**. Build web sem
+`EXPO_PUBLIC_API_ENV` declarada sai apontando para um IP de rede local e **não dá erro que
+explique** — parece CORS e não é. Ver §1x e `PARA_OUTRAS_EQUIPES.md` §10.7.
 
 ---
 
