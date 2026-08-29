@@ -17,7 +17,7 @@ describe('handleQueueNotification', () => {
     const f = fx();
     handleQueueNotification(notif('ATTENDANCE_STARTED'), f);
     expect(f.updateQueue).toHaveBeenCalledWith({ status: 'IN_PROGRESS' });
-    expect(f.alert).toHaveBeenCalledWith('É a sua vez! 🎉', 'msg');
+    expect(f.alert).toHaveBeenCalledWith('É a sua vez', 'msg');
   });
 
   it('ATTENDANCE_FINISHED → status FINISHED + alerta', () => {
@@ -30,7 +30,7 @@ describe('handleQueueNotification', () => {
   it('ATTENDANCE_PROMOTED → só alerta (intenção virou fila; sem fila ativa local)', () => {
     const f = fx();
     handleQueueNotification(notif('ATTENDANCE_PROMOTED'), f);
-    expect(f.alert).toHaveBeenCalledWith('Você entrou na fila! 🎉', 'msg');
+    expect(f.alert).toHaveBeenCalledWith('Você entrou na fila', 'msg');
     expect(f.updateQueue).not.toHaveBeenCalled();
     expect(f.leaveQueue).not.toHaveBeenCalled();
   });
@@ -56,10 +56,10 @@ describe('handleQueueNotification', () => {
   });
 
   it.each([
-    ['CUT_ACCEPTED', 'Pedido aceito! 🎉'],
+    ['CUT_ACCEPTED', 'Pedido aceito'],
     ['CUT_REFUSED', 'Pedido recusado'],
     ['CUT_EXPIRED', 'Pedido expirou'],
-    ['SWAP_OFFER_ACCEPTED', 'Troca feita! 🔄'],
+    ['SWAP_OFFER_ACCEPTED', 'Troca feita'],
   ] as const)('%s → só alerta, sem mexer na fila', (type, title) => {
     const f = fx();
     handleQueueNotification(notif(type), f);

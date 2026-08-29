@@ -2,7 +2,7 @@
 
 Pendências do app **cliente** que dependem do backend. O front já está pronto (ou pronto para consumir) em cada caso. Detalhe completo nos callouts do `PRD_FRONT-CLIENT.md`.
 
-Última atualização: **2026-08-06** · branch `dev` do front-client.
+Última atualização: **2026-08-28** · branch `dev` do front-client.
 
 ---
 
@@ -75,6 +75,7 @@ Pendências do app **cliente** que dependem do backend. O front já está pronto
 | B6 | **Filtro por localidade — Fase 2** (escala): aceitar `GET /establishment?uf=&city=&neighborhood=` (+ o `includeAll` já existente) e devolver só os da região. O front já tem a localidade do cliente (`locationStore`) pra mandar nos params; a Fase 1 (ordenar no device) já roda. É o item **C1** | 14 / PRD 11 | ⬜ backend |
 | B7 | ✅ **ENTREGUE E CONSUMIDO (2026-08-06)** — ~~Filtro por localidade — Fase 3 (GPS) — PRIORIDADE 1 do client (Andre 2026-08-01)**: **geocodar** o endereço de cada estabelecimento no cadastro (CEP/endereço → `latitude`/`longitude`, campos que o `Address` já tem) + `GET /establishment?lat=&lng=&radiusKm=` ordenado por distância (Haversine). ✅ **O LADO DO CLIENT JÁ ESTÁ FEITO (2026-08-01):** `expo-location` instalado + permissão pedida **na primeira abertura** + **reverse geocode no device** (nativo, sem API paga) preenchendo bairro/cidade/UF, e as **coordenadas já ficam guardadas** (`locationStore.coords`) esperando o endpoint. Enquanto o backend não vem, isso já melhora a Fase 1 (a Home abre ordenada pelo bairro do cliente **sem ele digitar CEP**); com o B7 vira **distância real** ("2,3 km"). ⚠️ Ativa só no binário 1.0.1 (módulo nativo) | 14 / PRD 11 | 🟡 **front pronto / backend é o gargalo** |
 | B8 | 🔴 **`#31` / partner S14 — token inválido conecta ANÔNIMO em vez de ser recusado.** O `StompAuthChannelInterceptor` loga `warn` e segue. Com access token de 1h e `reconnectDelay` reconectando sozinho, uma reconexão com token vencido sobe anônima: o tópico público continua atualizando a fila e **só o canal pessoal morre calado**, sem erro em nenhuma ponta. **Só o backend fecha** — sem a recusa, o app não tem como saber que está anônimo. O painel de diagnóstico do client (2026-08-06) apenas EXIBE o estado; não substitui a correção. Pedido: recusar o CONNECT com token inválido/expirado (erro STOMP), em vez de degradar para anônimo | 18b | ⬜ aberto |
+| B10 | 🔴 **`GET /establishment` leva ~11-12s em TODO ambiente, e o custo NÃO vem do volume.** Medido pelo front-partner em 26/08 (item **"`GET /establishment` leva ~12s em todo ambiente"** no handoff deles — citar pelo nome, o número renumera) e conferido por nós no código. **Já é falha visível, não é só lentidão:** o client estourava o timeout na PRIMEIRA tela ("Erro ao carregar estabelecimentos") com o backend respondendo 200 logo depois. Detalhe, medições e a pista que estreita a busca na **seção 17** | — | ⬜ **ABERTO — desempenho** |
 
 **🔗 Regras cross-cutting novas (partner/backend, o client precisa saber):**
 - **ETA com buffer de −10min (S10 partner, regra GLOBAL):** o **backend** calcula o tempo de espera **já com −10min** (piso 0) para o cliente chegar antes; **client e partner só EXIBEM o número** que vier — **NÃO subtrair no front** (evita divergência). O client já mostra `estimated_wait_minutes` como veio (nenhuma lógica de buffer a adicionar). Só ficar atento se o backend expuser `display_wait` vs `raw_eta` em campos separados.
@@ -426,3 +427,67 @@ Usem o **`distance_km` do backend**. **Não recalcular** — foi exatamente o er
 ➡️ **Mudou de lugar (2026-08-07):** tudo que é destinado a **outras equipes** agora vive num documento
 próprio — **[`PARA_OUTRAS_EQUIPES.md`](./PARA_OUTRAS_EQUIPES.md)**. Este handoff volta a ser só a
 conversa do front-client com o backend; aquele é o que se manda para ler.
+
+---
+
+## 17. 🔴 `GET /establishment` — ~11-12s de custo FIXO (B10)
+
+**Origem:** medido pelo **front-partner** em 2026-08-26, ao ver a primeira tela do app falhar.
+Registrado no handoff deles com o nome *"`GET /establishment` leva ~12s em todo ambiente"*.
+⚠️ **Conferimos e ele NÃO está no `PRD_BACKEND.md`** — existe só no handoff do partner. Pelo processo
+novo (decisão → PRD), ele ainda não chegou em quem precisa executar. **Este item existe para levar.**
+
+### As medições (front-partner, servidor quente)
+
+| Chamada | Lojas | Tempo |
+|---|---|---|
+| `/actuator/health/readiness` | — | **0,5s** ← o servidor está bem |
+| `/establishment` | 4 | **11,7s** |
+| `/establishment?includeAll=true` | 13 | **11,4s** |
+| `/establishment?name=Barbearia` | 3 | **6,6s** |
+
+Por ambiente: localhost **11,8s** · Railway **11,7s** · Render **>40s**.
+
+### O que os números já dizem
+
+1. **4 e 13 lojas custam o MESMO.** Não é N+1 por linha — é **custo fixo por request**.
+2. **Filtrar por nome corta pela metade** (11,7s → 6,6s) com contagem de linhas parecida (4 → 3).
+   Logo o corte **não vem de devolver menos linhas**: vem de **pular parte do trabalho**.
+3. **É idêntico em localhost e no Railway.** Não é hospedagem, não é rede, não é hibernação.
+   ⚠️ **Consequência direta: trocar de hospedagem não resolve, e keep-warm também não.**
+4. Valor constante de ~11s, independente de dados, tem cara de **espera fixa** (timeout batido, ou
+   algo feito uma vez por request) e **não** de conta proporcional.
+
+### 🔍 A pista que estreita a busca (achado nosso, 2026-08-28)
+
+O comentário do próprio `EstablishmentController.findAll` diz que a busca por nome
+**"tem prioridade"** — ou seja, `service.searchPublic(...)` tem **ramos diferentes**, e o ramo do
+nome é o que custa metade.
+
+**Sugestão de caminho, sem precisar de profiler:** comparar os dois ramos do `searchPublic` isola a
+metade cara. O que o ramo do nome **não faz** é o candidato número um.
+
+### ✅ O que já dá para descartar
+
+**Não é o geocoding.** `AddressGeocodingService` / `HttpGeocoder` são chamados **só** de
+`EstablishmentAddressServiceImpl` (criar/editar endereço) — **não estão no caminho da listagem**. E o
+timeout deles é 5s (`vupth.geocoding.timeout-seconds:5`), não 11.
+
+### As perguntas (as três do handoff do partner, que subscrevemos)
+
+1. **O que custa os ~11s fixos?** Cálculo de `estimated_wait_minutes` / `available_professionals`
+   por loja, consulta sem índice, ou algo feito uma vez por request?
+2. **Dá para separar o que a LISTA precisa do que só o DETALHE precisa?** A Home mostra **nome,
+   status e espera** — não precisa do resto. 📣 **É a pergunta de melhor relação custo/benefício**, e
+   é a mesma que destrava paginação depois.
+3. **Há paginação prevista?** Hoje o endpoint devolve tudo.
+
+### O que o front fez, e por que NÃO é conserto
+
+O client subiu o timeout de `local` de 10s para 30s **só para destravar o desenvolvimento**, com
+comentário no código dizendo que **mascara e não conserta**. Em `staging`/`prod` já eram 90s — é por
+isso que a tela "funciona": ela só demora ~12s para pintar.
+
+⚠️ **Não vamos empilhar contorno.** Enquanto o custo fixo existir, qualquer coisa que a gente faça
+aqui esconde o defeito e duplica trabalho.
+

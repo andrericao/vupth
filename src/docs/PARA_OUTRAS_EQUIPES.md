@@ -4,7 +4,7 @@
 > **outra equipe** fica aqui, num lugar só. O Andre é o canal entre os três projetos: nós **não
 > editamos o repositório de ninguém** — registramos aqui e ele repassa.
 >
-> Última atualização: **2026-08-07** · branch `dev` do front-client.
+> Última atualização: **2026-08-28** · branch `dev` do front-client.
 
 > ⚠️ **NÚMERO DE ITEM NÃO É REFERÊNCIA ESTÁVEL.** Os backlogs renumeram, então os `#N` citados aqui
 > valiam **na data em que foram escritos**. Procure o item pelo **NOME** no PRD da equipe dona; o
@@ -182,3 +182,349 @@ O **C21** (cada profissional escolhe fila **ou** agenda pura) está no handoff d
 É uma dependência forte da nossa tela da loja: junto com o **C22** (horário por dia da semana), as duas dizem que aquela tela **não pode assumir nem regime único nem horário único**. Se tivéssemos redesenhado a tela nesse meio-tempo, teríamos que refazer.
 
 Sem cobrança — o registro é para lembrar que **item que muda tela do outro app precisa de um empurrão ativo**, não só de estar escrito no handoff.
+
+---
+
+## 9. 🔴 BACKEND — resposta ao 18e (CORS / WebSocket / keep-warm) do PRD de 26/08
+
+Lemos a seção **18e. Acesso por link (build web) — CORS, WebSocket e keep-warm** do `PRD_BACKEND.md`
+(atualizada em 26/08 22h10). O desenho está certo e é o que destrava o acesso por link. Três coisas:
+uma em que **vocês têm razão e nós erramos**, uma **inconsistência que deixa o client de fora**, e
+uma **medição** que confirma o diagnóstico de vocês.
+
+### 9.1 ✅ WebSocket — vocês estão certos, o pedido era nosso erro
+
+Levantamos que autorizar só o HTTPS deixaria a fila em tempo real morta. **Não deixa.** Fomos ao
+código de vocês e confirmamos: `WebSocketConfig:68-69` já tem `setAllowedOriginPatterns("*")` nos
+dois endpoints (nativo e SockJS), com `/ws/**` em `permitAll()`. **Não há nada a fazer, e retiramos
+o pedido.**
+
+A observação de vocês procede — *"o front descreve como bloqueio de backend algo que já está
+liberado"* — e vale para nós aqui exatamente como valeu para vocês no S19. Registrado como
+aprendizado: **antes de escrever "bloqueio do backend", abrir o código do backend.**
+
+⚠️ **Concordamos também com a inversão do risco:** apertar o CORS do HTTP e apertar junto a origem
+do WS quebraria o que hoje funciona. **O commit do CORS não deve tocar no `*` do WS.** Se e quando
+a decisão registrada (alinhar o WS à lista do HTTP) for executada, **é commit separado, e queremos
+saber antes** — é o único ponto do 18e que pode derrubar tela nossa que hoje está de pé.
+
+### 9.2 🔴 A inconsistência: **o client não está na lista de origens**
+
+O 18e cita **apenas** `https://vupth-partner.pages.dev` e `https://*.vupth-partner.pages.dev`.
+**O client é outro projeto do Cloudflare Pages, com outro domínio.** Se o `CORS_ALLOWED_ORIGINS`
+subir com o que está documentado, o CORS entra, **o link do partner funciona e o do client
+continua quebrado — com o mesmíssimo modo de falha mudo.** E a leitura natural seria *"o backend já
+fez o CORS, então o problema é do client"*, que é falsa.
+
+**Origens do client, para entrar na env var:**
+
+| Origem | De onde vem | Fala com |
+|---|---|---|
+| `https://vupth.pages.dev` | Pages **Production**, build da branch `main` | **Railway** (prod) |
+| `https://*.vupth.pages.dev` | Pages **Preview**, builds da branch `dev` | **Render** (staging) |
+
+⚠️ **Segundo furo, que decorre do primeiro: `CORS_ALLOWED_ORIGINS` é env var POR AMBIENTE, e as duas
+origens do client falam com backends DIFERENTES.** O 18e trata o CORS como uma coisa só, mas não
+existe "a lista" — existe a lista do Render e a lista do Railway. Configurar só uma delas resolve
+metade. E a metade que costuma ser esquecida é **prod/Railway**, que é justamente **a que os
+testadores abrem** (o link público sai da `main`).
+
+Sugestão concreta — **as duas linhas**, uma em cada painel:
+
+```
+# Render (staging)  — atende as previews da branch dev
+CORS_ALLOWED_ORIGINS=https://*.vupth.pages.dev,https://*.vupth-partner.pages.dev
+
+# Railway (prod)    — atende o link público, é o que os testadores abrem
+CORS_ALLOWED_ORIGINS=https://vupth.pages.dev,https://vupth-partner.pages.dev
+```
+
+O curinga no meio (`https://*.vupth.pages.dev`) confirma a escolha de vocês por
+`setAllowedOriginPatterns` em vez de `allowedOrigins` — sem ela, **nenhuma preview de branch
+funciona**, nos dois apps.
+
+📣 **Do lado do client, nada muda no código:** já mandamos o JWT em `Authorization: Bearer`, não
+usamos cookie em lugar nenhum, e não temos nada que dependa de `allowCredentials(true)`.
+`allowCredentials(false)` está ok para nós.
+
+### 9.3 📐 Medição externa que confirma o diagnóstico de vocês (26/08)
+
+Vocês auditaram por dentro (`SecurityConfig` sem `.cors(...)`). Medimos por fora, nos **dois**
+backends, e o resultado bate com a previsão do 18e — inclusive o **401 no preflight**:
+
+| Backend | `OPTIONS /auth/login` com `Origin` + `Access-Control-Request-*` | `GET /actuator/health/readiness` com `Origin` |
+|---|---|---|
+| Railway (prod) | **401** | 200, **sem nenhum header `access-control-*`** |
+| Render (staging) | **401** | 200, **sem nenhum header `access-control-*`** |
+
+Ou seja: o preflight cai em `anyRequest().authenticated()` exatamente como vocês descreveram, e
+como preflight não carrega `Authorization`, o navegador nunca chega à chamada real. **Confirmado
+que não é "falta autorizar a origem" — não existe CORS nenhum, nos dois ambientes.**
+
+> ⏱️ **Medição de 26/08 — SUPERADA em 28/08.** O backend implementou o CORS. Estado atual na **§11**.
+
+✅ **Corrigimos um registro nosso:** havíamos anotado *"OPTIONS sem resposta"*. Era artefato de cold
+start do Render. **O comportamento real é 401**, como o 18e diz.
+
+### 9.4 ✅ Keep-warm — a conta das 750h resolve uma dúvida que era nossa
+
+A conta que vocês fizeram (**750 horas/mês somadas entre todos os serviços free da conta**; ping
+24/7 ≈ 744h ⇒ risco de **suspensão até o próximo ciclo**, que é pior que cold start; janela 08–22
+em dias úteis ≈ 308h) responde algo que estava aberto do nosso lado e que **não tínhamos
+considerado**. Adotado.
+
+Também explica o fracasso que o Andre relatou (*"esse keep-alive não funciona, ele é obliterado
+toda vez"*): era cron do **GitHub Actions**, que sofre throttling e atrasa — e **intervalo de 10–13
+min tolera ZERO falhas** antes dos 15 min de ociosidade. Com **cron-job.org a cada 5 min**, cabem
+**duas** falhas consecutivas. A troca de ferramenta é o conserto, não o ajuste do intervalo.
+
+Sem pedido nosso aqui: é configuração do Andre, e o `readiness` (não o `/actuator/health` agregado)
+já é o que o nosso portão `waitForBackend` usa.
+
+---
+
+## 10. 🌐 ESTADO DO ACESSO POR LINK — o que já fizemos, e onde travou
+
+> Para **backend** e **front-partner**. Este é o relato completo do que foi tentado do lado do
+> client, para ninguém refazer o caminho nem esperar por algo que já está pronto.
+
+### 10.1 ✅ Cloudflare Pages — projeto criado e no ar
+
+**O link do client existe: https://vupth.pages.dev** — responde **200**, a página carrega.
+
+Montado no padrão que o partner já usava, com **dois ambientes dentro do MESMO projeto** do Pages
+(não são dois projetos):
+
+| Ambiente do Pages | Branch | Backend |
+|---|---|---|
+| **Production** | `main` | **Railway** (prod) |
+| **Preview** | `dev` | **Render** (staging) |
+
+A variável `EXPO_PUBLIC_API_ENV` é **cravada no build**, por ambiente — não dá para trocar depois
+sem rebuildar. Foi criada nos dois.
+
+### 10.2 ✅ Merge na `main` — feito
+
+O merge para a `main` **foi feito** e o build de Production saiu. É de lá que sai o link público.
+
+⚠️ **A `main` ainda não tem tudo:** há **54 commits na `dev` fora da `main`**, na PR **#15**
+(`dev` → `main`), ainda aberta. O link de hoje reflete a `main`, não a `dev`.
+
+### 10.3 🔴 …e o link **não funciona**, por causa do CORS do backend
+
+**A página abre, e nenhuma chamada completa.** Não é bug do porte web nem do Cloudflare: é o CORS
+inexistente no backend, medido nos dois ambientes (detalhe e números na **§9.3**).
+
+> ⏱️ **Escrito em 27/08 — SUPERADO. Ver §11.**
+
+Este é **o único bloqueio** do acesso por link hoje. Está pedido ao backend na **§9.2** — e o pedido
+tem duas partes que precisam ir juntas: **incluir as origens do client** (o §18e do PRD deles cita
+só as do partner) e **configurar nos dois painéis**, Render e Railway, porque `CORS_ALLOWED_ORIGINS`
+é env var por ambiente.
+
+**Assim que essa barreira cair, seguimos com o teste por link.** Está parado esperando isso, não
+esperando trabalho nosso.
+
+### 10.4 🟡 Render vivo — em teste agora, antes de seguir
+
+O motivo é concreto: **na hora de testar com usuários o app ficava lento demais**, porque o servidor
+hiberna e o primeiro request leva ~50s. A intenção é o Andre testar em casa contra o **Render** e só
+mostrar aos testadores quando estiver com o mínimo de atrito.
+
+- ❌ **Cron do GitHub Actions não funciona** — sofre throttling e atrasa. Além disso, **intervalo de
+  10–13 min tolera ZERO falhas** antes dos 15 min de ociosidade.
+- ✅ **Adotado o desenho do §18e:** **cron-job.org**, `/actuator/health/readiness` (não o
+  `/actuator/health` agregado), **5 min**, com **janela de horário** — que é o único parâmetro que
+  protege a cota das **750 h/mês** somadas entre todos os serviços free da conta.
+
+**Em teste agora. O resultado sai antes de seguirmos** — se o keep-warm não segurar, o portão
+`waitForBackend` continua sendo o que salva o primeiro acesso.
+
+### 10.5 🔴 INCONSISTÊNCIA DE AMBIENTES — `dev` significa **duas máquinas diferentes**
+
+Achado ao montar o Pages. Os três projetos usam as mesmas palavras para coisas diferentes:
+
+| Nome | Backend (`application-*.properties`) | Front-client (`api.ts`) |
+|---|---|---|
+| `local` | — | `http://<ip>:8080` |
+| **`dev`** | **Docker local** | **Render** ⚠️ |
+| `staging` | **Render** | **Render** (apelido de `dev`) |
+| `prod` | **Railway** | **Railway** |
+
+⚠️ **`dev` é Docker local no backend e Render no client.** Mesma palavra, máquinas diferentes. Hoje
+não quebra nada porque o client tem o apelido `staging` apontando para o mesmo host — mas é um
+apelido que **esconde** o desencontro em vez de resolvê-lo, e o nome `local` já cobre o caso local.
+
+✅ **CORREÇÃO (27/08).** Uma versão anterior desta seção propunha `local`/`dev` = Docker local ·
+`staging` = Render · `prod` = Railway. **Estava errado, e o erro é nosso:** o acordo já existia e é
+outro. Quem leu a tabela antiga, desconsidere.
+
+**Vocabulário DECIDIDO pelo Andre em 28/08: `local` · `staging` · `prod`.** Três nomes, não quatro —
+o par `dev`/`staging` some, e some junto o motivo dele existir (era só o mesmo `.env` circulando
+entre os repos).
+
+| Nome | Onde roda | Quem publica ali |
+|---|---|---|
+| `local` | Docker na máquina | ninguém |
+| `staging` | **Render** | branch `dev` |
+| `prod` | **Railway** | branch `main` |
+
+⚠️ **Mudou em relação ao que foi acordado em 27/08.** A rodada anterior fechou em `local` · **`test`**
+· `prod` ([vupth-partner#18](https://github.com/andrericao/vupth-partner/pull/18#issuecomment-5437931194)).
+O Andre trocou `test` por **`staging`** por dois motivos: "test" carrega junto a ideia de teste
+automatizado, e **`staging` é o nome que o backend JÁ usa** no `application-staging.properties`
+apontando para o Render — menos renome em todo mundo. **Quem já tinha anotado `test`, corrija.**
+
+**Estado das três pontas:** front-client ✅ concorda · front-partner ✅ concorda · **backend ⬜ falta**.
+
+**O renome está TRAVADO POR DATA de propósito** — fazer fora de sincronia é o único jeito de isso
+custar caro. No client são quatro pontos, todos no mesmo arquivo, mais os `.env` e o `eas.json`:
+
+| onde | hoje | vira |
+|---|---|---|
+| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "staging" \| "prod"` |
+| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | **apaga a chave `dev`** — o `staging` já está certo |
+| `CANAL_PARA_ENV` | `development: "dev"` | `development: "staging"` |
+| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","staging","prod"]` |
+
+📣 **Backend:** é a ponta que falta. O custo aqui já está levantado e é pequeno; o que trava é o
+acordo, não o trabalho.
+
+### 10.6 ⚠️ FRONT-PARTNER — o canal `preview` grava em **PRODUÇÃO**
+
+No `apiEnv.ts` (compartilhado no desenho entre os dois apps):
+
+```ts
+export const CANAL_PARA_ENV: Record<string, ApiEnv> = {
+  development: "dev", preview: "prod", production: "prod",
+};
+```
+
+O canal **`preview` resolve para `prod`** — ou seja, **build de preview em device grava no banco de
+PRODUÇÃO**. Está documentado como **deliberado**, com a consequência assumida por escrito, então
+**não é bug e não estamos pedindo mudança**.
+
+Registramos por dois motivos: (1) é a resposta à dúvida *"se preview já visualiza a prod, isso não
+suja o banco?"* — **suja, e foi uma escolha**; (2) some com a distinção Render/Railway justamente no
+canal que mais parece seguro pelo nome. Se um dia o `staging` passar a ter dado de teste que
+importa, **este é o primeiro lugar a mexer.**
+
+### 10.7 ⚠️ O "link não funciona" que se DISFARÇA de CORS — e a medição que separa os dois
+
+Alerta do **front-partner** (PR #16 do client, 27/08), e ele procede: o fallback do `resolveApiEnv`
+é **`local`**. Num build web **sem** `EXPO_PUBLIC_API_ENV` declarada, o site sai apontando para um
+**IP de rede local** — e **não dá erro que explique**, só não conecta.
+
+**São dois "o link não funciona" com causas diferentes, e o segundo imita o primeiro.**
+
+✅ **Verificado no bundle que está no ar** (`https://vupth.pages.dev`, 27/08). A variável **está**
+cravada no ambiente **Production**:
+
+```js
+const l = {local:"http://192.168.0.16:8080", dev:"https://vupth-backend-ia.onrender.com",
+           staging:"https://vupth-backend-ia.onrender.com",
+           prod:"https://vupth-backend-ia-production.up.railway.app"},
+      f = (0,u.resolveApiEnv)(h,"prod"), p = l[f];
+```
+
+`resolveApiEnv(canal, "prod")` → `"prod"` → **Railway**. **Confirmado que o bloqueio do link público
+é o CORS**, e não o fallback.
+
+⚠️ **Falta conferir o ambiente Preview.** A Cloudflare **não herda** as variáveis entre Production e
+Preview — são dois conjuntos. Sem `EXPO_PUBLIC_API_ENV` no Preview, **toda preview da `dev` sai
+apontando para `192.168.0.16:8080`** e o sintoma é idêntico ao do CORS.
+
+**Como distinguir, em 10 segundos:** abrir o bundle publicado e procurar o argumento do
+`resolveApiEnv`. Se for `"prod"`/`"staging"`, o alvo está certo e a causa é CORS. Se o segundo
+argumento vier vazio/ausente, é o fallback `local` — e aí nenhum CORS do mundo resolve.
+
+### 10.8 ✅ A guarda do build web já está na `dev` (PR #16)
+
+Mergeada em 27/08. `tsconfig.json` ganhou `exclude` (`dist`, `web-build`, …) e o `eslint.config.js`
+ganhou `dist/` e `web-build/` nos `ignores`, travados por `src/__tests__/projeto/buildOutputIgnorado.test.ts`
+— que também barra o erro oposto, um `exclude` engolindo `src` (typecheck verde por não ter olhado
+o app).
+
+**Por que importa para quem for mexer aqui:** o client ainda **não tem `build:web`**. A guarda entrou
+**antes** do problema. Sem ela, rodar `expo export --platform web` e depois o portão dá duas falhas
+que **não apontam para a causa** — `tsc` com *"Maximum call stack size exceeded"* sem citar arquivo,
+e lint reprovando por milhares de problemas vindos do bundle.
+
+---
+
+## 11. 📍 ESTADO EM 2026-08-28 — o CORS entrou, e o que ainda falta
+
+> Esta seção **supera** o que as §9.3 e §10.3 dizem sobre "não existe CORS". Elas ficam como
+> registro datado; a verdade de hoje é esta.
+
+### ✅ O backend implementou o CORS
+
+Commit `4320108` na `dev` deles (*"CORS para o acesso por link, e o /actuator para de entregar
+metrics sem token"*). O `PRD_BACKEND.md` §18e foi reescrito: **CORS ✅ implementado**.
+
+**Faz o que foi combinado, inclusive o cuidado que pedimos com o WebSocket:** o
+`CorsConfigurationSource` retorna **`null`** para `/ws` e `/ws/**`, então o `CorsFilter` passa reto e
+o `setAllowedOriginPatterns("*")` do `WebSocketConfig` fica **intacto**. O tempo real não foi tocado.
+
+### 🪜 A escada de diagnóstico (serve para os dois apps)
+
+A env var vazia produz um sintoma **diferente** de "sem CORS", e isso permite localizar o problema
+sem acesso a painel nenhum:
+
+| `OPTIONS` de preflight | Significa |
+|---|---|
+| **401**, sem `vary` | código **não deployado** — o preflight cai em `anyRequest().authenticated()` |
+| **403** + `vary: Access-Control-Request-*` | código **no ar**, mas a **origem não está autorizada** |
+| **200** + `access-control-allow-origin` | **pronto** |
+
+⚠️ **`curl` sem o header `Origin` NÃO testa CORS** — não é requisição CORS, e responde 200 sempre.
+O comando que testa de verdade:
+
+```bash
+curl -i -X OPTIONS https://vupth-backend-ia.onrender.com/auth/login \
+  -H "Origin: https://vupth.pages.dev" \
+  -H "Access-Control-Request-Method: POST" \
+  -H "Access-Control-Request-Headers: authorization,content-type"
+```
+
+### 📐 Medido em 28/08
+
+| Backend | Origem | Resultado |
+|---|---|---|
+| **Render** (staging) | `https://vupth-partner.pages.dev` | **200** ✅ |
+| **Render** | `https://x.vupth-partner.pages.dev` | **200** ✅ — o curinga de subdomínio funciona |
+| **Render** | `https://vupth.pages.dev` | **403** ❌ |
+| **Render** | `https://dev.vupth.pages.dev` | **403** ❌ |
+| **Railway** (prod) | `https://vupth.pages.dev` | **401** ❌ — código não deployado |
+
+### 🔴 O que falta, e de quem é
+
+1. **Origens do client no `CORS_ALLOWED_ORIGINS` do Render** (+ restart). A variável já está no ar e
+   funcionando — só foi preenchida com a lista do §18e, que **citava apenas o partner**. É
+   exatamente o risco levantado na §9.2, e ele se concretizou.
+   ```
+   https://vupth-partner.pages.dev,https://*.vupth-partner.pages.dev,https://vupth.pages.dev,https://*.vupth.pages.dev
+   ```
+2. **Backend: merge `dev` → `main`** (agendado para 28/08 às 23:00) **+ a mesma variável no Railway.**
+   Antes do merge não adianta configurar o painel do Railway: não há código lá para ler a variável.
+   O §18e deles fala em *"a env var no Render"* — **no singular**; o link público sai do Railway.
+
+⚠️ **O 403 pega o `readiness` também.** Não é só o login: com a origem não autorizada, o portão
+`waitForBackend` da build web nunca passa, e o sintoma é *"preparando servidor…"* para sempre — sem
+erro que explique. É o mesmo modo de falha mudo de antes, com outro código HTTP.
+
+### 🟡 Cloudflare — a ponta staging do client ainda não existe
+
+`https://dev.vupth.pages.dev` devolve **404**: nunca houve deploy de preview da `dev`, e o alias
+`<branch>.<projeto>.pages.dev` só nasce depois do primeiro. O *branch control* foi ajustado para
+`dev` em 28/08, mas ele vale **daqui pra frente** — não reconstrói o que já passou. Resolve com
+*"Create deployment"* no painel ou com o próximo push na `dev`.
+
+✅ **Não precisa de código para ligar a preview ao Render:** o `BASE_URLS` já tem `staging` →
+Render e o `resolveApiEnv` já aceita `"staging"`. Basta `EXPO_PUBLIC_API_ENV=staging` no ambiente
+**Preview** da Cloudflare.
+
+⚠️ **A produção segue vindo da `main`** (conferido: `vupth.pages.dev` → 200, `main` em `cb329119`).
+A `dev` está **8 commits à frente**, incluindo a PR #16 inteira — então a preview, quando subir, vai
+mostrar coisa que o link público ainda não tem.
+

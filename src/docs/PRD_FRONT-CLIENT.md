@@ -29,6 +29,8 @@
 11. [Testes E2E — Maestro](#11-testes-e2e--maestro)
 12. [Pendente de Implementacao](#12-pendente-de-implementacao)
 
+> Seções fora da numeração: **1w** (nomes dos ambientes) · **1x** (acesso web) · **1z** (decisões pendentes do Andre).
+
 ---
 
 ## 1. Visao Geral do App
@@ -337,6 +339,57 @@ O Andre testou e **o fluxo passou com um e-mail sem cadastro**, porque o backend
 
 ---
 
+## 1w. 🌍 NOMES DOS AMBIENTES — `local` · `staging` · `prod` (decidido pelo Andre, 2026-08-28)
+
+> 📣 **Vocabulário único para os TRÊS projetos** (backend, front-client, front-partner). Esta é a
+> tabela válida. Qualquer outro nome que apareça em documento, `.env` ou painel está desatualizado.
+
+| Nome | Onde roda | Quem publica ali |
+|---|---|---|
+| **`local`** | Docker na máquina do dev | ninguém — é a máquina |
+| **`staging`** | **Render** | branch **`dev`** |
+| **`prod`** | **Railway** | branch **`main`** |
+
+### Por que três nomes, e por que estes
+
+O problema que isto resolve é **uma palavra significando duas máquinas**: `dev` era Docker local no
+backend e Render no client. Pior, a branch `dev` **publica no Render** — então "testa na dev" não
+distinguia branch de notebook.
+
+**`dev` sai do vocabulário.** É a única palavra que colidia com nome de branch. Os três nomes que
+ficam não colidem com nada: nem com branch, nem com os ambientes da Cloudflare Pages
+(*Production*/*Preview*), nem com os canais do EAS (`development`/`preview`/`production`).
+
+⚠️ **`staging` foi preferido a `test`** (que chegou a ser acordado em 27/08): "test" carrega junto a
+ideia de teste automatizado, e `staging` é o nome que o backend **já usa** no
+`application-staging.properties` apontando para o Render. Menos renome, menos ambiguidade.
+
+### O que muda no client
+
+Nada de comportamento — é renome. Quatro pontos, todos em `apiEnv.ts`/`api.ts`, mais os `.env` das
+máquinas e o `eas.json`:
+
+| onde | hoje | vira |
+|---|---|---|
+| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "staging" \| "prod"` |
+| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | **apaga a chave `dev`** (o `staging` já está certo) |
+| `CANAL_PARA_ENV` | `development: "dev"` | `development: "staging"` |
+| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","staging","prod"]` |
+
+✅ **Do nosso lado é DELEÇÃO, não renome** — a chave `staging` já existe e já aponta para o Render.
+O par `dev`/`staging` era duplicata que só existia porque o mesmo `.env` circulava entre os repos;
+ela some, e some o motivo dela.
+
+⚠️ **O renome está TRAVADO POR DATA, de propósito.** Fazer fora de sincronia entre os três repos é o
+único jeito de isto custar caro. O levantamento acima existe para o dia ser de execução, não de
+descoberta.
+
+⚠️ **O que NÃO é renome e morde antes:** o fallback do `resolveApiEnv` é **`local`**. Build web sem
+`EXPO_PUBLIC_API_ENV` declarada sai apontando para um IP de rede local e **não dá erro que
+explique** — parece CORS e não é. Ver §1x e `PARA_OUTRAS_EQUIPES.md` §10.7.
+
+---
+
 ## 1x. 🌐 ACESSO PELO NAVEGADOR (web) — decisão do Andre, 2026-08-17
 
 **Decisão:** vamos ter acesso por URL, como o partner já tem. E a limitação do navegador **é assumida em voz alta**, não escondida:
@@ -386,8 +439,62 @@ Com o aviso **no momento certo**, a multa fica defensável: ele foi informado an
 3. Banner honesto de limitação + CTA de download.
 4. CSP por último, **com o `connect-src` apontando para as nossas URLs**.
 
-Nada aqui aguarda decisão — o escopo está fechado.
+Nada aqui aguarda **decisão** — o escopo está fechado. O que falta é **implementação de terceiro**, abaixo.
 
+
+### 🔴 O bloqueio real do acesso por link: **CORS** (medido em 26/08, nos dois backends)
+
+O porte web em si não é o gargalo. **Nada do que está escrito acima funciona no navegador enquanto
+o backend não tiver CORS** — e hoje ele não tem nenhum. Isso vale para as duas pontas: o app nativo
+não é afetado (cliente nativo não manda `Origin`), o navegador é barrado antes da primeira chamada.
+
+**Medição nossa (26/08), contra os dois ambientes:**
+
+| Backend | `OPTIONS /auth/login` com `Origin` + `Access-Control-Request-*` | `GET /actuator/health/readiness` com `Origin` |
+|---|---|---|
+| Railway (prod ← `main`) | **401** | 200, **sem nenhum header `access-control-*`** |
+| Render (staging ← `dev`) | **401** | 200, **sem nenhum header `access-control-*`** |
+
+**Por que o modo de falha é mudo:** sem `.cors(...)` no `SecurityConfig`, o **preflight `OPTIONS`**
+cai em `anyRequest().authenticated()`, e preflight **não carrega `Authorization`** → 401 antes de
+qualquer chamada real. No console do navegador aparece só o erro genérico de CORS, sem corpo e sem
+status útil. **Sintoma: o link abre bonito e nenhuma chamada completa.** É por isso que este item
+não é diagnosticável a partir do nosso lado — e por isso está escrito aqui.
+
+> ⏱️ **28/08: o backend IMPLEMENTOU o CORS.** O parágrafo abaixo é registro de 27/08.
+> Estado atual, com a escada de diagnóstico e o que falta: `PARA_OUTRAS_EQUIPES.md` **§11**.
+
+**Estado do backend** (`PRD_BACKEND.md` §18e, 26/08): CORS 🟠 **especificado, não implementado** ·
+WebSocket ✅ **já aberto** · keep-warm = configuração do Andre. O desenho aprovado lá usa
+`setAllowedOriginPatterns` + env var `CORS_ALLOWED_ORIGINS` (default vazio), `allowCredentials(false)`.
+
+⚠️ **Duas origens nossas precisam entrar na env var — e em painéis DIFERENTES**, porque as duas
+publicações do Pages falam com backends diferentes:
+
+| Origem do client | De onde vem | Env var em |
+|---|---|---|
+| `https://vupth.pages.dev` | Pages **Production**, build da `main` | **Railway** |
+| `https://*.vupth.pages.dev` | Pages **Preview**, builds da `dev` | **Render** |
+
+O §18e cita só `vupth-partner.pages.dev`. **Pedido registrado em `PARA_OUTRAS_EQUIPES.md` §9.2.**
+
+✅ **Nada muda no nosso código por causa disso:** já mandamos o JWT em `Authorization: Bearer`, não
+usamos cookie, e não dependemos de `allowCredentials(true)`.
+
+✅ **WebSocket não é bloqueio** — `WebSocketConfig` já está com `setAllowedOriginPatterns("*")` nos
+dois endpoints. Nós tínhamos registrado como pendência; **estava errado e foi retirado**
+(`PARA_OUTRAS_EQUIPES.md` §9.1).
+
+⚠️ **Antes de culpar o CORS, confirmar o alvo do bundle.** O fallback do `resolveApiEnv` é
+**`local`**: build web sem `EXPO_PUBLIC_API_ENV` sai apontando para um IP de rede local e **não dá
+erro que explique** — sintoma idêntico ao do CORS. **Verificado em 27/08 que o Production está
+certo** (`resolveApiEnv(canal,"prod")` → Railway); **o Preview ainda não foi conferido**, e a
+Cloudflare não herda variáveis entre os dois ambientes. Detalhe em `PARA_OUTRAS_EQUIPES.md` §10.7.
+
+⚠️ **Divergência interna a corrigir antes de publicar:** o nosso `web-shims/expo-secure-store.js`
+usa **`localStorage`**; o do partner usa **`sessionStorage`**. O C26 deles diz explicitamente que
+isso **não pode divergir** — e a decisão desta seção ("a sessão morre ao fechar a aba") é a do
+`sessionStorage`. Hoje o nosso shim contradiz o próprio PRD.
 ---
 
 ## 1z. 🧭 DECISÕES PENDENTES DO ANDRE — contexto, pergunta e o que o mercado faz

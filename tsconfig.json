@@ -39,5 +39,7 @@
         "./src/hooks/*"
       ]
     }
-  }
+  },
+  "//": "Saida do `expo export`. O `expo/tsconfig.base` NAO exclui nada, entao sem isto o tsc entra no bundle gerado e morre com 'Maximum call stack size exceeded' — sem citar arquivo e sem pista de que a causa foi ter buildado o site. Aviso do Andre em 27/08, depois de pisar nisso no parceiro.",
+  "exclude": ["dist", "web-build", "node_modules", ".expo", "coverage", ".claude"]
 }
