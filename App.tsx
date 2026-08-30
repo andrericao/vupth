@@ -2,9 +2,20 @@ import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 
 import { useFonts } from "expo-font";
-import { Inter_400Regular, Inter_500Medium, Inter_700Bold } from "@expo-google-fonts/inter";
-import { Archivo_700Bold, Archivo_800ExtraBold } from "@expo-google-fonts/archivo";
-import { DMMono_500Medium } from "@expo-google-fonts/dm-mono";
+
+// Os TTFs vivem em `assets/fonts/`, NAO em `@expo-google-fonts/*`. O motivo e
+// o build web: o `expo export --platform web` grava cada asset espelhando o
+// caminho de origem, entao importar do pacote faz os arquivos sairem em
+// `dist/assets/node_modules/@expo-google-fonts/...` — e a Cloudflare Pages
+// DESCARTA `node_modules` do deploy, por design, sem avisar.
+//
+// O sintoma e traicoeiro: com o fallback de SPA o arquivo ausente responde
+// 200, so que devolvendo o index.html. Quem testa por status code ve verde.
+// O que distingue e o `content-type` (`text/html` em vez de `font/ttf`).
+// Achado pelo front-partner em 2026-08-29 e confirmado no nosso deploy.
+//
+// De brinde, importar so os arquivos que usamos derruba o export de 42 fontes
+// (o pacote inteiro do @expo-google-fonts entrava) para 6.
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -35,14 +46,19 @@ setupOnlineManager();
 const queryClient = new QueryClient();
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_700Bold,
-    Archivo_700Bold,
-    Archivo_800ExtraBold,
-    DMMono_500Medium,
+  // `fontError` NAO pode ser ignorado. Segurar a tela so no `fontsLoaded`
+  // transforma qualquer falha de fonte em spinner eterno — foi exatamente o
+  // que derrubou o app publicado do parceiro. Fonte que nao carrega deve
+  // degradar para a do sistema, nao prender o app.
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular: require("./assets/fonts/Inter_400Regular.ttf"),
+    Inter_500Medium: require("./assets/fonts/Inter_500Medium.ttf"),
+    Inter_700Bold: require("./assets/fonts/Inter_700Bold.ttf"),
+    Archivo_700Bold: require("./assets/fonts/Archivo_700Bold.ttf"),
+    Archivo_800ExtraBold: require("./assets/fonts/Archivo_800ExtraBold.ttf"),
+    DMMono_500Medium: require("./assets/fonts/DMMono_500Medium.ttf"),
   });
+  const fontGateOpen = fontsLoaded || Boolean(fontError);
   const restoreSession = useAuthStore((s) => s.restoreSession);
   const restoreQueue = useQueueStore((s) => s.restoreQueue);
   const restoreRated = useRatedStore((s) => s.restoreRated);
@@ -105,7 +121,7 @@ export default function App() {
         <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
 
         <QueryScopedHooks />
-        {!fontsLoaded ? <Loading /> : !backendReady ? <PreparingServer /> : <Routes />}
+        {!fontGateOpen ? <Loading /> : !backendReady ? <PreparingServer /> : <Routes />}
       </GluestackUIProvider>
     </QueryClientProvider>
   );
