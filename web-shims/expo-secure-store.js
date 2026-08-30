@@ -6,20 +6,29 @@
 // sobe ate um Alert.alert, que tambem e no-op no React Native Web, deixando a
 // tela parada sem dizer nada.
 //
-// localStorage NAO e armazenamento seguro. Isto vale so para rodar o app no
-// navegador durante o desenvolvimento; o alvo de producao continua iOS/Android,
-// onde o pacote real e usado sem passar por aqui.
+// sessionStorage NAO e armazenamento seguro. Mas a web deixou de ser so um
+// atalho de desenvolvimento: https://vupth.pages.dev e um deploy publicado, e o
+// que este arquivo decide vale para quem abrir o app por link.
+//
+// 🔒 sessionStorage, NAO localStorage (mitigacao 1 do D8, decidida em
+// 2026-08-12; o C26 do partner exige que os dois shims nao divirjam): o token
+// morre QUANDO A ABA FECHA, em vez de ficar guardado no navegador. Isso apaga
+// o cenario do computador compartilhado — o proximo que sentar nao herda a
+// sessao. O preco e logar de novo a cada visita. A outra metade da mitigacao
+// e o CSP em `public/_headers`, que ataca o XSS — o vetor real, ja que aqui o
+// token e legivel por qualquer JS da mesma origem.
 
 function store() {
   try {
-    return typeof localStorage !== 'undefined' ? localStorage : null;
+    return typeof sessionStorage !== 'undefined' ? sessionStorage : null;
   } catch {
     return null;
   }
 }
 
 // Navegador com storage bloqueado (modo privativo, cookies desligados): mantem
-// a sessao viva ao menos enquanto a aba estiver aberta.
+// a sessao viva enquanto a aba estiver aberta — mesmo comportamento do
+// sessionStorage, entao o fallback nao afrouxa a regra.
 const fallback = new Map();
 
 export async function getItemAsync(key) {
