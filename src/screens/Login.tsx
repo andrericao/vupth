@@ -10,6 +10,7 @@ import { Button } from "@components/Button";
 import { validateLogin } from "@domain/auth/validateAuth";
 import { postAuthRoute } from "@domain/auth/postAuthRoute";
 import { useAuthStore } from "@stores/authStore";
+import { useTabBarInset } from "@hooks/useTabBarInset";
 
 type RouteParams = {
   redirectTo?: string;
@@ -31,6 +32,7 @@ export function Login() {
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
+  const tabBarInset = useTabBarInset();
   const params = (route.params as RouteParams) ?? {};
   const login = useAuthStore((s) => s.login);
 
@@ -85,7 +87,10 @@ export function Login() {
       showsVerticalScrollIndicator={false}
       style={{ backgroundColor: "#FFFFFF" }}
     >
-      <VStack flex={1} pb={32} px={16}>
+      {/* pb soma a faixa da tab bar: estas telas vivem dentro do
+          Tab.Navigator, e sem a reserva o CTA do rodape nasce POR BAIXO
+          da barra — o toque nao chega nele. */}
+      <VStack flex={1} pb={32 + tabBarInset} px={16}>
         {/* Sem titulo: "OLA DE NOVO" e o heroi da tela, em 34px no corpo. O
             cabecalho aqui existe pelo voltar — e pra que o topo respeite o
             safe-area como em todas as outras telas. */}

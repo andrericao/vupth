@@ -14,7 +14,13 @@ import { authService } from '@services/authService';
 
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
+// Mock PARCIAL, de proposito. Substituir o modulo inteiro derruba quem depende
+// das outras exportacoes: o `useTabBarInset` importa
+// `@react-navigation/bottom-tabs`, que chama `createNavigatorFactory` daqui —
+// sem o requireActual a suite nem chega a rodar, com
+// `(0, _native.createNavigatorFactory) is not a function`.
 jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
   useRoute: () => ({ params: {} }),
 }));

@@ -11,6 +11,7 @@ import { Button } from "@components/Button";
 import { PasswordRules } from "@components/PasswordRules";
 import { validateSignUp, getPasswordRules } from "@domain/auth/validateAuth";
 import { useAuthStore } from "@stores/authStore";
+import { useTabBarInset } from "@hooks/useTabBarInset";
 
 type RouteParams = {
   redirectTo?: string;
@@ -33,6 +34,7 @@ export function SignUp() {
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
+  const tabBarInset = useTabBarInset();
   const params = (route.params as RouteParams) ?? {};
   const register = useAuthStore((s) => s.register);
   const login = useAuthStore((s) => s.login);
@@ -104,7 +106,10 @@ export function SignUp() {
       showsVerticalScrollIndicator={false}
       style={{ backgroundColor: "#FFFFFF" }}
     >
-      <VStack flex={1} pb={32} px={16}>
+      {/* pb soma a faixa da tab bar: estas telas vivem dentro do
+          Tab.Navigator, e sem a reserva o CTA do rodape nasce POR BAIXO
+          da barra — o toque nao chega nele. */}
+      <VStack flex={1} pb={32 + tabBarInset} px={16}>
         {/* Sem titulo: o heroi ("NAO PERCA SUA VEZ") fica no corpo, em 32px.
             "Agora nao" so no fluxo da fila: e a saida de quem foi interrompido
             no meio de uma acao. Quem veio pela Home ja tem o voltar, e um
