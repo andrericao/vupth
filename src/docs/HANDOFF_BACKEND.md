@@ -431,7 +431,48 @@ conversa do front-client com o backend; aquele é o que se manda para ler.
 
 ---
 
-## 17. 🔴 `GET /establishment` — ~11-12s de custo FIXO (B10)
+## 17. 🔴 `GET /establishment` — ~11-12s (B10)
+
+> # ✅ DIAGNOSTICADO PELO BACKEND EM 31/08 — **NÃO É CUSTO FIXO**
+>
+> **Leia isto antes do resto da seção.** Levamos a §18f ao `PRD_BACKEND.md` nesta mesma data e eles
+> mediram e fecharam o diagnóstico no mesmo dia (commit `a987b71`). **A premissa central de tudo o
+> que está escrito abaixo — "custo fixo por request" — está DERRUBADA.** O texto original fica como
+> histórico do raciocínio, não como verdade corrente.
+>
+> **A causa real:** o custo é **por loja** (~81ms/loja + ~0,3s de HTTP/TLS). O que ninguém enxergava
+> é que **o número de lojas que a resposta DEVOLVE não é o número que o backend PROCESSA** — o filtro
+> de lojas abertas roda **depois** de todo o trabalho, no controller. Com **17 lojas na resposta, o
+> backend já tinha processado 98**.
+>
+> **Isso explica de uma vez as três coisas que a gente observou e não conseguia juntar:**
+>
+> | O que víamos | Por quê |
+> |---|---|
+> | 4 e 13 lojas custarem o mesmo | processava a **base inteira** nos dois casos |
+> | 43 KB nunca custar mais que 10 KB | `includeAll=true` faz **MENOS** trabalho e devolve mais bytes |
+> | o ramo do nome custar metade | ele **não processa as outras 86 lojas** — filtra no SQL antes do N+1 |
+>
+> 🎯 **A nossa pista era a certa.** A pergunta que deixamos — *"o que o ramo do nome NÃO faz é o
+> candidato número um"* — tem resposta literal, e foi ela que fechou o diagnóstico.
+>
+> **E a pergunta (a) era mesmo a de melhor retorno, com resposta pior do que supúnhamos:** o
+> `queueSummary` chama `GetEstablishmentWithQueueUseCase` — **o use case do endpoint de DETALHE** —
+> uma vez por loja, cada uma em `REQUIRES_NEW`, só para extrair dois números. **A Home paga N páginas
+> de detalhe para desenhar nome, status e espera.**
+>
+> ### ⚠️ Duas coisas que mudam o nosso lado
+>
+> 1. **"Idêntico em toda hospedagem" DEIXOU DE VALER.** Prod está em **~24s**, não ~11s (~740ms por
+>    loja, **9× o Render**). **Prod é o pior dos dois** — e é o ambiente que o Andre decidiu mostrar
+>    ao usuário real. Some também a conclusão de que "trocar de hospedagem não resolve".
+> 2. **A base de PRODUÇÃO está poluída:** 32 lojas semeadas pela collection do Postman, das quais 4
+>    abertas e **uma só com cara de real**. Ou seja, parte dos ~24s é lixo de teste — e a Home do
+>    usuário real hoje mostra lojas que não existem.
+>
+> 📌 **O que isso faz com os nossos itens 7-9 do `PRD_FRONT-CLIENT.md`:** eles **continuam válidos e
+> ficam mais urgentes**. Se o custo é por loja e prod é 9× pior, pedir a mesma lista **duas vezes por
+> abertura** custa o dobro de um número que agora é ~24s.
 
 **Origem:** medido pelo **front-partner** em 2026-08-26, ao ver a primeira tela do app falhar.
 Registrado no handoff deles com o nome *"`GET /establishment` leva ~12s em todo ambiente"*.
