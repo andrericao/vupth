@@ -492,6 +492,68 @@ isso que a tela "funciona": ela só demora ~12s para pintar.
 ⚠️ **Não vamos empilhar contorno.** Enquanto o custo fixo existir, qualquer coisa que a gente faça
 aqui esconde o defeito e duplica trabalho.
 
+### 🆕 Remedição em 2026-08-31 (nossa, Render quente) — e uma ressalva ao "quente"
+
+Três rodadas alternadas, servidor já acordado:
+
+| rodada | `/establishment` (10 KB) | `?includeAll=true` (43 KB) |
+|---|---|---|
+| r1 | 10,3s | 8,4s |
+| r2 | 9,0s | 7,8s |
+| r3 | **7,1s** | **6,4s** |
+
+**1. O payload não explica o tempo — hipótese de volume ENCERRADA.** 43 KB nunca custou mais que
+10 KB, em nenhuma das três rodadas. Some a suspeita de serialização/transferência e reforça a de
+**espera fixa por request**.
+
+**2. ⚠️ "Servidor quente" NÃO é um estado único.** O tempo cai ~30% em três rodadas seguidas
+(10,3 → 7,1s), com cara de JIT/cache de banco ainda subindo. **Consequência para este documento:** as
+medições da tabela acima (partner, 26/08, "servidor quente") podem carregar o mesmo viés, e o número
+que o **usuário real** sente é o da ponta CARA da curva — quem abre o app de vez em quando nunca
+chega nos 6,4s. Ao remedir, **descartar as primeiras chamadas** e dizer quantas.
+
+**3. O que NÃO afirmamos.** O `includeAll` parecer mais rápido em 3/3 é **inconclusivo**: ele foi
+sempre a **segunda** chamada de cada rodada, e com a curva caindo a ordem explica a vantagem tão bem
+quanto o ramo de código. Para virar pista, rodar com a **ordem invertida**. Registrado aqui só para
+que ninguém persiga isso achando que já é achado.
+
+### 🤔 `Pageable` do Spring resolveria? — **não o custo fixo** (análise de 2026-08-31)
+
+Pergunta do Andre. A resposta curta é **não**, e o porquê está nos próprios números:
+
+- Paginação reduz **linhas devolvidas**. O custo aqui **não vem de linhas** — 4 e 13 lojas custam o
+  mesmo, e 4× o payload custa o mesmo. Devolver 10 em vez de 13 não mexe num custo que já é fixo.
+- Pior: **se a paginação for aplicada em memória** (carregar tudo e fatiar num `PageImpl`), ela
+  **não tira nada** do caminho caro — só muda o formato da resposta.
+- `Pageable` **só** ajudaria se o `LIMIT` descesse até o SQL **e** o custo fosse proporcional. As
+  duas condições precisam valer juntas; a segunda já sabemos que não vale.
+
+**O que ajudaria, e é a pergunta 2 desta seção:** separar o que a **lista** precisa do que só o
+**detalhe** precisa — uma projeção enxuta para a Home (nome, status, espera). Isso ataca o trabalho
+por request, e é justamente o que **destrava a paginação depois**, quando ela passa a valer a pena.
+
+⚠️ **E `Pageable` não é grátis para os fronts:** muda o contrato (a resposta vira
+`{content, totalElements, …}`), quebra os dois apps de uma vez, e **reabre uma decisão de produto já
+fechada** — o Andre decidiu em 27/07 que **não há raio default para ninguém sumir da lista**.
+Paginar traz de volta exatamente esse risco: a loja fechada/distante cai fora da primeira página e o
+cliente lê "não há lojas" onde há. Se um dia entrar, entra **com essa decisão revisitada**, não de
+carona numa mudança de performance.
+
+### ✂️ Contorno × desperdício NOSSO — a distinção que faltava aqui
+
+O "não vamos empilhar contorno" acima estava largo demais e barrava o próprio conserto. Separando:
+
+| | Exemplo | Vale fazer? |
+|---|---|---|
+| **Contorno** — esconde o defeito do backend | subir o timeout de 10s → 30s | ❌ já feito, e marcado no código como máscara |
+| **Desperdício nosso** — trabalho que o client cria sozinho | **pedir a MESMA lista duas vezes por abertura**; jogar fora o cache a cada fechamento | ✅ **é defeito nosso, conserta independente do B10** |
+
+Achados do client em 31/08, detalhados no `PRD_FRONT-CLIENT.md` §12: a Home dispara **duas** vezes o
+`GET /establishment` a cada abertura (a `queryKey` muda quando as coordenadas voltam do SecureStore,
+e a query não tem `enabled`), e o `QueryClient` não tem persistência, então toda abertura parte de
+cache vazio. **Somados, são ~10s + ~10s de espera que o backend não pediu.** Consertar isso não
+esconde o B10 — o B10 continua de pé e continua sendo o item que trava a primeira tela.
+
 ---
 
 ## 18. 📚 Leitura dos documentos das outras equipes — 2026-08-29

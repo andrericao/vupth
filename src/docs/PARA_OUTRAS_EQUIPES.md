@@ -337,8 +337,30 @@ mostrar aos testadores quando estiver com o mínimo de atrito.
   `/actuator/health` agregado), **5 min**, com **janela de horário** — que é o único parâmetro que
   protege a cota das **750 h/mês** somadas entre todos os serviços free da conta.
 
-**Em teste agora. O resultado sai antes de seguirmos** — se o keep-warm não segurar, o portão
-`waitForBackend` continua sendo o que salva o primeiro acesso.
+**❌ ENCERRADO EM 2026-08-31 — o keep-warm SAI DE ESCOPO (decisão do Andre).** Não vamos manter
+pinger nenhum. O raciocínio que fecha a questão: **o Render deixou de ser ambiente de testador.**
+
+| Ambiente | Quem usa, a partir de agora |
+|---|---|
+| **Render** (staging) | **só o Andre**, testando |
+| **Railway** (prod) | é o que vai na frente do **usuário real** |
+
+Como ninguém além do Andre abre o staging, hibernação virou custo que só ele paga — e ele sabe
+esperar os ~50s. Pagar cota de 750 h/mês (e arriscar suspensão da conta) para acelerar o cold start
+de uma pessoa não se paga. **O `P3` da lista de painel do backend pode ser fechado como "não
+faremos".**
+
+⚠️ **O portão `waitForBackend` CONTINUA valendo, e agora é a única defesa.** Sem keep-warm, todo
+primeiro acesso ao staging pega a instância fria. E ele segue necessário no **prod** por outro
+motivo, independente de hibernação: o **`P4`** (Health Check Path do Render vazio) faz o serviço ser
+dado como no ar quando a porta abre, **antes do Liquibase** — janela de 500 a cada deploy.
+
+📌 **Como se verifica:** `curl -o /dev/null -w '%{http_code} %{time_total}\n'
+https://vupth-backend-ia.onrender.com/actuator/health/readiness` depois de >15 min de ociosidade.
+Quente responde **0,5s**; frio, dezenas de segundos. Medido em 31/08: **quente 0,56s e 0,74s**; numa
+partida a frio o mesmo endpoint **não respondeu dentro de 120s** — indício de que o teto de ~90s do
+`waitForBackend` (PRD_BACKEND §18c) pode estar curto. **Uma medição só, não é conclusão** — para
+fechar, deixar hibernar e cronometrar até o primeiro 200.
 
 ### 10.5 🔴 INCONSISTÊNCIA DE AMBIENTES — `dev` significa **duas máquinas diferentes**
 
