@@ -1085,7 +1085,7 @@ cobrir linha):
 | 8 | 🔴 **O cache não sobrevive ao fechamento do app** | `App.tsx:46` é um `new QueryClient()` pelado, sem persistência: toda abertura parte de cache vazio e o usuário encara os ~7-10s inteiros de `SkeletonList`. **`@react-native-async-storage/async-storage` já é dependência** — dá para usar `persistQueryClient` **sem pacote novo**, mostrando a última lista conhecida na hora e revalidando atrás. Muda "10s de skeleton" para "lista imediata, atualiza sozinha". 📌 **Como se verifica:** fechar e reabrir o app offline — hoje mostra skeleton e erro; com persistência deve pintar a última lista | Pendente |
 | 9 | 🟡 **Polling caro contra endpoint de custo fixo** | `useEstablishments` tem `refetchInterval: 60000` para uma chamada de ~7-10s: o app passa **~15% do tempo** com esse request aberto, e o hook é consumido por **três telas** (`Home`, `EstablishmentList`, `Onboarding` — o React Query deduplica por chave, mas a chave muda com as coords, ver item 7). Reavaliar o intervalo **depois** do item 7. Relacionado: `includeAll=true` traz **43 KB contra 10 KB** — não custa tempo no servidor (medido 31/08), mas pesa no 4G do usuário | Pendente |
 
-| 10 | 🔒 **A posição na fila SAI da tela — só tempo estimado** | **DECISÃO DO ANDRE, 2026-08-31** (issue #20, ponto 1). ⚠️ **Inverte design deliberado:** hoje o número de 110px da `QueueStatus` é a posição, e o comentário no código justifica — *"é concreto e não oscila como a estimativa"*. Decidido: **(a)** a posição **some por completo**, o tempo estimado assume o número grande; **(b)** o tempo aparece **cru, como o backend manda**, subindo ou descendo, sem faixa nem suavização. Detalhes e o risco no quadro abaixo | Pendente (decisão fechada) |
+| 10 | 🔒 **A posição na fila SAI da tela — só tempo estimado** | **DECISÃO DO ANDRE, 2026-08-31** (issue #20, ponto 1). ⚠️ **Inverte design deliberado:** hoje o número de 110px da `QueueStatus` é a posição, e o comentário no código justifica — *"é concreto e não oscila como a estimativa"*. Decidido: **(a)** a posição **some por completo**, o tempo estimado assume o número grande; **(b)** o tempo aparece **cru, como o backend manda**, subindo ou descendo, sem faixa nem suavização. Detalhes e o risco no quadro abaixo. ⚠️ **Duas perguntas abertas desde 01/09:** a **Home** é um terceiro lugar que revela posição, e o **onboarding promete** acompanhá-la — ver os dois blocos ao fim do item | Pendente (decisão fechada; **alcance em aberto**) |
 
 #### Item 10 — o que sai da tela, e o efeito colateral
 
@@ -1140,6 +1140,56 @@ para na tela. O trabalho é em **dois repos**:
 
 O texto novo é decisão do Andre. Registrado no `PRD_BACKEND.md` (especificação de push) e no
 `PRD_FRONT-PARTNER.md` §11.2.
+
+### ⚠️ Um TERCEIRO lugar revela a posição: a Home (achado de 2026-09-01)
+
+Este item diz **"dois lugares revelam posição"** e lista os dois na `QueueStatus`. **São três.** O
+cartão de fila ativa da **Home** — a primeira tela do app — mostra, em **46px**:
+
+```
+activeQueue.position <= 1 ? "É a sua vez" : `Faltam ${activeQueue.position - 1}`
+```
+
+`position - 1` **é** o `peopleAhead` que o número de 110px da `QueueStatus` calcula. É a mesma
+informação, no mesmo tamanho de manchete, uma tela antes. E o comentário no próprio código diz que o
+tempo só entra *"até o 1º poll chegar"* — ou seja, o normal é mostrar a posição, não o tempo.
+
+| Onde | O quê | Sai? |
+|---|---|---|
+| `Home.tsx:392-395` | cartão de fila ativa: **"Faltam N"** em 46px, de `position - 1` | ❓ **decisão do Andre** |
+
+**Por que isto precisa de resposta antes de codar:** a régua declarada é *"o cliente não sabe onde
+está"*. Limpar só a `QueueStatus` não a cumpre — a Home continua contando quantos faltam, e é por
+ela que o cliente passa primeiro. Se a Home ficar como está, a régua real vira *"o cliente não vê a
+posição na tela de status"*, que é outra coisa e vale escrever assim.
+
+📌 O caminho de fallback já existe aqui também: sem `position`, o cartão cai em `formatWaitTime`.
+Como na `QueueStatus`, a mudança é **tornar esse ramo o único**.
+
+### ⚠️ O ONBOARDING promete a posição que vai sair (achado de 2026-09-01)
+
+Maior que uma tela, e por isso fica separado: a **promessa de entrada do app** cita a posição pelo
+nome.
+
+| Onde | O texto |
+|---|---|
+| `Feature Card` (componente do design system) | *"Acompanhe sua posição em tempo real."* |
+| `CLIENT · 02 Onboarding` / `02 — Onboarding 1` | *"Entre na fila pelo celular e acompanhe sua posição…"* |
+| `CLIENT · 09 Escolher servico` | rótulo *"Sua posição"* |
+| `CLIENT · 10 Permissao` | *"Avisamos faltando 2 pessoas"* · *"quando faltarem 2 pessoas"* |
+| `CLIENT · 12 Notificacoes` (componente `Notificação`) | *"Faltam 2 pessoas"* |
+
+Com a posição fora da tela, estas frases passam a **prometer o que o app não entrega**. E o efeito
+soma com o risco já registrado acima: se a tela perde todo sinal de progresso **e** o onboarding
+prometeu acompanhamento de posição, a frustração começa antes de o cliente entrar na fila.
+
+⚠️ **Isto é decisão de PRODUTO, não de desenho** — a design não reescreve a proposta de valor por
+conta própria. As saídas possíveis, para a decisão ser sobre alternativas e não sobre o problema:
+prometer **tempo** em vez de posição; prometer **aviso** ("a gente te chama") em vez de
+acompanhamento; ou manter a promessa e rever a decisão da posição.
+
+**Como se verifica:** procurar `posição` e `pessoas` nos textos do arquivo de design. Se as telas
+acima não citarem mais posição, este bloco foi resolvido — atualize-o.
 
 📌 **Facilitador:** o caminho já existe. O código tem fallback *"sem a posição, o tempo assume o
 lugar"* — a mudança é **tornar esse ramo o único**, não construir tela nova.
