@@ -1085,6 +1085,31 @@ cobrir linha):
 | 8 | 🔴 **O cache não sobrevive ao fechamento do app** | `App.tsx:46` é um `new QueryClient()` pelado, sem persistência: toda abertura parte de cache vazio e o usuário encara os ~7-10s inteiros de `SkeletonList`. **`@react-native-async-storage/async-storage` já é dependência** — dá para usar `persistQueryClient` **sem pacote novo**, mostrando a última lista conhecida na hora e revalidando atrás. Muda "10s de skeleton" para "lista imediata, atualiza sozinha". 📌 **Como se verifica:** fechar e reabrir o app offline — hoje mostra skeleton e erro; com persistência deve pintar a última lista | Pendente |
 | 9 | 🟡 **Polling caro contra endpoint de custo fixo** | `useEstablishments` tem `refetchInterval: 60000` para uma chamada de ~7-10s: o app passa **~15% do tempo** com esse request aberto, e o hook é consumido por **três telas** (`Home`, `EstablishmentList`, `Onboarding` — o React Query deduplica por chave, mas a chave muda com as coords, ver item 7). Reavaliar o intervalo **depois** do item 7. Relacionado: `includeAll=true` traz **43 KB contra 10 KB** — não custa tempo no servidor (medido 31/08), mas pesa no 4G do usuário | Pendente |
 
+| 10 | 🔒 **A posição na fila SAI da tela — só tempo estimado** | **DECISÃO DO ANDRE, 2026-08-31** (issue #20, ponto 1). ⚠️ **Inverte design deliberado:** hoje o número de 110px da `QueueStatus` é a posição, e o comentário no código justifica — *"é concreto e não oscila como a estimativa"*. Decidido: **(a)** a posição **some por completo**, o tempo estimado assume o número grande; **(b)** o tempo aparece **cru, como o backend manda**, subindo ou descendo, sem faixa nem suavização. Detalhes e o risco no quadro abaixo | Pendente (decisão fechada) |
+
+#### Item 10 — o que sai da tela, e o efeito colateral
+
+**Dois lugares revelam posição**, não um. O segundo passa despercebido:
+
+| Onde | O quê | Sai? |
+|---|---|---|
+| `QueueStatus.tsx:647-672` | número de 110px = `peopleAhead` + "pessoas na frente" | ✅ sim, é o alvo do pedido |
+| `QueueStatus.tsx:697-720` | fileira de bolinhas + **"Você já passou N pessoas"** (de `initialPosition` vs `position`) | ⬜ **sub-decisão ABERTA** |
+
+A fileira de bolinhas não mostra o lugar na fila, mas **entrega a mesma informação por outro caminho
+— dá para contar**. Se a régua é "o cliente não sabe onde está", ela sai junto.
+
+⚠️ **O efeito colateral, registrado antes de codar:** com a posição fora **e** tempo cru, a tela
+perde **todo** sinal de progresso — some o número que descia, somem as bolinhas que enchiam, e sobra
+um número que **pode subir na cara do cliente**. É a combinação com maior risco de o usuário concluir
+que a fila travou. A decisão está tomada e é do Andre; isto fica escrito para que, **se aparecer
+reclamação de "parece parado"**, ninguém reinvestigue do zero — a causa já está nomeada aqui, e as
+saídas descartadas na decisão (faixa "20-30 min", ou número que só desce) são o primeiro lugar a
+olhar.
+
+📌 **Facilitador:** o caminho já existe. O código tem fallback *"sem a posição, o tempo assume o
+lugar"* — a mudança é **tornar esse ramo o único**, não construir tela nova.
+
 > 🔗 **Contexto dos itens 7-9 — a demora ao abrir o app (levantada pelo Andre em 2026-08-31).** A
 > causa maior é do backend (**B10**, `GET /establishment` com custo fixo — `HANDOFF_BACKEND.md` §17,
 > onde está a remedição de 31/08 e a análise de por que `Pageable` **não** resolve). Mas 7 e 8 são
