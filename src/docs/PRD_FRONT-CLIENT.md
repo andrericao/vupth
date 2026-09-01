@@ -1244,6 +1244,36 @@ Lista viva dos handoffs abertos do front-client para o backend. Detalhe em `HAND
 | 11 | Filtro por bairro/localidade (C1) — **3 FASES (Andre 2026-07-23)** | **Fase 1 ✅ FEITA (front-only):** `LocationSelector` na Home (define localidade por "meu endereco" logado OU CEP via ViaCEP, persiste em `locationStore` com flag `resolved`; **logado auto-preenche do endereco principal** — proximidade sem tocar em nada; quem limpa o filtro nao o ve voltar); `sortByProximity` ordena **mesmo bairro → mesma cidade → resto** (chave = cidade+bairro, exige UF igual p/ homonimas), reusando o `address` que ja vem na listagem. Testes: `proximity`/`locationStore`/`LocationSelector`. Limitacao: ainda baixa a lista toda e ordena no device (ok enquanto a base e pequena). **Fase 2 ⬜ backend:** `GET /establishment?uf=&city=&neighborhood=` p/ escopar server-side (escala). **Fase 3 ⬜ backend+build:** GPS/Haversine — geocodar os enderecos no cadastro (CEP→lat/long) + `GET /establishment?lat=&lng=&radiusKm=` + `expo-location` no client (**modulo NATIVO → eas build**). Ver HANDOFF secao "Filtro por localidade". | **Fase 1 FEITA / Fases 2-3 aguardam backend** |
 | 12 | Testes de componente/tela | React Native Testing Library | Pendente |
 | 13 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
+| 14 | 🟡 **`npm audit` — 40 vulnerabilidades, mas quase nenhuma chega no app** | Levantado em **2026-08-31**, só anotado (decisão do Andre: registrar, não agir). Ver o quadro abaixo | Anotado, sem ação |
+
+#### Item 14 — leitura do `npm audit` de 2026-08-31
+
+O número cru (**40: 2 críticas, 19 altas, 18 moderadas, 1 baixa**) assusta mais do que deve. Separando
+o que **vai no bundle** do que é **ferramenta de build**, a lista encolhe muito:
+
+| Grupo | O que é | Exemplos | Chega no usuário? |
+|---|---|---|---|
+| **2 críticas + 19 altas** | cadeia do **Metro / `@expo/cli` / prebuild** | `shell-quote`, `tar`, `metro*`, `@expo/metro-config`, `svgo`, `postcss`, `image-size`, `node-forge`, `undici`, `ws`, `minimatch`, `picomatch`, `js-yaml`, `nanoid`, `brace-expansion`, `@xmldom/xmldom` | ❌ **não** — roda na máquina de quem builda |
+| **moderadas** | runtime de verdade | `@react-navigation/core`, `@react-navigation/native`, `expo-updates`, `expo-notifications`, `expo-constants`, `expo-asset`, `expo-splash-screen`, `uuid`, `query-string`, `decode-uri-component` | ✅ **sim** |
+
+**Só 1 das 40 é dependência DIRETA** (`expo`), e ela é "alta" apenas por arrastar o `@expo/cli`.
+
+**A inversão que importa:** o que de fato embarca no app está todo no balde **moderado**; o balde
+crítico/alto é toolchain. Priorizar por severidade aqui levaria a gastar o esforço no lugar errado.
+
+⚠️ **`npm audit fix --force` está fora de questão** sem decisão: mexeria no `expo`/`metro` e é
+troca de versão de SDK disfarçada de correção de segurança.
+
+📌 **Como se verifica:** `npm audit --json` e agrupar por `severity` + `isDirect`. 📎 **Contexto:** a
+Almar já puxou o **axios** para fora da faixa vulnerável em `1f21cd6c` (1.13.4 → 1.20.0), então o
+assunto já está no radar dela — a decisão de até onde ir em dependência é dela.
+
+⚠️ **Armadilha que isso revelou (custou um push):** o `node_modules` pode ficar **atrasado em relação
+ao lock** depois de um rebase que traz bump de dependência. Aqui o lock pedia axios **1.20.0** e o
+instalado era **1.13.4**; o `eslint-disable` de `api.ts:75` (necessário no axios 1.17+) virou
+**directive sem uso**, e o `--max-warnings 0` **barrou o push** por um "erro" que não existia no
+código. **Depois de rebase que toque `package.json`/`package-lock.json`, rodar `npm install` ANTES de
+tentar o push.**
 | 14 | Countdown resiliente offline | **FEITO no codigo (commit `f056c67f`).** Countdown ja roda pelo relogio do device (`useQueueCountdown`); alem disso: `@react-native-community/netinfo` + `onlineManager` do React Query pausam as queries offline e re-sincronizam ao reconectar, `OfflineBanner` (barra vermelha no topo) avisa o usuario, e `activeQueue` persiste em SecureStore entre reinicios. Uso DEFENSIVO (try/catch) — netinfo e nativo; se o OTA cair em build sem ele, assume online e nao quebra. ⚠️ **A deteccao de offline so ATIVA apos um novo `eas build`** (o OTA atual e seguro mas inerte, pois o modulo nativo nao esta no binario) | **FEITO (codigo) / ativa apos novo eas build** |
 
 ### 🔒 Trocar de posição (Adiantar/Atrasar) + Agendar (Intenção) — MODELO FECHADO 2026-07-15
