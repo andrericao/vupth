@@ -1094,10 +1094,24 @@ cobrir linha):
 | Onde | O quê | Sai? |
 |---|---|---|
 | `QueueStatus.tsx:647-672` | número de 110px = `peopleAhead` + "pessoas na frente" | ✅ sim, é o alvo do pedido |
-| `QueueStatus.tsx:697-720` | fileira de bolinhas + **"Você já passou N pessoas"** (de `initialPosition` vs `position`) | ⬜ **sub-decisão ABERTA** |
+| `QueueStatus.tsx:697-720` | fileira de bolinhas + **"Você já passou N pessoas"** (de `initialPosition` vs `position`) | ✅ **sim — Andre, 31/08** |
 
 A fileira de bolinhas não mostra o lugar na fila, mas **entrega a mesma informação por outro caminho
-— dá para contar**. Se a régua é "o cliente não sabe onde está", ela sai junto.
+— dá para contar**. A régua é "o cliente não sabe onde está", então ela sai junto.
+
+### 🔴 A restrição que evita o erro seguinte: o dado CONTINUA vindo
+
+**Isto é mudança de EXIBIÇÃO, não de contrato.** O `position` / `initialPosition` continua chegando
+do backend e **ninguém deve pedir para ele parar de mandar**:
+
+> **A posição é informação do PROFISSIONAL.** O app do parceiro precisa dela para tocar a fila. O que
+> muda é só que o **cliente não a vê** — o dado segue existindo, trafegando e sendo consumido do
+> outro lado. *(Andre, 2026-08-31.)*
+
+⚠️ **Consequência prática, para quem mexer nisto depois:** ao ver `position` deixar de ser usado na
+`QueueStatus`, a tentação é "limpar" — tirar o campo do tipo, ou abrir pedido ao backend para
+enxugar o payload. **Não fazer.** Seria uma economia de bytes que **quebraria o front-partner**.
+Retirar só o que **desenha** a posição; o campo fica.
 
 ⚠️ **O efeito colateral, registrado antes de codar:** com a posição fora **e** tempo cru, a tela
 perde **todo** sinal de progresso — some o número que descia, somem as bolinhas que enchiam, e sobra
