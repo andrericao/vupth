@@ -1121,6 +1121,26 @@ reclamação de "parece parado"**, ninguém reinvestigue do zero — a causa já
 saídas descartadas na decisão (faixa "20-30 min", ou número que só desce) são o primeiro lugar a
 olhar.
 
+### ⚠️ Não é só tela: o PUSH também revela a posição (achado de 31/08)
+
+**Andre, 31/08:** *"aviso sobre próximo ou quantos tem na frente serão mudados"*. Isso alcança código
+**já em produção, no backend** — o push `QUEUE_NEXT_IN_LINE` é disparado hoje com o texto
+**"É quase a sua vez!" / "Você é o próximo da fila."** (`QueuePushService.java:60`). A segunda frase
+**é** informação de posição, a mais específica que existe (posição 1), e chega ao cliente com o app
+**fechado** — por fora da tela que estamos limpando.
+
+⚠️ **Correção do que este item dizia antes:** escrevemos que a mudança era "um arquivo só, sem pedido
+ao backend". **Errado** — para a *tela* é verdade, mas a régua "o cliente não sabe onde está" não
+para na tela. O trabalho é em **dois repos**:
+
+| Onde | O quê |
+|---|---|
+| **client** (nosso) | tirar o número de `peopleAhead` e a fileira de bolinhas da `QueueStatus` |
+| **backend** (deles) | trocar **só o TEXTO** do push. Gatilho, dedup por `next_notified` e `data.type` ficam iguais — nós dependemos deles |
+
+O texto novo é decisão do Andre. Registrado no `PRD_BACKEND.md` (especificação de push) e no
+`PRD_FRONT-PARTNER.md` §11.2.
+
 📌 **Facilitador:** o caminho já existe. O código tem fallback *"sem a posição, o tempo assume o
 lugar"* — a mudança é **tornar esse ramo o único**, não construir tela nova.
 

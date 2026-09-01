@@ -351,9 +351,19 @@ de uma pessoa não se paga. **O `P3` da lista de painel do backend pode ser fech
 faremos".**
 
 ⚠️ **O portão `waitForBackend` CONTINUA valendo, e agora é a única defesa.** Sem keep-warm, todo
-primeiro acesso ao staging pega a instância fria. E ele segue necessário no **prod** por outro
-motivo, independente de hibernação: o **`P4`** (Health Check Path do Render vazio) faz o serviço ser
-dado como no ar quando a porta abre, **antes do Liquibase** — janela de 500 a cada deploy.
+primeiro acesso ao staging pega a instância fria.
+
+✅ **CORREÇÃO (31/08): o `P4` NÃO estava aberto — já estava feito.** Chegamos a escrever aqui que o
+Health Check Path do Render estava vazio e que isso abria uma janela de 500 a cada deploy. **Errado.**
+O backend registrou no commit `29ec009` que o campo **já estava setado**, e que ele entrou na lista
+como pendente só porque a seção 18c seguia dizendo "pendente" e ninguém reconferiu.
+
+📌 **A lição, que é a mesma dos dois lados:** eles chamam isso de *"o defeito do `keep-alive.yml`
+fantasma na direção contrária — texto que ninguém reconfere envelhece nos dois sentidos, inventando
+pendência tanto quanto escondendo"*. **Nós repetimos o erro na sequência**, herdando o estado da
+prosa deles em vez de conferir. Config de painel **não é verificável por `curl` de fora** — só no
+painel, ou perguntando. É exatamente a Regra 3 do `VUPTH_DOCS` (todo doc diz **como se verifica**)
+falhando por não ter resposta possível.
 
 📌 **Como se verifica:** `curl -o /dev/null -w '%{http_code} %{time_total}\n'
 https://vupth-backend-ia.onrender.com/actuator/health/readiness` depois de >15 min de ociosidade.
