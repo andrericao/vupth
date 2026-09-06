@@ -7,7 +7,7 @@ import { API_BASE_URL, API_ENV } from "./api";
 
 export interface WaitForBackendOptions {
   baseUrl?: string;
-  /** Desliga o portao (ex.: ambiente local, sem cold start). Default: env !== "local". */
+  /** Desliga o portao (a maquina nao hiberna, nao ha cold start). Default: env !== "dev". */
   enabled?: boolean;
   /** Teto total de espera. Default 90s. */
   maxTotalMs?: number;
@@ -50,7 +50,7 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 export async function waitForBackend(opts: WaitForBackendOptions = {}): Promise<boolean> {
   const {
     baseUrl = API_BASE_URL,
-    enabled = API_ENV !== "local",
+    enabled = API_ENV !== "dev",
     maxTotalMs = 90000,
     perAttemptMs = 60000,
     initialBackoffMs = 1500,

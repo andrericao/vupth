@@ -12,15 +12,16 @@ interface RefreshResponse {
 
 const localIp = process.env.EXPO_PUBLIC_API_LOCAL_IP || "localhost";
 
-// Render = ambiente de TESTE; Railway = PRODUCAO, e e no Railway que o time
-// testa em device (Andre 2026-08-22).
+// Tres nomes, os mesmos do backend: `dev` e a MAQUINA, `staging` e o Render,
+// `prod` e o Railway.
 //
-// `dev` e `staging` sao o MESMO host de proposito: este app batizou de `dev` o
-// que o partner batizou de `staging`, e o mesmo `.env` circula entre os dois
-// repos. Sem o apelido, `EXPO_PUBLIC_API_ENV=staging` aqui nao resolvia nada.
+// Ate 06/09 eram quatro, e duas chaves apontavam pro mesmo host: `dev` e
+// `staging` eram ambas o Render, porque este app batizou de `dev` o que o
+// partner batizou de `staging` e o mesmo `.env` circulava entre os repos. A
+// maquina se chamava `local`. Resultado: `dev` era a sua maquina no backend e
+// a nuvem no app — e um `.env` dizendo `dev` mandava pro Render de surpresa.
 const BASE_URLS: Record<string, string> = {
-	local: `http://${localIp}:8080`,
-	dev: "https://vupth-backend-ia.onrender.com",
+	dev: `http://${localIp}:8080`,
 	staging: "https://vupth-backend-ia.onrender.com",
 	prod: "https://vupth-backend-ia-production.up.railway.app",
 };
@@ -80,7 +81,7 @@ export const api = axios.create({
 	// PRIMEIRA tela em dev: "Erro ao carregar estabelecimentos", com o backend
 	// respondendo 200 logo depois. 30s cobre a lentidao sem esconder falha real.
 	// ⚠️ Isto MASCARA um problema de backend, nao conserta: ver S35.
-	timeout: env === "local" ? 30000 : 90000,
+	timeout: env === "dev" ? 30000 : 90000,
 	headers: {
 		"Content-Type": "application/json",
 	},

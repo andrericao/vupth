@@ -20,7 +20,16 @@
  * Consequencia pratica: publicar de qualquer maquina, com qualquer `.env`,
  * cai no backend certo. Nao ha mais o que lembrar antes de publicar.
  */
-export type ApiEnv = "local" | "dev" | "staging" | "prod";
+/**
+ * `dev` e a MAQUINA (Docker local), `staging` e o Render, `prod` e o Railway.
+ *
+ * Sao os mesmos tres nomes do backend — `application-dev.properties`,
+ * `application-staging.properties`, `application-prod.properties` — e e de
+ * proposito: ate 06/09 este app chamava de `dev` o RENDER e de `local` a
+ * maquina, invertendo o vocabulario de quem serve a API. A mesma palavra
+ * significava a sua maquina de um lado e a nuvem do outro.
+ */
+export type ApiEnv = "dev" | "staging" | "prod";
 
 /**
  * Canal do EAS -> ambiente. Mesma tabela do `eas.json` dos dois apps.
@@ -58,5 +67,8 @@ export function resolveApiEnv(
   if (doCanal) return doCanal;
 
   const doEnv = envDoBundle as ApiEnv | undefined;
-  return doEnv && ["local", "dev", "staging", "prod"].includes(doEnv) ? doEnv : "local";
+  // Fallback e `dev` (a maquina): valor desconhecido nao pode cair num
+  // ambiente que tem dado de gente. Quem errar o nome bate no proprio Docker
+  // e descobre na hora, em vez de escrever no Render sem perceber.
+  return doEnv && ["dev", "staging", "prod"].includes(doEnv) ? doEnv : "dev";
 }
