@@ -1,7 +1,7 @@
 name: EAS Update (OTA)
 
 # Publica a camada JavaScript (telas/logica/fixes) pela internet, sem rebuild de loja.
-# push em dev  -> branch/canal "preview"     (testers, APK preview)  | API: dev (Render)
+# push em dev  -> branch/canal "preview"     (testers, APK preview)  | API: staging (Render)
 # push em main -> branch/canal "production"   (usuarios finais)       | API: prod (Railway)
 #
 # IMPORTANTE: o `env` dos perfis do eas.json so vale para `eas build`.
@@ -50,7 +50,7 @@ jobs:
       - name: Publish OTA (dev -> preview)
         if: github.ref == 'refs/heads/dev'
         env:
-          EXPO_PUBLIC_API_ENV: dev
+          EXPO_PUBLIC_API_ENV: staging
           COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           SUBJECT="$(printf '%s\n' "$COMMIT_MSG" | head -n1)"

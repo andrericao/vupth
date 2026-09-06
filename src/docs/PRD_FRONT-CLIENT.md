@@ -369,12 +369,19 @@ ideia de teste automatizado, e `staging` é o nome que o backend **já usa** no
 Nada de comportamento — é renome. Quatro pontos, todos em `apiEnv.ts`/`api.ts`, mais os `.env` das
 máquinas e o `eas.json`:
 
-| onde | hoje | vira |
-|---|---|---|
-| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "staging" \| "prod"` |
-| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | **apaga a chave `dev`** (o `staging` já está certo) |
-| `CANAL_PARA_ENV` | `development: "dev"` | `development: "staging"` |
-| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","staging","prod"]` |
+| onde | hoje | vira | estado |
+|---|---|---|---|
+| `CANAL_PARA_ENV` | `development: "dev"` | `development: "staging"` | ✅ **feito 06/09** |
+| `eas.json` (`env` de cada perfil) | `development: "dev"`, `preview: "prod"` | ambos `"staging"` | ✅ **feito 06/09** |
+| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "staging" \| "prod"` | ⏳ trava a 3 |
+| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | **apaga a chave `dev`** (o `staging` já está certo) | ⏳ trava a 3 |
+| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","staging","prod"]` | ⏳ trava a 3 |
+
+📌 **06/09 — as duas primeiras linhas saíram na frente**, porque vieram de carona na decisão de tirar
+o `preview` de produção (`PARA_OUTRAS_EQUIPES.md` §10.6) e **não mudam host nenhum**: `dev` e
+`staging` já apontam para o mesmo Render. As três que restam **apagam uma chave** — essas continuam
+travadas pela sincronia dos três repos, porque um `.env` com `EXPO_PUBLIC_API_ENV=dev` numa máquina
+qualquer passaria a cair no fallback `local` sem avisar.
 
 ✅ **Do nosso lado é DELEÇÃO, não renome** — a chave `staging` já existe e já aponta para o Render.
 O par `dev`/`staging` era duplicata que só existia porque o mesmo `.env` circulava entre os repos;

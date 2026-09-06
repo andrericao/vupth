@@ -1,8 +1,9 @@
 /**
  * Qual backend este bundle fala.
  *
- * Render = ambiente de TESTE; Railway = PRODUCAO, e e no Railway que o time
- * testa em device (Andre 2026-08-22).
+ * Render = STAGING, e e nele que se testa: em device pelo canal `preview`, na
+ * web pelo link que comeca com "dev". Railway = PRODUCAO, e so o canal
+ * `production` encosta nele (Andre 2026-09-06).
  *
  * ⚠️ POR QUE ISTO NAO E SO UM `process.env`
  *
@@ -24,19 +25,24 @@ export type ApiEnv = "local" | "dev" | "staging" | "prod";
 /**
  * Canal do EAS -> ambiente. Mesma tabela do `eas.json` dos dois apps.
  *
- * `preview` aponta pro RAILWAY (producao), nao pro Render, e isso e
- * deliberado: `preview` e o UNICO canal que existe nos dois projetos, os
- * builds do time sao perfil `preview` com distribuicao interna, e e no Railway
- * que o time testa em device (Andre 2026-08-22). Mandar `preview` pro Render
- * significaria que o teste de device nunca bate no backend que eles conferem.
+ * `preview` aponta pro RENDER (staging). Ate 06/09 apontava pro Railway, e a
+ * justificativa escrita era "e no Railway que o time testa em device"
+ * (22/08) — o que significava, assumidamente, TESTE EM DEVICE GRAVANDO NO
+ * BANCO DE PRODUCAO.
  *
- * ⚠️ A consequencia esta assumida: teste em device grava no banco de
- * PRODUCAO. Se um dia existir um canal so de teste, e aqui que ele entra,
- * apontando pro `dev`.
+ * A premissa caiu duas vezes: em 28/08 ficou `staging` = Render (secao 1w do
+ * PRD), e em 06/09 o front-partner corrigiu o lado deles e fechou "o Render e
+ * o que se testa". O Andre confirmou pro client no mesmo dia: testa-se no
+ * `preview`; o que se MOSTRA a usuario e a versao de `production`.
+ *
+ * Fica so o `production` encostando no Railway. Efeito esperado, nao bug: o
+ * Render Free hiberna, entao o APK de teste ve o portao do `waitForBackend`
+ * (~50s) no primeiro acesso depois de ociosidade — o keep-warm foi cancelado
+ * em 31/08 de proposito.
  */
 export const CANAL_PARA_ENV: Record<string, ApiEnv> = {
-  development: "dev",
-  preview: "prod",
+  development: "staging",
+  preview: "staging",
   production: "prod",
 };
 

@@ -422,24 +422,34 @@ custar caro. No client são quatro pontos, todos no mesmo arquivo, mais os `.env
 📣 **Backend:** é a ponta que falta. O custo aqui já está levantado e é pequeno; o que trava é o
 acordo, não o trabalho.
 
-### 10.6 ⚠️ FRONT-PARTNER — o canal `preview` grava em **PRODUÇÃO**
+### 10.6 ✅ RESOLVIDO em 06/09 — o canal `preview` saiu de produção
 
-No `apiEnv.ts` (compartilhado no desenho entre os dois apps):
+**Estado atual** (`src/services/apiEnv.ts`; no partner é `src/lib/apiEnv.ts`):
 
 ```ts
 export const CANAL_PARA_ENV: Record<string, ApiEnv> = {
-  development: "dev", preview: "prod", production: "prod",
+  development: "staging", preview: "staging", production: "prod",
 };
 ```
 
-O canal **`preview` resolve para `prod`** — ou seja, **build de preview em device grava no banco de
-PRODUÇÃO**. Está documentado como **deliberado**, com a consequência assumida por escrito, então
-**não é bug e não estamos pedindo mudança**.
+**Só o canal `production` encosta no Railway.** Travado pelo teste
+*"nenhum canal além do `production` fala com o Railway"* em `src/__tests__/domain/apiEnv.test.ts` —
+se alguém reapontar um canal para `prod`, o CI reprova.
 
-Registramos por dois motivos: (1) é a resposta à dúvida *"se preview já visualiza a prod, isso não
-suja o banco?"* — **suja, e foi uma escolha**; (2) some com a distinção Render/Railway justamente no
-canal que mais parece seguro pelo nome. Se um dia o `staging` passar a ter dado de teste que
-importa, **este é o primeiro lugar a mexer.**
+**Como estava, e por que mudou.** Até 06/09 o `preview` resolvia `prod`: **build de preview em
+device gravava no banco de PRODUÇÃO**. Não era descuido — estava documentado como deliberado, com a
+justificativa *"é no Railway que o time testa em device"* (22/08). **A premissa caiu duas vezes:**
+em 28/08 ficou `staging` = Render (§1w), e em 06/09 o front-partner corrigiu o lado deles e fechou
+*"o Render é o que se testa"*. O Andre confirmou para o client no mesmo dia: **testa-se no
+`preview`; o que se MOSTRA a usuário é a versão de `production`.**
+
+⚠️ **Efeito esperado, não abram bug:** o Render Free hiberna, então o APK de teste passa a ver o
+portão do `waitForBackend` (~50s) no primeiro acesso depois de ociosidade. O keep-warm foi
+cancelado em 31/08 de propósito.
+
+🎓 **A lição:** o defeito não estava na escolha, estava na **prosa que ninguém reconferiu**. A
+justificativa continuou escrita por 15 dias depois de a premissa dela ter mudado — é o mesmo padrão
+do P4 e do `keep-alive.yml` fantasma.
 
 ### 10.7 ⚠️ O "link não funciona" que se DISFARÇA de CORS — e a medição que separa os dois
 
