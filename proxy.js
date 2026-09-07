@@ -45,6 +45,9 @@ const server = http.createServer((req, res) => {
   req.pipe(proxyReq);
 });
 
-server.listen(PORT, () => {
+// So a loopback: sem isso o proxy escutava em todas as interfaces, e qualquer
+// aparelho na mesma rede virava cliente do backend (por padrao, o de PRODUCAO)
+// com CORS liberado. Ferramenta pessoal de dev escuta so na propria maquina.
+server.listen(PORT, '127.0.0.1', () => {
   console.log(`Proxy rodando em http://localhost:${PORT} -> ${TARGET}`);
 });

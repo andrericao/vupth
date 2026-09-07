@@ -369,12 +369,19 @@ ideia de teste automatizado, e `staging` é o nome que o backend **já usa** no
 Nada de comportamento — é renome. Quatro pontos, todos em `apiEnv.ts`/`api.ts`, mais os `.env` das
 máquinas e o `eas.json`:
 
-| onde | hoje | vira |
-|---|---|---|
-| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "staging" \| "prod"` |
-| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | **apaga a chave `dev`** (o `staging` já está certo) |
-| `CANAL_PARA_ENV` | `development: "dev"` | `development: "staging"` |
-| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","staging","prod"]` |
+| onde | hoje | vira | estado |
+|---|---|---|---|
+| `CANAL_PARA_ENV` | `development: "dev"` | `development: "staging"` | ✅ **feito 06/09** |
+| `eas.json` (`env` de cada perfil) | `development: "dev"`, `preview: "prod"` | ambos `"staging"` | ✅ **feito 06/09** |
+| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "staging" \| "prod"` | ⏳ trava a 3 |
+| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | **apaga a chave `dev`** (o `staging` já está certo) | ⏳ trava a 3 |
+| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","staging","prod"]` | ⏳ trava a 3 |
+
+📌 **06/09 — as duas primeiras linhas saíram na frente**, porque vieram de carona na decisão de tirar
+o `preview` de produção (`PARA_OUTRAS_EQUIPES.md` §10.6) e **não mudam host nenhum**: `dev` e
+`staging` já apontam para o mesmo Render. As três que restam **apagam uma chave** — essas continuam
+travadas pela sincronia dos três repos, porque um `.env` com `EXPO_PUBLIC_API_ENV=dev` numa máquina
+qualquer passaria a cair no fallback `local` sem avisar.
 
 ✅ **Do nosso lado é DELEÇÃO, não renome** — a chave `staging` já existe e já aponta para o Render.
 O par `dev`/`staging` era duplicata que só existia porque o mesmo `.env` circulava entre os repos;
@@ -441,6 +448,46 @@ Com o aviso **no momento certo**, a multa fica defensável: ele foi informado an
 
 Nada aqui aguarda **decisão** — o escopo está fechado. O que falta é **implementação de terceiro**, abaixo.
 
+
+### 🔤 As FONTES da marca e o deploy web — resolvido em 2026-08-29
+
+**O que acontecia.** O `expo export --platform web` grava cada asset **espelhando o caminho de
+origem**. Com as fontes importadas de `@expo-google-fonts/*`, os TTFs saíam em
+`dist/assets/node_modules/@expo-google-fonts/...` — e a **Cloudflare Pages descarta `node_modules`
+do deploy, por design e sem avisar**.
+
+Somado a isso, o portão do `App.tsx` segurava a tela **só** no `fontsLoaded`, descartando o segundo
+elemento do `useFonts`. Resultado: **spinner eterno**. Não era CORS, não era backend.
+
+⚠️ **Por que passou despercebido, e a lição que vale para tudo:** com o fallback de SPA, **o arquivo
+ausente responde `200`**, devolvendo o `index.html`. Quem testa por status code vê verde.
+**`200` não significa que o arquivo existe — o que distingue é o `content-type`.**
+
+**Como está agora.** Os 6 TTFs que usamos vivem em `assets/fonts/` e entram por `require()`. O
+portão é `fontsLoaded || Boolean(fontError)`: fonte que falha **degrada para a do sistema** em vez de
+prender o app. De brinde, o export caiu de **42 fontes para 6** — antes o pacote inteiro do
+`@expo-google-fonts` entrava no bundle.
+
+**📐 COMO SE VERIFICA** *(medido em 29/08 — se der outro resultado, esta seção está mentindo)*:
+
+```bash
+# 1. pegue o bundle publicado
+curl -s https://dev.vupth.pages.dev/ | grep -o '/_expo/static/js/web/[^"]*\.js'
+
+# 2. no bundle, NAO pode haver caminho sob node_modules:
+grep -c 'assets/node_modules/@expo-google-fonts' bundle.js     # esperado: 0  (era 42)
+
+# 3. e a fonte tem de existir DE VERDADE — olhe o content-type, nao o status:
+curl -sI https://dev.vupth.pages.dev/assets/assets/fonts/Archivo_700Bold.<hash>.ttf | grep -i content-type
+# ✅ font/ttf   ❌ text/html  = nao existe, quem respondeu foi o fallback de SPA
+```
+
+🔒 **Travado por teste:** `src/__tests__/projeto/fontesForaDoNodeModules.test.ts` verifica as **três**
+condições juntas — nenhum import de `@expo-google-fonts`, os TTFs existem em `assets/fonts/`, e o
+portão considera o erro (inclusive que o render não voltou a usar `{!fontsLoaded ?`).
+
+> 🙏 **Crédito:** achado pelo **front-partner** em 29/08, que perdeu o app publicado para isso e nos
+> avisou antes de a gente descobrir sozinho. Eles corrigiram do mesmo jeito (`f310297`).
 
 ### 🔴 O bloqueio real do acesso por link: **CORS** (medido em 26/08, nos dois backends)
 
@@ -1041,6 +1088,77 @@ cobrir linha):
 | 4 | ~~Selecao de servicos obrigatoria~~ | Implementado: ServiceSelection.tsx — lista servicos, multi-selecao, preco, confirmar antes de entrar na fila. Endpoint: `GET /professional-queue/{id}/service-items` | **FEITO** |
 | 5 | Tempo real via WebSocket (STOMP) | ✅ **Servidor PROVADO em producao pelo backend (06/08)**: heartbeat `10000,10000`, entrega no canal pessoal e conexao ociosa de 40s sobrevivendo ao proxy do Render. **No front (2026-08-06):** flags do stompjs removidas, token renovado a cada conexao (`beforeConnect`), **C18 feito** (`AppState` reconecta ao voltar do background) e **painel de diagnostico** em Configuracoes. ⚠️ **A entrega no canal PESSOAL segue sem prova de device** — o poll do `getWaitTime` (30s) mascara: o status muda na tela mesmo com o canal mudo. Nao ha sintoma aberto; o que falta e medicao, e o painel resolve em 10s. Fica aberto do lado do backend o **B8** (`#31`: token invalido conecta anonimo em vez de ser recusado) | 🔄 **Sem sintoma; prova pendente** |
 | 6 | Consumir ETA estavel (meal-aware lock) | **Backend pronto (item 37, 2026-06-22)** — `GET /client-queue/{attendanceId}/wait-time` ja retorna estimativa estavel (refeicoes travadas no ingresso). O client ja consome esse endpoint em `useQueueCountdown`; validar que usa o `estimatedWaitingTime` estavel e nao recalcula por fora | Validar |
+| 7 | 🔴 **A Home pede a MESMA lista DUAS vezes por abertura** | `restoreLocation()` roda sem `await` em `App.tsx:78` e `useEstablishments` **não tem `enabled`**. A query sai com `coords: null`; quando as coordenadas voltam do SecureStore a `queryKey` muda e ela **sai de novo**. Com o `GET /establishment` em ~7-10s (B10), são **duas esperas** a cada abertura. ⚠️ **Não é para tirar as coords da chave** — elas estão lá consertando um bug real (sem isso o React Query devolveria para sempre a lista sem distância). O conserto é **segurar a primeira query até a restauração decidir, com prazo** (`enabled` + deadline, para GPS negado/lento não travar a tela). 📌 **Como se verifica:** log/proxy na abertura — hoje saem 2 `GET /establishment`, tem de sair 1 | Pendente |
+| 8 | 🔴 **O cache não sobrevive ao fechamento do app** | `App.tsx:46` é um `new QueryClient()` pelado, sem persistência: toda abertura parte de cache vazio e o usuário encara os ~7-10s inteiros de `SkeletonList`. **`@react-native-async-storage/async-storage` já é dependência** — dá para usar `persistQueryClient` **sem pacote novo**, mostrando a última lista conhecida na hora e revalidando atrás. Muda "10s de skeleton" para "lista imediata, atualiza sozinha". 📌 **Como se verifica:** fechar e reabrir o app offline — hoje mostra skeleton e erro; com persistência deve pintar a última lista | Pendente |
+| 9 | 🟡 **Polling caro contra endpoint que cobra por loja** | `useEstablishments` tem `refetchInterval: 60000` para uma chamada de ~7-10s: o app passa **~15% do tempo** com esse request aberto, e o hook é consumido por **três telas** (`Home`, `EstablishmentList`, `Onboarding` — o React Query deduplica por chave, mas a chave muda com as coords, ver item 7). Reavaliar o intervalo **depois** do item 7. Relacionado: `includeAll=true` traz **43 KB contra 10 KB** — não custa tempo no servidor (medido 31/08), mas pesa no 4G do usuário | Pendente |
+
+| 10 | 🔒 **A posição na fila SAI da tela — só tempo estimado** | **DECISÃO DO ANDRE, 2026-08-31** (issue #20, ponto 1). ⚠️ **Inverte design deliberado:** hoje o número de 110px da `QueueStatus` é a posição, e o comentário no código justifica — *"é concreto e não oscila como a estimativa"*. Decidido: **(a)** a posição **some por completo**, o tempo estimado assume o número grande; **(b)** o tempo aparece **cru, como o backend manda**, subindo ou descendo, sem faixa nem suavização. Detalhes e o risco no quadro abaixo | Pendente (decisão fechada) |
+
+#### Item 10 — o que sai da tela, e o efeito colateral
+
+**Dois lugares revelam posição**, não um. O segundo passa despercebido:
+
+| Onde | O quê | Sai? |
+|---|---|---|
+| `QueueStatus.tsx:647-672` | número de 110px = `peopleAhead` + "pessoas na frente" | ✅ sim, é o alvo do pedido |
+| `QueueStatus.tsx:697-720` | fileira de bolinhas + **"Você já passou N pessoas"** (de `initialPosition` vs `position`) | ✅ **sim — Andre, 31/08** |
+
+A fileira de bolinhas não mostra o lugar na fila, mas **entrega a mesma informação por outro caminho
+— dá para contar**. A régua é "o cliente não sabe onde está", então ela sai junto.
+
+### 🔴 A restrição que evita o erro seguinte: o dado CONTINUA vindo
+
+**Isto é mudança de EXIBIÇÃO, não de contrato.** O `position` / `initialPosition` continua chegando
+do backend e **ninguém deve pedir para ele parar de mandar**:
+
+> **A posição é informação do PROFISSIONAL.** O app do parceiro precisa dela para tocar a fila. O que
+> muda é só que o **cliente não a vê** — o dado segue existindo, trafegando e sendo consumido do
+> outro lado. *(Andre, 2026-08-31.)*
+
+⚠️ **Consequência prática, para quem mexer nisto depois:** ao ver `position` deixar de ser usado na
+`QueueStatus`, a tentação é "limpar" — tirar o campo do tipo, ou abrir pedido ao backend para
+enxugar o payload. **Não fazer.** Seria uma economia de bytes que **quebraria o front-partner**.
+Retirar só o que **desenha** a posição; o campo fica.
+
+⚠️ **O efeito colateral, registrado antes de codar:** com a posição fora **e** tempo cru, a tela
+perde **todo** sinal de progresso — some o número que descia, somem as bolinhas que enchiam, e sobra
+um número que **pode subir na cara do cliente**. É a combinação com maior risco de o usuário concluir
+que a fila travou. A decisão está tomada e é do Andre; isto fica escrito para que, **se aparecer
+reclamação de "parece parado"**, ninguém reinvestigue do zero — a causa já está nomeada aqui, e as
+saídas descartadas na decisão (faixa "20-30 min", ou número que só desce) são o primeiro lugar a
+olhar.
+
+### ⚠️ Não é só tela: o PUSH também revela a posição (achado de 31/08)
+
+**Andre, 31/08:** *"aviso sobre próximo ou quantos tem na frente serão mudados"*. Isso alcança código
+**já em produção, no backend** — o push `QUEUE_NEXT_IN_LINE` é disparado hoje com o texto
+**"É quase a sua vez!" / "Você é o próximo da fila."** (`QueuePushService.java:60`). A segunda frase
+**é** informação de posição, a mais específica que existe (posição 1), e chega ao cliente com o app
+**fechado** — por fora da tela que estamos limpando.
+
+⚠️ **Correção do que este item dizia antes:** escrevemos que a mudança era "um arquivo só, sem pedido
+ao backend". **Errado** — para a *tela* é verdade, mas a régua "o cliente não sabe onde está" não
+para na tela. O trabalho é em **dois repos**:
+
+| Onde | O quê |
+|---|---|
+| **client** (nosso) | tirar o número de `peopleAhead` e a fileira de bolinhas da `QueueStatus` |
+| **backend** (deles) | trocar **só o TEXTO** do push. Gatilho, dedup por `next_notified` e `data.type` ficam iguais — nós dependemos deles |
+
+O texto novo é decisão do Andre. Registrado no `PRD_BACKEND.md` (especificação de push) e no
+`PRD_FRONT-PARTNER.md` §11.2.
+
+📌 **Facilitador:** o caminho já existe. O código tem fallback *"sem a posição, o tempo assume o
+lugar"* — a mudança é **tornar esse ramo o único**, não construir tela nova.
+
+> 🔗 **Contexto dos itens 7-9 — a demora ao abrir o app (levantada pelo Andre em 2026-08-31).** A
+> causa maior é do backend (**B10** — ⚠️ **diagnosticado em 31/08: NÃO era custo fixo**, o custo é
+> **por loja** e o backend processa a base inteira antes de filtrar; e **prod está em ~24s, 9× o
+> Render**. Ver o quadro no topo de `HANDOFF_BACKEND.md` §17,
+> onde está a remedição de 31/08 e a análise de por que `Pageable` **não** resolve). Mas 7 e 8 são
+> **defeito nosso** e consertam independente do B10: não é contorno esconder o B10, é parar de pedir
+> duas vezes e parar de jogar fora trabalho já feito. O contorno de verdade foi subir o timeout, e
+> esse continua marcado no código como máscara.
 
 ### Media prioridade — Funcionalidades
 
@@ -1194,6 +1312,36 @@ Lista viva dos handoffs abertos do front-client para o backend. Detalhe em `HAND
 | 11 | Filtro por bairro/localidade (C1) — **3 FASES (Andre 2026-07-23)** | **Fase 1 ✅ FEITA (front-only):** `LocationSelector` na Home (define localidade por "meu endereco" logado OU CEP via ViaCEP, persiste em `locationStore` com flag `resolved`; **logado auto-preenche do endereco principal** — proximidade sem tocar em nada; quem limpa o filtro nao o ve voltar); `sortByProximity` ordena **mesmo bairro → mesma cidade → resto** (chave = cidade+bairro, exige UF igual p/ homonimas), reusando o `address` que ja vem na listagem. Testes: `proximity`/`locationStore`/`LocationSelector`. Limitacao: ainda baixa a lista toda e ordena no device (ok enquanto a base e pequena). **Fase 2 ⬜ backend:** `GET /establishment?uf=&city=&neighborhood=` p/ escopar server-side (escala). **Fase 3 ⬜ backend+build:** GPS/Haversine — geocodar os enderecos no cadastro (CEP→lat/long) + `GET /establishment?lat=&lng=&radiusKm=` + `expo-location` no client (**modulo NATIVO → eas build**). Ver HANDOFF secao "Filtro por localidade". | **Fase 1 FEITA / Fases 2-3 aguardam backend** |
 | 12 | Testes de componente/tela | React Native Testing Library | Pendente |
 | 13 | Guest na fila | `POST /professional-queue/add-quest-attendance` (sem login) | Pendente |
+| 14 | 🟡 **`npm audit` — 40 vulnerabilidades, mas quase nenhuma chega no app** | Levantado em **2026-08-31**, só anotado (decisão do Andre: registrar, não agir). Ver o quadro abaixo | Anotado, sem ação |
+
+#### Item 14 — leitura do `npm audit` de 2026-08-31
+
+O número cru (**40: 2 críticas, 19 altas, 18 moderadas, 1 baixa**) assusta mais do que deve. Separando
+o que **vai no bundle** do que é **ferramenta de build**, a lista encolhe muito:
+
+| Grupo | O que é | Exemplos | Chega no usuário? |
+|---|---|---|---|
+| **2 críticas + 19 altas** | cadeia do **Metro / `@expo/cli` / prebuild** | `shell-quote`, `tar`, `metro*`, `@expo/metro-config`, `svgo`, `postcss`, `image-size`, `node-forge`, `undici`, `ws`, `minimatch`, `picomatch`, `js-yaml`, `nanoid`, `brace-expansion`, `@xmldom/xmldom` | ❌ **não** — roda na máquina de quem builda |
+| **moderadas** | runtime de verdade | `@react-navigation/core`, `@react-navigation/native`, `expo-updates`, `expo-notifications`, `expo-constants`, `expo-asset`, `expo-splash-screen`, `uuid`, `query-string`, `decode-uri-component` | ✅ **sim** |
+
+**Só 1 das 40 é dependência DIRETA** (`expo`), e ela é "alta" apenas por arrastar o `@expo/cli`.
+
+**A inversão que importa:** o que de fato embarca no app está todo no balde **moderado**; o balde
+crítico/alto é toolchain. Priorizar por severidade aqui levaria a gastar o esforço no lugar errado.
+
+⚠️ **`npm audit fix --force` está fora de questão** sem decisão: mexeria no `expo`/`metro` e é
+troca de versão de SDK disfarçada de correção de segurança.
+
+📌 **Como se verifica:** `npm audit --json` e agrupar por `severity` + `isDirect`. 📎 **Contexto:** a
+Almar já puxou o **axios** para fora da faixa vulnerável em `1f21cd6c` (1.13.4 → 1.20.0), então o
+assunto já está no radar dela — a decisão de até onde ir em dependência é dela.
+
+⚠️ **Armadilha que isso revelou (custou um push):** o `node_modules` pode ficar **atrasado em relação
+ao lock** depois de um rebase que traz bump de dependência. Aqui o lock pedia axios **1.20.0** e o
+instalado era **1.13.4**; o `eslint-disable` de `api.ts:75` (necessário no axios 1.17+) virou
+**directive sem uso**, e o `--max-warnings 0` **barrou o push** por um "erro" que não existia no
+código. **Depois de rebase que toque `package.json`/`package-lock.json`, rodar `npm install` ANTES de
+tentar o push.**
 | 14 | Countdown resiliente offline | **FEITO no codigo (commit `f056c67f`).** Countdown ja roda pelo relogio do device (`useQueueCountdown`); alem disso: `@react-native-community/netinfo` + `onlineManager` do React Query pausam as queries offline e re-sincronizam ao reconectar, `OfflineBanner` (barra vermelha no topo) avisa o usuario, e `activeQueue` persiste em SecureStore entre reinicios. Uso DEFENSIVO (try/catch) — netinfo e nativo; se o OTA cair em build sem ele, assume online e nao quebra. ⚠️ **A deteccao de offline so ATIVA apos um novo `eas build`** (o OTA atual e seguro mas inerte, pois o modulo nativo nao esta no binario) | **FEITO (codigo) / ativa apos novo eas build** |
 
 ### 🔒 Trocar de posição (Adiantar/Atrasar) + Agendar (Intenção) — MODELO FECHADO 2026-07-15

@@ -4,7 +4,7 @@
 > **outra equipe** fica aqui, num lugar só. O Andre é o canal entre os três projetos: nós **não
 > editamos o repositório de ninguém** — registramos aqui e ele repassa.
 >
-> Última atualização: **2026-08-28** · branch `dev` do front-client.
+> Última atualização: **2026-08-29** · branch `dev` do front-client.
 
 > ⚠️ **NÚMERO DE ITEM NÃO É REFERÊNCIA ESTÁVEL.** Os backlogs renumeram, então os `#N` citados aqui
 > valiam **na data em que foram escritos**. Procure o item pelo **NOME** no PRD da equipe dona; o
@@ -337,8 +337,40 @@ mostrar aos testadores quando estiver com o mínimo de atrito.
   `/actuator/health` agregado), **5 min**, com **janela de horário** — que é o único parâmetro que
   protege a cota das **750 h/mês** somadas entre todos os serviços free da conta.
 
-**Em teste agora. O resultado sai antes de seguirmos** — se o keep-warm não segurar, o portão
-`waitForBackend` continua sendo o que salva o primeiro acesso.
+**❌ ENCERRADO EM 2026-08-31 — o keep-warm SAI DE ESCOPO (decisão do Andre).** Não vamos manter
+pinger nenhum. O raciocínio que fecha a questão: **o Render deixou de ser ambiente de testador.**
+
+| Ambiente | Quem usa, a partir de agora |
+|---|---|
+| **Render** (staging) | **só o Andre**, testando |
+| **Railway** (prod) | é o que vai na frente do **usuário real** |
+
+Como ninguém além do Andre abre o staging, hibernação virou custo que só ele paga — e ele sabe
+esperar os ~50s. Pagar cota de 750 h/mês (e arriscar suspensão da conta) para acelerar o cold start
+de uma pessoa não se paga. **O `P3` da lista de painel do backend pode ser fechado como "não
+faremos".**
+
+⚠️ **O portão `waitForBackend` CONTINUA valendo, e agora é a única defesa.** Sem keep-warm, todo
+primeiro acesso ao staging pega a instância fria.
+
+✅ **CORREÇÃO (31/08): o `P4` NÃO estava aberto — já estava feito.** Chegamos a escrever aqui que o
+Health Check Path do Render estava vazio e que isso abria uma janela de 500 a cada deploy. **Errado.**
+O backend registrou no commit `29ec009` que o campo **já estava setado**, e que ele entrou na lista
+como pendente só porque a seção 18c seguia dizendo "pendente" e ninguém reconferiu.
+
+📌 **A lição, que é a mesma dos dois lados:** eles chamam isso de *"o defeito do `keep-alive.yml`
+fantasma na direção contrária — texto que ninguém reconfere envelhece nos dois sentidos, inventando
+pendência tanto quanto escondendo"*. **Nós repetimos o erro na sequência**, herdando o estado da
+prosa deles em vez de conferir. Config de painel **não é verificável por `curl` de fora** — só no
+painel, ou perguntando. É exatamente a Regra 3 do `VUPTH_DOCS` (todo doc diz **como se verifica**)
+falhando por não ter resposta possível.
+
+📌 **Como se verifica:** `curl -o /dev/null -w '%{http_code} %{time_total}\n'
+https://vupth-backend-ia.onrender.com/actuator/health/readiness` depois de >15 min de ociosidade.
+Quente responde **0,5s**; frio, dezenas de segundos. Medido em 31/08: **quente 0,56s e 0,74s**; numa
+partida a frio o mesmo endpoint **não respondeu dentro de 120s** — indício de que o teto de ~90s do
+`waitForBackend` (PRD_BACKEND §18c) pode estar curto. **Uma medição só, não é conclusão** — para
+fechar, deixar hibernar e cronometrar até o primeiro 200.
 
 ### 10.5 🔴 INCONSISTÊNCIA DE AMBIENTES — `dev` significa **duas máquinas diferentes**
 
@@ -390,24 +422,34 @@ custar caro. No client são quatro pontos, todos no mesmo arquivo, mais os `.env
 📣 **Backend:** é a ponta que falta. O custo aqui já está levantado e é pequeno; o que trava é o
 acordo, não o trabalho.
 
-### 10.6 ⚠️ FRONT-PARTNER — o canal `preview` grava em **PRODUÇÃO**
+### 10.6 ✅ RESOLVIDO em 06/09 — o canal `preview` saiu de produção
 
-No `apiEnv.ts` (compartilhado no desenho entre os dois apps):
+**Estado atual** (`src/services/apiEnv.ts`; no partner é `src/lib/apiEnv.ts`):
 
 ```ts
 export const CANAL_PARA_ENV: Record<string, ApiEnv> = {
-  development: "dev", preview: "prod", production: "prod",
+  development: "staging", preview: "staging", production: "prod",
 };
 ```
 
-O canal **`preview` resolve para `prod`** — ou seja, **build de preview em device grava no banco de
-PRODUÇÃO**. Está documentado como **deliberado**, com a consequência assumida por escrito, então
-**não é bug e não estamos pedindo mudança**.
+**Só o canal `production` encosta no Railway.** Travado pelo teste
+*"nenhum canal além do `production` fala com o Railway"* em `src/__tests__/domain/apiEnv.test.ts` —
+se alguém reapontar um canal para `prod`, o CI reprova.
 
-Registramos por dois motivos: (1) é a resposta à dúvida *"se preview já visualiza a prod, isso não
-suja o banco?"* — **suja, e foi uma escolha**; (2) some com a distinção Render/Railway justamente no
-canal que mais parece seguro pelo nome. Se um dia o `staging` passar a ter dado de teste que
-importa, **este é o primeiro lugar a mexer.**
+**Como estava, e por que mudou.** Até 06/09 o `preview` resolvia `prod`: **build de preview em
+device gravava no banco de PRODUÇÃO**. Não era descuido — estava documentado como deliberado, com a
+justificativa *"é no Railway que o time testa em device"* (22/08). **A premissa caiu duas vezes:**
+em 28/08 ficou `staging` = Render (§1w), e em 06/09 o front-partner corrigiu o lado deles e fechou
+*"o Render é o que se testa"*. O Andre confirmou para o client no mesmo dia: **testa-se no
+`preview`; o que se MOSTRA a usuário é a versão de `production`.**
+
+⚠️ **Efeito esperado, não abram bug:** o Render Free hiberna, então o APK de teste passa a ver o
+portão do `waitForBackend` (~50s) no primeiro acesso depois de ociosidade. O keep-warm foi
+cancelado em 31/08 de propósito.
+
+🎓 **A lição:** o defeito não estava na escolha, estava na **prosa que ninguém reconferiu**. A
+justificativa continuou escrita por 15 dias depois de a premissa dela ter mudado — é o mesmo padrão
+do P4 e do `keep-alive.yml` fantasma.
 
 ### 10.7 ⚠️ O "link não funciona" que se DISFARÇA de CORS — e a medição que separa os dois
 
@@ -528,3 +570,85 @@ Render e o `resolveApiEnv` já aceita `"staging"`. Basta `EXPO_PUBLIC_API_ENV=st
 A `dev` está **8 commits à frente**, incluindo a PR #16 inteira — então a preview, quando subir, vai
 mostrar coisa que o link público ainda não tem.
 
+
+### 11.1 ✅ 2026-08-29 — o staging FUNCIONA, e o que faltava não era o CORS
+
+Depois que as origens entraram no Render, o link de staging **ainda não abria**. A causa era outra, e
+vale registrar porque **não estava no radar de ninguém**.
+
+**https://dev.vupth.pages.dev está funcionando.**
+
+#### 🙏 O achado é do front-partner
+
+Eles perderam o app publicado para isto, diagnosticaram e **nos avisaram antes de a gente descobrir
+sozinho** — inclusive medindo o **nosso** site e mandando a evidência pronta. Sem esse aviso,
+teríamos gasto o dia procurando no lugar errado (CORS, backend), que é exatamente onde o sintoma
+aponta.
+
+#### O defeito
+
+O `expo export --platform web` grava cada asset **espelhando o caminho de origem**. Com as fontes
+vindo de `@expo-google-fonts/*`, os TTFs saíam sob `dist/assets/node_modules/...` — e a **Cloudflare
+Pages descarta `node_modules` do deploy, por design e em silêncio**. Somado a um portão que segurava
+a tela só no `fontsLoaded`, dava **spinner eterno**.
+
+#### 🔴 A armadilha que vale generalizar: **`200` não significa que o arquivo existe**
+
+Com o fallback de SPA, **todo caminho responde 200** — o ausente devolve o `index.html`. Quem testa
+por status code vê verde e conclui que está tudo certo. **O que distingue é o `content-type`.**
+
+**É a mesma família da armadilha do `curl` sem `Origin`** (§11): teste que parece verde **sem ter
+verificado nada**. Vale para os três projetos:
+
+| Verificação | ❌ O que engana | ✅ O que prova |
+|---|---|---|
+| Arquivo estático existe | status `200` | `content-type` do recurso |
+| CORS autorizado | `curl` sem `Origin` → 200 | `curl` **com** `Origin` → `access-control-allow-origin` |
+
+**Teste de controle que fecha qualquer dúvida:** peça um caminho **inventado**. Se ele responder
+igual ao recurso real, o recurso real não existe.
+
+```bash
+curl -sI https://SEU-DOMINIO.pages.dev/nao-existe-mesmo-12345.ttf | grep -i content-type
+```
+
+#### 📐 Estado medido em 29/08
+
+| | Antes | Depois |
+|---|---|---|
+| Fontes sob `assets/node_modules/` no bundle | **42** | **0** |
+| Fontes em `assets/assets/fonts/` | 0 | **6** |
+| `content-type` do TTF | `text/html` ❌ | **`font/ttf`** ✅ |
+
+#### O que corrigimos (client)
+
+1. Os 6 TTFs saíram do `node_modules` para `assets/fonts/`, carregados por `require()`.
+2. O portão virou `fontsLoaded || Boolean(fontError)` — **esta é a mais importante**: sem ela,
+   qualquer falha futura de fonte volta a prender o app, em **qualquer** plataforma.
+3. 🔒 As três condições ficam travadas em `src/__tests__/projeto/fontesForaDoNodeModules.test.ts`.
+
+⚠️ **Correção ao relato do partner sobre nós:** eles supuseram que o nosso caso era silencioso
+("como vocês não travam no `useFonts`"). **Nós travávamos** — o `App.tsx` segurava a tela no
+`fontsLoaded`. Era a versão dura do defeito, não a discreta.
+
+### 11.2 📍 O que ainda falta para o LINK PÚBLICO
+
+O staging está resolvido. O público (`vupth.pages.dev` → Railway) depende de **uma linha de painel**:
+
+```
+CORS_ALLOWED_ORIGINS=https://vupth-partner.pages.dev,https://*.vupth-partner.pages.dev,https://vupth.pages.dev,https://*.vupth.pages.dev
+```
+
+O código de CORS **já está no Railway** — o preflight saiu de `401` para `403`, o que pela escada da
+§11 significa "no ar, origem não autorizada". A variável está **vazia** lá: hoje o Railway recusa
+**todas** as origens, inclusive as do partner.
+
+✅ **O backend já corrigiu isso antes de pedirmos.** A §18e ganhou uma **lista de tarefas de painel
+(P1–P4)**, e o **P2** traz **os dois painéis** e a string completa, **já com as origens do client**.
+Íamos abrir pedido; não há o que pedir. Estado deles: **Render ✅ feito 29/08 · Railway ⬜ pendente**.
+
+🔴 **E lá tem um item que nos afeta e não estava no nosso radar — o `P4`:** o *Health Check Path* do
+Render está **vazio**, então o Render dá o serviço como no ar **assim que a porta abre** — e no Spring
+Boot a porta abre **antes** de o Liquibase terminar. **A cada deploy há uma janela em que trafego real
+vai para uma instância com o banco não pronto, e o usuário toma 500.** É a janela que o nosso portão
+`waitForBackend` cobre, e a explicação para 500 esporádico logo após deploy: **não é bug de app**.
