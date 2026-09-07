@@ -19,6 +19,7 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { nomeDeExibicao } from "@domain/auth/displayName";
 import { Button } from "@components/Button";
 import { WsDiagnostics } from "@components/WsDiagnostics";
+import { PushDiagnostics } from "@components/PushDiagnostics";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
@@ -401,7 +402,12 @@ export function Settings() {
           </Text>
           </TouchableOpacity>
 
-          {toquesNaVersao >= 7 && <WsDiagnostics />}
+          {toquesNaVersao >= 7 && (
+            <>
+              <WsDiagnostics />
+              <PushDiagnostics />
+            </>
+          )}
 
           {/* Deletar conta desce pra ca como LINK: e irreversivel, entao nao
               disputa atencao com o resto — mas continua alcancavel por quem

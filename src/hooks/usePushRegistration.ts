@@ -13,6 +13,7 @@ import {
 import { pushService } from "@services/pushService";
 import { navigateFromNotification } from "@routes/navigationRef";
 import { useAuthStore } from "@stores/authStore";
+import { usePushDiagnosticsStore } from "@stores/pushDiagnosticsStore";
 
 // Chave onde o Expo Push Token registrado é guardado, p/ o logout desregistrar
 // (authStore.logout → DELETE /devices). Mesmo valor do authStore.
@@ -47,6 +48,8 @@ export function usePushRegistration() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
   const didRegister = useRef(false);
+  const registrarTentativa = usePushDiagnosticsStore((s) => s.registrarTentativa);
+  const registrarEnvio = usePushDiagnosticsStore((s) => s.registrarEnvio);
 
   // Android exige um canal para exibir notificações.
   useEffect(() => {
@@ -73,27 +76,39 @@ export function usePushRegistration() {
           Constants.expoConfig?.extra?.eas?.projectId ??
           (Constants as { easConfig?: { projectId?: string } }).easConfig?.projectId;
 
-        const token = await acquireExpoPushToken({
+        const { token, motivo, detalhe } = await acquireExpoPushToken({
           isDevice: Device.isDevice,
           getPermissionsAsync: Notifications.getPermissionsAsync,
           requestPermissionsAsync: Notifications.requestPermissionsAsync,
           getExpoPushTokenAsync: Notifications.getExpoPushTokenAsync,
           projectId,
         });
+        // Grava SEMPRE, inclusive o fracasso: o painel das Configurações e o
+        // QA dependem disto para separar "nao chegou push" de "nem tentamos".
+        registrarTentativa({ motivo, detalhe, token });
         if (!token || cancelled) return;
 
-        await pushService.registerDevice(token, mapPlatform(Platform.OS), accessToken);
+        try {
+          await pushService.registerDevice(token, mapPlatform(Platform.OS), accessToken);
+          registrarEnvio("ok");
+        } catch (e) {
+          // Token adquirido mas o backend nao ficou sabendo: o push nunca vai
+          // chegar, e o sintoma e identico ao de nao ter token.
+          registrarEnvio("falhou", (e as Error)?.message ?? String(e));
+          throw e;
+        }
         await SecureStore.setItemAsync(PUSH_TOKEN_KEY, token);
         didRegister.current = true;
       } catch {
-        // best-effort — push nunca deve derrubar o fluxo de login.
+        // best-effort — push nunca deve derrubar o fluxo de login. O motivo já
+        // ficou no store acima.
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, accessToken]);
+  }, [isAuthenticated, accessToken, registrarTentativa, registrarEnvio]);
 
   // Ao deslogar, permitir novo registro na próxima sessão.
   useEffect(() => {
