@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Alert, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 
 import { useFonts } from "expo-font";
@@ -40,8 +41,19 @@ import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 
+import { instalarAlertWeb } from "./web-shims/alert";
+
 // Pausa/retoma as queries conforme a conexao real (netinfo). 1x no boot.
 setupOnlineManager();
+
+// O React Native Web nao implementa `Alert`: a chamada nao falha, nao loga e
+// nao pinta NADA. Eram 60 avisos mudos no navegador — inclusive o motivo de uma
+// acao recusada, que e quando o usuario mais precisa de resposta.
+//
+// O patch troca o metodo no objeto que o react-native exporta, entao pega as 60
+// chamadas existentes E as futuras, sem import novo em tela nenhuma. Roda no
+// boot, antes de qualquer interacao poder disparar um Alert.
+if (Platform.OS === "web") instalarAlertWeb(Alert);
 
 const queryClient = new QueryClient();
 
