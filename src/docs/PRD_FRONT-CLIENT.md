@@ -339,16 +339,35 @@ O Andre testou e **o fluxo passou com um e-mail sem cadastro**, porque o backend
 
 ---
 
-## 1w. 🌍 NOMES DOS AMBIENTES — `local` · `staging` · `prod` (decidido pelo Andre, 2026-08-28)
+## 1w. 🌍 NOMES DOS AMBIENTES — `dev` · `staging` · `prod` (decidido pelo Andre, 2026-09-06)
 
 > 📣 **Vocabulário único para os TRÊS projetos** (backend, front-client, front-partner). Esta é a
 > tabela válida. Qualquer outro nome que apareça em documento, `.env` ou painel está desatualizado.
 
 | Nome | Onde roda | Quem publica ali |
 |---|---|---|
-| **`local`** | Docker na máquina do dev | ninguém — é a máquina |
+| **`dev`** | Docker na **máquina do dev** | ninguém — é a máquina |
 | **`staging`** | **Render** | branch **`dev`** |
 | **`prod`** | **Railway** | branch **`main`** |
+
+⚠️ **ESTA TABELA SUBSTITUI a de 28/08**, que dizia `local` · `staging` · `prod` e cortava o `dev`.
+**Era o lado errado a cortar.** O backend sempre teve `application-dev.properties` (Docker local),
+`application-staging.properties` (Render) e `application-prod.properties` (Railway) — três nomes,
+**sem `local`**. Quem estava invertido eram os fronts: `dev` apontava para o **Render** e a máquina
+se chamava `local`. A mesma palavra significava a sua máquina para quem **serve** a API e a nuvem
+para quem a **consome**, e um `.env` dizendo `dev` mandava para o Render sem avisar — com portão de
+readiness ligado e timeout de 90 s, comportamento de nuvem enquanto se testava contra o Docker.
+
+✅ **Aplicado no client em 06/09** (commit `5c8130ce`, em produção pela PR #26): `BASE_URLS` de 4
+chaves para 3, tipo `ApiEnv`, lista branca, `healthService` e o timeout do `api.ts`.
+**O fallback passou a ser `dev`** — valor desconhecido não pode cair num ambiente que tem dado de
+gente; quem errar o nome bate no próprio Docker e descobre na hora.
+**O `.env` versionado ficou em `staging`**, porque é o default de quem **clona** e a máquina
+apontada por ele não é a de quem clona; override pessoal em `.env.local`.
+
+🔴 **PENDENTE NO PARTNER:** os perfis `development` e `preview` do `eas.json` deles ainda dizem
+`dev` esperando o **Render**. Funciona só enquanto as duas chaves apontarem para o mesmo host.
+Pedido registrado na caixa de entrada deles no `vupth-docs`.
 
 ### Por que três nomes, e por que estes
 
@@ -381,7 +400,7 @@ máquinas e o `eas.json`:
 o `preview` de produção (`PARA_OUTRAS_EQUIPES.md` §10.6) e **não mudam host nenhum**: `dev` e
 `staging` já apontam para o mesmo Render. As três que restam **apagam uma chave** — essas continuam
 travadas pela sincronia dos três repos, porque um `.env` com `EXPO_PUBLIC_API_ENV=dev` numa máquina
-qualquer passaria a cair no fallback `local` sem avisar.
+qualquer passaria a cair no fallback (hoje `dev`, a máquina) sem avisar.
 
 ✅ **Do nosso lado é DELEÇÃO, não renome** — a chave `staging` já existe e já aponta para o Render.
 O par `dev`/`staging` era duplicata que só existia porque o mesmo `.env` circulava entre os repos;
@@ -391,7 +410,8 @@ ela some, e some o motivo dela.
 único jeito de isto custar caro. O levantamento acima existe para o dia ser de execução, não de
 descoberta.
 
-⚠️ **O que NÃO é renome e morde antes:** o fallback do `resolveApiEnv` é **`local`**. Build web sem
+⚠️ **O que NÃO é renome e morde antes:** o fallback do `resolveApiEnv` é a **máquina** (`dev`
+desde 06/09; era `local`). Build web sem
 `EXPO_PUBLIC_API_ENV` declarada sai apontando para um IP de rede local e **não dá erro que
 explique** — parece CORS e não é. Ver §1x e `PARA_OUTRAS_EQUIPES.md` §10.7.
 
@@ -532,11 +552,14 @@ usamos cookie, e não dependemos de `allowCredentials(true)`.
 dois endpoints. Nós tínhamos registrado como pendência; **estava errado e foi retirado**
 (`PARA_OUTRAS_EQUIPES.md` §9.1).
 
-⚠️ **Antes de culpar o CORS, confirmar o alvo do bundle.** O fallback do `resolveApiEnv` é
-**`local`**: build web sem `EXPO_PUBLIC_API_ENV` sai apontando para um IP de rede local e **não dá
-erro que explique** — sintoma idêntico ao do CORS. **Verificado em 27/08 que o Production está
-certo** (`resolveApiEnv(canal,"prod")` → Railway); **o Preview ainda não foi conferido**, e a
-Cloudflare não herda variáveis entre os dois ambientes. Detalhe em `PARA_OUTRAS_EQUIPES.md` §10.7.
+⚠️ **Antes de culpar o CORS, confirmar o alvo do bundle.** O fallback do `resolveApiEnv` é a
+**máquina** (`dev` desde 06/09): build web sem `EXPO_PUBLIC_API_ENV` sai apontando para um IP de
+rede local e **não dá erro que explique** — sintoma idêntico ao do CORS.
+✅ **Os DOIS ambientes conferidos em 06/09, no bundle que está no ar:** Production
+(`vupth.pages.dev`) tem `resolveApiEnv(h,"prod")` → Railway; Preview (`dev.vupth.pages.dev`) tem
+`resolveApiEnv(f,"staging")` → Render, já com o vocabulário novo (`dev:"http://192.168.0.16:8080"`,
+`staging:"...onrender.com"`). A Cloudflare não herda variáveis entre os dois ambientes, então cada
+um precisa ser conferido separadamente — foi o que se fez. Detalhe em `PARA_OUTRAS_EQUIPES.md` §10.7.
 
 ⚠️ **Divergência interna a corrigir antes de publicar:** o nosso `web-shims/expo-secure-store.js`
 usa **`localStorage`**; o do partner usa **`sessionStorage`**. O C26 deles diz explicitamente que
