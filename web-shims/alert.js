@@ -14,9 +14,26 @@
 // loop, e o `onPress` do botao roda depois do bundle inteiro parar) e nao
 // suportam mais de dois botoes. Varios Alert do app tem tres.
 //
-// ⚠️ O visual aqui e SOBRIO DE PROPOSITO. Identidade visual e da equipe de
-// design; isto existe para que o aviso APARECA. Quando o design definir o
-// dialogo do web, e este arquivo que muda — as 60 chamadas continuam iguais.
+// O VISUAL SEGUE O APP, e cada numero aqui foi COPIADO da fonte, nao escolhido:
+//
+//   backdrop rgba(0,0,0,.45) e padding 24 ....... DeleteAccountModal.tsx
+//   card branco, raio 20 ($card), padding 24 .... idem + config radii/space
+//   sombra 0 4px 16px rgba(22,51,0,.08) ......... utils/styles.ts floatingShadow
+//   botao pilula, altura MINIMA 54 .............. components/Button.tsx
+//   solido #9FE870 com texto #163300 ............ Button.tsx (nunca texto branco:
+//                                                 brandGreen e claro demais)
+//   cancel e destructive VAZADOS ................ Button.tsx (outline/destructive
+//                                                 sao borda, nao fundo cheio)
+//   titulo/botao Archivo, corpo Inter ........... config fonts heading/body
+//   SEM sombra no botao ......................... Button.tsx ("effect: NENHUMA"
+//                                                 no Pencil)
+//
+// ⚠️ Altura MINIMA, nao cravada: o app honra o ajuste de fonte do aparelho, e
+// caixa travada corta o rotulo quando a fonte cresce (DS4).
+//
+// Sem tema escuro: o app nao tem um. Inventar aqui criaria divergencia com as
+// telas. O refinamento fino e da equipe de design — quando vier, muda so este
+// arquivo e as 60 chamadas seguem iguais.
 
 const Z_INDEX = 99999;
 
@@ -28,32 +45,41 @@ function criarEstilo() {
     .vupth-alert-backdrop {
       position: fixed; inset: 0; z-index: ${Z_INDEX};
       display: flex; align-items: center; justify-content: center;
-      background: rgba(0,0,0,.45); padding: 16px;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: rgba(0,0,0,.45); padding: 24px;
     }
     .vupth-alert-box {
-      background: #fff; color: #171717; border-radius: 14px;
-      max-width: 420px; width: 100%; padding: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,.25);
+      background: #FFFFFF; color: #163300;
+      border-radius: 20px; padding: 24px;
+      max-width: 420px; width: 100%;
+      box-shadow: 0 4px 16px rgba(22,51,0,.08);
+      font-family: Inter_400Regular, system-ui, -apple-system, sans-serif;
     }
-    .vupth-alert-title { font-size: 17px; font-weight: 700; margin: 0 0 6px; }
-    .vupth-alert-msg { font-size: 15px; line-height: 1.45; margin: 0; white-space: pre-wrap; }
-    .vupth-alert-actions {
-      display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 18px;
+    .vupth-alert-title {
+      font-family: Archivo_700Bold, Inter_700Bold, system-ui, sans-serif;
+      font-size: 18px; color: #163300; margin: 0 0 12px;
     }
+    .vupth-alert-msg {
+      font-size: 16px; line-height: 1.45; color: #454745;
+      margin: 0; white-space: pre-wrap;
+    }
+    .vupth-alert-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
     .vupth-alert-btn {
-      font: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
-      border: 0; border-radius: 10px; padding: 10px 16px;
-      background: #16a34a; color: #fff;
+      font-family: Archivo_700Bold, Inter_700Bold, system-ui, sans-serif;
+      font-size: 16px; cursor: pointer;
+      min-height: 54px; padding: 8px 24px;
+      border-radius: 9999px; border: 0;
+      background: #9FE870; color: #163300;
     }
-    .vupth-alert-btn[data-style="cancel"] { background: #e5e5e5; color: #171717; }
-    .vupth-alert-btn[data-style="destructive"] { background: #dc2626; color: #fff; }
-    .vupth-alert-btn:focus-visible { outline: 2px solid #0a0a0a; outline-offset: 2px; }
-    @media (prefers-color-scheme: dark) {
-      .vupth-alert-box { background: #171717; color: #fafafa; }
-      .vupth-alert-btn[data-style="cancel"] { background: #404040; color: #fafafa; }
-      .vupth-alert-btn:focus-visible { outline-color: #fafafa; }
+    .vupth-alert-btn:hover { background: #8AD95C; }
+    .vupth-alert-btn[data-style="cancel"] {
+      background: transparent; color: #163300; border: 2px solid #163300;
     }
+    .vupth-alert-btn[data-style="cancel"]:hover { background: #E2F6D5; }
+    .vupth-alert-btn[data-style="destructive"] {
+      background: transparent; color: #B3261E; border: 2px solid #B3261E;
+    }
+    .vupth-alert-btn[data-style="destructive"]:hover { background: #F7E4E2; }
+    .vupth-alert-btn:focus-visible { outline: 2px solid #163300; outline-offset: 2px; }
   `;
   document.head.appendChild(style);
 }

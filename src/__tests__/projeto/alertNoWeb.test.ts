@@ -88,6 +88,34 @@ describe('o Alert do web mostra o que o app tem a dizer', () => {
     expect(dlg.getAttribute('aria-label')).toBe('Erro');
   });
 
+  it('o card segue a marca: brandGreen SO como fundo, com forest por cima', () => {
+    // A regra da marca: `brandGreen` (#9FE870) e claro demais para sustentar
+    // texto branco. O par certo e sempre fundo brandGreen + texto forest — se
+    // alguem "modernizar" o botao para texto branco, o rotulo some.
+    alertWeb('Titulo', 'Msg', [{ text: 'Ok' }]);
+    const css = document.getElementById('vupth-alert-style')!.textContent!;
+    const botaoSolido = css.slice(css.indexOf('.vupth-alert-btn {'), css.indexOf('.vupth-alert-btn:hover'));
+    expect(botaoSolido).toContain('background: #9FE870');
+    expect(botaoSolido).toContain('color: #163300');
+    expect(botaoSolido.toLowerCase()).not.toContain('color: #fff');
+    expect(botaoSolido.toLowerCase()).not.toContain('color: white');
+    // Botao do app e pilula de altura MINIMA — cravar corta o rotulo quando a
+    // fonte do sistema cresce (DS4).
+    expect(botaoSolido).toContain('border-radius: 9999px');
+    expect(botaoSolido).toContain('min-height: 54px');
+    expect(botaoSolido).not.toMatch(/(?<!min-)height:\s*54px/);
+  });
+
+  it('cancel e destructive sao VAZADOS, como no Button do app', () => {
+    alertWeb('Titulo', 'Msg', [{ text: 'Ok' }]);
+    const css = document.getElementById('vupth-alert-style')!.textContent!;
+    for (const estilo of ['cancel', 'destructive']) {
+      const bloco = css.slice(css.indexOf(`[data-style="${estilo}"] {`));
+      expect(bloco.slice(0, 200)).toContain('background: transparent');
+      expect(bloco.slice(0, 200)).toContain('border: 2px solid');
+    }
+  });
+
   it('instalar troca o metodo do Alert, e nao instala duas vezes', () => {
     const falso: { alert: unknown; __vupthWebAlert?: boolean } = { alert: () => {} };
     expect(instalarAlertWeb(falso)).toBe(true);
