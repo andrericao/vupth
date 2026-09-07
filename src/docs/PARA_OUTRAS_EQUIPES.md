@@ -372,55 +372,60 @@ partida a frio o mesmo endpoint **não respondeu dentro de 120s** — indício d
 `waitForBackend` (PRD_BACKEND §18c) pode estar curto. **Uma medição só, não é conclusão** — para
 fechar, deixar hibernar e cronometrar até o primeiro 200.
 
-### 10.5 🔴 INCONSISTÊNCIA DE AMBIENTES — `dev` significa **duas máquinas diferentes**
+### 10.5 ✅ RESOLVIDO em 06/09 — `dev` · `staging` · `prod`, os nomes do backend
 
-Achado ao montar o Pages. Os três projetos usam as mesmas palavras para coisas diferentes:
-
-| Nome | Backend (`application-*.properties`) | Front-client (`api.ts`) |
-|---|---|---|
-| `local` | — | `http://<ip>:8080` |
-| **`dev`** | **Docker local** | **Render** ⚠️ |
-| `staging` | **Render** | **Render** (apelido de `dev`) |
-| `prod` | **Railway** | **Railway** |
-
-⚠️ **`dev` é Docker local no backend e Render no client.** Mesma palavra, máquinas diferentes. Hoje
-não quebra nada porque o client tem o apelido `staging` apontando para o mesmo host — mas é um
-apelido que **esconde** o desencontro em vez de resolvê-lo, e o nome `local` já cobre o caso local.
-
-✅ **CORREÇÃO (27/08).** Uma versão anterior desta seção propunha `local`/`dev` = Docker local ·
-`staging` = Render · `prod` = Railway. **Estava errado, e o erro é nosso:** o acordo já existia e é
-outro. Quem leu a tabela antiga, desconsidere.
-
-**Vocabulário DECIDIDO pelo Andre em 28/08: `local` · `staging` · `prod`.** Três nomes, não quatro —
-o par `dev`/`staging` some, e some junto o motivo dele existir (era só o mesmo `.env` circulando
-entre os repos).
+**O vocabulário dos três projetos agora é um só:**
 
 | Nome | Onde roda | Quem publica ali |
 |---|---|---|
-| `local` | Docker na máquina | ninguém |
-| `staging` | **Render** | branch `dev` |
-| `prod` | **Railway** | branch `main` |
+| **`dev`** | Docker na **máquina do dev** | ninguém — é a máquina |
+| **`staging`** | **Render** | branch `dev` |
+| **`prod`** | **Railway** | branch `main` |
 
-⚠️ **Mudou em relação ao que foi acordado em 27/08.** A rodada anterior fechou em `local` · **`test`**
-· `prod` ([vupth-partner#18](https://github.com/andrericao/vupth-partner/pull/18#issuecomment-5437931194)).
-O Andre trocou `test` por **`staging`** por dois motivos: "test" carrega junto a ideia de teste
-automatizado, e **`staging` é o nome que o backend JÁ usa** no `application-staging.properties`
-apontando para o Render — menos renome em todo mundo. **Quem já tinha anotado `test`, corrija.**
+**São os nomes que o backend sempre usou** — `application-dev.properties`,
+`application-staging.properties`, `application-prod.properties`. Não houve invenção de nome: os
+fronts é que se alinharam.
 
-**Estado das três pontas:** front-client ✅ concorda · front-partner ✅ concorda · **backend ⬜ falta**.
+#### O que estava errado, e o que a gente aprendeu errando
 
-**O renome está TRAVADO POR DATA de propósito** — fazer fora de sincronia é o único jeito de isso
-custar caro. No client são quatro pontos, todos no mesmo arquivo, mais os `.env` e o `eas.json`:
+O achado original desta seção (27/08) estava **certo no diagnóstico**: *"`dev` é Docker local no
+backend e Render no client — mesma palavra, máquinas diferentes"*. Eram **quatro** nomes para três
+lugares, com `dev` e `staging` no mesmo host e a máquina chamada `local`.
 
-| onde | hoje | vira |
-|---|---|---|
-| `ApiEnv` | `"local" \| "dev" \| "staging" \| "prod"` | `"local" \| "staging" \| "prod"` |
-| `BASE_URLS` | `dev` **e** `staging` no mesmo host do Render | **apaga a chave `dev`** — o `staging` já está certo |
-| `CANAL_PARA_ENV` | `development: "dev"` | `development: "staging"` |
-| lista branca do `resolveApiEnv` | `["local","dev","staging","prod"]` | `["local","staging","prod"]` |
+⚠️ **Mas a conclusão saiu invertida, duas vezes.** Em 27/08 propusemos `local`/`dev` = Docker local
+e nós mesmos marcamos como "errado, o acordo já existia e é outro". Em 28/08 o acordo virou
+`local` · `staging` · `prod`, cortando o `dev`. **Era o lado errado a cortar:** `dev` é o nome de
+quem **serve** a API, e `local` só existia nos apps.
 
-📣 **Backend:** é a ponta que falta. O custo aqui já está levantado e é pequeno; o que trava é o
-acordo, não o trabalho.
+🎓 **A lição:** quando dois projetos discordam de um nome, **quem define é quem implementa a
+coisa nomeada** — aqui, o backend. Passamos duas rodadas negociando entre os fronts um vocabulário
+que já estava decidido do outro lado, em arquivo, há meses.
+
+**O custo concreto de ter ficado invertido:** um `.env` dizendo `dev` mandava para o Render sem
+avisar, com portão de readiness ligado e timeout de 90 s — comportamento de nuvem enquanto se
+testava contra o próprio Docker.
+
+#### Estado das três pontas
+
+| Ponta | Estado |
+|---|---|
+| **backend** | ✅ já era assim, e é a referência |
+| **front-client** | ✅ aplicado em 06/09 (commit `5c8130ce`, em produção pela PR #26) |
+| **front-partner** | 🔴 **falta** — ver abaixo |
+
+🔴 **FRONT-PARTNER, é um pedido e tem ordem:** os perfis `development` e `preview` do `eas.json` de
+vocês dizem `EXPO_PUBLIC_API_ENV: "dev"` esperando o **Render**. Troquem para `staging`
+**antes** de a chave `dev` mudar de host aí. Hoje as duas apontam para o mesmo lugar, então a troca
+é **segura agora e não muda nada**; depois, os dois APKs de teste apontariam para o **IP de outra
+pessoa** — mortos em qualquer aparelho e **sem erro que explique**, que é exatamente a armadilha do
+fallback que vocês nos alertaram em 27/08.
+**Como se verifica:** o `env` de cada perfil no `eas.json` e a lista `API_URLS` em
+`src/lib/api.ts`; depois da troca, nenhum perfil deve dizer `dev`.
+
+**No client a mudança foi DELEÇÃO:** `BASE_URLS` de 4 chaves para 3. O fallback do `resolveApiEnv`
+passou a ser `dev`, a máquina — valor desconhecido não pode cair num ambiente que tem dado de
+gente. E o `.env` **versionado** ficou em `staging`, porque é o default de quem **clona**, e a
+máquina apontada por ele não é a de quem clona; override pessoal vai em `.env.local`.
 
 ### 10.6 ✅ RESOLVIDO em 06/09 — o canal `preview` saiu de produção
 

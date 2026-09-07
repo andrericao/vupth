@@ -11,6 +11,7 @@ import { PasswordRules } from "@components/PasswordRules";
 import { getPasswordRules } from "@domain/auth/validateAuth";
 import { authService } from "@services/authService";
 import { waitForBackend } from "@services/healthService";
+import { useTabBarInset } from "@hooks/useTabBarInset";
 
 const EMAIL_RE = /\S+@\S+\.\S+/;
 
@@ -20,6 +21,7 @@ const EMAIL_RE = /\S+@\S+\.\S+/;
 export function ForgotPassword() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
+  const tabBarInset = useTabBarInset();
   const params = (route.params ?? {}) as NonNullable<AppRoutes["forgotPassword"]>;
 
   const [step, setStep] = useState<"email" | "reset">("email");
@@ -143,7 +145,10 @@ export function ForgotPassword() {
 
   return (
     <ScrollView flex={1} bg="$brandBackground" contentContainerStyle={{ flexGrow: 1 }}>
-      <VStack flex={1} pb={30} px={16} bg="$brandBackground">
+      {/* pb soma a faixa da tab bar: estas telas vivem dentro do
+          Tab.Navigator, e sem a reserva o CTA do rodape nasce POR BAIXO
+          da barra — o toque nao chega nele. */}
+      <VStack flex={1} pb={30 + tabBarInset} px={16} bg="$brandBackground">
         {/* Sem titulo no cabecalho: esta e uma tela de ENTRADA, e as tres do
             fluxo (login, cadastro, esqueci a senha) tem o mesmo desenho — o
             voltar sozinho em cima, o heroi em 34px no corpo. Antes o titulo

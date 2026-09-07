@@ -32,7 +32,12 @@ export function Button({
   return (
     <GluestackButton
       w="$full"
-      h={54}
+      // Altura MINIMA, nao cravada: o app honra o ajuste de fonte do aparelho
+      // (allowFontScaling nunca e desligado), e caixa travada CORTA o rotulo
+      // quando a fonte cresce. No tamanho padrao nada muda — 54 ja era maior
+      // que o conteudo. Mesmo idioma do ScreenHeader. Ver DS4 no
+      // HANDOFF_DESIGN do partner.
+      style={{ minHeight: 54 }}
       rounded="$full"
       bg={isGhost ? "transparent" : "$brandGreen"}
       $active-bg={isDestructive ? "$brandDangerTint" : isOutline ? "$greenTint" : "$brandSuccess"}

@@ -339,16 +339,35 @@ O Andre testou e **o fluxo passou com um e-mail sem cadastro**, porque o backend
 
 ---
 
-## 1w. 🌍 NOMES DOS AMBIENTES — `local` · `staging` · `prod` (decidido pelo Andre, 2026-08-28)
+## 1w. 🌍 NOMES DOS AMBIENTES — `dev` · `staging` · `prod` (decidido pelo Andre, 2026-09-06)
 
 > 📣 **Vocabulário único para os TRÊS projetos** (backend, front-client, front-partner). Esta é a
 > tabela válida. Qualquer outro nome que apareça em documento, `.env` ou painel está desatualizado.
 
 | Nome | Onde roda | Quem publica ali |
 |---|---|---|
-| **`local`** | Docker na máquina do dev | ninguém — é a máquina |
+| **`dev`** | Docker na **máquina do dev** | ninguém — é a máquina |
 | **`staging`** | **Render** | branch **`dev`** |
 | **`prod`** | **Railway** | branch **`main`** |
+
+⚠️ **ESTA TABELA SUBSTITUI a de 28/08**, que dizia `local` · `staging` · `prod` e cortava o `dev`.
+**Era o lado errado a cortar.** O backend sempre teve `application-dev.properties` (Docker local),
+`application-staging.properties` (Render) e `application-prod.properties` (Railway) — três nomes,
+**sem `local`**. Quem estava invertido eram os fronts: `dev` apontava para o **Render** e a máquina
+se chamava `local`. A mesma palavra significava a sua máquina para quem **serve** a API e a nuvem
+para quem a **consome**, e um `.env` dizendo `dev` mandava para o Render sem avisar — com portão de
+readiness ligado e timeout de 90 s, comportamento de nuvem enquanto se testava contra o Docker.
+
+✅ **Aplicado no client em 06/09** (commit `5c8130ce`, em produção pela PR #26): `BASE_URLS` de 4
+chaves para 3, tipo `ApiEnv`, lista branca, `healthService` e o timeout do `api.ts`.
+**O fallback passou a ser `dev`** — valor desconhecido não pode cair num ambiente que tem dado de
+gente; quem errar o nome bate no próprio Docker e descobre na hora.
+**O `.env` versionado ficou em `staging`**, porque é o default de quem **clona** e a máquina
+apontada por ele não é a de quem clona; override pessoal em `.env.local`.
+
+🔴 **PENDENTE NO PARTNER:** os perfis `development` e `preview` do `eas.json` deles ainda dizem
+`dev` esperando o **Render**. Funciona só enquanto as duas chaves apontarem para o mesmo host.
+Pedido registrado na caixa de entrada deles no `vupth-docs`.
 
 ### Por que três nomes, e por que estes
 
@@ -381,7 +400,7 @@ máquinas e o `eas.json`:
 o `preview` de produção (`PARA_OUTRAS_EQUIPES.md` §10.6) e **não mudam host nenhum**: `dev` e
 `staging` já apontam para o mesmo Render. As três que restam **apagam uma chave** — essas continuam
 travadas pela sincronia dos três repos, porque um `.env` com `EXPO_PUBLIC_API_ENV=dev` numa máquina
-qualquer passaria a cair no fallback `local` sem avisar.
+qualquer passaria a cair no fallback (hoje `dev`, a máquina) sem avisar.
 
 ✅ **Do nosso lado é DELEÇÃO, não renome** — a chave `staging` já existe e já aponta para o Render.
 O par `dev`/`staging` era duplicata que só existia porque o mesmo `.env` circulava entre os repos;
@@ -391,7 +410,8 @@ ela some, e some o motivo dela.
 único jeito de isto custar caro. O levantamento acima existe para o dia ser de execução, não de
 descoberta.
 
-⚠️ **O que NÃO é renome e morde antes:** o fallback do `resolveApiEnv` é **`local`**. Build web sem
+⚠️ **O que NÃO é renome e morde antes:** o fallback do `resolveApiEnv` é a **máquina** (`dev`
+desde 06/09; era `local`). Build web sem
 `EXPO_PUBLIC_API_ENV` declarada sai apontando para um IP de rede local e **não dá erro que
 explique** — parece CORS e não é. Ver §1x e `PARA_OUTRAS_EQUIPES.md` §10.7.
 
@@ -532,11 +552,14 @@ usamos cookie, e não dependemos de `allowCredentials(true)`.
 dois endpoints. Nós tínhamos registrado como pendência; **estava errado e foi retirado**
 (`PARA_OUTRAS_EQUIPES.md` §9.1).
 
-⚠️ **Antes de culpar o CORS, confirmar o alvo do bundle.** O fallback do `resolveApiEnv` é
-**`local`**: build web sem `EXPO_PUBLIC_API_ENV` sai apontando para um IP de rede local e **não dá
-erro que explique** — sintoma idêntico ao do CORS. **Verificado em 27/08 que o Production está
-certo** (`resolveApiEnv(canal,"prod")` → Railway); **o Preview ainda não foi conferido**, e a
-Cloudflare não herda variáveis entre os dois ambientes. Detalhe em `PARA_OUTRAS_EQUIPES.md` §10.7.
+⚠️ **Antes de culpar o CORS, confirmar o alvo do bundle.** O fallback do `resolveApiEnv` é a
+**máquina** (`dev` desde 06/09): build web sem `EXPO_PUBLIC_API_ENV` sai apontando para um IP de
+rede local e **não dá erro que explique** — sintoma idêntico ao do CORS.
+✅ **Os DOIS ambientes conferidos em 06/09, no bundle que está no ar:** Production
+(`vupth.pages.dev`) tem `resolveApiEnv(h,"prod")` → Railway; Preview (`dev.vupth.pages.dev`) tem
+`resolveApiEnv(f,"staging")` → Render, já com o vocabulário novo (`dev:"http://192.168.0.16:8080"`,
+`staging:"...onrender.com"`). A Cloudflare não herda variáveis entre os dois ambientes, então cada
+um precisa ser conferido separadamente — foi o que se fez. Detalhe em `PARA_OUTRAS_EQUIPES.md` §10.7.
 
 ⚠️ **Divergência interna a corrigir antes de publicar:** o nosso `web-shims/expo-secure-store.js`
 usa **`localStorage`**; o do partner usa **`sessionStorage`**. O C26 deles diz explicitamente que
@@ -1092,7 +1115,7 @@ cobrir linha):
 | 8 | 🔴 **O cache não sobrevive ao fechamento do app** | `App.tsx:46` é um `new QueryClient()` pelado, sem persistência: toda abertura parte de cache vazio e o usuário encara os ~7-10s inteiros de `SkeletonList`. **`@react-native-async-storage/async-storage` já é dependência** — dá para usar `persistQueryClient` **sem pacote novo**, mostrando a última lista conhecida na hora e revalidando atrás. Muda "10s de skeleton" para "lista imediata, atualiza sozinha". 📌 **Como se verifica:** fechar e reabrir o app offline — hoje mostra skeleton e erro; com persistência deve pintar a última lista | Pendente |
 | 9 | 🟡 **Polling caro contra endpoint que cobra por loja** | `useEstablishments` tem `refetchInterval: 60000` para uma chamada de ~7-10s: o app passa **~15% do tempo** com esse request aberto, e o hook é consumido por **três telas** (`Home`, `EstablishmentList`, `Onboarding` — o React Query deduplica por chave, mas a chave muda com as coords, ver item 7). Reavaliar o intervalo **depois** do item 7. Relacionado: `includeAll=true` traz **43 KB contra 10 KB** — não custa tempo no servidor (medido 31/08), mas pesa no 4G do usuário | Pendente |
 
-| 10 | 🔒 **A posição na fila SAI da tela — só tempo estimado** | **DECISÃO DO ANDRE, 2026-08-31** (issue #20, ponto 1). ⚠️ **Inverte design deliberado:** hoje o número de 110px da `QueueStatus` é a posição, e o comentário no código justifica — *"é concreto e não oscila como a estimativa"*. Decidido: **(a)** a posição **some por completo**, o tempo estimado assume o número grande; **(b)** o tempo aparece **cru, como o backend manda**, subindo ou descendo, sem faixa nem suavização. Detalhes e o risco no quadro abaixo | Pendente (decisão fechada) |
+| 10 | 🔒 **A posição na fila SAI da tela — só tempo estimado** | **DECISÃO DO ANDRE, 2026-08-31** (issue #20, ponto 1). ⚠️ **Inverte design deliberado:** hoje o número de 110px da `QueueStatus` é a posição, e o comentário no código justifica — *"é concreto e não oscila como a estimativa"*. Decidido: **(a)** a posição **some por completo**, o tempo estimado assume o número grande; **(b)** o tempo aparece **cru, como o backend manda**, subindo ou descendo, sem faixa nem suavização. Detalhes e o risco no quadro abaixo. ⚠️ **Duas perguntas abertas desde 01/09:** a **Home** é um terceiro lugar que revela posição, e o **onboarding promete** acompanhá-la — ver os dois blocos ao fim do item | Pendente (decisão fechada; **alcance em aberto**) |
 
 #### Item 10 — o que sai da tela, e o efeito colateral
 
@@ -1147,6 +1170,56 @@ para na tela. O trabalho é em **dois repos**:
 
 O texto novo é decisão do Andre. Registrado no `PRD_BACKEND.md` (especificação de push) e no
 `PRD_FRONT-PARTNER.md` §11.2.
+
+### ⚠️ Um TERCEIRO lugar revela a posição: a Home (achado de 2026-09-01)
+
+Este item diz **"dois lugares revelam posição"** e lista os dois na `QueueStatus`. **São três.** O
+cartão de fila ativa da **Home** — a primeira tela do app — mostra, em **46px**:
+
+```
+activeQueue.position <= 1 ? "É a sua vez" : `Faltam ${activeQueue.position - 1}`
+```
+
+`position - 1` **é** o `peopleAhead` que o número de 110px da `QueueStatus` calcula. É a mesma
+informação, no mesmo tamanho de manchete, uma tela antes. E o comentário no próprio código diz que o
+tempo só entra *"até o 1º poll chegar"* — ou seja, o normal é mostrar a posição, não o tempo.
+
+| Onde | O quê | Sai? |
+|---|---|---|
+| `Home.tsx:392-395` | cartão de fila ativa: **"Faltam N"** em 46px, de `position - 1` | ❓ **decisão do Andre** |
+
+**Por que isto precisa de resposta antes de codar:** a régua declarada é *"o cliente não sabe onde
+está"*. Limpar só a `QueueStatus` não a cumpre — a Home continua contando quantos faltam, e é por
+ela que o cliente passa primeiro. Se a Home ficar como está, a régua real vira *"o cliente não vê a
+posição na tela de status"*, que é outra coisa e vale escrever assim.
+
+📌 O caminho de fallback já existe aqui também: sem `position`, o cartão cai em `formatWaitTime`.
+Como na `QueueStatus`, a mudança é **tornar esse ramo o único**.
+
+### ⚠️ O ONBOARDING promete a posição que vai sair (achado de 2026-09-01)
+
+Maior que uma tela, e por isso fica separado: a **promessa de entrada do app** cita a posição pelo
+nome.
+
+| Onde | O texto |
+|---|---|
+| `Feature Card` (componente do design system) | *"Acompanhe sua posição em tempo real."* |
+| `CLIENT · 02 Onboarding` / `02 — Onboarding 1` | *"Entre na fila pelo celular e acompanhe sua posição…"* |
+| `CLIENT · 09 Escolher servico` | rótulo *"Sua posição"* |
+| `CLIENT · 10 Permissao` | *"Avisamos faltando 2 pessoas"* · *"quando faltarem 2 pessoas"* |
+| `CLIENT · 12 Notificacoes` (componente `Notificação`) | *"Faltam 2 pessoas"* |
+
+Com a posição fora da tela, estas frases passam a **prometer o que o app não entrega**. E o efeito
+soma com o risco já registrado acima: se a tela perde todo sinal de progresso **e** o onboarding
+prometeu acompanhamento de posição, a frustração começa antes de o cliente entrar na fila.
+
+⚠️ **Isto é decisão de PRODUTO, não de desenho** — a design não reescreve a proposta de valor por
+conta própria. As saídas possíveis, para a decisão ser sobre alternativas e não sobre o problema:
+prometer **tempo** em vez de posição; prometer **aviso** ("a gente te chama") em vez de
+acompanhamento; ou manter a promessa e rever a decisão da posição.
+
+**Como se verifica:** procurar `posição` e `pessoas` nos textos do arquivo de design. Se as telas
+acima não citarem mais posição, este bloco foi resolvido — atualize-o.
 
 📌 **Facilitador:** o caminho já existe. O código tem fallback *"sem a posição, o tempo assume o
 lugar"* — a mudança é **tornar esse ramo o único**, não construir tela nova.

@@ -20,7 +20,10 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
     // dois apps terem formularios do mesmo tamanho (Andre 2026-08-05). Os
     // botoes ja batiam (54px nos dois).
     <GluestackInput2
-      h="$12"
+      // Altura MINIMA, nao cravada: com a fonte do sistema ampliada, caixa
+      // travada corta o texto digitado. 48 e o valor do token `$12`, mantido
+      // para os formularios dos dois apps seguirem do mesmo tamanho.
+      style={{ minHeight: 48 }}
       px="$3"
       bg="$white"
       borderWidth="$1"
