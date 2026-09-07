@@ -41,6 +41,8 @@ import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 
+import { ErrorBoundary } from "@components/ErrorBoundary";
+
 import { instalarAlertWeb } from "./web-shims/alert";
 
 // Pausa/retoma as queries conforme a conexao real (netinfo). 1x no boot.
@@ -133,7 +135,12 @@ export default function App() {
         <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
 
         <QueryScopedHooks />
-        {!fontGateOpen ? <Loading /> : !backendReady ? <PreparingServer /> : <Routes />}
+        {/* Erro de render deixa de fechar o app e vira tela com mensagem. Fica
+            DENTRO dos providers de proposito: a tela de erro usa `Button` e os
+            tokens da marca, que precisam do Gluestack acima. */}
+        <ErrorBoundary>
+          {!fontGateOpen ? <Loading /> : !backendReady ? <PreparingServer /> : <Routes />}
+        </ErrorBoundary>
       </GluestackUIProvider>
     </QueryClientProvider>
   );
