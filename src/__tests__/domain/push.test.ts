@@ -57,27 +57,68 @@ describe('acquireExpoPushToken', () => {
     ...over,
   });
 
-  it('device + permissão já concedida → token', async () => {
-    expect(await acquireExpoPushToken(baseEnv({}))).toBe('ExponentPushToken[tok]');
+  // Até 07/09 os quatro desfechos abaixo devolviam o MESMO `null`, e o
+  // chamador engolia o resto num `catch {}`. O relato "não recebi nenhuma
+  // notificação" ficava indistinguível de "nem tentamos" — cada um destes
+  // motivos manda investigar num lugar diferente.
+
+  it('device + permissão já concedida → token, motivo ok', async () => {
+    const r = await acquireExpoPushToken(baseEnv({}));
+    expect(r.token).toBe('ExponentPushToken[tok]');
+    expect(r.motivo).toBe('ok');
   });
 
-  it('não é device físico → null (nem pede permissão)', async () => {
+  it('não é device físico → motivo "emulador" (e nem pede permissão)', async () => {
     const request = jest.fn();
-    const token = await acquireExpoPushToken(
+    const r = await acquireExpoPushToken(
       baseEnv({ isDevice: false, requestPermissionsAsync: request as never }),
     );
-    expect(token).toBeNull();
+    expect(r.token).toBeNull();
+    expect(r.motivo).toBe('emulador');
     expect(request).not.toHaveBeenCalled();
   });
 
-  it('permissão negada no pedido → null', async () => {
-    const token = await acquireExpoPushToken(
+  it('permissão negada → motivo "sem-permissao"', async () => {
+    const r = await acquireExpoPushToken(
       baseEnv({
         getPermissionsAsync: async () => ({ status: 'undetermined' }),
         requestPermissionsAsync: async () => ({ status: 'denied' }),
       }),
     );
-    expect(token).toBeNull();
+    expect(r.token).toBeNull();
+    expect(r.motivo).toBe('sem-permissao');
+  });
+
+  it('sem projectId → motivo proprio, e NAO chama o Expo', async () => {
+    // Sintoma identico ao de permissao negada; sem nomear, procura-se no lugar
+    // errado.
+    const get = jest.fn(async () => ({ data: 'ExponentPushToken[x]' }));
+    const r = await acquireExpoPushToken(
+      baseEnv({ projectId: undefined, getExpoPushTokenAsync: get }),
+    );
+    expect(r.motivo).toBe('sem-project-id');
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it('a chamada nativa lancando vira motivo "erro" COM detalhe, sem derrubar', async () => {
+    // E aqui que cai a credencial de push nao configurada no projeto.
+    const r = await acquireExpoPushToken(
+      baseEnv({
+        getExpoPushTokenAsync: async () => {
+          throw new Error('No FCM credentials');
+        },
+      }),
+    );
+    expect(r.motivo).toBe('erro');
+    expect(r.detalhe).toContain('FCM');
+    expect(r.token).toBeNull();
+  });
+
+  it('Expo respondendo sem token → motivo "sem-token"', async () => {
+    const r = await acquireExpoPushToken(
+      baseEnv({ getExpoPushTokenAsync: async () => ({ data: '' }) }),
+    );
+    expect(r.motivo).toBe('sem-token');
   });
 
   it('pede permissão só quando ainda não concedida', async () => {

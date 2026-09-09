@@ -29,7 +29,7 @@
 11. [Testes E2E — Maestro](#11-testes-e2e--maestro)
 12. [Pendente de Implementacao](#12-pendente-de-implementacao)
 
-> Seções fora da numeração: **1w** (nomes dos ambientes) · **1x** (acesso web) · **1z** (decisões pendentes do Andre).
+> Seções fora da numeração: **1v** (os erros de silêncio) · **1w** (nomes dos ambientes) · **1x** (acesso web) · **1z** (decisões pendentes do Andre).
 
 ---
 
@@ -423,7 +423,16 @@ explique** — parece CORS e não é. Ver §1x e `PARA_OUTRAS_EQUIPES.md` §10.7
 
 > *"é provisório; podemos a todo momento solicitar o download do app para aproveitar todas as funcionalidades. Podemos dizer que pelo navegador não tem notificação e logo abaixo oferecer link para baixá-lo."*
 
-Isso **reenquadra o custo do porte**: não estamos prometendo paridade, então os 64 usos de `Alert.alert` deixam de ser bloqueio — deixam de ser dívida e viram *degradação conhecida*.
+Isso **reenquadra o custo do porte**: não estamos prometendo paridade, então boa parte da distância
+para o app nativo deixa de ser dívida e vira *degradação conhecida*.
+
+🔴 **ERRO DE LEITURA QUE ISSO CAUSOU, corrigido em 2026-09-07.** Esta frase foi usada para concluir
+que os `Alert.alert` "deixam de ser bloqueio". **Estava errada, e o custo apareceu no teste de
+device:** a decisão acima é sobre **paridade de funcionalidade** (o web não tem push), **não** sobre
+o aviso **não renderizar**. Um app que não consegue dizer "senha incorreta" não está com
+funcionalidade reduzida — está **mudo**. O profissional clicava em finalizar um corte e não recebia
+retorno nenhum; o app *dizia* o motivo, o navegador é que não desenhava.
+✅ **Resolvido** com `web-shims/alert.js` (commit `5d99ad1e`) — ver o dimensionamento abaixo.
 
 ### O que o partner fez (achado no código; não está em documento deles)
 
@@ -439,7 +448,16 @@ Isso **reenquadra o custo do porte**: não estamos prometendo paridade, então o
 
 - **Fácil (24 arquivos):** o `expo-secure-store` sai de graça — copiar alias + shim, zero mudança de código nosso.
 - **Nativos:** `expo-location` e `expo-notifications` já são carregados com `require` dentro de `try/catch` nos nossos hooks, então **degradam sozinhos** em vez de derrubar o app. Falta tratar o `expo-updates` nas Configurações (id da OTA e "verificar atualização" não fazem sentido no navegador).
-- **`Alert.alert` é no-op no React Native Web** (64 usos). Com a decisão acima, a maioria vira degradação aceitável — **menos um caso**, abaixo.
+- ✅ **`Alert.alert` — RESOLVIDO em 07/09** (`web-shims/alert.js` + instalação no boot, commit
+  `5d99ad1e`). Ele é no-op no React Native Web: não falha, não loga, **não pinta nada**. Eram **60
+  chamadas medidas** neste app (o número 64 desta seção era estimativa antiga) e **110 no partner**.
+  **A correção é um patch no objeto que o `react-native` exporta**, não um wrapper: pega as 60
+  existentes **e as futuras**, sem tocar em nenhuma tela. Um wrapper exigiria lembrar em cada tela
+  nova, e a esquecida ficaria muda sem aviso.
+  O diálogo **segue a marca** (commit `9dd7fcbd`), com cada valor copiado da fonte — `Button.tsx`,
+  `DeleteAccountModal.tsx`, `floatingShadow`, tokens de `radii`/`space`/`fonts`. Dois testes travam o
+  que é regra de marca: `brandGreen` só como fundo com `forest` por cima, e secundários vazados.
+  🔴 **O partner continua com as 110 dele** — pedido registrado na caixa de entrada da equipe.
 
 ### ✅ Escopo do web — DECIDIDO (Andre, 2026-08-17): acesso COMPLETO
 
@@ -565,6 +583,54 @@ um precisa ser conferido separadamente — foi o que se fez. Detalhe em `PARA_OU
 usa **`localStorage`**; o do partner usa **`sessionStorage`**. O C26 deles diz explicitamente que
 isso **não pode divergir** — e a decisão desta seção ("a sessão morre ao fechar a aba") é a do
 `sessionStorage`. Hoje o nosso shim contradiz o próprio PRD.
+---
+
+
+## 1v. 🔇 OS ERROS DE SILÊNCIO — o que 2026-09-07 ensinou
+
+> 📣 Cinco entregas naquele dia. **Quatro eram o mesmo defeito com roupas diferentes:** o software
+> sabia o que tinha dado errado e **não contava para ninguém**. Nenhuma era erro de lógica.
+
+| O silêncio | Como aparecia para quem usava | Correção |
+|---|---|---|
+| `Alert.alert` no-op no web | clica e **nada acontece** | `web-shims/alert.js` (`5d99ad1e`) |
+| `catch {}` vazio no sair da fila | sai da tela **sem sair da fila** | `6013c120` |
+| **sem ErrorBoundary** | **o app fecha sozinho** | `e56a004b` |
+| `catch {}` no registro de push | nenhuma notificação, **sem motivo** | painel (`4daab2bd`) |
+
+### A regra que fica
+
+**`catch {}` vazio é uma decisão, não uma economia.** Onde ele existir, alguém decidiu que aquela
+falha não precisa ser contada — e essa decisão precisa estar escrita ao lado, ou ela vira uma venda.
+Nos dois casos de 07/09 o `catch` estava **certo em não derrubar o fluxo** e **errado em não deixar
+rastro**: a saída é registrar o motivo, não deixar a exceção subir.
+
+**Best-effort não é sinônimo de mudo.** O registro de push não pode quebrar o login — isso é certo.
+Mas "não quebrar" e "não contar" são coisas diferentes, e a segunda custou uma bateria inteira de QA.
+
+### ErrorBoundary — o limite importa
+
+`src/components/ErrorBoundary.tsx` envolve as rotas, **dentro** dos providers (a tela usa `Button` e
+os tokens). Mostra a mensagem técnica do erro **de propósito**: não há coletor de crash no projeto,
+e é o único rastro que o QA tem.
+
+⚠️ **Ele pega erro de RENDER, lifecycle e construtor. NÃO pega handler de evento nem promise solta.**
+Se o app fechar e essa tela **não** aparecer, isso já é diagnóstico: o erro não é de render.
+
+### Painéis de diagnóstico — os dois, atrás dos mesmos 7 toques
+
+Em Configurações, tocar 7× no número da versão revela **WebSocket** e **Push**. Existem pelo mesmo
+motivo: num binário instalado, `console.log` só aparece via `adb logcat` ou dev client — e o teste é
+feito com o celular na mão.
+
+O painel de push separa duas falhas que o usuário **sente igual**: **não ter token** e **o backend
+não saber do token**. Nos dois casos nenhuma notificação chega, e a correção é em lugares opostos.
+O token aparece só pelos **últimos 8 caracteres** — identifica sem expor.
+
+📌 **Como se verifica:** `src/__tests__/projeto/alertNoWeb.test.ts`,
+`src/__tests__/domain/leaveQueue.test.ts`, `src/__tests__/screens/ErrorBoundary.test.tsx`,
+`src/__tests__/domain/push.test.ts` e `src/__tests__/domain/pushDiagnostics.test.ts`.
+
 ---
 
 ## 1z. 🧭 DECISÕES PENDENTES DO ANDRE — contexto, pergunta e o que o mercado faz

@@ -43,18 +43,53 @@ export type PushEnv = {
   projectId?: string;
 };
 
-// Pede permissão (se preciso) e devolve o Expo Push Token, ou null quando não é
-// device físico / permissão negada. Best-effort: nunca lança.
-export async function acquireExpoPushToken(env: PushEnv): Promise<string | null> {
+/**
+ * Por que a aquisição termina — e por que isto não pode ser só `null`.
+ *
+ * Até 2026-09-07 esta função devolvia `null` para TRÊS desfechos diferentes
+ * (emulador, permissão negada, token vazio) e o chamador engolia o resto num
+ * `catch {}`. O relato "não recebi nenhuma notificação, de input nenhum" era
+ * então indistinguível de "nem tentamos": não havia como saber onde parou.
+ */
+export type MotivoPush =
+  | 'ok'
+  | 'emulador'
+  | 'sem-permissao'
+  | 'sem-token'
+  | 'sem-project-id'
+  | 'erro';
+
+export type ResultadoPush = {
+  token: string | null;
+  motivo: MotivoPush;
+  /** Mensagem crua quando `motivo` é 'erro' — o único rastro que sobra. */
+  detalhe?: string;
+};
+
+// Pede permissão (se preciso) e devolve o Expo Push Token com o MOTIVO do
+// desfecho. Best-effort: nunca lança — quem chama não pode quebrar por push.
+export async function acquireExpoPushToken(env: PushEnv): Promise<ResultadoPush> {
   // Emulador/web não recebem push remoto — nem pede permissão.
-  if (!env.isDevice) return null;
+  if (!env.isDevice) return { token: null, motivo: 'emulador' };
 
-  let { status } = await env.getPermissionsAsync();
-  if (status !== 'granted') {
-    status = (await env.requestPermissionsAsync()).status;
+  try {
+    let { status } = await env.getPermissionsAsync();
+    if (status !== 'granted') {
+      status = (await env.requestPermissionsAsync()).status;
+    }
+    if (status !== 'granted') return { token: null, motivo: 'sem-permissao' };
+
+    // Sem `projectId` o Expo não sabe para qual projeto emitir o token. Vale
+    // nomear: o sintoma (nenhum push) é igual ao de permissão negada.
+    if (!env.projectId) return { token: null, motivo: 'sem-project-id' };
+
+    const { data } = await env.getExpoPushTokenAsync({ projectId: env.projectId });
+    if (!data) return { token: null, motivo: 'sem-token' };
+    return { token: data, motivo: 'ok' };
+  } catch (e) {
+    // Onde cai a credencial de push ausente (FCM não configurado no projeto):
+    // a chamada nativa lança, e antes disto o erro morria no `catch {}` de quem
+    // chamava.
+    return { token: null, motivo: 'erro', detalhe: (e as Error)?.message ?? String(e) };
   }
-  if (status !== 'granted') return null;
-
-  const { data } = await env.getExpoPushTokenAsync({ projectId: env.projectId });
-  return data ?? null;
 }

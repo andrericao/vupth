@@ -30,6 +30,7 @@ import {
   moveToEndErrorMessage,
   CANCELLATION_PENALTY_VALUE,
 } from "@domain/queue/types";
+import { jaSaiuDaFila, mensagemDeFalhaAoSair } from "@domain/queue/leave";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -270,13 +271,32 @@ export function QueueStatus() {
           text: "Sim, sair",
           style: "destructive",
           onPress: async () => {
+            // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
+            // de 2026-09-07 ("sai da fila e o app fecha sozinho").
+            //
+            // 1. O `catch {}` era VAZIO. Se o cancelamento falhasse, o cliente
+            //    saia da tela sem ter saido da fila: a vez e a multa seguiam de
+            //    pe e ninguem ficava sabendo — nem ele, nem quem fosse
+            //    investigar depois. Engolir o erro nao e "nao atrapalhar o
+            //    usuario"; e mentir pra ele sobre o que aconteceu.
+            //
+            // 2. Limpar o store ANTES de navegar re-renderiza esta tela com
+            //    `activeQueue` nulo. Navegar primeiro tira a tela do caminho.
             try {
               if (attendanceId && accessToken) {
                 await attendanceService.cancel(attendanceId, accessToken);
               }
-            } catch {}
-            await leaveQueue();
+            } catch (error) {
+              // Ja nao esta na fila (o profissional removeu, ou um toque duplo
+              // cancelou antes): o objetivo do usuario esta cumprido. Segue pra
+              // limpeza, senao ele fica preso numa tela de fila que nao existe.
+              if (!jaSaiuDaFila(error)) {
+                Alert.alert("Nao foi possivel sair da fila", mensagemDeFalhaAoSair(error));
+                return;
+              }
+            }
             navigation.navigate("home");
+            await leaveQueue();
           },
         },
       ]
