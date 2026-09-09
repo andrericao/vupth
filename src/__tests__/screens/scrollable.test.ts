@@ -39,3 +39,35 @@ describe('toda tela precisa rolar', () => {
     expect(temContainerRolavel(fonte)).toBe(true);
   });
 });
+
+// Feedback de device (Andre 2026-09-09): "não quero essa página colada, ela
+// deve rolar junto com a página".
+//
+// Ter `FlatList` na tela nao basta — a Home TINHA uma, e mesmo assim so os
+// estabelecimentos rolavam. Saudacao, busca, card da fila e "Recentes" ficavam
+// FORA dela: a tela parecia presa, com uma janelinha rolando no meio.
+//
+// A varredura acima nao pegaria isso, porque a lista existia. Esta pega: na
+// Home, o conteudo do topo precisa viajar DENTRO da lista.
+describe('a Home rola inteira, nao so a lista', () => {
+  const fonte = readFileSync(join(SCREENS_DIR, 'Home.tsx'), 'utf8');
+
+  it('o conteudo do topo viaja no cabecalho da lista', () => {
+    expect(fonte).toMatch(/ListHeaderComponent=/);
+  });
+
+  it('a saudacao e o "Recentes" NAO ficam fora da lista', () => {
+    // Tudo que vem antes do `<FlatList` no return e conteudo fixo por
+    // definicao. Comentarios saem antes da checagem — o texto que EXPLICA a
+    // regra citava "Recentes" e reprovava o proprio arquivo.
+    // `lastIndexOf` ANTES da lista: o arquivo tem subcomponentes com `return`
+    // proprio, e o primeiro deles nao e o da tela.
+    const daLista = fonte.indexOf('<FlatList');
+    const corpo = fonte
+      .slice(fonte.lastIndexOf('return (', daLista), daLista)
+      .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(corpo).not.toMatch(/<ScreenHeader/);
+    expect(corpo).not.toMatch(/Recentes/);
+  });
+});

@@ -33,7 +33,7 @@ function greetingForHour(hour: number): string {
   return "Boa noite";
 }
 
-// "há N dias/semanas/meses" — so usado no card "Seu de sempre", nao vale um
+// "há N dias/semanas/meses" — so usado no card "Recentes", nao vale um
 // util compartilhado ainda (uso unico).
 function timeAgoLabel(iso: string | null | undefined): string | null {
   if (!iso) return null;
@@ -183,7 +183,7 @@ export function Home() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const { activeQueue, remaining, isInQueue } = useQueueCountdown();
-  // "Seu de sempre": ultimo atendimento CONCLUIDO de verdade. O backend nao tem
+  // "Recentes": ultimo atendimento CONCLUIDO de verdade. O backend nao tem
   // "favorito", entao usamos o historico. Sem historico, a secao nao aparece.
   const { data: history = [] } = useClientAttendances({ status: "FINISHED" });
   const lastVisit = history[0];
@@ -251,6 +251,26 @@ export function Home() {
 
   return (
     <VStack flex={1} bg="$brandBackground">
+      {/* A Home ROLA INTEIRA. Antes, tudo daqui até "Perto de você" ficava FORA
+          da lista — saudação, busca, card da fila e Recentes ficavam colados no
+          topo e só os estabelecimentos rolavam, o que dava a sensação de uma
+          página presa com uma janelinha rolando dentro. Agora tudo é
+          `ListHeaderComponent`: um scroll só, do topo ao fim. */}
+      <FlatList
+        data={isLoading || isError ? [] : filteredEstablishments}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefetching}
+            onRefresh={onRefresh}
+            colors={["#163300"]}
+            tintColor="#163300"
+          />
+        }
+        ListHeaderComponent={
+          <>
       {/* A saudacao e o TITULO da Home, nao um par sobreposto: como eyebrow
           (linha pequena por cima) ela empurrava o nome pra baixo e a Home
           comecava numa altura diferente de todas as outras telas. */}
@@ -406,7 +426,7 @@ export function Home() {
         </Box>
       )}
 
-      {/* Seu de sempre */}
+      {/* Recentes */}
       {lastVisit && (
         <VStack px={16} pt={22} gap={12}>
           <Text
@@ -416,7 +436,7 @@ export function Home() {
             letterSpacing={-0.3}
             color="$brandTextPrimary"
           >
-            Seu de sempre
+            Recentes
           </Text>
           <TouchableOpacity
             onPress={() =>
@@ -454,7 +474,7 @@ export function Home() {
           pura (decisao do Andre, 2026-08-06). "Livres agora" prometia so as
           abertas e listava fechada logo abaixo; quem diz quem esta aberto e a
           tag de cada linha. */}
-      <VStack flex={1} px={16} pt={22} gap={12}>
+        <VStack px={16} pt={22} gap={12}>
         <HStack justifyContent="space-between" alignItems="center">
           <Text
             fontFamily="$display"
@@ -477,42 +497,34 @@ export function Home() {
             </Text>
           </TouchableOpacity>
         </HStack>
-
-        {isLoading ? (
-          <SkeletonList count={4} />
-        ) : isError ? (
-          <Center mt={40}>
-            <Text color="$brandDanger">Erro ao carregar estabelecimentos</Text>
-          </Center>
-        ) : (
-          <FlatList
-            data={filteredEstablishments}
-            keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefetching}
-                onRefresh={onRefresh}
-                colors={["#163300"]}
-                tintColor="#163300"
-              />
-            }
-            renderItem={({ item }) => (
-              <EstablishmentRow
-                establishment={item}
-                distanceKm={item.distance_km ?? null}
-                onPress={() => handleEstablishmentPress(item)}
-              />
-            )}
-            ListEmptyComponent={
-              <Center mt={40}>
-                <Text color="$brandTextSecondary">Nenhum estabelecimento encontrado</Text>
-              </Center>
-            }
-          />
+        </VStack>
+          </>
+        }
+        renderItem={({ item }) => (
+          <Box px={16}>
+            <EstablishmentRow
+              establishment={item}
+              distanceKm={item.distance_km ?? null}
+              onPress={() => handleEstablishmentPress(item)}
+            />
+          </Box>
         )}
-      </VStack>
+        ListEmptyComponent={
+          isLoading ? (
+            <Box px={16}>
+              <SkeletonList count={4} />
+            </Box>
+          ) : isError ? (
+            <Center mt={40}>
+              <Text color="$brandDanger">Erro ao carregar estabelecimentos</Text>
+            </Center>
+          ) : (
+            <Center mt={40}>
+              <Text color="$brandTextSecondary">Nenhum estabelecimento encontrado</Text>
+            </Center>
+          )
+        }
+      />
 
       <FilterSheet
         visible={showFilter}
