@@ -16,6 +16,20 @@ jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }))
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
   useRoute: () => ({ params: {} }),
+  // A tela usa `useLimparAoSair`, que limpa o formulario ao PERDER o foco
+  // (09/09). Sem isto aqui o mock fica incompleto e a tela nem monta:
+  // "useFocusEffect is not a function".
+  //
+  // O mock roda o efeito e DESCARTA o cleanup de proposito: nestes testes a
+  // tela nunca perde o foco, entao a limpeza nao deve acontecer — se
+  // acontecesse, apagaria o formulario no meio das asserções.
+  useFocusEffect: (efeito: () => void | (() => void)) => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useEffect } = require('react');
+    useEffect(() => {
+      efeito();
+    }, [efeito]);
+  },
 }));
 jest.mock('@services/addressService', () => ({
   addressService: {
