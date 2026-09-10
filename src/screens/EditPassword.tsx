@@ -10,6 +10,7 @@ import { PasswordRules } from "@components/PasswordRules";
 import { getPasswordRules } from "@domain/auth/validateAuth";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
+import { useLimparAoSair } from "@hooks/useLimparAoSair";
 
 export function EditPassword() {
   const navigation = useNavigation();
@@ -20,6 +21,13 @@ export function EditPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  // Senha digitada pela metade nao sobrevive a saida da tela. Aqui o estado
+  // inicial e vazio mesmo — nao ha valor do usuario a restaurar.
+  useLimparAoSair(() => {
+    setCurrentPassword("");
+    setPassword("");
+    setConfirmPassword("");
+  });
 
   const rules = getPasswordRules(password);
   const allRulesPass = rules.every((r) => r.passed);

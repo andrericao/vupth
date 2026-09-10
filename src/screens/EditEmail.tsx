@@ -8,6 +8,7 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
+import { useLimparAoSair } from "@hooks/useLimparAoSair";
 
 export function EditEmail() {
   const navigation = useNavigation();
@@ -17,6 +18,9 @@ export function EditEmail() {
 
   const [email, setEmail] = useState(user?.email ?? "");
   const [isSaving, setIsSaving] = useState(false);
+  // Restaura o e-mail ATUAL, nao vazio: esta tela nasce preenchida, e esvaziar
+  // deixaria o campo em branco como se o usuario nao tivesse e-mail.
+  useLimparAoSair(() => setEmail(user?.email ?? ""));
 
   async function handleSave() {
     if (!accessToken || !email.trim()) return;

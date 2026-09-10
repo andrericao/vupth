@@ -8,6 +8,7 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
+import { useLimparAoSair } from "@hooks/useLimparAoSair";
 
 const GENDER_OPTIONS = ["MALE", "FEMALE", "NON_BINARY", "OTHERS"] as const;
 const GENDER_LABELS: Record<string, string> = {
@@ -29,6 +30,14 @@ export function EditProfile() {
   const [birthDate, setBirthDate] = useState(user?.birth_date ?? "");
   const [gender, setGender] = useState(user?.gender ?? "");
   const [isSaving, setIsSaving] = useState(false);
+  // Volta aos dados do usuario, nao a campos vazios — a tela nasce preenchida.
+  useLimparAoSair(() => {
+    setFirstName(user?.first_name ?? "");
+    setLastName(user?.last_name ?? "");
+    setPhone(user?.phone ?? "");
+    setBirthDate(user?.birth_date ?? "");
+    setGender(user?.gender ?? "");
+  });
 
   async function handleSave() {
     if (!accessToken) return;
