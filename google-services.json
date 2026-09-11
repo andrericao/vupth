@@ -1,0 +1,124 @@
+{
+  "project_info": {
+    "project_number": "637753175454",
+    "project_id": "vupth-app",
+    "storage_bucket": "vupth-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637753175454:android:400645e5595af90e913a8f",
+        "android_client_info": {
+          "package_name": "com.vupth.client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5Ms6QrQzIoZGivhuIddtOItwWqFG5-QE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637753175454:android:ee73679029308f02913a8f",
+        "android_client_info": {
+          "package_name": "com.vupth.client.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5Ms6QrQzIoZGivhuIddtOItwWqFG5-QE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637753175454:android:bc04650a137d27a3913a8f",
+        "android_client_info": {
+          "package_name": "com.vupth.client.preview"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5Ms6QrQzIoZGivhuIddtOItwWqFG5-QE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637753175454:android:f603b135b39e7bed913a8f",
+        "android_client_info": {
+          "package_name": "com.vupth.partner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5Ms6QrQzIoZGivhuIddtOItwWqFG5-QE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637753175454:android:7f3274cae48a8502913a8f",
+        "android_client_info": {
+          "package_name": "com.vupth.partner.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5Ms6QrQzIoZGivhuIddtOItwWqFG5-QE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:637753175454:android:1cc10ebdb0ac267f913a8f",
+        "android_client_info": {
+          "package_name": "com.vupth.partner.preview"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5Ms6QrQzIoZGivhuIddtOItwWqFG5-QE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
