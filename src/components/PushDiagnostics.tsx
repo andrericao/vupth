@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { TouchableOpacity } from "react-native";
 import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
 
 import { usePushDiagnosticsStore } from "@stores/pushDiagnosticsStore";
@@ -45,7 +47,8 @@ function Linha({ rotulo, valor, ok }: { rotulo: string; valor: string; ok: boole
 }
 
 export function PushDiagnostics() {
-  const { motivo, detalhe, tokenSufixo, envio, erroEnvio } = usePushDiagnosticsStore();
+  const { motivo, detalhe, tokenSufixo, token, envio, erroEnvio } = usePushDiagnosticsStore();
+  const [mostrarToken, setMostrarToken] = useState(false);
 
   return (
     <Box bg="$brandSurface" borderRadius="$lg" p="$3" mt="$3">
@@ -63,7 +66,31 @@ export function PushDiagnostics() {
         ) : (
           <>
             <Linha rotulo="token" valor={EXPLICACAO[motivo]} ok={motivo === "ok"} />
-            {tokenSufixo && <Linha rotulo="fim do token" valor={`…${tokenSufixo}`} ok />}
+            {tokenSufixo && (
+              <TouchableOpacity onPress={() => setMostrarToken((v) => !v)}>
+                <Linha
+                  rotulo="fim do token"
+                  valor={mostrarToken ? "toque p/ esconder" : `…${tokenSufixo} · toque p/ ver`}
+                  ok
+                />
+              </TouchableOpacity>
+            )}
+            {mostrarToken && token && (
+              // Token INTEIRO, selecionavel. Existe para o diagnostico manual:
+              // com ele da pra mandar um push pela ferramenta do Expo e separar
+              // "o backend nao envia" de "o Expo nao entrega" — hoje as duas
+              // hipoteses estao empatadas.
+              //
+              // `selectable` em vez de botao de copiar: copiar exigiria
+              // `expo-clipboard`, que e modulo NATIVO — entraria so com build
+              // novo, e a graca disto e chegar por OTA no APK que ja esta
+              // instalado. Segurar o texto abre o menu de copiar do sistema.
+              <Box bg="$white" borderRadius="$sm" p="$2">
+                <Text selectable fontFamily="$mono" fontSize="$xs" color="$forest">
+                  {token}
+                </Text>
+              </Box>
+            )}
             {detalhe && <Linha rotulo="detalhe" valor={detalhe} ok={false} />}
             <Linha
               rotulo="backend sabe?"

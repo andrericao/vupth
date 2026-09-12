@@ -36,6 +36,20 @@ describe('diagnostico de push', () => {
     expect(s.erroEnvio).toBe('401 Unauthorized');
   });
 
+  it('guarda o token INTEIRO para o diagnostico manual', () => {
+    // Sem ele nao da pra mandar um push pela ferramenta do Expo, e "o backend
+    // nao envia" x "o Expo nao entrega" ficam empatados.
+    usePushDiagnosticsStore
+      .getState()
+      .registrarTentativa({ motivo: 'ok', token: 'ExponentPushToken[abcdefghij]' });
+    expect(usePushDiagnosticsStore.getState().token).toBe('ExponentPushToken[abcdefghij]');
+  });
+
+  it('sem token, nao guarda lixo', () => {
+    usePushDiagnosticsStore.getState().registrarTentativa({ motivo: 'sem-permissao' });
+    expect(usePushDiagnosticsStore.getState().token).toBeNull();
+  });
+
   it('mostra so o FIM do token — identifica sem expor o valor', () => {
     expect(sufixoDoToken('ExponentPushToken[abcdefghij]')).toBe('cdefghij');
     expect(sufixoDoToken(null)).toBeNull();
