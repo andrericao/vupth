@@ -41,6 +41,7 @@ import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 
+import { useReconciliarFila } from "@hooks/useReconciliarFila";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 
 import { instalarAlertWeb } from "./web-shims/alert";
@@ -117,6 +118,12 @@ export default function App() {
   // Notificacao pessoal "é a sua vez" (WebSocket) app-wide: vale em qualquer
   // tela enquanto houver fila ativa, nao so na QueueStatus (item #5, fatia 2).
   useQueueNotifications(!!activeQueue);
+
+  // Se o servidor diz que ha atendimento ativo e o aparelho nao sabe, quem esta
+  // errado e o aparelho. Sem isto, quem entrou na fila por ACEITE DE PEDIDO DE
+  // CORTE nunca via a propria fila — o estado local so nascia quando o cliente
+  // entrava pela tela, e esse caminho nao passa por la.
+  useReconciliarFila();
 
   // Push (background/fechado): registra o device (POST /devices) quando autentica
   // e trata o toque. Best-effort/guardado — inerte ate um build COM o modulo
