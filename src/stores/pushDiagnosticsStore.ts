@@ -25,6 +25,18 @@ export type PushDiagnostics = {
   detalhe: string | null;
   /** Só o fim do token: identifica sem expor o valor inteiro na tela. */
   tokenSufixo: string | null;
+  /**
+   * O token INTEIRO, para o diagnóstico manual.
+   *
+   * Guardado a partir de 12/09, quando o push seguiu não chegando mesmo com
+   * token obtido e backend avisado. Com o token em mãos dá para mandar uma
+   * notificação pela ferramenta do Expo e separar dois culpados que hoje estão
+   * empatados: o backend não enviar, ou o Expo não entregar.
+   *
+   * Fica só em memória (o store não é persistido) e a tela só o revela sob
+   * toque — não é segredo forte, mas também não precisa ficar à mostra.
+   */
+  token: string | null;
   envio: EnvioAoBackend;
   erroEnvio: string | null;
   registradoEm: number | null;
@@ -40,6 +52,7 @@ const INICIAL: PushDiagnostics = {
   motivo: null,
   detalhe: null,
   tokenSufixo: null,
+  token: null,
   envio: 'nao-tentado',
   erroEnvio: null,
   registradoEm: null,
@@ -59,6 +72,7 @@ export const usePushDiagnosticsStore = create<Store>((set) => ({
       motivo,
       detalhe: detalhe ?? null,
       tokenSufixo: sufixoDoToken(token),
+      token: token ?? null,
       registradoEm: Date.now(),
     }),
   registrarEnvio: (envio, erro) => set({ envio, erroEnvio: erro ?? null }),

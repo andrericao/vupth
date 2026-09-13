@@ -17,6 +17,7 @@
       "bundleIdentifier": "com.vupth.client"
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "package": "com.vupth.client",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

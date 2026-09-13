@@ -12,6 +12,7 @@ import { maskCEP, unmask } from "@utils/masks";
 import { lookupCep } from "@utils/cep";
 import { SkeletonList } from "@components/Skeleton";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
+import { useLimparAoSair } from "@hooks/useLimparAoSair";
 
 type Mode = "list" | "form";
 
@@ -41,6 +42,14 @@ export function EditAddress() {
   // aparelho e manda as COORDENADAS junto — é delas que sai a distância na Home.
   const { captureDeviceAddress } = useDeviceLocation();
   const [gpsLoading, setGpsLoading] = useState(false);
+  // Endereco pela metade nao sobrevive a saida, e a tela volta para a LISTA:
+  // reencontrar um formulario de edicao aberto, com dados de antes, e o caminho
+  // curto pra salvar sem querer o que ja tinha sido abandonado.
+  useLimparAoSair(() => {
+    setMode("list");
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+  });
 
   const loadAddresses = useCallback(async () => {
     if (!accessToken) return;
