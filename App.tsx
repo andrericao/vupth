@@ -18,6 +18,8 @@ import { useFonts } from "expo-font";
 // De brinde, importar so os arquivos que usamos derruba o export de 42 fontes
 // (o pacote inteiro do @expo-google-fonts entrava) para 6.
 import { GluestackUIProvider } from "@gluestack-ui/themed";
+import { instalarDialogoNativo } from "@utils/alertNativo";
+import { DialogoVupth } from "@components/DialogoVupth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { config } from "./config/gluestack-ui.config";
@@ -59,6 +61,12 @@ setupOnlineManager();
 if (Platform.OS === "web") instalarAlertWeb(Alert);
 
 const queryClient = new QueryClient();
+
+// Substitui o `Alert.alert` para as ~65 chamadas passarem a desenhar a caixa da
+// marca, sem tocar em nenhuma delas. A rede esta no proprio instalador: sem o
+// <DialogoVupth /> montado, ele cai no Alert do sistema — feio e visivel e
+// melhor que bonito e invisivel.
+instalarDialogoNativo();
 
 export default function App() {
   // `fontError` NAO pode ser ignorado. Segurar a tela so no `fontsLoaded`
@@ -148,6 +156,9 @@ export default function App() {
         <ErrorBoundary>
           {!fontGateOpen ? <Loading /> : !backendReady ? <PreparingServer /> : <Routes />}
         </ErrorBoundary>
+        {/* Um so na arvore, FORA do portao de fonte: um aviso disparado antes
+            de a fonte carregar precisa aparecer do mesmo jeito. */}
+        <DialogoVupth />
       </GluestackUIProvider>
     </QueryClientProvider>
   );
