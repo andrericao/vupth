@@ -23,7 +23,7 @@ const TOKEN_KEY = "vupth_access_token";
  *    mudanca. Dai sai a MINHA posicao/espera em tempo real (`findMyPosition`),
  *    que antes so vinha do polling de ate 2min.
  *
- * ⚠️ Diagnostico 2026-08-01 (`src/docs/ws-test.html`): o servidor STOMP sempre
+ * ⚠️ Diagnostico 2026-08-01 (`tools/ws-test.html`): o servidor STOMP sempre
  * funcionou — handshake livre, JWT do frame CONNECT aceito, Principal setado e
  * broadcast publicando. O que quebrava o app eram as opcoes
  * `forceBinaryWSFrames` + `appendMissingNULLonIncoming`, que existem para

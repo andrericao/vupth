@@ -40,7 +40,7 @@ export function useQueueSocket(establishmentId: string | null) {
         reconnectDelay: 5000,
         // ⚠️ 2026-08-01: `forceBinaryWSFrames` + `appendMissingNULLonIncoming`
         // REMOVIDAS. O comentario antigo dizia que eram "workaround obrigatorio
-        // do RN" — nao sao: a pagina `src/docs/ws-test.html` conecta neste mesmo
+        // do RN" — nao sao: a pagina `tools/ws-test.html` conecta neste mesmo
         // servidor SEM elas e recebe tudo. Com o Spring correto elas atrapalham
         // o parse (socket vivo, mensagem que nunca aparece).
         //

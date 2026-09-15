@@ -1,6 +1,6 @@
 // Broadcast da fila do estabelecimento (`/topic/establishment/{id}/queue`).
 //
-// Diagnóstico 2026-08-01 (página `src/docs/ws-test.html`): o servidor STOMP
+// Diagnóstico 2026-08-01 (página `tools/ws-test.html`): o servidor STOMP
 // funciona e publica este tópico a cada mudança da fila. O app assinava só o
 // canal PESSOAL, então via apenas os eventos dirigidos a ele — posição e espera
 // continuavam vindo do polling (até 2min de atraso). Assinando o tópico, a
