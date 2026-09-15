@@ -457,6 +457,12 @@ export const gluestackUIConfig = createConfig({
       brandSurfaceAlt: '#E2F6D5',
       brandTextPrimary: '#163300',
       brandTextSecondary: '#454745',
+      // [marca-vupth] Placeholder de campo. NAO e `textSecondary`: com o texto
+      // digitado em forest (#163300), o #454745 dava 1,49:1 entre os dois — o
+      // MESMO numero do DS5.1 — e o campo vazio parecia preenchido (Andre,
+      // 14/09). Este valor passa AA no branco (5,05:1) e quase dobra a
+      // separacao para o texto digitado (2,76:1).
+      brandTextPlaceholder: '#6B706B',
       brandBorder: '#D7DDD3',
       brandDanger: '#B3261E',
       // Fundo do aviso de multa: `brandDanger` diluido no branco. Existia como

@@ -104,7 +104,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
             <Box borderWidth="$1" borderColor="$brandBorder" borderRadius="$xl" px="$3" py="$2" mt="$4">
               <TextInput
                 placeholder="Comentário (opcional)"
-                placeholderTextColor="#454745"
+                placeholderTextColor="#6B706B"
                 value={comment}
                 onChangeText={setComment}
                 multiline
