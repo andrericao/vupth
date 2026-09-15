@@ -10,7 +10,7 @@ import { useComingSoonStore } from '@stores/comingSoonStore';
 // sem ceder a vez). O backend PRD marca o #40 como CONCLUÍDO+testado (distinto do
 // status INTENTION/S2) → é divergência a DIAGNOSTICAR (backend na fila viva ou
 // display no front), não "backend não fez". Revertido para "em breve" até o
-// diagnóstico; religar trocando por goToQueue(targetTime). Ver HANDOFF_BACKEND §12.1.
+// diagnóstico; religar trocando por goToQueue(targetTime). Ver vupth-docs → backend.html (caixa do Front-Client) — o handoff saiu do repo em 15/09.
 // 'esqueci_senha' SAIU (2026-07-22): backend entregou forgot/reset-password e a
 // tela ForgotPassword está LIGADA (Login → forgotPassword).
 // 'trocar_posicao' SAIU (2026-07-24): backend entregou a troca (/swap-offers,
