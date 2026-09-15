@@ -323,7 +323,7 @@ export function Home() {
               value={search}
               onChangeText={setSearch}
               placeholder="Buscar serviço ou lugar"
-              placeholderTextColor="#454745"
+              placeholderTextColor="#6B706B"
               style={{ fontFamily: "Inter_400Regular", fontSize: 15, color: "#163300", padding: 0 }}
               returnKeyType="search"
             />

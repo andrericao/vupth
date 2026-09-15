@@ -45,7 +45,7 @@ function CampoHora({
     <Center bg="$brandSurface" borderRadius="$card" px={14} py={10}>
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor="#454745"
+        placeholderTextColor="#6B706B"
         keyboardType="number-pad"
         value={value}
         onChangeText={onChangeText}
