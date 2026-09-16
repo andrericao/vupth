@@ -1,29 +1,23 @@
 import { useState, useCallback } from "react";
 import { Alert, TouchableOpacity } from "react-native";
-import * as Updates from "expo-updates";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   VStack,
   Text,
-  Heading,
   Box,
   HStack,
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import { User, Mail, Lock, MapPin, ChevronRight, LogOut, RefreshCw } from "lucide-react-native";
+import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { nomeDeExibicao } from "@domain/auth/displayName";
 import { Button } from "@components/Button";
-import { WsDiagnostics } from "@components/WsDiagnostics";
-import { PushDiagnostics } from "@components/PushDiagnostics";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
-import { useComingSoonStore } from "@stores/comingSoonStore";
-import { COMING_SOON_LABELS, ComingSoonFeature } from "@domain/comingSoon";
 import { profileService } from "@services/profileService";
 import { addressService, AddressResponse } from "@services/addressService";
 
@@ -62,9 +56,23 @@ function MenuItem({
   );
 }
 
+// Rotulo em caixa alta sobre um card: o mesmo agrupamento do menu do partner
+// (Andre 2026-09-16: "o menu igual o do partner, com submenus").
+function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <VStack gap="$2">
+      <Text fontSize={11} fontWeight="$bold" letterSpacing={0.6} color="$brandTextSecondary">
+        {label.toUpperCase()}
+      </Text>
+      <Box borderRadius="$card" overflow="hidden" bg="$brandSurface">
+        {children}
+      </Box>
+    </VStack>
+  );
+}
+
 export function Settings() {
   const insets = useSafeAreaInsets();
-  const [toquesNaVersao, setToquesNaVersao] = useState(0);
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const user = useAuthStore((s) => s.user);
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -72,12 +80,6 @@ export function Settings() {
   const logout = useAuthStore((s) => s.logout);
 
   const [mainAddress, setMainAddress] = useState<AddressResponse | null>(null);
-
-  // Funcionalidades "em breve" mais tocadas primeiro = as que fizeram mais falta.
-  const comingSoonCounts = useComingSoonStore((s) => s.counts);
-  const awaited = (Object.entries(comingSoonCounts) as [string, number][])
-    .filter(([, n]) => n > 0)
-    .sort((a, b) => b[1] - a[1]);
 
   useFocusEffect(
     useCallback(() => {
@@ -169,36 +171,6 @@ export function Settings() {
     }
   }
 
-  const [isChecking, setIsChecking] = useState(false);
-
-  async function handleCheckUpdate() {
-    setIsChecking(true);
-    try {
-      const result = await Updates.checkForUpdateAsync();
-      if (result.isAvailable) {
-        await Updates.fetchUpdateAsync();
-        Alert.alert(
-          "Atualização baixada",
-          "O app vai reiniciar para aplicar a nova versão.",
-          [{ text: "OK", onPress: () => Updates.reloadAsync() }],
-        );
-      } else {
-        Alert.alert("Tudo certo", "Você já está na versão mais recente.");
-      }
-    } catch {
-      Alert.alert(
-        "Não foi possível verificar",
-        "Atualizações OTA só funcionam no APK de build (não no Expo Go/modo dev).",
-      );
-    } finally {
-      setIsChecking(false);
-    }
-  }
-
-  const otaInfo = Updates.updateId
-    ? `OTA ${Updates.updateId.slice(0, 8)}${Updates.createdAt ? ` · ${Updates.createdAt.toLocaleDateString()} ${Updates.createdAt.toLocaleTimeString()}` : ""}`
-    : "bundle embutido (nenhum OTA aplicado)";
-
   return (
     <ScrollView
       flex={1}
@@ -244,7 +216,7 @@ export function Settings() {
             e-mail, endereço nem deletar — boa prática; pedido Andre 2026-07-23). */}
         {isAuthenticated ? (
           <>
-            <Box borderRadius="$card" overflow="hidden" bg="$brandSurface">
+            <Grupo label="Conta">
               <MenuItem
                 icon={<User size={20} color="#163300" />}
                 label="Dados pessoais"
@@ -270,7 +242,7 @@ export function Settings() {
                 onPress={() => navigation.navigate("editAddress")}
                 last
               />
-            </Box>
+            </Grupo>
 
             {/* Sair NAO e vermelho: e uma saida legitima, nao um erro. O
                 vermelho fica reservado pro que e irreversivel (deletar), la
@@ -321,94 +293,24 @@ export function Settings() {
           </Box>
         )}
 
-        {/* [QA] Contador de toques em "em breve" — instrumentacao do TIME
-            ("as mais tocadas fizeram mais falta, priorizar quando o backend
-            liberar"). Estava na cara do usuario, contando pra ele o backlog
-            interno. Vai pro mesmo gesto do diagnostico de WS: 7 toques na
-            versao. */}
-        {toquesNaVersao >= 7 && awaited.length > 0 && (
-          <VStack mt="$8">
-            <Heading fontFamily="$heading" fontSize="$md" mb="$1">
-              Funcionalidades aguardadas
-            </Heading>
-            <Text size="xs" color="$brandTextSecondary" mb="$3">
-              As mais tocadas fizeram mais falta — priorizar quando o backend liberar.
-            </Text>
-            <Box borderRadius="$card" overflow="hidden">
-              {awaited.map(([feature, count]) => (
-                <HStack
-                  key={feature}
-                  bg="$brandSurface"
-                  px="$4"
-                  py="$3"
-                  borderBottomWidth="$1"
-                  borderBottomColor="$brandBorder"
-                  alignItems="center"
-                >
-                  <Text size="sm" flex={1}>
-                    {COMING_SOON_LABELS[feature as ComingSoonFeature] ?? feature}
-                  </Text>
-                  <Box bg="$greenTint" borderRadius="$full" px="$3" py="$1">
-                    <Text size="xs" fontFamily="$heading" color="$forest">
-                      {count}×
-                    </Text>
-                  </Box>
-                </HStack>
-              ))}
-            </Box>
-          </VStack>
-        )}
+        {/* Sistema vale para visitante tambem: a versao e o atualizar nao
+            dependem de conta. */}
+        <VStack mt="$6">
+          <Grupo label="Sistema">
+            <MenuItem
+              icon={<Smartphone size={20} color="#163300" />}
+              label="Versão do app"
+              onPress={() => navigation.navigate("sistema")}
+              last
+            />
+          </Grupo>
+        </VStack>
 
         {/* `flex-end` empurra o rodape pro fim: antes ele vinha logo abaixo do
             conteudo e sobrava um vazio grande embaixo, que fazia a tela
             parecer inacabada — principalmente pro VISITANTE, que so tem o
             convite de conta acima. */}
         <VStack flex={1} justifyContent="flex-end" mt="$10" alignItems="center" gap="$3">
-          <TouchableOpacity onPress={handleCheckUpdate} testID="check-update">
-            <HStack
-              bg="$brandSurface"
-              borderRadius="$full"
-              px={16}
-              py={12}
-              gap="$2"
-              alignItems="center"
-            >
-              <RefreshCw size={15} color="#163300" />
-              <Text fontFamily="$heading" fontSize={13} color="$forest">
-                {isChecking ? "Verificando..." : "Verificar atualização"}
-              </Text>
-            </HStack>
-          </TouchableOpacity>
-          {/* Versao em DM Mono: e numero de build, nao prosa — o token `mono`
-              existe pra isso. */}
-          {/* [QA] 7 toques aqui abrem o diagnostico de WebSocket. Ele nasceu
-              porque os logs sao gated por `__DEV__` e o QA roda bundle de
-              producao, mas estava SOLTO nesta tela: o usuario final via
-              "falhou o handshake", contagem de erros e a URL do servidor —
-              ruido tecnico pra quem so quer mexer na conta (Alexia
-              2026-08-21). Gesto de "modo desenvolvedor": segue acessivel em
-              producao, some da vista de quem nao procura. */}
-          <TouchableOpacity
-            onPress={() => setToquesNaVersao((n) => n + 1)}
-            accessibilityRole="button"
-            accessibilityLabel="Informações da versão"
-            testID="version-line"
-          >
-          {/* Junta so o que EXISTE: em dev o runtime e o canal vem vazios, e o
-              template fixo imprimia "· · bundle embutido", com dois pontos
-              orfaos na frente. */}
-          <Text fontFamily="$mono" fontSize={10} color="$brandTextSecondary" textAlign="center">
-            {[Updates.runtimeVersion, Updates.channel, otaInfo].filter(Boolean).join(" · ")}
-          </Text>
-          </TouchableOpacity>
-
-          {toquesNaVersao >= 7 && (
-            <>
-              <WsDiagnostics />
-              <PushDiagnostics />
-            </>
-          )}
-
           {/* Deletar conta desce pra ca como LINK: e irreversivel, entao nao
               disputa atencao com o resto — mas continua alcancavel por quem
               procura (era um botao de mesmo peso que "sair"). */}
