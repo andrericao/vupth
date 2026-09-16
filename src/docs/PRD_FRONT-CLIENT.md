@@ -1502,6 +1502,71 @@ tentar o push.**
 
 **② Agendar = INTENÇÃO (futuro).** **UX (obs. Andre 2026-07-15, testado no device):** **NÃO há mais o split "para hoje / para outro dia"** — um único **"Agendar"** abre direto um **seletor de dia** (uma faixa horizontal: **"Hoje"** e depois os **números dos dias** seguintes). Escolhido o dia, aparece a **barra de encaixe** daquele dia. Um único fluxo cobre "hoje mais tarde" e "outro dia" (a diferença é só qual dia foi tocado). Cria **INTENÇÃO** (`POST/PATCH/DELETE /attendances/intentions` — criar/editar/cancelar prontos; **promoção event-driven ✅ ENTREGUE 2026-07-22** — vira `SCHEDULED` ~15min antes do `desiredTime` e notifica **`ATTENDANCE_PROMOTED`** WS+push, front deve tratar; **visão de agenda ✅ ENTREGUE** — `GET /attendances/intentions/client/me` = `{frames[], intentions[]}` com **`projectedQueueEnd` + `openingTime`/`closingTime`** por profissional → destrava "meus agendamentos" e a moldura da barra; **resta só** o endpoint público `professional/{id}` com **blocos ANÔNIMOS** p/ ver os blocos de terceiros ao agendar — follow-up do backend). **O `#40`/`targetTime` é APOSENTADO como entrada de agendamento do cliente.** UI = seletor de dia + **barra de encaixe** (partição de disco; mockup do partner `design/agendamento-barra.html`). **Fronteira limpa:** horário **que a fila ainda não alcançou** → INTENÇÃO (②); furar/ceder **dentro da fila viva** → TROCA (①). Ver partner **S2** + HANDOFF_CLIENT **C6/C12**. *(O `reschedule`/`move-to-end` do Item 16 — "Atrasar → ir pro fim/agendar" — segue como remanejamento da vez existente; reconciliar depois se for convergir para INTENÇÃO.)*
 
+### ⏳ JANELA de horário (`de 19h às 22h`) — pedido do Andre, 2026-09-14
+
+**O pedido tem DUAS partes, e só a segunda é nova.**
+
+**Parte 1 — *"só posso ser atendido às 18h, não antes, mesmo que a fila esvazie"*: JÁ EXISTE.**
+É a INTENÇÃO do ② acima, exatamente como ela funciona: a intenção nasce **fora da fila viva**,
+o backend rejeita `422 INTENTION_BEFORE_QUEUE_END` se o horário cair antes do fim projetado
+da fila, e a promoção só acontece ~15min antes do `desiredTime`. **A fila esvaziar não puxa
+esse cliente para a frente.** O que falta não é modelo — é o endpoint de blocos anônimos, os
+três itens do front-client, e sobretudo o **front-partner, que não tem uma linha sobre
+INTENÇÃO** (a palavra não aparece em nenhum arquivo de código dele). Sem o partner, o cliente
+agenda e o profissional não vê: o agendamento não existe na prática.
+
+**Parte 2 — o TETO (`não depois das 22h`): é novo.** Hoje o modelo tem `desiredTime`, **um
+instante**, e "desired" é preferência. Não há limite superior, e "janela"/"período" nunca
+apareceram em documento nenhum deste projeto.
+
+#### A decisão que destrava: o que acontece às 22h01
+
+> **Decisão (Alexia, 2026-09-14): PERGUNTA.** Estourado o teto, o cliente é perguntado se
+> ainda quer ser atendido — não se cancela por conta própria nem se ignora o que ele pediu.
+
+**Sub-decisões que caem dessa escolha, e que o código precisa saber responder:**
+
+**(a) Perguntar QUANDO — na projeção, não no relógio.** Se às 21h o `projectedQueueEnd` já
+aponta 23h, o teto **já foi estourado**, só não chegou a hora. Perguntar às 22h05, com o
+profissional parado e a cadeira livre, é a pior hora possível para os dois. A pergunta deve
+sair **quando a projeção cruza o teto**, enquanto ainda dá para o cliente se organizar. O dado
+para isso já existe (`projectedQueueEnd`/`estimatedStartTime`).
+
+**(b) O silêncio precisa de um default.** Pergunta sem prazo trava a fila. O precedente do
+projeto é o **pedido de corte** (PENDING com validade de 5min + auto-nega por timer), mas ali
+quem espera é um pedido; aqui quem espera é **um profissional com a cadeira livre**, então o
+prazo tem de ser menor. ⬜ **Falta definir o prazo.**
+Para o *conteúdo* do default, o vocabulário já existe e não precisa de conceito novo:
+**silêncio = "não chegou" (`LATE`)** — cai uma posição e **continua na fila**, em vez de
+cancelar. Silêncio não é recusa.
+
+**(c) Quem diz NÃO não paga nada.** A regra de multa está selada no ① acima: *"a multa é pelo
+prejuízo aos outros, não pela ação em si"*. Quem sai porque **a loja estourou o horário dele**
+não deixa buraco nenhum — o atraso já era da casa. Então: **sem multa e sem strike (#39)**.
+Punir aqui seria cobrar do cliente um atraso que não é dele.
+
+**(d) O teto tem de sobreviver à promoção.** A INTENÇÃO vira `SCHEDULED` ~15min antes e daí em
+diante é um atendimento como outro qualquer. Se o teto ficar só na intenção, ele **some
+exatamente quando começa a valer**. O limite precisa viajar junto para o atendimento promovido.
+
+#### Consequência de modelo, e por que decidir agora
+
+**A janela CONTÉM o ponto:** "às 18h" é a janela `[18h, 18h]`. Trocar `desiredTime` por
+`desiredFrom`/`desiredTo` **antes** de o front-client construir a barra de encaixe e de o
+partner construir a visão dele custa muito menos do que remendar depois, com as duas pontas já
+lendo um campo só. **É a última janela barata para essa mudança.**
+
+⚠️ **Ainda em aberto, e é de produto:** a janela é **flexibilidade** (*"me encaixa em qualquer
+hora entre 19h e 22h"* — mais frouxo que um ponto, ajuda a loja a preencher buracos) ou apenas
+**limites duros** sobre um horário ainda escolhido a dedo? As duas leituras cabem na frase do
+Andre e dão produtos diferentes. **Nada disso foi pedido ao backend ainda.**
+
+📐 **No arquivo de design** existem quatro telas da série (`INT 01 — Escolher horário`,
+`INT 02 — Confirmar`, `INT 03 — Meus agendamentos`, `INT 04 — Estados de erro`), desenhadas
+para o modelo de **ponto**. Com janela, pelo menos a `INT 01` e a `INT 04` mudam.
+
+---
+
 ### Nota — Transferencia de proprietario (OWNER)
 
 O backend tem `PATCH /establishment/{id}/owner` que transfere ownership para outro profissional (`{ newOwnerId: "uuid" }`). Este endpoint e de **OWNER** e sera consumido pelo **app partner**, nao pelo client.
