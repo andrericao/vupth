@@ -71,7 +71,9 @@ if (Platform.OS === "web") instalarAlertWeb(Alert);
 // query restaurada seria descartada da memoria antes de alguem usa-la, e a
 // persistencia nao serviria para nada. So controla quanto tempo um cache SEM
 // ninguem olhando fica guardado; nao muda quando os dados sao refeitos.
-const queryClient = new QueryClient({
+// Exportado so para o smoke de boot limpar o cache no fim: cada query guarda um
+// timer de coleta de 24h, e sem o `clear()` o jest nao sai depois dos testes.
+export const queryClient = new QueryClient({
   defaultOptions: { queries: { gcTime: VALIDADE_MS } },
 });
 
