@@ -197,7 +197,7 @@ export function EstablishmentList() {
               value={search}
               onChangeText={setSearch}
               placeholder="Buscar pelo nome"
-              placeholderTextColor="#454745"
+              placeholderTextColor="#6B706B"
               style={{ fontFamily: "Inter_400Regular", fontSize: 15, color: "#163300", padding: 0 }}
               returnKeyType="search"
             />
