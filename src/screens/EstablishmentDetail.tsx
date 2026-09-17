@@ -9,7 +9,7 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Star, Info, Heart, ChevronRight } from "lucide-react-native";
+import { Star, Info, Heart, ChevronRight, Clock, ChevronDown } from "lucide-react-native";
 
 import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
 
@@ -23,7 +23,8 @@ import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { isEffectivelyOpen } from "@domain/establishment/types";
 import { formatWaitTime } from "@domain/queue/types";
-import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
+import { useEstablishment, useEstablishmentHours, useProfessionalsWithQueue } from "@hooks/useEstablishments";
+import { proximaAbertura, resumoDeHoje, semanaParaExibir } from "@domain/establishment/horarios";
 import { useQueueSocket } from "@hooks/useQueueSocket";
 import { useFavoritesStore } from "@stores/favoritesStore";
 
@@ -118,6 +119,12 @@ export function EstablishmentDetail() {
   const { establishmentId } = route.params as RouteParams;
 
   const { data: establishment, isLoading, isError } = useEstablishment(establishmentId);
+  // C22 — o horário por DIA da semana (contrato de 16/09, no ar em staging
+  // desde 17/09). Antes a tela só sabia "Aberto agora" / "Fechada agora": quem
+  // chegava fora do horário não tinha como saber QUANDO a loja reabre, e o
+  // agendar (modelo de 04/09) ficava sem sentido.
+  const { data: horarios } = useEstablishmentHours(establishmentId);
+  const [mostrarSemana, setMostrarSemana] = useState(false);
   const { data: professionals = [] } = useProfessionalsWithQueue(establishmentId);
 
   // Tempo real: atualiza a fila via WebSocket; o polling vira fallback (backend 18b)
@@ -181,6 +188,10 @@ export function EstablishmentDetail() {
   }
 
   const isOpen = isEffectivelyOpen(establishment);
+  const agora = new Date();
+  const hojeTexto = resumoDeHoje(horarios, agora);
+  const reabre = !isOpen ? proximaAbertura(horarios, agora) : null;
+  const semana = semanaParaExibir(horarios, agora);
   const showPhoto = !!establishment.urlImage && !heroFailed;
   const minWait =
     professionals.length > 0
@@ -261,11 +272,10 @@ export function EstablishmentDetail() {
               : ""}
           </Text>
         </HStack>
-        {/* ⚠️ C22 (PRD do client): o horario e por DIA da semana e a tela deveria
-            mostrar o dia corrente ("Hoje 9h-19h") e quando reabre. O contrato de
-            hoje so tem o booleano `is_open` — sem opening/closing time — entao
-            mostramos o estado, que e o que existe. A grade por dia depende do
-            backend (S27). */}
+        {/* O estado ("Aberto agora") responde SE dá para ir; o horário de hoje e
+            o "reabre" respondem QUANDO — e são coisas diferentes. Loja que ainda
+            não definiu a semana não ganha linha nenhuma: inventar horário é pior
+            que não ter. */}
         <HStack alignItems="center" gap="$2" mt="$0.5">
           <Center
             width={7}
@@ -290,6 +300,54 @@ export function EstablishmentDetail() {
             </>
           )}
         </HStack>
+
+        {(hojeTexto || reabre) && (
+          <TouchableOpacity
+            onPress={() => setMostrarSemana((v) => !v)}
+            disabled={semana.length === 0}
+            accessibilityRole="button"
+            accessibilityLabel="Horário de funcionamento"
+            testID="horario-hoje"
+          >
+            <HStack alignItems="center" gap="$2" mt="$2">
+              <Clock size={14} color="#454745" />
+              <Text size="sm" color="$brandTextSecondary">
+                {hojeTexto}
+                {reabre ? ` · ${reabre}` : ""}
+              </Text>
+              {semana.length > 0 && (
+                <ChevronDown
+                  size={14}
+                  color="#454745"
+                  style={{ transform: [{ rotate: mostrarSemana ? "180deg" : "0deg" }] }}
+                />
+              )}
+            </HStack>
+          </TouchableOpacity>
+        )}
+
+        {mostrarSemana && semana.length > 0 && (
+          <VStack mt="$2" gap="$1" testID="semana">
+            {semana.map((linha) => (
+              <HStack key={linha.dia} justifyContent="space-between">
+                <Text
+                  size="sm"
+                  color={linha.ehHoje ? "$brandTextPrimary" : "$brandTextSecondary"}
+                  fontWeight={linha.ehHoje ? "$semibold" : "$normal"}
+                >
+                  {linha.nome}
+                </Text>
+                <Text
+                  size="sm"
+                  color={linha.ehHoje ? "$brandTextPrimary" : "$brandTextSecondary"}
+                  fontWeight={linha.ehHoje ? "$semibold" : "$normal"}
+                >
+                  {linha.texto}
+                </Text>
+              </HStack>
+            ))}
+          </VStack>
+        )}
       </VStack>
 
       <VStack flex={1} px={16} pt="$5">

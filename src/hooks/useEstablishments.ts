@@ -52,3 +52,19 @@ export function useProfessionalsWithQueue(establishmentId: string) {
     refetchInterval: 20000,
   });
 }
+
+/**
+ * Horário por dia da semana da loja (C22). Muda raramente — `staleTime` longo,
+ * sem polling: quem precisa de "aberta AGORA" usa `is_open`, que vem na
+ * listagem e na tela da loja.
+ */
+export function useEstablishmentHours(establishmentId: string) {
+  return useQuery({
+    queryKey: ['establishment-hours', establishmentId],
+    queryFn: () => establishmentService.getHours(establishmentId).then((res) => res.data),
+    enabled: !!establishmentId,
+    staleTime: 10 * 60 * 1000,
+    // Loja antiga (ou backend sem a rota) devolve 404: não insistir.
+    retry: false,
+  });
+}
