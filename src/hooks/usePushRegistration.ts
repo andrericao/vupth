@@ -9,6 +9,7 @@ import {
   acquireExpoPushToken,
   mapPlatform,
   notificationRoute,
+  registrarComRetentativa,
 } from "@domain/push";
 import { pushService } from "@services/pushService";
 import { navigateFromNotification } from "@routes/navigationRef";
@@ -69,6 +70,16 @@ export function usePushRegistration() {
   useEffect(() => {
     if (!isAuthenticated || !accessToken || didRegister.current) return;
     let cancelled = false;
+    // A espera entre tentativas precisa morrer junto com a sessão: um timer de
+    // 25s solto depois do logout seguraria o processo e dispararia um POST com
+    // o token velho.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let acordar: (() => void) | undefined;
+    const esperar = (ms: number) =>
+      new Promise<void>((resolve) => {
+        acordar = resolve;
+        timer = setTimeout(resolve, ms);
+      });
 
     (async () => {
       try {
@@ -89,7 +100,17 @@ export function usePushRegistration() {
         if (!token || cancelled) return;
 
         try {
-          await pushService.registerDevice(token, mapPlatform(Platform.OS), accessToken);
+          // Com novas tentativas: logo depois do login o Render pode estar
+          // hibernando, e uma chamada so deixava o aparelho sem push ate o
+          // proximo login (teste de 15/09).
+          const desfecho = await registrarComRetentativa({
+            enviar: () => pushService.registerDevice(token, mapPlatform(Platform.OS), accessToken),
+            esperar,
+            cancelado: () => cancelled,
+            aoTentarDeNovo: (tentativa, e) =>
+              registrarEnvio("tentando", `tentativa ${tentativa} — ${(e as Error)?.message ?? String(e)}`),
+          });
+          if (desfecho === "cancelado") return;
           registrarEnvio("ok");
         } catch (e) {
           // Token adquirido mas o backend nao ficou sabendo: o push nunca vai
@@ -107,6 +128,8 @@ export function usePushRegistration() {
 
     return () => {
       cancelled = true;
+      clearTimeout(timer);
+      acordar?.();
     };
   }, [isAuthenticated, accessToken, registrarTentativa, registrarEnvio]);
 

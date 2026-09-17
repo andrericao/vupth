@@ -22,8 +22,12 @@
 //   botao pilula, altura MINIMA 54 .............. components/Button.tsx
 //   solido #9FE870 com texto #163300 ............ Button.tsx (nunca texto branco:
 //                                                 brandGreen e claro demais)
-//   cancel e destructive VAZADOS ................ Button.tsx (outline/destructive
-//                                                 sao borda, nao fundo cheio)
+//   hierarquia dos botoes ....................... src/domain/pesoDoBotao, a MESMA
+//                                                 regra do dialogo do app (PR #32).
+//                                                 ⚠️ Ate 16/09 este arquivo tinha a
+//                                                 hierarquia INVERTIDA (cancelar vazado):
+//                                                 o arquivo do Design pede cancelar
+//                                                 SOLIDO e so o destrutivo vazado.
 //   titulo/botao Archivo, corpo Inter ........... config fonts heading/body
 //   SEM sombra no botao ......................... Button.tsx ("effect: NENHUMA"
 //                                                 no Pencil)
@@ -34,6 +38,8 @@
 // Sem tema escuro: o app nao tem um. Inventar aqui criaria divergencia com as
 // telas. O refinamento fino e da equipe de design — quando vier, muda so este
 // arquivo e as 60 chamadas seguem iguais.
+
+import { pesoDoBotao } from "../src/domain/pesoDoBotao";
 
 const Z_INDEX = 99999;
 
@@ -68,17 +74,20 @@ function criarEstilo() {
       font-size: 16px; cursor: pointer;
       min-height: 54px; padding: 8px 24px;
       border-radius: 9999px; border: 0;
-      background: #9FE870; color: #163300;
     }
-    .vupth-alert-btn:hover { background: #8AD95C; }
-    .vupth-alert-btn[data-style="cancel"] {
-      background: transparent; color: #163300; border: 2px solid #163300;
+    /* Pintado pelo PESO, e o peso vem de src/domain/pesoDoBotao — a mesma
+       regra do dialogo do app. Os dois nao voltam a divergir. */
+    .vupth-alert-btn[data-peso="solido"] { background: #9FE870; color: #163300; }
+    .vupth-alert-btn[data-peso="solido"]:hover { background: #8AD95C; }
+    .vupth-alert-btn[data-peso="vazado"],
+    .vupth-alert-btn[data-peso="vazado-perigo"] {
+      background: transparent; color: #163300; border: 1.5px solid #163300;
     }
-    .vupth-alert-btn[data-style="cancel"]:hover { background: #E2F6D5; }
-    .vupth-alert-btn[data-style="destructive"] {
-      background: transparent; color: #B3261E; border: 2px solid #B3261E;
-    }
-    .vupth-alert-btn[data-style="destructive"]:hover { background: #F7E4E2; }
+    /* So o ROTULO em danger: a borda continua forest. A acao sem volta fica
+       disponivel sem chamar atencao — e o ponto inteiro da caixa. */
+    .vupth-alert-btn[data-peso="vazado-perigo"] { color: #B3261E; }
+    .vupth-alert-btn[data-peso="vazado"]:hover,
+    .vupth-alert-btn[data-peso="vazado-perigo"]:hover { background: #E2F6D5; }
     .vupth-alert-btn:focus-visible { outline: 2px solid #163300; outline-offset: 2px; }
   `;
   document.head.appendChild(style);
@@ -140,11 +149,13 @@ export function alertWeb(title, message, buttons, options) {
     fechar(botaoCancelar?.onPress ?? options?.onDismiss);
   }
 
-  lista.forEach((b) => {
+  const comEstilo = lista.map((b) => ({ estilo: b?.style }));
+  lista.forEach((b, i) => {
     const btn = document.createElement("button");
     btn.className = "vupth-alert-btn";
     btn.type = "button";
     if (b?.style) btn.dataset.style = b.style;
+    btn.dataset.peso = pesoDoBotao(comEstilo, i);
     btn.textContent = b?.text ?? "OK";
     btn.onclick = () => fechar(b?.onPress);
     acoes.appendChild(btn);

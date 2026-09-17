@@ -101,3 +101,12 @@ describe('locationStore', () => {
     expect(useLocationStore.getState().location).toBeNull();
   });
 });
+
+describe('locationStore — leitura do que estava salvo', () => {
+  it('marca hydrated mesmo quando a leitura falha — senão a lista de lojas nunca busca', async () => {
+    useLocationStore.setState({ hydrated: false });
+    (SecureStore.getItemAsync as jest.Mock).mockRejectedValueOnce(new Error('keystore'));
+    await useLocationStore.getState().restoreLocation();
+    expect(useLocationStore.getState().hydrated).toBe(true);
+  });
+});

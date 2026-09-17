@@ -123,3 +123,15 @@ describe('GPS — reverse geocode → localidade (Fase 3)', () => {
     });
   });
 });
+
+describe('UF por extenso vinda do Android (17/09)', () => {
+  it('vira a sigla no filtro da Home e no formulário de endereço', () => {
+    const raw = { city: 'Florianópolis', district: 'Centro', region: 'Santa Catarina' };
+    expect(toUserLocation(raw)?.state).toBe('SC');
+    expect(toAddressDraft(raw).state).toBe('SC');
+  });
+
+  it('nome desconhecido fica como veio — melhor que apagar', () => {
+    expect(toAddressDraft({ city: 'Lisboa', region: 'Lisboa' }).state).toBe('Lisboa');
+  });
+});

@@ -15,6 +15,9 @@ import {
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
+import { avisoDeSaida } from "@domain/queue/avisoDeSaida";
+import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
+import { ehNavegador } from "@utils/ehNavegador";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
 import { SwapOffersModal } from "@components/SwapOffersModal";
 import { useSwapOffers } from "@hooks/useSwapOffers";
@@ -259,47 +262,50 @@ export function QueueStatus() {
   const penalty = incursLatePenalty(remaining);
 
   function handleCancel() {
-    const message = penalty
-      ? `Você está perto de ser atendido. Sair agora gera uma multa de R$ ${CANCELLATION_PENALTY_VALUE},00 no seu próximo atendimento.`
-      : "Tem certeza que deseja sair da fila?";
+    // D10 (17/09): com multa, o aviso explica o impacto no próximo cliente e
+    // oferece a troca de lugar — sem multa — antes de "sair mesmo assim".
+    const aviso = avisoDeSaida({ multa: penalty, podeTrocar: canReshuffle });
+    const sair = async () => {
+      // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
+      // de 2026-09-07 ("sai da fila e o app fecha sozinho").
+      //
+      // 1. O `catch {}` era VAZIO. Se o cancelamento falhasse, o cliente
+      //    saia da tela sem ter saido da fila: a vez e a multa seguiam de
+      //    pe e ninguem ficava sabendo — nem ele, nem quem fosse
+      //    investigar depois. Engolir o erro nao e "nao atrapalhar o
+      //    usuario"; e mentir pra ele sobre o que aconteceu.
+      //
+      // 2. Limpar o store ANTES de navegar re-renderiza esta tela com
+      //    `activeQueue` nulo. Navegar primeiro tira a tela do caminho.
+      try {
+        if (attendanceId && accessToken) {
+          await attendanceService.cancel(attendanceId, accessToken);
+        }
+      } catch (error) {
+        // Ja nao esta na fila (o profissional removeu, ou um toque duplo
+        // cancelou antes): o objetivo do usuario esta cumprido. Segue pra
+        // limpeza, senao ele fica preso numa tela de fila que nao existe.
+        if (!jaSaiuDaFila(error)) {
+          Alert.alert("Nao foi possivel sair da fila", mensagemDeFalhaAoSair(error));
+          return;
+        }
+      }
+      navigation.navigate("home");
+      await leaveQueue();
+    };
     Alert.alert(
-      "Sair da fila",
-      message,
-      [
-        { text: "Não", style: "cancel" },
-        {
-          text: "Sim, sair",
-          style: "destructive",
-          onPress: async () => {
-            // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
-            // de 2026-09-07 ("sai da fila e o app fecha sozinho").
-            //
-            // 1. O `catch {}` era VAZIO. Se o cancelamento falhasse, o cliente
-            //    saia da tela sem ter saido da fila: a vez e a multa seguiam de
-            //    pe e ninguem ficava sabendo — nem ele, nem quem fosse
-            //    investigar depois. Engolir o erro nao e "nao atrapalhar o
-            //    usuario"; e mentir pra ele sobre o que aconteceu.
-            //
-            // 2. Limpar o store ANTES de navegar re-renderiza esta tela com
-            //    `activeQueue` nulo. Navegar primeiro tira a tela do caminho.
-            try {
-              if (attendanceId && accessToken) {
-                await attendanceService.cancel(attendanceId, accessToken);
-              }
-            } catch (error) {
-              // Ja nao esta na fila (o profissional removeu, ou um toque duplo
-              // cancelou antes): o objetivo do usuario esta cumprido. Segue pra
-              // limpeza, senao ele fica preso numa tela de fila que nao existe.
-              if (!jaSaiuDaFila(error)) {
-                Alert.alert("Nao foi possivel sair da fila", mensagemDeFalhaAoSair(error));
-                return;
-              }
-            }
-            navigation.navigate("home");
-            await leaveQueue();
-          },
-        },
-      ]
+      aviso.titulo,
+      aviso.mensagem,
+      aviso.botoes.map((botao) => ({
+        text: botao.texto,
+        style: botao.estilo,
+        onPress:
+          botao.acao === "sair"
+            ? sair
+            : botao.acao === "trocar"
+              ? () => setShowSwapOffers(true)
+              : undefined,
+      })),
     );
   }
 
@@ -741,6 +747,9 @@ export function QueueStatus() {
               </Text>
             </>
           )}
+          <Box mt="$5">
+            <AtualizarNoNavegador atualizando={refreshing} onPress={handleRefresh} />
+          </Box>
         </ScrollView>
 
         <VStack px={16} pb={28} gap="$3.5" alignItems="center">
@@ -927,9 +936,16 @@ export function QueueStatus() {
           </HStack>
         </Box>
 
-        <Text size="xs" color="$brandTextSecondary" mt="$4" textAlign="center">
-          A fila atualiza sozinha — arraste para baixo para atualizar agora
-        </Text>
+        {/* No navegador nao ha "arrastar para baixo": a dica vira o botao. */}
+        {ehNavegador() ? (
+          <Box mt="$4">
+            <AtualizarNoNavegador atualizando={refreshing} onPress={handleRefresh} />
+          </Box>
+        ) : (
+          <Text size="xs" color="$brandTextSecondary" mt="$4" textAlign="center">
+            A fila atualiza sozinha — arraste para baixo para atualizar agora
+          </Text>
+        )}
       </Center>
       </ScrollView>
 

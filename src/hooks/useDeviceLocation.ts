@@ -7,6 +7,7 @@ import {
   Coords,
   LocationProviders,
 } from '@domain/location/gps';
+import { acaoDoGpsNaAbertura, ESPERA_MAXIMA_GPS_MS } from '@domain/location/abertura';
 import { useLocationStore } from '@stores/locationStore';
 
 /**
@@ -26,6 +27,8 @@ export function useDeviceLocation() {
   const setLocation = useLocationStore((s) => s.setLocation);
   const setCoords = useLocationStore((s) => s.setCoords);
   const markGpsAsked = useLocationStore((s) => s.markGpsAsked);
+  const setGpsPending = useLocationStore((s) => s.setGpsPending);
+  const hydrated = useLocationStore((s) => s.hydrated);
   const askedRef = useRef(false);
 
   // Providers reais do expo-location, resolvidos só na hora do uso.
@@ -36,6 +39,10 @@ export function useDeviceLocation() {
       return {
         requestPermission: async () => {
           const { status } = await Location.requestForegroundPermissionsAsync();
+          return status === 'granted' ? 'granted' : 'denied';
+        },
+        checkPermission: async () => {
+          const { status } = await Location.getForegroundPermissionsAsync();
           return status === 'granted' ? 'granted' : 'denied';
         },
         getCoords: async () => {
@@ -94,15 +101,37 @@ export function useDeviceLocation() {
     }
   }, [loadProviders, markGpsAsked, setCoords]);
 
-  // Primeira abertura: só pergunta quem ainda não foi perguntado E ainda não
-  // definiu localidade na mão (`resolved`).
+  /** Aberturas seguintes: só a coordenada, sem perguntar e sem mexer no filtro. */
+  const refreshCoords = useCallback(async (): Promise<void> => {
+    const providers = loadProviders();
+    if (!providers?.checkPermission) return;
+    try {
+      if ((await providers.checkPermission()) !== 'granted') return;
+      await setCoords(await providers.getCoords());
+    } catch {
+      // GPS desligado: fica a coordenada salva.
+    }
+  }, [loadProviders, setCoords]);
+
+  // Espera a leitura do que estava salvo antes de decidir (ver
+  // `domain/location/abertura.ts`). Enquanto o GPS responde, a lista de lojas
+  // segura a busca — até o teto, para não ficar parada esperando o satélite.
   useEffect(() => {
     if (askedRef.current) return;
     const { gpsAsked, resolved } = useLocationStore.getState();
-    if (gpsAsked || resolved) return;
+    const acao = acaoDoGpsNaAbertura({ hydrated, gpsAsked: !!gpsAsked, resolved });
+    if (acao === 'esperar') return;
     askedRef.current = true;
-    requestDeviceLocation();
-  }, [requestDeviceLocation]);
+    if (acao === 'nada') return;
+
+    setGpsPending(true);
+    const teto = setTimeout(() => setGpsPending(false), ESPERA_MAXIMA_GPS_MS);
+    const tarefa = acao === 'perguntar' ? requestDeviceLocation() : refreshCoords();
+    tarefa.finally(() => {
+      clearTimeout(teto);
+      setGpsPending(false);
+    });
+  }, [hydrated, requestDeviceLocation, refreshCoords, setGpsPending]);
 
   return { requestDeviceLocation, captureDeviceAddress };
 }

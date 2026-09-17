@@ -1,4 +1,4 @@
-import { lookupCep } from "@utils/cep";
+import { lookupCep, siglaDaUf, buscarCepPorEndereco } from "@utils/cep";
 
 const okPayload = {
   logradouro: "Avenida Paulista",
@@ -62,5 +62,72 @@ describe("lookupCep", () => {
     });
 
     expect(await lookupCep("01310100")).toBeNull();
+  });
+});
+
+// GPS sem CEP (bateria de 07/09, A2): o provedor do Android traz rua, bairro,
+// cidade e estado, e quase nunca o CEP. O app completa pelo ViaCEP — mas só
+// quando a resposta é inequívoca: CEP chutado é pior que campo vazio.
+describe("siglaDaUf", () => {
+  it("aceita a sigla e o nome por extenso, com ou sem acento", () => {
+    expect(siglaDaUf("sc")).toBe("SC");
+    expect(siglaDaUf("Santa Catarina")).toBe("SC");
+    expect(siglaDaUf("São Paulo")).toBe("SP");
+    expect(siglaDaUf("Paraná")).toBe("PR");
+    expect(siglaDaUf("Atlantida")).toBeNull();
+  });
+});
+
+describe("buscarCepPorEndereco", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const endereco = {
+    street: "Rua Bocaiúva",
+    neighborhood: "Centro",
+    city: "Florianópolis",
+    state: "Santa Catarina",
+  };
+
+  it("um CEP só: preenche, e pergunta com a SIGLA da UF", async () => {
+    mockFetch(async () => ({ ok: true, json: async () => [{ cep: "88015-530", bairro: "Centro" }] }));
+    await expect(buscarCepPorEndereco(endereco)).resolves.toBe("88015530");
+    expect(global.fetch).toHaveBeenCalledWith(
+      "https://viacep.com.br/ws/SC/Florian%C3%B3polis/Rua%20Bocai%C3%BAva/json/",
+    );
+  });
+
+  it("vários CEPs, o bairro desempata", async () => {
+    mockFetch(async () => ({
+      ok: true,
+      json: async () => [
+        { cep: "88015-530", bairro: "Centro" },
+        { cep: "88020-000", bairro: "Agronômica" },
+      ],
+    }));
+    await expect(buscarCepPorEndereco(endereco)).resolves.toBe("88015530");
+  });
+
+  it("rua com vários CEPs no MESMO bairro (faixa de número): não chuta", async () => {
+    mockFetch(async () => ({
+      ok: true,
+      json: async () => [
+        { cep: "88015-530", bairro: "Centro" },
+        { cep: "88015-531", bairro: "Centro" },
+      ],
+    }));
+    await expect(buscarCepPorEndereco(endereco)).resolves.toBeNull();
+  });
+
+  it("sem resultado, estado desconhecido, rua curta ou rede fora: null, sem chamar ou sem lançar", async () => {
+    mockFetch(async () => ({ ok: true, json: async () => [] }));
+    await expect(buscarCepPorEndereco(endereco)).resolves.toBeNull();
+    await expect(buscarCepPorEndereco({ ...endereco, state: "Narnia" })).resolves.toBeNull();
+    await expect(buscarCepPorEndereco({ ...endereco, street: "Rx" })).resolves.toBeNull();
+    mockFetch(async () => {
+      throw new Error("offline");
+    });
+    await expect(buscarCepPorEndereco(endereco)).resolves.toBeNull();
   });
 });

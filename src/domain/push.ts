@@ -93,3 +93,55 @@ export async function acquireExpoPushToken(env: PushEnv): Promise<ResultadoPush>
     return { token: null, motivo: 'erro', detalhe: (e as Error)?.message ?? String(e) };
   }
 }
+
+/**
+ * Esperas entre as tentativas do POST /devices. Somam ~66s, acima dos ~50s que
+ * o Render Free leva para acordar — a primeira chamada é a que o acorda.
+ */
+export const ESPERAS_REGISTRO_MS = [3_000, 6_000, 12_000, 20_000, 25_000];
+
+/**
+ * Vale tentar de novo? Só quando o servidor NÃO respondeu (erro de rede,
+ * timeout) ou respondeu 5xx — o Render acordando devolve as duas coisas. Um 4xx
+ * é o backend recusando de verdade: repetir daria a mesma resposta.
+ */
+export function erroTransitorio(e: unknown): boolean {
+  const status = (e as { response?: { status?: number } })?.response?.status;
+  if (status === undefined) return true;
+  return status >= 500;
+}
+
+export type RegistroEnv = {
+  enviar: () => Promise<unknown>;
+  esperar: (ms: number) => Promise<void>;
+  cancelado: () => boolean;
+  /** Chamado antes de cada nova tentativa (a partir da 2ª), para o painel. */
+  aoTentarDeNovo?: (tentativa: number, erro: unknown) => void;
+  esperas?: number[];
+};
+
+/**
+ * POST /devices com novas tentativas para o cold start.
+ *
+ * Até 16/09 era uma chamada só, logo depois do login. Com o backend hibernando
+ * ela caía por rede, e o aparelho ficava SEM PUSH até a pessoa sair e entrar de
+ * novo — sem nada na tela que dissesse isso. O teste de 15/09 mostrou "backend
+ * sabe? NÃO — network error" num aparelho e "sim" no outro.
+ *
+ * Devolve 'ok', 'cancelado' ou lança o último erro.
+ */
+export async function registrarComRetentativa(env: RegistroEnv): Promise<'ok' | 'cancelado'> {
+  const esperas = env.esperas ?? ESPERAS_REGISTRO_MS;
+  for (let i = 0; ; i++) {
+    try {
+      await env.enviar();
+      return 'ok';
+    } catch (e) {
+      if (!erroTransitorio(e) || i >= esperas.length) throw e;
+      if (env.cancelado()) return 'cancelado';
+      env.aoTentarDeNovo?.(i + 2, e);
+      await env.esperar(esperas[i]);
+      if (env.cancelado()) return 'cancelado';
+    }
+  }
+}

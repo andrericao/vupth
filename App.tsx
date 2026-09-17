@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Alert, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import Constants from "expo-constants";
 
 import { useFonts } from "expo-font";
 
@@ -20,7 +21,8 @@ import { useFonts } from "expo-font";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { instalarDialogoNativo } from "@utils/alertNativo";
 import { DialogoVupth } from "@components/DialogoVupth";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 
 import { config } from "./config/gluestack-ui.config";
 
@@ -44,6 +46,7 @@ import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 
 import { useReconciliarFila } from "@hooks/useReconciliarFila";
+import { devePersistir, persister, VALIDADE_MS } from "@services/queryPersist";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 
 import { instalarAlertWeb } from "./web-shims/alert";
@@ -60,7 +63,19 @@ setupOnlineManager();
 // boot, antes de qualquer interacao poder disparar um Alert.
 if (Platform.OS === "web") instalarAlertWeb(Alert);
 
-const queryClient = new QueryClient();
+// O cache sobrevive entre aberturas: a ultima lista de lojas pinta na hora e
+// revalida atras, em vez de skeleton ate a API responder. Ver
+// `services/queryPersist.ts` — inclusive o que NAO e persistido e por que.
+//
+// `gcTime` precisa ser >= a validade do cache salvo. Com o default (5 min), a
+// query restaurada seria descartada da memoria antes de alguem usa-la, e a
+// persistencia nao serviria para nada. So controla quanto tempo um cache SEM
+// ninguem olhando fica guardado; nao muda quando os dados sao refeitos.
+// Exportado so para o smoke de boot limpar o cache no fim: cada query guarda um
+// timer de coleta de 24h, e sem o `clear()` o jest nao sai depois dos testes.
+export const queryClient = new QueryClient({
+  defaultOptions: { queries: { gcTime: VALIDADE_MS } },
+});
 
 // Substitui o `Alert.alert` para as ~65 chamadas passarem a desenhar a caixa da
 // marca, sem tocar em nenhuma delas. A rede esta no proprio instalador: sem o
@@ -145,7 +160,18 @@ export default function App() {
   useDeviceLocation();
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister,
+        maxAge: VALIDADE_MS,
+        // Versao nova do app invalida o cache salvo: se o formato de uma
+        // resposta mudar entre versoes, o app nao abre lendo um objeto que nao
+        // reconhece.
+        buster: Constants.expoConfig?.version ?? "",
+        dehydrateOptions: { shouldDehydrateQuery: devePersistir },
+      }}
+    >
       <GluestackUIProvider config={config}>
         <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
 
@@ -160,7 +186,7 @@ export default function App() {
             de a fonte carregar precisa aparecer do mesmo jeito. */}
         <DialogoVupth />
       </GluestackUIProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
 

@@ -18,7 +18,10 @@ import { MotivoPush } from '@domain/push';
  * NÃO é persistido: é retrato da sessão.
  */
 
-export type EnvioAoBackend = 'nao-tentado' | 'ok' | 'falhou';
+// 'tentando': a chamada falhou por rede ou 5xx e vai ser repetida — o backend
+// provavelmente está acordando. Sem este estado o painel mostrava "NÃO" durante
+// o cold start, e o teste era lido como falha de push.
+export type EnvioAoBackend = 'nao-tentado' | 'tentando' | 'ok' | 'falhou';
 
 export type PushDiagnostics = {
   motivo: MotivoPush | null;

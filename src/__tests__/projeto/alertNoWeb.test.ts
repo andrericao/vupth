@@ -89,31 +89,62 @@ describe('o Alert do web mostra o que o app tem a dizer', () => {
   });
 
   it('o card segue a marca: brandGreen SO como fundo, com forest por cima', () => {
-    // A regra da marca: `brandGreen` (#9FE870) e claro demais para sustentar
-    // texto branco. O par certo e sempre fundo brandGreen + texto forest — se
-    // alguem "modernizar" o botao para texto branco, o rotulo some.
+    // `brandGreen` (#9FE870) e claro demais para sustentar texto branco. O par
+    // certo e sempre fundo brandGreen + texto forest.
     alertWeb('Titulo', 'Msg', [{ text: 'Ok' }]);
     const css = document.getElementById('vupth-alert-style')!.textContent!;
-    const botaoSolido = css.slice(css.indexOf('.vupth-alert-btn {'), css.indexOf('.vupth-alert-btn:hover'));
-    expect(botaoSolido).toContain('background: #9FE870');
-    expect(botaoSolido).toContain('color: #163300');
-    expect(botaoSolido.toLowerCase()).not.toContain('color: #fff');
-    expect(botaoSolido.toLowerCase()).not.toContain('color: white');
-    // Botao do app e pilula de altura MINIMA — cravar corta o rotulo quando a
-    // fonte do sistema cresce (DS4).
-    expect(botaoSolido).toContain('border-radius: 9999px');
-    expect(botaoSolido).toContain('min-height: 54px');
-    expect(botaoSolido).not.toMatch(/(?<!min-)height:\s*54px/);
+    const solido = css.slice(css.indexOf('[data-peso="solido"] {'), css.indexOf('[data-peso="solido"]:hover'));
+    expect(solido).toContain('background: #9FE870');
+    expect(solido).toContain('color: #163300');
+    expect(solido.toLowerCase()).not.toContain('color: #fff');
+    // Pilula de altura MINIMA — cravar corta o rotulo com a fonte ampliada (DS4).
+    const base = css.slice(css.indexOf('.vupth-alert-btn {'), css.indexOf('[data-peso="solido"] {'));
+    expect(base).toContain('border-radius: 9999px');
+    expect(base).toContain('min-height: 54px');
+    expect(base).not.toMatch(/(?<!min-)height:\s*54px/);
   });
 
-  it('cancel e destructive sao VAZADOS, como no Button do app', () => {
+  // 🔴 A hierarquia. Ate 16/09 este arquivo a tinha INVERTIDA: cancelar vazado.
+  // O arquivo do Design (MODAL · Deletar conta) pede o oposto — o peso vai para
+  // a SAIDA SEGURA, e a acao sem volta fica disponivel sem convidar. O app ja
+  // fazia certo (PR #32); agora os dois leem a mesma regra, `pesoDoBotao`.
+  function pesos(botoes: { text: string; style?: 'cancel' | 'destructive' }[]) {
+    alertWeb('Titulo', 'Msg', botoes);
+    return [...document.querySelectorAll<HTMLElement>('.vupth-alert-btn')].map((b) => b.dataset.peso);
+  }
+
+  it('com acao destrutiva: CANCELAR e o solido, e o destrutivo e vazado', () => {
+    expect(pesos([
+      { text: 'Ficar', style: 'cancel' },
+      { text: 'Sair', style: 'destructive' },
+    ])).toEqual(['solido', 'vazado-perigo']);
+  });
+
+  it('sem acao destrutiva a hierarquia se inverte: o CONFIRMAR e o solido', () => {
+    // Ai o confirmar e a acao principal, e e ele que ganha o peso.
+    expect(pesos([
+      { text: 'Nao', style: 'cancel' },
+      { text: 'Sim' },
+    ])).toEqual(['vazado', 'solido']);
+  });
+
+  it('o destrutivo tem borda FOREST — so o rotulo fica vermelho', () => {
     alertWeb('Titulo', 'Msg', [{ text: 'Ok' }]);
     const css = document.getElementById('vupth-alert-style')!.textContent!;
-    for (const estilo of ['cancel', 'destructive']) {
-      const bloco = css.slice(css.indexOf(`[data-style="${estilo}"] {`));
-      expect(bloco.slice(0, 200)).toContain('background: transparent');
-      expect(bloco.slice(0, 200)).toContain('border: 2px solid');
-    }
+    // A borda vermelha era o que este arquivo fazia, e o desenho nao pede.
+    expect(css).not.toMatch(/border:[^;]*#B3261E/i);
+    // `lastIndexOf`: o primeiro bloco com esse seletor e o COMPARTILHADO com o
+    // vazado comum (rotulo forest). A regra que pinta o rotulo de vermelho vem
+    // depois e ganha pela cascata — e ela que precisa existir.
+    const perigo = css.slice(css.lastIndexOf('[data-peso="vazado-perigo"] {'));
+    expect(perigo.slice(0, 80)).toContain('color: #B3261E');
+  });
+
+  it('a borda do vazado e 1,5 — a mesma do Button/Outline', () => {
+    alertWeb('Titulo', 'Msg', [{ text: 'Ok' }]);
+    const css = document.getElementById('vupth-alert-style')!.textContent!;
+    expect(css).toContain('border: 1.5px solid #163300');
+    expect(css).not.toContain('border: 2px solid');
   });
 
   it('instalar troca o metodo do Alert, e nao instala duas vezes', () => {

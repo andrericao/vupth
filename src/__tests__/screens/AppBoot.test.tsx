@@ -1,6 +1,6 @@
 import { render, waitFor } from '@testing-library/react-native';
 
-import App from '../../../App';
+import App, { queryClient } from '../../../App';
 
 // Regressão real (2026-08-01): `useOutOfQueueSwap` (React Query) era chamado no
 // corpo do App, ACIMA do QueryClientProvider — o `useQuery` estourava "No
@@ -48,6 +48,11 @@ jest.mock('@react-native-community/netinfo', () => ({
 jest.setTimeout(30000);
 
 describe('App — boot', () => {
+  // O cliente do App usa `gcTime` de 24h (exigencia da persistencia), e cada
+  // query deixa um timer desse tamanho. Sem limpar, o jest terminava os testes e
+  // ficava parado: "Jest did not exit one second after the test run".
+  afterAll(() => queryClient.clear());
+
   it('monta sem estourar (todo hook app-wide dentro do seu provider)', async () => {
     const { unmount } = render(<App />);
 

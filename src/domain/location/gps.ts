@@ -1,4 +1,5 @@
 import { UserLocation } from '@domain/establishment/proximity';
+import { siglaDaUf } from '@utils/cep';
 
 // GPS (Fase 3 do filtro por localidade, prioridade Andre 2026-08-01). O app pede
 // a permissão de localização na primeira abertura, pega as coordenadas e faz
@@ -47,6 +48,8 @@ export type PermissionOutcome = 'granted' | 'denied';
 
 export interface LocationProviders {
   requestPermission: () => Promise<PermissionOutcome>;
+  /** Lê a permissão SEM perguntar — para as aberturas depois da primeira. */
+  checkPermission?: () => Promise<PermissionOutcome>;
   getCoords: () => Promise<Coords>;
   reverseGeocode: (coords: Coords) => Promise<ReverseGeocodeResult[]>;
 }
@@ -68,7 +71,10 @@ export function toUserLocation(result?: ReverseGeocodeResult | null): UserLocati
   if (city === '') return null;
 
   const neighborhood = (result.district ?? '').trim();
-  const state = (result.region ?? '').trim();
+  // O Android costuma trazer o estado por extenso ("Santa Catarina"): vira a
+  // sigla, que e o que o campo UF, o backend e a ordenacao por proximidade usam.
+  const regiao = (result.region ?? '').trim();
+  const state = (regiao && siglaDaUf(regiao)) || regiao;
 
   return {
     city,
@@ -114,7 +120,10 @@ export function toAddressDraft(result?: ReverseGeocodeResult | null): AddressDra
   const number = (result.streetNumber ?? '').trim();
   const neighborhood = (result.district ?? '').trim();
   const city = (result.city ?? result.subregion ?? '').trim();
-  const state = (result.region ?? '').trim();
+  // O Android costuma trazer o estado por extenso ("Santa Catarina"): vira a
+  // sigla, que e o que o campo UF, o backend e a ordenacao por proximidade usam.
+  const regiao = (result.region ?? '').trim();
+  const state = (regiao && siglaDaUf(regiao)) || regiao;
   const zipCode = (result.postalCode ?? '').replace(/\D/g, '');
 
   return {

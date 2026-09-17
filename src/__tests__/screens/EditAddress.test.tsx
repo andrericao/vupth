@@ -41,6 +41,11 @@ jest.mock('@services/addressService', () => ({
   },
 }));
 jest.mock('@hooks/useDeviceLocation', () => ({ useDeviceLocation: jest.fn() }));
+const mockBuscarCep = jest.fn();
+jest.mock('@utils/cep', () => ({
+  ...jest.requireActual('@utils/cep'),
+  buscarCepPorEndereco: (...args: unknown[]) => mockBuscarCep(...args),
+}));
 
 const mockList = addressService.list as jest.Mock;
 const mockUseDeviceLocation = useDeviceLocation as jest.Mock;
@@ -103,6 +108,44 @@ describe('EditAddress — oferta de GPS ao abrir o formulário', () => {
     expect(getByDisplayValue('Avenida Paulista')).toBeTruthy();
     // O CEP entra mascarado no campo — é assim que o formulário o valida.
     expect(getByDisplayValue('01310-100')).toBeTruthy();
+  });
+
+  it('GPS sem CEP: o app completa pelo endereço (bateria de 07/09, A2)', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const draft = {
+      street: 'Rua Bocaiúva',
+      number: '10',
+      neighborhood: 'Centro',
+      city: 'Florianópolis',
+      state: 'SC',
+    };
+    mockCapture.mockResolvedValue({ coords: { latitude: -27.59, longitude: -48.55 }, draft });
+    mockBuscarCep.mockResolvedValue('88015530');
+
+    const { findByText, findByDisplayValue } = renderWithProviders(<EditAddress />);
+    fireEvent.press(await findByText('Adicionar endereço'));
+    await waitFor(() => expect(alertSpy).toHaveBeenCalled());
+    await act(async () => {
+      await pressAlertButton(alertSpy, 'Usar GPS');
+    });
+
+    expect(mockBuscarCep).toHaveBeenCalledWith(draft);
+    expect(await findByDisplayValue('88015-530')).toBeTruthy();
+  });
+
+  it('GPS com CEP: não consulta o ViaCEP à toa', async () => {
+    const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    mockCapture.mockResolvedValue({
+      coords: { latitude: -23.55, longitude: -46.63 },
+      draft: { street: 'Avenida Paulista', number: '1000', city: 'São Paulo', state: 'SP', zipCode: '01310100' },
+    });
+    const { findByText } = renderWithProviders(<EditAddress />);
+    fireEvent.press(await findByText('Adicionar endereço'));
+    await waitFor(() => expect(alertSpy).toHaveBeenCalled());
+    await act(async () => {
+      await pressAlertButton(alertSpy, 'Usar GPS');
+    });
+    expect(mockBuscarCep).not.toHaveBeenCalled();
   });
 
   it('recusar a oferta deixa o formulário em branco para digitar', async () => {
