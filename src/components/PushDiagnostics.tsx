@@ -95,11 +95,23 @@ export function PushDiagnostics() {
             <Linha
               rotulo="backend sabe?"
               valor={
-                envio === "ok" ? "sim (POST /devices)" : envio === "falhou" ? "NÃO — envio falhou" : "não tentado"
+                envio === "ok"
+                  ? "sim (POST /devices)"
+                  : envio === "falhou"
+                    ? "NÃO — envio falhou"
+                    : envio === "tentando"
+                      ? "tentando de novo — servidor acordando"
+                      : "não tentado"
               }
               ok={envio === "ok" ? true : envio === "falhou" ? false : null}
             />
-            {erroEnvio && <Linha rotulo="erro do envio" valor={erroEnvio} ok={false} />}
+            {erroEnvio && (
+              <Linha
+                rotulo={envio === "tentando" ? "última falha" : "erro do envio"}
+                valor={erroEnvio}
+                ok={envio === "tentando" ? null : false}
+              />
+            )}
           </>
         )}
 
