@@ -15,6 +15,7 @@ import { Users, Clock, ChevronRight, Calendar, Repeat2 } from "lucide-react-nati
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
+import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { useClientIntentions } from "@hooks/useIntentions";
@@ -168,6 +169,9 @@ export function Attendances() {
     <VStack flex={1} bg="$brandBackground">
       <Box px={16}>
         <ScreenHeader root title="Atendimentos" />
+      </Box>
+      <Box px={16} alignItems="flex-start">
+        <AtualizarNoNavegador atualizando={isRefetching} onPress={() => refetch()} />
       </Box>
 
       <ScrollView

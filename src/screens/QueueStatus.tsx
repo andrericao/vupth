@@ -16,6 +16,8 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { avisoDeSaida } from "@domain/queue/avisoDeSaida";
+import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
+import { ehNavegador } from "@utils/ehNavegador";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
 import { SwapOffersModal } from "@components/SwapOffersModal";
 import { useSwapOffers } from "@hooks/useSwapOffers";
@@ -745,6 +747,9 @@ export function QueueStatus() {
               </Text>
             </>
           )}
+          <Box mt="$5">
+            <AtualizarNoNavegador atualizando={refreshing} onPress={handleRefresh} />
+          </Box>
         </ScrollView>
 
         <VStack px={16} pb={28} gap="$3.5" alignItems="center">
@@ -931,9 +936,16 @@ export function QueueStatus() {
           </HStack>
         </Box>
 
-        <Text size="xs" color="$brandTextSecondary" mt="$4" textAlign="center">
-          A fila atualiza sozinha — arraste para baixo para atualizar agora
-        </Text>
+        {/* No navegador nao ha "arrastar para baixo": a dica vira o botao. */}
+        {ehNavegador() ? (
+          <Box mt="$4">
+            <AtualizarNoNavegador atualizando={refreshing} onPress={handleRefresh} />
+          </Box>
+        ) : (
+          <Text size="xs" color="$brandTextSecondary" mt="$4" textAlign="center">
+            A fila atualiza sozinha — arraste para baixo para atualizar agora
+          </Text>
+        )}
       </Center>
       </ScrollView>
 
