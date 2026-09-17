@@ -9,7 +9,7 @@ import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 import { addressService, AddressResponse, AddressRequest } from "@services/addressService";
 import { maskCEP, unmask } from "@utils/masks";
-import { lookupCep } from "@utils/cep";
+import { lookupCep, buscarCepPorEndereco } from "@utils/cep";
 import { SkeletonList } from "@components/Skeleton";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
@@ -190,6 +190,15 @@ export function EditAddress() {
         latitude: coords.latitude,
         longitude: coords.longitude,
       }));
+      // O provedor do Android quase nunca traz o CEP (bateria de 07/09, A2).
+      // Com rua, cidade e UF, o ViaCEP completa — so quando a resposta e
+      // inequivoca, e sem passar por cima de um CEP que ja esteja no campo.
+      if (!draft.zipCode) {
+        const cep = await buscarCepPorEndereco(draft);
+        if (cep) {
+          setForm((prev) => (prev.zipCode ? prev : { ...prev, zipCode: maskCEP(cep) }));
+        }
+      }
       if (!draft.street || !draft.number) {
         Alert.alert(
           "Localização capturada",
