@@ -27,6 +27,11 @@ interface Persisted {
 }
 
 interface LocationState extends Persisted {
+  /** Já leu o que estava salvo? Antes disso `gpsAsked`/`coords` ainda não valem. */
+  hydrated: boolean;
+  /** O GPS da abertura ainda está respondendo — a lista de lojas espera. */
+  gpsPending: boolean;
+  setGpsPending: (v: boolean) => void;
   setLocation: (loc: UserLocation) => Promise<void>;
   setCoords: (coords: Coords) => Promise<void>;
   markGpsAsked: () => Promise<void>;
@@ -45,6 +50,10 @@ export const useLocationStore = create<LocationState>((set, get) => ({
   resolved: false,
   coords: null,
   gpsAsked: false,
+  hydrated: false,
+  gpsPending: false,
+
+  setGpsPending: (v) => set({ gpsPending: v }),
 
   setLocation: async (loc) => {
     set({ location: loc, resolved: true });
@@ -84,7 +93,11 @@ export const useLocationStore = create<LocationState>((set, get) => ({
           gpsAsked: !!data.gpsAsked,
         });
       }
-    } catch {}
+    } catch {
+      // Leitura falhou: segue como primeira abertura.
+    } finally {
+      set({ hydrated: true });
+    }
   },
 }));
 

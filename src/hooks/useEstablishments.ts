@@ -1,16 +1,21 @@
 import { useQuery } from '@tanstack/react-query';
 import { establishmentService } from '../services/establishmentService';
 import { useLocationStore } from '@stores/locationStore';
+import { coordsDaLista, listaPodeBuscar } from '@domain/location/abertura';
 
 export function useEstablishments() {
-  const coords = useLocationStore((s) => s.coords);
+  const coords = coordsDaLista(useLocationStore((s) => s.coords));
+  const hydrated = useLocationStore((s) => s.hydrated);
+  const gpsPending = useLocationStore((s) => s.gpsPending);
 
-  return useQuery({
-    // As coordenadas entram na CHAVE: o GPS costuma chegar depois da primeira
-    // busca (a permissão é assíncrona) e, sem isso, o React Query devolveria
-    // para sempre a lista sem distância que já estava em cache.
+  const query = useQuery({
+    // As coordenadas entram na CHAVE: sem isso o React Query devolveria para
+    // sempre a lista sem distância que já estava em cache. Por isso a busca só
+    // sai com a localização DECIDIDA — antes, a chave mudava depois da primeira
+    // busca e a lista era pedida duas ou três vezes por abertura.
     queryKey: ['establishments', coords?.latitude ?? null, coords?.longitude ?? null],
     queryFn: () => establishmentService.getAll(coords).then((res) => res.data),
+    enabled: listaPodeBuscar({ hydrated, gpsPending }),
     staleTime: 60000,
     // WebSocket ainda não funciona no device → polling para atualizar sozinho
     // (tempos de espera) sem puxar. Só roda com o app em foreground.
@@ -18,6 +23,10 @@ export function useEstablishments() {
     retry: 2,
     retryDelay: (attempt) => Math.min(3000 * (attempt + 1), 10000),
   });
+
+  // Com a busca segurada e sem dado, o v5 diz `isLoading: false` — e as telas
+  // leriam "nenhuma loja". Sem dado ainda é carregando, seguro ou não.
+  return { ...query, isLoading: query.isPending };
 }
 
 export function useEstablishment(id: string) {

@@ -47,6 +47,8 @@ export type PermissionOutcome = 'granted' | 'denied';
 
 export interface LocationProviders {
   requestPermission: () => Promise<PermissionOutcome>;
+  /** Lê a permissão SEM perguntar — para as aberturas depois da primeira. */
+  checkPermission?: () => Promise<PermissionOutcome>;
   getCoords: () => Promise<Coords>;
   reverseGeocode: (coords: Coords) => Promise<ReverseGeocodeResult[]>;
 }
