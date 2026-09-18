@@ -47,6 +47,9 @@ export function atendimentoAtivo(historico: ClientAttendance[]): ClientAttendanc
  * `position` ficam de fora de proposito: o poll do `useQueueCountdown` busca o
  * tempo de espera real logo em seguida e reconcilia. Chutar um numero aqui
  * mostraria uma previsao inventada por alguns segundos — pior que nao mostrar.
+ *
+ * ⚠️ Ate 17/09 este "de fora" era `0`, e ZERO TAMBEM E UM CHUTE: na tela virava
+ * "Agora". Agora e `null`, que as telas mostram como "Calculando...".
  */
 export function filaDoAtendimento(
   a: ClientAttendance,
@@ -62,7 +65,7 @@ export function filaDoAtendimento(
     // ja sabe se virar sem ele.
     establishmentName: nomeDoEstabelecimento ?? '',
     enteredAt: Date.parse(a.scheduledTime) || Date.now(),
-    estimatedMinutes: 0,
+    estimatedMinutes: null,
     status: a.status as AttendanceStatus,
     ...(emAtendimento && a.startTime ? { startedAt: Date.parse(a.startTime) } : {}),
     ...(a.services?.length

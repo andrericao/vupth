@@ -229,7 +229,13 @@ export function Attendances() {
                       piscando sinalizaria movimento. */}
                   <LiveDot size={8} color="#163300" pulsing={!isPaused} />
                   <Text size="xs" fontWeight="$semibold" color="$forest">
-                    {isBeingAttended ? "Em atendimento" : isPaused ? "Pausado" : formatWaitTime(remaining)}
+                    {isBeingAttended
+                      ? "Em atendimento"
+                      : isPaused
+                        ? "Pausado"
+                        : remaining == null
+                          ? "Calculando..."
+                          : formatWaitTime(remaining)}
                   </Text>
                 </HStack>
               </VStack>

@@ -49,3 +49,28 @@ describe('avisoDeSaida', () => {
     expect(botoes.map((_, i) => pesoDoBotao(botoes, i))).toEqual(['solido', 'vazado', 'vazado-perigo']);
   });
 });
+
+// Entrar por aceite de pedido de corte (ou reconciliar a fila na abertura) deixa
+// o app sem previsão por alguns segundos — e com o profissional em ALMOÇO foi
+// assim que a tela disse "agora" (Andre, 17/09). Aqui o aviso não afirma o que
+// não sabe: nem cobra o que talvez não seja devido, nem promete grátis.
+describe('avisoDeSaida — sem previsão ainda', () => {
+  it('diz a CONDIÇÃO da multa, em vez de afirmar que há ou que não há', () => {
+    const a = avisoDeSaida({ multa: false, podeTrocar: true, semPrevisao: true });
+    expect(a.mensagem).toMatch(/Ainda estamos calculando/);
+    expect(a.mensagem).toMatch(/Se faltar menos de 1 hora.*multa de R\$ 3,00/);
+    expect(acoes(a)).toEqual(['ficar', 'trocar', 'sair']);
+  });
+
+  it('sem a troca disponível, não a oferece', () => {
+    const a = avisoDeSaida({ multa: false, podeTrocar: false, semPrevisao: true });
+    expect(acoes(a)).toEqual(['ficar', 'sair']);
+    expect(a.mensagem).not.toMatch(/Trocar de lugar/);
+  });
+
+  it('a hierarquia continua pondo o peso em FICAR', () => {
+    const a = avisoDeSaida({ multa: false, podeTrocar: true, semPrevisao: true });
+    const botoes = a.botoes.map((b) => ({ estilo: b.estilo }));
+    expect(botoes.map((_, i) => pesoDoBotao(botoes, i))).toEqual(['solido', 'vazado', 'vazado-perigo']);
+  });
+});

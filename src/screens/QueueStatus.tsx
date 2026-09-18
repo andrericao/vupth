@@ -81,7 +81,7 @@ export function QueueStatus() {
   const ratedIds = useRatedStore((s) => s.ids);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
-  const { remaining, elapsedSeconds, color, isInQueue, isBeingAttended, isPaused, isFinished, activeQueue, refresh } = useQueueCountdown();
+  const { remaining, semPrevisao, elapsedSeconds, color, isInQueue, isBeingAttended, isPaused, isFinished, activeQueue, refresh } = useQueueCountdown();
 
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
@@ -242,14 +242,19 @@ export function QueueStatus() {
       ? "Pausado"
       : isBeingAttended
         ? formatElapsed(elapsedSeconds)
-        : remaining <= 0 && isInQueue
-          ? "Aguardando"
-          : formatWaitTime(remaining).replace('~', '');
+        : semPrevisao
+          // Entrou por aceite de corte (ou a fila foi reconciliada) e o servidor
+          // ainda nao respondeu: "ainda nao sei" NAO e "agora".
+          ? "Calculando..."
+          : remaining! <= 0 && isInQueue
+            ? "Aguardando"
+            : formatWaitTime(remaining!).replace('~', '');
   // Previsão fixa = entrada na fila + estimativa (atualiza quando o poll re-sincroniza).
   // Evita Date.now() no render (react-hooks/purity).
-  const startTimeLabel = activeQueue
-    ? estimatedStartTime(activeQueue.enteredAt, activeQueue.estimatedMinutes)
-    : "";
+  const startTimeLabel =
+    activeQueue && activeQueue.estimatedMinutes != null
+      ? estimatedStartTime(activeQueue.enteredAt, activeQueue.estimatedMinutes)
+      : "";
   // Término estimado do atendimento em curso = início + duração estimada.
   const endTimeLabel =
     isBeingAttended && activeQueue?.startedAt && activeQueue?.serviceMinutes != null
@@ -259,12 +264,14 @@ export function QueueStatus() {
   // Multa é pelo TEMPO estimado (não pelo status): vagar um lugar com < 1h para
   // ser atendido prejudica quem se segue. Vale para sair, reagendar e ir pro fim.
   // A TROCA por consentimento mútuo (#42) é que nunca terá multa.
-  const penalty = incursLatePenalty(remaining);
+  // Sem previsao nao da para AFIRMAR que falta menos de 1h — nem o contrario.
+  // O aviso de saida diz isso com todas as letras (ver `avisoDeSaida`).
+  const penalty = remaining != null && incursLatePenalty(remaining);
 
   function handleCancel() {
     // D10 (17/09): com multa, o aviso explica o impacto no próximo cliente e
     // oferece a troca de lugar — sem multa — antes de "sair mesmo assim".
-    const aviso = avisoDeSaida({ multa: penalty, podeTrocar: canReshuffle });
+    const aviso = avisoDeSaida({ multa: penalty, podeTrocar: canReshuffle, semPrevisao });
     const sair = async () => {
       // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
       // de 2026-09-07 ("sai da fila e o app fecha sozinho").
@@ -714,7 +721,11 @@ export function QueueStatus() {
               subiu — 0x99 dava 3,40:1 sobre o verde e reprovava no AA; 0xBF da
               4,99:1 e continua mais leve que o forest chapado do numero. */}
           <Text fontFamily="$body" fontSize={15} color="#163300BF" mt="$1">
-            {remaining <= 0 ? "a qualquer momento" : `~${formatWaitTime(remaining)} de espera`}
+            {semPrevisao
+              ? "calculando a espera"
+              : remaining! <= 0
+                ? "a qualquer momento"
+                : `~${formatWaitTime(remaining!)} de espera`}
           </Text>
 
           {/* Progresso: pontos cheios pelo que ja andou, apagados pelo que
@@ -893,7 +904,7 @@ export function QueueStatus() {
             <HStack w="$full" justifyContent="space-between" mb="$3">
               <Text size="sm" color="$brandTextSecondary">Previsão de início</Text>
               <Text size="sm" fontFamily="$heading">
-                {remaining <= 0 ? "A qualquer momento" : startTimeLabel}
+                {semPrevisao ? "Calculando..." : remaining! <= 0 ? "A qualquer momento" : startTimeLabel}
               </Text>
             </HStack>
           )}

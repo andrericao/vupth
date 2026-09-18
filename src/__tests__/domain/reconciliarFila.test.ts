@@ -77,10 +77,11 @@ describe('o estado montado a partir do servidor', () => {
 
   it('NÃO inventa estimativa nem posição — o poll busca as reais', () => {
     const fila = filaDoAtendimento(att());
-    expect(fila.estimatedMinutes).toBe(0);
+    // ZERO também é um chute: na tela vira "Agora", e com o profissional em
+    // almoço foi exatamente o que o cliente leu (Andre, 17/09). Sem previsão é
+    // `null`, e a tela diz "Calculando...".
+    expect(fila.estimatedMinutes).toBeNull();
     expect(fila.position).toBeUndefined();
-    // Chutar um numero mostraria uma previsao inventada por alguns segundos,
-    // que e pior do que nao mostrar.
     expect(fila.initialPosition).toBeUndefined();
   });
 

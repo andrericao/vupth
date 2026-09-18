@@ -367,7 +367,7 @@ export function Home() {
                 professionalName: activeQueue.professionalName,
                 establishmentId: activeQueue.establishmentId,
                 establishmentName: activeQueue.establishmentName,
-                estimatedWaitMinutes: activeQueue.estimatedMinutes,
+                estimatedWaitMinutes: activeQueue.estimatedMinutes ?? undefined,
                 serviceItemIds: [],
               })
             }
@@ -413,10 +413,13 @@ export function Home() {
                       ? activeQueue.position <= 1
                         ? "É a sua vez"
                         : `Faltam ${activeQueue.position - 1}`
-                      : formatWaitTime(remaining)}
+                      : remaining == null
+                        ? "Calculando..."
+                        : formatWaitTime(remaining)}
                   </Text>
                   <Text fontFamily="$body" fontSize={14} color="$forest">
-                    ~{formatWaitTime(remaining)} · {activeQueue.establishmentName}
+                    {remaining == null ? "" : `~${formatWaitTime(remaining)} · `}
+                    {activeQueue.establishmentName}
                   </Text>
                 </VStack>
                 <ChevronRight size={24} color="#163300" />

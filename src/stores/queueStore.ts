@@ -9,7 +9,16 @@ export interface ActiveQueue {
   establishmentId: string;
   establishmentName: string;
   enteredAt: number;
-  estimatedMinutes: number;
+  /**
+   * Minutos estimados ate a vez. `null` = AINDA NAO SABEMOS — quem entra na
+   * fila por aceite de pedido de corte, ou quem tem a fila reconciliada na
+   * abertura, fica assim ate o primeiro `wait-time` responder.
+   *
+   * Era `0` nesses casos, e zero na tela vira "Agora" — a informacao mais
+   * perigosa que existe aqui, porque faz o cliente sair de casa. Com o
+   * profissional em ALMOCO, foi exatamente o que aconteceu (Andre, 17/09).
+   */
+  estimatedMinutes: number | null;
   status: AttendanceStatus;
   // Preenchidos quando o atendimento inicia (IN_PROGRESS): início real (ms) e
   // duração estimada do serviço (min) — para tempo decorrido + término estimado.
