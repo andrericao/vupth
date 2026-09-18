@@ -64,31 +64,34 @@ export function Sistema() {
         <ScreenHeader title="Sistema" subtitle="Versão do app e atualizações." />
 
         <VStack pt={24} gap="$3" alignItems="center">
-          {/* No navegador o OTA nao existe: o botao so levaria a um erro. O que
-              atualiza ali e recarregar sem cache — mesmo texto do partner. */}
-          {ehNavegador() ? (
+          <TouchableOpacity onPress={handleCheckUpdate} testID="check-update">
+            <HStack
+              bg="$brandSurface"
+              borderRadius="$full"
+              px={16}
+              py={12}
+              gap="$2"
+              alignItems="center"
+            >
+              <RefreshCw size={15} color="#163300" />
+              <Text fontFamily="$heading" fontSize={13} color="$forest">
+                {isChecking ? "Verificando..." : "Verificar atualização"}
+              </Text>
+            </HStack>
+          </TouchableOpacity>
+
+          {/* No navegador o OTA nao existe, mas o aviso e um bloco A MAIS — nao
+              substitui a tela. Trocar um pelo outro deixava o navegador com uma
+              tela que so tinha a mensagem, e foi o que o Andre viu em 18/09. O
+              partner ja fazia assim (sistema.tsx deles); os dois apps agora
+              mostram a mesma coisa. */}
+          {ehNavegador() && (
             <Box bg="$brandSurface" borderRadius="$card" p="$4" testID="web-update-hint">
               <Text size="sm" color="$brandTextSecondary">
                 No navegador não existe atualização por dentro do app. Para ver a
                 versão mais nova, recarregue a página segurando Ctrl+Shift+R.
               </Text>
             </Box>
-          ) : (
-            <TouchableOpacity onPress={handleCheckUpdate} testID="check-update">
-              <HStack
-                bg="$brandSurface"
-                borderRadius="$full"
-                px={16}
-                py={12}
-                gap="$2"
-                alignItems="center"
-              >
-                <RefreshCw size={15} color="#163300" />
-                <Text fontFamily="$heading" fontSize={13} color="$forest">
-                  {isChecking ? "Verificando..." : "Verificar atualização"}
-                </Text>
-              </HStack>
-            </TouchableOpacity>
           )}
 
           {/* Versao em DM Mono: e numero de build, nao prosa. */}

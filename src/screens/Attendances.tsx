@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Alert, TouchableOpacity, RefreshControl } from "react-native";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, useScrollToTop } from "@react-navigation/native";
 import {
   VStack,
   Text,
@@ -55,6 +55,12 @@ function formatDateTime(iso: string): string {
 
 export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  // Tocar na aba JA ATIVA volta ao topo da lista (Andre, 18/09): e o gesto que
+  // todo app de lista tem, e o caminho natural de quem desceu demais. O
+  // `useScrollToTop` do React Navigation ja faz o combinado com o partner —
+  // sobe com animacao e, se ja estiver no topo, nao faz nada.
+  const rolagemRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  useScrollToTop(rolagemRef as never);
   const { activeQueue, remaining, isInQueue, isBeingAttended, isPaused } = useQueueCountdown();
   // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
   const emAtendimento = isBeingAttended || isPaused;
@@ -175,6 +181,7 @@ export function Attendances() {
       </Box>
 
       <ScrollView
+        ref={rolagemRef}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#163300" colors={["#163300"]} />
