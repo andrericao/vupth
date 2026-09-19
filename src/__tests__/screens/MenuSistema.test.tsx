@@ -89,14 +89,15 @@ describe('Sistema — versão, atualização e diagnósticos', () => {
     expect(getByText(/1\.0\.0 · staging/)).toBeTruthy();
   });
 
-  it('no navegador o aviso do Ctrl+Shift+R é um bloco A MAIS, não a tela inteira', () => {
-    // Andre, 18/09: no navegador a tela ficou SÓ com a mensagem. O aviso soma,
-    // não substitui — é como o partner já fazia.
+  it('no navegador mostra SÓ a versão — sem botão e sem texto de como atualizar', () => {
+    // Decisão do Andre em 18/09, igual no partner: ali não existe OTA, então o
+    // botão não teria o que fazer e a instrução de recarregar é do navegador.
     mockNoNavegador = true;
-    const { getByTestId } = renderWithProviders(<Sistema />);
-    expect(getByTestId('web-update-hint')).toBeTruthy();
-    expect(getByTestId('check-update')).toBeTruthy();
+    const { getByTestId, queryByTestId, queryByText } = renderWithProviders(<Sistema />);
     expect(getByTestId('version-line')).toBeTruthy();
+    expect(queryByTestId('check-update')).toBeNull();
+    expect(queryByTestId('web-update-hint')).toBeNull();
+    expect(queryByText(/Ctrl\+Shift\+R/)).toBeNull();
   });
 
   it('os painéis técnicos só abrem com 7 toques na versão', () => {
