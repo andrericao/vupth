@@ -16,6 +16,8 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { avisoDeSaida } from "@domain/queue/avisoDeSaida";
+import { recusaAoEntrar, atendimentoNaFilaDoProfissional } from "@domain/queue/entrarNaFila";
+import { filaDoAtendimento } from "@domain/queue/reconciliar";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
 import { ehNavegador } from "@utils/ehNavegador";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
@@ -197,12 +199,56 @@ export function QueueStatus() {
         if (mountedRef.current) {
           const status = error.response?.status;
           const code = error.response?.data?.code;
+          const recusa = recusaAoEntrar(error);
+
           // Loja fechada p/ novos (gate C1): oferece "solicitar corte" (BUG5 C2).
-          if (status === 409 && code === "ESTABLISHMENT_NOT_OPEN") {
+          // Este fica em TELA: tem uma ação propria para oferecer.
+          if (recusa.tipo === "loja-fechada") {
             setCanRequestCut(true);
-            setCreateError(
-              "A loja não está aberta agora, então não dá para entrar na fila direto. Você pode pedir um corte — o profissional tem 5 minutos para aceitar.",
-            );
+            setCreateError(recusa.mensagem);
+            return;
+          }
+
+          // Ja esta na fila daquele profissional (409 CLIENT_ALREADY_IN_QUEUE):
+          // o Andre viu isso como tela cheia com a mensagem crua do servidor
+          // (18/09). E um AVISO sobre o toque que ele acabou de dar, entao e
+          // dialogo — e ele sai dele para a fila que ja tem.
+          //
+          // O 409 nao traz o id do atendimento existente (decisao do backend:
+          // "a mensagem ao usuario nao carrega id"), entao o achamos pelo
+          // profissional no historico.
+          if (recusa.tipo === "ja-na-fila") {
+            Alert.alert("Você já está na fila", recusa.mensagem, [
+              { text: "Voltar", style: "cancel", onPress: () => navigation.goBack() },
+              {
+                text: "Ver minha fila",
+                onPress: async () => {
+                  try {
+                    const { data } = await attendanceService.listClientHistory(accessToken!);
+                    const existente = atendimentoNaFilaDoProfissional(data ?? [], professionalId);
+                    if (existente) {
+                      await useQueueStore
+                        .getState()
+                        .joinQueue(filaDoAtendimento(existente, paramEstName));
+                      if (mountedRef.current) setCreateError(null);
+                      return;
+                    }
+                  } catch {
+                    // Sem rede: melhor voltar do que ficar numa tela morta.
+                  }
+                  navigation.goBack();
+                },
+              },
+            ]);
+            return;
+          }
+
+          // Profissional sem aceitar novos: aviso, e o caminho continua sendo o
+          // pedido de corte, na tela anterior.
+          if (recusa.tipo === "nao-aceita") {
+            Alert.alert("Fila fechada", recusa.mensagem, [
+              { text: "Entendi", onPress: () => navigation.goBack() },
+            ]);
             return;
           }
           // Agendamento (#40): 422 alvo inviável / 400 passado -> mensagem amigável
@@ -218,7 +264,7 @@ export function QueueStatus() {
     }
 
     createAttendance();
-  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime]);
+  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, navigation, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";
