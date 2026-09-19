@@ -6,29 +6,39 @@
 // sobe ate um Alert.alert, que tambem e no-op no React Native Web, deixando a
 // tela parada sem dizer nada.
 //
-// sessionStorage NAO e armazenamento seguro. Mas a web deixou de ser so um
-// atalho de desenvolvimento: https://vupth.pages.dev e um deploy publicado, e o
-// que este arquivo decide vale para quem abrir o app por link.
+// Armazenamento de navegador NAO e cofre. Mas a web deixou de ser so um atalho
+// de desenvolvimento: https://vupth.pages.dev e um deploy publicado, e o que
+// este arquivo decide vale para quem abrir o app por link.
 //
-// 🔒 sessionStorage, NAO localStorage (mitigacao 1 do D8, decidida em
-// 2026-08-12; o C26 do partner exige que os dois shims nao divirjam): o token
-// morre QUANDO A ABA FECHA, em vez de ficar guardado no navegador. Isso apaga
-// o cenario do computador compartilhado — o proximo que sentar nao herda a
-// sessao. O preco e logar de novo a cada visita. A outra metade da mitigacao
-// e o CSP em `public/_headers`, que ataca o XSS — o vetor real, ja que aqui o
-// token e legivel por qualquer JS da mesma origem.
+// 🔓 localStorage desde 2026-09-19, por decisao do Andre: "mantenha o cache,
+// nao deslogue a cada fechamento da web". A SESSAO SOBREVIVE ao fechar a aba,
+// como em qualquer site que o usuario conhece.
+//
+// O que isso reverte, para quem vier depois nao achar que foi descuido: ate
+// aqui era `sessionStorage` (mitigacao 1 do D8, 2026-08-12), e o token morria
+// com a aba — o proximo que sentasse num computador compartilhado nao herdava
+// a sessao. O preco era logar a cada visita, e foi esse preco que o Andre
+// recusou. O RISCO que fica e o mesmo de qualquer site: quem usa computador
+// compartilhado precisa SAIR pelo app.
+//
+// ⚠️ A outra metade da mitigacao CONTINUA valendo, e agora carrega sozinha o
+// lado da seguranca: o CSP em `public/_headers` ataca o XSS, que e o vetor
+// real — aqui o token e legivel por qualquer JS da mesma origem.
+//
+// ⚠️ O C26 do partner pede que os dois shims nao divirjam: o partner precisa
+// da mesma troca, senao o cliente segue logado e o profissional nao.
 
 function store() {
   try {
-    return typeof sessionStorage !== 'undefined' ? sessionStorage : null;
+    return typeof localStorage !== 'undefined' ? localStorage : null;
   } catch {
     return null;
   }
 }
 
-// Navegador com storage bloqueado (modo privativo, cookies desligados): mantem
-// a sessao viva enquanto a aba estiver aberta — mesmo comportamento do
-// sessionStorage, entao o fallback nao afrouxa a regra.
+// Navegador com storage bloqueado (modo privativo, cookies desligados): a
+// sessao vive enquanto a aba estiver aberta. E menos do que o localStorage
+// entrega, mas e o maximo possivel sem storage — e melhor que nao logar.
 const fallback = new Map();
 
 export async function getItemAsync(key) {

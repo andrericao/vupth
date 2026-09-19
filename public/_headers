@@ -5,10 +5,14 @@
 # copia o conteudo de `public/` para a saida do `expo export --platform web`.
 #
 # Por que isto importa AQUI: na web o token nao mora em cofre do sistema, e sim
-# no `sessionStorage` (ver web-shims/expo-secure-store.js) — legivel por
-# qualquer JavaScript da mesma origem. O vetor real e XSS, e o CSP e a defesa
-# mais eficaz contra ele. As duas coisas andam juntas: sessionStorage encurta a
-# janela, o CSP evita que o script injetado exista.
+# no `localStorage` (ver web-shims/expo-secure-store.js) — legivel por qualquer
+# JavaScript da mesma origem. O vetor real e XSS, e o CSP e a defesa mais
+# eficaz contra ele.
+#
+# ⚠️ Desde 2026-09-19 o CSP carrega SOZINHO o lado da seguranca: a outra metade
+# da dupla era o `sessionStorage`, que encurtava a janela morrendo com a aba, e
+# o Andre trocou por `localStorage` para a sessao sobreviver ao fechamento.
+# Mexer neste arquivo ficou mais caro do que era.
 
 /*
   # Sem CSP, um <script> injetado le o token e o manda p/ fora. Com ele, o

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Alert, TouchableOpacity, RefreshControl } from "react-native";
 import { useNavigation, useFocusEffect, useScrollToTop } from "@react-navigation/native";
 import {
@@ -29,6 +29,8 @@ import { ClientAttendance } from "@services/attendanceService";
 import { intentionsService } from "@services/intentionsService";
 import { swapOfferService } from "@services/swapOfferService";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
+import { useQueueStore } from "@stores/queueStore";
+import { atendimentoAtivo, filaDoAtendimento } from "@domain/queue/reconciliar";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
@@ -75,6 +77,21 @@ export function Attendances() {
   // aceite (poll) e este card deixa acompanhar/cancelar enquanto está aberto.
   const { pending: pendingSwaps, refetchMyOffers } = useOutOfQueueSwap();
   const removePendingSwap = usePendingSwapStore((s) => s.removePending);
+
+  // REDE DE SEGURANCA: o servidor sabe da fila e o aparelho pode nao saber.
+  // Aconteceu com o Andre em 18/09 — ele mudou a vez, saiu, entrou de novo e o
+  // atendimento nao aparecia. O `useReconciliarFila` roda UMA vez por sessao
+  // autenticada; se falhar (rede ruim naquele instante) ninguem tenta de novo.
+  //
+  // Aqui o historico ja chega a cada 30s para montar a lista — entao custa zero
+  // usa-lo: estado local vazio + atendimento ativo no servidor = reconstroi. O
+  // servidor manda, e nunca o contrario: com fila local, nao se toca (ela
+  // carrega coisas que o historico nao tem, como a ancora do progresso).
+  useEffect(() => {
+    if (activeQueue || history.length === 0) return;
+    const ativo = atendimentoAtivo(history);
+    if (ativo) useQueueStore.getState().joinQueue(filaDoAtendimento(ativo));
+  }, [activeQueue, history]);
   const [cancellingSwapId, setCancellingSwapId] = useState<string | null>(null);
 
   const intentionGroups = groupIntentionsByDay(agenda?.intentions ?? []);
@@ -406,7 +423,10 @@ export function Attendances() {
                             </BadgeText>
                           </Badge>
                           <Text size="xs" color="$brandTextSecondary">
-                            R$ {a.totalValue.toFixed(2)}
+                            {/* Sem valor a tela nao quebra: `toFixed` em
+                                 undefined derruba a lista inteira, e um card
+                                 sem preco e melhor que uma tela branca. */}
+                            {a.totalValue != null ? `R$ ${a.totalValue.toFixed(2)}` : "—"}
                           </Text>
                         </VStack>
                       </HStack>
