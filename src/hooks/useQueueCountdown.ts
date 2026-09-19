@@ -12,7 +12,9 @@ export const URGENCY_COLORS = {
   urgent: '#EF4444',
 } as const;
 
-function getRemainingMinutes(queue: ActiveQueue): number {
+/** `null` enquanto o servidor nao disse a previsao — nao e "agora". */
+function getRemainingMinutes(queue: ActiveQueue): number | null {
+  if (queue.estimatedMinutes == null) return null;
   const elapsed = (Date.now() - queue.enteredAt) / 60000;
   return Math.max(0, Math.round(queue.estimatedMinutes - elapsed));
 }
@@ -23,7 +25,9 @@ function getUrgency(remaining: number, status: string): UrgencyLevel {
   return 'normal';
 }
 
-function getPollingInterval(remaining: number): number {
+function getPollingInterval(remaining: number | null): number {
+  // Sem previsao, o poll e o que TRAZ a previsao: vai no ritmo mais curto.
+  if (remaining == null) return 30000;
   // Teto de 2min: sem WebSocket, é o poll que detecta remoção pelo profissional
   // (CANCELLED) e mudanças de status — não pode demorar muito.
   if (remaining > 10) return 120000;
@@ -37,7 +41,7 @@ export function useQueueCountdown() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const user = useAuthStore((s) => s.user);
 
-  const [remaining, setRemaining] = useState(0);
+  const [remaining, setRemaining] = useState<number | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [urgency, setUrgency] = useState<UrgencyLevel>('normal');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -49,7 +53,8 @@ export function useQueueCountdown() {
     const tick = () => {
       const r = getRemainingMinutes(activeQueue);
       setRemaining(r);
-      setUrgency(getUrgency(r, activeQueue.status));
+      // Sem previsao nao ha urgencia a declarar.
+      setUrgency(r == null ? 'normal' : getUrgency(r, activeQueue.status));
     };
 
     const timer = setInterval(tick, 30000);
@@ -90,11 +95,16 @@ export function useQueueCountdown() {
       //    IN_PROGRESS) — isolado para NÃO impedir a checagem de status abaixo.
       try {
         const { data } = await queueService.getWaitTime(q.attendanceId, user.id, accessToken);
-        const reconciled = reconcileQueueEstimate(
-          { enteredAt: q.enteredAt, estimatedMinutes: q.estimatedMinutes },
-          data.estimatedWaitingTime,
-          Date.now(),
-        );
+        // Sem previsao ainda, a do servidor entra inteira — nao ha o que
+        // reconciliar contra um numero que nunca existiu.
+        const reconciled =
+          q.estimatedMinutes == null
+            ? { enteredAt: Date.now(), estimatedMinutes: data.estimatedWaitingTime }
+            : reconcileQueueEstimate(
+                { enteredAt: q.enteredAt, estimatedMinutes: q.estimatedMinutes },
+                data.estimatedWaitingTime,
+                Date.now(),
+              );
         const patch: Partial<ActiveQueue> = { ...(reconciled ?? {}) };
         if (data.position !== q.position) patch.position = data.position;
         // Ancora do progresso: grava a posição só na PRIMEIRA leitura. Se
@@ -147,7 +157,10 @@ export function useQueueCountdown() {
   const color = activeQueue ? URGENCY_COLORS[urgency] : URGENCY_COLORS.normal;
 
   return {
+    /** Minutos ate a vez; `null` = o servidor ainda nao disse. */
     remaining,
+    /** Atalho para as telas: nao ha previsao para mostrar (nao e "agora"). */
+    semPrevisao: remaining == null,
     elapsedSeconds,
     urgency,
     color,

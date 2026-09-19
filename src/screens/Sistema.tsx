@@ -64,16 +64,14 @@ export function Sistema() {
         <ScreenHeader title="Sistema" subtitle="Versão do app e atualizações." />
 
         <VStack pt={24} gap="$3" alignItems="center">
-          {/* No navegador o OTA nao existe: o botao so levaria a um erro. O que
-              atualiza ali e recarregar sem cache — mesmo texto do partner. */}
-          {ehNavegador() ? (
-            <Box bg="$brandSurface" borderRadius="$card" p="$4" testID="web-update-hint">
-              <Text size="sm" color="$brandTextSecondary">
-                No navegador não existe atualização por dentro do app. Para ver a
-                versão mais nova, recarregue a página segurando Ctrl+Shift+R.
-              </Text>
-            </Box>
-          ) : (
+          {/* NO NAVEGADOR a tela mostra so a identificacao da versao — sem o
+              botao e sem texto explicando como atualizar (Andre, 18/09; o
+              partner fez igual). O caminho foi este: primeiro o aviso do
+              Ctrl+Shift+R SUBSTITUIA o botao, e a tela ficava com uma frase e
+              mais nada; depois ele virou um bloco a mais; e a decisao final
+              tirou os dois. Ali nao existe OTA: o botao nao teria o que fazer,
+              e a instrucao de recarregar e do navegador, nao do app. */}
+          {!ehNavegador() && (
             <TouchableOpacity onPress={handleCheckUpdate} testID="check-update">
               <HStack
                 bg="$brandSurface"

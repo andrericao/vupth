@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, useScrollToTop, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import { Search, SlidersHorizontal, ChevronRight } from "lucide-react-native";
 
@@ -178,6 +178,12 @@ export function Home() {
   const [showFilter, setShowFilter] = useState(false);
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  // Tocar na aba JA ATIVA volta ao topo da lista (Andre, 18/09): e o gesto que
+  // todo app de lista tem, e o caminho natural de quem desceu demais. O
+  // `useScrollToTop` do React Navigation ja faz o combinado com o partner —
+  // sobe com animacao e, se ja estiver no topo, nao faz nada.
+  const listaRef = useRef<FlatList<Establishment>>(null);
+  useScrollToTop(listaRef as never);
   const route = useRoute<RouteProp<AppRoutes, "home">>();
   const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -257,6 +263,7 @@ export function Home() {
           página presa com uma janelinha rolando dentro. Agora tudo é
           `ListHeaderComponent`: um scroll só, do topo ao fim. */}
       <FlatList
+        ref={listaRef}
         data={isLoading || isError ? [] : filteredEstablishments}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
@@ -367,7 +374,7 @@ export function Home() {
                 professionalName: activeQueue.professionalName,
                 establishmentId: activeQueue.establishmentId,
                 establishmentName: activeQueue.establishmentName,
-                estimatedWaitMinutes: activeQueue.estimatedMinutes,
+                estimatedWaitMinutes: activeQueue.estimatedMinutes ?? undefined,
                 serviceItemIds: [],
               })
             }
@@ -413,10 +420,13 @@ export function Home() {
                       ? activeQueue.position <= 1
                         ? "É a sua vez"
                         : `Faltam ${activeQueue.position - 1}`
-                      : formatWaitTime(remaining)}
+                      : remaining == null
+                        ? "Calculando..."
+                        : formatWaitTime(remaining)}
                   </Text>
                   <Text fontFamily="$body" fontSize={14} color="$forest">
-                    ~{formatWaitTime(remaining)} · {activeQueue.establishmentName}
+                    {remaining == null ? "" : `~${formatWaitTime(remaining)} · `}
+                    {activeQueue.establishmentName}
                   </Text>
                 </VStack>
                 <ChevronRight size={24} color="#163300" />

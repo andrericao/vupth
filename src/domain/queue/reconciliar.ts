@@ -47,6 +47,9 @@ export function atendimentoAtivo(historico: ClientAttendance[]): ClientAttendanc
  * `position` ficam de fora de proposito: o poll do `useQueueCountdown` busca o
  * tempo de espera real logo em seguida e reconcilia. Chutar um numero aqui
  * mostraria uma previsao inventada por alguns segundos — pior que nao mostrar.
+ *
+ * ⚠️ Ate 17/09 este "de fora" era `0`, e ZERO TAMBEM E UM CHUTE: na tela virava
+ * "Agora". Agora e `null`, que as telas mostram como "Calculando...".
  */
 export function filaDoAtendimento(
   a: ClientAttendance,
@@ -62,11 +65,31 @@ export function filaDoAtendimento(
     // ja sabe se virar sem ele.
     establishmentName: nomeDoEstabelecimento ?? '',
     enteredAt: Date.parse(a.scheduledTime) || Date.now(),
-    estimatedMinutes: 0,
+    estimatedMinutes: null,
     status: a.status as AttendanceStatus,
     ...(emAtendimento && a.startTime ? { startedAt: Date.parse(a.startTime) } : {}),
     ...(a.services?.length
       ? { serviceMinutes: a.services.reduce((s, x) => s + (x.estimatedMinutes ?? 0), 0) }
       : {}),
   };
+}
+
+/**
+ * O atendimento mais recente que TERMINOU e ainda não foi avaliado.
+ *
+ * Existe porque a avaliação deixou de ser um pedágio: quem fugiu do popup uma
+ * vez não pode ser jogado nele de novo (Andre, 19/09). O convite fica na aba
+ * Atendimentos, onde ele não atrapalha — e leva ao atendimento que aconteceu.
+ */
+export function atendimentoSemAvaliar(
+  historico: ClientAttendance[],
+  jaAvaliados: string[],
+): ClientAttendance | null {
+  const candidatos = historico.filter(
+    (a) => a.status === 'FINISHED' && !jaAvaliados.includes(a.id),
+  );
+  if (candidatos.length === 0) return null;
+  return candidatos.reduce((maisRecente, a) =>
+    Date.parse(a.scheduledTime) > Date.parse(maisRecente.scheduledTime) ? a : maisRecente,
+  );
 }

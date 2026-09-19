@@ -60,14 +60,33 @@ export function canCancelAttendance(status: AttendanceStatus): boolean {
  * Re-entrar na tela (banner da Home/Atendimentos, sem serviços) nunca cria —
  * evita o erro "no service found" e filas-fantasma sem attendanceId.
  */
+/**
+ * A fila guardada no aparelho já ACABOU? Então ela não representa mais nada —
+ * é histórico, e histórico não bloqueia atendimento novo.
+ */
+export function filaEncerrada(status?: string | null): boolean {
+  return status === 'FINISHED' || status === 'CANCELLED';
+}
+
 export function shouldCreateAttendance(params: {
   alreadyCreated: boolean;
   hasAttendanceId: boolean;
   hasToken: boolean;
   serviceItemIds?: string[];
+  /** Status da fila que o aparelho tem guardada, se houver. */
+  localStatus?: string | null;
 }): boolean {
-  const { alreadyCreated, hasAttendanceId, hasToken, serviceItemIds } = params;
-  if (alreadyCreated || hasAttendanceId || !hasToken) return false;
+  const { alreadyCreated, hasAttendanceId, hasToken, serviceItemIds, localStatus } = params;
+  if (alreadyCreated || !hasToken) return false;
+  // 🔴 Andre, 19/09: "não consigo marcar o corte... se ele fugiu do popup de
+  // avaliar e marcar de novo com o mesmo profissional, é encaminhado à tela de
+  // avaliação". A fila local ficava com o atendimento TERMINADO até alguém
+  // tocar em "Concluir" — e quem fecha o app na tela da avaliação nunca toca.
+  // Daí em diante toda tentativa caía naquela tela, porque havia `attendanceId`.
+  //
+  // Atendimento encerrado NÃO é fila: pode marcar de novo. A avaliação continua
+  // disponível na aba Atendimentos, que é onde ela não atrapalha.
+  if (hasAttendanceId && !filaEncerrada(localStatus)) return false;
   return (serviceItemIds?.length ?? 0) > 0;
 }
 

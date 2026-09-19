@@ -32,7 +32,34 @@ export function avisoDeSaida(s: {
   podeTrocar: boolean;
   /** Valor que a saída custaria — enquanto o backend não informa, o fixo de hoje. */
   valor?: number;
+  /**
+   * O app ainda não sabe quanto falta para a vez (entrou por aceite de corte, ou
+   * a fila foi reconciliada e o servidor não respondeu). Sem isso não dá para
+   * AFIRMAR nem que há multa nem que não há — e as duas mentiras custam caro:
+   * uma cobra o que não deve, a outra promete grátis o que vai ser cobrado.
+   */
+  semPrevisao?: boolean;
 }): AvisoDeSaida {
+  if (s.semPrevisao) {
+    const valorIncerto = `R$ ${(s.valor ?? CANCELLATION_PENALTY_VALUE).toFixed(2).replace(".", ",")}`;
+    const base =
+      "Ainda estamos calculando quanto falta para a sua vez. Se faltar menos de 1 hora, " +
+      `sair agora gera multa de ${valorIncerto} no seu próximo atendimento.`;
+    return {
+      titulo: "Sair da fila",
+      mensagem: s.podeTrocar
+        ? `${base}\n\nTrocar de lugar com outro cliente nunca tem multa.`
+        : base,
+      botoes: [
+        { texto: "Ficar na fila", acao: "ficar", estilo: "cancel" },
+        ...(s.podeTrocar
+          ? [{ texto: "Trocar de lugar", acao: "trocar" as const, estilo: "default" as const }]
+          : []),
+        { texto: "Sair mesmo assim", acao: "sair", estilo: "destructive" },
+      ],
+    };
+  }
+
   if (!s.multa) {
     return {
       titulo: 'Sair da fila',

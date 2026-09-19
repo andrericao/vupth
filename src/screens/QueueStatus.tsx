@@ -16,6 +16,8 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { avisoDeSaida } from "@domain/queue/avisoDeSaida";
+import { recusaAoEntrar, atendimentoNaFilaDoProfissional } from "@domain/queue/entrarNaFila";
+import { filaDoAtendimento } from "@domain/queue/reconciliar";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
 import { ehNavegador } from "@utils/ehNavegador";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
@@ -81,7 +83,7 @@ export function QueueStatus() {
   const ratedIds = useRatedStore((s) => s.ids);
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
-  const { remaining, elapsedSeconds, color, isInQueue, isBeingAttended, isPaused, isFinished, activeQueue, refresh } = useQueueCountdown();
+  const { remaining, semPrevisao, elapsedSeconds, color, isInQueue, isBeingAttended, isPaused, isFinished, activeQueue, refresh } = useQueueCountdown();
 
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
@@ -149,6 +151,7 @@ export function QueueStatus() {
         hasAttendanceId: !!activeQueue?.attendanceId,
         hasToken: !!accessToken,
         serviceItemIds,
+        localStatus: activeQueue?.status,
       })
     ) {
       return;
@@ -197,12 +200,56 @@ export function QueueStatus() {
         if (mountedRef.current) {
           const status = error.response?.status;
           const code = error.response?.data?.code;
+          const recusa = recusaAoEntrar(error);
+
           // Loja fechada p/ novos (gate C1): oferece "solicitar corte" (BUG5 C2).
-          if (status === 409 && code === "ESTABLISHMENT_NOT_OPEN") {
+          // Este fica em TELA: tem uma ação propria para oferecer.
+          if (recusa.tipo === "loja-fechada") {
             setCanRequestCut(true);
-            setCreateError(
-              "A loja não está aberta agora, então não dá para entrar na fila direto. Você pode pedir um corte — o profissional tem 5 minutos para aceitar.",
-            );
+            setCreateError(recusa.mensagem);
+            return;
+          }
+
+          // Ja esta na fila daquele profissional (409 CLIENT_ALREADY_IN_QUEUE):
+          // o Andre viu isso como tela cheia com a mensagem crua do servidor
+          // (18/09). E um AVISO sobre o toque que ele acabou de dar, entao e
+          // dialogo — e ele sai dele para a fila que ja tem.
+          //
+          // O 409 nao traz o id do atendimento existente (decisao do backend:
+          // "a mensagem ao usuario nao carrega id"), entao o achamos pelo
+          // profissional no historico.
+          if (recusa.tipo === "ja-na-fila") {
+            Alert.alert("Você já está na fila", recusa.mensagem, [
+              { text: "Voltar", style: "cancel", onPress: () => navigation.goBack() },
+              {
+                text: "Ver minha fila",
+                onPress: async () => {
+                  try {
+                    const { data } = await attendanceService.listClientHistory(accessToken!);
+                    const existente = atendimentoNaFilaDoProfissional(data ?? [], professionalId);
+                    if (existente) {
+                      await useQueueStore
+                        .getState()
+                        .joinQueue(filaDoAtendimento(existente, paramEstName));
+                      if (mountedRef.current) setCreateError(null);
+                      return;
+                    }
+                  } catch {
+                    // Sem rede: melhor voltar do que ficar numa tela morta.
+                  }
+                  navigation.goBack();
+                },
+              },
+            ]);
+            return;
+          }
+
+          // Profissional sem aceitar novos: aviso, e o caminho continua sendo o
+          // pedido de corte, na tela anterior.
+          if (recusa.tipo === "nao-aceita") {
+            Alert.alert("Fila fechada", recusa.mensagem, [
+              { text: "Entendi", onPress: () => navigation.goBack() },
+            ]);
             return;
           }
           // Agendamento (#40): 422 alvo inviável / 400 passado -> mensagem amigável
@@ -218,7 +265,7 @@ export function QueueStatus() {
     }
 
     createAttendance();
-  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime]);
+  }, [activeQueue?.attendanceId, activeQueue?.status, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, navigation, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";
@@ -242,14 +289,19 @@ export function QueueStatus() {
       ? "Pausado"
       : isBeingAttended
         ? formatElapsed(elapsedSeconds)
-        : remaining <= 0 && isInQueue
-          ? "Aguardando"
-          : formatWaitTime(remaining).replace('~', '');
+        : semPrevisao
+          // Entrou por aceite de corte (ou a fila foi reconciliada) e o servidor
+          // ainda nao respondeu: "ainda nao sei" NAO e "agora".
+          ? "Calculando..."
+          : remaining! <= 0 && isInQueue
+            ? "Aguardando"
+            : formatWaitTime(remaining!).replace('~', '');
   // Previsão fixa = entrada na fila + estimativa (atualiza quando o poll re-sincroniza).
   // Evita Date.now() no render (react-hooks/purity).
-  const startTimeLabel = activeQueue
-    ? estimatedStartTime(activeQueue.enteredAt, activeQueue.estimatedMinutes)
-    : "";
+  const startTimeLabel =
+    activeQueue && activeQueue.estimatedMinutes != null
+      ? estimatedStartTime(activeQueue.enteredAt, activeQueue.estimatedMinutes)
+      : "";
   // Término estimado do atendimento em curso = início + duração estimada.
   const endTimeLabel =
     isBeingAttended && activeQueue?.startedAt && activeQueue?.serviceMinutes != null
@@ -259,12 +311,14 @@ export function QueueStatus() {
   // Multa é pelo TEMPO estimado (não pelo status): vagar um lugar com < 1h para
   // ser atendido prejudica quem se segue. Vale para sair, reagendar e ir pro fim.
   // A TROCA por consentimento mútuo (#42) é que nunca terá multa.
-  const penalty = incursLatePenalty(remaining);
+  // Sem previsao nao da para AFIRMAR que falta menos de 1h — nem o contrario.
+  // O aviso de saida diz isso com todas as letras (ver `avisoDeSaida`).
+  const penalty = remaining != null && incursLatePenalty(remaining);
 
   function handleCancel() {
     // D10 (17/09): com multa, o aviso explica o impacto no próximo cliente e
     // oferece a troca de lugar — sem multa — antes de "sair mesmo assim".
-    const aviso = avisoDeSaida({ multa: penalty, podeTrocar: canReshuffle });
+    const aviso = avisoDeSaida({ multa: penalty, podeTrocar: canReshuffle, semPrevisao });
     const sair = async () => {
       // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
       // de 2026-09-07 ("sai da fila e o app fecha sozinho").
@@ -714,7 +768,11 @@ export function QueueStatus() {
               subiu — 0x99 dava 3,40:1 sobre o verde e reprovava no AA; 0xBF da
               4,99:1 e continua mais leve que o forest chapado do numero. */}
           <Text fontFamily="$body" fontSize={15} color="#163300BF" mt="$1">
-            {remaining <= 0 ? "a qualquer momento" : `~${formatWaitTime(remaining)} de espera`}
+            {semPrevisao
+              ? "calculando a espera"
+              : remaining! <= 0
+                ? "a qualquer momento"
+                : `~${formatWaitTime(remaining!)} de espera`}
           </Text>
 
           {/* Progresso: pontos cheios pelo que ja andou, apagados pelo que
@@ -893,7 +951,7 @@ export function QueueStatus() {
             <HStack w="$full" justifyContent="space-between" mb="$3">
               <Text size="sm" color="$brandTextSecondary">Previsão de início</Text>
               <Text size="sm" fontFamily="$heading">
-                {remaining <= 0 ? "A qualquer momento" : startTimeLabel}
+                {semPrevisao ? "Calculando..." : remaining! <= 0 ? "A qualquer momento" : startTimeLabel}
               </Text>
             </HStack>
           )}

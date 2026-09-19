@@ -47,6 +47,21 @@ describe('Queue Domain', () => {
     it('NÃO cria sem token', () => {
       expect(shouldCreateAttendance({ ...base, hasToken: false })).toBe(false);
     });
+
+    // 🔴 Andre, 19/09: "não consigo marcar o corte". Quem fugia do popup de
+    // avaliar deixava o atendimento TERMINADO guardado no aparelho (só o
+    // "Concluir" limpava), e a partir daí toda tentativa de marcar com o mesmo
+    // profissional caía na tela da avaliação, sem criar nada.
+    it('CRIA quando a fila guardada já ACABOU — histórico não bloqueia corte novo', () => {
+      expect(shouldCreateAttendance({ ...base, hasAttendanceId: true, localStatus: 'FINISHED' })).toBe(true);
+      expect(shouldCreateAttendance({ ...base, hasAttendanceId: true, localStatus: 'CANCELLED' })).toBe(true);
+    });
+
+    it('e continua NÃO criando com fila viva — inclusive pausada', () => {
+      for (const localStatus of ['SCHEDULED', 'IN_PROGRESS', 'PAUSED']) {
+        expect(shouldCreateAttendance({ ...base, hasAttendanceId: true, localStatus })).toBe(false);
+      }
+    });
   });
 
   describe('reconcileQueueEstimate (countdown monotônico)', () => {

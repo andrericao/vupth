@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Alert, TouchableOpacity, RefreshControl } from "react-native";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, useScrollToTop } from "@react-navigation/native";
 import {
   VStack,
   Text,
@@ -11,7 +11,7 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Users, Clock, ChevronRight, Calendar, Repeat2 } from "lucide-react-native";
+import { Users, Clock, ChevronRight, Calendar, Repeat2, Star } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -29,6 +29,8 @@ import { ClientAttendance } from "@services/attendanceService";
 import { intentionsService } from "@services/intentionsService";
 import { swapOfferService } from "@services/swapOfferService";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
+import { useQueueStore } from "@stores/queueStore";
+import { atendimentoAtivo, atendimentoSemAvaliar, filaDoAtendimento } from "@domain/queue/reconciliar";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
@@ -55,6 +57,12 @@ function formatDateTime(iso: string): string {
 
 export function Attendances() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  // Tocar na aba JA ATIVA volta ao topo da lista (Andre, 18/09): e o gesto que
+  // todo app de lista tem, e o caminho natural de quem desceu demais. O
+  // `useScrollToTop` do React Navigation ja faz o combinado com o partner —
+  // sobe com animacao e, se ja estiver no topo, nao faz nada.
+  const rolagemRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
+  useScrollToTop(rolagemRef as never);
   const { activeQueue, remaining, isInQueue, isBeingAttended, isPaused } = useQueueCountdown();
   // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
   const emAtendimento = isBeingAttended || isPaused;
@@ -69,7 +77,27 @@ export function Attendances() {
   // aceite (poll) e este card deixa acompanhar/cancelar enquanto está aberto.
   const { pending: pendingSwaps, refetchMyOffers } = useOutOfQueueSwap();
   const removePendingSwap = usePendingSwapStore((s) => s.removePending);
+
+  // REDE DE SEGURANCA: o servidor sabe da fila e o aparelho pode nao saber.
+  // Aconteceu com o Andre em 18/09 — ele mudou a vez, saiu, entrou de novo e o
+  // atendimento nao aparecia. O `useReconciliarFila` roda UMA vez por sessao
+  // autenticada; se falhar (rede ruim naquele instante) ninguem tenta de novo.
+  //
+  // Aqui o historico ja chega a cada 30s para montar a lista — entao custa zero
+  // usa-lo: estado local vazio + atendimento ativo no servidor = reconstroi. O
+  // servidor manda, e nunca o contrario: com fila local, nao se toca (ela
+  // carrega coisas que o historico nao tem, como a ancora do progresso).
+  useEffect(() => {
+    if (activeQueue || history.length === 0) return;
+    const ativo = atendimentoAtivo(history);
+    if (ativo) useQueueStore.getState().joinQueue(filaDoAtendimento(ativo));
+  }, [activeQueue, history]);
   const [cancellingSwapId, setCancellingSwapId] = useState<string | null>(null);
+
+  // CONVITE para avaliar, no lugar de pedágio: quem fugiu do popup uma vez não
+  // pode ser jogado nele de novo (Andre, 19/09). Aqui ele fica à mão, e leva ao
+  // atendimento que aconteceu — quem não quiser, só ignora.
+  const semAvaliar = atendimentoSemAvaliar(history, ratedIds);
 
   const intentionGroups = groupIntentionsByDay(agenda?.intentions ?? []);
 
@@ -175,11 +203,42 @@ export function Attendances() {
       </Box>
 
       <ScrollView
+        ref={rolagemRef}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#163300" colors={["#163300"]} />
         }
       >
+        {semAvaliar && (
+          <Box px={16} mt="$5">
+            <TouchableOpacity onPress={() => setDetailFor(semAvaliar)} testID="convite-avaliar">
+              <HStack bg="$greenTint" borderRadius="$card" p="$4" gap="$3" alignItems="center">
+                <Star size={20} color="#163300" />
+                <VStack flex={1}>
+                  <Text fontFamily="$heading" size="sm" color="$forest">
+                    Como foi com {semAvaliar.professionalName}?
+                  </Text>
+                  <Text size="xs" color="$brandTextSecondary">
+                    Sua avaliação ajuda quem vem depois — toque para ver o atendimento.
+                  </Text>
+                </VStack>
+                <TouchableOpacity
+                  onPress={() =>
+                    setRatingFor({ id: semAvaliar.id, name: semAvaliar.professionalName ?? "" })
+                  }
+                  testID="avaliar-agora"
+                >
+                  <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
+                    <Text fontFamily="$heading" fontSize={12} color="$forest">
+                      Avaliar
+                    </Text>
+                  </Box>
+                </TouchableOpacity>
+              </HStack>
+            </TouchableOpacity>
+          </Box>
+        )}
+
         <VStack mt="$6" px={16}>
           <Text
             fontFamily="$body"
@@ -229,7 +288,13 @@ export function Attendances() {
                       piscando sinalizaria movimento. */}
                   <LiveDot size={8} color="#163300" pulsing={!isPaused} />
                   <Text size="xs" fontWeight="$semibold" color="$forest">
-                    {isBeingAttended ? "Em atendimento" : isPaused ? "Pausado" : formatWaitTime(remaining)}
+                    {isBeingAttended
+                      ? "Em atendimento"
+                      : isPaused
+                        ? "Pausado"
+                        : remaining == null
+                          ? "Calculando..."
+                          : formatWaitTime(remaining)}
                   </Text>
                 </HStack>
               </VStack>
@@ -393,7 +458,10 @@ export function Attendances() {
                             </BadgeText>
                           </Badge>
                           <Text size="xs" color="$brandTextSecondary">
-                            R$ {a.totalValue.toFixed(2)}
+                            {/* Sem valor a tela nao quebra: `toFixed` em
+                                 undefined derruba a lista inteira, e um card
+                                 sem preco e melhor que uma tela branca. */}
+                            {a.totalValue != null ? `R$ ${a.totalValue.toFixed(2)}` : "—"}
                           </Text>
                         </VStack>
                       </HStack>

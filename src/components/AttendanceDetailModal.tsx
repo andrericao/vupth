@@ -92,7 +92,7 @@ export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = t
               {a.durationInMinutes != null ? (
                 <Row label="Duração" value={`${a.durationInMinutes} min`} />
               ) : null}
-              <Row label="Valor" value={`R$ ${a.totalValue.toFixed(2)}`} />
+              <Row label="Valor" value={a.totalValue != null ? `R$ ${a.totalValue.toFixed(2)}` : "—"} />
             </ScrollView>
 
             {a.status === "FINISHED" && canRate && (
