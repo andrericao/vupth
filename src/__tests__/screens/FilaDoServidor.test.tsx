@@ -60,6 +60,33 @@ function semFilaLocal() {
   });
 }
 
+describe('Atendimentos — o convite para avaliar, em vez de pedágio', () => {
+  // Andre, 19/09: quem foge do popup de avaliar não pode ser jogado nele de
+  // novo. O convite fica aqui, e leva ao atendimento que aconteceu.
+  beforeEach(() => jest.clearAllMocks());
+
+  it('com atendimento encerrado sem avaliação, convida — e não força nada', () => {
+    semFilaLocal();
+    mockHistory.mockReturnValue({
+      data: [{ ...aguardando, status: 'FINISHED', totalValue: 30 }],
+      isLoading: false, refetch: jest.fn(), isRefetching: false,
+    });
+    const { getByTestId, getByText } = renderWithProviders(<Attendances />);
+    expect(getByTestId('convite-avaliar')).toBeTruthy();
+    expect(getByText(/Como foi com Carlos/)).toBeTruthy();
+  });
+
+  it('sem nada para avaliar, não aparece convite nenhum', () => {
+    semFilaLocal();
+    mockHistory.mockReturnValue({
+      data: [{ ...aguardando, status: 'SCHEDULED' }],
+      isLoading: false, refetch: jest.fn(), isRefetching: false,
+    });
+    const { queryByTestId } = renderWithProviders(<Attendances />);
+    expect(queryByTestId('convite-avaliar')).toBeNull();
+  });
+});
+
 describe('Atendimentos — o servidor manda quando o aparelho esqueceu', () => {
   beforeEach(() => jest.clearAllMocks());
 

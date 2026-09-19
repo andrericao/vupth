@@ -73,3 +73,23 @@ export function filaDoAtendimento(
       : {}),
   };
 }
+
+/**
+ * O atendimento mais recente que TERMINOU e ainda não foi avaliado.
+ *
+ * Existe porque a avaliação deixou de ser um pedágio: quem fugiu do popup uma
+ * vez não pode ser jogado nele de novo (Andre, 19/09). O convite fica na aba
+ * Atendimentos, onde ele não atrapalha — e leva ao atendimento que aconteceu.
+ */
+export function atendimentoSemAvaliar(
+  historico: ClientAttendance[],
+  jaAvaliados: string[],
+): ClientAttendance | null {
+  const candidatos = historico.filter(
+    (a) => a.status === 'FINISHED' && !jaAvaliados.includes(a.id),
+  );
+  if (candidatos.length === 0) return null;
+  return candidatos.reduce((maisRecente, a) =>
+    Date.parse(a.scheduledTime) > Date.parse(maisRecente.scheduledTime) ? a : maisRecente,
+  );
+}

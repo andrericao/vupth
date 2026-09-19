@@ -1,4 +1,4 @@
-import { atendimentoAtivo, estaAtivo, filaDoAtendimento } from '@domain/queue/reconciliar';
+import { atendimentoAtivo, atendimentoSemAvaliar, estaAtivo, filaDoAtendimento } from '@domain/queue/reconciliar';
 import { ClientAttendance } from '@services/attendanceService';
 
 // O defeito que isto conserta (08/09, confirmado em 09/09): o cliente entrava
@@ -113,5 +113,39 @@ describe('o estado montado a partir do servidor', () => {
   it('scheduledTime inválido não gera data quebrada', () => {
     const fila = filaDoAtendimento(att({ scheduledTime: 'nao-e-data' }));
     expect(Number.isNaN(fila.enteredAt)).toBe(false);
+  });
+});
+
+// O convite para avaliar sai do caminho e vai para a aba Atendimentos: quem
+// fugiu do popup uma vez não é jogado nele de novo (Andre, 19/09).
+describe('atendimentoSemAvaliar', () => {
+  const att = (id: string, status: string, quando: string) => ({
+    id,
+    professionalId: 'p1',
+    professionalName: 'Carlos',
+    establishmentId: 'e1',
+    status,
+    scheduledTime: quando,
+    services: [],
+    totalValue: 30,
+  });
+
+  it('acha o encerrado mais recente que ainda não foi avaliado', () => {
+    const hist = [
+      att('a1', 'FINISHED', '2026-09-17T10:00:00Z'),
+      att('a2', 'FINISHED', '2026-09-19T10:00:00Z'),
+      att('a3', 'SCHEDULED', '2026-09-20T10:00:00Z'),
+    ] as never[];
+    expect(atendimentoSemAvaliar(hist, [])?.id).toBe('a2');
+  });
+
+  it('o que já foi avaliado sai da frente', () => {
+    const hist = [att('a1', 'FINISHED', '2026-09-17T10:00:00Z'), att('a2', 'FINISHED', '2026-09-19T10:00:00Z')] as never[];
+    expect(atendimentoSemAvaliar(hist, ['a2'])?.id).toBe('a1');
+    expect(atendimentoSemAvaliar(hist, ['a1', 'a2'])).toBeNull();
+  });
+
+  it('fila em andamento não é convite para avaliar', () => {
+    expect(atendimentoSemAvaliar([att('a3', 'SCHEDULED', '2026-09-20T10:00:00Z')] as never[], [])).toBeNull();
   });
 });

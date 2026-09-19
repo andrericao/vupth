@@ -11,7 +11,7 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Users, Clock, ChevronRight, Calendar, Repeat2 } from "lucide-react-native";
+import { Users, Clock, ChevronRight, Calendar, Repeat2, Star } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -30,7 +30,7 @@ import { intentionsService } from "@services/intentionsService";
 import { swapOfferService } from "@services/swapOfferService";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { useQueueStore } from "@stores/queueStore";
-import { atendimentoAtivo, filaDoAtendimento } from "@domain/queue/reconciliar";
+import { atendimentoAtivo, atendimentoSemAvaliar, filaDoAtendimento } from "@domain/queue/reconciliar";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
@@ -93,6 +93,11 @@ export function Attendances() {
     if (ativo) useQueueStore.getState().joinQueue(filaDoAtendimento(ativo));
   }, [activeQueue, history]);
   const [cancellingSwapId, setCancellingSwapId] = useState<string | null>(null);
+
+  // CONVITE para avaliar, no lugar de pedágio: quem fugiu do popup uma vez não
+  // pode ser jogado nele de novo (Andre, 19/09). Aqui ele fica à mão, e leva ao
+  // atendimento que aconteceu — quem não quiser, só ignora.
+  const semAvaliar = atendimentoSemAvaliar(history, ratedIds);
 
   const intentionGroups = groupIntentionsByDay(agenda?.intentions ?? []);
 
@@ -204,6 +209,36 @@ export function Attendances() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#163300" colors={["#163300"]} />
         }
       >
+        {semAvaliar && (
+          <Box px={16} mt="$5">
+            <TouchableOpacity onPress={() => setDetailFor(semAvaliar)} testID="convite-avaliar">
+              <HStack bg="$greenTint" borderRadius="$card" p="$4" gap="$3" alignItems="center">
+                <Star size={20} color="#163300" />
+                <VStack flex={1}>
+                  <Text fontFamily="$heading" size="sm" color="$forest">
+                    Como foi com {semAvaliar.professionalName}?
+                  </Text>
+                  <Text size="xs" color="$brandTextSecondary">
+                    Sua avaliação ajuda quem vem depois — toque para ver o atendimento.
+                  </Text>
+                </VStack>
+                <TouchableOpacity
+                  onPress={() =>
+                    setRatingFor({ id: semAvaliar.id, name: semAvaliar.professionalName ?? "" })
+                  }
+                  testID="avaliar-agora"
+                >
+                  <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
+                    <Text fontFamily="$heading" fontSize={12} color="$forest">
+                      Avaliar
+                    </Text>
+                  </Box>
+                </TouchableOpacity>
+              </HStack>
+            </TouchableOpacity>
+          </Box>
+        )}
+
         <VStack mt="$6" px={16}>
           <Text
             fontFamily="$body"

@@ -151,6 +151,7 @@ export function QueueStatus() {
         hasAttendanceId: !!activeQueue?.attendanceId,
         hasToken: !!accessToken,
         serviceItemIds,
+        localStatus: activeQueue?.status,
       })
     ) {
       return;
@@ -264,7 +265,7 @@ export function QueueStatus() {
     }
 
     createAttendance();
-  }, [activeQueue?.attendanceId, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, navigation, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime]);
+  }, [activeQueue?.attendanceId, activeQueue?.status, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, navigation, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";
