@@ -46,7 +46,13 @@ function setRouteParams(params: Record<string, unknown>) {
 
 // Render de tela com GluestackUIProvider é pesado sob o jest (a 1ª montagem
 // carrega o build inteiro do gluestack). O default de 5s não cobre o 1º teste.
-jest.setTimeout(30000);
+// ⏱️ 90s, e nao 30s: o portao de pre-push do Andre falhou aqui em 19/09 com
+// "Exceeded timeout of 30000 ms" — nao por regressao, mas por CARGA. A maquina
+// roda varias sessoes ao mesmo tempo (tres repositorios, cada um com a sua
+// suite), e o primeiro mount do Gluestack, que ja e o mais caro do projeto,
+// passou dos 30s. Teste que falha por concorrencia nao esta medindo o codigo:
+// da tempo folgado e deixa o portao dizer a verdade.
+jest.setTimeout(90000);
 
 describe('ServiceSelection — portão de auth (modo visitante)', () => {
   beforeEach(() => {
