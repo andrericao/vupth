@@ -22,7 +22,14 @@ const SCREENS_DIR = join(__dirname, '../../screens');
 const SEM_SCROLL_PROPRIO = new Set<string>([]);
 
 function temContainerRolavel(fonte: string): boolean {
-  return /<ScrollView[\s>]/.test(fonte) || /<FlatList[\s>]/.test(fonte);
+  // `SectionList` entrou em 20/09 com as secoes "Trabalhando"/"Fora" na tela da
+  // loja: e a mesma lista virtualizada do `FlatList`, com cabecalho por secao.
+  // Faltava aqui, e a tela reprovou por usar a ferramenta certa.
+  return (
+    /<ScrollView[\s>]/.test(fonte) ||
+    /<FlatList[\s>]/.test(fonte) ||
+    /<SectionList[\s>]/.test(fonte)
+  );
 }
 
 describe('toda tela precisa rolar', () => {

@@ -9,8 +9,10 @@ let mockRemaining: number | null = 90;
 let mockEstimated: number | null = 90;
 let mockEmAtendimento = false;
 
-// Entrou às 12:00 (relógio local do teste).
-const ENTROU = new Date(2026, 8, 20, 12, 0, 0).getTime();
+// Entrou às 12:00 (relógio local do teste). O prefixo `mock` NÃO é estilo: a
+// fábrica do `jest.mock` é içada para antes dos imports, e o babel só deixa
+// ela citar identificadores que começam assim.
+const mockEntrou = new Date(2026, 8, 20, 12, 0, 0).getTime();
 
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn().mockResolvedValue('1'),
@@ -42,7 +44,7 @@ jest.mock('@hooks/useQueueCountdown', () => ({
       professionalName: 'Carlos',
       establishmentId: 'e1',
       establishmentName: 'Barbearia',
-      enteredAt: ENTROU,
+      enteredAt: mockEntrou,
       estimatedMinutes: mockEstimated,
       status: mockEmAtendimento ? 'IN_PROGRESS' : 'SCHEDULED',
     },

@@ -402,9 +402,10 @@ export function EstablishmentDetail() {
           )}
         </HStack>
 
-        {/* Duas secoes, e o cabecalho so aparece quando a OUTRA existe: numa
-            loja com todo mundo trabalhando, "Trabalhando" seria rotulo sem
-            contraste — ruido. */}
+        {/* O cabecalho "Trabalhando" so aparece quando existe a OUTRA secao:
+            numa loja com todo mundo em expediente ele seria rotulo sem
+            contraste. Ja o "Fora" aparece SEMPRE — sozinho, ele e justamente o
+            que explica por que ninguem esta disponivel. */}
         <SectionList
           sections={secoes}
           keyExtractor={(item) => item.id}
@@ -412,7 +413,7 @@ export function EstablishmentDetail() {
           stickySectionHeadersEnabled={false}
           contentContainerStyle={{ paddingBottom: 12 }}
           renderSectionHeader={({ section }) =>
-            secoes.length > 1 ? (
+            secoes.length > 1 || section.key === "fora" ? (
               <Text
                 size="xs"
                 fontFamily="$heading"

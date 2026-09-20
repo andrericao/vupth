@@ -85,7 +85,7 @@ describe('EstablishmentDetail — Trabalhando e Fora', () => {
 
     expect(getByText('Em intervalo')).toBeTruthy();
     expect(getByText('1 na fila')).toBeTruthy();
-    // Uma seção só: rótulo sem contraste é ruído.
+    // Só "Trabalhando" na tela: o rótulo não teria contraste com nada — ruído.
     expect(queryByTestId('secao-trabalhando')).toBeNull();
   });
 
@@ -109,6 +109,8 @@ describe('EstablishmentDetail — Trabalhando e Fora', () => {
     // A loja segue aberta (outro pode chegar), mas não há a quem entrar.
     expect(queryByText('Entrar com menor espera')).toBeNull();
     expect(queryByText(/menor espera /)).toBeNull();
+    // Sozinho, o rótulo "Fora" é o que explica por que ninguém está disponível —
+    // ao contrário de um "Trabalhando" sozinho, que não diria nada.
     expect(getByTestId('secao-fora')).toBeTruthy();
   });
 
