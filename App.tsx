@@ -33,6 +33,7 @@ import { PreparingServer } from "@components/PreparingServer";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
+import { useCienciaStore } from "@stores/cienciaStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { useFavoritesStore } from "@stores/favoritesStore";
 import { useComingSoonStore } from "@stores/comingSoonStore";
@@ -46,6 +47,7 @@ import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 
 import { useReconciliarFila } from "@hooks/useReconciliarFila";
+import { useAvisoDeAtraso } from "@hooks/useAvisoDeAtraso";
 import { devePersistir, persister, VALIDADE_MS } from "@services/queryPersist";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 
@@ -100,6 +102,7 @@ export default function App() {
   const restoreSession = useAuthStore((s) => s.restoreSession);
   const restoreQueue = useQueueStore((s) => s.restoreQueue);
   const restoreRated = useRatedStore((s) => s.restoreRated);
+  const restoreCiencia = useCienciaStore((s) => s.restoreCiencia);
   const restoreComingSoon = useComingSoonStore((s) => s.restore);
   const restoreLocation = useLocationStore((s) => s.restoreLocation);
   const restoreFirstRun = useFirstRunStore((s) => s.restoreFirstRun);
@@ -112,6 +115,7 @@ export default function App() {
     restoreSession();
     restoreQueue();
     restoreRated();
+    restoreCiencia();
     restoreComingSoon();
     restoreLocation();
     restorePendingSwap();
@@ -131,6 +135,7 @@ export default function App() {
     restoreSession,
     restoreQueue,
     restoreRated,
+    restoreCiencia,
     restoreFavorites,
     restoreComingSoon,
     restoreLocation,
@@ -147,6 +152,11 @@ export default function App() {
   // CORTE nunca via a propria fila — o estado local so nascia quando o cliente
   // entrava pela tela, e esse caminho nao passa por la.
   useReconciliarFila();
+
+  // Chamado e nao chegou: avisa e espera o toque ("nao podemos agir na
+  // surdina", Andre 18/09). Fica aqui, e nao na tela da fila, porque o atraso
+  // acontece justamente quando a pessoa nao esta olhando o app.
+  useAvisoDeAtraso();
 
   // Push (background/fechado): registra o device (POST /devices) quando autentica
   // e trata o toque. Best-effort/guardado — inerte ate um build COM o modulo

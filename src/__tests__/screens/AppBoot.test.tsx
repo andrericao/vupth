@@ -45,7 +45,7 @@ jest.mock('@react-native-community/netinfo', () => ({
 }));
 
 // O mount do Gluestack é pesado sob o jest.
-jest.setTimeout(30000);
+jest.setTimeout(90000); // ver ServiceSelection.test.tsx: 30s caiu por carga da maquina, nao por regressao (19/09)
 
 describe('App — boot', () => {
   // O cliente do App usa `gcTime` de 24h (exigencia da persistencia), e cada

@@ -51,7 +51,7 @@ const mockList = addressService.list as jest.Mock;
 const mockUseDeviceLocation = useDeviceLocation as jest.Mock;
 const mockCapture = jest.fn();
 
-jest.setTimeout(30000);
+jest.setTimeout(90000); // ver ServiceSelection.test.tsx: 30s caiu por carga da maquina, nao por regressao (19/09)
 
 /** Aciona o botão do Alert com este texto (o Alert é nativo: só espionamos). */
 function pressAlertButton(alertSpy: jest.SpyInstance, text: string) {

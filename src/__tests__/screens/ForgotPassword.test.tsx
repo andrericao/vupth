@@ -36,7 +36,7 @@ type GateOptions = Parameters<typeof waitForBackend>[0];
 
 // Render de tela com GluestackUIProvider é pesado sob o jest (a 1ª montagem
 // carrega o build inteiro do gluestack).
-jest.setTimeout(30000);
+jest.setTimeout(90000); // ver ServiceSelection.test.tsx: 30s caiu por carga da maquina, nao por regressao (19/09)
 
 describe('ForgotPassword — passo 1 (enviar código)', () => {
   beforeEach(() => {

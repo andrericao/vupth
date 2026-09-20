@@ -1,5 +1,9 @@
 export type AttendanceStatus =
   | 'SCHEDULED'
+  // Chamado e não apareceu. Existe no backend desde sempre (o `leave.ts` e o
+  // `swap.ts` já o tratavam como fila ocupada), mas faltava aqui — e sem o
+  // status no tipo não havia como avisar o cliente do próprio atraso.
+  | 'LATE'
   | 'IN_PROGRESS'
   | 'PAUSED'
   | 'FINISHED'
