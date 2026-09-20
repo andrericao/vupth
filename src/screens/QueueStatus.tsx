@@ -15,7 +15,9 @@ import {
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
+import { FaixaSemMulta } from "@components/FaixaSemMulta";
 import { avisoDeSaida } from "@domain/queue/avisoDeSaida";
+import { janelaSemMulta } from "@domain/queue/janelaSemMulta";
 import { recusaAoEntrar, atendimentoNaFilaDoProfissional } from "@domain/queue/entrarNaFila";
 import { filaDoAtendimento } from "@domain/queue/reconciliar";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
@@ -314,6 +316,15 @@ export function QueueStatus() {
   // Sem previsao nao da para AFIRMAR que falta menos de 1h — nem o contrario.
   // O aviso de saida diz isso com todas as letras (ver `avisoDeSaida`).
   const penalty = remaining != null && incursLatePenalty(remaining);
+
+  // A janela sem multa, dita na ENTRADA e nao so na saida (Andre, 20/09). Sai
+  // da mesma ancora da "Previsao de inicio" logo abaixo — se os dois horarios
+  // discordassem na mesma tela, nenhum dos dois valeria.
+  const janela = janelaSemMulta({
+    enteredAt: activeQueue?.enteredAt,
+    estimatedMinutes: activeQueue?.estimatedMinutes,
+    restanteMinutos: remaining,
+  });
 
   function handleCancel() {
     // D10 (17/09): com multa, o aviso explica o impacto no próximo cliente e
@@ -904,6 +915,11 @@ export function QueueStatus() {
                 ? "Em atendimento!"
                 : "Você está na fila!"}
         </Heading>
+
+        {/* Assim que ele entra, ele sabe ate quando pode desistir de graca —
+            em vez de descobrir a multa no momento em que ela o pune. Some
+            quando o atendimento comeca: ali nao ha mais fila de onde sair. */}
+        {waitingInQueue && <FaixaSemMulta janela={janela} />}
 
         <Box
           bg="$brandSurface"
