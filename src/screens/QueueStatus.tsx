@@ -821,6 +821,15 @@ export function QueueStatus() {
           </Box>
         </ScrollView>
 
+        {/* Assim que ele entra, ele sabe ate quando pode desistir de graca —
+            em vez de descobrir a multa no momento em que ela o pune. Fica logo
+            ACIMA de "Sair da fila": a regra ao lado da acao que ela governa.
+            So existe nesta tela — comecado o atendimento, nao ha mais fila de
+            onde sair. */}
+        <Box px={16} pb="$2">
+          <FaixaSemMulta janela={janela} ground="marca" />
+        </Box>
+
         <VStack px={16} pb={28} gap="$3.5" alignItems="center">
           {canReshuffle && (
             <TouchableOpacity
@@ -915,11 +924,6 @@ export function QueueStatus() {
                 ? "Em atendimento!"
                 : "Você está na fila!"}
         </Heading>
-
-        {/* Assim que ele entra, ele sabe ate quando pode desistir de graca —
-            em vez de descobrir a multa no momento em que ela o pune. Some
-            quando o atendimento comeca: ali nao ha mais fila de onde sair. */}
-        {waitingInQueue && <FaixaSemMulta janela={janela} />}
 
         <Box
           bg="$brandSurface"

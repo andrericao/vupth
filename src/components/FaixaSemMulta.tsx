@@ -8,10 +8,20 @@ import { JanelaSemMulta, textoDaJanela } from "@domain/queue/janelaSemMulta";
  * e a mesma forma do aviso de "Fechada agora" na tela da loja — informa sem
  * interromper.
  *
- * Verde claro enquanto ha janela; ambar quando ela acaba, porque ai o estado
- * MUDOU e a cor e o que avisa sem pedir leitura.
+ * Enquanto ha janela a faixa e discreta; quando ela acaba vira ambar, porque ai
+ * o estado MUDOU e a cor e o que avisa sem pedir leitura.
+ *
+ * `ground="marca"` e a tela da fila, que e verde cheia: ali o `$greenTint`
+ * sumiria no fundo, entao a faixa e um forest TRANSLUCIDO — a mesma solucao do
+ * resto daquela tela.
  */
-export function FaixaSemMulta({ janela }: { janela: JanelaSemMulta }) {
+export function FaixaSemMulta({
+  janela,
+  ground = "claro",
+}: {
+  janela: JanelaSemMulta;
+  ground?: "claro" | "marca";
+}) {
   const texto = textoDaJanela(janela);
 
   // Sem previsao nao ha o que dizer: afirmar "sem multa" ou "com multa" seriam
@@ -22,7 +32,7 @@ export function FaixaSemMulta({ janela }: { janela: JanelaSemMulta }) {
 
   return (
     <Box
-      bg={acabou ? "$brandWarning" : "$greenTint"}
+      bg={acabou ? "$brandWarning" : ground === "marca" ? "#1633001A" : "$greenTint"}
       borderRadius="$card"
       px="$3.5"
       py="$2.5"
