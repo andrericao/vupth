@@ -43,6 +43,10 @@ import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 const HISTORY_STATUS: Record<string, { label: string; bg: string; fg: string }> = {
   FINISHED: { label: "Concluído", bg: "#E2F6D5", fg: "#163300" },   // greenTint
   CANCELLED: { label: "Cancelado", bg: "#F3F5F1", fg: "#B3261E" },  // surface + danger
+  // A loja tirou da fila (contrato de 18/09). O CANCELLED fica "Cancelado", e nao
+  // "Você saiu da fila": os atendimentos ANTIGOS seguem CANCELLED mesmo quando foi
+  // a loja, e o rotulo pessoal poria na conta do cliente o que ele nao fez.
+  REMOVED: { label: "Retirado pela loja", bg: "#F3F5F1", fg: "#B3261E" }, // surface + danger
   LATE: { label: "Atrasado", bg: "#FFC091", fg: "#163300" },        // accentPeach
 };
 
@@ -175,7 +179,11 @@ export function Attendances() {
   }
 
   const realizados = history.filter(
-    (a) => a.status === "FINISHED" || a.status === "CANCELLED" || a.status === "LATE",
+    (a) =>
+      a.status === "FINISHED" ||
+      a.status === "CANCELLED" ||
+      a.status === "REMOVED" ||
+      a.status === "LATE",
   );
 
   function handleGoToQueue() {

@@ -64,6 +64,7 @@ const STATUS_LABELS: Record<string, string> = {
   PAUSED: "Pausado",
   FINISHED: "Concluído",
   CANCELLED: "Cancelado",
+  REMOVED: "Retirado pela loja",
 };
 
 export function QueueStatus() {

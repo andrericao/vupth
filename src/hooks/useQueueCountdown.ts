@@ -3,7 +3,7 @@ import { useQueueStore, ActiveQueue } from '@stores/queueStore';
 import { useAuthStore } from '@stores/authStore';
 import { queueService } from '@services/queueService';
 import { attendanceService } from '@services/attendanceService';
-import { reconcileQueueEstimate, AttendanceStatus } from '@domain/queue/types';
+import { reconcileQueueEstimate, AttendanceStatus, saiuSemAtendimento } from '@domain/queue/types';
 
 export type UrgencyLevel = 'normal' | 'urgent';
 
@@ -119,9 +119,11 @@ export function useQueueCountdown() {
         const hist = await attendanceService.listClientHistory(accessToken);
         const mine = hist.data.find((a) => a.id === q.attendanceId);
         if (mine) {
-          // Profissional removeu / cancelou o atendimento (→ CANCELLED): sai da
-          // fila no cliente (limpa store + SecureStore) para o banner sumir.
-          if (mine.status === 'CANCELLED') {
+          // O atendimento acabou sem acontecer — cancelado (CANCELLED) ou a loja
+          // tirou o cliente (REMOVED): sai da fila no cliente (limpa store +
+          // SecureStore) para o banner sumir. ⚠️ Sem o REMOVED aqui, o cliente
+          // retirado pela loja continuaria "na fila" no aparelho para sempre.
+          if (saiuSemAtendimento(mine.status)) {
             useQueueStore.getState().leaveQueue();
             return;
           }

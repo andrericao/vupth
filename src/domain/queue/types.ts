@@ -7,7 +7,13 @@ export type AttendanceStatus =
   | 'IN_PROGRESS'
   | 'PAUSED'
   | 'FINISHED'
-  | 'CANCELLED';
+  // CANCELLED e REMOVED sao os dois fins "sem atendimento", e contam historias
+  // diferentes (contrato do backend, decisao do Andre de 18/09): CANCELLED e o
+  // CLIENTE desistindo; REMOVED e a LOJA tirando o cliente da fila (o "remover"
+  // do profissional e a escalada de nao comparecimento). Atendimentos antigos
+  // seguem CANCELLED mesmo quando foi a loja — nao da para reconstruir quem tirou.
+  | 'CANCELLED'
+  | 'REMOVED';
 
 export interface Attendance {
   id: string;
@@ -69,7 +75,17 @@ export function canCancelAttendance(status: AttendanceStatus): boolean {
  * é histórico, e histórico não bloqueia atendimento novo.
  */
 export function filaEncerrada(status?: string | null): boolean {
-  return status === 'FINISHED' || status === 'CANCELLED';
+  return status === 'FINISHED' || saiuSemAtendimento(status);
+}
+
+/**
+ * O atendimento acabou SEM acontecer — o cliente desistiu (CANCELLED) ou a loja
+ * o tirou da fila (REMOVED). E o que faz o app limpar a fila guardada no
+ * aparelho. Ficar num lugar so impede o proximo status "sem atendimento" de
+ * ser esquecido em um dos pontos que decidem isso.
+ */
+export function saiuSemAtendimento(status?: string | null): boolean {
+  return status === 'CANCELLED' || status === 'REMOVED';
 }
 
 export function shouldCreateAttendance(params: {

@@ -18,6 +18,7 @@ import { formatClockTime } from "@domain/queue/types";
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
   FINISHED: { label: "Concluído", bg: "#E2F6D5", fg: "#163300" },       // greenTint
   CANCELLED: { label: "Cancelado", bg: "#F3F5F1", fg: "#B3261E" },      // surface + danger
+  REMOVED: { label: "Retirado pela loja", bg: "#F3F5F1", fg: "#B3261E" }, // surface + danger
   LATE: { label: "Atrasado", bg: "#FFC091", fg: "#163300" },            // accentPeach
   IN_PROGRESS: { label: "Em atendimento", bg: "#9FE870", fg: "#163300" }, // brandGreen
   SCHEDULED: { label: "Aguardando", bg: "#F3F5F1", fg: "#454745" },     // surface + neutro
