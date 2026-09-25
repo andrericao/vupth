@@ -27,6 +27,7 @@ import { useAuthStore } from "@stores/authStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
+import { regraDaMulta } from "@domain/queue/saidaDaFila";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
 // POUCOS lugares com sombra legitima: no Pencil o "Resumo" sobre `forest` e um
@@ -415,6 +416,13 @@ export function ServiceSelection() {
                       {estimatedStartTime(openedAt, estimatedWaitMinutes)}
                     </Text>
                   </HStack>
+                )}
+                {/* A regra da multa ANTES do toque que coloca na fila (CDC).
+                    Ate 25/09 o app so falava de multa na hora de sair. */}
+                {storeOpen && (
+                  <Text size="xs" color="#FFFFFFB3" testID="regra-da-multa">
+                    {regraDaMulta()}
+                  </Text>
                 )}
               </VStack>
             )}

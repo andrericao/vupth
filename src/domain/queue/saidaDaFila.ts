@@ -78,3 +78,13 @@ export function saidaDaFila(s: {
 
   return { faixa: `Para sair da fila, ${INSTRUCAO}.`, confirmacao: null };
 }
+
+/**
+ * A regra da multa dita ANTES de a pessoa entrar — no resumo da escolha de
+ * servicos e nos Termos. Exigencia do CDC: ate 25/09 o app so falava de multa
+ * na hora de sair. Um texto so, para os dois lugares nao divergirem; o valor e
+ * o limite sao os que o servidor cobra hoje (D4 ainda nao chegou).
+ */
+export function regraDaMulta(valor: number = CANCELLATION_PENALTY_VALUE): string {
+  return `Sair da fila faltando menos de 1 hora para a sua vez gera multa de ${reais(valor)}, cobrada no seu próximo atendimento. Trocar de lugar com outro cliente não tem custo.`;
+}

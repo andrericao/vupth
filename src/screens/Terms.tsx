@@ -3,6 +3,7 @@ import { TouchableOpacity } from "react-native";
 import { VStack, HStack, Text, Box, Center, ScrollView } from "@gluestack-ui/themed";
 
 import { ScreenHeader } from "@components/ScreenHeader";
+import { regraDaMulta } from "@domain/queue/saidaDaFila";
 
 type Aba = "uso" | "privacidade";
 
@@ -42,8 +43,10 @@ const TERMOS: Secao[] = [
   },
   {
     titulo: "5. Cancelamento",
-    corpo:
-      "Você pode sair da fila ou excluir sua conta a qualquer momento pelo aplicativo.",
+    // A multa entrou em 25/09 (exigencia do CDC: a regra dita antes). O texto
+    // vem de `regraDaMulta`, o mesmo do resumo antes de entrar na fila.
+    // ⚠️ Como o resto desta tela, precisa da revisao juridica antes das lojas.
+    corpo: `Você pode sair da fila ou excluir sua conta a qualquer momento pelo aplicativo. ${regraDaMulta()}`,
   },
 ];
 
