@@ -36,6 +36,7 @@ import {
   rescheduleErrorMessage,
   moveToEndErrorMessage,
   CANCELLATION_PENALTY_VALUE,
+  STATUS_DESCONHECIDO,
 } from "@domain/queue/types";
 import { jaSaiuDaFila, mensagemDeFalhaAoSair } from "@domain/queue/leave";
 import { useAuthStore } from "@stores/authStore";
@@ -1010,7 +1011,7 @@ export function QueueStatus() {
           <HStack w="$full" justifyContent="space-between">
             <Text size="sm" color="$brandTextSecondary">Status</Text>
             <Text size="sm" fontFamily="$heading">
-              {STATUS_LABELS[status] ?? status}
+              {STATUS_LABELS[status] ?? STATUS_DESCONHECIDO}
             </Text>
           </HStack>
         </Box>

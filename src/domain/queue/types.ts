@@ -84,6 +84,14 @@ export function filaEncerrada(status?: string | null): boolean {
  * aparelho. Ficar num lugar so impede o proximo status "sem atendimento" de
  * ser esquecido em um dos pontos que decidem isso.
  */
+/**
+ * Rotulo de um status que o app NAO conhece. O texto do servidor nunca vai cru
+ * para a tela — foi a "tela branca com log do backend" que o Andre viu em
+ * 18/09. "Outro" e o mesmo texto do Partner (104720c), para os dois apps
+ * dizerem igual quando o backend criar o proximo status.
+ */
+export const STATUS_DESCONHECIDO = 'Outro';
+
 export function saiuSemAtendimento(status?: string | null): boolean {
   return status === 'CANCELLED' || status === 'REMOVED';
 }

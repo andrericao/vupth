@@ -41,4 +41,15 @@ describe('AttendanceDetailModal — quem encerrou o atendimento', () => {
 
     expect(getByText('Cancelado')).toBeTruthy();
   });
+
+  it('um status que o app não conhece nunca aparece cru — vira "Outro", como no Partner', () => {
+    // O próximo status que o backend criar não pode repetir a "tela branca com
+    // log do backend" de 18/09.
+    const { getByText, queryByText } = renderWithProviders(
+      <AttendanceDetailModal attendance={atendimento('NO_SHOW_ESCALATED')} onClose={jest.fn()} onRate={jest.fn()} />,
+    );
+
+    expect(getByText('Outro')).toBeTruthy();
+    expect(queryByText('NO_SHOW_ESCALATED')).toBeNull();
+  });
 });

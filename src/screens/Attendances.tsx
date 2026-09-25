@@ -33,7 +33,7 @@ import { useQueueStore } from "@stores/queueStore";
 import { atendimentoAtivo, atendimentoSemAvaliar, filaDoAtendimento } from "@domain/queue/reconciliar";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
-import { formatWaitTime, formatClockTime } from "@domain/queue/types";
+import { formatWaitTime, formatClockTime, STATUS_DESCONHECIDO } from "@domain/queue/types";
 
 // [marca-vupth] Cada status e um PAR (fundo, texto). Antes era so uma cor de
 // FUNDO com texto branco fixo por cima, e "Atrasado" (#F59E0B + branco) dava
@@ -439,7 +439,7 @@ export function Attendances() {
             <VStack gap="$3">
               {realizados.map((a) => {
                 const st = HISTORY_STATUS[a.status] ?? {
-                  label: a.status,
+                  label: STATUS_DESCONHECIDO,
                   bg: "#F3F5F1",
                   fg: "#454745",
                 };
