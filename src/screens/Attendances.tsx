@@ -67,7 +67,7 @@ export function Attendances() {
   // sobe com animacao e, se ja estiver no topo, nao faz nada.
   const rolagemRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   useScrollToTop(rolagemRef as never);
-  const { activeQueue, remaining, isInQueue, isBeingAttended, isPaused } = useQueueCountdown();
+  const { activeQueue, remaining, isInQueue, isBeingAttended, isPaused, isLate } = useQueueCountdown();
   // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
   const emAtendimento = isBeingAttended || isPaused;
   const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
@@ -256,7 +256,9 @@ export function Attendances() {
             EM ANDAMENTO
           </Text>
 
-          {activeQueue && (isInQueue || emAtendimento) ? (
+          {/* O atrasado (LATE) e atendimento EM ANDAMENTO: ate 25/09 ele caia em
+              "Nenhum atendimento em andamento" e ia para os realizados. */}
+          {activeQueue && (isInQueue || emAtendimento || isLate) ? (
             <TouchableOpacity onPress={handleGoToQueue}>
               {/* Unico card com borda verde-marca da tela: e o atendimento
                   VIVO, o que a pessoa abriu o app pra ver. */}
@@ -297,6 +299,8 @@ export function Attendances() {
                       ? "Em atendimento"
                       : isPaused
                         ? "Pausado"
+                        : isLate
+                          ? "Você foi chamado"
                         : remaining == null
                           ? "Calculando..."
                           : formatWaitTime(remaining)}

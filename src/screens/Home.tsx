@@ -188,7 +188,7 @@ export function Home() {
   const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
-  const { activeQueue, remaining, isInQueue } = useQueueCountdown();
+  const { activeQueue, remaining, isInQueue, isLate } = useQueueCountdown();
   // "Recentes": ultimo atendimento CONCLUIDO de verdade. O backend nao tem
   // "favorito", entao usamos o historico. Sem historico, a secao nao aparece.
   const { data: history = [] } = useClientAttendances({ status: "FINISHED" });
@@ -364,8 +364,9 @@ export function Home() {
         </HStack>
       </Box>
 
-      {/* Fila ativa */}
-      {isInQueue && activeQueue && (
+      {/* Fila ativa. O atrasado (LATE) tambem: ele segue na fila — sem o card,
+          o Inicio dizia que nao havia nada, e o teste de 25/09 leu "acabou". */}
+      {(isInQueue || isLate) && activeQueue && (
         <Box px={16} pt={20}>
           <TouchableOpacity
             onPress={() =>
@@ -388,7 +389,7 @@ export function Home() {
                   letterSpacing={0.8}
                   color="$forest"
                 >
-                  VOCÊ ESTÁ NA FILA
+                  {isLate ? "VOCÊ FOI CHAMADO" : "VOCÊ ESTÁ NA FILA"}
                 </Text>
                 <HStack
                   bg="$forest"

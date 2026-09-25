@@ -167,6 +167,9 @@ export function useQueueCountdown() {
     urgency,
     color,
     isInQueue: !!activeQueue && activeQueue.status === 'SCHEDULED',
+    /** Chamado e nao chegou (LATE). Segue na fila: o profissional ainda espera
+        o corte comecar — as telas mostram a fila, e nao "nenhum atendimento". */
+    isLate: !!activeQueue && activeQueue.status === 'LATE',
     isBeingAttended: !!activeQueue && activeQueue.status === 'IN_PROGRESS',
     isPaused: !!activeQueue && activeQueue.status === 'PAUSED',
     isFinished: !!activeQueue && activeQueue.status === 'FINISHED',
