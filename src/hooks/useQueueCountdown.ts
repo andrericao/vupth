@@ -154,6 +154,18 @@ export function useQueueCountdown() {
     };
   }, [activeQueue, accessToken, user?.id, updateQueue]);
 
+  // Uma consulta JA na abertura (e quando a fila passa a ser outro atendimento).
+  // Ate 26/09 a primeira so vinha depois do intervalo inteiro — ate 2 min com a
+  // previsao acima de 10 min —, e quem era chamado com a previsao ainda alta
+  // esperava esse tempo pelo aviso de atraso (q292 reprovou em 25/09). Chaveada
+  // no `attendanceId`, e nao na fila inteira: cada consulta atualiza a fila, e
+  // reconsultar a cada atualizacao viraria um laco.
+  useEffect(() => {
+    if (!activeQueue?.attendanceId) return;
+    const primeira = setTimeout(() => pollRef.current(), 0);
+    return () => clearTimeout(primeira);
+  }, [activeQueue?.attendanceId]);
+
   const refresh = useCallback(() => pollRef.current(), []);
 
   const color = activeQueue ? URGENCY_COLORS[urgency] : URGENCY_COLORS.normal;
