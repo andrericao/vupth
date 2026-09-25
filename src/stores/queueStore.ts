@@ -22,6 +22,8 @@ export interface ActiveQueue {
   status: AttendanceStatus;
   /** ms — ate quando sair e de graca (D13). So existe quando o SERVIDOR informa. */
   toleranceUntil?: number | null;
+  /** Quanto a saida custaria agora, SEGUNDO O SERVIDOR (D4). Ausente = regra de hoje. */
+  exitPenaltyValue?: number | null;
   // Preenchidos quando o atendimento inicia (IN_PROGRESS): início real (ms) e
   // duração estimada do serviço (min) — para tempo decorrido + término estimado.
   startedAt?: number;

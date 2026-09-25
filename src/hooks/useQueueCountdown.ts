@@ -111,6 +111,8 @@ export function useQueueCountdown() {
         // e o servidor que cobra (D13/D15).
         const ate = data.toleranceUntil ? Date.parse(data.toleranceUntil) : null;
         if ((ate || null) !== (q.toleranceUntil ?? null)) patch.toleranceUntil = ate || null;
+        const valor = typeof data.exitPenaltyValue === 'number' ? data.exitPenaltyValue : null;
+        if (valor !== (q.exitPenaltyValue ?? null)) patch.exitPenaltyValue = valor;
         // Ancora do progresso: grava a posição só na PRIMEIRA leitura. Se
         // fosse reescrita a cada poll, "já passou N" seria sempre zero.
         if (q.initialPosition == null) patch.initialPosition = data.position;

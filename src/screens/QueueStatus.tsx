@@ -341,7 +341,17 @@ export function QueueStatus() {
   // some sozinha. O texto e sempre o da regra de AGORA — nao o do momento do toque.
   const [mostrarFaixaDeSaida, setMostrarFaixaDeSaida] = useState(false);
   const ultimoToqueEmSair = useRef<number | null>(null);
-  const saidaAtual = saidaDaFila({ multa: penalty, semPrevisao });
+  // Quanto sair custa AGORA. Com o valor do servidor (D4: R$ 3 / R$ 5, zero na
+  // tolerancia), ele manda — inclusive para dizer que nao ha multa. Sem ele, a
+  // regra que o servidor aplica hoje: R$ 3 com menos de 1h.
+  function regraDaSaida(naTolerancia = false) {
+    const doServidor = activeQueue?.exitPenaltyValue;
+    if (typeof doServidor === "number") {
+      return { multa: doServidor > 0, valor: doServidor, semPrevisao: false };
+    }
+    return { multa: penalty && !naTolerancia, semPrevisao: semPrevisao && !naTolerancia };
+  }
+  const saidaAtual = saidaDaFila(regraDaSaida());
   useEffect(() => {
     if (!mostrarFaixaDeSaida) return;
     const t = setTimeout(() => setMostrarFaixaDeSaida(false), 8000);
@@ -354,7 +364,7 @@ export function QueueStatus() {
   function handleCancel() {
     // Dentro da tolerancia informada pelo servidor, sair nao tem multa (D13).
     const naTolerancia = !!activeQueue?.toleranceUntil && Date.now() < activeQueue.toleranceUntil;
-    const saida = saidaDaFila({ multa: penalty && !naTolerancia, semPrevisao: semPrevisao && !naTolerancia });
+    const saida = saidaDaFila(regraDaSaida(naTolerancia));
     const agora = Date.now();
     if (!ehToqueDuplo(ultimoToqueEmSair.current, agora)) {
       ultimoToqueEmSair.current = agora;

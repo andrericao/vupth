@@ -37,6 +37,12 @@ export interface WaitTimeResponse {
    * Opcional: o servidor ainda nao manda — sem ele o app nao mostra janela nenhuma.
    */
   toleranceUntil?: string | null;
+  /**
+   * Quanto a saida custaria AGORA (D4: R$ 3 com menos de 1h, R$ 5 com 30 min
+   * ou menos; 0 dentro da tolerancia). Pedido ao Backend em 17/09 — opcional:
+   * sem ele, o app usa a regra que o servidor aplica hoje (R$ 3, menos de 1h).
+   */
+  exitPenaltyValue?: number | null;
   startTime: string;
 }
 
