@@ -61,6 +61,7 @@ type RouteParams = {
 
 const STATUS_LABELS: Record<string, string> = {
   SCHEDULED: "Aguardando",
+  LATE: "Atrasado",
   IN_PROGRESS: "Em atendimento",
   PAUSED: "Pausado",
   FINISHED: "Concluído",

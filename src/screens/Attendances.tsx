@@ -33,7 +33,7 @@ import { useQueueStore } from "@stores/queueStore";
 import { atendimentoAtivo, atendimentoSemAvaliar, filaDoAtendimento } from "@domain/queue/reconciliar";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
-import { formatWaitTime, formatClockTime, STATUS_DESCONHECIDO } from "@domain/queue/types";
+import { formatWaitTime, formatClockTime, STATUS_DESCONHECIDO, filaEncerrada } from "@domain/queue/types";
 
 // [marca-vupth] Cada status e um PAR (fundo, texto). Antes era so uma cor de
 // FUNDO com texto branco fixo por cima, e "Atrasado" (#F59E0B + branco) dava
@@ -178,13 +178,10 @@ export function Attendances() {
     );
   }
 
-  const realizados = history.filter(
-    (a) =>
-      a.status === "FINISHED" ||
-      a.status === "CANCELLED" ||
-      a.status === "REMOVED" ||
-      a.status === "LATE",
-  );
+  // Realizados sao os atendimentos que ACABARAM. O LATE ficava aqui ate 25/09 —
+  // e o cliente atrasado lia "Atrasado" entre os encerrados, como se tivesse
+  // acabado, enquanto o profissional ainda esperava para comecar o corte.
+  const realizados = history.filter((a) => filaEncerrada(a.status));
 
   function handleGoToQueue() {
     if (!activeQueue) return;

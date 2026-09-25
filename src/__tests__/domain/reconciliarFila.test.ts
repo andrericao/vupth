@@ -37,6 +37,20 @@ describe('quais atendimentos põem o cliente na fila', () => {
     expect(estaAtivo('PAUSED')).toBe(true);
   });
 
+  it('atrasado (LATE) conta — o profissional ainda espera o corte começar', () => {
+    // Teste do Andre de 25/09: fora desta lista, quem tinha a fila refeita pelo
+    // servidor perdia a fila no app e, com ela, o aviso de atraso (q292).
+    expect(estaAtivo('LATE')).toBe(true);
+  });
+
+  it('reconstrói a fila de quem está atrasado', () => {
+    const hist = [att({ status: 'FINISHED' }), att({ id: 'atrasado', status: 'LATE' })];
+    const ativo = atendimentoAtivo(hist);
+    expect(ativo?.id).toBe('atrasado');
+    // E a fila montada carrega o LATE — é o que o aviso de atraso lê.
+    expect(filaDoAtendimento(ativo!).status).toBe('LATE');
+  });
+
   it('encerrado e cancelado NAO contam', () => {
     expect(estaAtivo('FINISHED')).toBe(false);
     expect(estaAtivo('CANCELLED')).toBe(false);

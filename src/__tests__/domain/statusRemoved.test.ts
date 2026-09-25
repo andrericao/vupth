@@ -30,6 +30,12 @@ describe('status REMOVED — a loja tirou o cliente da fila', () => {
     }
   });
 
+  it('atrasado (LATE) NÃO está encerrado — não vai para os realizados', () => {
+    // Teste do Andre de 25/09: o atendimento atrasado aparecia entre os
+    // realizados com o selo "Atrasado", como se tivesse acabado.
+    expect(filaEncerrada('LATE')).toBe(false);
+  });
+
   it('REMOVED não reconstrói a fila a partir do histórico do servidor', () => {
     expect(estaAtivo('REMOVED')).toBe(false);
   });
