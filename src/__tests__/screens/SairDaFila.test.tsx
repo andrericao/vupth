@@ -75,54 +75,72 @@ jest.mock('@components/QueueDisclaimerModal', () => ({ QueueDisclaimerModal: () 
 
 type BotaoDoAlert = { text: string; onPress?: () => unknown };
 
-function tocarEmSair(getAllByText: (t: string) => unknown[]) {
-  const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  const [botao] = getAllByText('Sair da fila');
-  fireEvent.press(botao as never);
-  const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
-  alerta.mockRestore();
-  return { titulo, mensagem, botoes };
+// D15 (Andre, 24/09): "Sair da fila" pede DOIS toques seguidos. O teste usa o
+// testID do link — o texto "Sair da fila" também aparece dentro da faixa.
+function tocar(getByTestId: (id: string) => unknown) {
+  fireEvent.press(getByTestId('leave-queue') as never);
 }
 
-describe('QueueStatus — o aviso de sair da fila', () => {
+describe('QueueStatus — sair da fila (D15)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRemaining = 20;
   });
 
-  it('com menos de 1h: explica o impacto e oferece trocar de lugar antes de sair', () => {
-    const { getAllByText } = renderWithProviders(<QueueStatus />);
-    const { mensagem, botoes } = tocarEmSair(getAllByText);
-    expect(mensagem).toMatch(/próximo cliente é chamado antes do previsto/);
-    expect(botoes.map((b) => b.text)).toEqual(['Ficar na fila', 'Trocar de lugar', 'Sair mesmo assim']);
-  });
-
-  it('"Trocar de lugar" abre as ofertas de troca e NÃO sai da fila', () => {
-    const { getAllByText, getByText } = renderWithProviders(<QueueStatus />);
-    const { botoes } = tocarEmSair(getAllByText);
-    act(() => {
-      botoes.find((b) => b.text === 'Trocar de lugar')!.onPress!();
-    });
-    expect(getByText('ofertas-de-troca')).toBeTruthy();
+  it('um toque só mostra a faixa — não sai, não pergunta nada', () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    expect(getByTestId('faixa-de-saida')).toBeTruthy();
+    expect(alerta).not.toHaveBeenCalled();
     expect(attendanceService.cancel).not.toHaveBeenCalled();
+    alerta.mockRestore();
   });
 
-  it('"Sair mesmo assim" cancela, volta ao início e limpa a fila local', async () => {
-    const { getAllByText } = renderWithProviders(<QueueStatus />);
-    const { botoes } = tocarEmSair(getAllByText);
+  it('com menos de 1h, a faixa diz o valor e o porquê — e só a multa, sem convite de troca', () => {
+    const { getByTestId, getByText, queryByText } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    expect(getByText(/sair agora gera multa de R\$ 3,00/)).toBeTruthy();
+    expect(getByText(/quem está atrás é chamado antes do previsto/)).toBeTruthy();
+    expect(queryByText(/Trocar de lugar/)).toBeNull();
+  });
+
+  it('dois toques seguidos com multa abrem "Sim / Não" — e "Não" deixa na fila', () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    tocar(getByTestId);
+    const [, , botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
+    expect(botoes.map((b) => b.text)).toEqual(['Não', 'Sim, sair']);
+    expect(attendanceService.cancel).not.toHaveBeenCalled();
+    alerta.mockRestore();
+  });
+
+  it('"Sim, sair" cancela, volta ao início e limpa a fila local', async () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    tocar(getByTestId);
+    const [, , botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
     await act(async () => {
-      await botoes.find((b) => b.text === 'Sair mesmo assim')!.onPress!();
+      await botoes.find((b) => b.text === 'Sim, sair')!.onPress!();
     });
     expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk');
     expect(mockNavigate).toHaveBeenCalledWith('home');
     expect(mockLeave).toHaveBeenCalled();
+    alerta.mockRestore();
   });
 
-  it('com 1h ou mais: só confirma, sem falar de multa', () => {
+  it('sem multa (1h ou mais), os dois toques tiram direto — sem confirmação', async () => {
     mockRemaining = 90;
-    const { getAllByText } = renderWithProviders(<QueueStatus />);
-    const { mensagem, botoes } = tocarEmSair(getAllByText);
-    expect(mensagem).toBe('Tem certeza que deseja sair da fila?');
-    expect(botoes.map((b) => b.text)).toEqual(['Não', 'Sim, sair']);
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    await act(async () => {
+      tocar(getByTestId);
+    });
+    expect(alerta).not.toHaveBeenCalled();
+    expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk');
+    alerta.mockRestore();
   });
 });

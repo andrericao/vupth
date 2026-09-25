@@ -84,14 +84,14 @@ describe('QueueStatus — nenhuma faixa enquanto a pessoa só espera (D15)', () 
 
   it('com espera longa, não há faixa nem valor na tela', () => {
     const { queryByTestId, queryByText } = renderWithProviders(<QueueStatus />);
-    expect(queryByTestId('faixa-sem-multa')).toBeNull();
+    expect(queryByTestId('faixa-de-saida')).toBeNull();
     expect(queryByText(/R\$/)).toBeNull();
   });
 
   it('com menos de 1h, também não — o valor só aparece ao tentar sair', () => {
     mockRemaining = 30;
     const { queryByTestId, queryByText } = renderWithProviders(<QueueStatus />);
-    expect(queryByTestId('faixa-sem-multa')).toBeNull();
+    expect(queryByTestId('faixa-de-saida')).toBeNull();
     expect(queryByText(/R\$/)).toBeNull();
   });
 
