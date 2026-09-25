@@ -42,6 +42,8 @@ import { useFirstRunStore } from "@stores/firstRunStore";
 import { useQueueNotifications } from "@hooks/useQueueNotifications";
 import { usePushRegistration } from "@hooks/usePushRegistration";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
+import { usePedidoDeCorte } from "@hooks/usePedidoDeCorte";
+import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
@@ -107,6 +109,7 @@ export default function App() {
   const restoreLocation = useLocationStore((s) => s.restoreLocation);
   const restoreFirstRun = useFirstRunStore((s) => s.restoreFirstRun);
   const restorePendingSwap = usePendingSwapStore((s) => s.restorePending);
+  const restorePedidosDeCorte = usePedidoDeCorteStore((s) => s.restaurar);
   const restoreFavorites = useFavoritesStore((s) => s.restoreFavorites);
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
@@ -119,6 +122,7 @@ export default function App() {
     restoreComingSoon();
     restoreLocation();
     restorePendingSwap();
+    restorePedidosDeCorte();
     restoreFirstRun();
     restoreFavorites();
     // Portao de readiness (cold start do Render): acorda o backend ANTES de liberar
@@ -140,6 +144,7 @@ export default function App() {
     restoreComingSoon,
     restoreLocation,
     restorePendingSwap,
+    restorePedidosDeCorte,
     restoreFirstRun,
   ]);
 
@@ -207,5 +212,8 @@ function QueryScopedHooks() {
   // Troca publicada de FORA da fila (F8 fatia 2): sem WS conectado, o aceite
   // chega por poll — entra na fila local e avisa quando alguem ceder.
   useOutOfQueueSwap();
+  // Pedido de corte: a resposta chega por poll e o app avisa o desfecho — nem o
+  // WebSocket (so com fila ativa) nem o push chegavam a quem so pediu corte.
+  usePedidoDeCorte();
   return null;
 }

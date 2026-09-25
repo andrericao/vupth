@@ -18,6 +18,8 @@ import { RescheduleModal } from "@components/RescheduleModal";
 import { FaixaSemMulta } from "@components/FaixaSemMulta";
 import { avisoDeSaida } from "@domain/queue/avisoDeSaida";
 import { janelaSemMulta } from "@domain/queue/janelaSemMulta";
+import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
+import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { recusaAoEntrar, atendimentoNaFilaDoProfissional } from "@domain/queue/entrarNaFila";
 import { filaDoAtendimento } from "@domain/queue/reconciliar";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
@@ -537,13 +539,26 @@ export function QueueStatus() {
                 if (!accessToken || isRequestingCut) return;
                 setIsRequestingCut(true);
                 try {
-                  await cutRequestService.create(
+                  const { data: pedido } = await cutRequestService.create(
                     { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [] },
                     accessToken,
                   );
+                  // Guarda o pedido para o app avisar a resposta (usePedidoDeCorte).
+                  await usePedidoDeCorteStore.getState().adicionar(
+                    pedidoDaResposta(
+                      pedido,
+                      {
+                        professionalId,
+                        professionalName: paramProfName ?? "",
+                        establishmentId,
+                        establishmentName: paramEstName ?? "",
+                      },
+                      Date.now(),
+                    ),
+                  );
                   Alert.alert(
                     "Pedido enviado! ⏳",
-                    "O profissional tem 5 minutos para responder. Você será avisado aqui no app.",
+                    "O profissional tem 5 minutos para responder. A resposta aparece aqui no app — o pedido fica no Início enquanto isso.",
                   );
                   navigation.goBack();
                 } catch (error: any) {
