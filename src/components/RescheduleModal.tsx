@@ -11,6 +11,7 @@ import {
   formatClockTime,
   CANCELLATION_PENALTY_VALUE,
 } from "@domain/queue/types";
+import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 
 type Props = {
   visible: boolean;
@@ -45,7 +46,7 @@ function CampoHora({
     <Center bg="$brandSurface" borderRadius="$card" px={14} py={10}>
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor="#6B706B"
+        placeholderTextColor={COR_DO_PLACEHOLDER}
         keyboardType="number-pad"
         value={value}
         onChangeText={onChangeText}

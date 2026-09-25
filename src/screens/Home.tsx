@@ -26,6 +26,7 @@ import { FilterSheet } from "@components/FilterSheet";
 import { useFavoritesStore } from "@stores/favoritesStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
+import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 
 // [marca-vupth] Saudacao por horario do dia (Pencil CLIENT · 06 Home).
 function greetingForHour(hour: number): string {
@@ -346,7 +347,7 @@ export function Home() {
               value={search}
               onChangeText={setSearch}
               placeholder="Buscar serviço ou lugar"
-              placeholderTextColor="#6B706B"
+              placeholderTextColor={COR_DO_PLACEHOLDER}
               style={[
                 {
                   fontFamily: "Inter_400Regular",

@@ -16,6 +16,7 @@ import { statusTag } from "@domain/establishment/statusTag";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { formatWaitTime } from "@domain/queue/types";
+import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 
 type SortBy = "wait" | "distance";
 
@@ -197,7 +198,7 @@ export function EstablishmentList() {
               value={search}
               onChangeText={setSearch}
               placeholder="Buscar pelo nome"
-              placeholderTextColor="#6B706B"
+              placeholderTextColor={COR_DO_PLACEHOLDER}
               style={{ fontFamily: "Inter_400Regular", fontSize: 15, color: "#163300", padding: 0 }}
               returnKeyType="search"
             />
