@@ -112,12 +112,15 @@ export function EditProfile() {
             <Text size="sm" color="$brandTextSecondary">Gênero</Text>
             <VStack gap="$2">
               {GENDER_OPTIONS.map((g) => (
+                // Sem `h`: a altura fixa de 40 brigava com a altura minima de 54 do
+                // Button — o botao era DESENHADO com 54, mas o layout reservava 40.
+                // Com quatro opcoes a diferenca somava quase um botao, e o "Salvar"
+                // subia por cima do "Outro" (print do Andre, 26/09).
                 <Button
                   key={g}
                   title={GENDER_LABELS[g]}
                   variant={gender === g ? "solid" : "outline"}
                   onPress={() => setGender(g)}
-                  h="$10"
                 />
               ))}
             </VStack>
