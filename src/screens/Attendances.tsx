@@ -34,6 +34,8 @@ import { atendimentoAtivo, atendimentoSemAvaliar, filaDoAtendimento } from "@dom
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
 import { formatWaitTime, formatClockTime, STATUS_DESCONHECIDO, filaEncerrada } from "@domain/queue/types";
+import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
+import { usePilulaDeTopo } from "@hooks/usePilulaDeTopo";
 
 // [marca-vupth] Cada status e um PAR (fundo, texto). Antes era so uma cor de
 // FUNDO com texto branco fixo por cima, e "Atrasado" (#F59E0B + branco) dava
@@ -67,6 +69,7 @@ export function Attendances() {
   // sobe com animacao e, se ja estiver no topo, nao faz nada.
   const rolagemRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   useScrollToTop(rolagemRef as never);
+  const pilula = usePilulaDeTopo();
   const { activeQueue, remaining, isInQueue, isBeingAttended, isPaused, isLate } = useQueueCountdown();
   // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
   const emAtendimento = isBeingAttended || isPaused;
@@ -209,6 +212,9 @@ export function Attendances() {
 
       <ScrollView
         ref={rolagemRef}
+        onScroll={pilula.onScroll}
+        onLayout={pilula.onLayout}
+        scrollEventThrottle={32}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
         refreshControl={
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#163300" colors={["#163300"]} />
@@ -488,6 +494,17 @@ export function Attendances() {
           )}
         </VStack>
       </ScrollView>
+      <PilulaVoltarAoTopo
+        visivel={pilula.visivel}
+        // O ScrollView daqui e o do Gluestack, cujo tipo nao expoe o `scrollTo`
+        // da instancia — que existe, porque por baixo e o do React Native.
+        onPress={() =>
+          (rolagemRef.current as unknown as { scrollTo: (o: { y: number; animated: boolean }) => void } | null)?.scrollTo({
+            y: 0,
+            animated: true,
+          })
+        }
+      />
 
       <AttendanceDetailModal
         attendance={detailFor}

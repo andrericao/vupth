@@ -25,6 +25,8 @@ import { LiveDot } from "@components/LiveDot";
 import { FilterSheet } from "@components/FilterSheet";
 import { useFavoritesStore } from "@stores/favoritesStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
+import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
+import { usePilulaDeTopo } from "@hooks/usePilulaDeTopo";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 
@@ -194,6 +196,7 @@ export function Home() {
   // sobe com animacao e, se ja estiver no topo, nao faz nada.
   const listaRef = useRef<FlatList<Establishment>>(null);
   useScrollToTop(listaRef as never);
+  const pilula = usePilulaDeTopo();
   const route = useRoute<RouteProp<AppRoutes, "home">>();
   const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -275,6 +278,9 @@ export function Home() {
           `ListHeaderComponent`: um scroll só, do topo ao fim. */}
       <FlatList
         ref={listaRef}
+        onScroll={pilula.onScroll}
+        onLayout={pilula.onLayout}
+        scrollEventThrottle={32}
         data={isLoading || isError ? [] : filteredEstablishments}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
@@ -597,6 +603,10 @@ export function Home() {
         value={selectedFilter}
         onSelect={setSelectedFilter}
         onClose={() => setShowFilter(false)}
+      />
+      <PilulaVoltarAoTopo
+        visivel={pilula.visivel}
+        onPress={() => listaRef.current?.scrollToOffset({ offset: 0, animated: true })}
       />
     </VStack>
   );
