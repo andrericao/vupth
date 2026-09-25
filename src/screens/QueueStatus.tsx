@@ -18,7 +18,7 @@ import { RescheduleModal } from "@components/RescheduleModal";
 import { saidaDaFila, ehToqueDuplo } from "@domain/queue/saidaDaFila";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
-import { recusaAoEntrar, atendimentoNaFilaDoProfissional } from "@domain/queue/entrarNaFila";
+import { recusaAoEntrar, atendimentoNaFilaDoProfissional, avisoDeFilaExistente } from "@domain/queue/entrarNaFila";
 import { filaDoAtendimento } from "@domain/queue/reconciliar";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
 import { ehNavegador } from "@utils/ehNavegador";
@@ -37,6 +37,7 @@ import {
   moveToEndErrorMessage,
   CANCELLATION_PENALTY_VALUE,
   STATUS_DESCONHECIDO,
+  filaEncerrada,
 } from "@domain/queue/types";
 import { jaSaiuDaFila, mensagemDeFalhaAoSair } from "@domain/queue/leave";
 import { useAuthStore } from "@stores/authStore";
@@ -147,6 +148,22 @@ export function QueueStatus() {
     return () => {
       mountedRef.current = false;
     };
+  }, []);
+
+  // Tentou entrar (veio com servicos escolhidos) numa fila, mas o aparelho JA
+  // tem uma fila viva: a tela mostra a existente — e agora diz por que. Roda
+  // uma vez, com o estado da ABERTURA da tela: depois dela, a fila que aparece
+  // pode ser a que esta propria tela acabou de criar.
+  const avisouFilaExistente = useRef(false);
+  useEffect(() => {
+    if (avisouFilaExistente.current) return;
+    avisouFilaExistente.current = true;
+    const atual = useQueueStore.getState().activeQueue;
+    if (!serviceItemIds?.length || !atual?.attendanceId || filaEncerrada(atual.status)) return;
+    const aviso = avisoDeFilaExistente(atual, professionalId);
+    Alert.alert(aviso.titulo, aviso.mensagem, [{ text: "Ver minha fila" }]);
+    // So na abertura, de proposito — ver o comentario acima.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

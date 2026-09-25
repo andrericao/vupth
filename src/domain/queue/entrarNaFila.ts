@@ -51,3 +51,30 @@ export function atendimentoNaFilaDoProfissional<T extends { professionalId: stri
     historico.find((a) => a.professionalId === professionalId && ocupado.includes(a.status)) ?? null
   );
 }
+
+/**
+ * O aviso quando o APARELHO ja sabe que o cliente esta numa fila (q246 reprovou
+ * em 25/09: "sou encaminhado ao servico que ja existe, mas nao aparece aviso").
+ *
+ * O dialogo de 19/09 so disparava na recusa do SERVIDOR — e o servidor so e
+ * consultado quando o aparelho nao sabe da fila. Sabendo, a tela mostrava a fila
+ * existente em silencio, e se ela fosse de OUTRO profissional, sem explicar por
+ * que a pessoa via uma fila que nao pediu.
+ */
+export function avisoDeFilaExistente(
+  atual: { professionalId: string; professionalName?: string; establishmentName?: string },
+  professionalIdTentado: string,
+): { titulo: string; mensagem: string } {
+  const quem = atual.professionalName || 'este profissional';
+  if (atual.professionalId === professionalIdTentado) {
+    return {
+      titulo: 'Você já está na fila',
+      mensagem: `Você já está na fila de ${quem} — esta é a sua vez, abaixo.`,
+    };
+  }
+  const onde = atual.establishmentName ? ` (${atual.establishmentName})` : '';
+  return {
+    titulo: 'Você já está em outra fila',
+    mensagem: `Você já está na fila de ${quem}${onde} — é ela que aparece abaixo. Para entrar em outra, saia desta primeiro.`,
+  };
+}
