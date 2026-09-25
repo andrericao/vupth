@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
+import { FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle } from "react-native";
 import { useNavigation, useRoute, useScrollToTop, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import { Search, SlidersHorizontal, ChevronRight } from "lucide-react-native";
@@ -33,6 +33,14 @@ function greetingForHour(hour: number): string {
   if (hour < 18) return "Boa tarde";
   return "Boa noite";
 }
+
+// O <input> do navegador traz borda e anel de foco proprios, que roubam a altura
+// do campo — o mesmo reset do Partner (nw/Input, RESET_WEB).
+// `outlineStyle: "none"` existe no CSS mas nao no tipo do React Native — o cast
+// e o mesmo que o Partner faz.
+const RESET_WEB = (Platform.OS === "web"
+  ? { outlineStyle: "none", outlineWidth: 0, borderWidth: 0 }
+  : null) as unknown as TextStyle | null;
 
 // "há N dias/semanas/meses" — so usado no card "Recentes", nao vale um
 // util compartilhado ainda (uso unico).
@@ -318,12 +326,18 @@ export function Home() {
 
       {/* Busca */}
       <Box px={16} pt={16}>
+        {/* 🔴 Andre, 24/09: "o texto fica espremido no input de buscar". O campo
+            tinha `padding: 0` e nenhuma altura: no Android a caixa ficava do
+            tamanho do glifo e cortava acento e descendente; na web o <input> do
+            navegador ainda trazia borda e anel de foco proprios. Agora: altura
+            minima no campo, altura de linha, sem o respiro de fonte do Android,
+            e o mesmo reset de web do Partner (b829ad5). */}
         <HStack
           bg="$brandSurface"
           borderRadius="$full"
           gap={10}
           px={16}
-          py={13}
+          minHeight={50}
           alignItems="center"
         >
           <Search size={18} color="#454745" />
@@ -333,8 +347,21 @@ export function Home() {
               onChangeText={setSearch}
               placeholder="Buscar serviço ou lugar"
               placeholderTextColor="#6B706B"
-              style={{ fontFamily: "Inter_400Regular", fontSize: 15, color: "#163300", padding: 0 }}
+              style={[
+                {
+                  fontFamily: "Inter_400Regular",
+                  fontSize: 15,
+                  lineHeight: 20,
+                  color: "#163300",
+                  paddingVertical: 12,
+                  paddingHorizontal: 0,
+                  includeFontPadding: false,
+                  textAlignVertical: "center",
+                },
+                RESET_WEB,
+              ]}
               returnKeyType="search"
+              testID="busca-home"
             />
           </Box>
           {/* Era um icone SOLTO: parecia botao e nao fazia nada (QA Alexia).
