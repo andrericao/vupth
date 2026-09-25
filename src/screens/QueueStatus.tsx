@@ -15,9 +15,7 @@ import {
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
-import { FaixaSemMulta } from "@components/FaixaSemMulta";
 import { avisoDeSaida } from "@domain/queue/avisoDeSaida";
-import { janelaSemMulta } from "@domain/queue/janelaSemMulta";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { recusaAoEntrar, atendimentoNaFilaDoProfissional } from "@domain/queue/entrarNaFila";
@@ -321,15 +319,6 @@ export function QueueStatus() {
   // Sem previsao nao da para AFIRMAR que falta menos de 1h — nem o contrario.
   // O aviso de saida diz isso com todas as letras (ver `avisoDeSaida`).
   const penalty = remaining != null && incursLatePenalty(remaining);
-
-  // A janela sem multa, dita na ENTRADA e nao so na saida (Andre, 20/09). Sai
-  // da mesma ancora da "Previsao de inicio" logo abaixo — se os dois horarios
-  // discordassem na mesma tela, nenhum dos dois valeria.
-  const janela = janelaSemMulta({
-    enteredAt: activeQueue?.enteredAt,
-    estimatedMinutes: activeQueue?.estimatedMinutes,
-    restanteMinutos: remaining,
-  });
 
   function handleCancel() {
     // D10 (17/09): com multa, o aviso explica o impacto no próximo cliente e
@@ -839,16 +828,15 @@ export function QueueStatus() {
           </Box>
         </ScrollView>
 
-        {/* Assim que ele entra, ele sabe ate quando pode desistir de graca —
-            em vez de descobrir a multa no momento em que ela o pune. Fica logo
-            ACIMA de "Sair da fila": a regra ao lado da acao que ela governa.
-            So existe nesta tela — comecado o atendimento, nao ha mais fila de
-            onde sair. */}
-        <Box px={16} pb="$2">
-          <FaixaSemMulta janela={janela} ground="marca" />
-        </Box>
+        {/* A faixa fixa de 20/09 saiu (teste de 25/09): ela empurrava "Sair da
+            fila" para fora da tela e mostrava o VALOR da multa na entrada. Pela
+            D15, enquanto a pessoa so espera nao ha faixa — ela so aparece ao
+            tentar sair.
 
-        <VStack px={16} pb={28} gap="$3.5" alignItems="center">
+            O respiro de baixo soma a barra do sistema: com um valor fixo, no
+            Android com navegacao por gestos/botoes o ultimo botao ficava por
+            baixo dela. */}
+        <VStack px={16} style={{ paddingBottom: Math.max(28, insets.bottom + 16) }} gap="$3.5" alignItems="center">
           {canReshuffle && (
             <TouchableOpacity
               onPress={handleOpenChangeTurn}

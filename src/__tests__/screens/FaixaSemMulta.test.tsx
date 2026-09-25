@@ -72,40 +72,31 @@ jest.mock('@components/RescheduleModal', () => ({ RescheduleModal: () => null })
 jest.mock('@components/RatingModal', () => ({ RatingModal: () => null }));
 jest.mock('@components/QueueDisclaimerModal', () => ({ QueueDisclaimerModal: () => null }));
 
-describe('QueueStatus — a faixa da janela sem multa', () => {
+describe('QueueStatus — nenhuma faixa enquanto a pessoa só espera (D15)', () => {
+  // A faixa fixa de 20/09 saiu no teste de 25/09: ela empurrava "Sair da fila"
+  // para fora da tela e mostrava o VALOR da multa na entrada. Pela D15, a faixa
+  // só aparece quando a pessoa tenta sair.
   beforeEach(() => {
     mockRemaining = 90;
     mockEstimated = 90;
     mockEmAtendimento = false;
   });
 
-  it('na entrada, diz até que horas dá para sair de graça', () => {
-    const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
-
-    expect(getByTestId('faixa-sem-multa')).toBeTruthy();
-    expect(getByText(/sem multa até 12:30/)).toBeTruthy();
+  it('com espera longa, não há faixa nem valor na tela', () => {
+    const { queryByTestId, queryByText } = renderWithProviders(<QueueStatus />);
+    expect(queryByTestId('faixa-sem-multa')).toBeNull();
+    expect(queryByText(/R\$/)).toBeNull();
   });
 
-  it('quando a janela acaba, a faixa muda de texto em vez de sumir', () => {
+  it('com menos de 1h, também não — o valor só aparece ao tentar sair', () => {
     mockRemaining = 30;
-    const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
-
-    expect(getByTestId('faixa-sem-multa')).toBeTruthy();
-    expect(getByText(/sair agora custa R\$ 3,00/)).toBeTruthy();
+    const { queryByTestId, queryByText } = renderWithProviders(<QueueStatus />);
+    expect(queryByTestId('faixa-sem-multa')).toBeNull();
+    expect(queryByText(/R\$/)).toBeNull();
   });
 
-  it('sem previsão, não há faixa — não se afirma o que não se sabe', () => {
-    mockRemaining = null;
-    mockEstimated = null;
-    const { queryByTestId } = renderWithProviders(<QueueStatus />);
-
-    expect(queryByTestId('faixa-sem-multa')).toBeNull();
-  });
-
-  it('em atendimento a faixa some — não há mais fila de onde sair', () => {
-    mockEmAtendimento = true;
-    const { queryByTestId } = renderWithProviders(<QueueStatus />);
-
-    expect(queryByTestId('faixa-sem-multa')).toBeNull();
+  it('"Sair da fila" continua na tela', () => {
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    expect(getByTestId('leave-queue')).toBeTruthy();
   });
 });
