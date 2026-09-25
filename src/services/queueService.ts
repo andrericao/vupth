@@ -32,6 +32,11 @@ export interface WaitTimeResponse {
   totalEstimatedMinutes: number;
   totalRemainingMinutes: number;
   estimatedWaitingTime: number;
+  /**
+   * Ate quando sair da fila e de graca (D13, pedido ao Backend em 24/09).
+   * Opcional: o servidor ainda nao manda — sem ele o app nao mostra janela nenhuma.
+   */
+  toleranceUntil?: string | null;
   startTime: string;
 }
 

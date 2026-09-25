@@ -20,6 +20,8 @@ export interface ActiveQueue {
    */
   estimatedMinutes: number | null;
   status: AttendanceStatus;
+  /** ms — ate quando sair e de graca (D13). So existe quando o SERVIDOR informa. */
+  toleranceUntil?: number | null;
   // Preenchidos quando o atendimento inicia (IN_PROGRESS): início real (ms) e
   // duração estimada do serviço (min) — para tempo decorrido + término estimado.
   startedAt?: number;

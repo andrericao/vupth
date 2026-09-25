@@ -107,6 +107,10 @@ export function useQueueCountdown() {
               );
         const patch: Partial<ActiveQueue> = { ...(reconciled ?? {}) };
         if (data.position !== q.position) patch.position = data.position;
+        // A tolerancia vem do servidor ou nao vem: o app nao a calcula, porque
+        // e o servidor que cobra (D13/D15).
+        const ate = data.toleranceUntil ? Date.parse(data.toleranceUntil) : null;
+        if ((ate || null) !== (q.toleranceUntil ?? null)) patch.toleranceUntil = ate || null;
         // Ancora do progresso: grava a posição só na PRIMEIRA leitura. Se
         // fosse reescrita a cada poll, "já passou N" seria sempre zero.
         if (q.initialPosition == null) patch.initialPosition = data.position;

@@ -16,6 +16,7 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { saidaDaFila, ehToqueDuplo } from "@domain/queue/saidaDaFila";
+import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { recusaAoEntrar, atendimentoNaFilaDoProfissional, avisoDeFilaExistente } from "@domain/queue/entrarNaFila";
@@ -351,7 +352,9 @@ export function QueueStatus() {
   // mostra a faixa — o que acontece se sair, e a instrucao. Com multa (ou sem
   // saber), os dois toques abrem "Sim / Nao"; sem multa, tiram direto.
   function handleCancel() {
-    const saida = saidaDaFila({ multa: penalty, semPrevisao });
+    // Dentro da tolerancia informada pelo servidor, sair nao tem multa (D13).
+    const naTolerancia = !!activeQueue?.toleranceUntil && Date.now() < activeQueue.toleranceUntil;
+    const saida = saidaDaFila({ multa: penalty && !naTolerancia, semPrevisao: semPrevisao && !naTolerancia });
     const agora = Date.now();
     if (!ehToqueDuplo(ultimoToqueEmSair.current, agora)) {
       ultimoToqueEmSair.current = agora;
@@ -868,6 +871,10 @@ export function QueueStatus() {
             O respiro de baixo soma a barra do sistema: com um valor fixo, no
             Android com navegacao por gestos/botoes o ultimo botao ficava por
             baixo dela. */}
+        {/* D13/D15: a tolerancia, sem preco — so com o horario do servidor. A
+            `key` recomeca a faixa quando o horario muda. */}
+        <FaixaDaTolerancia key={activeQueue?.toleranceUntil ?? 0} ate={activeQueue?.toleranceUntil} />
+
         {mostrarFaixaDeSaida && (
           <Box px={16} pb="$2">
             <Box
