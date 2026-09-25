@@ -43,9 +43,11 @@ export function instalarDialogoNativo(deps: {
   const hostMontado = deps.hostMontado ?? (() => useDialogoStore.getState().hostMontado);
 
   alvo.__vupthAlertOriginal = original;
-  alvo.alert = ((titulo: string, mensagem?: string, botoes?: any[]) => {
+  alvo.alert = ((titulo: string, mensagem?: string, botoes?: any[], opcoes?: { cancelable?: boolean }) => {
     if (!hostMontado()) {
-      original(titulo, mensagem, botoes);
+      // Repassa exatamente o que veio: sem opcoes, a mesma chamada de antes.
+      if (opcoes === undefined) original(titulo, mensagem, botoes);
+      else original(titulo, mensagem, botoes, opcoes);
       return;
     }
     const lista = botoes && botoes.length > 0 ? botoes : [{ text: "OK" }];
@@ -53,6 +55,9 @@ export function instalarDialogoNativo(deps: {
       titulo,
       mensagem,
       botoes: lista.map((b) => ({ texto: b?.text ?? "OK", estilo: b?.style ?? "default" })),
+      // Ate 25/09 o 4o argumento era ignorado: o aviso de atraso, que pede
+      // `cancelable: false`, era dado como lido pelo voltar do Android.
+      cancelavel: opcoes?.cancelable !== false,
     }).then((indice) => lista[indice]?.onPress?.());
   }) as typeof Alert.alert;
   alvo.__vupthDialogo = true;

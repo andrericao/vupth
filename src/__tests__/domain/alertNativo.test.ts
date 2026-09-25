@@ -58,3 +58,15 @@ describe("instalarDialogoNativo", () => {
     expect(alvo.alert).toBe(primeiro);
   });
 });
+
+describe('alertNativo — o cancelable do Alert chega ao diálogo', () => {
+  it('cancelable: false vira cancelavel: false', () => {
+    const { useDialogoStore } = jest.requireActual('@stores/dialogo.store');
+    const { instalarDialogoNativo } = jest.requireActual('@utils/alertNativo');
+    const alvo: { alert: (...a: unknown[]) => void } = { alert: jest.fn() };
+    useDialogoStore.setState({ atual: null, fila: [] });
+    instalarDialogoNativo({ plataforma: 'android', alvo, hostMontado: () => true });
+    alvo.alert('Você foi chamado', 'msg', [{ text: 'Entendi' }], { cancelable: false });
+    expect(useDialogoStore.getState().atual?.cancelavel).toBe(false);
+  });
+});
