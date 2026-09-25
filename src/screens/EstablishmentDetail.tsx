@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SectionList, TouchableOpacity, Alert, ImageBackground } from "react-native";
+import { SectionList, TouchableOpacity, Alert, ImageBackground, Linking } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -9,7 +9,7 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Star, Info, Heart, ChevronRight, Clock, ChevronDown } from "lucide-react-native";
+import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin } from "lucide-react-native";
 
 import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
 
@@ -23,6 +23,7 @@ import { agruparPorExpediente, emIntervalo } from "@domain/professional/expedien
 import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { isEffectivelyOpen } from "@domain/establishment/types";
+import { enderecoEmUmaLinha, linkDoMapa } from "@domain/establishment/endereco";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useEstablishmentHours, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { proximaAbertura, resumoDeHoje, semanaParaExibir } from "@domain/establishment/horarios";
@@ -221,6 +222,8 @@ export function EstablishmentDetail() {
   const hojeTexto = resumoDeHoje(horarios, agora);
   const reabre = !isOpen ? proximaAbertura(horarios, agora) : null;
   const semana = semanaParaExibir(horarios, agora);
+  const endereco = enderecoEmUmaLinha(establishment.address);
+  const mapa = linkDoMapa(establishment.address);
   const showPhoto = !!establishment.urlImage && !heroFailed;
   const minWait =
     trabalhando.length > 0
@@ -357,6 +360,30 @@ export function EstablishmentDetail() {
                   style={{ transform: [{ rotate: mostrarSemana ? "180deg" : "0deg" }] }}
                 />
               )}
+            </HStack>
+          </TouchableOpacity>
+        )}
+
+        {/* Onde fica. Logo abaixo do horario: as duas perguntas de quem vai sair
+            de casa sao "esta aberto?" e "como chego?". Tocar abre o mapa. */}
+        {endereco && (
+          <TouchableOpacity
+            onPress={() => mapa && Linking.openURL(mapa)}
+            disabled={!mapa}
+            accessibilityRole="link"
+            accessibilityLabel={`Endereço: ${endereco}. Abrir no mapa`}
+            testID="endereco-da-loja"
+          >
+            <HStack alignItems="flex-start" gap="$2" mt="$2">
+              <MapPin size={14} color="#454745" style={{ marginTop: 3 }} />
+              <Text size="sm" color="$brandTextSecondary" flex={1}>
+                {endereco}
+                {mapa ? (
+                  <Text size="sm" color="$forest" fontFamily="$heading">
+                    {"  "}Como chegar
+                  </Text>
+                ) : null}
+              </Text>
             </HStack>
           </TouchableOpacity>
         )}
