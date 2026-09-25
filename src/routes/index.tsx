@@ -1,8 +1,10 @@
+import { Platform } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AuthRoutes } from "./auth.routes";
 import { navigationRef } from "./navigationRef";
+import { linkingWeb } from "./linking";
 import { Onboarding } from "@screens/Onboarding";
 import { useFirstRunStore } from "@stores/firstRunStore";
 
@@ -30,7 +32,13 @@ export function Routes(){
 	return(
 		<SafeAreaProvider>
 		<Box flex={1} bg="$white">
-		<NavigationContainer ref={navigationRef} theme={theme}>
+		{/* Na web a navegacao entra no historico do navegador — sem isto o voltar
+		    do celular saia do site (ver linking.ts). No aparelho, nada muda. */}
+		<NavigationContainer
+			ref={navigationRef}
+			theme={theme}
+			linking={Platform.OS === "web" ? linkingWeb : undefined}
+		>
 			{restored && !onboardingSeen ? <Onboarding /> : <AuthRoutes />}
 		</NavigationContainer>
 		<OfflineBanner />
