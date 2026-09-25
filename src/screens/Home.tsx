@@ -24,7 +24,8 @@ import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
 import { FilterSheet } from "@components/FilterSheet";
 import { useFavoritesStore } from "@stores/favoritesStore";
-import { formatWaitTime } from "@domain/queue/types";
+import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
+import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 
 // [marca-vupth] Saudacao por horario do dia (Pencil CLIENT · 06 Home).
 function greetingForHour(hour: number): string {
@@ -188,7 +189,8 @@ export function Home() {
   const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
-  const { activeQueue, remaining, isInQueue } = useQueueCountdown();
+  const { activeQueue, remaining, isInQueue, isLate } = useQueueCountdown();
+  const pedidosDeCorte = usePedidoDeCorteStore((s) => s.pedidos);
   // "Recentes": ultimo atendimento CONCLUIDO de verdade. O backend nao tem
   // "favorito", entao usamos o historico. Sem historico, a secao nao aparece.
   const { data: history = [] } = useClientAttendances({ status: "FINISHED" });
@@ -364,8 +366,9 @@ export function Home() {
         </HStack>
       </Box>
 
-      {/* Fila ativa */}
-      {isInQueue && activeQueue && (
+      {/* Fila ativa. O atrasado (LATE) tambem: ele segue na fila — sem o card,
+          o Inicio dizia que nao havia nada, e o teste de 25/09 leu "acabou". */}
+      {(isInQueue || isLate) && activeQueue && (
         <Box px={16} pt={20}>
           <TouchableOpacity
             onPress={() =>
@@ -388,7 +391,7 @@ export function Home() {
                   letterSpacing={0.8}
                   color="$forest"
                 >
-                  VOCÊ ESTÁ NA FILA
+                  {isLate ? "VOCÊ FOI CHAMADO" : "VOCÊ ESTÁ NA FILA"}
                 </Text>
                 <HStack
                   bg="$forest"
@@ -435,6 +438,31 @@ export function Home() {
           </TouchableOpacity>
         </Box>
       )}
+
+      {/* Pedido de corte esperando resposta. Sem isto o cliente pedia e ficava no
+          escuro ate o fim dos 5 minutos (teste de 25/09); o desfecho chega em
+          aviso pelo usePedidoDeCorte. */}
+      {pedidosDeCorte.map((p) => (
+        <Box px={16} pt={20} key={p.id}>
+          <VStack bg="$brandSurface" borderRadius={24} gap={6} p={20} testID="pedido-de-corte">
+            <Text
+              fontFamily="$body"
+              fontSize={12}
+              fontWeight="$bold"
+              letterSpacing={0.8}
+              color="$forest"
+            >
+              PEDIDO DE CORTE ENVIADO
+            </Text>
+            <Text fontFamily="$display" fontSize={18} letterSpacing={-0.4} color="$forest">
+              Aguardando {p.professionalName || "o profissional"} responder
+            </Text>
+            <Text fontFamily="$body" fontSize={14} color="$brandTextSecondary">
+              {p.establishmentName ? `${p.establishmentName} · ` : ""}resposta até {formatClockTime(new Date(p.expiraEm))}
+            </Text>
+          </VStack>
+        </Box>
+      ))}
 
       {/* Recentes */}
       {lastVisit && (

@@ -15,7 +15,9 @@ import {
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
-import { avisoDeSaida } from "@domain/queue/avisoDeSaida";
+import { saidaDaFila, ehToqueDuplo } from "@domain/queue/saidaDaFila";
+import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
+import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { recusaAoEntrar, atendimentoNaFilaDoProfissional } from "@domain/queue/entrarNaFila";
 import { filaDoAtendimento } from "@domain/queue/reconciliar";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
@@ -34,6 +36,7 @@ import {
   rescheduleErrorMessage,
   moveToEndErrorMessage,
   CANCELLATION_PENALTY_VALUE,
+  STATUS_DESCONHECIDO,
 } from "@domain/queue/types";
 import { jaSaiuDaFila, mensagemDeFalhaAoSair } from "@domain/queue/leave";
 import { useAuthStore } from "@stores/authStore";
@@ -58,10 +61,12 @@ type RouteParams = {
 
 const STATUS_LABELS: Record<string, string> = {
   SCHEDULED: "Aguardando",
+  LATE: "Atrasado",
   IN_PROGRESS: "Em atendimento",
   PAUSED: "Pausado",
   FINISHED: "Concluído",
   CANCELLED: "Cancelado",
+  REMOVED: "Retirado pela loja",
 };
 
 export function QueueStatus() {
@@ -314,12 +319,32 @@ export function QueueStatus() {
   // Sem previsao nao da para AFIRMAR que falta menos de 1h — nem o contrario.
   // O aviso de saida diz isso com todas as letras (ver `avisoDeSaida`).
   const penalty = remaining != null && incursLatePenalty(remaining);
+  // A faixa da saida (D15): so depois do primeiro toque em "Sair da fila", e
+  // some sozinha. O texto e sempre o da regra de AGORA — nao o do momento do toque.
+  const [mostrarFaixaDeSaida, setMostrarFaixaDeSaida] = useState(false);
+  const ultimoToqueEmSair = useRef<number | null>(null);
+  const saidaAtual = saidaDaFila({ multa: penalty, semPrevisao });
+  useEffect(() => {
+    if (!mostrarFaixaDeSaida) return;
+    const t = setTimeout(() => setMostrarFaixaDeSaida(false), 8000);
+    return () => clearTimeout(t);
+  }, [mostrarFaixaDeSaida]);
 
+  // D15 (Andre, 24/09): "Sair da fila" pede DOIS toques seguidos. O primeiro so
+  // mostra a faixa — o que acontece se sair, e a instrucao. Com multa (ou sem
+  // saber), os dois toques abrem "Sim / Nao"; sem multa, tiram direto.
   function handleCancel() {
-    // D10 (17/09): com multa, o aviso explica o impacto no próximo cliente e
-    // oferece a troca de lugar — sem multa — antes de "sair mesmo assim".
-    const aviso = avisoDeSaida({ multa: penalty, podeTrocar: canReshuffle, semPrevisao });
+    const saida = saidaDaFila({ multa: penalty, semPrevisao });
+    const agora = Date.now();
+    if (!ehToqueDuplo(ultimoToqueEmSair.current, agora)) {
+      ultimoToqueEmSair.current = agora;
+      setMostrarFaixaDeSaida(true);
+      return;
+    }
+    ultimoToqueEmSair.current = null;
+
     const sair = async () => {
+      setMostrarFaixaDeSaida(false);
       // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
       // de 2026-09-07 ("sai da fila e o app fecha sozinho").
       //
@@ -347,20 +372,15 @@ export function QueueStatus() {
       navigation.navigate("home");
       await leaveQueue();
     };
-    Alert.alert(
-      aviso.titulo,
-      aviso.mensagem,
-      aviso.botoes.map((botao) => ({
-        text: botao.texto,
-        style: botao.estilo,
-        onPress:
-          botao.acao === "sair"
-            ? sair
-            : botao.acao === "trocar"
-              ? () => setShowSwapOffers(true)
-              : undefined,
-      })),
-    );
+
+    if (!saida.confirmacao) {
+      sair();
+      return;
+    }
+    Alert.alert(saida.confirmacao.titulo, saida.confirmacao.mensagem, [
+      { text: saida.confirmacao.nao, style: "cancel" },
+      { text: saida.confirmacao.sim, style: "destructive", onPress: sair },
+    ]);
   }
 
   // "Mudar minha vez": busca o ETA do fim da fila (piso de agendamento) e abre o
@@ -523,13 +543,26 @@ export function QueueStatus() {
                 if (!accessToken || isRequestingCut) return;
                 setIsRequestingCut(true);
                 try {
-                  await cutRequestService.create(
+                  const { data: pedido } = await cutRequestService.create(
                     { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [] },
                     accessToken,
                   );
+                  // Guarda o pedido para o app avisar a resposta (usePedidoDeCorte).
+                  await usePedidoDeCorteStore.getState().adicionar(
+                    pedidoDaResposta(
+                      pedido,
+                      {
+                        professionalId,
+                        professionalName: paramProfName ?? "",
+                        establishmentId,
+                        establishmentName: paramEstName ?? "",
+                      },
+                      Date.now(),
+                    ),
+                  );
                   Alert.alert(
                     "Pedido enviado! ⏳",
-                    "O profissional tem 5 minutos para responder. Você será avisado aqui no app.",
+                    "O profissional tem 5 minutos para responder. A resposta aparece aqui no app — o pedido fica no Início enquanto isso.",
                   );
                   navigation.goBack();
                 } catch (error: any) {
@@ -810,7 +843,36 @@ export function QueueStatus() {
           </Box>
         </ScrollView>
 
-        <VStack px={16} pb={28} gap="$3.5" alignItems="center">
+        {/* A faixa fixa de 20/09 saiu (teste de 25/09): ela empurrava "Sair da
+            fila" para fora da tela e mostrava o VALOR da multa na entrada. Pela
+            D15, enquanto a pessoa so espera nao ha faixa — ela so aparece ao
+            tentar sair.
+
+            O respiro de baixo soma a barra do sistema: com um valor fixo, no
+            Android com navegacao por gestos/botoes o ultimo botao ficava por
+            baixo dela. */}
+        {mostrarFaixaDeSaida && (
+          <Box px={16} pb="$2">
+            <Box
+              // Com multa, ambar: e o estado que pede atencao. Sem multa, o forest
+              // translucido do resto da tela verde.
+              bg={saidaAtual.confirmacao ? "$brandWarning" : "#1633001A"}
+              borderRadius="$card"
+              px="$3.5"
+              py="$2.5"
+              testID="faixa-de-saida"
+            >
+              <HStack alignItems="center" gap="$2">
+                <Info size={16} color="#163300" />
+                <Text size="xs" color="$forest" flex={1}>
+                  {saidaAtual.faixa}
+                </Text>
+              </HStack>
+            </Box>
+          </Box>
+        )}
+
+        <VStack px={16} style={{ paddingBottom: Math.max(28, insets.bottom + 16) }} gap="$3.5" alignItems="center">
           {canReshuffle && (
             <TouchableOpacity
               onPress={handleOpenChangeTurn}
@@ -989,7 +1051,7 @@ export function QueueStatus() {
           <HStack w="$full" justifyContent="space-between">
             <Text size="sm" color="$brandTextSecondary">Status</Text>
             <Text size="sm" fontFamily="$heading">
-              {STATUS_LABELS[status] ?? status}
+              {STATUS_LABELS[status] ?? STATUS_DESCONHECIDO}
             </Text>
           </HStack>
         </Box>

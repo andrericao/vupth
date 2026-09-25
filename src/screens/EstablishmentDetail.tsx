@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FlatList, TouchableOpacity, Alert, ImageBackground } from "react-native";
+import { SectionList, TouchableOpacity, Alert, ImageBackground } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -19,6 +19,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
 import { ProfessionalWithQueue } from "@domain/professional/types";
+import { agruparPorExpediente, emIntervalo } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { isEffectivelyOpen } from "@domain/establishment/types";
@@ -43,12 +44,16 @@ type RouteParams = {
 function ProfessionalRow({
   professional,
   lojaAberta,
+  fora,
   onPress,
 }: {
   professional: ProfessionalWithQueue;
   /** Loja fechada: ninguem esta sendo atendido, entao a linha nao pode falar
       de fila nem de "agora". Ver o mesmo conserto na Home. */
   lojaAberta: boolean;
+  /** Fora do expediente: ir para Fora FECHA a fila (regra de 09/09), entao a
+      linha nao pode oferecer entrada nem anunciar espera. */
+  fora: boolean;
   onPress: () => void;
 }) {
   const queueCount = professional.queue_count ?? 0;
@@ -71,7 +76,18 @@ function ProfessionalRow({
                 dentro de uma tela que diz "Fechada agora" — o mesmo defeito ja
                 corrigido na Home. Fechada, a linha diz o que da pra fazer. */}
             <HStack alignItems="center" gap="$2" mt="$0.5">
-              {lojaAberta ? (
+              {!lojaAberta ? (
+                <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
+                  Agendar
+                </Text>
+              ) : fora ? (
+                /* Quem esta fora do expediente nao recebe: anunciar "Sem fila ·
+                   Agora" aqui convidava para uma fila que ninguem vai atender —
+                   e era o defeito que o Partner reportou em 07/09. */
+                <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
+                  Fila fechada
+                </Text>
+              ) : (
                 <>
                   <Text size="xs" color="$brandTextPrimary" fontFamily="$heading">
                     {queueCount === 0 ? "Sem fila" : `${queueCount} na fila`}
@@ -82,11 +98,18 @@ function ProfessionalRow({
                       ? "Agora"
                       : `~${formatWaitTime(professional.estimated_wait_minutes ?? 0)}`}
                   </Text>
+                  {/* Intervalo e almoco ou saida rapida: a pessoa VOLTA e a fila
+                      dela segue andando, por isso ela fica entre quem trabalha —
+                      mas com o rotulo, senao a espera anunciada engana. */}
+                  {emIntervalo(professional.work_status) && (
+                    <>
+                      <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
+                      <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
+                        Em intervalo
+                      </Text>
+                    </>
+                  )}
                 </>
-              ) : (
-                <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
-                  Agendar
-                </Text>
               )}
             </HStack>
             <HStack alignItems="center" gap="$2" mt="$0.5">
@@ -156,10 +179,16 @@ export function EstablishmentDetail() {
     });
   }
 
-  function handleSelectShortestQueue() {
-    if (professionals.length === 0) return;
+  // "Trabalhando" e "Fora" sao secoes de TELA (contrato de 19/09): o backend
+  // manda todo mundo e quem separa e o app.
+  const { trabalhando, fora } = agruparPorExpediente(professionals);
 
-    const shortest = professionals.reduce((prev, curr) =>
+  function handleSelectShortestQueue() {
+    if (trabalhando.length === 0) return;
+
+    // ⚠️ So entre quem esta no expediente. Antes o botao podia mandar o cliente
+    // para a "menor espera" de quem foi embora — que e sempre zero.
+    const shortest = trabalhando.reduce((prev, curr) =>
       (curr.estimated_wait_minutes ?? 0) < (prev.estimated_wait_minutes ?? 0) ? curr : prev
     );
 
@@ -194,9 +223,15 @@ export function EstablishmentDetail() {
   const semana = semanaParaExibir(horarios, agora);
   const showPhoto = !!establishment.urlImage && !heroFailed;
   const minWait =
-    professionals.length > 0
-      ? Math.min(...professionals.map((p) => p.estimated_wait_minutes ?? 0))
+    trabalhando.length > 0
+      ? Math.min(...trabalhando.map((p) => p.estimated_wait_minutes ?? 0))
       : 0;
+  // Secao vazia nao entra: loja com todo mundo em expediente nao ganha um
+  // "Fora" vazio, e loja fechada (que leva todos a OFF) mostra so o "Fora".
+  const secoes = [
+    { key: "trabalhando" as const, title: "Trabalhando", data: trabalhando },
+    { key: "fora" as const, title: "Fora", data: fora },
+  ].filter((s) => s.data.length > 0);
   const rating = resolveRating(
     establishment.rating_best ?? establishment.rating_average,
     establishment.rating_count,
@@ -289,7 +324,7 @@ export function EstablishmentDetail() {
                 estar aberta com a fila drenando). */}
             {isOpen ? "Aberto agora" : "Fechada agora"}
           </Text>
-          {isOpen && professionals.length > 0 && (
+          {isOpen && trabalhando.length > 0 && (
             <>
               <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
               {/* `formatWaitTime(0)` devolve "Agora" — "menor espera Agora" fica
@@ -367,15 +402,34 @@ export function EstablishmentDetail() {
           )}
         </HStack>
 
-        <FlatList
-          data={professionals}
+        {/* O cabecalho "Trabalhando" so aparece quando existe a OUTRA secao:
+            numa loja com todo mundo em expediente ele seria rotulo sem
+            contraste. Ja o "Fora" aparece SEMPRE — sozinho, ele e justamente o
+            que explica por que ninguem esta disponivel. */}
+        <SectionList
+          sections={secoes}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
+          stickySectionHeadersEnabled={false}
           contentContainerStyle={{ paddingBottom: 12 }}
-          renderItem={({ item }) => (
+          renderSectionHeader={({ section }) =>
+            secoes.length > 1 || section.key === "fora" ? (
+              <Text
+                size="xs"
+                fontFamily="$heading"
+                color="$brandTextSecondary"
+                mb="$2"
+                testID={`secao-${section.key}`}
+              >
+                {section.title}
+              </Text>
+            ) : null
+          }
+          renderItem={({ item, section }) => (
             <ProfessionalRow
               professional={item}
               lojaAberta={isOpen}
+              fora={section.key === "fora"}
               onPress={() => handleSelectProfessional(item.id)}
             />
           )}
@@ -388,7 +442,7 @@ export function EstablishmentDetail() {
       </VStack>
 
       <VStack px={16} pb={32}>
-        {isOpen && professionals.length > 0 && (
+        {isOpen && trabalhando.length > 0 && (
           <Button title="Entrar com menor espera" onPress={handleSelectShortestQueue} />
         )}
 

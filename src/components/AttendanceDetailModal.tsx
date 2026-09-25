@@ -4,7 +4,7 @@ import { VStack, HStack, Box, Text, Heading, Badge, BadgeText, ScrollView } from
 import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
 import { ClientAttendance } from "@services/attendanceService";
-import { formatClockTime } from "@domain/queue/types";
+import { formatClockTime, STATUS_DESCONHECIDO } from "@domain/queue/types";
 
 // [marca-vupth] Este era o ultimo lugar do app na paleta ANTERIOR (#3B7A3F,
 // #E63946, #F59E0B) e a unica cor por status, com texto branco fixo por cima.
@@ -18,6 +18,7 @@ import { formatClockTime } from "@domain/queue/types";
 const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
   FINISHED: { label: "Concluído", bg: "#E2F6D5", fg: "#163300" },       // greenTint
   CANCELLED: { label: "Cancelado", bg: "#F3F5F1", fg: "#B3261E" },      // surface + danger
+  REMOVED: { label: "Retirado pela loja", bg: "#F3F5F1", fg: "#B3261E" }, // surface + danger
   LATE: { label: "Atrasado", bg: "#FFC091", fg: "#163300" },            // accentPeach
   IN_PROGRESS: { label: "Em atendimento", bg: "#9FE870", fg: "#163300" }, // brandGreen
   SCHEDULED: { label: "Aguardando", bg: "#F3F5F1", fg: "#454745" },     // surface + neutro
@@ -64,7 +65,7 @@ type Props = {
 // opção de avaliar (quando FINISHED e ainda não avaliado).
 export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = true }: Props) {
   const a = attendance;
-  const st = a ? STATUS[a.status] ?? { label: a.status, bg: "#F3F5F1", fg: "#454745" } : null;
+  const st = a ? STATUS[a.status] ?? { label: STATUS_DESCONHECIDO, bg: "#F3F5F1", fg: "#454745" } : null;
 
   return (
     <Modal visible={!!a} transparent animationType="fade" onRequestClose={onClose}>

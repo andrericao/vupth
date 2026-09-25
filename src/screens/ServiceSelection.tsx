@@ -25,6 +25,8 @@ import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
+import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
+import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
 // POUCOS lugares com sombra legitima: no Pencil o "Resumo" sobre `forest` e um
@@ -71,6 +73,7 @@ export function ServiceSelection() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
   const addPendingSwap = usePendingSwapStore((s) => s.addPending);
+  const guardarPedidoDeCorte = usePedidoDeCorteStore((s) => s.adicionar);
 
   const [services, setServices] = useState<ServiceItemResponse[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>(serviceItemIds ?? []);
@@ -210,14 +213,19 @@ export function ServiceSelection() {
     }
     setIsRequestingCut(true);
     try {
-      await cutRequestService.create(
+      const { data: pedido } = await cutRequestService.create(
         { professionalId, establishmentId, serviceItemIds: selectedIds },
         accessToken,
+      );
+      // Guarda o pedido: e o que deixa o app avisar a RESPOSTA (usePedidoDeCorte).
+      // Sem isto o cliente nunca sabia se foi aceito (teste de 25/09).
+      await guardarPedidoDeCorte(
+        pedidoDaResposta(pedido, { professionalId, professionalName, establishmentId, establishmentName }, Date.now()),
       );
       setShowMoreOptions(false);
       Alert.alert(
         "Pedido enviado! ⏳",
-        "O profissional tem 5 minutos para responder. Você será avisado aqui no app.",
+        "O profissional tem 5 minutos para responder. A resposta aparece aqui no app — o pedido fica no Início enquanto isso.",
       );
       navigation.navigate("home");
     } catch (error: any) {

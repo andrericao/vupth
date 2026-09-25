@@ -1,3 +1,5 @@
+import { WorkStatus } from "./expediente";
+
 export interface Professional {
   id: string;
   name: string;
@@ -9,6 +11,10 @@ export interface Professional {
 }
 
 export interface ProfessionalWithQueue extends Professional {
+  // Expediente (contrato de 19/09): WORKING / ON_BREAK / OFF. Opcional porque
+  // producao ainda pode rodar o backend anterior — quem le usa
+  // `@domain/professional/expediente`, onde a ausencia conta como trabalhando.
+  work_status?: WorkStatus | null;
   waiting_list: AttendanceInQueue[];
   queue_count: number;
   estimated_wait_minutes: number;

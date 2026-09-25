@@ -7,7 +7,7 @@ import { CANCELLATION_PENALTY_VALUE } from './types';
  * aviso. O toque É o registro de que ele soube: não serve tarja que passa, nem
  * texto escondido no histórico.
  *
- * A saída da fila já avisa assim (ver `avisoDeSaida`). O que faltava era o
+ * A saída da fila já avisa assim (ver `saidaDaFila`). O que faltava era o
  * ATRASO — e ele avisa MESMO QUANDO NÃO HÁ MULTA, porque a contagem é o que
  * torna a terceira vez justa: quem chega na 3ª sem nunca ter sido avisado é
  * punido por uma regra que não viu.

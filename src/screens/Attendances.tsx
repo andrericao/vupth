@@ -33,7 +33,7 @@ import { useQueueStore } from "@stores/queueStore";
 import { atendimentoAtivo, atendimentoSemAvaliar, filaDoAtendimento } from "@domain/queue/reconciliar";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
-import { formatWaitTime, formatClockTime } from "@domain/queue/types";
+import { formatWaitTime, formatClockTime, STATUS_DESCONHECIDO, filaEncerrada } from "@domain/queue/types";
 
 // [marca-vupth] Cada status e um PAR (fundo, texto). Antes era so uma cor de
 // FUNDO com texto branco fixo por cima, e "Atrasado" (#F59E0B + branco) dava
@@ -43,6 +43,10 @@ import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 const HISTORY_STATUS: Record<string, { label: string; bg: string; fg: string }> = {
   FINISHED: { label: "Concluído", bg: "#E2F6D5", fg: "#163300" },   // greenTint
   CANCELLED: { label: "Cancelado", bg: "#F3F5F1", fg: "#B3261E" },  // surface + danger
+  // A loja tirou da fila (contrato de 18/09). O CANCELLED fica "Cancelado", e nao
+  // "Você saiu da fila": os atendimentos ANTIGOS seguem CANCELLED mesmo quando foi
+  // a loja, e o rotulo pessoal poria na conta do cliente o que ele nao fez.
+  REMOVED: { label: "Retirado pela loja", bg: "#F3F5F1", fg: "#B3261E" }, // surface + danger
   LATE: { label: "Atrasado", bg: "#FFC091", fg: "#163300" },        // accentPeach
 };
 
@@ -63,7 +67,7 @@ export function Attendances() {
   // sobe com animacao e, se ja estiver no topo, nao faz nada.
   const rolagemRef = useRef<React.ComponentRef<typeof ScrollView>>(null);
   useScrollToTop(rolagemRef as never);
-  const { activeQueue, remaining, isInQueue, isBeingAttended, isPaused } = useQueueCountdown();
+  const { activeQueue, remaining, isInQueue, isBeingAttended, isPaused, isLate } = useQueueCountdown();
   // Em atendimento OU pausado = card verde de "andamento" (não é fila de espera).
   const emAtendimento = isBeingAttended || isPaused;
   const { data: history = [], isLoading, refetch, isRefetching } = useClientAttendances();
@@ -174,9 +178,10 @@ export function Attendances() {
     );
   }
 
-  const realizados = history.filter(
-    (a) => a.status === "FINISHED" || a.status === "CANCELLED" || a.status === "LATE",
-  );
+  // Realizados sao os atendimentos que ACABARAM. O LATE ficava aqui ate 25/09 —
+  // e o cliente atrasado lia "Atrasado" entre os encerrados, como se tivesse
+  // acabado, enquanto o profissional ainda esperava para comecar o corte.
+  const realizados = history.filter((a) => filaEncerrada(a.status));
 
   function handleGoToQueue() {
     if (!activeQueue) return;
@@ -251,7 +256,9 @@ export function Attendances() {
             EM ANDAMENTO
           </Text>
 
-          {activeQueue && (isInQueue || emAtendimento) ? (
+          {/* O atrasado (LATE) e atendimento EM ANDAMENTO: ate 25/09 ele caia em
+              "Nenhum atendimento em andamento" e ia para os realizados. */}
+          {activeQueue && (isInQueue || emAtendimento || isLate) ? (
             <TouchableOpacity onPress={handleGoToQueue}>
               {/* Unico card com borda verde-marca da tela: e o atendimento
                   VIVO, o que a pessoa abriu o app pra ver. */}
@@ -292,6 +299,8 @@ export function Attendances() {
                       ? "Em atendimento"
                       : isPaused
                         ? "Pausado"
+                        : isLate
+                          ? "Você foi chamado"
                         : remaining == null
                           ? "Calculando..."
                           : formatWaitTime(remaining)}
@@ -431,7 +440,7 @@ export function Attendances() {
             <VStack gap="$3">
               {realizados.map((a) => {
                 const st = HISTORY_STATUS[a.status] ?? {
-                  label: a.status,
+                  label: STATUS_DESCONHECIDO,
                   bg: "#F3F5F1",
                   fg: "#454745",
                 };

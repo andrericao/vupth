@@ -20,8 +20,17 @@ import { AttendanceStatus } from './types';
 // `listClientHistory` — o poll do `useQueueCountdown` ja os encontra pelo id.
 // O que faltava era usa-los quando o local esta vazio.
 
-/** Status em que o cliente ESTA na fila (ou na cadeira) e precisa ver a tela. */
-const ATIVOS: AttendanceStatus[] = ['SCHEDULED', 'IN_PROGRESS', 'PAUSED'];
+/**
+ * Status em que o cliente ESTA na fila (ou na cadeira) e precisa ver a tela.
+ *
+ * ⚠️ O LATE e VIVO: o cliente foi chamado e nao chegou, mas para o
+ * profissional o atendimento segue esperando o corte comecar. Ate 25/09 ele
+ * ficava fora desta lista — quem tinha a fila refeita pelo servidor perdia a
+ * fila no app, e com ela o aviso de atraso, que so dispara com a fila no
+ * aparelho (teste do Andre de 25/09, q292). E a mesma lista do
+ * `entrarNaFila`, que ja contava o LATE como ocupado.
+ */
+const ATIVOS: AttendanceStatus[] = ['SCHEDULED', 'LATE', 'IN_PROGRESS', 'PAUSED'];
 
 export function estaAtivo(status: string): boolean {
   return (ATIVOS as string[]).includes(status);

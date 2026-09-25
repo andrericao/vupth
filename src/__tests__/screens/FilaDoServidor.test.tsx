@@ -135,3 +135,21 @@ describe('Atendimentos — o servidor manda quando o aparelho esqueceu', () => {
     expect(mockJoin).not.toHaveBeenCalled();
   });
 });
+
+describe('Atendimentos — o atrasado segue em andamento', () => {
+  // Teste do Andre de 25/09: marcado como atrasado, o atendimento ia para os
+  // realizados e a aba dizia "Nenhum atendimento em andamento".
+  beforeEach(() => jest.clearAllMocks());
+
+  it('com a fila em LATE, mostra o card de andamento — e não o vazio', () => {
+    mockCountdown.mockReturnValue({
+      activeQueue: { attendanceId: 'a1', status: 'LATE', establishmentName: 'Barbearia', professionalName: 'Carlos', enteredAt: Date.now(), estimatedMinutes: 0 },
+      remaining: 0, semPrevisao: false, isInQueue: false, isBeingAttended: false, isPaused: false, isLate: true,
+    });
+    mockHistory.mockReturnValue({ data: [{ ...aguardando, status: 'LATE' }], isLoading: false, refetch: jest.fn(), isRefetching: false });
+
+    const { getByText, queryByText } = renderWithProviders(<Attendances />);
+    expect(getByText('Você foi chamado')).toBeTruthy();
+    expect(queryByText('Nenhum atendimento em andamento')).toBeNull();
+  });
+});
