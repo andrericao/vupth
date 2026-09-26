@@ -13,6 +13,14 @@ describe('EstablishmentService', () => {
     expect(response.data[0].name).toBe('Barbearia Top');
   });
 
+  it('getAll não manda mais o includeAll — a fechada já vem por padrão', async () => {
+    mock.onGet('/establishment').reply((config) => [200, [config.params ?? {}]]);
+    const semGps = await establishmentService.getAll();
+    expect(semGps.data[0]).toEqual({});
+    const comGps = await establishmentService.getAll({ latitude: -22.9, longitude: -43.2 });
+    expect(comGps.data[0]).toEqual({ lat: -22.9, lng: -43.2 });
+  });
+
   it('getPraOntem pede só as abertas agora e com profissional, com a coordenada em par', async () => {
     mock.onGet('/establishment').reply((config) => [200, [config.params]]);
 
