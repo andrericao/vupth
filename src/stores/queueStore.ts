@@ -24,6 +24,8 @@ export interface ActiveQueue {
   toleranceUntil?: number | null;
   /** Quanto a saida custaria agora, SEGUNDO O SERVIDOR (D4). Ausente = regra de hoje. */
   exitPenaltyValue?: number | null;
+  /** Atrasos que contam (wait-time) — o aviso de atraso diz "este é o seu Nº". */
+  lateCount?: number | null;
   // Preenchidos quando o atendimento inicia (IN_PROGRESS): início real (ms) e
   // duração estimada do serviço (min) — para tempo decorrido + término estimado.
   startedAt?: number;

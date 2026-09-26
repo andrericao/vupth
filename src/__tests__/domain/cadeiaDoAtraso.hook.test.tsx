@@ -61,4 +61,26 @@ describe('a cadeia do aviso de atraso', () => {
       ),
     );
   });
+
+  it('com o lateCount do wait-time (Backend e328629), o aviso diz qual atraso é', async () => {
+    mockWait.mockResolvedValue({
+      data: { attendanceId: 'a1', position: 2, estimatedWaitingTime: 10, lateCount: 2, latesUntilPenalty: 1 },
+    });
+    mockHistory.mockResolvedValue({ data: [{ id: 'a1', status: 'LATE', services: [] }] });
+
+    renderHook(() => {
+      useQueueCountdown();
+      useAvisoDeAtraso();
+    });
+
+    await waitFor(() => expect(useQueueStore.getState().activeQueue?.lateCount).toBe(2));
+    await waitFor(() =>
+      expect(Alert.alert).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.stringMatching(/Este é o seu 2º atraso/),
+        expect.any(Array),
+        { cancelable: false },
+      ),
+    );
+  });
 });
