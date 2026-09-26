@@ -29,6 +29,19 @@ describe('AttendanceService', () => {
     expect(response.data.status).toBe('CANCELLED');
   });
 
+  it('cancel leva a ciência da multa: o valor confirmado vai em acknowledgedPenalty', async () => {
+    mock.onPut('/attendances/att-1/cancel').reply((config) => [200, { params: config.params ?? null }]);
+
+    const comMulta = await attendanceService.cancel('att-1', 'my-token', 5);
+    expect((comMulta.data as any).params).toEqual({ acknowledgedPenalty: '5.00' });
+
+    const semMulta = await attendanceService.cancel('att-1', 'my-token');
+    expect((semMulta.data as any).params).toBeNull();
+
+    const zero = await attendanceService.cancel('att-1', 'my-token', 0);
+    expect((zero.data as any).params).toBeNull();
+  });
+
   it('listClientHistory deve buscar GET /attendances/client/me com Bearer token', async () => {
     mock.onGet('/attendances/client/me').reply((config) => {
       expect(config.headers?.Authorization).toBe('Bearer my-token');

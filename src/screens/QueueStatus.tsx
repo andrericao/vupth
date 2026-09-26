@@ -15,7 +15,7 @@ import {
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
-import { saidaDaFila, ehToqueDuplo } from "@domain/queue/saidaDaFila";
+import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor } from "@domain/queue/saidaDaFila";
 import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
@@ -41,7 +41,7 @@ import {
   STATUS_DESCONHECIDO,
   filaEncerrada,
 } from "@domain/queue/types";
-import { jaSaiuDaFila, mensagemDeFalhaAoSair } from "@domain/queue/leave";
+import { jaSaiuDaFila, mensagemDeFalhaAoSair, multaSemCiencia } from "@domain/queue/leave";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -376,7 +376,7 @@ export function QueueStatus() {
     }
     ultimoToqueEmSair.current = null;
 
-    const sair = async () => {
+    const sair = async (valorConfirmado: number | null) => {
       setMostrarFaixaDeSaida(false);
       // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
       // de 2026-09-07 ("sai da fila e o app fecha sozinho").
@@ -391,9 +391,21 @@ export function QueueStatus() {
       //    `activeQueue` nulo. Navegar primeiro tira a tela do caminho.
       try {
         if (attendanceId && accessToken) {
-          await attendanceService.cancel(attendanceId, accessToken);
+          await attendanceService.cancel(attendanceId, accessToken, valorConfirmado ?? undefined);
         }
       } catch (error) {
+        // Ciencia da multa: o servidor so tira da fila com o "Sim" ao valor que
+        // ELE cobra. Sem o valor (ou com um menor), 409 — e o cliente continua
+        // na fila. Mostra o aviso com o valor dele e repete no "Sim".
+        const valorDoServidor = multaSemCiencia(error);
+        if (valorDoServidor != null) {
+          const aviso = avisoDaMultaDoServidor(valorDoServidor);
+          Alert.alert(aviso.titulo, aviso.mensagem, [
+            { text: aviso.nao, style: "cancel" },
+            { text: aviso.sim, style: "destructive", onPress: () => sair(valorDoServidor) },
+          ]);
+          return;
+        }
         // Ja nao esta na fila (o profissional removeu, ou um toque duplo
         // cancelou antes): o objetivo do usuario esta cumprido. Segue pra
         // limpeza, senao ele fica preso numa tela de fila que nao existe.
@@ -407,12 +419,12 @@ export function QueueStatus() {
     };
 
     if (!saida.confirmacao) {
-      sair();
+      sair(null);
       return;
     }
     Alert.alert(saida.confirmacao.titulo, saida.confirmacao.mensagem, [
       { text: saida.confirmacao.nao, style: "cancel" },
-      { text: saida.confirmacao.sim, style: "destructive", onPress: sair },
+      { text: saida.confirmacao.sim, style: "destructive", onPress: () => sair(saida.valorConfirmado) },
     ]);
   }
 

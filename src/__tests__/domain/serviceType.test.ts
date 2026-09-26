@@ -42,8 +42,25 @@ describe('serviceTypeLabel', () => {
 describe('formatSpecialty', () => {
   it('traduz a especialidade que veio como categoria em inglês', () => {
     // Era exatamente isto que aparecia embaixo do nome do profissional.
-    expect(formatSpecialty('BARBER')).toBe('Barbearia');
     expect(formatSpecialty('NAIL_SALON')).toBe('Manicure');
+    expect(formatSpecialty('BEAUTY_SALON')).toBe('Salão');
+  });
+
+  // Andre, 26/09: na tela da loja, a faixa dos profissionais mostrava "NAIL_TECH".
+  // É o código que o cadastro do Partner grava.
+  it('traduz os códigos do cadastro do Partner — BARBER é o profissional, não a loja', () => {
+    expect(formatSpecialty('BARBER')).toBe('Barbeiro');
+    expect(formatSpecialty('HAIRDRESSER')).toBe('Cabeleireiro(a)');
+    expect(formatSpecialty('NAIL_TECH')).toBe('Manicure');
+    expect(formatSpecialty('EYEBROW_TECH')).toBe('Designer de sobrancelha');
+    expect(formatSpecialty('MASSEUSE')).toBe('Massagista');
+    expect(formatSpecialty('ESTHETICIAN')).toBe('Esteticista');
+    expect(formatSpecialty('nail_tech')).toBe('Manicure');
+  });
+
+  it('código que ainda não conhecemos nunca aparece cru', () => {
+    expect(formatSpecialty('TATTOO_ARTIST')).toBe('');
+    expect(formatSpecialty('TATTOO_ARTIST, Colorista')).toBe('Colorista');
   });
 
   it('PRESERVA quem escreveu a especialidade de verdade', () => {
@@ -53,7 +70,7 @@ describe('formatSpecialty', () => {
   });
 
   it('trata lista separada por vírgula, misturando os dois casos', () => {
-    expect(formatSpecialty('BARBER, Colorista')).toBe('Barbearia, Colorista');
+    expect(formatSpecialty('BARBER, Colorista')).toBe('Barbeiro, Colorista');
   });
 
   it('vazio, nulo e indefinido viram string vazia (não "undefined" na tela)', () => {

@@ -10,7 +10,25 @@
 // seria pior do que a falha original.
 
 export interface ErroDeApi {
-  response?: { status?: number; data?: { code?: string; message?: string } };
+  response?: {
+    status?: number;
+    data?: { code?: string; message?: string; exitPenaltyValue?: number | string | null };
+  };
+}
+
+/**
+ * O servidor recusou a saida porque a multa nao foi confirmada (ou foi
+ * confirmada com valor menor — a multa subiu no meio). Devolve o valor que ele
+ * cobra, para o app mostrar o aviso e repetir no "Sim". `null` = nao e esse erro.
+ * Ciencia da multa: Backend 0caf229, em producao desde 26/09.
+ */
+export function multaSemCiencia(error: unknown): number | null {
+  const err = error as ErroDeApi | null | undefined;
+  if (err?.response?.status !== 409) return null;
+  const data = err.response.data;
+  if (data?.code !== "EXIT_PENALTY_NOT_ACKNOWLEDGED") return null;
+  const valor = Number(data.exitPenaltyValue);
+  return Number.isFinite(valor) && valor > 0 ? valor : null;
 }
 
 /**
