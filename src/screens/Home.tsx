@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef, memo } from "react";
 import { FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle } from "react-native";
 import { useNavigation, useRoute, useScrollToTop, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
-import { Search, SlidersHorizontal, ChevronRight } from "lucide-react-native";
+import { Search, SlidersHorizontal, ChevronRight, Zap } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType } from "@domain/establishment/types";
@@ -11,7 +11,8 @@ import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity"
 import { statusTag } from "@domain/establishment/statusTag";
 import { serviceTypeLabel } from "@domain/establishment/serviceType";
 import { primeiroNome } from "@domain/auth/displayName";
-import { useEstablishments } from "@hooks/useEstablishments";
+import { useEstablishments, usePraOntem } from "@hooks/useEstablishments";
+import { ordenarPraOntem, rotuloPraOntem } from "@domain/establishment/praOntem";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { useAuthStore } from "@stores/authStore";
@@ -108,9 +109,12 @@ function StatusPill({ label, live }: { label: string; live: boolean }) {
 const EstablishmentRow = memo(function EstablishmentRow({
   establishment,
   distanceKm,
+  destaque,
   onPress,
 }: {
   establishment: Establishment;
+  // "Pra ontem": em quanto tempo a pessoa senta na cadeira, contando o caminho.
+  destaque?: string | null;
   // Distancia real (GPS). null = device sem coordenada ou loja ainda nao
   // geocodificada pelo backend — a linha some, a loja nunca some da lista.
   distanceKm: number | null;
@@ -128,9 +132,8 @@ const EstablishmentRow = memo(function EstablishmentRow({
   // distancia, em vez de imprimir "undefined".
   const tag = statusTag(establishment);
 
-  const meta: string[] = establishment.serviceType
-    ? [serviceTypeLabel(establishment.serviceType)]
-    : [];
+  const meta: string[] = destaque ? [destaque] : [];
+  if (establishment.serviceType) meta.push(serviceTypeLabel(establishment.serviceType));
   if (distanceKm != null) meta.push(formatDistanceKm(distanceKm));
 
   return (
@@ -191,6 +194,9 @@ export function Home() {
   const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<ServiceType | "ALL">("ALL");
   const [showFilter, setShowFilter] = useState(false);
+  // "Pra ontem" (Andre, 26/09): quem tem compromisso e precisa cortar ja ve so
+  // as lojas abertas e livres, de quem atende primeiro, contando o caminho.
+  const [praOntem, setPraOntem] = useState(false);
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   // Tocar na aba JA ATIVA volta ao topo da lista (Andre, 18/09): e o gesto que
@@ -201,7 +207,9 @@ export function Home() {
   useScrollToTop(listaRef as never);
   const pilula = usePilulaDeTopo();
   const route = useRoute<RouteProp<AppRoutes, "home">>();
-  const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
+  const todas = useEstablishments();
+  const livres = usePraOntem(praOntem);
+  const { data: establishments = [], isLoading, isError, refetch, isRefetching } = praOntem ? livres : todas;
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const { activeQueue, remaining, isInQueue, isLate } = useQueueCountdown();
@@ -251,12 +259,14 @@ export function Home() {
   // Favoritos sobem ao topo — e o que faz o coracao da tela da loja valer
   // alguma coisa (do contrario ele preenche um icone e nao muda nada).
   const favoriteIds = useFavoritesStore((s) => s.ids);
-  const filteredEstablishments = orderForHome(
-    filterEstablishments(establishments, search, selectedFilter),
-    coords != null,
-    location,
-    favoriteIds,
-  );
+  const filteredEstablishments = praOntem
+    ? ordenarPraOntem(filterEstablishments(establishments, search, selectedFilter))
+    : orderForHome(
+        filterEstablishments(establishments, search, selectedFilter),
+        coords != null,
+        location,
+        favoriteIds,
+      );
 
   const onRefresh = useCallback(() => {
     refetch();
@@ -274,11 +284,12 @@ export function Home() {
         <EstablishmentRow
           establishment={item}
           distanceKm={item.distance_km ?? null}
+          destaque={praOntem ? rotuloPraOntem(item) : null}
           onPress={handleEstablishmentPress}
         />
       </Box>
     ),
-    [handleEstablishmentPress],
+    [handleEstablishmentPress, praOntem],
   );
 
   // Sem nome cadastrado, cai no apelido do e-mail — NUNCA no texto de
@@ -417,6 +428,41 @@ export function Home() {
           </TouchableOpacity>
         </HStack>
       </Box>
+
+      {/* "Pra ontem": liga e desliga. Ligado, a secao de baixo mostra so as
+          abertas e livres, na ordem de quem atende primeiro. */}
+      <HStack px={16} pt={12}>
+        <TouchableOpacity
+          onPress={() => setPraOntem((v) => !v)}
+          accessibilityRole="button"
+          accessibilityState={{ selected: praOntem }}
+          accessibilityLabel={
+            praOntem
+              ? "Pra ontem ligado: só lojas abertas e livres. Tocar para ver todas"
+              : "Pra ontem: tenho um compromisso e preciso cortar já"
+          }
+          testID="pra-ontem"
+        >
+          <HStack
+            bg={praOntem ? "$forest" : "$brandSurface"}
+            borderRadius="$full"
+            gap={8}
+            px={16}
+            py={10}
+            alignItems="center"
+          >
+            <Zap size={16} color={praOntem ? "#9FE870" : "#163300"} />
+            <Text
+              fontFamily="$display"
+              fontSize={14}
+              fontWeight="$bold"
+              color={praOntem ? "$brandGreen" : "$forest"}
+            >
+              Pra ontem
+            </Text>
+          </HStack>
+        </TouchableOpacity>
+      </HStack>
 
       {/* Fila ativa. O atrasado (LATE) tambem: ele segue na fila — sem o card,
           o Inicio dizia que nao havia nada, e o teste de 25/09 leu "acabou". */}
@@ -573,20 +619,35 @@ export function Home() {
             letterSpacing={-0.3}
             color="$brandTextPrimary"
           >
-            Perto de você
+            {praOntem ? "Pra ontem" : "Perto de você"}
           </Text>
           {/* Leva a lista cheia (Pencil CLIENT · 07), carregando o filtro de
               categoria que estiver ativo aqui. Antes apontava para a propria
               Home — era um link morto. */}
-          <TouchableOpacity
-            onPress={() => navigation.navigate("establishmentList", { filter: selectedFilter })}
-            testID="see-all"
-          >
-            <Text fontFamily="$body" fontSize={14} fontWeight="$semibold" color="$brandTextSecondary">
-              Ver todos
-            </Text>
-          </TouchableOpacity>
+          {praOntem ? (
+            <TouchableOpacity onPress={() => setPraOntem(false)} testID="pra-ontem-sair">
+              <Text fontFamily="$body" fontSize={14} fontWeight="$semibold" color="$brandTextSecondary">
+                Ver todas
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("establishmentList", { filter: selectedFilter })}
+              testID="see-all"
+            >
+              <Text fontFamily="$body" fontSize={14} fontWeight="$semibold" color="$brandTextSecondary">
+                Ver todos
+              </Text>
+            </TouchableOpacity>
+          )}
         </HStack>
+        {praOntem && (
+          <Text fontFamily="$body" fontSize={13} color="$brandTextSecondary">
+            {coords
+              ? "Abertas agora, de quem te atende primeiro — já contando o caminho até lá."
+              : "Abertas agora, da menor espera. Ligue a localização para contar o caminho."}
+          </Text>
+        )}
         </VStack>
           </>
         }
@@ -610,7 +671,9 @@ export function Home() {
             </Center>
           ) : (
             <Center mt={40}>
-              <Text color="$brandTextSecondary">Nenhum estabelecimento encontrado</Text>
+              <Text color="$brandTextSecondary">
+                {praOntem ? "Nenhuma loja aberta e livre agora" : "Nenhum estabelecimento encontrado"}
+              </Text>
             </Center>
           )
         }

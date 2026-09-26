@@ -13,6 +13,22 @@ describe('EstablishmentService', () => {
     expect(response.data[0].name).toBe('Barbearia Top');
   });
 
+  it('getPraOntem pede só as abertas agora e com profissional, com a coordenada em par', async () => {
+    mock.onGet('/establishment').reply((config) => [200, [config.params]]);
+
+    const comGps = await establishmentService.getPraOntem({ latitude: -22.9, longitude: -43.2 });
+    expect(comGps.data[0]).toEqual({
+      openNow: true,
+      hasAvailability: true,
+      sort: 'wait',
+      lat: -22.9,
+      lng: -43.2,
+    });
+
+    const semGps = await establishmentService.getPraOntem(null);
+    expect(semGps.data[0]).toEqual({ openNow: true, hasAvailability: true, sort: 'wait' });
+  });
+
   it('getById deve retornar estabelecimento específico', async () => {
     mock.onGet('/establishment/id/est-1').reply(200, {
       id: 'est-1',

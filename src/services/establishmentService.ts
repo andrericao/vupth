@@ -49,6 +49,24 @@ export const establishmentService = {
     });
   },
 
+  /**
+   * Busca "Pra ontem" (Andre, 26/09): so as lojas ABERTAS AGORA e com
+   * profissional com servico — o corte e os filtros sao do servidor (06/09).
+   * Com `coords` vem a distancia; a ordem final (quem atende primeiro,
+   * contando o caminho) e do app — `domain/establishment/praOntem`.
+   */
+  getPraOntem(coords?: Coords | null) {
+    return api.get<Establishment[]>('/establishment', {
+      params: {
+        openNow: true,
+        hasAvailability: true,
+        sort: 'wait',
+        // Tem de ir o PAR: coordenada pela metade é 422 no backend.
+        ...(coords ? { lat: coords.latitude, lng: coords.longitude } : {}),
+      },
+    });
+  },
+
   getById(id: string) {
     return api.get<Establishment>(`/establishment/id/${id}`);
   },

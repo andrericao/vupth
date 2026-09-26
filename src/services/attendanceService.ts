@@ -17,6 +17,9 @@ export interface AttendanceResponse {
   establishmentId: string;
   status: string;
   scheduledTime: string;
+  // Backend 782db11 (26/09): o horario pedido (targetTime) caiu numa refeicao e
+  // o atendimento foi para depois dela — scheduledTime e o horario real.
+  placedAfterBreak?: boolean;
 }
 
 export interface CancelAttendanceResponse {
@@ -63,6 +66,7 @@ export interface AttendanceInQueueResponse {
   scheduledTime: string;
   isIntent?: boolean;
   targetTime?: string | null;
+  placedAfterBreak?: boolean;
 }
 
 export const attendanceService = {

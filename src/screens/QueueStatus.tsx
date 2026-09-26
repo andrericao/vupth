@@ -21,6 +21,7 @@ import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { recusaAoEntrar, atendimentoNaFilaDoProfissional, avisoDeFilaExistente } from "@domain/queue/entrarNaFila";
 import { filaDoAtendimento } from "@domain/queue/reconciliar";
+import { avisoDepoisDoIntervalo, avisoDoReagendamento } from "@domain/queue/horarioPedido";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
 import { ehNavegador } from "@utils/ehNavegador";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
@@ -216,6 +217,8 @@ export function QueueStatus() {
         );
         if (mountedRef.current) {
           await updateQueue({ attendanceId: data.id });
+          const aviso = avisoDepoisDoIntervalo(data);
+          if (aviso) Alert.alert(aviso.titulo, aviso.mensagem);
         }
       } catch (error: any) {
         // Limpa a fila otimista para não deixar tarja/banner residual sem atendimento real.
@@ -453,10 +456,8 @@ export function QueueStatus() {
         estimatedMinutes: Math.max(0, Math.round((targetMs - Date.now()) / 60000)),
       });
       setShowReschedule(false);
-      Alert.alert(
-        "Horário reservado",
-        "Você cedeu a vez e será chamado por volta do horário escolhido. Pode variar um pouco.",
-      );
+      const aviso = avisoDoReagendamento(data);
+      Alert.alert(aviso.titulo, aviso.mensagem);
       refresh();
     } catch (error: any) {
       Alert.alert(
