@@ -17,6 +17,8 @@ export interface ProfessionalWithQueue extends Professional {
   work_status?: WorkStatus | null;
   // Fila ou so agenda (Backend 8e6c00f) — ver `@domain/professional/modo`.
   operation_mode?: 'QUEUE' | 'AGENDA_ONLY' | null;
+  // Foto de perfil (Backend 46f1f74, em producao) — null sem foto: ficam as iniciais.
+  profile_image_url?: string | null;
   waiting_list: AttendanceInQueue[];
   queue_count: number;
   estimated_wait_minutes: number;

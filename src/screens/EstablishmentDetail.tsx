@@ -74,7 +74,9 @@ function ProfessionalRow({
     <TouchableOpacity onPress={onPress} testID={`professional-${professional.id}`}>
       <Box bg="$brandSurface" p="$3" mb="$3" borderRadius="$card">
         <HStack alignItems="center" gap="$3">
-          <PlaceAvatar name={professional.name} />
+          {/* Foto quando o profissional tiver (Partner 1.4.0); sem ela, ou com
+              URL quebrada, o PlaceAvatar volta para as iniciais. */}
+          <PlaceAvatar name={professional.name} photoUrl={professional.profile_image_url} />
           <VStack flex={1}>
             <Text fontFamily="$heading" fontSize="$sm" color="$forest">
               {professional.name}
