@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports -- isolateModules precisa do require para recarregar o modulo com o mock */
 import { copiarTexto, carregarClipboard } from '@utils/copiar';
 import { raizDoSite, linkParaCompartilhar } from '@routes/linking';
 
