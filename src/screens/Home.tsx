@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, memo } from "react";
 import { FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle } from "react-native";
 import { useNavigation, useRoute, useScrollToTop, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
@@ -102,7 +102,10 @@ function StatusPill({ label, live }: { label: string; live: boolean }) {
   );
 }
 
-function EstablishmentRow({
+// Memorizada (Andre, 18/09: "apresentar de acordo como o usuario vai
+// scrollando"): a Home re-renderiza a cada tique do countdown, a cada letra da
+// busca e quando a pilula aparece — e cada vez redesenhava TODAS as linhas.
+const EstablishmentRow = memo(function EstablishmentRow({
   establishment,
   distanceKm,
   onPress,
@@ -111,7 +114,7 @@ function EstablishmentRow({
   // Distancia real (GPS). null = device sem coordenada ou loja ainda nao
   // geocodificada pelo backend — a linha some, a loja nunca some da lista.
   distanceKm: number | null;
-  onPress: () => void;
+  onPress: (establishment: Establishment) => void;
 }) {
   // "Aberta AGORA" efetiva (inclui horario de funcionamento) — loja OPEN fora
   // do horario mostra fechada (feedback Andre 2026-07-22).
@@ -131,7 +134,7 @@ function EstablishmentRow({
   if (distanceKm != null) meta.push(formatDistanceKm(distanceKm));
 
   return (
-    <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>
+    <TouchableOpacity onPress={() => onPress(establishment)} testID={`establishment-${establishment.id}`}>
       {/* Fechada entra APAGADA (decisao da design, 2026-08-26) — o mesmo
           tratamento nas duas listas.
 
@@ -182,7 +185,7 @@ function EstablishmentRow({
       </HStack>
     </TouchableOpacity>
   );
-}
+});
 
 export function Home() {
   const [search, setSearch] = useState("");
@@ -259,9 +262,24 @@ export function Home() {
     refetch();
   }, [refetch]);
 
-  function handleEstablishmentPress(establishment: Establishment) {
-    navigation.navigate("establishmentDetail", { establishmentId: establishment.id });
-  }
+  // Estavel entre renders: e o que deixa a linha memorizada nao redesenhar.
+  const handleEstablishmentPress = useCallback(
+    (establishment: Establishment) =>
+      navigation.navigate("establishmentDetail", { establishmentId: establishment.id }),
+    [navigation],
+  );
+  const renderLoja = useCallback(
+    ({ item }: { item: Establishment }) => (
+      <Box px={16}>
+        <EstablishmentRow
+          establishment={item}
+          distanceKm={item.distance_km ?? null}
+          onPress={handleEstablishmentPress}
+        />
+      </Box>
+    ),
+    [handleEstablishmentPress],
+  );
 
   // Sem nome cadastrado, cai no apelido do e-mail — NUNCA no texto de
   // visitante. "Estabelecimentos" e o que quem nao entrou ve; usar o mesmo
@@ -572,15 +590,15 @@ export function Home() {
         </VStack>
           </>
         }
-        renderItem={({ item }) => (
-          <Box px={16}>
-            <EstablishmentRow
-              establishment={item}
-              distanceKm={item.distance_km ?? null}
-              onPress={() => handleEstablishmentPress(item)}
-            />
-          </Box>
-        )}
+        renderItem={renderLoja}
+        // Desenha a primeira dobra ja e o resto em lotes, conforme rola (Andre,
+        // 18/09). Com 59 lojas em producao, desenhar tudo de uma vez segurava a
+        // tela; a paginacao da chamada e a outra metade, do Backend.
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        updateCellsBatchingPeriod={50}
+        windowSize={7}
+        removeClippedSubviews={Platform.OS === "android"}
         ListEmptyComponent={
           isLoading ? (
             <Box px={16}>
