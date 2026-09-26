@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SectionList, TouchableOpacity, Alert, ImageBackground, Linking } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -32,6 +32,8 @@ import { useFavoritesStore } from "@stores/favoritesStore";
 
 type RouteParams = {
   establishmentId: string;
+  /** Link compartilhado apontando um profissional (24/09). */
+  profissional?: string;
 };
 
 // Linha do profissional (Pencil CLIENT · 08 Estabelecimento).
@@ -140,7 +142,7 @@ export function EstablishmentDetail() {
   const insets = useSafeAreaInsets();
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const { establishmentId } = route.params as RouteParams;
+  const { establishmentId, profissional: profissionalDoLink } = route.params as RouteParams;
 
   const { data: establishment, isLoading, isError } = useEstablishment(establishmentId);
   // C22 — o horário por DIA da semana (contrato de 16/09, no ar em staging
@@ -187,6 +189,20 @@ export function EstablishmentDetail() {
   // "Trabalhando" e "Fora" sao secoes de TELA (contrato de 19/09): o backend
   // manda todo mundo e quem separa e o app.
   const { trabalhando, fora } = agruparPorExpediente(professionals);
+
+  // Link compartilhado com `?profissional=` (24/09): assim que a loja e a
+  // lista chegam, abre os servicos dele — uma vez so, para o voltar trazer a
+  // pessoa a loja, e nao reabrir o profissional.
+  const abriuDoLink = useRef(false);
+  useEffect(() => {
+    if (!profissionalDoLink || abriuDoLink.current || !establishment) return;
+    if (!professionals.some((p) => p.id === profissionalDoLink)) return;
+    abriuDoLink.current = true;
+    handleSelectProfessional(profissionalDoLink);
+    // handleSelectProfessional e recriada a cada render; o que importa aqui e
+    // ter a loja e o profissional na mao.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profissionalDoLink, establishment, professionals]);
 
   function handleSelectShortestQueue() {
     if (trabalhando.length === 0) return;

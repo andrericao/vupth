@@ -29,7 +29,9 @@ import { ServiceType } from "@domain/establishment/types";
 export type AppRoutes = {
   home: { filter?: ServiceType | "ALL" } | undefined;
   establishmentList: { filter?: ServiceType | "ALL" } | undefined;
-  establishmentDetail: { establishmentId: string };
+  // `profissional`: chegou por link compartilhado apontando um profissional
+  // (`/loja/:id?profissional=...`, 24/09) — a tela abre direto os servicos dele.
+  establishmentDetail: { establishmentId: string; profissional?: string };
   login: {
     redirectTo?: string;
     establishmentId?: string;

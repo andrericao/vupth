@@ -49,3 +49,21 @@ describe('linking da web', () => {
     expect(JSON.stringify(telaDoCaminho('/perfil/dados', opcoes))).toContain('editProfile');
   });
 });
+
+describe('o link para compartilhar (24/09)', () => {
+  const { linkParaCompartilhar } = jest.requireActual('../../routes/linking');
+
+  it('a loja', () => {
+    expect(linkParaCompartilhar('https://vupth.pages.dev/', 'e1')).toBe('https://vupth.pages.dev/loja/e1');
+  });
+
+  it('a loja já abrindo um profissional', () => {
+    expect(linkParaCompartilhar('https://vupth.pages.dev', 'e1', 'p9')).toBe('https://vupth.pages.dev/loja/e1?profissional=p9');
+  });
+
+  it('o link do profissional reabre a loja com o profissional nos parâmetros', () => {
+    const estado = JSON.stringify(telaDoCaminho('/loja/e1?profissional=p9', opcoes));
+    expect(estado).toContain('establishmentDetail');
+    expect(estado).toContain('"profissional":"p9"');
+  });
+});
