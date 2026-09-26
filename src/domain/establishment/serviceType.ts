@@ -23,13 +23,38 @@ export function serviceTypeLabel(value: string): string {
 }
 
 /**
+ * Codigos de especialidade que o cadastro do Partner grava (onboarding do
+ * profissional) — os mesmos rotulos de la (`vupth-partner/src/lib/especialidade.ts`).
+ * Andre, 26/09: na tela da loja, a faixa dos profissionais mostrava "NAIL_TECH".
+ * `BARBER` aqui e o PROFISSIONAL ("Barbeiro"), nao a loja ("Barbearia").
+ */
+export const SPECIALTY_LABELS: Record<string, string> = {
+  BARBER: 'Barbeiro',
+  HAIRDRESSER: 'Cabeleireiro(a)',
+  NAIL_TECH: 'Manicure',
+  EYEBROW_TECH: 'Designer de sobrancelha',
+  MASSEUSE: 'Massagista',
+  ESTHETICIAN: 'Esteticista',
+};
+
+/** Parece codigo de sistema ("NAIL_TECH"), e nao texto escrito por alguem. */
+const PARECE_CODIGO = /^[A-Z][A-Z0-9]*(_[A-Z0-9]+)+$/;
+
+function especialidade(parte: string): string {
+  const codigo = parte.toUpperCase();
+  const nome = SPECIALTY_LABELS[codigo] ?? SERVICE_TYPE_LABELS[codigo as ServiceType];
+  if (nome) return nome;
+  // Codigo que ainda nao conhecemos nunca vai cru para a tela.
+  return PARECE_CODIGO.test(parte) ? '' : parte;
+}
+
+/**
  * Especialidade do profissional, para exibicao.
  *
- * No backend `specialty` e **texto livre** ("Corte masculino", "Colorista") —
- * nao e enum. Mas parte dos cadastros foi preenchida com a categoria em ingles
- * (`BARBER`, `NAIL_SALON`), e era isso que aparecia embaixo do nome do
- * profissional. Traduzimos o que reconhecemos e devolvemos o resto **intacto**:
- * mapear a forco quebraria quem escreveu a especialidade de verdade.
+ * O cadastro do Partner grava um CODIGO (`NAIL_TECH`, `HAIRDRESSER`…), e
+ * cadastros antigos trazem a categoria da loja (`NAIL_SALON`) ou texto livre
+ * ("Colorista"). Traduz os codigos conhecidos, esconde os desconhecidos e deixa
+ * o texto livre intacto — mapear a forca quebraria quem escreveu de verdade.
  *
  * Aceita lista separada por virgula, que e como alguns cadastros vieram.
  */
@@ -37,7 +62,7 @@ export function formatSpecialty(raw: string | null | undefined): string {
   if (!raw) return '';
   return raw
     .split(',')
-    .map((part) => serviceTypeLabel(part.trim()))
+    .map((part) => especialidade(part.trim()))
     .filter((part) => part.length > 0)
     .join(', ');
 }
