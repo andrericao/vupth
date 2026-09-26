@@ -1,6 +1,6 @@
 import { MOCK_ESTABLISHMENTS } from '@domain/establishment/mockData';
 import { Establishment, isEffectivelyOpen } from '@domain/establishment/types';
-import { filterEstablishments, sortEstablishments } from '@domain/establishment/filter';
+import { filterEstablishments, sortEstablishments, paraBusca } from '@domain/establishment/filter';
 
 describe('Home - Filtro de Estabelecimentos', () => {
   it('esconde as fechadas sem sinal de profissional agendavel (interim, aguarda backend)', () => {
@@ -189,5 +189,26 @@ describe('isEffectivelyOpen', () => {
   it('sem is_open (mocks/legado), cai no open_status', () => {
     expect(isEffectivelyOpen({ ...base, open_status: 'OPEN' })).toBe(true);
     expect(isEffectivelyOpen({ ...base, open_status: 'CLOSED' })).toBe(false);
+  });
+});
+
+describe('busca sem acento (Andre, 24/09)', () => {
+  // "A pesquisa pelo salão deve desconsiderar maiúsculas e minúsculas e
+  // acentuação." Antes, "salao" não achava o "Salão".
+  const loja = (name: string) =>
+    ({ id: name, name, open_status: 'OPEN', is_open: true, estimated_wait_minutes: 10, services: [] }) as unknown as Establishment;
+
+  it('"salao" acha o "Salão Bella"', () => {
+    const r = filterEstablishments([loja('Salão Bella'), loja('Barbearia do Zé')], 'salao', 'ALL');
+    expect(r.map((e) => e.name)).toEqual(['Salão Bella']);
+  });
+
+  it('o acento na busca também é ignorado: "barbearia do ze" acha a do Zé', () => {
+    const r = filterEstablishments([loja('Barbearia do Zé')], 'BARBEARIA DO ZE', 'ALL');
+    expect(r).toHaveLength(1);
+  });
+
+  it('paraBusca tira acento, maiúscula e espaço das pontas', () => {
+    expect(paraBusca('  Ação Çapão ')).toBe('acao capao');
   });
 });

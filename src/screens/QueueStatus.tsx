@@ -16,9 +16,10 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { saidaDaFila, ehToqueDuplo } from "@domain/queue/saidaDaFila";
+import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
-import { recusaAoEntrar, atendimentoNaFilaDoProfissional } from "@domain/queue/entrarNaFila";
+import { recusaAoEntrar, atendimentoNaFilaDoProfissional, avisoDeFilaExistente } from "@domain/queue/entrarNaFila";
 import { filaDoAtendimento } from "@domain/queue/reconciliar";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
 import { ehNavegador } from "@utils/ehNavegador";
@@ -37,6 +38,7 @@ import {
   moveToEndErrorMessage,
   CANCELLATION_PENALTY_VALUE,
   STATUS_DESCONHECIDO,
+  filaEncerrada,
 } from "@domain/queue/types";
 import { jaSaiuDaFila, mensagemDeFalhaAoSair } from "@domain/queue/leave";
 import { useAuthStore } from "@stores/authStore";
@@ -147,6 +149,22 @@ export function QueueStatus() {
     return () => {
       mountedRef.current = false;
     };
+  }, []);
+
+  // Tentou entrar (veio com servicos escolhidos) numa fila, mas o aparelho JA
+  // tem uma fila viva: a tela mostra a existente — e agora diz por que. Roda
+  // uma vez, com o estado da ABERTURA da tela: depois dela, a fila que aparece
+  // pode ser a que esta propria tela acabou de criar.
+  const avisouFilaExistente = useRef(false);
+  useEffect(() => {
+    if (avisouFilaExistente.current) return;
+    avisouFilaExistente.current = true;
+    const atual = useQueueStore.getState().activeQueue;
+    if (!serviceItemIds?.length || !atual?.attendanceId || filaEncerrada(atual.status)) return;
+    const aviso = avisoDeFilaExistente(atual, professionalId);
+    Alert.alert(aviso.titulo, aviso.mensagem, [{ text: "Ver minha fila" }]);
+    // So na abertura, de proposito — ver o comentario acima.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -323,7 +341,17 @@ export function QueueStatus() {
   // some sozinha. O texto e sempre o da regra de AGORA — nao o do momento do toque.
   const [mostrarFaixaDeSaida, setMostrarFaixaDeSaida] = useState(false);
   const ultimoToqueEmSair = useRef<number | null>(null);
-  const saidaAtual = saidaDaFila({ multa: penalty, semPrevisao });
+  // Quanto sair custa AGORA. Com o valor do servidor (D4: R$ 3 / R$ 5, zero na
+  // tolerancia), ele manda — inclusive para dizer que nao ha multa. Sem ele, a
+  // regra que o servidor aplica hoje: R$ 3 com menos de 1h.
+  function regraDaSaida(naTolerancia = false) {
+    const doServidor = activeQueue?.exitPenaltyValue;
+    if (typeof doServidor === "number") {
+      return { multa: doServidor > 0, valor: doServidor, semPrevisao: false };
+    }
+    return { multa: penalty && !naTolerancia, semPrevisao: semPrevisao && !naTolerancia };
+  }
+  const saidaAtual = saidaDaFila(regraDaSaida());
   useEffect(() => {
     if (!mostrarFaixaDeSaida) return;
     const t = setTimeout(() => setMostrarFaixaDeSaida(false), 8000);
@@ -334,7 +362,9 @@ export function QueueStatus() {
   // mostra a faixa — o que acontece se sair, e a instrucao. Com multa (ou sem
   // saber), os dois toques abrem "Sim / Nao"; sem multa, tiram direto.
   function handleCancel() {
-    const saida = saidaDaFila({ multa: penalty, semPrevisao });
+    // Dentro da tolerancia informada pelo servidor, sair nao tem multa (D13).
+    const naTolerancia = !!activeQueue?.toleranceUntil && Date.now() < activeQueue.toleranceUntil;
+    const saida = saidaDaFila(regraDaSaida(naTolerancia));
     const agora = Date.now();
     if (!ehToqueDuplo(ultimoToqueEmSair.current, agora)) {
       ultimoToqueEmSair.current = agora;
@@ -851,6 +881,10 @@ export function QueueStatus() {
             O respiro de baixo soma a barra do sistema: com um valor fixo, no
             Android com navegacao por gestos/botoes o ultimo botao ficava por
             baixo dela. */}
+        {/* D13/D15: a tolerancia, sem preco — so com o horario do servidor. A
+            `key` recomeca a faixa quando o horario muda. */}
+        <FaixaDaTolerancia key={activeQueue?.toleranceUntil ?? 0} ate={activeQueue?.toleranceUntil} />
+
         {mostrarFaixaDeSaida && (
           <Box px={16} pb="$2">
             <Box

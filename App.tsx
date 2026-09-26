@@ -21,6 +21,8 @@ import { useFonts } from "expo-font";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { instalarDialogoNativo } from "@utils/alertNativo";
 import { DialogoVupth } from "@components/DialogoVupth";
+import { ConviteDeTroca } from "@components/ConviteDeTroca";
+import { useConviteDeTroca } from "@hooks/useConviteDeTroca";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 
@@ -200,6 +202,7 @@ export default function App() {
         {/* Um so na arvore, FORA do portao de fonte: um aviso disparado antes
             de a fonte carregar precisa aparecer do mesmo jeito. */}
         <DialogoVupth />
+        <ConviteDeTroca />
       </GluestackUIProvider>
     </PersistQueryClientProvider>
   );
@@ -215,5 +218,8 @@ function QueryScopedHooks() {
   // Pedido de corte: a resposta chega por poll e o app avisa o desfecho — nem o
   // WebSocket (so com fila ativa) nem o push chegavam a quem so pediu corte.
   usePedidoDeCorte();
+  // Convite de troca como popup em qualquer tela (D16) — antes a oferta so era
+  // buscada com a tela da fila aberta, e o outro cliente nao a achava.
+  useConviteDeTroca();
   return null;
 }

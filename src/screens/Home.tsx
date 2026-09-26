@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from "react";
-import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
+import { useState, useCallback, useEffect, useRef, memo } from "react";
+import { FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle } from "react-native";
 import { useNavigation, useRoute, useScrollToTop, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import { Search, SlidersHorizontal, ChevronRight } from "lucide-react-native";
@@ -25,7 +25,10 @@ import { LiveDot } from "@components/LiveDot";
 import { FilterSheet } from "@components/FilterSheet";
 import { useFavoritesStore } from "@stores/favoritesStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
+import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
+import { usePilulaDeTopo } from "@hooks/usePilulaDeTopo";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
+import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 
 // [marca-vupth] Saudacao por horario do dia (Pencil CLIENT · 06 Home).
 function greetingForHour(hour: number): string {
@@ -33,6 +36,14 @@ function greetingForHour(hour: number): string {
   if (hour < 18) return "Boa tarde";
   return "Boa noite";
 }
+
+// O <input> do navegador traz borda e anel de foco proprios, que roubam a altura
+// do campo — o mesmo reset do Partner (nw/Input, RESET_WEB).
+// `outlineStyle: "none"` existe no CSS mas nao no tipo do React Native — o cast
+// e o mesmo que o Partner faz.
+const RESET_WEB = (Platform.OS === "web"
+  ? { outlineStyle: "none", outlineWidth: 0, borderWidth: 0 }
+  : null) as unknown as TextStyle | null;
 
 // "há N dias/semanas/meses" — so usado no card "Recentes", nao vale um
 // util compartilhado ainda (uso unico).
@@ -91,7 +102,10 @@ function StatusPill({ label, live }: { label: string; live: boolean }) {
   );
 }
 
-function EstablishmentRow({
+// Memorizada (Andre, 18/09: "apresentar de acordo como o usuario vai
+// scrollando"): a Home re-renderiza a cada tique do countdown, a cada letra da
+// busca e quando a pilula aparece — e cada vez redesenhava TODAS as linhas.
+const EstablishmentRow = memo(function EstablishmentRow({
   establishment,
   distanceKm,
   onPress,
@@ -100,7 +114,7 @@ function EstablishmentRow({
   // Distancia real (GPS). null = device sem coordenada ou loja ainda nao
   // geocodificada pelo backend — a linha some, a loja nunca some da lista.
   distanceKm: number | null;
-  onPress: () => void;
+  onPress: (establishment: Establishment) => void;
 }) {
   // "Aberta AGORA" efetiva (inclui horario de funcionamento) — loja OPEN fora
   // do horario mostra fechada (feedback Andre 2026-07-22).
@@ -120,7 +134,7 @@ function EstablishmentRow({
   if (distanceKm != null) meta.push(formatDistanceKm(distanceKm));
 
   return (
-    <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>
+    <TouchableOpacity onPress={() => onPress(establishment)} testID={`establishment-${establishment.id}`}>
       {/* Fechada entra APAGADA (decisao da design, 2026-08-26) — o mesmo
           tratamento nas duas listas.
 
@@ -171,7 +185,7 @@ function EstablishmentRow({
       </HStack>
     </TouchableOpacity>
   );
-}
+});
 
 export function Home() {
   const [search, setSearch] = useState("");
@@ -185,6 +199,7 @@ export function Home() {
   // sobe com animacao e, se ja estiver no topo, nao faz nada.
   const listaRef = useRef<FlatList<Establishment>>(null);
   useScrollToTop(listaRef as never);
+  const pilula = usePilulaDeTopo();
   const route = useRoute<RouteProp<AppRoutes, "home">>();
   const { data: establishments = [], isLoading, isError, refetch, isRefetching } = useEstablishments();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -247,9 +262,24 @@ export function Home() {
     refetch();
   }, [refetch]);
 
-  function handleEstablishmentPress(establishment: Establishment) {
-    navigation.navigate("establishmentDetail", { establishmentId: establishment.id });
-  }
+  // Estavel entre renders: e o que deixa a linha memorizada nao redesenhar.
+  const handleEstablishmentPress = useCallback(
+    (establishment: Establishment) =>
+      navigation.navigate("establishmentDetail", { establishmentId: establishment.id }),
+    [navigation],
+  );
+  const renderLoja = useCallback(
+    ({ item }: { item: Establishment }) => (
+      <Box px={16}>
+        <EstablishmentRow
+          establishment={item}
+          distanceKm={item.distance_km ?? null}
+          onPress={handleEstablishmentPress}
+        />
+      </Box>
+    ),
+    [handleEstablishmentPress],
+  );
 
   // Sem nome cadastrado, cai no apelido do e-mail — NUNCA no texto de
   // visitante. "Estabelecimentos" e o que quem nao entrou ve; usar o mesmo
@@ -266,6 +296,9 @@ export function Home() {
           `ListHeaderComponent`: um scroll só, do topo ao fim. */}
       <FlatList
         ref={listaRef}
+        onScroll={pilula.onScroll}
+        onLayout={pilula.onLayout}
+        scrollEventThrottle={32}
         data={isLoading || isError ? [] : filteredEstablishments}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
@@ -318,12 +351,18 @@ export function Home() {
 
       {/* Busca */}
       <Box px={16} pt={16}>
+        {/* 🔴 Andre, 24/09: "o texto fica espremido no input de buscar". O campo
+            tinha `padding: 0` e nenhuma altura: no Android a caixa ficava do
+            tamanho do glifo e cortava acento e descendente; na web o <input> do
+            navegador ainda trazia borda e anel de foco proprios. Agora: altura
+            minima no campo, altura de linha, sem o respiro de fonte do Android,
+            e o mesmo reset de web do Partner (b829ad5). */}
         <HStack
           bg="$brandSurface"
           borderRadius="$full"
           gap={10}
           px={16}
-          py={13}
+          minHeight={50}
           alignItems="center"
         >
           <Search size={18} color="#454745" />
@@ -332,9 +371,22 @@ export function Home() {
               value={search}
               onChangeText={setSearch}
               placeholder="Buscar serviço ou lugar"
-              placeholderTextColor="#6B706B"
-              style={{ fontFamily: "Inter_400Regular", fontSize: 15, color: "#163300", padding: 0 }}
+              placeholderTextColor={COR_DO_PLACEHOLDER}
+              style={[
+                {
+                  fontFamily: "Inter_400Regular",
+                  fontSize: 15,
+                  lineHeight: 20,
+                  color: "#163300",
+                  paddingVertical: 12,
+                  paddingHorizontal: 0,
+                  includeFontPadding: false,
+                  textAlignVertical: "center",
+                },
+                RESET_WEB,
+              ]}
               returnKeyType="search"
+              testID="busca-home"
             />
           </Box>
           {/* Era um icone SOLTO: parecia botao e nao fazia nada (QA Alexia).
@@ -538,15 +590,15 @@ export function Home() {
         </VStack>
           </>
         }
-        renderItem={({ item }) => (
-          <Box px={16}>
-            <EstablishmentRow
-              establishment={item}
-              distanceKm={item.distance_km ?? null}
-              onPress={() => handleEstablishmentPress(item)}
-            />
-          </Box>
-        )}
+        renderItem={renderLoja}
+        // Desenha a primeira dobra ja e o resto em lotes, conforme rola (Andre,
+        // 18/09). Com 59 lojas em producao, desenhar tudo de uma vez segurava a
+        // tela; a paginacao da chamada e a outra metade, do Backend.
+        initialNumToRender={6}
+        maxToRenderPerBatch={6}
+        updateCellsBatchingPeriod={50}
+        windowSize={7}
+        removeClippedSubviews={Platform.OS === "android"}
         ListEmptyComponent={
           isLoading ? (
             <Box px={16}>
@@ -569,6 +621,10 @@ export function Home() {
         value={selectedFilter}
         onSelect={setSelectedFilter}
         onClose={() => setShowFilter(false)}
+      />
+      <PilulaVoltarAoTopo
+        visivel={pilula.visivel}
+        onPress={() => listaRef.current?.scrollToOffset({ offset: 0, animated: true })}
       />
     </VStack>
   );

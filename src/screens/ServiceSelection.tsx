@@ -27,6 +27,7 @@ import { useAuthStore } from "@stores/authStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
+import { regraDaMulta } from "@domain/queue/saidaDaFila";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
 // POUCOS lugares com sombra legitima: no Pencil o "Resumo" sobre `forest` e um
@@ -47,6 +48,8 @@ type RouteParams = {
   establishmentName: string;
   estimatedWaitMinutes: number;
   establishmentOpen?: boolean;
+  // Profissional em "Fora": a entrada na fila nao age; o caminho e o corte.
+  profissionalFora?: boolean;
   // Seleção restaurada ao voltar do portão de auth (visitante que logou).
   serviceItemIds?: string[];
   // Tamanho da fila do profissional: a posição do cliente é este número + 1.
@@ -66,6 +69,7 @@ export function ServiceSelection() {
     establishmentOpen,
     serviceItemIds,
     queueCount,
+    profissionalFora,
   } = route.params as RouteParams;
   // Ausente = aberta (fluxos legados). false = fila fechada agora.
   const storeOpen = establishmentOpen ?? true;
@@ -232,7 +236,12 @@ export function ServiceSelection() {
       const code = error.response?.data?.code;
       const msg =
         code === "CUT_REQUEST_NOT_ALLOWED"
-          ? "A loja está aberta agora — dá para entrar na fila normalmente."
+          ? profissionalFora
+            ? // O servidor ainda recusa corte com a loja aberta (pedido de 07/09,
+              // reforcado em 24/09). Dizer "entre na fila" aqui mandaria a
+              // pessoa para a fila de quem nao esta atendendo.
+              `${professionalName || "Este profissional"} está fora agora e ainda não recebe pedidos por aqui. Escolha alguém que está trabalhando, ou agende.`
+            : "A loja está aberta agora — dá para entrar na fila normalmente."
           : error.response?.data?.message || "Erro ao enviar o pedido de corte";
       Alert.alert("Erro", msg);
     } finally {
@@ -244,7 +253,8 @@ export function ServiceSelection() {
   // fechada a primária é agendar, então o corte entra aqui; com ela aberta, a
   // primária é entrar na fila e o agendar entra aqui. A troca vale nos dois.
   const moreOptions: MoreOption[] = [
-    ...(storeOpen
+    // Com o profissional Fora, o corte e a acao principal: o menu leva o agendar.
+    ...(storeOpen || profissionalFora
       ? [
           {
             key: "schedule",
@@ -396,7 +406,7 @@ export function ServiceSelection() {
                 {/* Posicao so entra quando a tela sabe o tamanho da fila. Quem
                     chega aqui por outro caminho (volta do login) nao recebe o
                     dado — melhor omitir a linha do que chutar um numero. */}
-                {queueCount != null && storeOpen && (
+                {queueCount != null && storeOpen && !profissionalFora && (
                   <HStack justifyContent="space-between" alignItems="center">
                     <Text size="sm" color="#FFFFFFB3">
                       Sua posição
@@ -406,7 +416,7 @@ export function ServiceSelection() {
                     </Text>
                   </HStack>
                 )}
-                {storeOpen && (
+                {storeOpen && !profissionalFora && (
                   <HStack justifyContent="space-between" alignItems="center">
                     <Text size="sm" color="#FFFFFFB3">
                       Começa por volta de
@@ -415,6 +425,13 @@ export function ServiceSelection() {
                       {estimatedStartTime(openedAt, estimatedWaitMinutes)}
                     </Text>
                   </HStack>
+                )}
+                {/* A regra da multa ANTES do toque que coloca na fila (CDC).
+                    Ate 25/09 o app so falava de multa na hora de sair. */}
+                {storeOpen && !profissionalFora && (
+                  <Text size="xs" color="#FFFFFFB3" testID="regra-da-multa">
+                    {regraDaMulta()}
+                  </Text>
                 )}
               </VStack>
             )}
@@ -425,7 +442,17 @@ export function ServiceSelection() {
               {/* Uma ação primária só (Andre 2026-08-01): loja aberta = entrar na
                   fila; fechada = agendar (badge AGENDAR). O resto — solicitar
                   corte, entrar por troca — vive no menu "Mais opções". */}
-              {storeOpen ? (
+              {profissionalFora ? (
+                // Fora do expediente a fila esta fechada: nao ha "Entrar na fila"
+                // a oferecer. O pedido de corte deixa o profissional decidir
+                // (Andre, 07/09 e 24/09).
+                <Button
+                  title={isRequestingCut ? "Enviando pedido..." : `Solicitar corte · R$ ${totalPrice.toFixed(2)}`}
+                  testID="primary-cut"
+                  isDisabled={isRequestingCut}
+                  onPress={handleRequestCut}
+                />
+              ) : storeOpen ? (
                 <Button
                   title={`Entrar na fila · R$ ${totalPrice.toFixed(2)}`}
                   testID="primary-queue"

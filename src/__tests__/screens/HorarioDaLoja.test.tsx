@@ -96,3 +96,12 @@ describe('EstablishmentDetail — horário por dia (C22)', () => {
     expect(getByText('Aberto agora')).toBeTruthy();
   });
 });
+
+describe('EstablishmentDetail — o endereço', () => {
+  beforeEach(() => mockHours.mockReturnValue({ data: undefined }));
+
+  it('sem endereço no payload, a tela não ganha linha nenhuma', () => {
+    const { queryByTestId } = renderWithProviders(<EstablishmentDetail />);
+    expect(queryByTestId('endereco-da-loja')).toBeNull();
+  });
+});

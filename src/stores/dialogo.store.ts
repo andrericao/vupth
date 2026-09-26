@@ -25,12 +25,19 @@ export type PedidoDialogo = {
   titulo: string;
   mensagem?: string;
   botoes?: BotaoDialogo[];
+  /**
+   * `false` = o voltar do Android NAO fecha — so um botao responde. E o
+   * `cancelable: false` do Alert (ex.: o aviso de atraso, onde o toque e o
+   * registro de que a pessoa soube). Ausente = o voltar responde como cancelar.
+   */
+  cancelavel?: boolean;
 };
 
 type DialogoNaTela = {
   titulo: string;
   mensagem?: string;
   botoes: Required<BotaoDialogo>[];
+  cancelavel: boolean;
   resolver: (indice: number) => void;
 };
 
@@ -79,6 +86,7 @@ export function abrirDialogo(pedido: PedidoDialogo): Promise<number> {
       titulo: pedido.titulo,
       mensagem: pedido.mensagem,
       botoes: normalizar(pedido.botoes),
+      cancelavel: pedido.cancelavel !== false,
       resolver: resolve,
     });
   });

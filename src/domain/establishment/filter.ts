@@ -21,8 +21,18 @@ export function sortEstablishments(list: Establishment[]): Establishment[] {
 }
 
 /**
+ * O texto como a busca o compara: sem maiuscula e SEM ACENTO (Andre, 24/09: "a
+ * pesquisa pelo salao deve desconsiderar maiusculas e minusculas e
+ * acentuacao"). Quem digita "salao" num teclado sem acento tem de achar o
+ * "Salão" — antes a busca dizia que nao havia nada.
+ */
+export function paraBusca(texto: string): string {
+  return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+/**
  * Filtra a lista de estabelecimentos da Home.
- * - busca por nome (case-insensitive)
+ * - busca por nome (sem maiuscula e sem acento — `paraBusca`)
  * - filtro por categoria (serviceType)
  * - **ABERTA AGORA** (`is_open` efetivo — inclui o horário de funcionamento):
  *   esconde quem não tem profissional com serviço — o backend sinaliza com
@@ -39,7 +49,7 @@ export function filterEstablishments(
   selectedFilter: ServiceType | 'ALL',
 ): Establishment[] {
   return establishments.filter((e) => {
-    const matchesSearch = e.name.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = paraBusca(e.name).includes(paraBusca(search));
     const matchesFilter = selectedFilter === 'ALL' || e.serviceType === selectedFilter;
     const visibleByAvailability = isEffectivelyOpen(e)
       ? e.estimated_wait_minutes !== null

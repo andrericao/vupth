@@ -107,6 +107,12 @@ export function useQueueCountdown() {
               );
         const patch: Partial<ActiveQueue> = { ...(reconciled ?? {}) };
         if (data.position !== q.position) patch.position = data.position;
+        // A tolerancia vem do servidor ou nao vem: o app nao a calcula, porque
+        // e o servidor que cobra (D13/D15).
+        const ate = data.toleranceUntil ? Date.parse(data.toleranceUntil) : null;
+        if ((ate || null) !== (q.toleranceUntil ?? null)) patch.toleranceUntil = ate || null;
+        const valor = typeof data.exitPenaltyValue === 'number' ? data.exitPenaltyValue : null;
+        if (valor !== (q.exitPenaltyValue ?? null)) patch.exitPenaltyValue = valor;
         // Ancora do progresso: grava a posição só na PRIMEIRA leitura. Se
         // fosse reescrita a cada poll, "já passou N" seria sempre zero.
         if (q.initialPosition == null) patch.initialPosition = data.position;
@@ -153,6 +159,18 @@ export function useQueueCountdown() {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [activeQueue, accessToken, user?.id, updateQueue]);
+
+  // Uma consulta JA na abertura (e quando a fila passa a ser outro atendimento).
+  // Ate 26/09 a primeira so vinha depois do intervalo inteiro — ate 2 min com a
+  // previsao acima de 10 min —, e quem era chamado com a previsao ainda alta
+  // esperava esse tempo pelo aviso de atraso (q292 reprovou em 25/09). Chaveada
+  // no `attendanceId`, e nao na fila inteira: cada consulta atualiza a fila, e
+  // reconsultar a cada atualizacao viraria um laco.
+  useEffect(() => {
+    if (!activeQueue?.attendanceId) return;
+    const primeira = setTimeout(() => pollRef.current(), 0);
+    return () => clearTimeout(primeira);
+  }, [activeQueue?.attendanceId]);
 
   const refresh = useCallback(() => pollRef.current(), []);
 

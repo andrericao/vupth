@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { SectionList, TouchableOpacity, Alert, ImageBackground } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { SectionList, TouchableOpacity, Alert, ImageBackground, Linking } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -9,7 +9,7 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Star, Info, Heart, ChevronRight, Clock, ChevronDown } from "lucide-react-native";
+import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin } from "lucide-react-native";
 
 import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
 
@@ -19,10 +19,11 @@ import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
 import { ProfessionalWithQueue } from "@domain/professional/types";
-import { agruparPorExpediente, emIntervalo } from "@domain/professional/expediente";
+import { agruparPorExpediente, emIntervalo, estaNoExpediente } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { isEffectivelyOpen } from "@domain/establishment/types";
+import { enderecoEmUmaLinha, linkDoMapa } from "@domain/establishment/endereco";
 import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useEstablishmentHours, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { proximaAbertura, resumoDeHoje, semanaParaExibir } from "@domain/establishment/horarios";
@@ -31,6 +32,8 @@ import { useFavoritesStore } from "@stores/favoritesStore";
 
 type RouteParams = {
   establishmentId: string;
+  /** Link compartilhado apontando um profissional (24/09). */
+  profissional?: string;
 };
 
 // Linha do profissional (Pencil CLIENT · 08 Estabelecimento).
@@ -139,7 +142,7 @@ export function EstablishmentDetail() {
   const insets = useSafeAreaInsets();
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
-  const { establishmentId } = route.params as RouteParams;
+  const { establishmentId, profissional: profissionalDoLink } = route.params as RouteParams;
 
   const { data: establishment, isLoading, isError } = useEstablishment(establishmentId);
   // C22 — o horário por DIA da semana (contrato de 16/09, no ar em staging
@@ -162,6 +165,9 @@ export function EstablishmentDetail() {
 
   function handleSelectProfessional(professionalId: string) {
     const prof = professionals.find((p) => p.id === professionalId);
+    // "Fora" = fila fechada (ir para Fora fecha a fila, regra de 09/09). A tela
+    // de servicos nao oferece a entrada — so o pedido de corte (24/09).
+    const fora = !estaNoExpediente(prof?.work_status);
     if (!establishment) return;
 
     // Loja fechada NÃO bloqueia mais (Andre 2026-07-23): o fluxo segue até os
@@ -175,6 +181,7 @@ export function EstablishmentDetail() {
       establishmentName: establishment?.name ?? "",
       estimatedWaitMinutes: prof?.estimated_wait_minutes ?? 0,
       establishmentOpen: isEffectivelyOpen(establishment),
+      profissionalFora: fora,
       queueCount: prof?.queue_count ?? 0,
     });
   }
@@ -182,6 +189,20 @@ export function EstablishmentDetail() {
   // "Trabalhando" e "Fora" sao secoes de TELA (contrato de 19/09): o backend
   // manda todo mundo e quem separa e o app.
   const { trabalhando, fora } = agruparPorExpediente(professionals);
+
+  // Link compartilhado com `?profissional=` (24/09): assim que a loja e a
+  // lista chegam, abre os servicos dele — uma vez so, para o voltar trazer a
+  // pessoa a loja, e nao reabrir o profissional.
+  const abriuDoLink = useRef(false);
+  useEffect(() => {
+    if (!profissionalDoLink || abriuDoLink.current || !establishment) return;
+    if (!professionals.some((p) => p.id === profissionalDoLink)) return;
+    abriuDoLink.current = true;
+    handleSelectProfessional(profissionalDoLink);
+    // handleSelectProfessional e recriada a cada render; o que importa aqui e
+    // ter a loja e o profissional na mao.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profissionalDoLink, establishment, professionals]);
 
   function handleSelectShortestQueue() {
     if (trabalhando.length === 0) return;
@@ -221,6 +242,8 @@ export function EstablishmentDetail() {
   const hojeTexto = resumoDeHoje(horarios, agora);
   const reabre = !isOpen ? proximaAbertura(horarios, agora) : null;
   const semana = semanaParaExibir(horarios, agora);
+  const endereco = enderecoEmUmaLinha(establishment.address);
+  const mapa = linkDoMapa(establishment.address);
   const showPhoto = !!establishment.urlImage && !heroFailed;
   const minWait =
     trabalhando.length > 0
@@ -357,6 +380,30 @@ export function EstablishmentDetail() {
                   style={{ transform: [{ rotate: mostrarSemana ? "180deg" : "0deg" }] }}
                 />
               )}
+            </HStack>
+          </TouchableOpacity>
+        )}
+
+        {/* Onde fica. Logo abaixo do horario: as duas perguntas de quem vai sair
+            de casa sao "esta aberto?" e "como chego?". Tocar abre o mapa. */}
+        {endereco && (
+          <TouchableOpacity
+            onPress={() => mapa && Linking.openURL(mapa)}
+            disabled={!mapa}
+            accessibilityRole="link"
+            accessibilityLabel={`Endereço: ${endereco}. Abrir no mapa`}
+            testID="endereco-da-loja"
+          >
+            <HStack alignItems="flex-start" gap="$2" mt="$2">
+              <MapPin size={14} color="#454745" style={{ marginTop: 3 }} />
+              <Text size="sm" color="$brandTextSecondary" flex={1}>
+                {endereco}
+                {mapa ? (
+                  <Text size="sm" color="$forest" fontFamily="$heading">
+                    {"  "}Como chegar
+                  </Text>
+                ) : null}
+              </Text>
             </HStack>
           </TouchableOpacity>
         )}

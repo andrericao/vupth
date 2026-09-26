@@ -1,4 +1,4 @@
-import { Modal, View, Text, Pressable, ScrollView } from "react-native";
+import { Modal, View, Text, Pressable, ScrollView, BackHandler } from "react-native";
 import { useEffect } from "react";
 
 import { useDialogoStore } from "@stores/dialogo.store";
@@ -45,9 +45,23 @@ export function DialogoVupth() {
     return () => marcarHost(false);
   }, [marcarHost]);
 
-  if (!atual) return null;
+  const indiceCancelar = atual ? atual.botoes.findIndex((b) => b.estilo === "cancel") : -1;
 
-  const indiceCancelar = atual.botoes.findIndex((b) => b.estilo === "cancel");
+  // O voltar do Android com um diálogo na tela. Teste de 25/09: num aviso só
+  // com "OK", o voltar levou a TELA de volta e o diálogo ficou por cima. Então,
+  // enquanto houver diálogo, o voltar é dele — responde como cancelar (ou o
+  // primeiro botão) e NUNCA chega à navegação. Com `cancelavel: false`, é
+  // consumido e não faz nada: só um botão responde.
+  useEffect(() => {
+    if (!atual) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      if (atual.cancelavel) responder(indiceCancelar >= 0 ? indiceCancelar : 0);
+      return true;
+    });
+    return () => sub.remove();
+  }, [atual, indiceCancelar, responder]);
+
+  if (!atual) return null;
 
   return (
     <Modal
@@ -56,7 +70,9 @@ export function DialogoVupth() {
       animationType="fade"
       // Voltar (Android) equivale ao cancelar; sem ele, o único jeito de sair de
       // um aviso seria acertar o botão.
-      onRequestClose={() => responder(indiceCancelar >= 0 ? indiceCancelar : 0)}
+      onRequestClose={() => {
+        if (atual.cancelavel) responder(indiceCancelar >= 0 ? indiceCancelar : 0);
+      }}
     >
       <View
         style={{

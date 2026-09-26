@@ -70,3 +70,15 @@ export const linkingWeb: LinkingOptions<any> = {
   getPathFromState: caminhoDaTela,
   getStateFromPath: telaDoCaminho,
 };
+
+/**
+ * O link que se compartilha (pedido do Andre de 24/09, botao no Partner): a
+ * loja, ou a loja ja abrindo um profissional. O profissional vai como
+ * `?profissional=` — o unico parametro que atravessa a barra de endereco, de
+ * proposito: sem ele o link abriria a loja e a pessoa teria de procurar.
+ */
+export function linkParaCompartilhar(base: string, establishmentId: string, professionalId?: string): string {
+  const raiz = base.replace(/\/+$/, "");
+  const loja = `${raiz}/loja/${encodeURIComponent(establishmentId)}`;
+  return professionalId ? `${loja}?profissional=${encodeURIComponent(professionalId)}` : loja;
+}

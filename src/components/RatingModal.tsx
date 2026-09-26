@@ -8,6 +8,7 @@ import { floatingShadow } from "@utils/styles";
 import { ratingService } from "@services/ratingService";
 import { useAuthStore } from "@stores/authStore";
 import { useRatedStore } from "@stores/ratedStore";
+import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 
 type Props = {
   visible: boolean;
@@ -104,7 +105,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
             <Box borderWidth="$1" borderColor="$brandBorder" borderRadius="$xl" px="$3" py="$2" mt="$4">
               <TextInput
                 placeholder="Comentário (opcional)"
-                placeholderTextColor="#6B706B"
+                placeholderTextColor={COR_DO_PLACEHOLDER}
                 value={comment}
                 onChangeText={setComment}
                 multiline

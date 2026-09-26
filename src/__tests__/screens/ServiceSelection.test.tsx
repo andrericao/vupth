@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import { fireEvent, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ServiceSelection } from '@screens/ServiceSelection';
 import { establishmentService } from '@services/establishmentService';
@@ -80,6 +80,13 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
         serviceItemIds: ['s1'],
       }),
     );
+  });
+
+  it('com serviço escolhido, o resumo diz a regra da multa ANTES de entrar (CDC)', async () => {
+    useAuthStore.setState({ isAuthenticated: true });
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    expect(getByTestId('regra-da-multa')).toBeTruthy();
   });
 
   it('LOGADO: confirmar vai direto pra queueStatus', async () => {
@@ -208,5 +215,39 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
         'tok',
       ),
     );
+  });
+
+  describe('profissional em "Fora" (Andre, 24/09)', () => {
+    // Loja aberta, profissional fora do expediente e fila fechada: o app não
+    // pode oferecer a entrada — só o pedido de corte, e o profissional decide.
+    beforeEach(() => {
+      setRouteParams({ ...OPEN_PARAMS, profissionalFora: true });
+      useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    });
+
+    it('a ação principal é "Solicitar corte" — não há "Entrar na fila"', async () => {
+      const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+      expect(getByTestId('primary-cut')).toBeTruthy();
+      expect(queryByTestId('primary-queue')).toBeNull();
+      // Nem posição, nem previsão, nem regra de saída de uma fila em que ele não entra.
+      expect(queryByTestId('regra-da-multa')).toBeNull();
+    });
+
+    it('servidor recusando o corte com a loja aberta: diz que o profissional está fora — não manda entrar na fila', async () => {
+      mockCreateCut.mockRejectedValue(
+        Object.assign(new Error('409'), { response: { status: 409, data: { code: 'CUT_REQUEST_NOT_ALLOWED' } } }),
+      );
+      const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+      const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+      await act(async () => {
+        fireEvent.press(getByTestId('primary-cut'));
+      });
+      const [, mensagem] = alerta.mock.calls[0] as [string, string];
+      expect(mensagem).toMatch(/está fora agora/);
+      expect(mensagem).not.toMatch(/entrar na fila normalmente/);
+      alerta.mockRestore();
+    });
   });
 });

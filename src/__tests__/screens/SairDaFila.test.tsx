@@ -12,6 +12,7 @@ import { attendanceService } from '@services/attendanceService';
 const mockNavigate = jest.fn();
 const mockLeave = jest.fn();
 let mockRemaining = 20;
+let mockValor: number | null = null;
 
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn().mockResolvedValue('1'),
@@ -45,6 +46,7 @@ jest.mock('@hooks/useQueueCountdown', () => ({
       enteredAt: 0,
       estimatedMinutes: mockRemaining,
       status: 'SCHEDULED',
+      exitPenaltyValue: mockValor,
     },
   }),
 }));
@@ -85,6 +87,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRemaining = 20;
+    mockValor = null;
   });
 
   it('um toque só mostra a faixa — não sai, não pergunta nada', () => {
@@ -141,6 +144,26 @@ describe('QueueStatus — sair da fila (D15)', () => {
     });
     expect(alerta).not.toHaveBeenCalled();
     expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk');
+    alerta.mockRestore();
+  });
+
+  it('com o valor do servidor (D4), é ele que aparece — R$ 5 com 30 min ou menos', () => {
+    mockValor = 5;
+    const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    expect(getByText(/multa de R\$ 5,00/)).toBeTruthy();
+  });
+
+  it('servidor dizendo zero (tolerância) manda sobre a regra local: sai sem confirmação', async () => {
+    mockValor = 0;
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    await act(async () => {
+      tocar(getByTestId);
+    });
+    expect(alerta).not.toHaveBeenCalled();
+    expect(attendanceService.cancel).toHaveBeenCalled();
     alerta.mockRestore();
   });
 });

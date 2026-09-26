@@ -1,4 +1,4 @@
-import { saidaDaFila, ehToqueDuplo, JANELA_DO_TOQUE_DUPLO_MS } from '@domain/queue/saidaDaFila';
+import { saidaDaFila, ehToqueDuplo, JANELA_DO_TOQUE_DUPLO_MS, regraDaMulta } from '@domain/queue/saidaDaFila';
 
 // D15 (Andre, 24/09): dois toques seguidos para sair; com multa, confirmação
 // "Sim / Não"; sem multa, sai direto.
@@ -38,5 +38,15 @@ describe('o que a saída diz', () => {
 
   it('o valor informado entra no texto', () => {
     expect(saidaDaFila({ multa: true, valor: 5 }).faixa).toMatch(/R\$ 5,00/);
+  });
+});
+
+describe('a regra da multa dita antes de entrar (CDC)', () => {
+  it('diz o limite, o valor, quando é cobrada e a saída sem custo', () => {
+    const t = regraDaMulta();
+    expect(t).toMatch(/menos de 1 hora/);
+    expect(t).toMatch(/R\$ 3,00/);
+    expect(t).toMatch(/próximo atendimento/);
+    expect(t).toMatch(/Trocar de lugar .* não tem custo/);
   });
 });
