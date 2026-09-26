@@ -12,11 +12,10 @@ import { CANCELLATION_PENALTY_VALUE } from './types';
 //   confirmacao "Sim / Nao", e so o "Sim" tira da fila.
 // - Sem multa, os dois toques tiram direto, sem confirmacao.
 //
-// ⏳ A TOLERANCIA (5 ou 10 min desde a entrada, D13) ainda nao existe no
-// servidor — hoje ele cobra sem tolerancia, pela regra de menos de 1h. O app
-// segue o que o servidor cobra: quando ele expuser ate quando a tolerancia
-// vale, a faixa sem preco entra aqui, e nao antes (mostrar uma janela que o
-// servidor nao honra seria prometer o que ele nao cumpre).
+// O "Sim" e a CIENCIA da multa (Backend 0caf229, em producao desde 26/09): o
+// valor que a confirmacao mostrou vai junto na saida. Sem ele — ou com valor
+// menor — o servidor responde 409 com o valor certo e NAO tira da fila; o app
+// mostra o aviso com esse valor e repete no "Sim" (`avisoDaMultaDoServidor`).
 //
 // Substitui o dialogo do D10 ("Ficar na fila / Trocar de lugar / Sair mesmo
 // assim"): a troca deixou de morar na saida (D16 a leva para um popup).
@@ -33,6 +32,8 @@ export type SaidaDaFila = {
   faixa: string;
   /** Com multa (ou sem saber), os dois toques pedem confirmacao. */
   confirmacao: { titulo: string; mensagem: string; sim: string; nao: string } | null;
+  /** O valor que a confirmacao mostrou — vai na saida como a ciencia do cliente. */
+  valorConfirmado: number | null;
 };
 
 const INSTRUCAO = 'toque em "Sair da fila" duas vezes seguidas';
@@ -61,6 +62,7 @@ export function saidaDaFila(s: {
         sim: 'Sim, sair',
         nao: 'Não',
       },
+      valorConfirmado: s.valor ?? CANCELLATION_PENALTY_VALUE,
     };
   }
 
@@ -73,10 +75,24 @@ export function saidaDaFila(s: {
         sim: 'Sim, sair',
         nao: 'Não',
       },
+      valorConfirmado: s.valor ?? CANCELLATION_PENALTY_VALUE,
     };
   }
 
-  return { faixa: `Para sair da fila, ${INSTRUCAO}.`, confirmacao: null };
+  return { faixa: `Para sair da fila, ${INSTRUCAO}.`, confirmacao: null, valorConfirmado: null };
+}
+
+/**
+ * O servidor recusou a saida pedindo a ciencia da multa (409): o aviso com o
+ * valor DELE. O "Sim" repete a saida com esse valor.
+ */
+export function avisoDaMultaDoServidor(valor: number) {
+  return {
+    titulo: 'Sair da fila?',
+    mensagem: `Sair agora gera multa de ${reais(valor)}, cobrada no seu próximo atendimento. Sem o seu "Sim", você continua na fila.`,
+    sim: 'Sim, sair',
+    nao: 'Não',
+  };
 }
 
 /**

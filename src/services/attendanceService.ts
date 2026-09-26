@@ -76,11 +76,19 @@ export const attendanceService = {
     });
   },
 
-  cancel(attendanceId: string, accessToken: string) {
+  // Ciencia da multa (Backend 0caf229, em producao desde 26/09): se sair agora
+  // custa algo, o servidor so aceita com o valor que o cliente confirmou —
+  // sem ele, 409 EXIT_PENALTY_NOT_ACKNOWLEDGED e o cliente continua na fila.
+  cancel(attendanceId: string, accessToken: string, acknowledgedPenalty?: number) {
     return api.put<CancelAttendanceResponse>(
       `/attendances/${attendanceId}/cancel`,
       null,
-      { headers: { Authorization: `Bearer ${accessToken}` } },
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        ...(acknowledgedPenalty != null && acknowledgedPenalty > 0
+          ? { params: { acknowledgedPenalty: acknowledgedPenalty.toFixed(2) } }
+          : {}),
+      },
     );
   },
 
