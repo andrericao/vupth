@@ -25,6 +25,7 @@ import { ProfessionalWithQueue } from "@domain/professional/types";
 import { agruparPorExpediente, emIntervalo, estaNoExpediente } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
+import { ehSoAgenda } from "@domain/professional/modo";
 import { isEffectivelyOpen } from "@domain/establishment/types";
 import { enderecoEmUmaLinha, linkDoMapa } from "@domain/establishment/endereco";
 import { formatWaitTime } from "@domain/queue/types";
@@ -185,6 +186,7 @@ export function EstablishmentDetail() {
       estimatedWaitMinutes: prof?.estimated_wait_minutes ?? 0,
       establishmentOpen: isEffectivelyOpen(establishment),
       profissionalFora: fora,
+      soAgenda: ehSoAgenda(prof),
       queueCount: prof?.queue_count ?? 0,
     });
   }

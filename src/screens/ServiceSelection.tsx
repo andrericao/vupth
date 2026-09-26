@@ -28,6 +28,7 @@ import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { regraDaMulta } from "@domain/queue/saidaDaFila";
+import { acaoPrincipal, opcoesDoMenu, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
 // POUCOS lugares com sombra legitima: no Pencil o "Resumo" sobre `forest` e um
@@ -50,11 +51,16 @@ type RouteParams = {
   establishmentOpen?: boolean;
   // Profissional em "Fora": a entrada na fila nao age; o caminho e o corte.
   profissionalFora?: boolean;
+  // Profissional "so agenda" (Backend 8e6c00f): sem fila e sem corte — so agendar.
+  soAgenda?: boolean;
   // Seleção restaurada ao voltar do portão de auth (visitante que logou).
   serviceItemIds?: string[];
   // Tamanho da fila do profissional: a posição do cliente é este número + 1.
   queueCount?: number;
 };
+
+// Fora do corpo do componente: o relogio so e lido no toque, nunca no render.
+const agora = () => Date.now();
 
 export function ServiceSelection() {
   const insets = useSafeAreaInsets();
@@ -70,9 +76,14 @@ export function ServiceSelection() {
     serviceItemIds,
     queueCount,
     profissionalFora,
+    soAgenda = false,
   } = route.params as RouteParams;
   // Ausente = aberta (fluxos legados). false = fila fechada agora.
   const storeOpen = establishmentOpen ?? true;
+  const situacao = { soAgenda, fora: !!profissionalFora, lojaAberta: storeOpen };
+  const principal = acaoPrincipal(situacao);
+  // A estimativa da fila (posicao, horario, multa) so vale quando a acao e entrar nela.
+  const vaiPraFila = principal === "fila";
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -224,7 +235,7 @@ export function ServiceSelection() {
       // Guarda o pedido: e o que deixa o app avisar a RESPOSTA (usePedidoDeCorte).
       // Sem isto o cliente nunca sabia se foi aceito (teste de 25/09).
       await guardarPedidoDeCorte(
-        pedidoDaResposta(pedido, { professionalId, professionalName, establishmentId, establishmentName }, Date.now()),
+        pedidoDaResposta(pedido, { professionalId, professionalName, establishmentId, establishmentName }, agora()),
       );
       setShowMoreOptions(false);
       Alert.alert(
@@ -235,7 +246,9 @@ export function ServiceSelection() {
     } catch (error: any) {
       const code = error.response?.data?.code;
       const msg =
-        code === "CUT_REQUEST_NOT_ALLOWED"
+        code === "PROFESSIONAL_AGENDA_ONLY"
+          ? MENSAGEM_SO_AGENDA
+          : code === "CUT_REQUEST_NOT_ALLOWED"
           ? profissionalFora
             ? // O servidor ainda recusa corte com a loja aberta (pedido de 07/09,
               // reforcado em 24/09). Dizer "entre na fila" aqui mandaria a
@@ -252,32 +265,26 @@ export function ServiceSelection() {
   // Menu "Mais opções": tudo que não é a ação primária da tela. Com a loja
   // fechada a primária é agendar, então o corte entra aqui; com ela aberta, a
   // primária é entrar na fila e o agendar entra aqui. A troca vale nos dois.
-  const moreOptions: MoreOption[] = [
-    // Com o profissional Fora, o corte e a acao principal: o menu leva o agendar.
-    ...(storeOpen || profissionalFora
-      ? [
-          {
-            key: "schedule",
-            icon: Calendar,
-            title: "Agendar para depois",
-            description: "Escolha outro dia ou horário com este profissional.",
-            onPress: () => {
-              setShowMoreOptions(false);
-              setShowSchedule(true);
-            },
-          },
-        ]
-      : [
-          {
-            key: "cut",
-            icon: Scissors,
-            title: isRequestingCut ? "Enviando pedido..." : "Solicitar corte",
-            description: "A loja está fechada — o profissional tem 5 minutos para responder.",
-            disabled: isRequestingCut,
-            onPress: handleRequestCut,
-          },
-        ]),
-    {
+  const todasAsOpcoes: Record<OpcaoDoMenu, MoreOption> = {
+    schedule: {
+      key: "schedule",
+      icon: Calendar,
+      title: "Agendar para depois",
+      description: "Escolha outro dia ou horário com este profissional.",
+      onPress: () => {
+        setShowMoreOptions(false);
+        setShowSchedule(true);
+      },
+    },
+    cut: {
+      key: "cut",
+      icon: Scissors,
+      title: isRequestingCut ? "Enviando pedido..." : "Solicitar corte",
+      description: "A loja está fechada — o profissional tem 5 minutos para responder.",
+      disabled: isRequestingCut,
+      onPress: handleRequestCut,
+    },
+    swap: {
       key: "swap",
       icon: Repeat2,
       title: isPublishingSwap ? "Publicando..." : "Entrar por troca",
@@ -285,7 +292,10 @@ export function ServiceSelection() {
       disabled: isPublishingSwap,
       onPress: handleRequestSwap,
     },
-  ];
+  };
+  // Com o profissional Fora, o corte e a acao principal: o menu leva o agendar.
+  // "So agenda" nao tem menu — nao ha nada alem de agendar.
+  const moreOptions: MoreOption[] = opcoesDoMenu(situacao).map((k) => todasAsOpcoes[k]);
 
   if (isLoading) {
     // O esqueleto tem de comecar na MESMA altura da tela pronta, senao o
@@ -406,7 +416,7 @@ export function ServiceSelection() {
                 {/* Posicao so entra quando a tela sabe o tamanho da fila. Quem
                     chega aqui por outro caminho (volta do login) nao recebe o
                     dado — melhor omitir a linha do que chutar um numero. */}
-                {queueCount != null && storeOpen && !profissionalFora && (
+                {queueCount != null && vaiPraFila && (
                   <HStack justifyContent="space-between" alignItems="center">
                     <Text size="sm" color="#FFFFFFB3">
                       Sua posição
@@ -416,7 +426,7 @@ export function ServiceSelection() {
                     </Text>
                   </HStack>
                 )}
-                {storeOpen && !profissionalFora && (
+                {vaiPraFila && (
                   <HStack justifyContent="space-between" alignItems="center">
                     <Text size="sm" color="#FFFFFFB3">
                       Começa por volta de
@@ -428,7 +438,7 @@ export function ServiceSelection() {
                 )}
                 {/* A regra da multa ANTES do toque que coloca na fila (CDC).
                     Ate 25/09 o app so falava de multa na hora de sair. */}
-                {storeOpen && !profissionalFora && (
+                {vaiPraFila && (
                   <Text size="xs" color="#FFFFFFB3" testID="regra-da-multa">
                     {regraDaMulta()}
                   </Text>
@@ -442,7 +452,7 @@ export function ServiceSelection() {
               {/* Uma ação primária só (Andre 2026-08-01): loja aberta = entrar na
                   fila; fechada = agendar (badge AGENDAR). O resto — solicitar
                   corte, entrar por troca — vive no menu "Mais opções". */}
-              {profissionalFora ? (
+              {principal === "corte" ? (
                 // Fora do expediente a fila esta fechada: nao ha "Entrar na fila"
                 // a oferecer. O pedido de corte deixa o profissional decidir
                 // (Andre, 07/09 e 24/09).
@@ -452,7 +462,7 @@ export function ServiceSelection() {
                   isDisabled={isRequestingCut}
                   onPress={handleRequestCut}
                 />
-              ) : storeOpen ? (
+              ) : principal === "fila" ? (
                 <Button
                   title={`Entrar na fila · R$ ${totalPrice.toFixed(2)}`}
                   testID="primary-queue"
@@ -465,12 +475,19 @@ export function ServiceSelection() {
                   onPress={() => setShowSchedule(true)}
                 />
               )}
-              <Button
-                title="Mais opções"
-                variant="outline"
-                testID="more-options"
-                onPress={() => setShowMoreOptions(true)}
-              />
+              {soAgenda && (
+                <Text size="xs" color="$brandTextSecondary" textAlign="center" testID="so-agenda">
+                  {MENSAGEM_SO_AGENDA}
+                </Text>
+              )}
+              {moreOptions.length > 0 && (
+                <Button
+                  title="Mais opções"
+                  variant="outline"
+                  testID="more-options"
+                  onPress={() => setShowMoreOptions(true)}
+                />
+              )}
             </VStack>
           )}
         </>

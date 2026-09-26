@@ -15,6 +15,8 @@ export interface ProfessionalWithQueue extends Professional {
   // producao ainda pode rodar o backend anterior — quem le usa
   // `@domain/professional/expediente`, onde a ausencia conta como trabalhando.
   work_status?: WorkStatus | null;
+  // Fila ou so agenda (Backend 8e6c00f) — ver `@domain/professional/modo`.
+  operation_mode?: 'QUEUE' | 'AGENDA_ONLY' | null;
   waiting_list: AttendanceInQueue[];
   queue_count: number;
   estimated_wait_minutes: number;
