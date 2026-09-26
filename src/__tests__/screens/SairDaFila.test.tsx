@@ -119,7 +119,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     alerta.mockRestore();
   });
 
-  it('"Sim, sair" cancela, volta ao início e limpa a fila local', async () => {
+  it('"Sim, sair" cancela com a ciência da multa (o valor mostrado), volta ao início e limpa a fila local', async () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
@@ -128,7 +128,8 @@ describe('QueueStatus — sair da fila (D15)', () => {
     await act(async () => {
       await botoes.find((b) => b.text === 'Sim, sair')!.onPress!();
     });
-    expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk');
+    // Ciência da multa (Backend 0caf229): o "Sim" leva o valor que o aviso mostrou.
+    expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk', 3);
     expect(mockNavigate).toHaveBeenCalledWith('home');
     expect(mockLeave).toHaveBeenCalled();
     alerta.mockRestore();
@@ -143,7 +144,8 @@ describe('QueueStatus — sair da fila (D15)', () => {
       tocar(getByTestId);
     });
     expect(alerta).not.toHaveBeenCalled();
-    expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk');
+    // Sem multa, não há o que confirmar: nenhum valor vai junto.
+    expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk', undefined);
     alerta.mockRestore();
   });
 
@@ -164,6 +166,52 @@ describe('QueueStatus — sair da fila (D15)', () => {
     });
     expect(alerta).not.toHaveBeenCalled();
     expect(attendanceService.cancel).toHaveBeenCalled();
+    alerta.mockRestore();
+  });
+
+  it('servidor pedindo a ciência (409): o aviso com o valor DELE, e o "Sim" repete a saída com ele', async () => {
+    mockValor = 3;
+    (attendanceService.cancel as jest.Mock).mockRejectedValueOnce({
+      response: { status: 409, data: { code: 'EXIT_PENALTY_NOT_ACKNOWLEDGED', exitPenaltyValue: 5 } },
+    });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    tocar(getByTestId);
+    const [, , primeiro] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
+    await act(async () => {
+      await primeiro.find((b) => b.text === 'Sim, sair')!.onPress!();
+    });
+    // Recusado: continua na fila, e o segundo aviso traz o valor do servidor.
+    expect(mockNavigate).not.toHaveBeenCalled();
+    const [, mensagem, segundo] = alerta.mock.calls[1] as [string, string, BotaoDoAlert[]];
+    expect(mensagem).toMatch(/R\$ 5,00/);
+    await act(async () => {
+      await segundo.find((b) => b.text === 'Sim, sair')!.onPress!();
+    });
+    expect(attendanceService.cancel).toHaveBeenLastCalledWith('a1', 'tk', 5);
+    expect(mockNavigate).toHaveBeenCalledWith('home');
+    expect(mockLeave).toHaveBeenCalled();
+    alerta.mockRestore();
+  });
+
+  it('"Não" no aviso do servidor deixa na fila', async () => {
+    (attendanceService.cancel as jest.Mock).mockRejectedValueOnce({
+      response: { status: 409, data: { code: 'EXIT_PENALTY_NOT_ACKNOWLEDGED', exitPenaltyValue: 5 } },
+    });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    tocar(getByTestId);
+    const [, , primeiro] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
+    await act(async () => {
+      await primeiro.find((b) => b.text === 'Sim, sair')!.onPress!();
+    });
+    const [, , segundo] = alerta.mock.calls[1] as [string, string, BotaoDoAlert[]];
+    expect(segundo.map((b) => b.text)).toEqual(['Não', 'Sim, sair']);
+    expect(attendanceService.cancel).toHaveBeenCalledTimes(1);
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockLeave).not.toHaveBeenCalled();
     alerta.mockRestore();
   });
 });
