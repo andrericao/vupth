@@ -63,6 +63,9 @@ export type AppRoutes = {
     // Loja aberta AGORA (is_open efetivo)? false => a ação primária vira
     // "Agendar" e o "Solicitar corte" entra no menu. Ausente = aberta.
     establishmentOpen?: boolean;
+    // Profissional em "Fora" (fila fechada): entrar na fila NAO age — o caminho
+    // e pedir corte, e o profissional decide (Andre, 07/09 e 24/09).
+    profissionalFora?: boolean;
     // Seleção de serviços restaurada ao voltar do portão de auth.
     serviceItemIds?: string[];
     // Quantos já esperam na fila deste profissional — a posição do cliente é

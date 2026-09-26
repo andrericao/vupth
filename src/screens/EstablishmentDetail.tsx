@@ -19,7 +19,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
 import { ProfessionalWithQueue } from "@domain/professional/types";
-import { agruparPorExpediente, emIntervalo } from "@domain/professional/expediente";
+import { agruparPorExpediente, emIntervalo, estaNoExpediente } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { isEffectivelyOpen } from "@domain/establishment/types";
@@ -163,6 +163,9 @@ export function EstablishmentDetail() {
 
   function handleSelectProfessional(professionalId: string) {
     const prof = professionals.find((p) => p.id === professionalId);
+    // "Fora" = fila fechada (ir para Fora fecha a fila, regra de 09/09). A tela
+    // de servicos nao oferece a entrada — so o pedido de corte (24/09).
+    const fora = !estaNoExpediente(prof?.work_status);
     if (!establishment) return;
 
     // Loja fechada NÃO bloqueia mais (Andre 2026-07-23): o fluxo segue até os
@@ -176,6 +179,7 @@ export function EstablishmentDetail() {
       establishmentName: establishment?.name ?? "",
       estimatedWaitMinutes: prof?.estimated_wait_minutes ?? 0,
       establishmentOpen: isEffectivelyOpen(establishment),
+      profissionalFora: fora,
       queueCount: prof?.queue_count ?? 0,
     });
   }
