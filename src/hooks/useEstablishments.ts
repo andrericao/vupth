@@ -29,6 +29,29 @@ export function useEstablishments() {
   return { ...query, isLoading: query.isPending };
 }
 
+/**
+ * Lista do "Pra ontem" — so busca quando o modo esta ligado. A mesma espera
+ * pela localizacao decidida da Home, e um poll mais curto: quem tem pressa
+ * precisa da espera de agora.
+ */
+export function usePraOntem(ligado: boolean) {
+  const coords = coordsDaLista(useLocationStore((s) => s.coords));
+  const hydrated = useLocationStore((s) => s.hydrated);
+  const gpsPending = useLocationStore((s) => s.gpsPending);
+
+  const query = useQuery({
+    queryKey: ['pra-ontem', coords?.latitude ?? null, coords?.longitude ?? null],
+    queryFn: () => establishmentService.getPraOntem(coords).then((res) => res.data),
+    enabled: ligado && listaPodeBuscar({ hydrated, gpsPending }),
+    staleTime: 30000,
+    refetchInterval: ligado ? 30000 : false,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(3000 * (attempt + 1), 10000),
+  });
+
+  return { ...query, isLoading: query.isPending };
+}
+
 export function useEstablishment(id: string) {
   return useQuery({
     queryKey: ['establishment', id],
