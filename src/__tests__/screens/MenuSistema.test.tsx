@@ -41,12 +41,13 @@ jest.mock('@components/PushDiagnostics', () => {
   return { PushDiagnostics: () => <Text>painel-push</Text> };
 });
 jest.mock('@components/DeleteAccountModal', () => ({ DeleteAccountModal: () => null }));
+let mockLogado = true;
 jest.mock('@stores/authStore', () => ({
   useAuthStore: (seletor: (s: unknown) => unknown) =>
     seletor({
-      user: { first_name: 'Alexia', email: 'a@b.com' },
-      accessToken: 'token-de-teste',
-      isAuthenticated: true,
+      user: mockLogado ? { first_name: 'Alexia', email: 'a@b.com' } : null,
+      accessToken: mockLogado ? 'token-de-teste' : null,
+      isAuthenticated: mockLogado,
       logout: jest.fn(),
     }),
 }));
@@ -56,7 +57,19 @@ jest.mock('@stores/comingSoonStore', () => ({
 }));
 
 describe('Perfil — menu em grupos, como o do partner', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockLogado = true;
+  });
+
+  // Andre, 26/09: o visitante não vê o menu "Versão do app" — vê a versão e a data.
+  it('VISITANTE: sem o menu Sistema; a versão aparece no rodapé, sem toque', () => {
+    mockLogado = false;
+    const { queryByText, getByTestId } = renderWithProviders(<Settings />);
+    expect(queryByText('Versão do app')).toBeNull();
+    expect(queryByText('SISTEMA')).toBeNull();
+    expect(getByTestId('versao-visitante').props.children).toBe('Versão 1.0.0');
+  });
 
   it('mostra os grupos Conta e Sistema', () => {
     const { getByText } = renderWithProviders(<Settings />);

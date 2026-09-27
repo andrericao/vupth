@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import * as Updates from "expo-updates";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   VStack,
@@ -15,6 +16,7 @@ import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone } from "luci
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { nomeDeExibicao } from "@domain/auth/displayName";
+import { rotuloDaVersao } from "@domain/versao";
 import { Button } from "@components/Button";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
@@ -293,8 +295,9 @@ export function Settings() {
           </Box>
         )}
 
-        {/* Sistema vale para visitante tambem: a versao e o atualizar nao
-            dependem de conta. */}
+        {/* O menu "Versão do app" (e os 7 toques do diagnostico) e so de quem
+            tem conta (Andre, 26/09). O visitante ve a versao e a data no rodape. */}
+        {isAuthenticated && (
         <VStack mt="$6">
           <Grupo label="Sistema">
             <MenuItem
@@ -305,6 +308,7 @@ export function Settings() {
             />
           </Grupo>
         </VStack>
+        )}
 
         {/* `flex-end` empurra o rodape pro fim: antes ele vinha logo abaixo do
             conteudo e sobrava um vazio grande embaixo, que fazia a tela
@@ -328,6 +332,11 @@ export function Settings() {
               </TouchableOpacity>
             )}
           </HStack>
+          {!isAuthenticated && (
+            <Text size="2xs" color="$brandTextSecondary" testID="versao-visitante">
+              {rotuloDaVersao(Updates.runtimeVersion, Updates.createdAt)}
+            </Text>
+          )}
         </VStack>
       </VStack>
 
