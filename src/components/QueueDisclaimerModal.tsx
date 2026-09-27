@@ -5,6 +5,7 @@ import { Info, Check } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
+import { fs } from "@stores/fonteStore";
 
 export const QUEUE_DISCLAIMER_TITLE = "Sobre o tempo estimado";
 // [marca-vupth] Texto do Pencil (CLIENT · 08), duas linhas. O anterior tinha
@@ -39,8 +40,8 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
                 nao usa preto em lugar nenhum. */}
             <Text
               fontFamily="$display"
-              fontSize={19}
-              lineHeight={23}
+              fontSize={fs(19)}
+              lineHeight={fs(23)}
               letterSpacing={-0.4}
               color="$forest"
               flex={1}
@@ -49,7 +50,7 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
             </Text>
           </HStack>
 
-          <Text size="sm" lineHeight={22} color="$brandTextSecondary">
+          <Text size="sm" lineHeight={fs(22)} color="$brandTextSecondary">
             {QUEUE_DISCLAIMER_TEXT}
           </Text>
 

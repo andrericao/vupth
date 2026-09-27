@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Alert, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
@@ -26,7 +26,8 @@ import { useConviteDeTroca } from "@hooks/useConviteDeTroca";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 
-import { config } from "./config/gluestack-ui.config";
+import { configComFonte } from "./config/gluestack-ui.config";
+import { useFonteStore } from "@stores/fonteStore";
 
 import { Routes } from "@routes/index";
 
@@ -113,6 +114,11 @@ export default function App() {
   const restorePendingSwap = usePendingSwapStore((s) => s.restorePending);
   const restorePedidosDeCorte = usePedidoDeCorteStore((s) => s.restaurar);
   const restoreFavorites = useFavoritesStore((s) => s.restoreFavorites);
+  const restaurarFonte = useFonteStore((s) => s.restaurar);
+  // O tamanho da letra das Configuracoes: o tema muda, e a arvore remonta para
+  // que os tamanhos escritos direto nas telas (fs) tambem acompanhem.
+  const passoDaFonte = useFonteStore((s) => s.passo);
+  const configDoTema = useMemo(() => configComFonte(passoDaFonte), [passoDaFonte]);
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
 
@@ -127,6 +133,7 @@ export default function App() {
     restorePedidosDeCorte();
     restoreFirstRun();
     restoreFavorites();
+    restaurarFonte();
     // Portao de readiness (cold start do Render): acorda o backend ANTES de liberar
     // login/cadastro/listagem. A 1a cutucada acorda a instancia; segue mesmo se
     // estourar o teto (chamadas seguintes ja pegam a instancia quente). CLAUDE.md 18c.
@@ -143,6 +150,7 @@ export default function App() {
     restoreRated,
     restoreCiencia,
     restoreFavorites,
+    restaurarFonte,
     restoreComingSoon,
     restoreLocation,
     restorePendingSwap,
@@ -189,7 +197,7 @@ export default function App() {
         dehydrateOptions: { shouldDehydrateQuery: devePersistir },
       }}
     >
-      <GluestackUIProvider config={config}>
+      <GluestackUIProvider config={configDoTema} key={passoDaFonte}>
         <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
 
         <QueryScopedHooks />

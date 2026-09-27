@@ -2,6 +2,7 @@ import { View, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useIsOnline } from "@hooks/useNetwork";
+import { fs } from "@stores/fonteStore";
 
 // Barra fixa no topo quando o device esta sem conexao. O countdown da fila segue
 // rodando local (pelo relogio), mas o resto pode estar desatualizado — este
@@ -28,7 +29,7 @@ export function OfflineBanner() {
         elevation: 9999,
       }}
     >
-      <Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "600" }}>
+      <Text style={{ color: "#FFFFFF", fontSize: fs(12), fontWeight: "600" }}>
         Sem conexão — os dados podem estar desatualizados
       </Text>
     </View>

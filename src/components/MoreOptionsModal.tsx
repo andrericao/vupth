@@ -2,6 +2,7 @@ import { Modal, TouchableOpacity, Pressable } from "react-native";
 import { VStack, HStack, Box, Text } from "@gluestack-ui/themed";
 import { ChevronRight } from "lucide-react-native";
 import type { ComponentType } from "react";
+import { fs } from "@stores/fonteStore";
 
 export type MoreOption = {
   key: string;
@@ -50,7 +51,7 @@ export function MoreOptionsModal({ visible, title, subtitle, options, onClose }:
         />
         <VStack bg="$brandBackground" borderRadius="$hero" p="$5" gap="$4">
           <VStack gap="$1">
-            <Text fontFamily="$display" fontSize={20} letterSpacing={-0.5} color="$forest">
+            <Text fontFamily="$display" fontSize={fs(20)} letterSpacing={-0.5} color="$forest">
               {title ?? "Mais opções"}
             </Text>
             {subtitle && (

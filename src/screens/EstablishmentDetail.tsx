@@ -34,6 +34,7 @@ import { useEstablishment, useEstablishmentHours, useProfessionalsWithQueue } fr
 import { proximaAbertura, resumoDeHoje, semanaParaExibir } from "@domain/establishment/horarios";
 import { useQueueSocket } from "@hooks/useQueueSocket";
 import { useFavoritesStore } from "@stores/favoritesStore";
+import { fs } from "@stores/fonteStore";
 
 type RouteParams = {
   establishmentId: string;
@@ -373,8 +374,8 @@ export function EstablishmentDetail() {
         {showPhoto && (
           <Text
             fontFamily="$display"
-            fontSize={26}
-            lineHeight={30}
+            fontSize={fs(26)}
+            lineHeight={fs(30)}
             letterSpacing={-1}
             color="$forest"
           >

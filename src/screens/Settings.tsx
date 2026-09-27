@@ -22,6 +22,8 @@ import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
 import { addressService, AddressResponse } from "@services/addressService";
+import { fs, useFonteStore } from "@stores/fonteStore";
+import { PASSOS_DA_FONTE, rotuloDoPasso } from "@domain/fonte";
 
 function MenuItem({
   icon,
@@ -63,7 +65,7 @@ function MenuItem({
 function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <VStack gap="$2">
-      <Text fontSize={11} fontWeight="$bold" letterSpacing={0.6} color="$brandTextSecondary">
+      <Text fontSize={fs(11)} fontWeight="$bold" letterSpacing={0.6} color="$brandTextSecondary">
         {label.toUpperCase()}
       </Text>
       <Box borderRadius="$card" overflow="hidden" bg="$brandSurface">
@@ -80,6 +82,8 @@ export function Settings() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
+  const passoDaFonte = useFonteStore((s) => s.passo);
+  const escolherFonte = useFonteStore((s) => s.escolher);
 
   const [mainAddress, setMainAddress] = useState<AddressResponse | null>(null);
 
@@ -191,12 +195,12 @@ export function Settings() {
       {isAuthenticated ? (
         <VStack bg="$forest" style={{ paddingTop: insets.top + 24 }} pb={32} px={16} gap="$3" alignItems="center">
           <Center width={88} height={88} borderRadius={44} bg="$brandGreen">
-            <Text fontFamily="$display" fontSize={32} color="$forest">
+            <Text fontFamily="$display" fontSize={fs(32)} color="$forest">
               {initials}
             </Text>
           </Center>
           <VStack gap="$1" alignItems="center">
-            <Text fontFamily="$display" fontSize={24} letterSpacing={-0.8} color="$white">
+            <Text fontFamily="$display" fontSize={fs(24)} letterSpacing={-0.8} color="$white">
               {nomeDoTopo}
             </Text>
             {user?.email && (
@@ -294,6 +298,37 @@ export function Settings() {
             </VStack>
           </Box>
         )}
+
+        {/* Tamanho da letra (Andre, 26/09): um passo por vez, ate +4 — 10 → 11 →
+            12 → 13 → 14. Vale para visitante tambem: ler nao depende de conta. */}
+        <VStack mt="$6">
+          <Grupo label="Tamanho da letra">
+            <HStack p="$3" gap="$2" justifyContent="space-between">
+              {PASSOS_DA_FONTE.map((p) => (
+                <TouchableOpacity
+                  key={p}
+                  onPress={() => escolherFonte(p)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: passoDaFonte === p }}
+                  accessibilityLabel={`Tamanho da letra ${rotuloDoPasso(p)}`}
+                  testID={`fonte-${p}`}
+                  style={{ flex: 1 }}
+                >
+                  <Box
+                    bg={passoDaFonte === p ? "$forest" : "$brandBackground"}
+                    borderRadius="$full"
+                    py={8}
+                    alignItems="center"
+                  >
+                    <Text fontSize={fs(13)} fontWeight="$bold" color={passoDaFonte === p ? "$brandGreen" : "$forest"}>
+                      {rotuloDoPasso(p)}
+                    </Text>
+                  </Box>
+                </TouchableOpacity>
+              ))}
+            </HStack>
+          </Grupo>
+        </VStack>
 
         {/* O menu "Versão do app" (e os 7 toques do diagnostico) e so de quem
             tem conta (Andre, 26/09). O visitante ve a versao e a data no rodape. */}

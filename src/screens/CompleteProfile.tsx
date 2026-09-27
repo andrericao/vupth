@@ -11,6 +11,7 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { postAuthRoute, PostAuthParams } from "@domain/auth/postAuthRoute";
 import { profileService } from "@services/profileService";
 import { useAuthStore } from "@stores/authStore";
+import { fs } from "@stores/fonteStore";
 
 /**
  * Pede o NOME, logo depois do cadastro.
@@ -105,21 +106,21 @@ export function CompleteProfile() {
             alignSelf="flex-start"
           >
             <UserRound size={15} color="#163300" />
-            <Text fontFamily="$heading" fontSize={12} color="$forest">
+            <Text fontFamily="$heading" fontSize={fs(12)} color="$forest">
               CONTA CRIADA
             </Text>
           </HStack>
 
           <Text
             fontFamily="$display"
-            fontSize={34}
-            lineHeight={36}
+            fontSize={fs(34)}
+            lineHeight={fs(36)}
             letterSpacing={-1.5}
             color="$forest"
           >
             QUASE LÁ
           </Text>
-          <Text size="md" color="$brandTextSecondary" lineHeight={23}>
+          <Text size="md" color="$brandTextSecondary" lineHeight={fs(23)}>
             {daFila
               ? "Só o seu nome — é por ele que o profissional vai te chamar."
               : "Só o seu nome, para o profissional saber quem chamar."}

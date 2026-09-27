@@ -3,6 +3,7 @@ import { fireEvent } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { Settings } from '@screens/Settings';
 import { Sistema } from '@screens/Sistema';
+import { useFonteStore } from '@stores/fonteStore';
 
 // Andre 2026-09-16: "quero que o menu fique igual o do partner (com submenus,
 // a versao deve ser escondida)". O Perfil passa a ser um menu em grupos, e a
@@ -125,3 +126,14 @@ describe('Sistema — versão, atualização e diagnósticos', () => {
     expect(queryByText('Funcionalidades aguardadas')).toBeTruthy();
   });
 });
+
+describe('Perfil — tamanho da letra (Andre, 26/09)', () => {
+  it('cinco passos, de Normal a +4; tocar escolhe', () => {
+    const { getByTestId } = renderWithProviders(<Settings />);
+    for (const p of [0, 1, 2, 3, 4]) expect(getByTestId(`fonte-${p}`)).toBeTruthy();
+    fireEvent.press(getByTestId('fonte-2'));
+    expect(useFonteStore.getState().passo).toBe(2);
+    useFonteStore.setState({ passo: 0 });
+  });
+});
+

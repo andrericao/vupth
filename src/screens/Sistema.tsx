@@ -10,6 +10,7 @@ import { WsDiagnostics } from "@components/WsDiagnostics";
 import { PushDiagnostics } from "@components/PushDiagnostics";
 import { useComingSoonStore } from "@stores/comingSoonStore";
 import { COMING_SOON_LABELS, ComingSoonFeature } from "@domain/comingSoon";
+import { fs } from "@stores/fonteStore";
 
 // A versao e o que a cerca (atualizar, diagnosticos) saiu da tela de Perfil
 // para esta, atras do item "Versão do app" — o mesmo desenho do partner
@@ -82,7 +83,7 @@ export function Sistema() {
                 alignItems="center"
               >
                 <RefreshCw size={15} color="#163300" />
-                <Text fontFamily="$heading" fontSize={13} color="$forest">
+                <Text fontFamily="$heading" fontSize={fs(13)} color="$forest">
                   {isChecking ? "Verificando..." : "Verificar atualização"}
                 </Text>
               </HStack>
@@ -101,7 +102,7 @@ export function Sistema() {
             testID="version-line"
           >
             {/* Junta so o que EXISTE: em dev o runtime e o canal vem vazios. */}
-            <Text fontFamily="$mono" fontSize={10} color="$brandTextSecondary" textAlign="center">
+            <Text fontFamily="$mono" fontSize={fs(10)} color="$brandTextSecondary" textAlign="center">
               {[Updates.runtimeVersion, Updates.channel, otaInfo].filter(Boolean).join(" · ")}
             </Text>
           </TouchableOpacity>

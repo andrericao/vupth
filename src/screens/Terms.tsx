@@ -4,6 +4,7 @@ import { VStack, HStack, Text, Box, Center, ScrollView } from "@gluestack-ui/the
 
 import { ScreenHeader } from "@components/ScreenHeader";
 import { regraDaMulta } from "@domain/queue/saidaDaFila";
+import { fs } from "@stores/fonteStore";
 
 type Aba = "uso" | "privacidade";
 
@@ -116,7 +117,7 @@ export function Terms() {
               >
                 <Text
                   fontFamily="$heading"
-                  fontSize={14}
+                  fontSize={fs(14)}
                   color={ativa ? "$brandGreen" : "$brandTextSecondary"}
                 >
                   {label}
@@ -130,15 +131,15 @@ export function Terms() {
       <VStack px={16} pt={24} gap="$4.5">
         {secoes.map((s) => (
           <VStack key={s.titulo} gap="$1.5">
-            <Text fontFamily="$heading" fontSize={15} color="$brandTextPrimary">
+            <Text fontFamily="$heading" fontSize={fs(15)} color="$brandTextPrimary">
               {s.titulo}
             </Text>
-            <Text size="xs" color="$brandTextSecondary" lineHeight={20}>
+            <Text size="xs" color="$brandTextSecondary" lineHeight={fs(20)}>
               {s.corpo}
             </Text>
           </VStack>
         ))}
-        <Text fontFamily="$mono" fontSize={11} color="$brandTextSecondary" mt="$2">
+        <Text fontFamily="$mono" fontSize={fs(11)} color="$brandTextSecondary" mt="$2">
           Atualizado em 21 de agosto de 2026
         </Text>
       </VStack>

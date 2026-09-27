@@ -6,6 +6,7 @@ import { BellRing, Check } from "lucide-react-native";
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
 import { useFirstRunStore } from "@stores/firstRunStore";
+import { fs } from "@stores/fonteStore";
 
 const PROMESSAS = [
   "Avisamos faltando 2 pessoas",
@@ -54,14 +55,14 @@ export function PushPermission() {
       <VStack px={16} gap="$3">
         <Text
           fontFamily="$display"
-          fontSize={32}
-          lineHeight={34}
+          fontSize={fs(32)}
+          lineHeight={fs(34)}
           letterSpacing={-1.4}
           color="$forest"
         >
           PODE FECHAR O APP
         </Text>
-        <Text size="md" color="$brandTextSecondary" lineHeight={23}>
+        <Text size="md" color="$brandTextSecondary" lineHeight={fs(23)}>
           Avisamos quando faltarem 2 pessoas. Sem isso, mantenha o app aberto.
         </Text>
         <VStack gap="$2.5" mt="$1.5">
