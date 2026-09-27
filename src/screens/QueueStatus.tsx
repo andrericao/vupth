@@ -685,7 +685,7 @@ export function QueueStatus() {
             </Center>
             <Text
               fontFamily="$display"
-              fontSize={32}
+              fontSize={36}
               letterSpacing={-1.4}
               color="$forest"
               textAlign="center"
@@ -705,7 +705,7 @@ export function QueueStatus() {
               <VStack bg="$brandSurface" borderRadius={20} p={20} gap="$4" alignItems="center">
                 <Text
                   fontFamily="$display"
-                  fontSize={17}
+                  fontSize={21}
                   letterSpacing={-0.3}
                   color="$brandTextPrimary"
                   textAlign="center"
@@ -737,7 +737,7 @@ export function QueueStatus() {
                     bg="$brandGreen"
                   />
                   <VStack flex={1} gap="$0.5">
-                    <Text fontFamily="$heading" fontSize={15} color="$forest">
+                    <Text fontFamily="$heading" fontSize={19} color="$forest">
                       Marcar de novo com {activeQueue.professionalName ?? "o profissional"}
                     </Text>
                     <Text size="xs" color="$forest">
@@ -804,7 +804,7 @@ export function QueueStatus() {
         >
           <Text
             fontFamily="$body"
-            fontSize={13}
+            fontSize={17}
             fontWeight="$bold"
             letterSpacing={1}
             color="$forest"
@@ -819,8 +819,8 @@ export function QueueStatus() {
             <>
               <Text
                 fontFamily="$display"
-                fontSize={110}
-                lineHeight={112}
+                fontSize={114}
+                lineHeight={116}
                 letterSpacing={-6}
                 color="$forest"
                 testID="queue-position"
@@ -829,7 +829,7 @@ export function QueueStatus() {
               </Text>
               <Text
                 fontFamily="$display"
-                fontSize={26}
+                fontSize={30}
                 letterSpacing={-0.8}
                 color="$forest"
                 textAlign="center"
@@ -844,8 +844,8 @@ export function QueueStatus() {
           ) : (
             <Text
               fontFamily="$display"
-              fontSize={72}
-              lineHeight={78}
+              fontSize={76}
+              lineHeight={82}
               letterSpacing={-3}
               color="$forest"
               testID="queue-time"
@@ -858,7 +858,7 @@ export function QueueStatus() {
               da tela ele hierarquiza sem virar uma segunda cor. So o ALPHA
               subiu — 0x99 dava 3,40:1 sobre o verde e reprovava no AA; 0xBF da
               4,99:1 e continua mais leve que o forest chapado do numero. */}
-          <Text fontFamily="$body" fontSize={15} color="#163300BF" mt="$1">
+          <Text fontFamily="$body" fontSize={19} color="#163300BF" mt="$1">
             {semPrevisao
               ? "calculando a espera"
               : remaining! <= 0
@@ -891,7 +891,7 @@ export function QueueStatus() {
               {/* [contraste] Mesma logica do subtitulo acima: alpha 0xB3 dava
                   4,38:1 sobre o verde, 0xCC da 5,69:1. Fica um degrau ACIMA do
                   subtitulo, como era antes. */}
-              <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="#163300CC" mt="$3">
+              <Text fontFamily="$body" fontSize={17} fontWeight="$semibold" color="#163300CC" mt="$3">
                 Você já passou {passed} {passed === 1 ? "pessoa" : "pessoas"}
               </Text>
             </>
@@ -953,7 +953,7 @@ export function QueueStatus() {
                 opacity={isRemanejando ? 0.6 : 1}
               >
                 <Repeat2 size={17} color="#9FE870" />
-                <Text fontFamily="$heading" fontSize={15} color="$brandGreen">
+                <Text fontFamily="$heading" fontSize={19} color="$brandGreen">
                   {isRemanejando ? "Um instante..." : "Mudar minha vez"}
                 </Text>
               </HStack>
@@ -964,7 +964,7 @@ export function QueueStatus() {
               solicitacao depois"). A tela verde nao tinha como chegar neles. */}
           {canReshuffle && (
             <TouchableOpacity onPress={() => setShowSwapOffers(true)} testID="ver-trocas">
-              <Text fontFamily="$heading" fontSize={14} color="$forest">
+              <Text fontFamily="$heading" fontSize={18} color="$forest">
                 {acceptableCount > 0 ? `Pedidos de troca (${acceptableCount})` : "Pedidos de troca"}
               </Text>
             </TouchableOpacity>
@@ -974,7 +974,7 @@ export function QueueStatus() {
               para quem procura, sem gritar para quem nao esta procurando. */}
           {canCancel && (
             <TouchableOpacity onPress={handleCancel} disabled={isRemanejando} testID="leave-queue">
-              <Text fontFamily="$body" fontSize={13} fontWeight="$semibold" color="#163300CC">
+              <Text fontFamily="$body" fontSize={17} fontWeight="$semibold" color="#163300CC">
                 Sair da fila
               </Text>
             </TouchableOpacity>

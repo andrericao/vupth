@@ -116,7 +116,7 @@ export function Terms() {
               >
                 <Text
                   fontFamily="$heading"
-                  fontSize={14}
+                  fontSize={18}
                   color={ativa ? "$brandGreen" : "$brandTextSecondary"}
                 >
                   {label}
@@ -130,15 +130,15 @@ export function Terms() {
       <VStack px={16} pt={24} gap="$4.5">
         {secoes.map((s) => (
           <VStack key={s.titulo} gap="$1.5">
-            <Text fontFamily="$heading" fontSize={15} color="$brandTextPrimary">
+            <Text fontFamily="$heading" fontSize={19} color="$brandTextPrimary">
               {s.titulo}
             </Text>
-            <Text size="xs" color="$brandTextSecondary" lineHeight={20}>
+            <Text size="xs" color="$brandTextSecondary" lineHeight={24}>
               {s.corpo}
             </Text>
           </VStack>
         ))}
-        <Text fontFamily="$mono" fontSize={11} color="$brandTextSecondary" mt="$2">
+        <Text fontFamily="$mono" fontSize={15} color="$brandTextSecondary" mt="$2">
           Atualizado em 21 de agosto de 2026
         </Text>
       </VStack>

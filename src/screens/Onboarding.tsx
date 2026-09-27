@@ -58,14 +58,14 @@ export function Onboarding() {
       <VStack flex={1} px={16} pt="$7" gap="$3">
         <Text
           fontFamily="$display"
-          fontSize={38}
-          lineHeight={39}
+          fontSize={42}
+          lineHeight={43}
           letterSpacing={-1.7}
           color="$forest"
         >
           CHEGA DE FILA
         </Text>
-        <Text size="md" color="$brandTextSecondary" lineHeight={23}>
+        <Text size="md" color="$brandTextSecondary" lineHeight={27}>
           Veja quem está livre perto de você e entre na fila.
         </Text>
         {openNow > 0 && (

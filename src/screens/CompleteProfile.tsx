@@ -105,21 +105,21 @@ export function CompleteProfile() {
             alignSelf="flex-start"
           >
             <UserRound size={15} color="#163300" />
-            <Text fontFamily="$heading" fontSize={12} color="$forest">
+            <Text fontFamily="$heading" fontSize={16} color="$forest">
               CONTA CRIADA
             </Text>
           </HStack>
 
           <Text
             fontFamily="$display"
-            fontSize={34}
-            lineHeight={36}
+            fontSize={38}
+            lineHeight={40}
             letterSpacing={-1.5}
             color="$forest"
           >
             QUASE LÁ
           </Text>
-          <Text size="md" color="$brandTextSecondary" lineHeight={23}>
+          <Text size="md" color="$brandTextSecondary" lineHeight={27}>
             {daFila
               ? "Só o seu nome — é por ele que o profissional vai te chamar."
               : "Só o seu nome, para o profissional saber quem chamar."}

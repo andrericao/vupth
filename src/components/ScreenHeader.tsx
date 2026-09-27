@@ -116,8 +116,8 @@ export function ScreenHeader({ title, subtitle, action, onBack, root, ground }: 
           mt={5}
           numberOfLines={2}
           fontFamily="$display"
-          fontSize={26}
-          lineHeight={30}
+          fontSize={30}
+          lineHeight={34}
           letterSpacing={-1}
           color="$forest"
         >

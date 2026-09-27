@@ -119,7 +119,7 @@ function WarmupAnimation() {
         </Center>
       </Animated.View>
       <VStack space="xs" alignItems="center">
-        <Text fontFamily="$display" fontSize={20} letterSpacing={-0.4} color="$forest">
+        <Text fontFamily="$display" fontSize={24} letterSpacing={-0.4} color="$forest">
           {STEPS[index].title}
         </Text>
         <Text

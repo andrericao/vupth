@@ -63,7 +63,7 @@ function MenuItem({
 function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <VStack gap="$2">
-      <Text fontSize={11} fontWeight="$bold" letterSpacing={0.6} color="$brandTextSecondary">
+      <Text fontSize={15} fontWeight="$bold" letterSpacing={0.6} color="$brandTextSecondary">
         {label.toUpperCase()}
       </Text>
       <Box borderRadius="$card" overflow="hidden" bg="$brandSurface">
@@ -191,12 +191,12 @@ export function Settings() {
       {isAuthenticated ? (
         <VStack bg="$forest" style={{ paddingTop: insets.top + 24 }} pb={32} px={16} gap="$3" alignItems="center">
           <Center width={88} height={88} borderRadius={44} bg="$brandGreen">
-            <Text fontFamily="$display" fontSize={32} color="$forest">
+            <Text fontFamily="$display" fontSize={36} color="$forest">
               {initials}
             </Text>
           </Center>
           <VStack gap="$1" alignItems="center">
-            <Text fontFamily="$display" fontSize={24} letterSpacing={-0.8} color="$white">
+            <Text fontFamily="$display" fontSize={28} letterSpacing={-0.8} color="$white">
               {nomeDoTopo}
             </Text>
             {user?.email && (

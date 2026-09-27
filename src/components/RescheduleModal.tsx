@@ -53,7 +53,7 @@ function CampoHora({
         // DM Mono: e numero, e o token `mono` existe justamente pra hora.
         style={{
           fontFamily: "DMMono_500Medium",
-          fontSize: 26,
+          fontSize: 30,
           width: 46,
           textAlign: "center",
           color: "#163300",
@@ -101,8 +101,8 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
           <VStack gap="$1.5">
             <Text
               fontFamily="$display"
-              fontSize={22}
-              lineHeight={26}
+              fontSize={26}
+              lineHeight={30}
               letterSpacing={-0.6}
               color="$forest"
             >
@@ -122,7 +122,7 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
                 variar" (a linha do relogio acima ja diz "deve ir ate") e o
                 caso do intervalo, que so importa quando acontece — e ai quem
                 avisa e a mensagem de erro, com o horario real. */}
-            <Text size="sm" lineHeight={20} color="$brandTextSecondary">
+            <Text size="sm" lineHeight={24} color="$brandTextSecondary">
               Escolha o horário — precisa estar dentro do funcionamento da loja.
             </Text>
           </VStack>
@@ -137,7 +137,7 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
               py="$2.5"
             >
               <TriangleAlert size={16} color="#B3261E" />
-              <Text fontFamily="$heading" fontSize={13} lineHeight={18} color="$brandDanger" flex={1}>
+              <Text fontFamily="$heading" fontSize={17} lineHeight={22} color="$brandDanger" flex={1}>
                 Perto de ser atendido: reagendar agora gera multa de R${" "}
                 {CANCELLATION_PENALTY_VALUE},00.
               </Text>
@@ -146,7 +146,7 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
 
           <HStack alignItems="center" justifyContent="center" gap="$2">
             <CampoHora placeholder="HH" value={hour} onChangeText={(t) => setHour(onlyDigits(t))} />
-            <Text fontFamily="$display" fontSize={22} color="$forest">
+            <Text fontFamily="$display" fontSize={26} color="$forest">
               :
             </Text>
             <CampoHora placeholder="MM" value={minute} onChangeText={(t) => setMinute(onlyDigits(t))} />

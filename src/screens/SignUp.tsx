@@ -140,7 +140,7 @@ export function SignUp() {
               alignSelf="flex-start"
             >
               <TriangleAlert size={15} color="#163300" />
-              <Text fontFamily="$heading" fontSize={12} color="$forest">
+              <Text fontFamily="$heading" fontSize={16} color="$forest">
                 {params.professionalName
                   ? `ENTRANDO NA FILA · ${params.professionalName.toUpperCase()}`
                   : "VOCÊ ESTÁ ENTRANDO NA FILA"}
@@ -227,7 +227,7 @@ export function SignUp() {
             size="2xs"
             color="$brandTextSecondary"
             textAlign="center"
-            lineHeight={15}
+            lineHeight={19}
           >
             Ao continuar você concorda com os Termos de Uso e a Política de Privacidade.
           </Text>

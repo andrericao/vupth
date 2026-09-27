@@ -99,8 +99,8 @@ export function Login() {
         <VStack gap="$2" mt="$3">
           <Text
             fontFamily="$display"
-            fontSize={34}
-            lineHeight={36}
+            fontSize={38}
+            lineHeight={40}
             letterSpacing={-1.5}
             color="$forest"
           >

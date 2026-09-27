@@ -161,8 +161,8 @@ export function ForgotPassword() {
               mais "esquecendo a senha", esta criando uma nova. */}
           <Text
             fontFamily="$display"
-            fontSize={34}
-            lineHeight={36}
+            fontSize={38}
+            lineHeight={40}
             letterSpacing={-1.5}
             color="$forest"
           >

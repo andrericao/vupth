@@ -55,7 +55,7 @@ export function FilterSheet({ visible, value, onSelect, onClose }: Props) {
           gap="$4"
         >
           <VStack gap="$1">
-            <Text fontFamily="$display" fontSize={20} letterSpacing={-0.5} color="$forest">
+            <Text fontFamily="$display" fontSize={24} letterSpacing={-0.5} color="$forest">
               Filtrar por categoria
             </Text>
             <Text size="sm" color="$brandTextSecondary">
@@ -86,7 +86,7 @@ export function FilterSheet({ visible, value, onSelect, onClose }: Props) {
                   >
                     <Text
                       fontFamily="$heading"
-                      fontSize={13}
+                      fontSize={17}
                       color={ativo ? "$brandGreen" : "$brandTextSecondary"}
                     >
                       {op.label}

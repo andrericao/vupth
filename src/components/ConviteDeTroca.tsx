@@ -122,7 +122,7 @@ export function ConviteDeTroca() {
               style={{
                 flex: 1,
                 fontFamily: "Archivo_800ExtraBold",
-                fontSize: 18,
+                fontSize: 22,
                 letterSpacing: -0.4,
                 color: FOREST,
               }}
@@ -139,7 +139,7 @@ export function ConviteDeTroca() {
               <X size={20} color={FOREST} />
             </Pressable>
           </View>
-          <Text style={{ fontFamily: "Inter_400Regular", fontSize: 14, lineHeight: 20, color: TEXT_SECONDARY }}>
+          <Text style={{ fontFamily: "Inter_400Regular", fontSize: 18, lineHeight: 24, color: TEXT_SECONDARY }}>
             {texto.mensagem}
           </Text>
           <BarraDoTempo duracaoMs={DURACAO_DO_CONVITE_MS} chave={atual.id} />
@@ -157,7 +157,7 @@ export function ConviteDeTroca() {
               opacity: aceitando ? 0.6 : 1,
             }}
           >
-            <Text style={{ fontFamily: "Archivo_700Bold", fontSize: 16, color: FOREST }}>
+            <Text style={{ fontFamily: "Archivo_700Bold", fontSize: 20, color: FOREST }}>
               {aceitando ? "Aceitando..." : "Aceitar"}
             </Text>
           </Pressable>

@@ -34,7 +34,7 @@ export function AtualizarNoNavegador({
         opacity={atualizando ? 0.6 : 1}
       >
         <RefreshCw size={15} color="#163300" />
-        <Text fontFamily="$heading" fontSize={13} color="$forest">
+        <Text fontFamily="$heading" fontSize={17} color="$forest">
           {atualizando ? "Atualizando..." : "Atualizar"}
         </Text>
       </HStack>

@@ -240,7 +240,7 @@ export function Attendances() {
                   testID="avaliar-agora"
                 >
                   <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
-                    <Text fontFamily="$heading" fontSize={12} color="$forest">
+                    <Text fontFamily="$heading" fontSize={16} color="$forest">
                       Avaliar
                     </Text>
                   </Box>
@@ -253,7 +253,7 @@ export function Attendances() {
         <VStack mt="$6" px={16}>
           <Text
             fontFamily="$body"
-            fontSize={11}
+            fontSize={15}
             fontWeight="$bold"
             letterSpacing={0.8}
             color="$brandTextSecondary"
@@ -279,7 +279,7 @@ export function Attendances() {
                 <HStack alignItems="center" gap="$2.5">
                   <Users size={20} color="#163300" />
                   <VStack flex={1} gap="$0.5">
-                    <Text fontFamily="$display" fontSize={16} letterSpacing={-0.4} color="$forest">
+                    <Text fontFamily="$display" fontSize={20} letterSpacing={-0.4} color="$forest">
                       {activeQueue.establishmentName}
                     </Text>
                     <Text size="xs" color="$brandTextSecondary">
@@ -327,7 +327,7 @@ export function Attendances() {
           <VStack mt="$6" px={16}>
             <Text
               fontFamily="$body"
-              fontSize={11}
+              fontSize={15}
               fontWeight="$bold"
               letterSpacing={0.8}
               color="$brandTextSecondary"
@@ -371,7 +371,7 @@ export function Attendances() {
           <VStack mt="$6" px={16}>
             <Text
               fontFamily="$body"
-              fontSize={11}
+              fontSize={15}
               fontWeight="$bold"
               letterSpacing={0.8}
               color="$brandTextSecondary"
@@ -424,7 +424,7 @@ export function Attendances() {
         <VStack mt="$6" px={16}>
           <Text
             fontFamily="$body"
-            fontSize={11}
+            fontSize={15}
             fontWeight="$bold"
             letterSpacing={0.8}
             color="$brandTextSecondary"
