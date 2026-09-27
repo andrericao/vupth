@@ -944,6 +944,16 @@ export function QueueStatus() {
               </HStack>
             </TouchableOpacity>
           )}
+          {/* Os pedidos de troca — os que eu posso aceitar, com o lugar e o
+              horario, e os meus (Andre, 26/09: "nao consegui achar essa
+              solicitacao depois"). A tela verde nao tinha como chegar neles. */}
+          {canReshuffle && (
+            <TouchableOpacity onPress={() => setShowSwapOffers(true)} testID="ver-trocas">
+              <Text fontFamily="$heading" fontSize={14} color="$forest">
+                {acceptableCount > 0 ? `Pedidos de troca (${acceptableCount})` : "Pedidos de troca"}
+              </Text>
+            </TouchableOpacity>
+          )}
           {/* "Sair da fila" NAO e botao vermelho aqui (era, antes): sair e uma
               saida legitima, nao um erro. Fica como link discreto — presente
               para quem procura, sem gritar para quem nao esta procurando. */}
@@ -984,6 +994,7 @@ export function QueueStatus() {
         <SwapOffersModal
           visible={showSwapOffers}
           professionalId={professionalId}
+          establishmentId={establishmentId}
           onClose={() => setShowSwapOffers(false)}
           onChanged={refresh}
         />
@@ -1189,6 +1200,7 @@ export function QueueStatus() {
       <SwapOffersModal
         visible={showSwapOffers}
         professionalId={professionalId}
+        establishmentId={establishmentId}
         onClose={() => setShowSwapOffers(false)}
         onChanged={refresh}
       />

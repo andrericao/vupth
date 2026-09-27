@@ -4,24 +4,30 @@ import { VStack, HStack, Box, Text, Heading, Divider, Spinner } from "@gluestack
 
 import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
-import { acceptOfferText, myOfferText } from "@domain/queue/swap";
+import { acceptOfferText, myOfferText, vagaNaFila } from "@domain/queue/swap";
+import { formatClockTime } from "@domain/queue/types";
+import { queueService, QueueResponse } from "@services/queueService";
 import { swapOfferService, SwapOfferResponse } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
 
 type Props = {
   visible: boolean;
   professionalId: string | null;
+  // Com a loja, o pedido mostra o lugar e o horario da vaga (Andre, 26/09).
+  establishmentId?: string | null;
   onClose: () => void;
   onChanged: () => void; // troca aceita/cancelada → o pai recarrega a fila
 };
 
 // Modal da troca (C13): lista as ofertas que EU posso aceitar + as MINHAS (para
 // cancelar). Abre pelo botão "Trocar" da fila. Busca fresco ao abrir.
-export function SwapOffersModal({ visible, professionalId, onClose, onChanged }: Props) {
+export function SwapOffersModal({ visible, professionalId, establishmentId, onClose, onChanged }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
   const [acceptable, setAcceptable] = useState<SwapOfferResponse[]>([]);
   const [mine, setMine] = useState<SwapOfferResponse[]>([]);
   const [loading, setLoading] = useState(false);
+  const [fila, setFila] = useState<QueueResponse | null>(null);
+  const [lidoEm, setLidoEm] = useState(0);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -34,12 +40,19 @@ export function SwapOffersModal({ visible, professionalId, onClose, onChanged }:
       ]);
       setAcceptable(a.data);
       setMine(m.data);
+      // A fila so serve para dizer o lugar e o horario — sem ela, o pedido
+      // aparece como antes.
+      if (establishmentId) {
+        const f = await queueService.getQueue(professionalId, establishmentId, accessToken).catch(() => null);
+        setFila(f?.data ?? null);
+        setLidoEm(Date.now());
+      }
     } catch {
       // silencioso — o modal só mostra vazio
     } finally {
       setLoading(false);
     }
-  }, [accessToken, professionalId]);
+  }, [accessToken, professionalId, establishmentId]);
 
   useEffect(() => {
     // Busca fresco ao abrir. O setState (loading) roda dentro de load() — disable
@@ -114,6 +127,14 @@ export function SwapOffersModal({ visible, professionalId, onClose, onChanged }:
               {acceptable.map((o) => (
                 <Box key={o.id} bg="$brandSurface" borderRadius="$card" p="$3">
                   <Text size="sm" color="$brandTextPrimary">{acceptOfferText(o.direction)}</Text>
+                  {(() => {
+                    const vaga = fila ? vagaNaFila(fila, o.requesterAttendanceId, lidoEm) : null;
+                    return vaga ? (
+                      <Text size="sm" fontFamily="$heading" color="$forest" mt="$1" testID={`vaga-${o.id}`}>
+                        Você vai para o {vaga.posicao}º lugar, por volta de {formatClockTime(new Date(vaga.horarioMs))}
+                      </Text>
+                    ) : null;
+                  })()}
                   <Button
                     title={busyId === o.id ? "Aceitando..." : "Aceitar troca"}
                     mt="$2"
