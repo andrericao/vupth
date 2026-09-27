@@ -87,4 +87,13 @@ describe('EstablishmentDetail — o link do profissional', () => {
     renderWithProviders(<EstablishmentDetail />);
     expect(mockNavigate).not.toHaveBeenCalled();
   });
+
+  // Andre, 26/09: trabalhando com a fila fechada, o app deixava entrar.
+  it('trabalhando com a fila fechada: aparece "Fila fechada" e a escolha segue como a de quem está Fora', () => {
+    mockParams = { establishmentId: 'e1', profissional: 'b' };
+    mockProfs.mockReturnValue({ data: [prof('b', { work_status: 'WORKING', accepting_new: false })] });
+    const { getByTestId } = renderWithProviders(<EstablishmentDetail />);
+    expect(getByTestId('fila-fechada-b')).toBeTruthy();
+    expect(mockNavigate).toHaveBeenCalledWith('serviceSelection', expect.objectContaining({ professionalId: 'b', profissionalFora: true }));
+  });
 });

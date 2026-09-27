@@ -22,7 +22,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
 import { ProfessionalWithQueue } from "@domain/professional/types";
-import { agruparPorExpediente, emIntervalo, estaNoExpediente } from "@domain/professional/expediente";
+import { agruparPorExpediente, emIntervalo, estaNoExpediente, filaFechada } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { ehSoAgenda } from "@domain/professional/modo";
@@ -110,6 +110,14 @@ function ProfessionalRow({
                   {/* Intervalo e almoco ou saida rapida: a pessoa VOLTA e a fila
                       dela segue andando, por isso ela fica entre quem trabalha —
                       mas com o rotulo, senao a espera anunciada engana. */}
+                  {estaNoExpediente(professional.work_status) && professional.accepting_new === false && (
+                    <>
+                      <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
+                      <Text size="xs" color="$brandTextSecondary" fontFamily="$heading" testID={`fila-fechada-${professional.id}`}>
+                        Fila fechada
+                      </Text>
+                    </>
+                  )}
                   {emIntervalo(professional.work_status) && (
                     <>
                       <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
@@ -173,7 +181,9 @@ export function EstablishmentDetail() {
     const prof = professionals.find((p) => p.id === professionalId);
     // "Fora" = fila fechada (ir para Fora fecha a fila, regra de 09/09). A tela
     // de servicos nao oferece a entrada — so o pedido de corte (24/09).
-    const fora = !estaNoExpediente(prof?.work_status);
+    // Trabalhando com a fila fechada (`accepting_new: false`) tambem nao recebe
+    // ninguem novo: mesmo caminho de quem esta Fora (26/09).
+    const fora = filaFechada(prof);
     if (!establishment) return;
 
     // Loja fechada NÃO bloqueia mais (Andre 2026-07-23): o fluxo segue até os
