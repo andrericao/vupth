@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, memo } from "react";
-import { FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle } from "react-native";
+import { FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle, ScrollView } from "react-native";
 import { useNavigation, useRoute, useScrollToTop, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import { Search, SlidersHorizontal, ChevronRight, Zap } from "lucide-react-native";
@@ -189,6 +189,49 @@ const EstablishmentRow = memo(function EstablishmentRow({
     </TouchableOpacity>
   );
 });
+
+// As categorias da faixa do Inicio, na ordem em que o cliente mais procura.
+const CATEGORIAS_DA_FAIXA: ServiceType[] = ["BARBER", "BEAUTY_SALON", "NAIL_SALON", "EYEBROW", "SPA", "CLINIC"];
+
+function PilulaDeFiltro({
+  ativa,
+  onPress,
+  rotulo,
+  icone,
+  testID,
+  accessibilityLabel,
+}: {
+  ativa: boolean;
+  onPress: () => void;
+  rotulo: string;
+  icone?: React.ReactNode;
+  testID: string;
+  accessibilityLabel: string;
+}) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: ativa }}
+      accessibilityLabel={accessibilityLabel}
+      testID={testID}
+    >
+      <HStack
+        bg={ativa ? "$forest" : "$brandSurface"}
+        borderRadius="$full"
+        gap={6}
+        px={12}
+        py={7}
+        alignItems="center"
+      >
+        {icone}
+        <Text fontFamily="$display" fontSize={13} fontWeight="$bold" color={ativa ? "$brandGreen" : "$forest"}>
+          {rotulo}
+        </Text>
+      </HStack>
+    </TouchableOpacity>
+  );
+}
 
 export function Home() {
   const [search, setSearch] = useState("");
@@ -429,40 +472,37 @@ export function Home() {
         </HStack>
       </Box>
 
-      {/* "Pra ontem": liga e desliga. Ligado, a secao de baixo mostra so as
-          abertas e livres, na ordem de quem atende primeiro. */}
-      <HStack px={16} pt={12}>
-        <TouchableOpacity
+      {/* "Pra ontem" e as categorias numa faixa so, que rola de lado (Andre,
+          26/09: "volte os filtros ao lado do pra ontem" e "diminua a pilula").
+          Tocar na categoria ativa desliga o filtro. */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12, gap: 8 }}
+      >
+        <PilulaDeFiltro
+          ativa={praOntem}
           onPress={() => setPraOntem((v) => !v)}
-          accessibilityRole="button"
-          accessibilityState={{ selected: praOntem }}
           accessibilityLabel={
             praOntem
               ? "Pra ontem ligado: só lojas abertas e livres. Tocar para ver todas"
               : "Pra ontem: tenho um compromisso e preciso cortar já"
           }
           testID="pra-ontem"
-        >
-          <HStack
-            bg={praOntem ? "$forest" : "$brandSurface"}
-            borderRadius="$full"
-            gap={8}
-            px={16}
-            py={10}
-            alignItems="center"
-          >
-            <Zap size={16} color={praOntem ? "#9FE870" : "#163300"} />
-            <Text
-              fontFamily="$display"
-              fontSize={14}
-              fontWeight="$bold"
-              color={praOntem ? "$brandGreen" : "$forest"}
-            >
-              Pra ontem
-            </Text>
-          </HStack>
-        </TouchableOpacity>
-      </HStack>
+          icone={<Zap size={13} color={praOntem ? "#9FE870" : "#163300"} />}
+          rotulo="Pra ontem"
+        />
+        {CATEGORIAS_DA_FAIXA.map((c) => (
+          <PilulaDeFiltro
+            key={c}
+            ativa={selectedFilter === c}
+            onPress={() => setSelectedFilter((atual) => (atual === c ? "ALL" : c))}
+            accessibilityLabel={`Filtrar por ${serviceTypeLabel(c)}`}
+            testID={`filtro-${c}`}
+            rotulo={serviceTypeLabel(c)}
+          />
+        ))}
+      </ScrollView>
 
       {/* Fila ativa. O atrasado (LATE) tambem: ele segue na fila — sem o card,
           o Inicio dizia que nao havia nada, e o teste de 25/09 leu "acabou". */}
