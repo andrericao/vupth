@@ -54,14 +54,14 @@ export function PushPermission() {
       <VStack px={16} gap="$3">
         <Text
           fontFamily="$display"
-          fontSize={36}
-          lineHeight={38}
+          fontSize={32}
+          lineHeight={34}
           letterSpacing={-1.4}
           color="$forest"
         >
           PODE FECHAR O APP
         </Text>
-        <Text size="md" color="$brandTextSecondary" lineHeight={27}>
+        <Text size="md" color="$brandTextSecondary" lineHeight={23}>
           Avisamos quando faltarem 2 pessoas. Sem isso, mantenha o app aberto.
         </Text>
         <VStack gap="$2.5" mt="$1.5">

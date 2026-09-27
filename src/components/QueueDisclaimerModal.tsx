@@ -39,8 +39,8 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
                 nao usa preto em lugar nenhum. */}
             <Text
               fontFamily="$display"
-              fontSize={23}
-              lineHeight={27}
+              fontSize={19}
+              lineHeight={23}
               letterSpacing={-0.4}
               color="$forest"
               flex={1}
@@ -49,7 +49,7 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
             </Text>
           </HStack>
 
-          <Text size="sm" lineHeight={26} color="$brandTextSecondary">
+          <Text size="sm" lineHeight={22} color="$brandTextSecondary">
             {QUEUE_DISCLAIMER_TEXT}
           </Text>
 

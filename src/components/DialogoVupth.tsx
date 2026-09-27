@@ -100,7 +100,7 @@ export function DialogoVupth() {
           <Text
             style={{
               fontFamily: "Archivo_800ExtraBold",
-              fontSize: 22,
+              fontSize: 18,
               letterSpacing: -0.4,
               color: FOREST,
             }}
@@ -115,8 +115,8 @@ export function DialogoVupth() {
               <Text
                 style={{
                   fontFamily: "Inter_400Regular",
-                  fontSize: 18,
-                  lineHeight: 24,
+                  fontSize: 14,
+                  lineHeight: 20,
                   color: TEXT_SECONDARY,
                 }}
               >
@@ -151,7 +151,7 @@ export function DialogoVupth() {
                   <Text
                     style={{
                       fontFamily: "Archivo_700Bold",
-                      fontSize: 20,
+                      fontSize: 16,
                       color: perigo ? DANGER : FOREST,
                     }}
                   >

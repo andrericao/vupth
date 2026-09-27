@@ -373,8 +373,8 @@ export function EstablishmentDetail() {
         {showPhoto && (
           <Text
             fontFamily="$display"
-            fontSize={30}
-            lineHeight={34}
+            fontSize={26}
+            lineHeight={30}
             letterSpacing={-1}
             color="$forest"
           >

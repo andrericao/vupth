@@ -82,7 +82,7 @@ export function Sistema() {
                 alignItems="center"
               >
                 <RefreshCw size={15} color="#163300" />
-                <Text fontFamily="$heading" fontSize={17} color="$forest">
+                <Text fontFamily="$heading" fontSize={13} color="$forest">
                   {isChecking ? "Verificando..." : "Verificar atualização"}
                 </Text>
               </HStack>
@@ -101,7 +101,7 @@ export function Sistema() {
             testID="version-line"
           >
             {/* Junta so o que EXISTE: em dev o runtime e o canal vem vazios. */}
-            <Text fontFamily="$mono" fontSize={14} color="$brandTextSecondary" textAlign="center">
+            <Text fontFamily="$mono" fontSize={10} color="$brandTextSecondary" textAlign="center">
               {[Updates.runtimeVersion, Updates.channel, otaInfo].filter(Boolean).join(" · ")}
             </Text>
           </TouchableOpacity>

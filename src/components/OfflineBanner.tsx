@@ -28,7 +28,7 @@ export function OfflineBanner() {
         elevation: 9999,
       }}
     >
-      <Text style={{ color: "#FFFFFF", fontSize: 16, fontWeight: "600" }}>
+      <Text style={{ color: "#FFFFFF", fontSize: 12, fontWeight: "600" }}>
         Sem conexão — os dados podem estar desatualizados
       </Text>
     </View>

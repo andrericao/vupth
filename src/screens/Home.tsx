@@ -93,7 +93,7 @@ function StatusPill({ label, live }: { label: string; live: boolean }) {
       {live && <LiveDot size={8} color="#163300" pulsing />}
       <Text
         fontFamily="$display"
-        fontSize={16}
+        fontSize={12}
         fontWeight="$bold"
         color={live ? "$forest" : "$brandTextSecondary"}
       >
@@ -164,7 +164,7 @@ const EstablishmentRow = memo(function EstablishmentRow({
           color={tag.live ? "$forest" : "$brandTextSecondary"}
         />
         <VStack flex={1} gap={4}>
-          <Text fontFamily="$display" fontSize={19} fontWeight="$bold" color="$brandTextPrimary">
+          <Text fontFamily="$display" fontSize={15} fontWeight="$bold" color="$brandTextPrimary">
             {establishment.name}
           </Text>
           <HStack gap={8} alignItems="center">
@@ -176,7 +176,7 @@ const EstablishmentRow = memo(function EstablishmentRow({
                 {i > 0 && (
                   <Center width={3} height={3} borderRadius={1.5} bg="$brandTextSecondary" />
                 )}
-                <Text fontFamily="$body" fontSize={17} color="$brandTextSecondary">
+                <Text fontFamily="$body" fontSize={13} color="$brandTextSecondary">
                   {m}
                 </Text>
               </HStack>
@@ -225,7 +225,7 @@ function PilulaDeFiltro({
         alignItems="center"
       >
         {icone}
-        <Text fontFamily="$display" fontSize={17} fontWeight="$bold" color={ativa ? "$brandGreen" : "$forest"}>
+        <Text fontFamily="$display" fontSize={13} fontWeight="$bold" color={ativa ? "$brandGreen" : "$forest"}>
           {rotulo}
         </Text>
       </HStack>
@@ -394,7 +394,7 @@ export function Home() {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
-                <Text fontFamily="$display" fontSize={18} fontWeight="$bold" color="$forest">
+                <Text fontFamily="$display" fontSize={14} fontWeight="$bold" color="$forest">
                   Cadastrar
                 </Text>
               </TouchableOpacity>
@@ -429,8 +429,8 @@ export function Home() {
               style={[
                 {
                   fontFamily: "Inter_400Regular",
-                  fontSize: 19,
-                  lineHeight: 24,
+                  fontSize: 15,
+                  lineHeight: 20,
                   color: "#163300",
                   paddingVertical: 12,
                   paddingHorizontal: 0,
@@ -524,7 +524,7 @@ export function Home() {
               <HStack justifyContent="space-between" alignItems="center">
                 <Text
                   fontFamily="$body"
-                  fontSize={16}
+                  fontSize={12}
                   fontWeight="$bold"
                   letterSpacing={0.8}
                   color="$forest"
@@ -540,7 +540,7 @@ export function Home() {
                   alignItems="center"
                 >
                   <LiveDot size={8} color="#9FE870" />
-                  <Text fontFamily="$display" fontSize={16} fontWeight="$bold" color="$brandGreen">
+                  <Text fontFamily="$display" fontSize={12} fontWeight="$bold" color="$brandGreen">
                     Ao vivo
                   </Text>
                 </HStack>
@@ -549,10 +549,10 @@ export function Home() {
                 <VStack flex={1}>
                   <Text
                     fontFamily="$display"
-                    fontSize={50}
+                    fontSize={46}
                     fontWeight="$extrabold"
                     letterSpacing={-2}
-                    lineHeight={50}
+                    lineHeight={46}
                     color="$forest"
                   >
                     {/* Posicao real (GET wait-time). Ate o 1o poll chegar, cai no
@@ -565,7 +565,7 @@ export function Home() {
                         ? "Calculando..."
                         : formatWaitTime(remaining)}
                   </Text>
-                  <Text fontFamily="$body" fontSize={18} color="$forest">
+                  <Text fontFamily="$body" fontSize={14} color="$forest">
                     {remaining == null ? "" : `~${formatWaitTime(remaining)} · `}
                     {activeQueue.establishmentName}
                   </Text>
@@ -585,17 +585,17 @@ export function Home() {
           <VStack bg="$brandSurface" borderRadius={24} gap={6} p={20} testID="pedido-de-corte">
             <Text
               fontFamily="$body"
-              fontSize={16}
+              fontSize={12}
               fontWeight="$bold"
               letterSpacing={0.8}
               color="$forest"
             >
               PEDIDO DE CORTE ENVIADO
             </Text>
-            <Text fontFamily="$display" fontSize={22} letterSpacing={-0.4} color="$forest">
+            <Text fontFamily="$display" fontSize={18} letterSpacing={-0.4} color="$forest">
               Aguardando {p.professionalName || "o profissional"} responder
             </Text>
-            <Text fontFamily="$body" fontSize={18} color="$brandTextSecondary">
+            <Text fontFamily="$body" fontSize={14} color="$brandTextSecondary">
               {p.establishmentName ? `${p.establishmentName} · ` : ""}resposta até {formatClockTime(new Date(p.expiraEm))}
             </Text>
           </VStack>
@@ -607,7 +607,7 @@ export function Home() {
         <VStack px={16} pt={22} gap={12}>
           <Text
             fontFamily="$display"
-            fontSize={21}
+            fontSize={17}
             fontWeight="$bold"
             letterSpacing={-0.3}
             color="$brandTextPrimary"
@@ -624,20 +624,20 @@ export function Home() {
             <HStack bg="$brandSurface" borderRadius={18} gap={14} p={14} alignItems="center">
               <PlaceAvatar name={lastVisit.professionalName} bg="$accentPeach" />
               <VStack flex={1} gap={3}>
-                <Text fontFamily="$display" fontSize={19} fontWeight="$bold" color="$brandTextPrimary">
+                <Text fontFamily="$display" fontSize={15} fontWeight="$bold" color="$brandTextPrimary">
                   {lastVisit.professionalName}
                   {lastVisit.services?.length
                     ? ` · ${lastVisit.services.map((s) => s.customName).join(" + ")}`
                     : ""}
                 </Text>
                 {timeAgoLabel(lastVisit.endTime ?? lastVisit.scheduledTime) && (
-                  <Text fontFamily="$body" fontSize={17} color="$brandTextSecondary">
+                  <Text fontFamily="$body" fontSize={13} color="$brandTextSecondary">
                     Última vez {timeAgoLabel(lastVisit.endTime ?? lastVisit.scheduledTime)}
                   </Text>
                 )}
               </VStack>
               <Box bg="$forest" borderRadius="$full" px={14} py={9}>
-                <Text fontFamily="$display" fontSize={17} fontWeight="$bold" color="$brandGreen">
+                <Text fontFamily="$display" fontSize={13} fontWeight="$bold" color="$brandGreen">
                   Repetir
                 </Text>
               </Box>
@@ -654,7 +654,7 @@ export function Home() {
         <HStack justifyContent="space-between" alignItems="center">
           <Text
             fontFamily="$display"
-            fontSize={21}
+            fontSize={17}
             fontWeight="$bold"
             letterSpacing={-0.3}
             color="$brandTextPrimary"
@@ -666,7 +666,7 @@ export function Home() {
               Home — era um link morto. */}
           {praOntem ? (
             <TouchableOpacity onPress={() => setPraOntem(false)} testID="pra-ontem-sair">
-              <Text fontFamily="$body" fontSize={18} fontWeight="$semibold" color="$brandTextSecondary">
+              <Text fontFamily="$body" fontSize={14} fontWeight="$semibold" color="$brandTextSecondary">
                 Ver todas
               </Text>
             </TouchableOpacity>
@@ -675,14 +675,14 @@ export function Home() {
               onPress={() => navigation.navigate("establishmentList", { filter: selectedFilter })}
               testID="see-all"
             >
-              <Text fontFamily="$body" fontSize={18} fontWeight="$semibold" color="$brandTextSecondary">
+              <Text fontFamily="$body" fontSize={14} fontWeight="$semibold" color="$brandTextSecondary">
                 Ver todos
               </Text>
             </TouchableOpacity>
           )}
         </HStack>
         {praOntem && (
-          <Text fontFamily="$body" fontSize={17} color="$brandTextSecondary">
+          <Text fontFamily="$body" fontSize={13} color="$brandTextSecondary">
             {coords
               ? "Abertas agora, de quem te atende primeiro — já contando o caminho até lá."
               : "Abertas agora, da menor espera. Ligue a localização para contar o caminho."}

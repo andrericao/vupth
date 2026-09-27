@@ -118,8 +118,8 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
           <VStack gap="$1">
             <Text
               fontFamily="$display"
-              fontSize={26}
-              lineHeight={30}
+              fontSize={22}
+              lineHeight={26}
               letterSpacing={-0.6}
               color="$forest"
             >
@@ -134,7 +134,7 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
             <VStack key={grupo.titulo} gap="$2">
               <Text
                 fontFamily="$body"
-                fontSize={15}
+                fontSize={11}
                 fontWeight="$bold"
                 letterSpacing={0.8}
                 color="$brandTextSecondary"
@@ -180,7 +180,7 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
                     >
                       <Radio selected={isSelected} disabled={disabled} />
                       <VStack flex={1} gap="$0.5">
-                        <Text fontFamily="$heading" fontSize={18} color="$forest">
+                        <Text fontFamily="$heading" fontSize={14} color="$forest">
                           {option.title}
                         </Text>
                         <Text size="xs" color="$brandTextSecondary">

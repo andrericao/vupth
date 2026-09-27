@@ -28,7 +28,7 @@ export function TabLabel({ focused, children }: { focused: boolean; children: st
   return (
     <Text
       style={{
-        fontSize: 15,
+        fontSize: 11,
         marginTop: 2,
         fontWeight: focused ? "700" : "500",
         color: focused ? TAB_ACTIVE : TAB_INACTIVE,

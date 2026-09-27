@@ -70,7 +70,7 @@ export function PilulaVoltarAoTopo({ visivel, onPress }: { visivel: boolean; onP
         }}
       >
         <ArrowUp size={14} color={FOREST} />
-        <Text style={{ fontFamily: "Archivo_700Bold", fontSize: 17, color: FOREST }}>Voltar ao topo</Text>
+        <Text style={{ fontFamily: "Archivo_700Bold", fontSize: 13, color: FOREST }}>Voltar ao topo</Text>
       </Pressable>
     </Animated.View>
   );
