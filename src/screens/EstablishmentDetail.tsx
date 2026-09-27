@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { SectionList, TouchableOpacity, Alert, ImageBackground, Linking, Share } from "react-native";
+import { SectionList, TouchableOpacity, Alert, ImageBackground, Linking, Share, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@gluestack-ui/themed";
 import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Copy } from "lucide-react-native";
 import { copiarTexto } from "@utils/copiar";
+import { FotoAmpliada } from "@components/FotoAmpliada";
 import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
 import { API_ENV } from "@services/api";
 
@@ -53,8 +54,11 @@ function ProfessionalRow({
   lojaAberta,
   fora,
   onPress,
+  onVerFoto,
 }: {
   professional: ProfessionalWithQueue;
+  /** Tocar na foto abre em tela cheia (so quando ha foto). */
+  onVerFoto?: (uri: string) => void;
   /** Loja fechada: ninguem esta sendo atendido, entao a linha nao pode falar
       de fila nem de "agora". Ver o mesmo conserto na Home. */
   lojaAberta: boolean;
@@ -76,7 +80,17 @@ function ProfessionalRow({
         <HStack alignItems="center" gap="$3">
           {/* Foto quando o profissional tiver (Partner 1.4.0); sem ela, ou com
               URL quebrada, o PlaceAvatar volta para as iniciais. */}
-          <PlaceAvatar name={professional.name} photoUrl={professional.profile_image_url} />
+          {professional.profile_image_url && onVerFoto ? (
+            <TouchableOpacity
+              onPress={() => onVerFoto(professional.profile_image_url!)}
+              accessibilityLabel={`Ver a foto de ${professional.name}`}
+              testID={`foto-${professional.id}`}
+            >
+              <PlaceAvatar name={professional.name} photoUrl={professional.profile_image_url} />
+            </TouchableOpacity>
+          ) : (
+            <PlaceAvatar name={professional.name} photoUrl={professional.profile_image_url} />
+          )}
           <VStack flex={1}>
             <Text fontFamily="$heading" fontSize="$sm" color="$forest">
               {professional.name}
@@ -171,6 +185,7 @@ export function EstablishmentDetail() {
   useQueueSocket(establishmentId);
 
   const [heroFailed, setHeroFailed] = useState(false);
+  const [fotoAmpliada, setFotoAmpliada] = useState<string | null>(null);
 
   const favoriteIds = useFavoritesStore((s) => s.ids);
   const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
@@ -327,6 +342,12 @@ export function EstablishmentDetail() {
           baixo. */}
       {showPhoto ? (
         <Box height={210} width="$full">
+          <Pressable
+            style={{ flex: 1 }}
+            onPress={() => setFotoAmpliada(establishment.urlImage!)}
+            accessibilityLabel="Ver a foto da loja"
+            testID="foto-da-loja"
+          >
           <ImageBackground
             source={{ uri: establishment.urlImage! }}
             style={{ flex: 1 }}
@@ -337,6 +358,7 @@ export function EstablishmentDetail() {
               <ScreenHeader ground="foto" action={acoes} />
             </Box>
           </ImageBackground>
+          </Pressable>
         </Box>
       ) : (
         // SEM foto o nome da loja e o titulo do cabecalho — voltar · nome ·
@@ -519,6 +541,7 @@ export function EstablishmentDetail() {
               lojaAberta={isOpen}
               fora={section.key === "fora"}
               onPress={() => handleSelectProfessional(item.id)}
+              onVerFoto={setFotoAmpliada}
             />
           )}
           ListEmptyComponent={
@@ -563,6 +586,7 @@ export function EstablishmentDetail() {
           </TouchableOpacity>
         )}
       </VStack>
+      <FotoAmpliada uri={fotoAmpliada} onClose={() => setFotoAmpliada(null)} />
     </VStack>
   );
 }

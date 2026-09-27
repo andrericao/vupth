@@ -141,4 +141,16 @@ describe('EstablishmentDetail — Trabalhando e Fora', () => {
     expect(fotos).toHaveLength(1);
     expect(getAllByText(/^P/).length).toBeGreaterThan(0);
   });
+
+  // Andre, 26/09: tocar na foto abre com zoom.
+  it('tocar na foto do profissional abre a foto em tela cheia', () => {
+    const { fireEvent } = jest.requireActual('@testing-library/react-native');
+    mockProfs.mockReturnValue({ data: [prof('a', { work_status: 'WORKING', profile_image_url: 'https://cdn/a.jpg' })] });
+    const { getByTestId, queryByTestId } = renderWithProviders(<EstablishmentDetail />);
+    expect(queryByTestId('foto-ampliada-imagem')).toBeNull();
+    fireEvent.press(getByTestId('foto-a'));
+    expect(getByTestId('foto-ampliada-imagem').props.source).toEqual({ uri: 'https://cdn/a.jpg' });
+    fireEvent.press(getByTestId('foto-ampliada'));
+    expect(queryByTestId('foto-ampliada-imagem')).toBeNull();
+  });
 });
