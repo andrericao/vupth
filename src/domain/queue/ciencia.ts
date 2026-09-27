@@ -16,6 +16,11 @@ export type AvisoDeAtraso = {
   mensagem: string;
   /** Um só, e obrigatório: é ele que registra a ciência. */
   botao: string;
+  /**
+   * Oferece "Adiar minha vez" no mesmo aviso (Andre, 26/09 — esboço): adiar
+   * evita o próximo atraso. Não no 3º: ali ele já foi para o fim da fila.
+   */
+  oferecerAdiar: boolean;
 };
 
 // Regra dos 3 atrasos (Backend e328629, refeita pelo Andre em 26/09): no 1º e
@@ -26,6 +31,8 @@ const MULTA_NA_TERCEIRA = 3;
 export const MULTA_POR_ATRASO = 5;
 
 const ordinal = (n: number): string => `${n}º`;
+// Tom positivo antes da multa (Andre, 26/09: "não se atrase / evite multa").
+const TITULO_POSITIVO = 'Não se atrase — evite a multa';
 const reais = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`;
 
 export function avisoDeAtraso(s: {
@@ -48,28 +55,32 @@ export function avisoDeAtraso(s: {
         `multa de ${valor} no seu próximo atendimento, e você foi para o fim da fila. ` +
         'Pode continuar nela ou sair sem nova multa.',
       botao: 'Entendi',
+      oferecerAdiar: false,
     };
   }
 
   if (temContagem) {
     const faltam = MULTA_NA_TERCEIRA - s.contagem!;
     return {
-      titulo,
+      titulo: TITULO_POSITIVO,
       mensagem:
         `Este é o seu ${ordinal(s.contagem!)} atraso — sem multa. Você trocou de lugar com o próximo e continua na fila. ` +
         `No ${ordinal(MULTA_NA_TERCEIRA)}, multa de ${valor} e você vai para o fim da fila` +
-        (faltam > 0 ? ` (${faltam === 1 ? 'falta um' : `faltam ${faltam}`}).` : '.'),
+        (faltam > 0 ? ` (${faltam === 1 ? 'falta um' : `faltam ${faltam}`}).` : '.') +
+        ' Se não vai dar tempo, adie a sua vez.',
       botao: 'Entendi',
+      oferecerAdiar: true,
     };
   }
 
   // Sem a contagem do servidor: avisa o que SABE, e não inventa ordinal.
   return {
-    titulo,
+    titulo: TITULO_POSITIVO,
     mensagem:
       'Você trocou de lugar com o próximo e continua na fila, por enquanto sem multa. Os atrasos se acumulam — ' +
-      `no ${ordinal(MULTA_NA_TERCEIRA)}, multa de ${valor} e você vai para o fim da fila.`,
+      `no ${ordinal(MULTA_NA_TERCEIRA)}, multa de ${valor} e você vai para o fim da fila. Se não vai dar tempo, adie a sua vez.`,
     botao: 'Entendi',
+    oferecerAdiar: true,
   };
 }
 

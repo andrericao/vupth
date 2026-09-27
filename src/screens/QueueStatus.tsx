@@ -60,6 +60,8 @@ type RouteParams = {
   estimatedWaitMinutes?: number;
   serviceItemIds?: string[];
   targetTime?: string;
+  // Veio do "Adiar minha vez" do aviso de atraso: abre o "Mudar minha vez".
+  abrirMudarVez?: boolean;
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -84,6 +86,7 @@ export function QueueStatus() {
     serviceItemIds,
     estimatedWaitMinutes,
     targetTime,
+    abrirMudarVez,
   } = route.params as RouteParams;
 
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -424,12 +427,24 @@ export function QueueStatus() {
     }
     Alert.alert(saida.confirmacao.titulo, saida.confirmacao.mensagem, [
       { text: saida.confirmacao.nao, style: "cancel" },
+      // Evitar a multa sem sair (Andre, 26/09 — esboço): adiar a vez nao custa.
+      ...(canReshuffle ? [{ text: "Adiar minha vez", onPress: () => { handleOpenChangeTurn(); } }] : []),
       { text: saida.confirmacao.sim, style: "destructive", onPress: () => sair(saida.valorConfirmado) },
     ]);
   }
 
   // "Mudar minha vez": busca o ETA do fim da fila (piso de agendamento) e abre o
   // menu de direção (adiantar/atrasar). Sem bloquear se a fila não responder.
+  // "Adiar minha vez" no aviso de atraso: chega aqui com o pedido de abrir o
+  // "Mudar minha vez" — uma vez, quando a fila ja esta no aparelho.
+  const abriuMudarVez = useRef(false);
+  useEffect(() => {
+    if (!abrirMudarVez || abriuMudarVez.current || !activeQueue?.attendanceId) return;
+    abriuMudarVez.current = true;
+    handleOpenChangeTurn();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abrirMudarVez, activeQueue?.attendanceId]);
+
   async function handleOpenChangeTurn() {
     let tail: number | null = null;
     let last = false;

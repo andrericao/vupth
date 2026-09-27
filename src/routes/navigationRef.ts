@@ -47,3 +47,18 @@ export function goToLoginAfterOnboarding(): void {
   };
   tryNavigate();
 }
+
+/**
+ * Abre a tela da fila ja no "Mudar minha vez" — o "Adiar minha vez" do aviso de
+ * atraso, que vive fora das telas (useAvisoDeAtraso). Best-effort.
+ */
+export function abrirMudarMinhaVez(fila: {
+  professionalId: string;
+  establishmentId: string;
+  professionalName?: string;
+  establishmentName?: string;
+}): void {
+  if (!navigationRef.isReady()) return;
+  const navigate = navigationRef.navigate as unknown as (name: string, params?: object) => void;
+  navigate("homeTab", { screen: "queueStatus", params: { ...fila, serviceItemIds: [], abrirMudarVez: true } });
+}

@@ -39,6 +39,17 @@ describe('avisoDeAtraso', () => {
     expect(a.mensagem).toMatch(/^multa de R\$ 5,00/);
   });
 
+  // Andre, 26/09 (esboço): desde o 1º atraso, tom positivo e a opção de adiar.
+  it('antes da multa: título positivo e oferece adiar; no 3º, não', () => {
+    for (const s of [{}, { contagem: 1 }, { contagem: 2 }]) {
+      const a = avisoDeAtraso(s);
+      expect(a.titulo).toBe('Não se atrase — evite a multa');
+      expect(a.oferecerAdiar).toBe(true);
+      expect(a.mensagem).toMatch(/adie a sua vez/);
+    }
+    expect(avisoDeAtraso({ contagem: 3 }).oferecerAdiar).toBe(false);
+  });
+
   it('SEM a contagem (o backend ainda não manda), não inventa ordinal', () => {
     const a = avisoDeAtraso({});
     expect(a.mensagem).not.toMatch(/\dº atraso/);

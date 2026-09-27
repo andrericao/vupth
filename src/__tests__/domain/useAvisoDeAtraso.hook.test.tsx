@@ -9,6 +9,8 @@ import { useQueueStore } from '@stores/queueStore';
 // TOQUE — e o toque é o registro de que o cliente soube.
 
 jest.mock('expo-secure-store');
+const mockAbrir = jest.fn();
+jest.mock('@routes/navigationRef', () => ({ abrirMudarMinhaVez: (f: unknown) => mockAbrir(f) }));
 
 function porNaFila(status: string, attendanceId = 'a1') {
   useQueueStore.setState({
@@ -44,10 +46,10 @@ describe('useAvisoDeAtraso', () => {
     const [titulo, mensagem, botoes, opcoes] = alerta.mock.calls[0] as [
       string, string, { text: string; onPress?: () => void }[], { cancelable?: boolean },
     ];
-    expect(titulo).toBe('Você foi chamado e não chegou');
+    // Esboço de 26/09: tom positivo e "Adiar minha vez" no mesmo aviso.
+    expect(titulo).toBe('Não se atrase — evite a multa');
     expect(mensagem).toMatch(/continua na fila/);
-    expect(botoes).toHaveLength(1);
-    expect(botoes[0].text).toBe('Entendi');
+    expect(botoes.map((b) => b.text)).toEqual(['Adiar minha vez', 'Entendi']);
     expect(opcoes.cancelable).toBe(false);
   });
 
@@ -57,7 +59,7 @@ describe('useAvisoDeAtraso', () => {
     const [, , botoes] = alerta.mock.calls[0] as [string, string, { onPress?: () => void }[]];
 
     await act(async () => {
-      botoes[0].onPress!();
+      botoes[botoes.length - 1].onPress!();
     });
     expect(useCienciaStore.getState().ids).toEqual(['a1']);
 
@@ -84,5 +86,16 @@ describe('useAvisoDeAtraso', () => {
     porNaFila('LATE', 'a2');
     renderHook(() => useAvisoDeAtraso());
     expect(alerta).toHaveBeenCalledTimes(1);
+  });
+
+  it('"Adiar minha vez" registra a ciência e abre o Mudar minha vez da fila', async () => {
+    porNaFila('LATE');
+    renderHook(() => useAvisoDeAtraso());
+    const [, , botoes] = alerta.mock.calls[0] as [string, string, { text: string; onPress?: () => void }[]];
+    await act(async () => {
+      botoes.find((b) => b.text === 'Adiar minha vez')!.onPress!();
+    });
+    expect(useCienciaStore.getState().ids).toEqual(['a1']);
+    expect(mockAbrir).toHaveBeenCalledWith(expect.objectContaining({ professionalId: 'p1', establishmentId: 'e1' }));
   });
 });

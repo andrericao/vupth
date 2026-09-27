@@ -114,7 +114,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     tocar(getByTestId);
     tocar(getByTestId);
     const [, , botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
-    expect(botoes.map((b) => b.text)).toEqual(['Não', 'Sim, sair']);
+    expect(botoes.map((b) => b.text)).toEqual(['Não', 'Adiar minha vez', 'Sim, sair']);
     expect(attendanceService.cancel).not.toHaveBeenCalled();
     alerta.mockRestore();
   });

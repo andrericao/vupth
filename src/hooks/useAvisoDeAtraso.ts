@@ -4,6 +4,7 @@ import { Alert } from "react-native";
 import { avisoDeAtraso, precisaAvisarAtraso } from "@domain/queue/ciencia";
 import { useCienciaStore } from "@stores/cienciaStore";
 import { useQueueStore } from "@stores/queueStore";
+import { abrirMudarMinhaVez } from "@routes/navigationRef";
 
 /**
  * O cliente foi chamado e nao chegou: avisa, e espera o toque.
@@ -31,7 +32,20 @@ export function useAvisoDeAtraso() {
     if (!precisaAvisarAtraso({ status: activeQueue?.status, attendanceId, jaAvisados })) return;
 
     const aviso = avisoDeAtraso({ contagem: activeQueue?.lateCount });
+    // Lida na hora do toque: a fila mais recente, sem fazer o aviso reabrir a cada poll.
+    const fila = () => useQueueStore.getState().activeQueue;
     Alert.alert(aviso.titulo, aviso.mensagem, [
+      // Adiar tambem registra a ciencia: o toque, qualquer um, e o "eu soube".
+      ...(aviso.oferecerAdiar
+        ? [{
+            text: "Adiar minha vez",
+            onPress: () => {
+              registrarCiencia(attendanceId!);
+              const f = fila();
+              if (f) abrirMudarMinhaVez(f);
+            },
+          }]
+        : []),
       // O toque E o registro. Sem `cancelable`, tambem nao da pra sair por fora
       // no Android — clicar ao lado nao pode valer por "eu soube".
       { text: aviso.botao, onPress: () => registrarCiencia(attendanceId!) },
