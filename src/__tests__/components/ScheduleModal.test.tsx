@@ -21,9 +21,9 @@ describe('ScheduleModal', () => {
     expect(queryByText('Para outro dia')).toBeNull();
   });
 
-  it('sem dia escolhido, "Confirmar dia" não dispara nada', () => {
+  it('sem dia escolhido, "Confirmar" não dispara nada', () => {
     const { getByText } = renderModal();
-    fireEvent.press(getByText('Confirmar dia'));
+    fireEvent.press(getByText('Confirmar'));
     expect(notifyComingSoon).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
   });
@@ -31,7 +31,7 @@ describe('ScheduleModal', () => {
   it('escolher "Hoje" e confirmar conta agendar_hoje e fecha (barra em breve)', () => {
     const { getByText } = renderModal();
     fireEvent.press(getByText('Hoje'));
-    fireEvent.press(getByText('Confirmar dia'));
+    fireEvent.press(getByText('Confirmar'));
     expect(notifyComingSoon).toHaveBeenCalledWith('agendar_hoje');
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -40,7 +40,7 @@ describe('ScheduleModal', () => {
     const { getByText, getAllByRole } = renderModal();
     // Ordem de render: pílulas de dia primeiro; [1] = amanhã.
     fireEvent.press(getAllByRole('button')[1]);
-    fireEvent.press(getByText('Confirmar dia'));
+    fireEvent.press(getByText('Confirmar'));
     expect(notifyComingSoon).toHaveBeenCalledWith('agendar_outro_dia');
   });
 

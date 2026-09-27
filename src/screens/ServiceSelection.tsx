@@ -269,7 +269,7 @@ export function ServiceSelection() {
     schedule: {
       key: "schedule",
       icon: Calendar,
-      title: "Agendar para depois",
+      title: "Agendar",
       description: "Escolha outro dia ou horário com este profissional.",
       onPress: () => {
         setShowMoreOptions(false);
@@ -470,7 +470,7 @@ export function ServiceSelection() {
                 />
               ) : (
                 <Button
-                  title={`Agendar para depois · R$ ${totalPrice.toFixed(2)}`}
+                  title={`Agendar · R$ ${totalPrice.toFixed(2)}`}
                   testID="primary-schedule"
                   onPress={() => setShowSchedule(true)}
                 />

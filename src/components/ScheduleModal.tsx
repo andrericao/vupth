@@ -75,7 +75,7 @@ export function ScheduleModal({ visible, onClose }: Props) {
           )}
 
           <Button
-            title="Confirmar dia"
+            title="Confirmar"
             mt="$5"
             isDisabled={selectedDate == null}
             opacity={selectedDate == null ? 0.5 : 1}
