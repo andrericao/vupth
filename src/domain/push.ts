@@ -145,3 +145,16 @@ export async function registrarComRetentativa(env: RegistroEnv): Promise<'ok' | 
     }
   }
 }
+
+/**
+ * O push que chega com o app ABERTO vira aviso com "OK" (Andre, 26/09: "deve
+ * haver um botao de OK quando for avisar que estamos proximo do corte"). O
+ * banner do sistema passa rapido e some; o aviso fica ate o toque. Sem texto
+ * nenhum, nao ha o que mostrar.
+ */
+export function avisoDoPush(conteudo: { title?: string | null; body?: string | null }): { titulo: string; mensagem: string } | null {
+  const titulo = (conteudo.title ?? '').trim();
+  const mensagem = (conteudo.body ?? '').trim();
+  if (!titulo && !mensagem) return null;
+  return { titulo: titulo || 'VUPTH', mensagem };
+}

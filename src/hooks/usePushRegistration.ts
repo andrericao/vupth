@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Platform } from "react-native";
+import { Alert, Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
@@ -7,6 +7,7 @@ import * as SecureStore from "expo-secure-store";
 
 import {
   acquireExpoPushToken,
+  avisoDoPush,
   mapPlatform,
   notificationRoute,
   registrarComRetentativa,
@@ -30,8 +31,10 @@ const PUSH_TOKEN_KEY = "vupth_push_token";
 // deixa o resto do app (JS) rodar; push só funciona num build COM o módulo.
 try {
   Notifications.setNotificationHandler({
+    // Com o app aberto o push vira aviso com "OK" (listener abaixo): o banner
+    // sairia junto e diria a mesma coisa duas vezes.
     handleNotification: async () => ({
-      shouldShowBanner: true,
+      shouldShowBanner: false,
       shouldShowList: true,
       shouldPlaySound: true,
       shouldSetBadge: false,
@@ -137,6 +140,19 @@ export function usePushRegistration() {
   useEffect(() => {
     if (!isAuthenticated) didRegister.current = false;
   }, [isAuthenticated]);
+
+  // Push com o app aberto → aviso com "OK" (Andre, 26/09).
+  useEffect(() => {
+    try {
+      const sub = Notifications.addNotificationReceivedListener((notificacao) => {
+        const aviso = avisoDoPush(notificacao.request.content);
+        if (aviso) Alert.alert(aviso.titulo, aviso.mensagem, [{ text: "OK" }]);
+      });
+      return () => sub.remove();
+    } catch {
+      // binário sem o módulo nativo de push — sem aviso.
+    }
+  }, []);
 
   // Toque na notificação → navega conforme o data.type.
   useEffect(() => {
