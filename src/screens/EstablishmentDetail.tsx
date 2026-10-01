@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { SectionList, TouchableOpacity, Alert, ImageBackground, Linking } from "react-native";
+import { SectionList, TouchableOpacity, Alert, ImageBackground, Linking, Share } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -9,7 +9,10 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin } from "lucide-react-native";
+import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Copy } from "lucide-react-native";
+import { copiarTexto } from "@utils/copiar";
+import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
+import { API_ENV } from "@services/api";
 
 import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
 
@@ -22,6 +25,7 @@ import { ProfessionalWithQueue } from "@domain/professional/types";
 import { agruparPorExpediente, emIntervalo, estaNoExpediente } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
+import { ehSoAgenda } from "@domain/professional/modo";
 import { isEffectivelyOpen } from "@domain/establishment/types";
 import { enderecoEmUmaLinha, linkDoMapa } from "@domain/establishment/endereco";
 import { formatWaitTime } from "@domain/queue/types";
@@ -70,7 +74,9 @@ function ProfessionalRow({
     <TouchableOpacity onPress={onPress} testID={`professional-${professional.id}`}>
       <Box bg="$brandSurface" p="$3" mb="$3" borderRadius="$card">
         <HStack alignItems="center" gap="$3">
-          <PlaceAvatar name={professional.name} />
+          {/* Foto quando o profissional tiver (Partner 1.4.0); sem ela, ou com
+              URL quebrada, o PlaceAvatar volta para as iniciais. */}
+          <PlaceAvatar name={professional.name} photoUrl={professional.profile_image_url} />
           <VStack flex={1}>
             <Text fontFamily="$heading" fontSize="$sm" color="$forest">
               {professional.name}
@@ -182,6 +188,7 @@ export function EstablishmentDetail() {
       estimatedWaitMinutes: prof?.estimated_wait_minutes ?? 0,
       establishmentOpen: isEffectivelyOpen(establishment),
       profissionalFora: fora,
+      soAgenda: ehSoAgenda(prof),
       queueCount: prof?.queue_count ?? 0,
     });
   }
@@ -261,6 +268,16 @@ export function EstablishmentDetail() {
     establishment.id,
   );
 
+  // Copiar o link da loja (Andre, 26/09): a base da indicacao. Sem o modulo
+  // nativo (APK anterior ao build), cai no compartilhar do sistema.
+  async function handleCopiarLink() {
+    const link = linkParaCompartilhar(raizDoSite(API_ENV), establishmentId);
+    if (await copiarTexto(link)) {
+      Alert.alert("Link copiado", "Cole onde quiser para indicar esta loja.");
+      return;
+    }
+    Share.share({ message: link }).catch(() => {});
+  }
   // Um so botao de favorito pros dois ramos (com foto e sem): antes cada ramo
   // desenhava o proprio, e eles ja tinham saido com tamanhos diferentes.
   const favorito = (
@@ -275,6 +292,20 @@ export function EstablishmentDetail() {
           diferenca sutil de cor. */}
       <Heart size={20} color="#163300" fill={isFavorite ? "#163300" : "none"} />
     </HeaderIconButton>
+  );
+
+  const acoes = (
+    <HStack gap="$2">
+      <HeaderIconButton
+        onPress={handleCopiarLink}
+        ground={showPhoto ? "foto" : "claro"}
+        testID="copiar-link"
+        accessibilityLabel="Copiar o link da loja"
+      >
+        <Copy size={20} color="#163300" />
+      </HeaderIconButton>
+      {favorito}
+    </HStack>
   );
 
   return (
@@ -293,7 +324,7 @@ export function EstablishmentDetail() {
             onError={() => setHeroFailed(true)}
           >
             <Box px={16}>
-              <ScreenHeader ground="foto" action={favorito} />
+              <ScreenHeader ground="foto" action={acoes} />
             </Box>
           </ImageBackground>
         </Box>
@@ -302,7 +333,7 @@ export function EstablishmentDetail() {
         // favoritar na mesma linha, como nas demais telas. Com foto ele nao
         // cabe ali (ficaria por cima da imagem) e desce pro corpo.
         <Box px={16}>
-          <ScreenHeader title={establishment.name} action={favorito} />
+          <ScreenHeader title={establishment.name} action={acoes} />
         </Box>
       )}
 

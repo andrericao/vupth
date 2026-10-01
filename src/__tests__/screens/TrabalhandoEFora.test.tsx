@@ -126,4 +126,19 @@ describe('EstablishmentDetail — Trabalhando e Fora', () => {
 
     expect(getByText(/menor espera 45 min/)).toBeTruthy();
   });
+
+  // Partner 1.4.0 grava a foto; o Backend manda profile_image_url (46f1f74).
+  it('o profissional com foto aparece com ela; sem foto, com as iniciais', () => {
+    mockProfs.mockReturnValue({
+      data: [
+        prof('a', { work_status: 'WORKING', profile_image_url: 'https://cdn/a.jpg' }),
+        prof('b', { work_status: 'WORKING', profile_image_url: null }),
+      ],
+    });
+    const { UNSAFE_getAllByType, getAllByText } = renderWithProviders(<EstablishmentDetail />);
+    const { Image } = jest.requireActual('react-native');
+    const fotos = UNSAFE_getAllByType(Image).filter((i: { props: { source?: { uri?: string } } }) => i.props.source?.uri === 'https://cdn/a.jpg');
+    expect(fotos).toHaveLength(1);
+    expect(getAllByText(/^P/).length).toBeGreaterThan(0);
+  });
 });

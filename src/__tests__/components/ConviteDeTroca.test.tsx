@@ -40,6 +40,23 @@ describe('o convite de troca (D16)', () => {
     expect(queryByTestId('convite-de-troca')).toBeNull();
   });
 
+  // Andre, 26/09: "algo visual que demonstre os 5 segundos sendo contados".
+  it('a barra do tempo começa cheia e esvazia junto com os 5 segundos', () => {
+    act(() => useConviteDeTrocaStore.getState().mostrar(oferta()));
+    const { getByTestId } = render(<ConviteDeTroca />);
+    const barra = () => getByTestId('convite-tempo').props.children;
+    const largura = () => {
+      const { StyleSheet } = jest.requireActual('react-native');
+      const w = StyleSheet.flatten(barra().props.style).width;
+      // Animado: a largura é uma interpolação; o valor corrente sai de __getValue.
+      return typeof w === 'string' ? w : String(w.__getValue());
+    };
+    expect(getByTestId('convite-tempo')).toBeTruthy();
+    expect(largura()).toBe('100%');
+    act(() => jest.advanceTimersByTime(DURACAO_DO_CONVITE_MS / 2));
+    expect(parseFloat(largura())).toBeLessThan(100);
+  });
+
   it('o X e o toque fora fecham', () => {
     act(() => useConviteDeTrocaStore.getState().mostrar(oferta()));
     const { getByTestId, queryByTestId, rerender } = render(<ConviteDeTroca />);

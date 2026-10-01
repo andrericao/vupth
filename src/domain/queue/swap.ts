@@ -78,3 +78,33 @@ export function outOfQueueOfferErrorMessage(code?: string, status?: number): str
         : 'Não foi possível publicar o pedido. Tente novamente em instantes.';
   }
 }
+
+/**
+ * Onde fica a vaga de um atendimento na fila, e por volta de que horas ela e
+ * chamada (Andre, 26/09: "como o cliente decidiria se iria trocar sem saber em
+ * que horario?"). Aceitar uma troca e ficar com a vaga de quem pediu — e ela
+ * que o pedido mostra.
+ *
+ * A conta usa so a fila que o servidor devolve: quem espera (SCHEDULED/LATE),
+ * na ordem dela, cada um com o proprio tempo; o que falta do atendimento em
+ * curso e o total restante menos o de quem espera. `null` quando a vaga nao
+ * esta entre os que esperam (o pedido e de fora da fila, ou ela andou).
+ */
+export function vagaNaFila(
+  fila: {
+    attendancesInQueue: { id: string; status: string; estimatedMinutes: number | null }[];
+    totalRemainingMinutes: number;
+  },
+  attendanceId: string | null,
+  agoraMs: number,
+): { posicao: number; horarioMs: number } | null {
+  if (!attendanceId) return null;
+  const esperando = fila.attendancesInQueue.filter((a) => a.status === 'SCHEDULED' || a.status === 'LATE');
+  const i = esperando.findIndex((a) => a.id === attendanceId);
+  if (i < 0) return null;
+  const minutos = (a: { estimatedMinutes: number | null }) => Math.max(0, a.estimatedMinutes ?? 0);
+  const deQuemEspera = esperando.reduce((t, a) => t + minutos(a), 0);
+  const emCurso = Math.max(0, (fila.totalRemainingMinutes ?? 0) - deQuemEspera);
+  const antes = esperando.slice(0, i).reduce((t, a) => t + minutos(a), 0);
+  return { posicao: i + 1, horarioMs: agoraMs + (emCurso + antes) * 60000 };
+}

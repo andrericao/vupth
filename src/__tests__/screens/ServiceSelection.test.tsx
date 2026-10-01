@@ -250,4 +250,22 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       alerta.mockRestore();
     });
   });
+
+  describe('profissional "só agenda" (Backend 8e6c00f)', () => {
+    beforeEach(() => {
+      setRouteParams({ ...OPEN_PARAMS, soAgenda: true });
+      useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    });
+
+    it('com a loja aberta, a única ação é agendar — sem fila, sem corte, sem menu', async () => {
+      const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+      expect(getByTestId('primary-schedule')).toBeTruthy();
+      expect(queryByTestId('primary-queue')).toBeNull();
+      expect(queryByTestId('primary-cut')).toBeNull();
+      expect(queryByTestId('more-options')).toBeNull();
+      expect(queryByTestId('regra-da-multa')).toBeNull();
+      expect(getByTestId('so-agenda')).toBeTruthy();
+    });
+  });
 });

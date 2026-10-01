@@ -43,6 +43,9 @@ export interface WaitTimeResponse {
    * sem ele, o app usa a regra que o servidor aplica hoje (R$ 3, menos de 1h).
    */
   exitPenaltyValue?: number | null;
+  /** Atrasos que contam, somando atendimentos (Backend e328629) — zera no 3º, que vira multa. */
+  lateCount?: number | null;
+  latesUntilPenalty?: number | null;
   startTime: string;
 }
 

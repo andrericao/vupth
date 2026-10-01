@@ -9,6 +9,8 @@
  * Aviso vira DIÁLOGO: o cliente tocou em algo, a resposta é sobre aquele toque,
  * e ele continua onde estava. Tela cheia é para quando não há caminho de volta.
  */
+import { MENSAGEM_SO_AGENDA } from '@domain/professional/modo';
+
 export type RecusaAoEntrar =
   | { tipo: 'ja-na-fila'; mensagem: string }
   | { tipo: 'nao-aceita'; mensagem: string }
@@ -33,6 +35,8 @@ export function recusaAoEntrar(error: unknown): RecusaAoEntrar {
   // de AÇÃO é nossa, porque só a tela sabe o que oferece.
   if (code === 'CLIENT_ALREADY_IN_QUEUE') return { tipo: 'ja-na-fila', mensagem: JA_NA_FILA };
   if (code === 'PROFESSIONAL_NOT_ACCEPTING_NEW') return { tipo: 'nao-aceita', mensagem: NAO_ACEITA };
+  // So agenda (Backend 8e6c00f): o mesmo caminho de volta — o agendar esta na tela anterior.
+  if (code === 'PROFESSIONAL_AGENDA_ONLY') return { tipo: 'nao-aceita', mensagem: MENSAGEM_SO_AGENDA };
   if (code === 'ESTABLISHMENT_NOT_OPEN') return { tipo: 'loja-fechada', mensagem: LOJA_FECHADA };
 
   return {

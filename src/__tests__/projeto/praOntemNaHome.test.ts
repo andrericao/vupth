@@ -17,4 +17,11 @@ describe('o botão Pra ontem na Home', () => {
     expect(HOME).toMatch(/ordenarPraOntem\(filterEstablishments\(/);
     expect(HOME).toMatch(/destaque=\{praOntem \? rotuloPraOntem\(item\) : null\}/);
   });
+
+  // Andre, 26/09: "volte os filtros, barbearia, salão, manicure ao lado do pra ontem".
+  it('as categorias ficam na mesma faixa do Pra ontem, e tocar na ativa desliga', () => {
+    expect(HOME).toMatch(/CATEGORIAS_DA_FAIXA: ServiceType\[\] = \["BARBER", "BEAUTY_SALON", "NAIL_SALON"/);
+    expect(HOME).toMatch(/testID=\{`filtro-\$\{c\}`\}/);
+    expect(HOME).toMatch(/atual === c \? "ALL" : c/);
+  });
 });

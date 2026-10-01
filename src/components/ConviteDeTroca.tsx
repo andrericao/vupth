@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, Modal, Pressable, Text, View } from "react-native";
+import { Alert, Animated, Easing, Modal, Pressable, Text, View } from "react-native";
 import { X } from "lucide-react-native";
 
 import { DURACAO_DO_CONVITE_MS, textoDoConvite } from "@domain/queue/conviteDeTroca";
@@ -10,6 +10,36 @@ import { useConviteDeTrocaStore } from "@stores/conviteDeTrocaStore";
 const FOREST = "#163300";
 const GREEN = "#9FE870";
 const TEXT_SECONDARY = "#454745";
+
+/**
+ * Os 5 segundos à vista (Andre, 26/09: "algo visual que demonstre os 5 segundos
+ * sendo contados, pode ser uma barra esvaziando"). Linear, do cheio ao vazio, no
+ * mesmo tempo em que o convite fecha sozinho.
+ */
+export function BarraDoTempo({ duracaoMs, chave }: { duracaoMs: number; chave: string }) {
+  const [resto] = useState(() => new Animated.Value(1));
+  useEffect(() => {
+    resto.setValue(1);
+    const anim = Animated.timing(resto, {
+      toValue: 0,
+      duration: duracaoMs,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    });
+    anim.start();
+    return () => anim.stop();
+  }, [chave, duracaoMs, resto]);
+  const largura = resto.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] });
+  return (
+    <View
+      testID="convite-tempo"
+      accessibilityLabel="Tempo para aceitar"
+      style={{ height: 6, borderRadius: 3, backgroundColor: "#16330014", overflow: "hidden" }}
+    >
+      <Animated.View style={{ height: 6, width: largura, backgroundColor: FOREST, borderRadius: 3 }} />
+    </View>
+  );
+}
 
 /**
  * O convite de troca na tela (D16, Andre 24/09): aparece por 5 segundos, com
@@ -112,6 +142,7 @@ export function ConviteDeTroca() {
           <Text style={{ fontFamily: "Inter_400Regular", fontSize: 14, lineHeight: 20, color: TEXT_SECONDARY }}>
             {texto.mensagem}
           </Text>
+          <BarraDoTempo duracaoMs={DURACAO_DO_CONVITE_MS} chave={atual.id} />
           <Pressable
             onPress={aceitar}
             disabled={aceitando}

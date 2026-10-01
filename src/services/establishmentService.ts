@@ -37,12 +37,10 @@ export const establishmentService = {
    * e o cliente leria "não há lojas" onde na verdade há.
    */
   getAll(coords?: Coords | null) {
-    // includeAll=true: traz tambem os FECHADOS (por padrao a listagem publica so
-    // retorna abertos — BUG5 do backend). O cliente pode querer manifestar
-    // interesse/agendar para a reabertura.
+    // A listagem ja traz as FECHADAS por padrao (Backend, em producao desde
+    // 17/09) — o cliente pode agendar para a reabertura. O `includeAll` saiu.
     return api.get<Establishment[]>('/establishment', {
       params: {
-        includeAll: true,
         // Tem de ir o PAR: coordenada pela metade é 422 no backend.
         ...(coords ? { lat: coords.latitude, lng: coords.longitude } : {}),
       },

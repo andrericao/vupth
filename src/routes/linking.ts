@@ -82,3 +82,12 @@ export function linkParaCompartilhar(base: string, establishmentId: string, prof
   const loja = `${raiz}/loja/${encodeURIComponent(establishmentId)}`;
   return professionalId ? `${loja}?profissional=${encodeURIComponent(professionalId)}` : loja;
 }
+
+/**
+ * Onde o app web do cliente mora — a raiz dos links compartilhados. Producao
+ * aponta para o site de producao; o resto (preview, dev) para o de staging, o
+ * mesmo par que o Partner usa (`vupth-partner/src/lib/linkPublico.ts`).
+ */
+export function raizDoSite(env: string): string {
+  return env === "prod" ? "https://vupth.pages.dev" : "https://dev.vupth.pages.dev";
+}
