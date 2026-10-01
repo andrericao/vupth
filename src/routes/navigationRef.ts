@@ -62,3 +62,14 @@ export function abrirMudarMinhaVez(fila: {
   const navigate = navigationRef.navigate as unknown as (name: string, params?: object) => void;
   navigate("homeTab", { screen: "queueStatus", params: { ...fila, serviceItemIds: [], abrirMudarVez: true } });
 }
+
+// O estado da navegacao, guardado para a arvore remontar no mesmo lugar — ao
+// salvar o tamanho da fonte o app se redesenha e a pessoa continua na tela em
+// que estava (Andre, 26/09), em vez de voltar ao Inicio.
+let estadoGuardado: object | undefined;
+export function guardarEstadoDaNavegacao(estado: object | undefined): void {
+  estadoGuardado = estado;
+}
+export function estadoDaNavegacao(): object | undefined {
+  return estadoGuardado;
+}

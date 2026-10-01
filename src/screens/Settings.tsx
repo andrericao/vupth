@@ -11,7 +11,7 @@ import {
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone } from "lucide-react-native";
+import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone, Palette } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -22,8 +22,7 @@ import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
 import { addressService, AddressResponse } from "@services/addressService";
-import { fs, useFonteStore } from "@stores/fonteStore";
-import { PASSOS_DA_FONTE, rotuloDoPasso } from "@domain/fonte";
+import { fs } from "@stores/fonteStore";
 
 function MenuItem({
   icon,
@@ -82,8 +81,6 @@ export function Settings() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
-  const passoDaFonte = useFonteStore((s) => s.passo);
-  const escolherFonte = useFonteStore((s) => s.escolher);
 
   const [mainAddress, setMainAddress] = useState<AddressResponse | null>(null);
 
@@ -299,34 +296,16 @@ export function Settings() {
           </Box>
         )}
 
-        {/* Tamanho da letra (Andre, 26/09): um passo por vez, ate +4 — 10 → 11 →
-            12 → 13 → 14. Vale para visitante tambem: ler nao depende de conta. */}
+        {/* Aparencia (Andre, 26/09): tema e tamanho da fonte num submenu. Vale
+            para visitante tambem: ler nao depende de conta. */}
         <VStack mt="$6">
-          <Grupo label="Tamanho da letra">
-            <HStack p="$3" gap="$2" justifyContent="space-between">
-              {PASSOS_DA_FONTE.map((p) => (
-                <TouchableOpacity
-                  key={p}
-                  onPress={() => escolherFonte(p)}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: passoDaFonte === p }}
-                  accessibilityLabel={`Tamanho da letra ${rotuloDoPasso(p)}`}
-                  testID={`fonte-${p}`}
-                  style={{ flex: 1 }}
-                >
-                  <Box
-                    bg={passoDaFonte === p ? "$forest" : "$brandBackground"}
-                    borderRadius="$full"
-                    py={8}
-                    alignItems="center"
-                  >
-                    <Text fontSize={fs(13)} fontWeight="$bold" color={passoDaFonte === p ? "$brandGreen" : "$forest"}>
-                      {rotuloDoPasso(p)}
-                    </Text>
-                  </Box>
-                </TouchableOpacity>
-              ))}
-            </HStack>
+          <Grupo label="Aparência">
+            <MenuItem
+              icon={<Palette size={20} color="#163300" />}
+              label="Tema e tamanho da fonte"
+              onPress={() => navigation.navigate("aparencia")}
+              last
+            />
           </Grupo>
         </VStack>
 

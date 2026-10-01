@@ -3,7 +3,7 @@ import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { AuthRoutes } from "./auth.routes";
-import { navigationRef } from "./navigationRef";
+import { navigationRef, guardarEstadoDaNavegacao, estadoDaNavegacao } from "./navigationRef";
 import { linkingWeb } from "./linking";
 import { Onboarding } from "@screens/Onboarding";
 import { useFirstRunStore } from "@stores/firstRunStore";
@@ -38,6 +38,10 @@ export function Routes(){
 			ref={navigationRef}
 			theme={theme}
 			linking={Platform.OS === "web" ? linkingWeb : undefined}
+			// No aparelho, remontar (tamanho da fonte) volta a tela em que estava.
+			// Na web quem manda e o endereco (linking).
+			initialState={Platform.OS === "web" ? undefined : (estadoDaNavegacao() as never)}
+			onStateChange={guardarEstadoDaNavegacao}
 		>
 			{restored && !onboardingSeen ? <Onboarding /> : <AuthRoutes />}
 		</NavigationContainer>
