@@ -12,7 +12,7 @@
 #
 # As etapas dependem umas das outras (o cadastro da 02 e quem entra na fila na
 # 05; a multa da 05 e a que a 06 confere), por isso e UM roteiro que chama as
-# oito em ordem.
+# dez em ordem.
 # ════════════════════════════════════════════════════════════════════════════
 appId: ${APP_ID}
 env:
@@ -102,3 +102,17 @@ env:
       SERVICO_ID: ${output.SERVICO_ID}
       EMAIL_PROF: ${output.EMAIL_PROF}
     label: "00.14 · roda 08_fila_fechada"
+- runFlow:
+    file: etapas/09_login.yaml
+    env:
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+    label: "00.15 · roda 09_login"
+- runFlow:
+    file: etapas/10_pedido_de_corte.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "00.16 · roda 10_pedido_de_corte"
