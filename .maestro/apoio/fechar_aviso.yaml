@@ -1,0 +1,14 @@
+# Fecha a caixa de AVISO (um botao so: "OK"/"Entendi") se ela estiver na tela.
+# Nunca use depois de uma CONFIRMACAO: la o botao 0 pode ser o "Nao".
+# O Alert do app e o DialogoVupth nas duas plataformas, com testID por botao.
+appId: ${APP_ID}
+---
+- waitForAnimationToEnd:
+    timeout: 3000
+- runFlow:
+    when:
+      visible:
+        id: "dialogo-botao-0"
+    commands:
+      - tapOn:
+          id: "dialogo-botao-0"

@@ -1,0 +1,12 @@
+# Da loja ate a escolha de servicos, com o servico de teste marcado.
+# env: PROF_ID, SERVICO_ID
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "professional-${PROF_ID}"
+- extendedWaitUntil:
+    visible:
+      id: "service-${SERVICO_ID}"
+    timeout: 30000
+- tapOn:
+    id: "service-${SERVICO_ID}"

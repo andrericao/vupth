@@ -1,0 +1,25 @@
+# Entra na fila (primeiro da fila = menos de 1 hora) e sai: a saida pede
+# confirmacao e gera a multa que a etapa 06 confere no total.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "primary-queue"
+- extendedWaitUntil:
+    visible: "Entendi"
+    timeout: 60000
+- tapOn: "Entendi"
+- extendedWaitUntil:
+    visible:
+      id: "queue-position"
+    timeout: 30000
+
+# Sair da fila: dois toques seguidos e a confirmacao com o valor.
+- tapOn:
+    id: "leave-queue"
+- tapOn:
+    id: "leave-queue"
+- extendedWaitUntil:
+    visible: "Sair da fila?"
+    timeout: 10000
+- tapOn: "Sim, sair"
+- runFlow: ../apoio/fechar_aviso.yaml

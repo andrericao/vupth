@@ -1,0 +1,17 @@
+# DEC-1 (Andre, 01/10): a multa nao aparece na escolha — so no total, numa
+# linha somada, com o link para a explicacao (motivo, quem, quando).
+# env: TAG, LOJA, PROF_ID, SERVICO_ID
+appId: ${APP_ID}
+---
+- runFlow: ../apoio/abrir_a_loja.yaml
+- runFlow: ../apoio/escolher_servico.yaml
+- extendedWaitUntil:
+    visible:
+      id: "multas-pendentes"
+    timeout: 30000
+- tapOn:
+    id: "ver-multas"
+- assertVisible:
+    id: "explicacao-multas"
+- assertVisible: "Multa pendente"
+- tapOn: "Entendi"

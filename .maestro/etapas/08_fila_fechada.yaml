@@ -1,0 +1,16 @@
+# O profissional fecha a fila (pela API, o papel do Partner): a loja mostra
+# "Fila fechada" no card dele — o app nao oferece entrar.
+# env: TAG, LOJA, PROF_ID, EMAIL_PROF
+appId: ${APP_ID}
+---
+- runScript:
+    file: ../scripts/fechar_fila.js
+    env:
+      API: ${API}
+      SENHA: ${SENHA}
+      EMAIL_PROF: ${EMAIL_PROF}
+- runFlow: ../apoio/abrir_a_loja.yaml
+- extendedWaitUntil:
+    visible:
+      id: "fila-fechada-${PROF_ID}"
+    timeout: 90000

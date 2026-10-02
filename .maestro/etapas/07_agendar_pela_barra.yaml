@@ -1,0 +1,25 @@
+# A segunda porta: agendar um horario pela barra de encaixe (DEC-3). Continua
+# na escolha de servicos da etapa 06, com o servico marcado.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "second-door-schedule"
+- extendedWaitUntil:
+    visible:
+      id: "barra-de-encaixe"
+    timeout: 30000
+- tapOn:
+    id: "horario-.*"
+    index: 0
+- tapOn:
+    id: "confirmar-agendamento"
+- extendedWaitUntil:
+    visible: "Agendado"
+    timeout: 30000
+- runFlow: ../apoio/fechar_aviso.yaml
+
+# Aparece em Atendimentos.
+- tapOn: "Atendimentos"
+- extendedWaitUntil:
+    visible: ${PROF}
+    timeout: 30000

@@ -1,0 +1,8 @@
+# A loja de teste aparece na busca, aberta, com o profissional trabalhando.
+# env: TAG, LOJA, PROF_ID, PROF
+appId: ${APP_ID}
+---
+- runFlow: ../apoio/abrir_a_loja.yaml
+- assertVisible: ${PROF}
+- assertNotVisible:
+    id: "fila-fechada-${PROF_ID}"

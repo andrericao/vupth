@@ -1,0 +1,34 @@
+# Cadastro a partir do convite do Perfil, com o nome na tela seguinte.
+# env: EMAIL_CLIENTE, NOME_CLIENTE
+appId: ${APP_ID}
+---
+- tapOn: "Criar conta grátis"
+- tapOn: "E-mail"
+- inputText: ${EMAIL_CLIENTE}
+- tapOn: "Crie uma senha"
+- inputText: ${SENHA}
+- tapOn: "Confirmar senha"
+- inputText: ${SENHA}
+- hideKeyboard
+- tapOn:
+    id: "primary-signup"
+
+- extendedWaitUntil:
+    visible:
+      id: "complete-profile-name"
+    timeout: 60000
+- tapOn:
+    id: "complete-profile-name"
+- inputText: ${NOME_CLIENTE}
+- hideKeyboard
+- tapOn:
+    id: "complete-profile-save"
+- runFlow: ../apoio/fechar_aviso.yaml
+
+# Logado, o Perfil mostra a conta — e a Aparencia volta.
+- tapOn: "Perfil"
+- extendedWaitUntil:
+    visible: "CONTA"
+    timeout: 15000
+- assertVisible: "APARÊNCIA"
+- assertNotVisible: "Criar conta grátis"

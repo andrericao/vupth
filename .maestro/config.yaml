@@ -1,2 +1,5 @@
-appId: host.exp.exponent
-name: VUPTH E2E Tests
+# So o roteiro completo roda. As etapas e o apoio sao chamados por ele, e os
+# fluxos soltos da raiz (01_signup ... 08_profile_settings) sao do tempo do
+# Expo Go — obsoletos desde 02/10, ver o README.
+flows:
+  - bateria_completa.yaml

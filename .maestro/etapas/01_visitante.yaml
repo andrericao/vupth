@@ -1,0 +1,19 @@
+# Visitante (sem conta). Andre, 02/10: no Perfil ele ve SO o convite —
+# Criar conta e Entrar —, os Termos e a versao. Nenhum grupo de menu.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "onboarding-start"
+- runFlow: ../apoio/fechar_aviso.yaml
+
+- tapOn: "Perfil"
+- assertVisible: "Criar conta grátis"
+- assertVisible: "Já tenho conta"
+- assertVisible:
+    id: "terms"
+- assertVisible:
+    id: "versao-visitante"
+- assertNotVisible: "APARÊNCIA"
+- assertNotVisible: "SISTEMA"
+- assertNotVisible: "CONTA"
+- assertNotVisible: "Sair da conta"
