@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Alert, TouchableOpacity, ScrollView } from "react-native";
+import { Alert, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -130,6 +130,7 @@ export function ServiceSelection() {
   const { data: pendentes } = useMultasPendentes();
   const multas = pendentes?.penalties ?? [];
   const conta = contaComMultas(totalPrice, multas);
+  const [showMultas, setShowMultas] = useState(false);
   const totalMinutes = selectedServices.reduce(
     (sum, s) => sum + (s.weeklyAverageDurationInMinutes ?? 30),
     0,
@@ -442,24 +443,18 @@ export function ServiceSelection() {
                     </Text>
                   </HStack>
                 )}
-                {/* Cobrancas do app, separadas do servico, cada uma com a origem. */}
+                {/* DEC-1 (Andre, 01/10): a multa nao aparece na escolha — so no
+                    total, numa linha somada ao valor, com o link para a explicacao
+                    (cada multa: motivo, quem, quando). */}
                 {multas.length > 0 && (
-                  <VStack gap="$1.5" pt="$1" testID="multas-pendentes">
-                    <HStack justifyContent="space-between" alignItems="center">
-                      <Text size="sm" color="#FFFFFFB3">Serviço</Text>
-                      <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">{reais(conta.servico)}</Text>
-                    </HStack>
-                    {multas.map((m) => (
-                      <HStack key={m.penaltyId} justifyContent="space-between" alignItems="flex-start" gap="$2">
-                        <Text size="xs" color="#FFFFFFB3" flex={1}>Multa — {origemDaMulta(m)}</Text>
-                        <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">{reais(Number(m.amount) || 0)}</Text>
-                      </HStack>
-                    ))}
-                    <HStack justifyContent="space-between" alignItems="center">
-                      <Text size="sm" color="#FFFFFF" fontWeight="$bold">Total no próximo atendimento</Text>
-                      <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen" testID="total-com-multas">{reais(conta.total)}</Text>
-                    </HStack>
-                  </VStack>
+                  <HStack justifyContent="space-between" alignItems="center" testID="multas-pendentes">
+                    <TouchableOpacity onPress={() => setShowMultas(true)} testID="ver-multas">
+                      <Text size="sm" color="#FFFFFFB3" textDecorationLine="underline">
+                        Multa pendente · entenda
+                      </Text>
+                    </TouchableOpacity>
+                    <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">+ {reais(conta.totalMultas)}</Text>
+                  </HStack>
                 )}
                 {/* A regra da multa ANTES do toque que coloca na fila (CDC).
                     Ate 25/09 o app so falava de multa na hora de sair. */}
@@ -482,20 +477,20 @@ export function ServiceSelection() {
                 // a oferecer. O pedido de corte deixa o profissional decidir
                 // (Andre, 07/09 e 24/09).
                 <Button
-                  title={isRequestingCut ? "Enviando pedido..." : `Solicitar corte · R$ ${totalPrice.toFixed(2)}`}
+                  title={isRequestingCut ? "Enviando pedido..." : `Solicitar corte · R$ ${conta.total.toFixed(2)}`}
                   testID="primary-cut"
                   isDisabled={isRequestingCut}
                   onPress={handleRequestCut}
                 />
               ) : principal === "fila" ? (
                 <Button
-                  title={`Entrar na fila · R$ ${totalPrice.toFixed(2)}`}
+                  title={`Entrar na fila · R$ ${conta.total.toFixed(2)}`}
                   testID="primary-queue"
                   onPress={handleConfirm}
                 />
               ) : (
                 <Button
-                  title={`Agendar · R$ ${totalPrice.toFixed(2)}`}
+                  title={`Agendar · R$ ${conta.total.toFixed(2)}`}
                   testID="primary-schedule"
                   onPress={() => setShowSchedule(true)}
                 />
@@ -527,6 +522,24 @@ export function ServiceSelection() {
         onClose={() => setShowMoreOptions(false)}
       />
 
+      {/* A explicacao das multas que entram no total (DEC-1). */}
+      <Modal visible={showMultas} transparent animationType="fade" onRequestClose={() => setShowMultas(false)}>
+        <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
+          <VStack bg="$white" borderRadius="$card" p="$6" gap="$3" testID="explicacao-multas">
+            <Text fontFamily="$heading" fontSize="$lg" color="$forest">Multa pendente</Text>
+            <Text size="sm" color="$brandTextSecondary">
+              Entra no valor do seu próximo atendimento, separada do serviço.
+            </Text>
+            {multas.map((m) => (
+              <HStack key={m.penaltyId} justifyContent="space-between" alignItems="flex-start" gap="$2">
+                <Text size="sm" color="$brandTextPrimary" flex={1}>{origemDaMulta(m)}</Text>
+                <Text fontFamily="$heading" fontSize="$sm" color="$forest">{reais(Number(m.amount) || 0)}</Text>
+              </HStack>
+            ))}
+            <Button title="Entendi" mt="$2" onPress={() => setShowMultas(false)} />
+          </VStack>
+        </Box>
+      </Modal>
       <ScheduleModal
         visible={showSchedule}
         onClose={() => setShowSchedule(false)}

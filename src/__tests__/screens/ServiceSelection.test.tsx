@@ -282,13 +282,17 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       mockMultas = [];
     });
 
-    it('com multa pendente, a conta mostra serviço, multa com a origem e o total', async () => {
+    // DEC-1 (01/10): nada de lista na escolha — uma linha somada ao total e o link.
+    it('com multa pendente: uma linha "+ R$" no total, o botão soma, e o link explica cada uma', async () => {
       mockMultas = [{ penaltyId: 'm1', type: 'LATE_CANCEL', amount: 5, originProfessionalName: 'Carlos' }];
-      const { findByTestId, getByTestId, getByText } = renderWithProviders(<ServiceSelection />);
+      const { findByTestId, getByTestId, getByText, queryByText } = renderWithProviders(<ServiceSelection />);
       fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
       expect(await findByTestId('multas-pendentes', {}, { timeout: 15000 })).toBeTruthy();
-      expect(getByText(/Multa — Saiu da fila · Carlos/)).toBeTruthy();
-      expect(getByTestId('total-com-multas').props.children).toBe('R$ 35,00');
+      expect(getByText('+ R$ 5,00')).toBeTruthy();
+      expect(queryByText(/Saiu da fila · Carlos/)).toBeNull();
+      expect(getByText(/Entrar na fila · R\$ 35\.00/)).toBeTruthy();
+      fireEvent.press(getByTestId('ver-multas'));
+      expect(getByText('Saiu da fila · Carlos')).toBeTruthy();
     });
 
     it('sem multa, a conta fica como sempre', async () => {
