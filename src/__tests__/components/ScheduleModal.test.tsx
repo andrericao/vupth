@@ -23,8 +23,8 @@ const amanha = () => {
   return d;
 };
 
-function abrir(over: Record<string, unknown> = {}) {
-  const props = {
+function abrir(over: Partial<React.ComponentProps<typeof ScheduleModal>> = {}) {
+  const props: React.ComponentProps<typeof ScheduleModal> & { onClose: jest.Mock; onPrecisaLogin: jest.Mock; onAgendado: jest.Mock } = {
     visible: true,
     onClose: jest.fn(),
     professionalId: 'p1',
@@ -33,9 +33,9 @@ function abrir(over: Record<string, unknown> = {}) {
     minutosDoServico: 60,
     onPrecisaLogin: jest.fn(),
     onAgendado: jest.fn(),
-    ...over,
+    ...(over as object),
   };
-  return { props, ...renderWithProviders(<ScheduleModal {...(props as never)} />) };
+  return { props, ...renderWithProviders(<ScheduleModal {...props} />) };
 }
 
 describe('ScheduleModal — barra de encaixe', () => {
