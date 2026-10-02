@@ -7,6 +7,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "build:web": "EXPO_PUBLIC_BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) expo export --platform web",
     "test": "jest",
     "test:integration": "jest src/__tests__/integration",
     "test:watch": "jest --watch",
