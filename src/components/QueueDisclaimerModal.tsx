@@ -87,7 +87,7 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
             </HStack>
           </TouchableOpacity>
 
-          <Button title="Entendi" mt="$5" onPress={() => onClose(dontShow)} />
+          <Button className="mt-5" title="Entendi" onPress={() => onClose(dontShow)} />
         </VStack>
       </Box>
     </Modal>

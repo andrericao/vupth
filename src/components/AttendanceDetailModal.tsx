@@ -97,9 +97,9 @@ export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = t
             </ScrollView>
 
             {a.status === "FINISHED" && canRate && (
-              <Button title="Avaliar atendimento" mt="$5" onPress={onRate} />
+              <Button className="mt-5" title="Avaliar atendimento" onPress={onRate} />
             )}
-            <Button title="Fechar" variant="outline" mt="$3" onPress={onClose} />
+            <Button className="mt-3" title="Fechar" variant="outline" onPress={onClose} />
           </VStack>
         )}
       </Box>

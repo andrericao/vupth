@@ -109,8 +109,8 @@ export function LocationSelector() {
             </Text>
 
             <Button
+              className="mt-5"
               title={busy ? "Buscando..." : "Usar minha localização atual"}
-              mt="$5"
               isDisabled={busy}
               testID="use-gps"
               onPress={useGps}
@@ -118,9 +118,9 @@ export function LocationSelector() {
 
             {isAuthenticated && (
               <Button
+                className="mt-3"
                 title={busy ? "Buscando..." : "Usar meu endereço cadastrado"}
                 variant="outline"
-                mt="$3"
                 isDisabled={busy}
                 onPress={useMyAddress}
               />
@@ -140,9 +140,9 @@ export function LocationSelector() {
               maxLength={9}
             />
             <Button
+              className="mt-3"
               title={busy ? "Buscando..." : "Usar este CEP"}
               variant="outline"
-              mt="$3"
               isDisabled={busy || cep.length < 9}
               onPress={useCep}
             />
@@ -155,7 +155,7 @@ export function LocationSelector() {
               </TouchableOpacity>
             )}
 
-            <Button title="Fechar" variant="outline" mt="$5" onPress={() => setOpen(false)} />
+            <Button className="mt-5" title="Fechar" variant="outline" onPress={() => setOpen(false)} />
           </VStack>
         </Box>
       </Modal>

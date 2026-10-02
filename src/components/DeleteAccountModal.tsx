@@ -75,14 +75,12 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
 
           <Button
             title={isDeleting ? "Deletando..." : "Deletar minha conta"}
-            variant="outline"
-            borderColor="$brandDanger"
-            $active-bg="$brandDangerTint"
+            variant="destructive"
             isDisabled={password.length === 0 || isDeleting}
             testID="delete-account-confirm"
             onPress={confirm}
           />
-          <Button title="Cancelar" mt="$1" onPress={close} isDisabled={isDeleting} />
+          <Button className="mt-1" title="Cancelar" onPress={close} isDisabled={isDeleting} />
         </VStack>
       </Box>
     </Modal>

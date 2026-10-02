@@ -136,8 +136,8 @@ export function SwapOffersModal({ visible, professionalId, establishmentId, onCl
                     ) : null;
                   })()}
                   <Button
+                    className="mt-2"
                     title={busyId === o.id ? "Aceitando..." : "Aceitar troca"}
-                    mt="$2"
                     isDisabled={!!busyId}
                     onPress={() => accept(o.id)}
                   />
@@ -164,7 +164,7 @@ export function SwapOffersModal({ visible, professionalId, establishmentId, onCl
             </VStack>
           )}
 
-          <Button title="Fechar" variant="outline" mt="$5" onPress={onClose} />
+          <Button className="mt-5" title="Fechar" variant="outline" onPress={onClose} />
         </VStack>
       </Box>
     </Modal>

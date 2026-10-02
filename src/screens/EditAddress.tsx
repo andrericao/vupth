@@ -243,9 +243,9 @@ export function EditAddress() {
           <VStack pt={24} flex={1}>
 
           <Button
+            className="mb-4"
             title={gpsLoading ? "Localizando..." : "Usar minha localização (GPS)"}
             variant="outline"
-            mb="$4"
             isDisabled={gpsLoading}
             testID="address-use-gps"
             onPress={handleUseGps}

@@ -336,7 +336,7 @@ export function ServiceSelection() {
       <VStack flex={1} px={16} style={{ paddingTop: insets.top + 12 }} pb={30} bg="$brandBackground">
         <Center flex={1}>
           <Text color="$brandDanger" textAlign="center">{error}</Text>
-          <Button title="Voltar" mt="$4" onPress={() => navigation.goBack()} />
+          <Button className="mt-4" title="Voltar" onPress={() => navigation.goBack()} />
         </Center>
       </VStack>
     );
@@ -356,7 +356,7 @@ export function ServiceSelection() {
           <Text color="$brandTextSecondary" textAlign="center">
             Nenhum serviço disponível para este profissional
           </Text>
-          <Button title="Voltar" mt="$4" onPress={() => navigation.goBack()} />
+          <Button className="mt-4" title="Voltar" onPress={() => navigation.goBack()} />
         </Center>
       ) : (
         <>
@@ -550,7 +550,7 @@ export function ServiceSelection() {
                 <Text fontFamily="$heading" fontSize="$sm" color="$forest">{reais(Number(m.amount) || 0)}</Text>
               </HStack>
             ))}
-            <Button title="Entendi" mt="$2" onPress={() => setShowMultas(false)} />
+            <Button className="mt-2" title="Entendi" onPress={() => setShowMultas(false)} />
           </VStack>
         </Box>
       </Modal>

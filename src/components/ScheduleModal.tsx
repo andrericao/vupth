@@ -148,14 +148,13 @@ export function ScheduleModal({
           )}
 
           <Button
+            className="mt-5"
             title={enviando ? "Agendando..." : "Confirmar"}
-            mt="$5"
             isDisabled={horario == null || enviando}
-            opacity={horario == null ? 0.5 : 1}
             onPress={confirmar}
             testID="confirmar-agendamento"
           />
-          <Button title="Cancelar" variant="outline" mt="$3" onPress={close} />
+          <Button className="mt-3" title="Cancelar" variant="outline" onPress={close} />
         </VStack>
       </Box>
     </Modal>

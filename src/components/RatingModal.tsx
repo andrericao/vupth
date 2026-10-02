@@ -116,12 +116,12 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
           )}
 
           <Button
+            className="mt-5"
             title={submitting ? "Enviando..." : "Enviar avaliação"}
-            mt="$5"
             isLoading={submitting}
             onPress={handleSubmit}
           />
-          <Button title="Agora não" variant="outline" mt="$3" onPress={() => onClose(false)} />
+          <Button className="mt-3" title="Agora não" variant="outline" onPress={() => onClose(false)} />
         </VStack>
       </Box>
     </Modal>

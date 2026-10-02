@@ -595,8 +595,8 @@ export function QueueStatus() {
           </Text>
           {canRequestCut && (
             <Button
+              className="mt-4"
               title={isRequestingCut ? "Enviando pedido..." : "Solicitar corte"}
-              mt="$4"
               isDisabled={isRequestingCut}
               onPress={async () => {
                 if (!accessToken || isRequestingCut) return;
@@ -638,9 +638,9 @@ export function QueueStatus() {
             />
           )}
           <Button
+            className="mt-4"
             title="Voltar"
             variant={canRequestCut ? "outline" : "solid"}
-            mt="$4"
             onPress={() => {
               leaveQueue();
               navigation.goBack();
