@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 
-// IDs de atendimentos que o cliente JÁ avaliou. Workaround front-only pra esconder
-// o "Avaliar" de forma persistente (entre reaberturas do app) enquanto o backend
-// não expõe `rated` no GET /attendances/client/me (HANDOFF §3.1). Quando o backend
-// entregar, este store vira só um cache/fallback da fonte da verdade.
+// IDs de atendimentos que o cliente JÁ avaliou. A fonte da verdade é o `rated`
+// do GET /attendances/client/me (Backend 3925ec3, ver `podeAvaliar`); este store
+// cobre a nota recém-enviada até o refetch e a tela de fim de atendimento, que
+// lê a fila local e não o histórico.
 const RATED_KEY = 'vupth_rated_attendances';
 
 interface RatedState {

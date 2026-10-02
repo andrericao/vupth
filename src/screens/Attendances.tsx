@@ -30,7 +30,7 @@ import { intentionsService } from "@services/intentionsService";
 import { swapOfferService } from "@services/swapOfferService";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { useQueueStore } from "@stores/queueStore";
-import { atendimentoAtivo, atendimentoSemAvaliar, filaDoAtendimento } from "@domain/queue/reconciliar";
+import { atendimentoAtivo, atendimentoSemAvaliar, filaDoAtendimento, podeAvaliar } from "@domain/queue/reconciliar";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
 import { formatWaitTime, formatClockTime, STATUS_DESCONHECIDO, filaEncerrada } from "@domain/queue/types";
@@ -451,7 +451,7 @@ export function Attendances() {
                   bg: "#F3F5F1",
                   fg: "#454745",
                 };
-                const canRate = a.status === "FINISHED" && !ratedIds.includes(a.id);
+                const canRate = podeAvaliar(a, ratedIds);
                 return (
                   <TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => setDetailFor(a)}>
                     <Box bg="$brandSurface" p="$4" borderRadius="$card">
@@ -509,7 +509,7 @@ export function Attendances() {
 
       <AttendanceDetailModal
         attendance={detailFor}
-        canRate={!!detailFor && detailFor.status === "FINISHED" && !ratedIds.includes(detailFor.id)}
+        canRate={!!detailFor && podeAvaliar(detailFor, ratedIds)}
         onClose={() => setDetailFor(null)}
         onRate={() => {
           if (detailFor) setRatingFor({ id: detailFor.id, name: detailFor.professionalName });

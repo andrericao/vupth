@@ -47,6 +47,8 @@ export interface ClientAttendance {
   startTime: string | null;
   endTime: string | null;
   durationInMinutes: number | null;
+  /** Ja tem nota (Backend 3925ec3). Ausente = backend anterior: vale o ratedStore. */
+  rated?: boolean;
 }
 
 export interface ClientAttendanceFilters {
