@@ -22,6 +22,7 @@ import { EditPassword } from "@screens/EditPassword";
 import { EditAddress } from "@screens/EditAddress";
 import { Terms } from "@screens/Terms";
 import { Sistema } from "@screens/Sistema";
+import { Aparencia } from "@screens/Aparencia";
 import { ServiceSelection } from "@screens/ServiceSelection";
 import { TabPill, TabLabel, TAB_ACTIVE, TAB_INACTIVE, tabBarShadow } from "@components/TabPill";
 import { ServiceType } from "@domain/establishment/types";
@@ -108,6 +109,7 @@ export type AppRoutes = {
   editAddress: undefined;
   terms: undefined;
   sistema: undefined;
+  aparencia: undefined;
 };
 
 export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutes>;
@@ -149,6 +151,7 @@ function SettingsStack() {
       <SettingsStackNav.Screen name="editAddress" component={EditAddress} />
       <SettingsStackNav.Screen name="terms" component={Terms} />
       <SettingsStackNav.Screen name="sistema" component={Sistema} />
+      <SettingsStackNav.Screen name="aparencia" component={Aparencia} />
     </SettingsStackNav.Navigator>
   );
 }

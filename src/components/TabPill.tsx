@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { View, Text } from "react-native";
+import { fs } from "@stores/fonteStore";
 
 // [marca-vupth] Pilula da aba ativa: fundo greenTint atras do icone quando
 // focado. Era um forest translucido (rgba) — o Pencil (Tab Bar Client v3)
@@ -28,7 +29,7 @@ export function TabLabel({ focused, children }: { focused: boolean; children: st
   return (
     <Text
       style={{
-        fontSize: 11,
+        fontSize: fs(11),
         marginTop: 2,
         fontWeight: focused ? "700" : "500",
         color: focused ? TAB_ACTIVE : TAB_INACTIVE,

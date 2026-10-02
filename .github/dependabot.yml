@@ -1,0 +1,32 @@
+# PRs automaticos de atualizacao (melhoria de 02/10). Semanal, para nao virar
+# ruido. Os PRs passam pelo mesmo CI (ci.yml) de qualquer outro.
+#
+# ⚠️ Expo, React Native e React sobem JUNTOS e com o Partner e o Backend (acordo
+# entre equipes, SDK por aparelho no Expo Go) — por isso ficam de fora das
+# atualizacoes de versao. Alerta de seguranca continua chegando para eles.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    target-branch: dev
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: expo
+      - dependency-name: "expo-*"
+      - dependency-name: "@expo/*"
+      - dependency-name: react
+      - dependency-name: react-dom
+      - dependency-name: react-native
+      - dependency-name: "react-native-*"
+      - dependency-name: "@react-native/*"
+    groups:
+      menores:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    target-branch: dev

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AccessibilityInfo, Animated, Pressable, Text } from "react-native";
 import { ArrowUp } from "lucide-react-native";
+import { fs } from "@stores/fonteStore";
 
 const FOREST = "#163300";
 const GREEN_TINT = "#E2F6D5";
@@ -70,7 +71,7 @@ export function PilulaVoltarAoTopo({ visivel, onPress }: { visivel: boolean; onP
         }}
       >
         <ArrowUp size={14} color={FOREST} />
-        <Text style={{ fontFamily: "Archivo_700Bold", fontSize: 13, color: FOREST }}>Voltar ao topo</Text>
+        <Text style={{ fontFamily: "Archivo_700Bold", fontSize: fs(13), color: FOREST }}>Voltar ao topo</Text>
       </Pressable>
     </Animated.View>
   );

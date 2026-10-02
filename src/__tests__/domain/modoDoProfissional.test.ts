@@ -1,4 +1,4 @@
-import { ehSoAgenda, acaoPrincipal, opcoesDoMenu, MENSAGEM_SO_AGENDA } from '@domain/professional/modo';
+import { ehSoAgenda, acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA } from '@domain/professional/modo';
 import { recusaAoEntrar } from '@domain/queue/entrarNaFila';
 
 // Modo por profissional (Backend 8e6c00f, em produção desde 26/09): fila ou só agenda.
@@ -22,8 +22,9 @@ describe('a ação principal da escolha de serviços', () => {
     }
   });
 
-  it('fila: fora → corte; loja aberta → fila; loja fechada → agendar', () => {
-    expect(acaoPrincipal({ soAgenda: false, fora: true, lojaAberta: true })).toBe('corte');
+  // DEC-6 (02/10): com a fila fechada, Agendar — o corte vai para o menu.
+  it('fila: fora → agendar; loja aberta → fila; loja fechada → agendar', () => {
+    expect(acaoPrincipal({ soAgenda: false, fora: true, lojaAberta: true })).toBe('agendar');
     expect(acaoPrincipal({ soAgenda: false, fora: false, lojaAberta: true })).toBe('fila');
     expect(acaoPrincipal({ soAgenda: false, fora: false, lojaAberta: false })).toBe('agendar');
   });
@@ -34,10 +35,23 @@ describe('o menu "Mais opções"', () => {
     expect(opcoesDoMenu({ soAgenda: true, fora: false, lojaAberta: true })).toEqual([]);
   });
 
-  it('loja aberta ou profissional fora: agendar e troca; loja fechada: corte e troca', () => {
-    expect(opcoesDoMenu({ soAgenda: false, fora: false, lojaAberta: true })).toEqual(['schedule', 'swap']);
-    expect(opcoesDoMenu({ soAgenda: false, fora: true, lojaAberta: false })).toEqual(['schedule', 'swap']);
+  it('fila aberta: só a troca — o agendar já está na tela, como segunda porta', () => {
+    expect(opcoesDoMenu({ soAgenda: false, fora: false, lojaAberta: true })).toEqual(['swap']);
+  });
+
+  it('fila fechada (DEC-6): só o pedido de corte — a troca também põe na fila; loja fechada: corte e troca', () => {
+    expect(opcoesDoMenu({ soAgenda: false, fora: true, lojaAberta: true })).toEqual(['cut']);
+    expect(opcoesDoMenu({ soAgenda: false, fora: true, lojaAberta: false })).toEqual(['cut']);
     expect(opcoesDoMenu({ soAgenda: false, fora: false, lojaAberta: false })).toEqual(['cut', 'swap']);
+  });
+});
+
+describe('o fim de fila híbrido (C20)', () => {
+  it('só com a fila aberta há a segunda porta — agendar ao lado de entrar agora', () => {
+    expect(temSegundaPorta({ soAgenda: false, fora: false, lojaAberta: true })).toBe(true);
+    expect(temSegundaPorta({ soAgenda: false, fora: true, lojaAberta: true })).toBe(false);
+    expect(temSegundaPorta({ soAgenda: false, fora: false, lojaAberta: false })).toBe(false);
+    expect(temSegundaPorta({ soAgenda: true, fora: false, lojaAberta: true })).toBe(false);
   });
 });
 

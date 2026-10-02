@@ -31,6 +31,10 @@ jest.mock('@services/establishmentService', () => ({
 jest.mock('@services/swapOfferService', () => ({
   swapOfferService: { create: jest.fn() },
 }));
+let mockMultas: unknown[] = [];
+jest.mock('@services/penaltyService', () => ({
+  penaltyService: { listPending: jest.fn(() => Promise.resolve({ data: { total: 0, penalties: mockMultas } })) },
+}));
 jest.mock('@services/cutRequestService', () => ({
   cutRequestService: { create: jest.fn() },
 }));
@@ -199,6 +203,15 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     );
   });
 
+  it('fila aberta: as duas portas na tela — entrar agora e agendar; o menu fica só com a troca (C20)', async () => {
+    const { getByTestId, queryByTestId } = await selectServiceAndOpenMenu();
+
+    expect(getByTestId('primary-queue')).toBeTruthy();
+    expect(getByTestId('second-door-schedule')).toBeTruthy();
+    expect(queryByTestId('more-option-schedule')).toBeNull();
+    expect(getByTestId('more-option-swap')).toBeTruthy();
+  });
+
   it('restaura a seleção que voltou do portão de auth (serviceItemIds na rota)', async () => {
     useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
     setRouteParams({ ...OPEN_PARAMS, serviceItemIds: ['s1'] });
@@ -225,11 +238,18 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
     });
 
-    it('a ação principal é "Solicitar corte" — não há "Entrar na fila"', async () => {
+    // DEC-6 (02/10): só "Agendar" e "Mais opções" — o corte mora no menu.
+    it('a ação principal é "Agendar"; o menu tem só o pedido de corte — nunca "Entrar na fila"', async () => {
       const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
       fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
-      expect(getByTestId('primary-cut')).toBeTruthy();
+      expect(getByTestId('primary-schedule')).toBeTruthy();
       expect(queryByTestId('primary-queue')).toBeNull();
+      expect(queryByTestId('primary-cut')).toBeNull();
+      expect(queryByTestId('second-door-schedule')).toBeNull();
+      fireEvent.press(getByTestId('more-options'));
+      expect(getByTestId('more-option-cut')).toBeTruthy();
+      expect(queryByTestId('more-option-swap')).toBeNull();
+      expect(queryByTestId('more-option-schedule')).toBeNull();
       // Nem posição, nem previsão, nem regra de saída de uma fila em que ele não entra.
       expect(queryByTestId('regra-da-multa')).toBeNull();
     });
@@ -241,8 +261,9 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
       const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
       fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+      fireEvent.press(getByTestId('more-options'));
       await act(async () => {
-        fireEvent.press(getByTestId('primary-cut'));
+        fireEvent.press(getByTestId('more-option-cut'));
       });
       const [, mensagem] = alerta.mock.calls[0] as [string, string];
       expect(mensagem).toMatch(/está fora agora/);
@@ -266,6 +287,35 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       expect(queryByTestId('more-options')).toBeNull();
       expect(queryByTestId('regra-da-multa')).toBeNull();
       expect(getByTestId('so-agenda')).toBeTruthy();
+    });
+  });
+
+  describe('multas pendentes na conta (Backend 389a152)', () => {
+    beforeEach(() => {
+      setRouteParams({ ...OPEN_PARAMS });
+      useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    });
+    afterEach(() => {
+      mockMultas = [];
+    });
+
+    // DEC-1 (01/10): nada de lista na escolha — uma linha somada ao total e o link.
+    it('com multa pendente: uma linha "+ R$" no total, o botão soma, e o link explica cada uma', async () => {
+      mockMultas = [{ penaltyId: 'm1', type: 'LATE_CANCEL', amount: 5, originProfessionalName: 'Carlos' }];
+      const { findByTestId, getByTestId, getByText, queryByText } = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+      expect(await findByTestId('multas-pendentes', {}, { timeout: 15000 })).toBeTruthy();
+      expect(getByText('+ R$ 5,00')).toBeTruthy();
+      expect(queryByText(/Saiu da fila · Carlos/)).toBeNull();
+      expect(getByText(/Entrar na fila · R\$ 35\.00/)).toBeTruthy();
+      fireEvent.press(getByTestId('ver-multas'));
+      expect(getByText('Saiu da fila · Carlos')).toBeTruthy();
+    });
+
+    it('sem multa, a conta fica como sempre', async () => {
+      const { findByTestId, queryByTestId } = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+      expect(queryByTestId('multas-pendentes')).toBeNull();
     });
   });
 });

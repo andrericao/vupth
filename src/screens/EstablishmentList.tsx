@@ -17,6 +17,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { formatWaitTime } from "@domain/queue/types";
 import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
+import { fs } from "@stores/fonteStore";
 
 type SortBy = "wait" | "distance";
 
@@ -199,7 +200,7 @@ export function EstablishmentList() {
               onChangeText={setSearch}
               placeholder="Buscar pelo nome"
               placeholderTextColor={COR_DO_PLACEHOLDER}
-              style={{ fontFamily: "Inter_400Regular", fontSize: 15, color: "#163300", padding: 0 }}
+              style={{ fontFamily: "Inter_400Regular", fontSize: fs(15), color: "#163300", padding: 0 }}
               returnKeyType="search"
             />
           </Box>
@@ -220,10 +221,10 @@ export function EstablishmentList() {
                 <Zap size={20} color="#163300" />
               </Center>
               <VStack flex={1} gap={2}>
-                <Text fontFamily="$heading" fontSize={15} color="$white">
+                <Text fontFamily="$heading" fontSize={fs(15)} color="$white">
                   Entrar com menor espera
                 </Text>
-                <Text fontFamily="$body" fontSize={13} color="$brandGreen">
+                <Text fontFamily="$body" fontSize={fs(13)} color="$brandGreen">
                   {best.name} · {waitLabel(best).replace("~", "")}
                 </Text>
               </VStack>
@@ -252,7 +253,7 @@ export function EstablishmentList() {
                 alignItems="center"
               >
                 <ArrowUpDown size={13} color="#163300" />
-                <Text fontFamily="$heading" fontSize={12} color="$brandTextPrimary">
+                <Text fontFamily="$heading" fontSize={fs(12)} color="$brandTextPrimary">
                   {sortBy === "wait" ? "Menor espera" : "Mais perto"}
                 </Text>
               </HStack>

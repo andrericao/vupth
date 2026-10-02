@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { SectionList, TouchableOpacity, Alert, ImageBackground, Linking, Share } from "react-native";
+import { SectionList, TouchableOpacity, Alert, Linking, Share, Pressable, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -11,6 +12,7 @@ import {
 } from "@gluestack-ui/themed";
 import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Copy } from "lucide-react-native";
 import { copiarTexto } from "@utils/copiar";
+import { FotoAmpliada } from "@components/FotoAmpliada";
 import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
 import { API_ENV } from "@services/api";
 
@@ -22,7 +24,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
 import { ProfessionalWithQueue } from "@domain/professional/types";
-import { agruparPorExpediente, emIntervalo, estaNoExpediente } from "@domain/professional/expediente";
+import { agruparPorExpediente, emIntervalo, estaNoExpediente, filaFechada } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { ehSoAgenda } from "@domain/professional/modo";
@@ -33,6 +35,7 @@ import { useEstablishment, useEstablishmentHours, useProfessionalsWithQueue } fr
 import { proximaAbertura, resumoDeHoje, semanaParaExibir } from "@domain/establishment/horarios";
 import { useQueueSocket } from "@hooks/useQueueSocket";
 import { useFavoritesStore } from "@stores/favoritesStore";
+import { fs } from "@stores/fonteStore";
 
 type RouteParams = {
   establishmentId: string;
@@ -53,8 +56,11 @@ function ProfessionalRow({
   lojaAberta,
   fora,
   onPress,
+  onVerFoto,
 }: {
   professional: ProfessionalWithQueue;
+  /** Tocar na foto abre em tela cheia (so quando ha foto). */
+  onVerFoto?: (uri: string) => void;
   /** Loja fechada: ninguem esta sendo atendido, entao a linha nao pode falar
       de fila nem de "agora". Ver o mesmo conserto na Home. */
   lojaAberta: boolean;
@@ -76,7 +82,17 @@ function ProfessionalRow({
         <HStack alignItems="center" gap="$3">
           {/* Foto quando o profissional tiver (Partner 1.4.0); sem ela, ou com
               URL quebrada, o PlaceAvatar volta para as iniciais. */}
-          <PlaceAvatar name={professional.name} photoUrl={professional.profile_image_url} />
+          {professional.profile_image_url && onVerFoto ? (
+            <TouchableOpacity
+              onPress={() => onVerFoto(professional.profile_image_url!)}
+              accessibilityLabel={`Ver a foto de ${professional.name}`}
+              testID={`foto-${professional.id}`}
+            >
+              <PlaceAvatar name={professional.name} photoUrl={professional.profile_image_url} />
+            </TouchableOpacity>
+          ) : (
+            <PlaceAvatar name={professional.name} photoUrl={professional.profile_image_url} />
+          )}
           <VStack flex={1}>
             <Text fontFamily="$heading" fontSize="$sm" color="$forest">
               {professional.name}
@@ -110,6 +126,14 @@ function ProfessionalRow({
                   {/* Intervalo e almoco ou saida rapida: a pessoa VOLTA e a fila
                       dela segue andando, por isso ela fica entre quem trabalha —
                       mas com o rotulo, senao a espera anunciada engana. */}
+                  {estaNoExpediente(professional.work_status) && professional.accepting_new === false && (
+                    <>
+                      <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
+                      <Text size="xs" color="$brandTextSecondary" fontFamily="$heading" testID={`fila-fechada-${professional.id}`}>
+                        Fila fechada
+                      </Text>
+                    </>
+                  )}
                   {emIntervalo(professional.work_status) && (
                     <>
                       <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
@@ -163,6 +187,7 @@ export function EstablishmentDetail() {
   useQueueSocket(establishmentId);
 
   const [heroFailed, setHeroFailed] = useState(false);
+  const [fotoAmpliada, setFotoAmpliada] = useState<string | null>(null);
 
   const favoriteIds = useFavoritesStore((s) => s.ids);
   const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
@@ -173,7 +198,9 @@ export function EstablishmentDetail() {
     const prof = professionals.find((p) => p.id === professionalId);
     // "Fora" = fila fechada (ir para Fora fecha a fila, regra de 09/09). A tela
     // de servicos nao oferece a entrada — so o pedido de corte (24/09).
-    const fora = !estaNoExpediente(prof?.work_status);
+    // Trabalhando com a fila fechada (`accepting_new: false`) tambem nao recebe
+    // ninguem novo: mesmo caminho de quem esta Fora (26/09).
+    const fora = filaFechada(prof);
     if (!establishment) return;
 
     // Loja fechada NÃO bloqueia mais (Andre 2026-07-23): o fluxo segue até os
@@ -317,16 +344,26 @@ export function EstablishmentDetail() {
           baixo. */}
       {showPhoto ? (
         <Box height={210} width="$full">
-          <ImageBackground
-            source={{ uri: establishment.urlImage! }}
+          <Pressable
             style={{ flex: 1 }}
-            resizeMode="cover"
-            onError={() => setHeroFailed(true)}
+            onPress={() => setFotoAmpliada(establishment.urlImage!)}
+            accessibilityLabel="Ver a foto da loja"
+            testID="foto-da-loja"
           >
-            <Box px={16}>
-              <ScreenHeader ground="foto" action={acoes} />
-            </Box>
-          </ImageBackground>
+          {/* expo-image (melhoria de 02/10): a foto fica em disco. Ele nao tem
+              ImageBackground — a foto ocupa o fundo e o cabecalho vem por cima. */}
+          <Image
+            source={{ uri: establishment.urlImage! }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            cachePolicy="memory-disk"
+            onError={() => setHeroFailed(true)}
+            testID="foto-da-loja-imagem"
+          />
+          <Box px={16}>
+            <ScreenHeader ground="foto" action={acoes} />
+          </Box>
+          </Pressable>
         </Box>
       ) : (
         // SEM foto o nome da loja e o titulo do cabecalho — voltar · nome ·
@@ -341,8 +378,8 @@ export function EstablishmentDetail() {
         {showPhoto && (
           <Text
             fontFamily="$display"
-            fontSize={26}
-            lineHeight={30}
+            fontSize={fs(26)}
+            lineHeight={fs(30)}
             letterSpacing={-1}
             color="$forest"
           >
@@ -509,6 +546,7 @@ export function EstablishmentDetail() {
               lojaAberta={isOpen}
               fora={section.key === "fora"}
               onPress={() => handleSelectProfessional(item.id)}
+              onVerFoto={setFotoAmpliada}
             />
           )}
           ListEmptyComponent={
@@ -553,6 +591,7 @@ export function EstablishmentDetail() {
           </TouchableOpacity>
         )}
       </VStack>
+      <FotoAmpliada uri={fotoAmpliada} onClose={() => setFotoAmpliada(null)} />
     </VStack>
   );
 }

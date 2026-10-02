@@ -3,6 +3,7 @@ import { useEffect } from "react";
 
 import { useDialogoStore } from "@stores/dialogo.store";
 import { pesoDoBotao } from "@domain/pesoDoBotao";
+import { fs } from "@stores/fonteStore";
 
 // O diálogo do app — a mesma caixa nas duas plataformas e nos dois apps.
 //
@@ -100,7 +101,7 @@ export function DialogoVupth() {
           <Text
             style={{
               fontFamily: "Archivo_800ExtraBold",
-              fontSize: 18,
+              fontSize: fs(18),
               letterSpacing: -0.4,
               color: FOREST,
             }}
@@ -115,8 +116,8 @@ export function DialogoVupth() {
               <Text
                 style={{
                   fontFamily: "Inter_400Regular",
-                  fontSize: 14,
-                  lineHeight: 20,
+                  fontSize: fs(14),
+                  lineHeight: fs(20),
                   color: TEXT_SECONDARY,
                 }}
               >
@@ -151,7 +152,7 @@ export function DialogoVupth() {
                   <Text
                     style={{
                       fontFamily: "Archivo_700Bold",
-                      fontSize: 16,
+                      fontSize: fs(16),
                       color: perigo ? DANGER : FOREST,
                     }}
                   >

@@ -17,7 +17,8 @@ describe('a busca da Home não espreme o texto', () => {
 
   it('a caixa tem altura mínima, e o texto altura de linha', () => {
     expect(campo).toMatch(/minHeight=\{50\}/);
-    expect(campo).toMatch(/lineHeight: 20/);
+    // O tamanho escolhido nas Configuracoes soma aqui tambem (fs).
+    expect(campo).toMatch(/lineHeight: fs\(20\)/);
   });
 
   it('sem o respiro de fonte do Android, e com o reset de web', () => {

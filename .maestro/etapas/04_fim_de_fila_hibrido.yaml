@@ -1,0 +1,21 @@
+# C20 (Andre, 05/08): com a fila aberta, as DUAS portas na tela — entrar agora
+# ou agendar. A regra da multa aparece antes do toque que poe na fila (CDC).
+# env: PROF_ID, SERVICO_ID
+appId: ${APP_ID}
+---
+- runFlow: ../apoio/escolher_servico.yaml
+- assertVisible:
+    id: "primary-queue"
+- assertVisible:
+    id: "second-door-schedule"
+- assertVisible:
+    id: "regra-da-multa"
+# O agendar saiu do "Mais opcoes": la sobra so a troca.
+- tapOn:
+    id: "more-options"
+- assertVisible:
+    id: "more-option-swap"
+- assertNotVisible:
+    id: "more-option-schedule"
+- tapOn:
+    id: "more-options-close"

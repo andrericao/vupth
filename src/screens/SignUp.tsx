@@ -12,6 +12,7 @@ import { PasswordRules } from "@components/PasswordRules";
 import { validateSignUp, getPasswordRules } from "@domain/auth/validateAuth";
 import { useAuthStore } from "@stores/authStore";
 import { useTabBarInset } from "@hooks/useTabBarInset";
+import { fs } from "@stores/fonteStore";
 
 type RouteParams = {
   redirectTo?: string;
@@ -140,7 +141,7 @@ export function SignUp() {
               alignSelf="flex-start"
             >
               <TriangleAlert size={15} color="#163300" />
-              <Text fontFamily="$heading" fontSize={12} color="$forest">
+              <Text fontFamily="$heading" fontSize={fs(12)} color="$forest">
                 {params.professionalName
                   ? `ENTRANDO NA FILA · ${params.professionalName.toUpperCase()}`
                   : "VOCÊ ESTÁ ENTRANDO NA FILA"}
@@ -227,7 +228,7 @@ export function SignUp() {
             size="2xs"
             color="$brandTextSecondary"
             textAlign="center"
-            lineHeight={15}
+            lineHeight={fs(15)}
           >
             Ao continuar você concorda com os Termos de Uso e a Política de Privacidade.
           </Text>

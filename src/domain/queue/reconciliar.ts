@@ -84,6 +84,15 @@ export function filaDoAtendimento(
 }
 
 /**
+ * "Avaliar" só nos FINISHED sem nota. A fonte é o `rated` do servidor (Backend
+ * 3925ec3); a lista local cobre a nota recém-enviada, antes do próximo
+ * refetch, e o backend anterior, que não manda o campo.
+ */
+export function podeAvaliar(a: ClientAttendance, jaAvaliados: string[]): boolean {
+  return a.status === 'FINISHED' && a.rated !== true && !jaAvaliados.includes(a.id);
+}
+
+/**
  * O atendimento mais recente que TERMINOU e ainda não foi avaliado.
  *
  * Existe porque a avaliação deixou de ser um pedágio: quem fugiu do popup uma
@@ -94,9 +103,7 @@ export function atendimentoSemAvaliar(
   historico: ClientAttendance[],
   jaAvaliados: string[],
 ): ClientAttendance | null {
-  const candidatos = historico.filter(
-    (a) => a.status === 'FINISHED' && !jaAvaliados.includes(a.id),
-  );
+  const candidatos = historico.filter((a) => podeAvaliar(a, jaAvaliados));
   if (candidatos.length === 0) return null;
   return candidatos.reduce((maisRecente, a) =>
     Date.parse(a.scheduledTime) > Date.parse(maisRecente.scheduledTime) ? a : maisRecente,

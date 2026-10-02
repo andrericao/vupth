@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Animated, AccessibilityInfo, Easing } from "react-native";
 import { Center, Text, VStack, HStack } from "@gluestack-ui/themed";
 import { Smartphone, Store, Scissors, Footprints } from "lucide-react-native";
+import { fs } from "@stores/fonteStore";
 
 // Tela do portão de readiness / cold start (Pencil CLIENT · 23 Preparando
 // Servidor). Enquanto o backend acorda (Render Free, ~50s), seguramos o app
@@ -119,7 +120,7 @@ function WarmupAnimation() {
         </Center>
       </Animated.View>
       <VStack space="xs" alignItems="center">
-        <Text fontFamily="$display" fontSize={20} letterSpacing={-0.4} color="$forest">
+        <Text fontFamily="$display" fontSize={fs(20)} letterSpacing={-0.4} color="$forest">
           {STEPS[index].title}
         </Text>
         <Text

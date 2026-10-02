@@ -5,6 +5,7 @@ import { assinar } from "@services/stompCompartilhado";
 import { useQueueStore } from "@stores/queueStore";
 import { QueueNotification, AttendanceStatus } from "@domain/queue/types";
 import { handleQueueNotification } from "@domain/queue/notifications";
+import { oferecerVezAdiantada } from "@utils/vezAdiantada";
 import { findMyPosition, QueueBroadcast } from "@domain/queue/broadcast";
 
 /**
@@ -37,6 +38,7 @@ export function useQueueNotifications(enabled: boolean) {
           leaveQueue,
           alert: Alert.alert,
           activeAttendanceId: useQueueStore.getState().activeQueue?.attendanceId,
+          oferecerVezAdiantada,
         });
       } catch (e) {
         if (__DEV__) console.log("[ws] erro ao processar notificacao", e);

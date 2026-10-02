@@ -12,6 +12,7 @@ import { getPasswordRules } from "@domain/auth/validateAuth";
 import { authService } from "@services/authService";
 import { waitForBackend } from "@services/healthService";
 import { useTabBarInset } from "@hooks/useTabBarInset";
+import { fs } from "@stores/fonteStore";
 
 const EMAIL_RE = /\S+@\S+\.\S+/;
 
@@ -161,8 +162,8 @@ export function ForgotPassword() {
               mais "esquecendo a senha", esta criando uma nova. */}
           <Text
             fontFamily="$display"
-            fontSize={34}
-            lineHeight={36}
+            fontSize={fs(34)}
+            lineHeight={fs(36)}
             letterSpacing={-1.5}
             color="$forest"
           >

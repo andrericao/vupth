@@ -28,7 +28,24 @@
   X-Content-Type-Options: nosniff
   # Nao vaza a URL interna (com ids) ao clicar p/ fora.
   Referrer-Policy: strict-origin-when-cross-origin
-  # A web nao usa camera/microfone/GPS por enquanto — negar por padrao.
-  Permissions-Policy: geolocation=(), camera=(), microphone=()
+  # Camera e microfone negados. O GPS fica liberado SO para a nossa origem: a
+  # busca por proximidade usa a localizacao, e com geolocation=() o navegador
+  # negava sem nem perguntar (melhoria de 02/10).
+  Permissions-Policy: geolocation=(self), camera=(), microphone=()
   # Forca HTTPS nas proximas visitas.
   Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Cache (melhoria de 02/10). Os bundles do `expo export` levam o hash no nome:
+# um arquivo novo e outra URL, entao o navegador pode guardar um ano sem nunca
+# servir versao velha. O index.html e o que aponta para eles — esse o navegador
+# confere a cada visita, senao o deploy novo nao chega.
+# ⚠️ Cache-Control so nestes blocos, nunca no /*: o Pages JUNTA os valores de
+# blocos que casam na mesma URL, e "immutable" somado a "no-cache" nao vale nada.
+/_expo/static/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/
+  Cache-Control: no-cache
+
+/index.html
+  Cache-Control: no-cache

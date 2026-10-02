@@ -7,6 +7,8 @@ export interface QueueNotificationEffects {
   alert: (title: string, message?: string) => void;
   // Attendance da fila ativa no momento da notificação (null/undefined = sem fila).
   activeAttendanceId?: string | null;
+  // A vez adiantou: pergunta se o cliente topa (sem isto, so avisa).
+  oferecerVezAdiantada?: (attendanceId: string, mensagem: string) => void;
 }
 
 /**
@@ -57,6 +59,10 @@ export function handleQueueNotification(
     // reflete; aqui só avisa.
     case 'SWAP_OFFER_ACCEPTED':
       fx.alert('Troca feita', notif.message);
+      break;
+    case 'EARLIER_TURN_OFFERED':
+      if (fx.oferecerVezAdiantada) fx.oferecerVezAdiantada(notif.attendanceId, notif.message);
+      else fx.alert('Sua vez adiantou', notif.message);
       break;
   }
 }

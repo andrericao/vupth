@@ -3,6 +3,7 @@ import { HStack, Text } from "@gluestack-ui/themed";
 import { RefreshCw } from "lucide-react-native";
 
 import { ehNavegador } from "@utils/ehNavegador";
+import { fs } from "@stores/fonteStore";
 
 // Puxar para atualizar (RefreshControl) nao existe no navegador: com mouse nao
 // ha gesto, e onde o navegador tem gesto proprio ele recarrega a pagina inteira
@@ -34,7 +35,7 @@ export function AtualizarNoNavegador({
         opacity={atualizando ? 0.6 : 1}
       >
         <RefreshCw size={15} color="#163300" />
-        <Text fontFamily="$heading" fontSize={13} color="$forest">
+        <Text fontFamily="$heading" fontSize={fs(13)} color="$forest">
           {atualizando ? "Atualizando..." : "Atualizar"}
         </Text>
       </HStack>

@@ -2,6 +2,7 @@ import {
   agruparPorExpediente,
   emIntervalo,
   estaNoExpediente,
+  filaFechada,
 } from '@domain/professional/expediente';
 
 // Contrato de 19/09: o backend manda TODO profissional com pelo menos um
@@ -45,5 +46,22 @@ describe('expediente', () => {
 
     expect(trabalhando).toHaveLength(0);
     expect(fora).toHaveLength(2);
+  });
+});
+
+
+// Andre, 26/09: trabalhando com a fila fechada, o cliente ainda entrava.
+describe('fila fechada para novos', () => {
+  it('fora do expediente, ou trabalhando com accepting_new false', () => {
+    expect(filaFechada({ work_status: 'OFF' })).toBe(true);
+    expect(filaFechada({ work_status: 'WORKING', accepting_new: false })).toBe(true);
+    expect(filaFechada({ work_status: 'ON_BREAK', accepting_new: false })).toBe(true);
+  });
+
+  it('trabalhando com a fila aberta, ou sem o campo (backend anterior): aberta', () => {
+    expect(filaFechada({ work_status: 'WORKING', accepting_new: true })).toBe(false);
+    expect(filaFechada({ work_status: 'WORKING' })).toBe(false);
+    expect(filaFechada({})).toBe(false);
+    expect(filaFechada(undefined)).toBe(false);
   });
 });

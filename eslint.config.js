@@ -12,6 +12,8 @@ module.exports = defineConfig([
     // `lint` rodado DEPOIS de gerar o site devolve milhares de problemas
     // vindos do bundle — e com `--max-warnings 0` no portao, isso reprova
     // tudo. Aviso do Andre em 27/08, depois de pisar nisso no parceiro.
-    ignores: ['coverage/', '.expo/', 'node_modules/', '.claude/', 'dist/', 'web-build/'],
+    // .maestro/scripts roda no JS do Maestro (globais http, json, output), nao
+    // no app — fora do lint, como no Partner.
+    ignores: ['coverage/', '.expo/', 'node_modules/', '.claude/', 'dist/', 'web-build/', '.maestro/'],
   },
 ]);

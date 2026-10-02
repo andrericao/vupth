@@ -3,7 +3,7 @@ import { MotionAnimationDriver } from '@gluestack-style/legend-motion-animation-
 import { createConfig, createComponents } from '@gluestack-style/react';
 import * as componentsTheme from './theme';
 
-export const gluestackUIConfig = createConfig({
+const configBase = {
   aliases: {
     bg: 'backgroundColor',
     bgColor: 'backgroundColor',
@@ -756,7 +756,9 @@ export const gluestackUIConfig = createConfig({
     },
   },
   plugins: [new AnimationResolver(MotionAnimationDriver)],
-});
+} as const;
+
+export const gluestackUIConfig = createConfig(configBase);
 
 type Config = typeof gluestackUIConfig; // Assuming `config` is defined elsewhere
 
@@ -782,3 +784,23 @@ export const config = {
   ...gluestackUIConfig,
   components: componentsConfig,
 };
+
+/**
+ * O tema com a letra maior — o "Tamanho da letra" das Configuracoes (Andre,
+ * 26/09: 10 → 11 → 12 → 13 → 14, ate +4). So os tamanhos e as alturas de linha
+ * mudam; o resto do tema e o mesmo.
+ */
+export function configComFonte(passo: number): typeof config {
+  if (!passo) return config;
+  const mais = (tabela: Record<string, number>) =>
+    Object.fromEntries(Object.entries(tabela).map(([k, v]) => [k, v + passo]));
+  const tokens = {
+    ...configBase.tokens,
+    fontSizes: mais(configBase.tokens.fontSizes),
+    lineHeights: mais(configBase.tokens.lineHeights),
+  };
+  return {
+    ...(createConfig({ ...configBase, tokens } as unknown as typeof configBase) as typeof gluestackUIConfig),
+    components: componentsConfig,
+  };
+}

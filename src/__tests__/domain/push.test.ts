@@ -1,4 +1,5 @@
 import {
+  avisoDoPush,
   mapPlatform,
   deviceDeletePath,
   notificationRoute,
@@ -130,5 +131,22 @@ describe('acquireExpoPushToken', () => {
       }),
     );
     expect(request).toHaveBeenCalledTimes(1);
+  });
+});
+
+
+// Andre, 26/09: com o app aberto, o aviso de que o corte está próximo tem "OK".
+describe('o push com o app aberto', () => {
+  it('vira aviso com o título e o texto do push', () => {
+    expect(avisoDoPush({ title: 'Sua vez está chegando', body: 'Faltam 10 min' })).toEqual({
+      titulo: 'Sua vez está chegando',
+      mensagem: 'Faltam 10 min',
+    });
+  });
+
+  it('sem título, usa o nome do app; sem texto nenhum, não mostra nada', () => {
+    expect(avisoDoPush({ title: null, body: 'Oi' })).toEqual({ titulo: 'VUPTH', mensagem: 'Oi' });
+    expect(avisoDoPush({ title: ' ', body: '' })).toBeNull();
+    expect(avisoDoPush({})).toBeNull();
   });
 });

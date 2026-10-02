@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Alert, TouchableOpacity, ScrollView } from "react-native";
+import { Alert, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -28,7 +28,9 @@ import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { regraDaMulta } from "@domain/queue/saidaDaFila";
-import { acaoPrincipal, opcoesDoMenu, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
+import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
+import { useMultasPendentes } from "@hooks/useMultasPendentes";
+import { acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
 // POUCOS lugares com sombra legitima: no Pencil o "Resumo" sobre `forest` e um
@@ -124,6 +126,11 @@ export function ServiceSelection() {
 
   const selectedServices = services.filter((s) => selectedIds.includes(s.id));
   const totalPrice = selectedServices.reduce((sum, s) => sum + s.price, 0);
+  // Multas pendentes entram na conta, separadas do servico (Backend 389a152).
+  const { data: pendentes } = useMultasPendentes();
+  const multas = pendentes?.penalties ?? [];
+  const conta = contaComMultas(totalPrice, multas);
+  const [showMultas, setShowMultas] = useState(false);
   const totalMinutes = selectedServices.reduce(
     (sum, s) => sum + (s.weeklyAverageDurationInMinutes ?? 30),
     0,
@@ -263,13 +270,13 @@ export function ServiceSelection() {
   }
 
   // Menu "Mais opções": tudo que não é a ação primária da tela. Com a loja
-  // fechada a primária é agendar, então o corte entra aqui; com ela aberta, a
-  // primária é entrar na fila e o agendar entra aqui. A troca vale nos dois.
+  // fechada a primária é agendar, então o corte entra aqui; com a fila aberta o
+  // agendar é a segunda porta, na tela (C20). A troca vale nos dois.
   const todasAsOpcoes: Record<OpcaoDoMenu, MoreOption> = {
     schedule: {
       key: "schedule",
       icon: Calendar,
-      title: "Agendar para depois",
+      title: "Agendar",
       description: "Escolha outro dia ou horário com este profissional.",
       onPress: () => {
         setShowMoreOptions(false);
@@ -280,7 +287,9 @@ export function ServiceSelection() {
       key: "cut",
       icon: Scissors,
       title: isRequestingCut ? "Enviando pedido..." : "Solicitar corte",
-      description: "A loja está fechada — o profissional tem 5 minutos para responder.",
+      description: profissionalFora
+        ? "A fila está fechada — peça o corte e o profissional tem 5 minutos para responder."
+        : "A loja está fechada — o profissional tem 5 minutos para responder.",
       disabled: isRequestingCut,
       onPress: handleRequestCut,
     },
@@ -293,7 +302,7 @@ export function ServiceSelection() {
       onPress: handleRequestSwap,
     },
   };
-  // Com o profissional Fora, o corte e a acao principal: o menu leva o agendar.
+  // Com a fila fechada (DEC-6) a principal e agendar e o menu leva so o corte.
   // "So agenda" nao tem menu — nao ha nada alem de agendar.
   const moreOptions: MoreOption[] = opcoesDoMenu(situacao).map((k) => todasAsOpcoes[k]);
 
@@ -436,6 +445,19 @@ export function ServiceSelection() {
                     </Text>
                   </HStack>
                 )}
+                {/* DEC-1 (Andre, 01/10): a multa nao aparece na escolha — so no
+                    total, numa linha somada ao valor, com o link para a explicacao
+                    (cada multa: motivo, quem, quando). */}
+                {multas.length > 0 && (
+                  <HStack justifyContent="space-between" alignItems="center" testID="multas-pendentes">
+                    <TouchableOpacity onPress={() => setShowMultas(true)} testID="ver-multas">
+                      <Text size="sm" color="#FFFFFFB3" textDecorationLine="underline">
+                        Multa pendente · entenda
+                      </Text>
+                    </TouchableOpacity>
+                    <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">+ {reais(conta.totalMultas)}</Text>
+                  </HStack>
+                )}
                 {/* A regra da multa ANTES do toque que coloca na fila (CDC).
                     Ate 25/09 o app so falava de multa na hora de sair. */}
                 {vaiPraFila && (
@@ -450,28 +472,31 @@ export function ServiceSelection() {
           {selectedIds.length > 0 && (
             <VStack position="absolute" bottom={30} left={20} right={20} gap="$2">
               {/* Uma ação primária só (Andre 2026-08-01): loja aberta = entrar na
-                  fila; fechada = agendar (badge AGENDAR). O resto — solicitar
-                  corte, entrar por troca — vive no menu "Mais opções". */}
-              {principal === "corte" ? (
-                // Fora do expediente a fila esta fechada: nao ha "Entrar na fila"
-                // a oferecer. O pedido de corte deixa o profissional decidir
-                // (Andre, 07/09 e 24/09).
+                  fila; fechada = agendar (badge AGENDAR). Com a fila aberta o
+                  agendar vem logo abaixo, como segunda porta (C20). O resto —
+                  solicitar corte, entrar por troca — vive no menu "Mais opções". */}
+              {/* Fila fechada (DEC-6, 02/10): a principal e agendar e o pedido de
+                  corte fica no menu — nunca "Entrar na fila". */}
+              {principal === "fila" ? (
                 <Button
-                  title={isRequestingCut ? "Enviando pedido..." : `Solicitar corte · R$ ${totalPrice.toFixed(2)}`}
-                  testID="primary-cut"
-                  isDisabled={isRequestingCut}
-                  onPress={handleRequestCut}
-                />
-              ) : principal === "fila" ? (
-                <Button
-                  title={`Entrar na fila · R$ ${totalPrice.toFixed(2)}`}
+                  title={`Entrar na fila · R$ ${conta.total.toFixed(2)}`}
                   testID="primary-queue"
                   onPress={handleConfirm}
                 />
               ) : (
                 <Button
-                  title={`Agendar para depois · R$ ${totalPrice.toFixed(2)}`}
+                  title={`Agendar · R$ ${conta.total.toFixed(2)}`}
                   testID="primary-schedule"
+                  onPress={() => setShowSchedule(true)}
+                />
+              )}
+              {/* Fim de fila hibrido (C20): com a fila aberta, a outra porta —
+                  agendar um horario que a fila ainda nao alcancou. */}
+              {temSegundaPorta(situacao) && (
+                <Button
+                  title="Agendar um horário"
+                  variant="outline"
+                  testID="second-door-schedule"
                   onPress={() => setShowSchedule(true)}
                 />
               )}
@@ -502,9 +527,33 @@ export function ServiceSelection() {
         onClose={() => setShowMoreOptions(false)}
       />
 
+      {/* A explicacao das multas que entram no total (DEC-1). */}
+      <Modal visible={showMultas} transparent animationType="fade" onRequestClose={() => setShowMultas(false)}>
+        <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
+          <VStack bg="$white" borderRadius="$card" p="$6" gap="$3" testID="explicacao-multas">
+            <Text fontFamily="$heading" fontSize="$lg" color="$forest">Multa pendente</Text>
+            <Text size="sm" color="$brandTextSecondary">
+              Entra no valor do seu próximo atendimento, separada do serviço.
+            </Text>
+            {multas.map((m) => (
+              <HStack key={m.penaltyId} justifyContent="space-between" alignItems="flex-start" gap="$2">
+                <Text size="sm" color="$brandTextPrimary" flex={1}>{origemDaMulta(m)}</Text>
+                <Text fontFamily="$heading" fontSize="$sm" color="$forest">{reais(Number(m.amount) || 0)}</Text>
+              </HStack>
+            ))}
+            <Button title="Entendi" mt="$2" onPress={() => setShowMultas(false)} />
+          </VStack>
+        </Box>
+      </Modal>
       <ScheduleModal
         visible={showSchedule}
         onClose={() => setShowSchedule(false)}
+        professionalId={professionalId}
+        establishmentId={establishmentId}
+        serviceItemIds={selectedIds}
+        minutosDoServico={totalMinutes}
+        onPrecisaLogin={goToLoginAndComeBack}
+        onAgendado={() => navigation.navigate("home")}
       />
     </VStack>
   );

@@ -30,12 +30,13 @@ import { intentionsService } from "@services/intentionsService";
 import { swapOfferService } from "@services/swapOfferService";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { useQueueStore } from "@stores/queueStore";
-import { atendimentoAtivo, atendimentoSemAvaliar, filaDoAtendimento } from "@domain/queue/reconciliar";
+import { atendimentoAtivo, atendimentoSemAvaliar, filaDoAtendimento, podeAvaliar } from "@domain/queue/reconciliar";
 import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { groupIntentionsByDay } from "@domain/schedule/agenda";
 import { formatWaitTime, formatClockTime, STATUS_DESCONHECIDO, filaEncerrada } from "@domain/queue/types";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { usePilulaDeTopo } from "@hooks/usePilulaDeTopo";
+import { fs } from "@stores/fonteStore";
 
 // [marca-vupth] Cada status e um PAR (fundo, texto). Antes era so uma cor de
 // FUNDO com texto branco fixo por cima, e "Atrasado" (#F59E0B + branco) dava
@@ -240,7 +241,7 @@ export function Attendances() {
                   testID="avaliar-agora"
                 >
                   <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
-                    <Text fontFamily="$heading" fontSize={12} color="$forest">
+                    <Text fontFamily="$heading" fontSize={fs(12)} color="$forest">
                       Avaliar
                     </Text>
                   </Box>
@@ -253,7 +254,7 @@ export function Attendances() {
         <VStack mt="$6" px={16}>
           <Text
             fontFamily="$body"
-            fontSize={11}
+            fontSize={fs(11)}
             fontWeight="$bold"
             letterSpacing={0.8}
             color="$brandTextSecondary"
@@ -279,7 +280,7 @@ export function Attendances() {
                 <HStack alignItems="center" gap="$2.5">
                   <Users size={20} color="#163300" />
                   <VStack flex={1} gap="$0.5">
-                    <Text fontFamily="$display" fontSize={16} letterSpacing={-0.4} color="$forest">
+                    <Text fontFamily="$display" fontSize={fs(16)} letterSpacing={-0.4} color="$forest">
                       {activeQueue.establishmentName}
                     </Text>
                     <Text size="xs" color="$brandTextSecondary">
@@ -327,7 +328,7 @@ export function Attendances() {
           <VStack mt="$6" px={16}>
             <Text
               fontFamily="$body"
-              fontSize={11}
+              fontSize={fs(11)}
               fontWeight="$bold"
               letterSpacing={0.8}
               color="$brandTextSecondary"
@@ -371,7 +372,7 @@ export function Attendances() {
           <VStack mt="$6" px={16}>
             <Text
               fontFamily="$body"
-              fontSize={11}
+              fontSize={fs(11)}
               fontWeight="$bold"
               letterSpacing={0.8}
               color="$brandTextSecondary"
@@ -424,7 +425,7 @@ export function Attendances() {
         <VStack mt="$6" px={16}>
           <Text
             fontFamily="$body"
-            fontSize={11}
+            fontSize={fs(11)}
             fontWeight="$bold"
             letterSpacing={0.8}
             color="$brandTextSecondary"
@@ -450,7 +451,7 @@ export function Attendances() {
                   bg: "#F3F5F1",
                   fg: "#454745",
                 };
-                const canRate = a.status === "FINISHED" && !ratedIds.includes(a.id);
+                const canRate = podeAvaliar(a, ratedIds);
                 return (
                   <TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => setDetailFor(a)}>
                     <Box bg="$brandSurface" p="$4" borderRadius="$card">
@@ -508,7 +509,7 @@ export function Attendances() {
 
       <AttendanceDetailModal
         attendance={detailFor}
-        canRate={!!detailFor && detailFor.status === "FINISHED" && !ratedIds.includes(detailFor.id)}
+        canRate={!!detailFor && podeAvaliar(detailFor, ratedIds)}
         onClose={() => setDetailFor(null)}
         onRate={() => {
           if (detailFor) setRatingFor({ id: detailFor.id, name: detailFor.professionalName });

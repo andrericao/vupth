@@ -31,3 +31,20 @@ describe('a sessão na web sobrevive ao fechar a aba', () => {
     expect(headers).toMatch(/script-src 'self'/);
   });
 });
+
+describe('os cabeçalhos da web (melhorias de 02/10)', () => {
+  it('o GPS vale para a nossa origem — a busca por proximidade usa a localização', () => {
+    expect(headers).toMatch(/Permissions-Policy: geolocation=\(self\)/);
+    expect(headers).not.toMatch(/Permissions-Policy: geolocation=\(\)/);
+  });
+
+  it('os bundles com hash ficam um ano no cache; o index.html é conferido a cada visita', () => {
+    expect(headers).toMatch(/\/_expo\/static\/\*\n  Cache-Control: public, max-age=31536000, immutable/);
+    expect(headers).toMatch(/\/index\.html\n  Cache-Control: no-cache/);
+  });
+
+  it('o /* não leva Cache-Control — o Pages juntaria com o immutable', () => {
+    const blocoGeral = headers.split(/\n\/_expo/)[0];
+    expect(blocoGeral).not.toMatch(/^\s+Cache-Control:/m);
+  });
+});

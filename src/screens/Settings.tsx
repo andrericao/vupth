@@ -11,7 +11,7 @@ import {
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone } from "lucide-react-native";
+import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone, Palette } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -22,6 +22,7 @@ import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
 import { addressService, AddressResponse } from "@services/addressService";
+import { fs } from "@stores/fonteStore";
 
 function MenuItem({
   icon,
@@ -62,8 +63,8 @@ function MenuItem({
 // (Andre 2026-09-16: "o menu igual o do partner, com submenus").
 function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <VStack gap="$2">
-      <Text fontSize={11} fontWeight="$bold" letterSpacing={0.6} color="$brandTextSecondary">
+    <VStack gap="$2" testID={`grupo-${label}`}>
+      <Text fontSize={fs(11)} fontWeight="$bold" letterSpacing={0.6} color="$brandTextSecondary">
         {label.toUpperCase()}
       </Text>
       <Box borderRadius="$card" overflow="hidden" bg="$brandSurface">
@@ -191,12 +192,12 @@ export function Settings() {
       {isAuthenticated ? (
         <VStack bg="$forest" style={{ paddingTop: insets.top + 24 }} pb={32} px={16} gap="$3" alignItems="center">
           <Center width={88} height={88} borderRadius={44} bg="$brandGreen">
-            <Text fontFamily="$display" fontSize={32} color="$forest">
+            <Text fontFamily="$display" fontSize={fs(32)} color="$forest">
               {initials}
             </Text>
           </Center>
           <VStack gap="$1" alignItems="center">
-            <Text fontFamily="$display" fontSize={24} letterSpacing={-0.8} color="$white">
+            <Text fontFamily="$display" fontSize={fs(24)} letterSpacing={-0.8} color="$white">
               {nomeDoTopo}
             </Text>
             {user?.email && (
@@ -293,6 +294,22 @@ export function Settings() {
               />
             </VStack>
           </Box>
+        )}
+
+        {/* Aparencia (Andre, 26/09): tema e tamanho da fonte num submenu. So de
+            quem tem conta (Andre, 02/10): o visitante ve o convite — Entrar e
+            Criar conta —, os Termos e a versao no rodape, e nada mais. */}
+        {isAuthenticated && (
+        <VStack mt="$6">
+          <Grupo label="Aparência">
+            <MenuItem
+              icon={<Palette size={20} color="#163300" />}
+              label="Tema e tamanho da fonte"
+              onPress={() => navigation.navigate("aparencia")}
+              last
+            />
+          </Grupo>
+        </VStack>
         )}
 
         {/* O menu "Versão do app" (e os 7 toques do diagnostico) e so de quem

@@ -1,0 +1,19 @@
+# Do Inicio ate a loja de teste e o profissional dela. env: TAG, LOJA, PROF_ID
+# A busca filtra por pedaco do nome: digitar so "C<tag>" deixa o campo com um
+# texto diferente do nome inteiro, e o toque cai no card, nao no campo.
+appId: ${APP_ID}
+---
+- tapOn: "Início"
+- tapOn:
+    id: "busca-home"
+- eraseText: 30
+- inputText: "C${TAG}"
+- hideKeyboard
+- extendedWaitUntil:
+    visible: ${LOJA}
+    timeout: 30000
+- tapOn: ${LOJA}
+- extendedWaitUntil:
+    visible:
+      id: "professional-${PROF_ID}"
+    timeout: 30000

@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { VStack, HStack, Text, Center } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
+import { fs } from "@stores/fonteStore";
 
 type Props = {
   /**
@@ -116,8 +117,8 @@ export function ScreenHeader({ title, subtitle, action, onBack, root, ground }: 
           mt={5}
           numberOfLines={2}
           fontFamily="$display"
-          fontSize={26}
-          lineHeight={30}
+          fontSize={fs(26)}
+          lineHeight={fs(30)}
           letterSpacing={-1}
           color="$forest"
         >

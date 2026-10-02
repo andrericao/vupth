@@ -6,6 +6,7 @@ import { DURACAO_DO_CONVITE_MS, textoDoConvite } from "@domain/queue/conviteDeTr
 import { swapOfferService } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
 import { useConviteDeTrocaStore } from "@stores/conviteDeTrocaStore";
+import { fs } from "@stores/fonteStore";
 
 const FOREST = "#163300";
 const GREEN = "#9FE870";
@@ -122,7 +123,7 @@ export function ConviteDeTroca() {
               style={{
                 flex: 1,
                 fontFamily: "Archivo_800ExtraBold",
-                fontSize: 18,
+                fontSize: fs(18),
                 letterSpacing: -0.4,
                 color: FOREST,
               }}
@@ -139,7 +140,7 @@ export function ConviteDeTroca() {
               <X size={20} color={FOREST} />
             </Pressable>
           </View>
-          <Text style={{ fontFamily: "Inter_400Regular", fontSize: 14, lineHeight: 20, color: TEXT_SECONDARY }}>
+          <Text style={{ fontFamily: "Inter_400Regular", fontSize: fs(14), lineHeight: fs(20), color: TEXT_SECONDARY }}>
             {texto.mensagem}
           </Text>
           <BarraDoTempo duracaoMs={DURACAO_DO_CONVITE_MS} chave={atual.id} />
@@ -157,7 +158,7 @@ export function ConviteDeTroca() {
               opacity: aceitando ? 0.6 : 1,
             }}
           >
-            <Text style={{ fontFamily: "Archivo_700Bold", fontSize: 16, color: FOREST }}>
+            <Text style={{ fontFamily: "Archivo_700Bold", fontSize: fs(16), color: FOREST }}>
               {aceitando ? "Aceitando..." : "Aceitar"}
             </Text>
           </Pressable>

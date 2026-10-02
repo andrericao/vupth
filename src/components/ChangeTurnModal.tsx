@@ -6,6 +6,7 @@ import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
 import { formatClockTime } from "@domain/queue/types";
 import { SwapOfferDirection } from "@services/swapOfferService";
+import { fs } from "@stores/fonteStore";
 
 type Props = {
   visible: boolean;
@@ -118,8 +119,8 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
           <VStack gap="$1">
             <Text
               fontFamily="$display"
-              fontSize={22}
-              lineHeight={26}
+              fontSize={fs(22)}
+              lineHeight={fs(26)}
               letterSpacing={-0.6}
               color="$forest"
             >
@@ -134,7 +135,7 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
             <VStack key={grupo.titulo} gap="$2">
               <Text
                 fontFamily="$body"
-                fontSize={11}
+                fontSize={fs(11)}
                 fontWeight="$bold"
                 letterSpacing={0.8}
                 color="$brandTextSecondary"
@@ -180,7 +181,7 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
                     >
                       <Radio selected={isSelected} disabled={disabled} />
                       <VStack flex={1} gap="$0.5">
-                        <Text fontFamily="$heading" fontSize={14} color="$forest">
+                        <Text fontFamily="$heading" fontSize={fs(14)} color="$forest">
                           {option.title}
                         </Text>
                         <Text size="xs" color="$brandTextSecondary">

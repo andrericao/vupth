@@ -47,7 +47,10 @@ export type QueueNotificationType =
   | 'CUT_EXPIRED'
   // Troca aberta (C13): a oferta foi aceita — chega aos DOIS lados, cada um com
   // o próprio attendanceId; o app só recarrega a posição.
-  | 'SWAP_OFFER_ACCEPTED';
+  | 'SWAP_OFFER_ACCEPTED'
+  // Adiantado por desistencia (Backend d959214): alguem saiu e a vez adiantou —
+  // o cliente topa ou nao o horario novo (a mensagem traz o HH:MM).
+  | 'EARLIER_TURN_OFFERED';
 
 export interface QueueNotification {
   type: QueueNotificationType;

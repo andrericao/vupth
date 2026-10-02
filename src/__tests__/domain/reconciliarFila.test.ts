@@ -1,4 +1,4 @@
-import { atendimentoAtivo, atendimentoSemAvaliar, estaAtivo, filaDoAtendimento } from '@domain/queue/reconciliar';
+import { atendimentoAtivo, atendimentoSemAvaliar, estaAtivo, filaDoAtendimento, podeAvaliar } from '@domain/queue/reconciliar';
 import { ClientAttendance } from '@services/attendanceService';
 
 // O defeito que isto conserta (08/09, confirmado em 09/09): o cliente entrava
@@ -159,7 +159,31 @@ describe('atendimentoSemAvaliar', () => {
     expect(atendimentoSemAvaliar(hist, ['a1', 'a2'])).toBeNull();
   });
 
+  it('o rated do servidor (Backend 3925ec3) tira o avaliado da frente, mesmo sem a lista local', () => {
+    const hist = [
+      { ...att('a1', 'FINISHED', '2026-09-17T10:00:00Z'), rated: false },
+      { ...att('a2', 'FINISHED', '2026-09-19T10:00:00Z'), rated: true },
+    ] as never[];
+    expect(atendimentoSemAvaliar(hist, [])?.id).toBe('a1');
+  });
+
   it('fila em andamento não é convite para avaliar', () => {
     expect(atendimentoSemAvaliar([att('a3', 'SCHEDULED', '2026-09-20T10:00:00Z')] as never[], [])).toBeNull();
+  });
+});
+
+describe('podeAvaliar', () => {
+  const a = (status: string, rated?: boolean) => ({ id: 'a1', status, ...(rated === undefined ? {} : { rated }) }) as never;
+
+  it('só FINISHED sem nota', () => {
+    expect(podeAvaliar(a('FINISHED', false), [])).toBe(true);
+    expect(podeAvaliar(a('FINISHED', true), [])).toBe(false);
+    expect(podeAvaliar(a('CANCELLED', false), [])).toBe(false);
+  });
+
+  it('sem o campo (backend anterior) vale a lista local; a nota recém-enviada também', () => {
+    expect(podeAvaliar(a('FINISHED'), [])).toBe(true);
+    expect(podeAvaliar(a('FINISHED'), ['a1'])).toBe(false);
+    expect(podeAvaliar(a('FINISHED', false), ['a1'])).toBe(false);
   });
 });

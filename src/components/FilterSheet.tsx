@@ -3,6 +3,7 @@ import { VStack, HStack, Box, Text } from "@gluestack-ui/themed";
 
 import { ServiceType } from "@domain/establishment/types";
 import { SERVICE_TYPE_LABELS } from "@domain/establishment/serviceType";
+import { fs } from "@stores/fonteStore";
 
 export type FilterValue = ServiceType | "ALL";
 
@@ -55,7 +56,7 @@ export function FilterSheet({ visible, value, onSelect, onClose }: Props) {
           gap="$4"
         >
           <VStack gap="$1">
-            <Text fontFamily="$display" fontSize={20} letterSpacing={-0.5} color="$forest">
+            <Text fontFamily="$display" fontSize={fs(20)} letterSpacing={-0.5} color="$forest">
               Filtrar por categoria
             </Text>
             <Text size="sm" color="$brandTextSecondary">
@@ -86,7 +87,7 @@ export function FilterSheet({ visible, value, onSelect, onClose }: Props) {
                   >
                     <Text
                       fontFamily="$heading"
-                      fontSize={13}
+                      fontSize={fs(13)}
                       color={ativo ? "$brandGreen" : "$brandTextSecondary"}
                     >
                       {op.label}

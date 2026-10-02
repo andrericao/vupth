@@ -47,6 +47,8 @@ export interface ClientAttendance {
   startTime: string | null;
   endTime: string | null;
   durationInMinutes: number | null;
+  /** Ja tem nota (Backend 3925ec3). Ausente = backend anterior: vale o ratedStore. */
+  rated?: boolean;
 }
 
 export interface ClientAttendanceFilters {
@@ -110,6 +112,16 @@ export const attendanceService = {
         headers: { Authorization: `Bearer ${accessToken}` },
         params: { targetTime: targetTimeISO },
       },
+    );
+  },
+
+  // Adiantado por desistencia (Backend d959214): aceitar o horario novo. Ele
+  // vira o prometido e o atraso passa a contar dele. Recusar = nao chamar nada.
+  acceptEarlierTurn(attendanceId: string, accessToken: string) {
+    return api.patch<{ attendanceId: string; promisedTime: string }>(
+      `/attendances/${attendanceId}/accept-earlier-turn`,
+      null,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
     );
   },
 

@@ -41,3 +41,13 @@ export function agruparPorExpediente<T extends ComExpediente>(profissionais: T[]
 
   return { trabalhando, fora };
 }
+
+/**
+ * Fila FECHADA para novos (Andre, 26/09: o profissional trabalhando com a fila
+ * fechada ainda recebia cliente pelo app). Vale fora do expediente, e tambem
+ * com ele trabalhando e `accepting_new: false` — ele termina quem ja esta, mas
+ * nao recebe mais ninguem. Ausente conta como aberta (backend anterior).
+ */
+export function filaFechada(p?: { work_status?: WorkStatus | string | null; accepting_new?: boolean | null } | null): boolean {
+  return !estaNoExpediente(p?.work_status) || p?.accepting_new === false;
+}

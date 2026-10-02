@@ -11,6 +11,7 @@ import { validateLogin } from "@domain/auth/validateAuth";
 import { postAuthRoute } from "@domain/auth/postAuthRoute";
 import { useAuthStore } from "@stores/authStore";
 import { useTabBarInset } from "@hooks/useTabBarInset";
+import { fs } from "@stores/fonteStore";
 
 type RouteParams = {
   redirectTo?: string;
@@ -99,8 +100,8 @@ export function Login() {
         <VStack gap="$2" mt="$3">
           <Text
             fontFamily="$display"
-            fontSize={34}
-            lineHeight={36}
+            fontSize={fs(34)}
+            lineHeight={fs(36)}
             letterSpacing={-1.5}
             color="$forest"
           >
