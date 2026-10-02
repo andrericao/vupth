@@ -16,4 +16,11 @@ module.exports = defineConfig([
     // no app — fora do lint, como no Partner.
     ignores: ['coverage/', '.expo/', 'node_modules/', '.claude/', 'dist/', 'web-build/', '.maestro/'],
   },
+  {
+    // tools/ roda no Node (ex.: a catraca da cobertura), fora do app.
+    files: ['tools/**/*.js'],
+    languageOptions: {
+      globals: { __dirname: 'readonly', require: 'readonly', module: 'writable', process: 'readonly', console: 'readonly' },
+    },
+  },
 ]);
