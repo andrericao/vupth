@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Image } from "react-native";
+import { Image } from "expo-image";
 import { Center, Text } from "@gluestack-ui/themed";
 
 type Props = {
@@ -22,6 +22,9 @@ type Props = {
  * nada nesse caso — a linha fica com um buraco no lugar do avatar. Sem o
  * `onError` aqui, cada tela precisaria lembrar disso sozinha (e uma ja tinha
  * esquecido).
+ *
+ * `expo-image` (melhoria de 02/10): guarda a foto em disco — a `Image` do RN
+ * baixava de novo a cada tela, e a lista de lojas repete os mesmos avatares.
  */
 export function PlaceAvatar({
   name,
@@ -37,6 +40,9 @@ export function PlaceAvatar({
       <Image
         source={{ uri: photoUrl }}
         onError={() => setImageFailed(true)}
+        cachePolicy="memory-disk"
+        contentFit="cover"
+        transition={150}
         style={{ width: size, height: size, borderRadius: size / 2 }}
       />
     );

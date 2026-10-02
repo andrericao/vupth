@@ -1,4 +1,5 @@
-import { Image, Modal, Pressable } from "react-native";
+import { Modal, Pressable } from "react-native";
+import { Image } from "expo-image";
 import { X } from "lucide-react-native";
 
 /**
@@ -16,7 +17,7 @@ export function FotoAmpliada({ uri, onClose }: { uri: string | null; onClose: ()
         style={{ flex: 1, backgroundColor: "#000000E6", alignItems: "center", justifyContent: "center" }}
       >
         {uri && (
-          <Image source={{ uri }} resizeMode="contain" style={{ width: "100%", height: "80%" }} testID="foto-ampliada-imagem" />
+          <Image source={{ uri }} contentFit="contain" cachePolicy="memory-disk" style={{ width: "100%", height: "80%" }} testID="foto-ampliada-imagem" />
         )}
         <Pressable
           onPress={onClose}

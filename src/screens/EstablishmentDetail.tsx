@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { SectionList, TouchableOpacity, Alert, ImageBackground, Linking, Share, Pressable } from "react-native";
+import { SectionList, TouchableOpacity, Alert, Linking, Share, Pressable, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -349,16 +350,19 @@ export function EstablishmentDetail() {
             accessibilityLabel="Ver a foto da loja"
             testID="foto-da-loja"
           >
-          <ImageBackground
+          {/* expo-image (melhoria de 02/10): a foto fica em disco. Ele nao tem
+              ImageBackground — a foto ocupa o fundo e o cabecalho vem por cima. */}
+          <Image
             source={{ uri: establishment.urlImage! }}
-            style={{ flex: 1 }}
-            resizeMode="cover"
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+            cachePolicy="memory-disk"
             onError={() => setHeroFailed(true)}
-          >
-            <Box px={16}>
-              <ScreenHeader ground="foto" action={acoes} />
-            </Box>
-          </ImageBackground>
+            testID="foto-da-loja-imagem"
+          />
+          <Box px={16}>
+            <ScreenHeader ground="foto" action={acoes} />
+          </Box>
           </Pressable>
         </Box>
       ) : (

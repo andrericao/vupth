@@ -136,7 +136,8 @@ describe('EstablishmentDetail — Trabalhando e Fora', () => {
       ],
     });
     const { UNSAFE_getAllByType, getAllByText } = renderWithProviders(<EstablishmentDetail />);
-    const { Image } = jest.requireActual('react-native');
+    // expo-image desde 02/10 (cache em disco).
+    const { Image } = jest.requireActual('expo-image');
     const fotos = UNSAFE_getAllByType(Image).filter((i: { props: { source?: { uri?: string } } }) => i.props.source?.uri === 'https://cdn/a.jpg');
     expect(fotos).toHaveLength(1);
     expect(getAllByText(/^P/).length).toBeGreaterThan(0);
@@ -149,7 +150,8 @@ describe('EstablishmentDetail — Trabalhando e Fora', () => {
     const { getByTestId, queryByTestId } = renderWithProviders(<EstablishmentDetail />);
     expect(queryByTestId('foto-ampliada-imagem')).toBeNull();
     fireEvent.press(getByTestId('foto-a'));
-    expect(getByTestId('foto-ampliada-imagem').props.source).toEqual({ uri: 'https://cdn/a.jpg' });
+    // O expo-image entrega a fonte ao nativo como lista.
+    expect(getByTestId('foto-ampliada-imagem').props.source).toEqual([{ uri: 'https://cdn/a.jpg' }]);
     fireEvent.press(getByTestId('foto-ampliada'));
     expect(queryByTestId('foto-ampliada-imagem')).toBeNull();
   });
