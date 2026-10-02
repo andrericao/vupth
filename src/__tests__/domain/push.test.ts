@@ -1,5 +1,9 @@
 import {
   avisoDoPush,
+  tocouNoOk,
+  ACAO_OK,
+  CANAL_ALERTAS,
+  CATEGORIA_CIENCIA,
   mapPlatform,
   deviceDeletePath,
   notificationRoute,
@@ -148,5 +152,17 @@ describe('o push com o app aberto', () => {
     expect(avisoDoPush({ title: null, body: 'Oi' })).toEqual({ titulo: 'VUPTH', mensagem: 'Oi' });
     expect(avisoDoPush({ title: ' ', body: '' })).toBeNull();
     expect(avisoDoPush({})).toBeNull();
+  });
+});
+
+describe('notificação de ciência (app fechado)', () => {
+  it('o botão OK só fecha; o toque no corpo segue navegando', () => {
+    expect(tocouNoOk({ actionIdentifier: ACAO_OK })).toBe(true);
+    expect(tocouNoOk({ actionIdentifier: 'expo.modules.notifications.actions.DEFAULT' })).toBe(false);
+  });
+
+  it('ids combinados com o Backend e o Partner', () => {
+    expect(CATEGORIA_CIENCIA).toBe('CIENCIA');
+    expect(CANAL_ALERTAS).toBe('alertas');
   });
 });
