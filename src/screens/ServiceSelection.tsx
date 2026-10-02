@@ -287,7 +287,9 @@ export function ServiceSelection() {
       key: "cut",
       icon: Scissors,
       title: isRequestingCut ? "Enviando pedido..." : "Solicitar corte",
-      description: "A loja está fechada — o profissional tem 5 minutos para responder.",
+      description: profissionalFora
+        ? "A fila está fechada — peça o corte e o profissional tem 5 minutos para responder."
+        : "A loja está fechada — o profissional tem 5 minutos para responder.",
       disabled: isRequestingCut,
       onPress: handleRequestCut,
     },
@@ -300,7 +302,7 @@ export function ServiceSelection() {
       onPress: handleRequestSwap,
     },
   };
-  // Com o profissional Fora, o corte e a acao principal: o menu leva o agendar.
+  // Com a fila fechada (DEC-6) a principal e agendar e o menu leva so o corte.
   // "So agenda" nao tem menu — nao ha nada alem de agendar.
   const moreOptions: MoreOption[] = opcoesDoMenu(situacao).map((k) => todasAsOpcoes[k]);
 
@@ -473,17 +475,9 @@ export function ServiceSelection() {
                   fila; fechada = agendar (badge AGENDAR). Com a fila aberta o
                   agendar vem logo abaixo, como segunda porta (C20). O resto —
                   solicitar corte, entrar por troca — vive no menu "Mais opções". */}
-              {principal === "corte" ? (
-                // Fora do expediente a fila esta fechada: nao ha "Entrar na fila"
-                // a oferecer. O pedido de corte deixa o profissional decidir
-                // (Andre, 07/09 e 24/09).
-                <Button
-                  title={isRequestingCut ? "Enviando pedido..." : `Solicitar corte · R$ ${conta.total.toFixed(2)}`}
-                  testID="primary-cut"
-                  isDisabled={isRequestingCut}
-                  onPress={handleRequestCut}
-                />
-              ) : principal === "fila" ? (
+              {/* Fila fechada (DEC-6, 02/10): a principal e agendar e o pedido de
+                  corte fica no menu — nunca "Entrar na fila". */}
+              {principal === "fila" ? (
                 <Button
                   title={`Entrar na fila · R$ ${conta.total.toFixed(2)}`}
                   testID="primary-queue"

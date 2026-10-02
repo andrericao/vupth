@@ -1,6 +1,6 @@
 # O profissional fecha a fila (pela API, o papel do Partner): a loja mostra
 # "Fila fechada" no card dele — o app nao oferece entrar.
-# env: TAG, LOJA, PROF_ID, EMAIL_PROF
+# env: TAG, LOJA, PROF_ID, SERVICO_ID, EMAIL_PROF
 appId: ${APP_ID}
 ---
 - runScript:
@@ -14,3 +14,21 @@ appId: ${APP_ID}
     visible:
       id: "fila-fechada-${PROF_ID}"
     timeout: 90000
+
+# DEC-6 (02/10): na escolha do servico, so "Agendar" e "Mais opcoes" — o
+# pedido de corte mora no menu, e a troca (que poe na fila) nao aparece.
+- runFlow: ../apoio/escolher_servico.yaml
+- assertVisible:
+    id: "primary-schedule"
+- assertNotVisible:
+    id: "primary-queue"
+- assertNotVisible:
+    id: "second-door-schedule"
+- tapOn:
+    id: "more-options"
+- assertVisible:
+    id: "more-option-cut"
+- assertNotVisible:
+    id: "more-option-swap"
+- tapOn:
+    id: "more-options-close"

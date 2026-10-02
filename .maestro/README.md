@@ -28,7 +28,7 @@ dono e profissional na mesma conta, trabalhando, com um serviço, aberta das
 | 05 | `entra_e_sai_com_multa` | Entra na fila, aceita o aviso, sai com os dois toques e a confirmação — primeiro da fila, a saída gera multa |
 | 06 | `multa_no_total` | A multa da 05 aparece só no total, com a explicação (DEC-1) |
 | 07 | `agendar_pela_barra` | A segunda porta abre a barra de encaixe, agenda o primeiro horário livre e o agendamento aparece em Atendimentos (DEC-3) |
-| 08 | `fila_fechada` | O profissional fecha a fila (pela API): a loja mostra "Fila fechada" no card dele |
+| 08 | `fila_fechada` | O profissional fecha a fila (pela API): a loja mostra "Fila fechada" no card dele, e a escolha de serviços só oferece Agendar e, no menu, o pedido de corte (DEC-6) |
 
 `apoio/` tem os pedaços repetidos (abrir a loja, escolher o serviço, fechar
 um aviso) e `scripts/` as chamadas à API.
