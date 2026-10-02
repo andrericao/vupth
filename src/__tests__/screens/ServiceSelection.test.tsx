@@ -28,6 +28,11 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('@services/establishmentService', () => ({
   establishmentService: { getServiceItemsByProfessional: jest.fn() },
 }));
+// O snapshot da loja (WS) vem do cache do react-query, que a tela da loja
+// mantem; aqui nao ha loja atras — sem snapshot.
+jest.mock('@hooks/useEstablishments', () => ({
+  useSnapshotDaLoja: () => undefined,
+}));
 jest.mock('@services/swapOfferService', () => ({
   swapOfferService: { create: jest.fn() },
 }));
