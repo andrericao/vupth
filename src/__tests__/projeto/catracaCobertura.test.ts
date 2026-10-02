@@ -1,4 +1,6 @@
 // DEC-7 (Andre, 02/10): o minimo de cobertura so sobe.
+// A catraca e JS do Node (tools/), sem tipos: require, nao import.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { subirCatraca } = require('../../../tools/catraca-cobertura');
 
 const medido = (l: number, b: number, f: number, s: number) => ({
