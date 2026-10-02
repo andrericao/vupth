@@ -21,6 +21,7 @@ import { formatWaitTime, estimatedStartTime } from "@domain/queue/types";
 import { ServiceItemResponse } from "@domain/professional/types";
 import { outOfQueueOfferErrorMessage } from "@domain/queue/swap";
 import { establishmentService } from "@services/establishmentService";
+import { duracaoDoServico } from "@domain/professional/duracaoDoServico";
 import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
@@ -132,7 +133,7 @@ export function ServiceSelection() {
   const conta = contaComMultas(totalPrice, multas);
   const [showMultas, setShowMultas] = useState(false);
   const totalMinutes = selectedServices.reduce(
-    (sum, s) => sum + (s.weeklyAverageDurationInMinutes ?? 30),
+    (sum, s) => sum + duracaoDoServico(s),
     0,
   );
 
@@ -390,7 +391,7 @@ export function ServiceSelection() {
                           {service.customName}
                         </Text>
                         <Text size="xs" color="$brandTextSecondary">
-                          {service.weeklyAverageDurationInMinutes ?? 30} min
+                          {duracaoDoServico(service)} min
                         </Text>
                       </VStack>
                       <Text fontFamily="$heading" fontSize="$sm" color="$forest">

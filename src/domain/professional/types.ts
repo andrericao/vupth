@@ -57,5 +57,7 @@ export interface ServiceItemResponse {
   serviceItemType: string;
   customName: string;
   price: number;
+  /** Tempo configurado pelo profissional — o que o cliente ve (Backend d1165a2). */
+  estimatedMinutes?: number | null;
   weeklyAverageDurationInMinutes: number | null;
 }
