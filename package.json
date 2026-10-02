@@ -18,6 +18,7 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "coverageReporters": ["json", "json-summary", "lcov", "text", "clover"],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|@gluestack-ui/.*|@gluestack-style/.*|@legendapp/.*|lucide-react-native|nativewind|react-native-css-interop)"
     ],
