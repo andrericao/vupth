@@ -63,7 +63,7 @@ function MenuItem({
 // (Andre 2026-09-16: "o menu igual o do partner, com submenus").
 function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <VStack gap="$2">
+    <VStack gap="$2" testID={`grupo-${label}`}>
       <Text fontSize={fs(11)} fontWeight="$bold" letterSpacing={0.6} color="$brandTextSecondary">
         {label.toUpperCase()}
       </Text>
@@ -296,8 +296,10 @@ export function Settings() {
           </Box>
         )}
 
-        {/* Aparencia (Andre, 26/09): tema e tamanho da fonte num submenu. Vale
-            para visitante tambem: ler nao depende de conta. */}
+        {/* Aparencia (Andre, 26/09): tema e tamanho da fonte num submenu. So de
+            quem tem conta (Andre, 02/10): o visitante ve o convite — Entrar e
+            Criar conta —, os Termos e a versao no rodape, e nada mais. */}
+        {isAuthenticated && (
         <VStack mt="$6">
           <Grupo label="Aparência">
             <MenuItem
@@ -308,6 +310,7 @@ export function Settings() {
             />
           </Grupo>
         </VStack>
+        )}
 
         {/* O menu "Versão do app" (e os 7 toques do diagnostico) e so de quem
             tem conta (Andre, 26/09). O visitante ve a versao e a data no rodape. */}

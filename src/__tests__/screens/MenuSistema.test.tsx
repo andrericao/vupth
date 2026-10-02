@@ -71,6 +71,23 @@ describe('Perfil — menu em grupos, como o do partner', () => {
     expect(getByTestId('versao-visitante').props.children).toBe('Versão 1.0.0');
   });
 
+  // Andre, 02/10: o visitante vê só o convite. A Aparência ficava exposta,
+  // como o "Sobre o app" antes dela — o teste olha QUALQUER grupo, para o
+  // próximo menu novo não escapar do mesmo jeito.
+  it('VISITANTE: nenhum grupo de menu — só Criar conta, Entrar, os Termos e a versão', () => {
+    mockLogado = false;
+    const { queryAllByTestId, queryByText, getByText, getByTestId } = renderWithProviders(<Settings />);
+    expect(queryAllByTestId(/^grupo-/)).toHaveLength(0);
+    expect(queryByText('APARÊNCIA')).toBeNull();
+    expect(queryByText('Tema e tamanho da fonte')).toBeNull();
+    expect(getByText('Criar conta grátis')).toBeTruthy();
+    expect(getByText('Já tenho conta')).toBeTruthy();
+    expect(getByTestId('terms')).toBeTruthy();
+    expect(getByTestId('versao-visitante')).toBeTruthy();
+    expect(queryByText('Sair da conta')).toBeNull();
+    expect(queryByText('Deletar minha conta')).toBeNull();
+  });
+
   it('mostra os grupos Conta e Sistema', () => {
     const { getByText } = renderWithProviders(<Settings />);
     expect(getByText('CONTA')).toBeTruthy();
