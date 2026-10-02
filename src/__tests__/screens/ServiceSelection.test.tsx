@@ -238,11 +238,18 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
     });
 
-    it('a ação principal é "Solicitar corte" — não há "Entrar na fila"', async () => {
+    // DEC-6 (02/10): só "Agendar" e "Mais opções" — o corte mora no menu.
+    it('a ação principal é "Agendar"; o menu tem só o pedido de corte — nunca "Entrar na fila"', async () => {
       const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
       fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
-      expect(getByTestId('primary-cut')).toBeTruthy();
+      expect(getByTestId('primary-schedule')).toBeTruthy();
       expect(queryByTestId('primary-queue')).toBeNull();
+      expect(queryByTestId('primary-cut')).toBeNull();
+      expect(queryByTestId('second-door-schedule')).toBeNull();
+      fireEvent.press(getByTestId('more-options'));
+      expect(getByTestId('more-option-cut')).toBeTruthy();
+      expect(queryByTestId('more-option-swap')).toBeNull();
+      expect(queryByTestId('more-option-schedule')).toBeNull();
       // Nem posição, nem previsão, nem regra de saída de uma fila em que ele não entra.
       expect(queryByTestId('regra-da-multa')).toBeNull();
     });
@@ -254,8 +261,9 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
       const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
       fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+      fireEvent.press(getByTestId('more-options'));
       await act(async () => {
-        fireEvent.press(getByTestId('primary-cut'));
+        fireEvent.press(getByTestId('more-option-cut'));
       });
       const [, mensagem] = alerta.mock.calls[0] as [string, string];
       expect(mensagem).toMatch(/está fora agora/);

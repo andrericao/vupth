@@ -22,8 +22,9 @@ describe('a ação principal da escolha de serviços', () => {
     }
   });
 
-  it('fila: fora → corte; loja aberta → fila; loja fechada → agendar', () => {
-    expect(acaoPrincipal({ soAgenda: false, fora: true, lojaAberta: true })).toBe('corte');
+  // DEC-6 (02/10): com a fila fechada, Agendar — o corte vai para o menu.
+  it('fila: fora → agendar; loja aberta → fila; loja fechada → agendar', () => {
+    expect(acaoPrincipal({ soAgenda: false, fora: true, lojaAberta: true })).toBe('agendar');
     expect(acaoPrincipal({ soAgenda: false, fora: false, lojaAberta: true })).toBe('fila');
     expect(acaoPrincipal({ soAgenda: false, fora: false, lojaAberta: false })).toBe('agendar');
   });
@@ -38,8 +39,9 @@ describe('o menu "Mais opções"', () => {
     expect(opcoesDoMenu({ soAgenda: false, fora: false, lojaAberta: true })).toEqual(['swap']);
   });
 
-  it('profissional fora: agendar e troca; loja fechada: corte e troca', () => {
-    expect(opcoesDoMenu({ soAgenda: false, fora: true, lojaAberta: false })).toEqual(['schedule', 'swap']);
+  it('fila fechada (DEC-6): só o pedido de corte — a troca também põe na fila; loja fechada: corte e troca', () => {
+    expect(opcoesDoMenu({ soAgenda: false, fora: true, lojaAberta: true })).toEqual(['cut']);
+    expect(opcoesDoMenu({ soAgenda: false, fora: true, lojaAberta: false })).toEqual(['cut']);
     expect(opcoesDoMenu({ soAgenda: false, fora: false, lojaAberta: false })).toEqual(['cut', 'swap']);
   });
 });

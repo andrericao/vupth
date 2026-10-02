@@ -82,4 +82,5 @@ env:
       TAG: ${output.TAG}
       LOJA: ${output.LOJA}
       PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
       EMAIL_PROF: ${output.EMAIL_PROF}
