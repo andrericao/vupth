@@ -1,5 +1,6 @@
 import { mock } from './setup';
 import { attendanceService } from '../../services/attendanceService';
+import { penaltyService } from '../../services/penaltyService';
 
 describe('AttendanceService', () => {
   it('create deve enviar dados e Bearer token', async () => {
@@ -124,5 +125,18 @@ describe('AttendanceService', () => {
 
     expect(response.status).toBe(200);
     expect(response.data.status).toBe('SCHEDULED');
+  });
+});
+
+
+describe('penaltyService', () => {
+  it('lista as multas pendentes do cliente com o token', async () => {
+    mock.onGet('/clients/me/pending-penalties').reply((config) => {
+      expect(config.headers?.Authorization).toBe('Bearer tk');
+      return [200, { total: 5, penalties: [{ penaltyId: 'm1', type: 'LATE_CANCEL', amount: 5 }] }];
+    });
+    const { data } = await penaltyService.listPending('tk');
+    expect(data.total).toBe(5);
+    expect(data.penalties[0].penaltyId).toBe('m1');
   });
 });

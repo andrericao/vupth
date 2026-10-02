@@ -31,6 +31,10 @@ jest.mock('@services/establishmentService', () => ({
 jest.mock('@services/swapOfferService', () => ({
   swapOfferService: { create: jest.fn() },
 }));
+let mockMultas: unknown[] = [];
+jest.mock('@services/penaltyService', () => ({
+  penaltyService: { listPending: jest.fn(() => Promise.resolve({ data: { total: 0, penalties: mockMultas } })) },
+}));
 jest.mock('@services/cutRequestService', () => ({
   cutRequestService: { create: jest.fn() },
 }));
@@ -266,6 +270,31 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       expect(queryByTestId('more-options')).toBeNull();
       expect(queryByTestId('regra-da-multa')).toBeNull();
       expect(getByTestId('so-agenda')).toBeTruthy();
+    });
+  });
+
+  describe('multas pendentes na conta (Backend 389a152)', () => {
+    beforeEach(() => {
+      setRouteParams({ ...OPEN_PARAMS });
+      useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    });
+    afterEach(() => {
+      mockMultas = [];
+    });
+
+    it('com multa pendente, a conta mostra serviço, multa com a origem e o total', async () => {
+      mockMultas = [{ penaltyId: 'm1', type: 'LATE_CANCEL', amount: 5, originProfessionalName: 'Carlos' }];
+      const { findByTestId, getByTestId, getByText } = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+      expect(await findByTestId('multas-pendentes', {}, { timeout: 15000 })).toBeTruthy();
+      expect(getByText(/Multa — Saiu da fila · Carlos/)).toBeTruthy();
+      expect(getByTestId('total-com-multas').props.children).toBe('R$ 35,00');
+    });
+
+    it('sem multa, a conta fica como sempre', async () => {
+      const { findByTestId, queryByTestId } = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+      expect(queryByTestId('multas-pendentes')).toBeNull();
     });
   });
 });

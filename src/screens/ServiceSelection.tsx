@@ -28,6 +28,8 @@ import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { regraDaMulta } from "@domain/queue/saidaDaFila";
+import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
+import { useMultasPendentes } from "@hooks/useMultasPendentes";
 import { acaoPrincipal, opcoesDoMenu, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
@@ -124,6 +126,10 @@ export function ServiceSelection() {
 
   const selectedServices = services.filter((s) => selectedIds.includes(s.id));
   const totalPrice = selectedServices.reduce((sum, s) => sum + s.price, 0);
+  // Multas pendentes entram na conta, separadas do servico (Backend 389a152).
+  const { data: pendentes } = useMultasPendentes();
+  const multas = pendentes?.penalties ?? [];
+  const conta = contaComMultas(totalPrice, multas);
   const totalMinutes = selectedServices.reduce(
     (sum, s) => sum + (s.weeklyAverageDurationInMinutes ?? 30),
     0,
@@ -435,6 +441,25 @@ export function ServiceSelection() {
                       {estimatedStartTime(openedAt, estimatedWaitMinutes)}
                     </Text>
                   </HStack>
+                )}
+                {/* Cobrancas do app, separadas do servico, cada uma com a origem. */}
+                {multas.length > 0 && (
+                  <VStack gap="$1.5" pt="$1" testID="multas-pendentes">
+                    <HStack justifyContent="space-between" alignItems="center">
+                      <Text size="sm" color="#FFFFFFB3">Serviço</Text>
+                      <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">{reais(conta.servico)}</Text>
+                    </HStack>
+                    {multas.map((m) => (
+                      <HStack key={m.penaltyId} justifyContent="space-between" alignItems="flex-start" gap="$2">
+                        <Text size="xs" color="#FFFFFFB3" flex={1}>Multa — {origemDaMulta(m)}</Text>
+                        <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">{reais(Number(m.amount) || 0)}</Text>
+                      </HStack>
+                    ))}
+                    <HStack justifyContent="space-between" alignItems="center">
+                      <Text size="sm" color="#FFFFFF" fontWeight="$bold">Total no próximo atendimento</Text>
+                      <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen" testID="total-com-multas">{reais(conta.total)}</Text>
+                    </HStack>
+                  </VStack>
                 )}
                 {/* A regra da multa ANTES do toque que coloca na fila (CDC).
                     Ate 25/09 o app so falava de multa na hora de sair. */}
