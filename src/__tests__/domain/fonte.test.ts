@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-import { passoValido, rotuloDoPasso, PASSOS_DA_FONTE } from '@domain/fonte';
+import { passoValido, rotuloDoPasso, PASSOS_DA_FONTE, varsDaFonte } from '@domain/fonte';
 import { useFonteStore, fs } from '@stores/fonteStore';
 import { configComFonte, config } from '../../../config/gluestack-ui.config';
 
@@ -46,5 +46,27 @@ describe('o tema com a letra maior', () => {
     const base = config.tokens as { fontSizes: Record<string, number>; lineHeights: Record<string, number> };
     expect(t.fontSizes.xs).toBe(base.fontSizes.xs + 4);
     expect(t.lineHeights.sm).toBe(base.lineHeights.sm + 4);
+  });
+});
+
+// NativeWind (DEC-5): o tailwind.config.js le cada tamanho de uma variavel CSS.
+describe('as variaveis da escala para o NativeWind', () => {
+  it('no Normal, os valores do arquivo de design — os mesmos do Partner', () => {
+    const v = varsDaFonte(0);
+    expect(v['--text-sm']).toBe('14px');
+    expect(v['--lh-sm']).toBe('20px');
+    expect(v['--text-xxxl']).toBe('34px');
+    expect(v['--f13']).toBe('13px');
+  });
+
+  it('cada passo soma em px no tamanho e na altura de linha', () => {
+    const v = varsDaFonte(2);
+    expect(v['--text-sm']).toBe('16px');
+    expect(v['--lh-sm']).toBe('22px');
+    expect(v['--f13']).toBe('15px');
+  });
+
+  it('passo estranho volta ao Normal', () => {
+    expect(varsDaFonte(9)).toEqual(varsDaFonte(0));
   });
 });

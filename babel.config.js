@@ -1,7 +1,14 @@
 module.exports = function(api) {
   api.cache(true);
   return {
-    presets: ['babel-preset-expo'],
+    // NativeWind (DEC-5, migracao tela por tela como no Partner):
+    // jsxImportSource "nativewind" habilita a prop `className` em qualquer
+    // componente e o preset processa as classes. NAO afeta as telas que ainda
+    // usam o Gluestack v1 (props $token, nao className).
+    presets: [
+      ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
+      'nativewind/babel',
+    ],
     plugins: [
       [
         'module-resolver',

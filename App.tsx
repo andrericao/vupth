@@ -1,5 +1,7 @@
+import "./global.css"; // NativeWind (DEC-5): habilita as classes Tailwind
 import { useEffect, useMemo, useState } from "react";
-import { Alert, Platform } from "react-native";
+import { Alert, Platform, View } from "react-native";
+import { vars } from "nativewind";
 import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
 
@@ -28,6 +30,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 
 import { configComFonte } from "./config/gluestack-ui.config";
 import { useFonteStore } from "@stores/fonteStore";
+import { varsDaFonte } from "@domain/fonte";
 
 import { Routes } from "@routes/index";
 
@@ -119,6 +122,8 @@ export default function App() {
   // que os tamanhos escritos direto nas telas (fs) tambem acompanhem.
   const passoDaFonte = useFonteStore((s) => s.passo);
   const configDoTema = useMemo(() => configComFonte(passoDaFonte), [passoDaFonte]);
+  // O mesmo passo nas telas do NativeWind: as variaveis CSS da escala.
+  const estiloDaFonte = useMemo(() => vars(varsDaFonte(passoDaFonte)), [passoDaFonte]);
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
 
@@ -199,6 +204,7 @@ export default function App() {
     >
       <GluestackUIProvider config={configDoTema} key={passoDaFonte}>
         <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
+        <View style={[{ flex: 1 }, estiloDaFonte]}>
 
         <QueryScopedHooks />
         {/* Erro de render deixa de fechar o app e vira tela com mensagem. Fica
@@ -211,6 +217,7 @@ export default function App() {
             de a fonte carregar precisa aparecer do mesmo jeito. */}
         <DialogoVupth />
         <ConviteDeTroca />
+        </View>
       </GluestackUIProvider>
     </PersistQueryClientProvider>
   );
