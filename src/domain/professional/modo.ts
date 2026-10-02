@@ -23,11 +23,23 @@ export function acaoPrincipal({ soAgenda, fora, lojaAberta }: Situacao): AcaoPri
 }
 
 /**
- * O menu "Mais opcoes": tudo que nao e a acao principal. "So agenda" nao tem
- * nada alem de agendar — entrar por troca tambem e entrar na fila.
+ * Fim de fila hibrido (C20, Andre 05/08): com a fila aberta o cliente escolhe —
+ * entrar agora ou agendar. O agendar e a segunda porta, visivel ao lado da
+ * principal; nos outros casos nao ha segunda porta.
  */
-export function opcoesDoMenu({ soAgenda, fora, lojaAberta }: Situacao): OpcaoDoMenu[] {
+export function temSegundaPorta(situacao: Situacao): boolean {
+  return acaoPrincipal(situacao) === 'fila';
+}
+
+/**
+ * O menu "Mais opcoes": tudo que nao e a acao principal nem a segunda porta.
+ * "So agenda" nao tem nada alem de agendar — entrar por troca tambem e entrar
+ * na fila.
+ */
+export function opcoesDoMenu(situacao: Situacao): OpcaoDoMenu[] {
+  const { soAgenda, fora, lojaAberta } = situacao;
   if (soAgenda) return [];
+  if (temSegundaPorta(situacao)) return ['swap'];
   return lojaAberta || fora ? ['schedule', 'swap'] : ['cut', 'swap'];
 }
 

@@ -30,7 +30,7 @@ import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { regraDaMulta } from "@domain/queue/saidaDaFila";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
-import { acaoPrincipal, opcoesDoMenu, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
+import { acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
 // POUCOS lugares com sombra legitima: no Pencil o "Resumo" sobre `forest` e um
@@ -270,8 +270,8 @@ export function ServiceSelection() {
   }
 
   // Menu "Mais opções": tudo que não é a ação primária da tela. Com a loja
-  // fechada a primária é agendar, então o corte entra aqui; com ela aberta, a
-  // primária é entrar na fila e o agendar entra aqui. A troca vale nos dois.
+  // fechada a primária é agendar, então o corte entra aqui; com a fila aberta o
+  // agendar é a segunda porta, na tela (C20). A troca vale nos dois.
   const todasAsOpcoes: Record<OpcaoDoMenu, MoreOption> = {
     schedule: {
       key: "schedule",
@@ -470,8 +470,9 @@ export function ServiceSelection() {
           {selectedIds.length > 0 && (
             <VStack position="absolute" bottom={30} left={20} right={20} gap="$2">
               {/* Uma ação primária só (Andre 2026-08-01): loja aberta = entrar na
-                  fila; fechada = agendar (badge AGENDAR). O resto — solicitar
-                  corte, entrar por troca — vive no menu "Mais opções". */}
+                  fila; fechada = agendar (badge AGENDAR). Com a fila aberta o
+                  agendar vem logo abaixo, como segunda porta (C20). O resto —
+                  solicitar corte, entrar por troca — vive no menu "Mais opções". */}
               {principal === "corte" ? (
                 // Fora do expediente a fila esta fechada: nao ha "Entrar na fila"
                 // a oferecer. O pedido de corte deixa o profissional decidir
@@ -492,6 +493,16 @@ export function ServiceSelection() {
                 <Button
                   title={`Agendar · R$ ${conta.total.toFixed(2)}`}
                   testID="primary-schedule"
+                  onPress={() => setShowSchedule(true)}
+                />
+              )}
+              {/* Fim de fila hibrido (C20): com a fila aberta, a outra porta —
+                  agendar um horario que a fila ainda nao alcancou. */}
+              {temSegundaPorta(situacao) && (
+                <Button
+                  title="Agendar um horário"
+                  variant="outline"
+                  testID="second-door-schedule"
                   onPress={() => setShowSchedule(true)}
                 />
               )}

@@ -203,6 +203,15 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     );
   });
 
+  it('fila aberta: as duas portas na tela — entrar agora e agendar; o menu fica só com a troca (C20)', async () => {
+    const { getByTestId, queryByTestId } = await selectServiceAndOpenMenu();
+
+    expect(getByTestId('primary-queue')).toBeTruthy();
+    expect(getByTestId('second-door-schedule')).toBeTruthy();
+    expect(queryByTestId('more-option-schedule')).toBeNull();
+    expect(getByTestId('more-option-swap')).toBeTruthy();
+  });
+
   it('restaura a seleção que voltou do portão de auth (serviceItemIds na rota)', async () => {
     useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
     setRouteParams({ ...OPEN_PARAMS, serviceItemIds: ['s1'] });
