@@ -13,6 +13,7 @@ import {
   registrarComRetentativa,
 } from "@domain/push";
 import { pushService } from "@services/pushService";
+import { oferecerVezAdiantada } from "@utils/vezAdiantada";
 import { navigateFromNotification } from "@routes/navigationRef";
 import { useAuthStore } from "@stores/authStore";
 import { usePushDiagnosticsStore } from "@stores/pushDiagnosticsStore";
@@ -145,7 +146,14 @@ export function usePushRegistration() {
   useEffect(() => {
     try {
       const sub = Notifications.addNotificationReceivedListener((notificacao) => {
-        const aviso = avisoDoPush(notificacao.request.content);
+        const conteudo = notificacao.request.content;
+        // A vez adiantou: a pergunta com "Topo", e nao um aviso com OK.
+        const dados = (conteudo.data ?? {}) as { type?: string; attendanceId?: string };
+        if (dados.type === "EARLIER_TURN_OFFERED" && dados.attendanceId) {
+          oferecerVezAdiantada(dados.attendanceId, conteudo.body ?? "");
+          return;
+        }
+        const aviso = avisoDoPush(conteudo);
         if (aviso) Alert.alert(aviso.titulo, aviso.mensagem, [{ text: "OK" }]);
       });
       return () => sub.remove();

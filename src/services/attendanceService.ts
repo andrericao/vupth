@@ -113,6 +113,16 @@ export const attendanceService = {
     );
   },
 
+  // Adiantado por desistencia (Backend d959214): aceitar o horario novo. Ele
+  // vira o prometido e o atraso passa a contar dele. Recusar = nao chamar nada.
+  acceptEarlierTurn(attendanceId: string, accessToken: string) {
+    return api.patch<{ attendanceId: string; promisedTime: string }>(
+      `/attendances/${attendanceId}/accept-earlier-turn`,
+      null,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+  },
+
   // Item 16 — espera longa: desce a vez para o fim da fila (sem sair, sem strike).
   // No-op se já for o último. Erros: 403 (não é o dono), 400 (status != SCHEDULED).
   moveToEnd(attendanceId: string, accessToken: string) {
