@@ -166,6 +166,10 @@ describe('atendimentoSemAvaliar', () => {
     ] as never[];
     expect(atendimentoSemAvaliar(hist, [])?.id).toBe('a1');
   });
+
+  it('fila em andamento não é convite para avaliar', () => {
+    expect(atendimentoSemAvaliar([att('a3', 'SCHEDULED', '2026-09-20T10:00:00Z')] as never[], [])).toBeNull();
+  });
 });
 
 describe('podeAvaliar', () => {
@@ -181,9 +185,5 @@ describe('podeAvaliar', () => {
     expect(podeAvaliar(a('FINISHED'), [])).toBe(true);
     expect(podeAvaliar(a('FINISHED'), ['a1'])).toBe(false);
     expect(podeAvaliar(a('FINISHED', false), ['a1'])).toBe(false);
-  });
-
-  it('fila em andamento não é convite para avaliar', () => {
-    expect(atendimentoSemAvaliar([att('a3', 'SCHEDULED', '2026-09-20T10:00:00Z')] as never[], [])).toBeNull();
   });
 });
