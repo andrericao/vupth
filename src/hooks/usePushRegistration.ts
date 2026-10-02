@@ -8,9 +8,13 @@ import * as SecureStore from "expo-secure-store";
 import {
   acquireExpoPushToken,
   avisoDoPush,
+  ACAO_OK,
+  CANAL_ALERTAS,
+  CATEGORIA_CIENCIA,
   mapPlatform,
   notificationRoute,
   registrarComRetentativa,
+  tocouNoOk,
 } from "@domain/push";
 import { pushService } from "@services/pushService";
 import { oferecerVezAdiantada } from "@utils/vezAdiantada";
@@ -60,13 +64,34 @@ export function usePushRegistration() {
   useEffect(() => {
     if (Platform.OS === "android") {
       try {
+        // HIGH (Andre, 02/10): aparece no topo na hora, sem esperar. O Backend
+        // manda o push com prioridade alta; o canal precisa acompanhar.
         Notifications.setNotificationChannelAsync("default", {
           name: "default",
-          importance: Notifications.AndroidImportance.DEFAULT,
+          importance: Notifications.AndroidImportance.HIGH,
+        }).catch(() => {});
+        // ⚠️ O Android NAO muda a importancia de um canal que ja existe: quem
+        // instalou antes segue com o "default" em DEFAULT. O canal "alertas"
+        // nasce HIGH em todo aparelho — o Backend passa a mandar channelId "alertas".
+        Notifications.setNotificationChannelAsync(CANAL_ALERTAS, {
+          name: "Avisos",
+          importance: Notifications.AndroidImportance.HIGH,
         }).catch(() => {});
       } catch {
         // binário sem o módulo nativo de push.
       }
+    }
+  }, []);
+
+  // O botao "OK" na propria notificacao (app fechado): so fecha, nao abre o app.
+  // Aparece quando o push vem com categoryId "CIENCIA" (Backend).
+  useEffect(() => {
+    try {
+      Notifications.setNotificationCategoryAsync(CATEGORIA_CIENCIA, [
+        { identifier: ACAO_OK, buttonTitle: "OK", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+    } catch {
+      // binário sem o módulo nativo de push.
     }
   }, []);
 
@@ -166,6 +191,11 @@ export function usePushRegistration() {
   useEffect(() => {
     try {
       const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+        // "OK" só fecha a notificação — não navega.
+        if (tocouNoOk(response)) {
+          Notifications.dismissNotificationAsync(response.notification.request.identifier).catch(() => {});
+          return;
+        }
         const data = response.notification.request.content.data;
         navigateFromNotification(notificationRoute(data));
       });

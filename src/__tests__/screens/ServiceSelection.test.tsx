@@ -319,3 +319,16 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     });
   });
 });
+
+describe('ServiceSelection — tempo do serviço (tempo-do-servico)', () => {
+  it('mostra o tempo configurado pelo profissional, não a média da semana', async () => {
+    setRouteParams({ ...OPEN_PARAMS });
+    mockGetServices.mockResolvedValue({
+      data: [{ id: 's1', customName: 'Corte', price: 30, estimatedMinutes: 45, weeklyAverageDurationInMinutes: 30 }],
+    });
+    const { findByText, queryByText } = renderWithProviders(<ServiceSelection />);
+
+    expect(await findByText('45 min', {}, { timeout: 15000 })).toBeTruthy();
+    expect(queryByText('30 min')).toBeNull();
+  });
+});

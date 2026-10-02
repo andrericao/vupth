@@ -158,3 +158,19 @@ export function avisoDoPush(conteudo: { title?: string | null; body?: string | n
   if (!titulo && !mensagem) return null;
   return { titulo: titulo || 'VUPTH', mensagem };
 }
+
+/**
+ * Notificacao de ciencia com o app FECHADO (Andre, 02/10): a que so informa
+ * ganha o botao "OK" na propria notificacao, que so a fecha. Aparece quando o
+ * Backend manda `categoryId: "CIENCIA"` — mesmo id do Partner.
+ */
+export const CATEGORIA_CIENCIA = 'CIENCIA';
+export const ACAO_OK = 'OK';
+
+/** Canal Android HIGH novo, id "alertas" combinado com o Backend e o Partner (o "default" antigo nao sobe de importancia). */
+export const CANAL_ALERTAS = 'alertas';
+
+/** O toque foi no botao OK: so fecha a notificacao, nao abre tela. */
+export function tocouNoOk(resposta: { actionIdentifier: string }): boolean {
+  return resposta.actionIdentifier === ACAO_OK;
+}

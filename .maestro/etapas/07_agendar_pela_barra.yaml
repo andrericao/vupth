@@ -4,22 +4,32 @@ appId: ${APP_ID}
 ---
 - tapOn:
     id: "second-door-schedule"
+    label: "07.01 · toca em second-door-schedule"
 - extendedWaitUntil:
     visible:
       id: "barra-de-encaixe"
     timeout: 30000
+    label: "07.02 · espera barra-de-encaixe"
 - tapOn:
     id: "horario-.*"
     index: 0
+    label: "07.03 · toca em horario-.*"
 - tapOn:
     id: "confirmar-agendamento"
+    label: "07.04 · toca em confirmar-agendamento"
 - extendedWaitUntil:
     visible: "Agendado"
     timeout: 30000
-- runFlow: ../apoio/fechar_aviso.yaml
+    label: "07.05 · espera Agendado"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "07.06 · roda fechar_aviso"
 
 # Aparece em Atendimentos.
-- tapOn: "Atendimentos"
+- tapOn:
+    text: "Atendimentos"
+    label: "07.07 · toca em Atendimentos"
 - extendedWaitUntil:
     visible: ${PROF}
     timeout: 30000
+    label: "07.08 · espera ${PROF}"

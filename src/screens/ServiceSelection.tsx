@@ -21,6 +21,8 @@ import { formatWaitTime, estimatedStartTime } from "@domain/queue/types";
 import { ServiceItemResponse } from "@domain/professional/types";
 import { outOfQueueOfferErrorMessage } from "@domain/queue/swap";
 import { establishmentService } from "@services/establishmentService";
+import { comTempoAtual, duracaoDoServico } from "@domain/professional/duracaoDoServico";
+import { useSnapshotDaLoja } from "@hooks/useEstablishments";
 import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
@@ -92,7 +94,14 @@ export function ServiceSelection() {
   const addPendingSwap = usePendingSwapStore((s) => s.addPending);
   const guardarPedidoDeCorte = usePedidoDeCorteStore((s) => s.adicionar);
 
-  const [services, setServices] = useState<ServiceItemResponse[]>([]);
+  const [servicosLidos, setServices] = useState<ServiceItemResponse[]>([]);
+  // O profissional editou o tempo com a tela aberta: o snapshot da loja (WS)
+  // traz o novo e ele vale por cima do que foi lido ao abrir.
+  const snapshot = useSnapshotDaLoja(establishmentId);
+  const services = comTempoAtual(
+    servicosLidos,
+    snapshot?.find((p) => p.id === professionalId)?.service_items,
+  );
   const [selectedIds, setSelectedIds] = useState<string[]>(serviceItemIds ?? []);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -132,7 +141,7 @@ export function ServiceSelection() {
   const conta = contaComMultas(totalPrice, multas);
   const [showMultas, setShowMultas] = useState(false);
   const totalMinutes = selectedServices.reduce(
-    (sum, s) => sum + (s.weeklyAverageDurationInMinutes ?? 30),
+    (sum, s) => sum + duracaoDoServico(s),
     0,
   );
 
@@ -390,7 +399,7 @@ export function ServiceSelection() {
                           {service.customName}
                         </Text>
                         <Text size="xs" color="$brandTextSecondary">
-                          {service.weeklyAverageDurationInMinutes ?? 30} min
+                          {duracaoDoServico(service)} min
                         </Text>
                       </VStack>
                       <Text fontFamily="$heading" fontSize="$sm" color="$forest">

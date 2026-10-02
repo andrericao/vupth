@@ -9,26 +9,39 @@ appId: ${APP_ID}
       API: ${API}
       SENHA: ${SENHA}
       EMAIL_PROF: ${EMAIL_PROF}
-- runFlow: ../apoio/abrir_a_loja.yaml
+    label: "08.01 · roda fechar_fila"
+- runFlow:
+    file: ../apoio/abrir_a_loja.yaml
+    label: "08.02 · roda abrir_a_loja"
 - extendedWaitUntil:
     visible:
       id: "fila-fechada-${PROF_ID}"
     timeout: 90000
+    label: "08.03 · espera fila-fechada-${PROF_ID}"
 
 # DEC-6 (02/10): na escolha do servico, so "Agendar" e "Mais opcoes" — o
 # pedido de corte mora no menu, e a troca (que poe na fila) nao aparece.
-- runFlow: ../apoio/escolher_servico.yaml
+- runFlow:
+    file: ../apoio/escolher_servico.yaml
+    label: "08.04 · roda escolher_servico"
 - assertVisible:
     id: "primary-schedule"
+    label: "08.05 · vê primary-schedule"
 - assertNotVisible:
     id: "primary-queue"
+    label: "08.06 · não vê primary-queue"
 - assertNotVisible:
     id: "second-door-schedule"
+    label: "08.07 · não vê second-door-schedule"
 - tapOn:
     id: "more-options"
+    label: "08.08 · toca em more-options"
 - assertVisible:
     id: "more-option-cut"
+    label: "08.09 · vê more-option-cut"
 - assertNotVisible:
     id: "more-option-swap"
+    label: "08.10 · não vê more-option-swap"
 - tapOn:
     id: "more-options-close"
+    label: "08.11 · toca em more-options-close"

@@ -3,19 +3,28 @@
 # env: PROF_ID, SERVICO_ID
 appId: ${APP_ID}
 ---
-- runFlow: ../apoio/escolher_servico.yaml
+- runFlow:
+    file: ../apoio/escolher_servico.yaml
+    label: "04.01 · roda escolher_servico"
 - assertVisible:
     id: "primary-queue"
+    label: "04.02 · vê primary-queue"
 - assertVisible:
     id: "second-door-schedule"
+    label: "04.03 · vê second-door-schedule"
 - assertVisible:
     id: "regra-da-multa"
+    label: "04.04 · vê regra-da-multa"
 # O agendar saiu do "Mais opcoes": la sobra so a troca.
 - tapOn:
     id: "more-options"
+    label: "04.05 · toca em more-options"
 - assertVisible:
     id: "more-option-swap"
+    label: "04.06 · vê more-option-swap"
 - assertNotVisible:
     id: "more-option-schedule"
+    label: "04.07 · não vê more-option-schedule"
 - tapOn:
     id: "more-options-close"
+    label: "04.08 · toca em more-options-close"
