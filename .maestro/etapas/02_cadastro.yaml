@@ -2,33 +2,64 @@
 # env: EMAIL_CLIENTE, NOME_CLIENTE
 appId: ${APP_ID}
 ---
-- tapOn: "Criar conta grátis"
-- tapOn: "E-mail"
-- inputText: ${EMAIL_CLIENTE}
-- tapOn: "Crie uma senha"
-- inputText: ${SENHA}
-- tapOn: "Confirmar senha"
-- inputText: ${SENHA}
-- hideKeyboard
+- tapOn:
+    text: "Criar conta grátis"
+    label: "02.01 · toca em Criar conta grátis"
+- tapOn:
+    text: "E-mail"
+    label: "02.02 · toca em E-mail"
+- inputText:
+    text: ${EMAIL_CLIENTE}
+    label: "02.03 · digita ${EMAIL_CLIENTE}"
+- tapOn:
+    text: "Crie uma senha"
+    label: "02.04 · toca em Crie uma senha"
+- inputText:
+    text: ${SENHA}
+    label: "02.05 · digita ${SENHA}"
+- tapOn:
+    text: "Confirmar senha"
+    label: "02.06 · toca em Confirmar senha"
+- inputText:
+    text: ${SENHA}
+    label: "02.07 · digita ${SENHA}"
+- hideKeyboard:
+    label: "02.08 · fecha o teclado"
 - tapOn:
     id: "primary-signup"
+    label: "02.09 · toca em primary-signup"
 
 - extendedWaitUntil:
     visible:
       id: "complete-profile-name"
     timeout: 60000
+    label: "02.10 · espera complete-profile-name"
 - tapOn:
     id: "complete-profile-name"
-- inputText: ${NOME_CLIENTE}
-- hideKeyboard
+    label: "02.11 · toca em complete-profile-name"
+- inputText:
+    text: ${NOME_CLIENTE}
+    label: "02.12 · digita ${NOME_CLIENTE}"
+- hideKeyboard:
+    label: "02.13 · fecha o teclado"
 - tapOn:
     id: "complete-profile-save"
-- runFlow: ../apoio/fechar_aviso.yaml
+    label: "02.14 · toca em complete-profile-save"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "02.15 · roda fechar_aviso"
 
 # Logado, o Perfil mostra a conta — e a Aparencia volta.
-- tapOn: "Perfil"
+- tapOn:
+    text: "Perfil"
+    label: "02.16 · toca em Perfil"
 - extendedWaitUntil:
     visible: "CONTA"
     timeout: 15000
-- assertVisible: "APARÊNCIA"
-- assertNotVisible: "Criar conta grátis"
+    label: "02.17 · espera CONTA"
+- assertVisible:
+    text: "APARÊNCIA"
+    label: "02.18 · vê APARÊNCIA"
+- assertNotVisible:
+    text: "Criar conta grátis"
+    label: "02.19 · não vê Criar conta grátis"

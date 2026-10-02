@@ -2,7 +2,12 @@
 # env: TAG, LOJA, PROF_ID, PROF
 appId: ${APP_ID}
 ---
-- runFlow: ../apoio/abrir_a_loja.yaml
-- assertVisible: ${PROF}
+- runFlow:
+    file: ../apoio/abrir_a_loja.yaml
+    label: "03.01 · roda abrir_a_loja"
+- assertVisible:
+    text: ${PROF}
+    label: "03.02 · vê ${PROF}"
 - assertNotVisible:
     id: "fila-fechada-${PROF_ID}"
+    label: "03.03 · não vê fila-fechada-${PROF_ID}"
