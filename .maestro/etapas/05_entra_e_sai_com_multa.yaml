@@ -4,22 +4,34 @@ appId: ${APP_ID}
 ---
 - tapOn:
     id: "primary-queue"
+    label: "05.01 · toca em primary-queue"
 - extendedWaitUntil:
     visible: "Entendi"
     timeout: 60000
-- tapOn: "Entendi"
+    label: "05.02 · espera Entendi"
+- tapOn:
+    text: "Entendi"
+    label: "05.03 · toca em Entendi"
 - extendedWaitUntil:
     visible:
       id: "queue-position"
     timeout: 30000
+    label: "05.04 · espera queue-position"
 
 # Sair da fila: dois toques seguidos e a confirmacao com o valor.
 - tapOn:
     id: "leave-queue"
+    label: "05.05 · toca em leave-queue"
 - tapOn:
     id: "leave-queue"
+    label: "05.06 · toca em leave-queue"
 - extendedWaitUntil:
     visible: "Sair da fila?"
     timeout: 10000
-- tapOn: "Sim, sair"
-- runFlow: ../apoio/fechar_aviso.yaml
+    label: "05.07 · espera Sair da fila?"
+- tapOn:
+    text: "Sim, sair"
+    label: "05.08 · toca em Sim, sair"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.09 · roda fechar_aviso"

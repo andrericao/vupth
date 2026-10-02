@@ -4,16 +4,35 @@ appId: ${APP_ID}
 ---
 - tapOn:
     id: "onboarding-start"
-- runFlow: ../apoio/fechar_aviso.yaml
+    label: "01.01 · toca em onboarding-start"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "01.02 · roda fechar_aviso"
 
-- tapOn: "Perfil"
-- assertVisible: "Criar conta grátis"
-- assertVisible: "Já tenho conta"
+- tapOn:
+    text: "Perfil"
+    label: "01.03 · toca em Perfil"
+- assertVisible:
+    text: "Criar conta grátis"
+    label: "01.04 · vê Criar conta grátis"
+- assertVisible:
+    text: "Já tenho conta"
+    label: "01.05 · vê Já tenho conta"
 - assertVisible:
     id: "terms"
+    label: "01.06 · vê terms"
 - assertVisible:
     id: "versao-visitante"
-- assertNotVisible: "APARÊNCIA"
-- assertNotVisible: "SISTEMA"
-- assertNotVisible: "CONTA"
-- assertNotVisible: "Sair da conta"
+    label: "01.07 · vê versao-visitante"
+- assertNotVisible:
+    text: "APARÊNCIA"
+    label: "01.08 · não vê APARÊNCIA"
+- assertNotVisible:
+    text: "SISTEMA"
+    label: "01.09 · não vê SISTEMA"
+- assertNotVisible:
+    text: "CONTA"
+    label: "01.10 · não vê CONTA"
+- assertNotVisible:
+    text: "Sair da conta"
+    label: "01.11 · não vê Sair da conta"
