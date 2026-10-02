@@ -77,6 +77,21 @@ export function useProfessionalsWithQueue(establishmentId: string) {
 }
 
 /**
+ * So LE o snapshot da loja que a tela da loja (atras na pilha) mantem em dia
+ * pelo WS e pelo polling — nao busca nem faz polling por conta propria.
+ */
+export function useSnapshotDaLoja(establishmentId: string) {
+  return useQuery({
+    queryKey: ['professionals-with-queue', establishmentId],
+    queryFn: () =>
+      establishmentService
+        .getProfessionalsWithQueue(establishmentId)
+        .then((res) => res.data.professionals ?? []),
+    enabled: false,
+  }).data;
+}
+
+/**
  * Horário por dia da semana da loja (C22). Muda raramente — `staleTime` longo,
  * sem polling: quem precisa de "aberta AGORA" usa `is_open`, que vem na
  * listagem e na tela da loja.
