@@ -1,0 +1,41 @@
+# Pedido de corte enviado e respondido (fluxo critico, DEC-7). A fila do
+# profissional esta fechada (etapa 08): o cliente pede pelo menu "Mais opcoes",
+# o profissional aceita pela API e o app avisa e poe o cliente na fila.
+# env: TAG, LOJA, PROF_ID, SERVICO_ID, EMAIL_PROF
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/abrir_a_loja.yaml
+    label: "10.01 · roda abrir_a_loja"
+- runFlow:
+    file: ../apoio/escolher_servico.yaml
+    label: "10.02 · roda escolher_servico"
+- tapOn:
+    id: "more-options"
+    label: "10.03 · toca em more-options"
+- tapOn:
+    id: "more-option-cut"
+    label: "10.04 · toca em more-option-cut"
+- extendedWaitUntil:
+    visible: "Pedido enviado!.*"
+    timeout: 30000
+    label: "10.05 · espera Pedido enviado!"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "10.06 · roda fechar_aviso"
+- runScript:
+    file: ../scripts/responder_pedido.js
+    env:
+      API: ${API}
+      SENHA: ${SENHA}
+      EMAIL_PROF: ${EMAIL_PROF}
+      ACAO: accept
+    label: "10.07 · o profissional aceita (API)"
+# O app confere o historico a cada 15 s enquanto ha pedido esperando.
+- extendedWaitUntil:
+    visible: "Pedido aceito"
+    timeout: 60000
+    label: "10.08 · espera Pedido aceito"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "10.09 · roda fechar_aviso"

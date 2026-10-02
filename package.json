@@ -12,6 +12,7 @@
     "test:integration": "jest src/__tests__/integration",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "coverage:catraca": "node tools/catraca-cobertura.js",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "prepare": "git config core.hooksPath .githooks || true"
