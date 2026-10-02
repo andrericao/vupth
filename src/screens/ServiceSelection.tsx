@@ -530,6 +530,12 @@ export function ServiceSelection() {
       <ScheduleModal
         visible={showSchedule}
         onClose={() => setShowSchedule(false)}
+        professionalId={professionalId}
+        establishmentId={establishmentId}
+        serviceItemIds={selectedIds}
+        minutosDoServico={totalMinutes}
+        onPrecisaLogin={goToLoginAndComeBack}
+        onAgendado={() => navigation.navigate("home")}
       />
     </VStack>
   );

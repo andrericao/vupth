@@ -1,5 +1,6 @@
 import { api } from './api';
 import { AttendanceServiceLine } from './attendanceService';
+import type { AgendaPublica } from '@domain/schedule/encaixe';
 
 // Item ② (Agendar = INTENÇÃO). O cliente reserva um horário PRETENDIDO futuro
 // (`desiredTime`) que NÃO entra na fila viva agora — nasce com status INTENTION,
@@ -75,6 +76,12 @@ export const intentionsService = {
     return api.delete<void>(`/attendances/intentions/${intentionId}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
+  },
+
+  // Barra de encaixe (Backend 03fafb9): a agenda PUBLICA do profissional, sem
+  // token — o piso da fila de hoje e os horarios ja reservados, anonimos.
+  getPublicAgenda(professionalId: string) {
+    return api.get<AgendaPublica>(`/attendances/intentions/professional/${professionalId}`);
   },
 
   // "Meus agendamentos": intenções futuras do próprio cliente + um frame por

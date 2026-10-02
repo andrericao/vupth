@@ -1,53 +1,123 @@
-import { fireEvent } from '@testing-library/react-native';
+import { Alert } from 'react-native';
+import { act, fireEvent } from '@testing-library/react-native';
+
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ScheduleModal } from '@components/ScheduleModal';
-import { notifyComingSoon } from '@domain/comingSoon';
+import { intentionsService } from '@services/intentionsService';
+import { establishmentService } from '@services/establishmentService';
+import { useAuthStore } from '@stores/authStore';
+import { dataISO } from '@domain/establishment/horarios';
 
-jest.mock('@domain/comingSoon', () => ({ notifyComingSoon: jest.fn() }));
+// Barra de encaixe (Andre, 26/09): escolhe o dia, vê os horários livres, confirma.
 
-describe('ScheduleModal', () => {
-  const onClose = jest.fn();
+jest.mock('expo-secure-store');
+jest.mock('@services/intentionsService', () => ({
+  intentionsService: { getPublicAgenda: jest.fn(), create: jest.fn() },
+}));
+jest.mock('@services/establishmentService', () => ({ establishmentService: { getHours: jest.fn() } }));
+jest.setTimeout(90000);
 
-  beforeEach(() => jest.clearAllMocks());
+const amanha = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d;
+};
 
-  function renderModal() {
-    return renderWithProviders(<ScheduleModal visible onClose={onClose} />);
-  }
+function abrir(over: Record<string, unknown> = {}) {
+  const props = {
+    visible: true,
+    onClose: jest.fn(),
+    professionalId: 'p1',
+    establishmentId: 'e1',
+    serviceItemIds: ['s1'],
+    minutosDoServico: 60,
+    onPrecisaLogin: jest.fn(),
+    onAgendado: jest.fn(),
+    ...over,
+  };
+  return { props, ...renderWithProviders(<ScheduleModal {...(props as never)} />) };
+}
 
-  it('mostra o seletor de dia (Hoje) em vez do split hoje/outro-dia', () => {
-    const { getByText, queryByText } = renderModal();
-    expect(getByText('Hoje')).toBeTruthy();
-    expect(queryByText('Para hoje, mais tarde')).toBeNull();
-    expect(queryByText('Para outro dia')).toBeNull();
+describe('ScheduleModal — barra de encaixe', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useAuthStore.setState({ accessToken: 'tk' });
+    (intentionsService.getPublicAgenda as jest.Mock).mockResolvedValue({ data: { frame: null, blocks: [] } });
+    // Amanhã aberto das 09:00 às 11:00.
+    (establishmentService.getHours as jest.Mock).mockResolvedValue({
+      data: { configured: true, weekly: [], exceptions: [], upcoming: [{ date: dataISO(amanha()), day: 'MONDAY', closed: false, opens: '09:00', closes: '11:00' }] },
+    });
   });
 
-  it('sem dia escolhido, "Confirmar" não dispara nada', () => {
-    const { getByText } = renderModal();
-    fireEvent.press(getByText('Confirmar'));
-    expect(notifyComingSoon).not.toHaveBeenCalled();
-    expect(onClose).not.toHaveBeenCalled();
+  it('sem horário escolhido, "Confirmar" não agenda', async () => {
+    const { getByTestId } = abrir();
+    await act(async () => {});
+    fireEvent.press(getByTestId('confirmar-agendamento'));
+    expect(intentionsService.create).not.toHaveBeenCalled();
   });
 
-  it('escolher "Hoje" e confirmar conta agendar_hoje e fecha (barra em breve)', () => {
-    const { getByText } = renderModal();
-    fireEvent.press(getByText('Hoje'));
-    fireEvent.press(getByText('Confirmar'));
-    expect(notifyComingSoon).toHaveBeenCalledWith('agendar_hoje');
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it('escolher outro dia (2ª pílula) conta agendar_outro_dia', () => {
-    const { getByText, getAllByRole } = renderModal();
-    // Ordem de render: pílulas de dia primeiro; [1] = amanhã.
+  it('escolhe amanhã, vê os horários em que o serviço cabe, escolhe e confirma', async () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    (intentionsService.create as jest.Mock).mockResolvedValue({ data: {} });
+    const { getAllByRole, findByTestId, getByTestId, queryByTestId, props } = abrir();
+    await act(async () => {});
     fireEvent.press(getAllByRole('button')[1]);
-    fireEvent.press(getByText('Confirmar'));
-    expect(notifyComingSoon).toHaveBeenCalledWith('agendar_outro_dia');
+    expect(await findByTestId('horario-09:00')).toBeTruthy();
+    expect(getByTestId('horario-10:00')).toBeTruthy();
+    expect(queryByTestId('horario-10:30')).toBeNull();
+    fireEvent.press(getByTestId('horario-09:30'));
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    const [dados, token] = (intentionsService.create as jest.Mock).mock.calls[0];
+    expect(token).toBe('tk');
+    expect(dados.professionalId).toBe('p1');
+    expect(dados.serviceItemIds).toEqual(['s1']);
+    expect(new Date(dados.desiredTime).getHours()).toBe(9);
+    expect(alerta).toHaveBeenCalledWith('Agendado', expect.stringMatching(/às 09:30/));
+    expect(props.onAgendado).toHaveBeenCalled();
+    alerta.mockRestore();
   });
 
-  it('"Cancelar" só fecha, sem contar', () => {
-    const { getByText } = renderModal();
+  it('a recusa do servidor vira a frase dela', async () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    (intentionsService.create as jest.Mock).mockRejectedValue({ response: { status: 409, data: { code: 'PROFESSIONAL_AGENDA_FULL' } } });
+    const { getAllByRole, findByTestId, getByTestId } = abrir();
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    fireEvent.press(await findByTestId('horario-09:00'));
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    expect(alerta).toHaveBeenCalledWith('Não foi possível agendar', expect.stringMatching(/ocupado/));
+    alerta.mockRestore();
+  });
+
+  it('visitante: confirmar leva ao login, sem agendar', async () => {
+    useAuthStore.setState({ accessToken: null });
+    const { getAllByRole, findByTestId, getByTestId, props } = abrir();
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    fireEvent.press(await findByTestId('horario-09:00'));
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    expect(props.onPrecisaLogin).toHaveBeenCalled();
+    expect(intentionsService.create).not.toHaveBeenCalled();
+  });
+
+  it('dia sem horário da loja: diz que a loja não informou', async () => {
+    (establishmentService.getHours as jest.Mock).mockResolvedValue({ data: { configured: false, weekly: [], exceptions: [], upcoming: [] } });
+    const { getAllByRole, findByTestId } = abrir();
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    expect((await findByTestId('sem-horario')).props.children).toMatch(/não informou/);
+  });
+
+  it('"Cancelar" só fecha', async () => {
+    const { getByText, props } = abrir();
+    await act(async () => {});
     fireEvent.press(getByText('Cancelar'));
-    expect(onClose).toHaveBeenCalledTimes(1);
-    expect(notifyComingSoon).not.toHaveBeenCalled();
+    expect(props.onClose).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,40 +1,97 @@
-import { useState } from "react";
-import { Modal } from "react-native";
-import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
-import { Calendar } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { Alert, Modal, ScrollView, TouchableOpacity } from "react-native";
+import { VStack, HStack, Box, Text, Heading, Spinner } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
 import { DaySelector } from "@components/DaySelector";
 import { floatingShadow } from "@utils/styles";
-import { notifyComingSoon } from "@domain/comingSoon";
-import { isSameDay } from "@domain/schedule/days";
+import { horariosDoDia, mensagemDoAgendamento, AgendaPublica } from "@domain/schedule/encaixe";
+import { formatClockTime } from "@domain/queue/types";
+import { HorariosDaLoja } from "@domain/establishment/horarios";
+import { intentionsService } from "@services/intentionsService";
+import { establishmentService } from "@services/establishmentService";
+import { useAuthStore } from "@stores/authStore";
 
 type Props = {
   visible: boolean;
   onClose: () => void;
+  professionalId?: string;
+  establishmentId?: string;
+  serviceItemIds?: string[];
+  /** Duracao somada dos servicos escolhidos — o horario tem de caber inteiro. */
+  minutosDoServico?: number;
+  /** Visitante: o agendar passa pelo login (a selecao volta com ele). */
+  onPrecisaLogin?: () => void;
+  onAgendado?: () => void;
 };
 
-// "Agendar atendimento" = INTENÇÃO (Item ②, decisão Andre 2026-07-15). UX: SEM o
-// split "hoje/outro dia" — um único fluxo mostra o seletor de dia ("Hoje" + números
-// dos dias) e, escolhido o dia, a barra de encaixe daquele dia.
-// ⏳ A barra de encaixe AGUARDA o backend expor projectedQueueEnd/closing_time/blocos
-// ocupados. Enquanto isso, ao confirmar o dia mostramos "em breve" e contamos o toque
-// (comingSoon). Ao ligar: trocar o notifyComingSoon pela barra de encaixe → cria a
-// INTENÇÃO via intentionsService.create({ professionalId, serviceItemIds, desiredTime }).
-export function ScheduleModal({ visible, onClose }: Props) {
+// "Agendar" = INTENCAO (Item ②). Escolhe o dia, ve a BARRA DE ENCAIXE daquele
+// dia — os horarios em que o servico cabe — e confirma (Andre, 26/09: "temos que
+// incluir essa funcionalidade"). Os horarios vem da agenda publica do
+// profissional (piso da fila e reservados, anonimos) e do horario da loja.
+export function ScheduleModal({
+  visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado,
+}: Props) {
+  const accessToken = useAuthStore((s) => s.accessToken);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [horario, setHorario] = useState<Date | null>(null);
+  const [agenda, setAgenda] = useState<AgendaPublica | null>(null);
+  const [horariosDaLoja, setHorariosDaLoja] = useState<HorariosDaLoja | null>(null);
+  const [enviando, setEnviando] = useState(false);
+  const [agora, setAgora] = useState(0);
+
+  // A agenda e o horario da loja: uma leitura ao abrir.
+  useEffect(() => {
+    if (!visible || !professionalId || !establishmentId) return;
+    let vivo = true;
+    Promise.all([
+      intentionsService.getPublicAgenda(professionalId).then((r) => r.data).catch(() => null),
+      establishmentService.getHours(establishmentId).then((r) => r.data).catch(() => null),
+    ]).then(([a, h]) => {
+      if (!vivo) return;
+      setAgenda(a);
+      setHorariosDaLoja(h);
+      setAgora(Date.now());
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [visible, professionalId, establishmentId]);
 
   function close() {
     setSelectedDate(null);
+    setHorario(null);
+    // Ao reabrir, le de novo: "agora" zerado = carregando.
+    setAgora(0);
     onClose();
   }
 
-  function confirmDay() {
-    if (!selectedDate) return;
-    // Enquanto a barra de encaixe não existe, contabiliza a intenção do cliente
-    // (hoje vs outro dia) pra priorização e avisa "em breve".
-    notifyComingSoon(isSameDay(selectedDate, new Date()) ? "agendar_hoje" : "agendar_outro_dia");
-    close();
+  const doDia = selectedDate && agora
+    ? horariosDoDia({ dia: selectedDate, agoraMs: agora, horarios: horariosDaLoja, agenda, minutosDoServico })
+    : null;
+
+  async function confirmar() {
+    if (!horario || !professionalId) return;
+    if (!accessToken) {
+      close();
+      onPrecisaLogin?.();
+      return;
+    }
+    setEnviando(true);
+    try {
+      await intentionsService.create(
+        { professionalId, serviceItemIds, desiredTime: horario.toISOString() },
+        accessToken,
+      );
+      const quando = `${String(horario.getDate()).padStart(2, "0")}/${String(horario.getMonth() + 1).padStart(2, "0")} às ${formatClockTime(horario)}`;
+      close();
+      Alert.alert("Agendado", `Seu horário ficou para ${quando}. Ele aparece em Atendimentos.`);
+      onAgendado?.();
+    } catch (error: any) {
+      Alert.alert("Não foi possível agendar", mensagemDoAgendamento(error?.response?.status, error?.response?.data?.code));
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -42,44 +99,61 @@ export function ScheduleModal({ visible, onClose }: Props) {
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
         <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
-            Agendar atendimento
+            Agendar
           </Heading>
           <Text size="sm" color="$brandTextSecondary" mt="$1">
-            Não vai dar para esperar na fila agora? Escolha o dia para manifestar
-            sua intenção.
+            Escolha o dia e o horário.
           </Text>
 
           <Box mt="$5">
-            <DaySelector selectedDate={selectedDate} onSelect={setSelectedDate} />
+            <DaySelector
+              selectedDate={selectedDate}
+              onSelect={(d) => {
+                setSelectedDate(d);
+                setHorario(null);
+              }}
+            />
           </Box>
 
           {selectedDate != null && (
-            <Box
-              bg="$greenTint"
-              borderRadius="$xl"
-              px="$4"
-              py="$3"
-              mt="$4"
-            >
-              <HStack alignItems="center" gap="$2">
-                <Calendar size={18} color="#163300" />
-                {/* [contraste] Era `$gray500` (#DDDEDF) sobre `$greenTint`
-                    (#E2F6D5) — dois tons claríssimos, texto praticamente
-                    invisível. Sobre greenTint o par da marca é `$forest`,
-                    o mesmo do ícone ao lado. */}
-                <Text size="sm" color="$forest" flex={1}>
-                  A escolha do horário deste dia (barra de encaixe) chega em breve.
+            <Box mt="$4" testID="barra-de-encaixe">
+              {!doDia ? (
+                <HStack gap="$2" alignItems="center">
+                  <Spinner color="$forest" />
+                  <Text size="sm" color="$brandTextSecondary">Buscando horários...</Text>
+                </HStack>
+              ) : doDia.tipo === "livres" ? (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                  {doDia.horarios.map((h) => {
+                    const ativo = horario?.getTime() === h.getTime();
+                    return (
+                      <TouchableOpacity key={h.getTime()} onPress={() => setHorario(h)} testID={`horario-${formatClockTime(h)}`}>
+                        <Box bg={ativo ? "$forest" : "$brandSurface"} borderRadius="$full" px={14} py={8}>
+                          <Text fontWeight="$bold" color={ativo ? "$brandGreen" : "$forest"}>{formatClockTime(h)}</Text>
+                        </Box>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              ) : (
+                <Text size="sm" color="$brandTextSecondary" testID="sem-horario">
+                  {doDia.tipo === "fechada"
+                    ? "A loja não abre neste dia."
+                    : doDia.tipo === "cheio"
+                      ? "Não há horário livre para este serviço neste dia."
+                      : "A loja ainda não informou o horário deste dia."}
                 </Text>
-              </HStack>
+              )}
             </Box>
           )}
 
           <Button
-            title="Confirmar"
+            title={enviando ? "Agendando..." : "Confirmar"}
             mt="$5"
-            isDisabled={selectedDate == null}
-            opacity={selectedDate == null ? 0.5 : 1}
-            onPress={confirmDay}
+            isDisabled={horario == null || enviando}
+            opacity={horario == null ? 0.5 : 1}
+            onPress={confirmar}
+            testID="confirmar-agendamento"
           />
           <Button title="Cancelar" variant="outline" mt="$3" onPress={close} />
         </VStack>
