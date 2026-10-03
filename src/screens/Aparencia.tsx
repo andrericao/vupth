@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Alert, Modal, Pressable, TouchableOpacity } from "react-native";
-import { VStack, HStack, Box, Text, ScrollView } from "@gluestack-ui/themed";
+import { Alert, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { ChevronRight, Moon, Type } from "lucide-react-native";
 
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -22,15 +21,15 @@ function Linha({ icone, rotulo, valor, onPress, testID, last }: {
 }) {
   return (
     <TouchableOpacity onPress={onPress} testID={testID}>
-      <HStack px={16} py={15} gap="$3" alignItems="center">
+      <View className="flex-row px-4 py-[15px] gap-3 items-center">
         {icone}
-        <VStack flex={1} gap="$0.5">
-          <Text size="xs" color="$brandTextSecondary">{rotulo}</Text>
-          <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary">{valor}</Text>
-        </VStack>
+        <View className="flex-1 gap-0.5">
+          <Text className="font-body text-xs text-vupth-textSecondary">{rotulo}</Text>
+          <Text className="font-body text-sm font-semibold text-vupth-textPrimary">{valor}</Text>
+        </View>
         <ChevronRight size={18} color="#454745" />
-      </HStack>
-      {!last && <Box height={1} bg="$brandBorder" />}
+      </View>
+      {!last && <View className="h-px bg-vupth-border" />}
     </TouchableOpacity>
   );
 }
@@ -51,11 +50,13 @@ export function Aparencia() {
     if (rascunho !== passo) await escolher(rascunho);
   }
 
+  // NativeWind (DEC-5): mesmas medidas do v1. A amostra segue com o tamanho
+  // em `style` — ela mostra o tamanho que VAI ficar, fora da escala atual.
   return (
-    <ScrollView flex={1} bg="$brandBackground" contentContainerStyle={{ flexGrow: 1 }}>
-      <VStack px={16} pb={30}>
+    <ScrollView className="flex-1 bg-vupth-background" contentContainerStyle={{ flexGrow: 1 }}>
+      <View className="px-4 pb-[30px]">
         <ScreenHeader title="Aparência" subtitle="Tema e tamanho da fonte." />
-        <Box mt="$6" borderRadius="$card" overflow="hidden" bg="$brandSurface">
+        <View className="mt-6 rounded-card overflow-hidden bg-vupth-surface">
           <Linha
             icone={<Moon size={20} color="#163300" />}
             rotulo="Tema"
@@ -71,8 +72,8 @@ export function Aparencia() {
             onPress={abrirFonte}
             last
           />
-        </Box>
-      </VStack>
+        </View>
+      </View>
 
       <Modal visible={janela} transparent animationType="fade" onRequestClose={() => setJanela(false)}>
         <Pressable
@@ -80,18 +81,22 @@ export function Aparencia() {
           style={{ flex: 1, backgroundColor: "#16330073", justifyContent: "center", paddingHorizontal: 24 }}
         >
           <Pressable onPress={() => {}} testID="janela-da-fonte">
-            <VStack bg="$white" borderRadius={20} p={22} gap="$4">
-              <Text fontFamily="$heading" fontSize={18} color="$forest">Tamanho da fonte</Text>
+            <View className="bg-white rounded-card p-[22px] gap-4">
+              <Text className="font-heading text-lg text-vupth-forest">Tamanho da fonte</Text>
               {/* A demonstracao: o tamanho que vai ficar, antes de salvar. */}
-              <Box bg="$brandSurface" borderRadius={14} p={14} testID="amostra-da-fonte">
-                <Text fontFamily="$heading" fontSize={AMOSTRA_TITULO + rascunho} color="$forest" testID="amostra-titulo">
+              <View className="bg-vupth-surface rounded-[14px] p-[14px]" testID="amostra-da-fonte">
+                <Text
+                  className="font-heading text-vupth-forest"
+                  style={{ fontSize: AMOSTRA_TITULO + rascunho }}
+                  testID="amostra-titulo"
+                >
                   Barbearia do Carlos
                 </Text>
-                <Text fontSize={AMOSTRA_TEXTO + rascunho} color="$brandTextSecondary" mt="$1">
+                <Text className="font-body text-vupth-textSecondary mt-1" style={{ fontSize: AMOSTRA_TEXTO + rascunho }}>
                   Você é o 2º da fila — por volta de 14:30.
                 </Text>
-              </Box>
-              <HStack gap="$2">
+              </View>
+              <View className="flex-row gap-2">
                 {PASSOS_DA_FONTE.map((p) => (
                   <TouchableOpacity
                     key={p}
@@ -102,17 +107,17 @@ export function Aparencia() {
                     testID={`fonte-${p}`}
                     style={{ flex: 1 }}
                   >
-                    <Box bg={rascunho === p ? "$forest" : "$brandSurface"} borderRadius="$full" py={8} alignItems="center">
-                      <Text fontSize={13} fontWeight="$bold" color={rascunho === p ? "$brandGreen" : "$forest"}>
+                    <View className={`rounded-full py-2 items-center ${rascunho === p ? "bg-vupth-forest" : "bg-vupth-surface"}`}>
+                      <Text className={`font-body text-f13 font-bold ${rascunho === p ? "text-vupth-green" : "text-vupth-forest"}`}>
                         {rotuloDoPasso(p)}
                       </Text>
-                    </Box>
+                    </View>
                   </TouchableOpacity>
                 ))}
-              </HStack>
+              </View>
               <Button title="Salvar" onPress={salvar} testID="salvar-fonte" />
               <Button title="Cancelar" variant="outline" onPress={() => setJanela(false)} />
-            </VStack>
+            </View>
           </Pressable>
         </Pressable>
       </Modal>

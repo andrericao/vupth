@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Alert, TouchableOpacity } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import * as Updates from "expo-updates";
-import { VStack, Text, Heading, Box, HStack, ScrollView } from "@gluestack-ui/themed";
 import { RefreshCw } from "lucide-react-native";
 
 import { ehNavegador } from "@utils/ehNavegador";
@@ -10,7 +9,6 @@ import { WsDiagnostics } from "@components/WsDiagnostics";
 import { PushDiagnostics } from "@components/PushDiagnostics";
 import { useComingSoonStore } from "@stores/comingSoonStore";
 import { COMING_SOON_LABELS, ComingSoonFeature } from "@domain/comingSoon";
-import { fs } from "@stores/fonteStore";
 
 // A versao e o que a cerca (atualizar, diagnosticos) saiu da tela de Perfil
 // para esta, atras do item "Versão do app" — o mesmo desenho do partner
@@ -55,16 +53,17 @@ export function Sistema() {
     : "bundle embutido (nenhum OTA aplicado)";
 
   return (
+    // NativeWind (DEC-5): mesmas medidas do v1; o fs(13)/fs(10) virou
+    // text-f13/text-f10, que seguem o tamanho da letra pelas variaveis CSS.
     <ScrollView
-      flex={1}
-      bg="$brandBackground"
+      className="flex-1 bg-vupth-background"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} pb={30} px={16}>
+      <View className="flex-1 pb-[30px] px-4">
         <ScreenHeader title="Sistema" subtitle="Versão do app e atualizações." />
 
-        <VStack pt={24} gap="$3" alignItems="center">
+        <View className="pt-6 gap-3 items-center">
           {/* NO NAVEGADOR a tela mostra so a identificacao da versao — sem o
               botao e sem texto explicando como atualizar (Andre, 18/09; o
               partner fez igual). O caminho foi este: primeiro o aviso do
@@ -74,19 +73,12 @@ export function Sistema() {
               e a instrucao de recarregar e do navegador, nao do app. */}
           {!ehNavegador() && (
             <TouchableOpacity onPress={handleCheckUpdate} testID="check-update">
-              <HStack
-                bg="$brandSurface"
-                borderRadius="$full"
-                px={16}
-                py={12}
-                gap="$2"
-                alignItems="center"
-              >
+              <View className="flex-row bg-vupth-surface rounded-full px-4 py-3 gap-2 items-center">
                 <RefreshCw size={15} color="#163300" />
-                <Text fontFamily="$heading" fontSize={fs(13)} color="$forest">
+                <Text className="font-heading text-f13 text-vupth-forest">
                   {isChecking ? "Verificando..." : "Verificar atualização"}
                 </Text>
-              </HStack>
+              </View>
             </TouchableOpacity>
           )}
 
@@ -102,7 +94,7 @@ export function Sistema() {
             testID="version-line"
           >
             {/* Junta so o que EXISTE: em dev o runtime e o canal vem vazios. */}
-            <Text fontFamily="$mono" fontSize={fs(10)} color="$brandTextSecondary" textAlign="center">
+            <Text className="font-mono text-f10 text-vupth-textSecondary text-center">
               {[Updates.runtimeVersion, Updates.channel, otaInfo].filter(Boolean).join(" · ")}
             </Text>
           </TouchableOpacity>
@@ -113,43 +105,38 @@ export function Sistema() {
               <PushDiagnostics />
             </>
           )}
-        </VStack>
+        </View>
 
         {/* [QA] Contador de toques em "em breve" — instrumentacao do TIME, nao
             do usuario. */}
         {toquesNaVersao >= 7 && awaited.length > 0 && (
-          <VStack mt="$8">
-            <Heading fontFamily="$heading" fontSize="$md" mb="$1">
+          <View className="mt-8">
+            <Text className="font-heading text-md text-vupth-textPrimary mb-1">
               Funcionalidades aguardadas
-            </Heading>
-            <Text size="xs" color="$brandTextSecondary" mb="$3">
+            </Text>
+            <Text className="font-body text-xs text-vupth-textSecondary mb-3">
               As mais tocadas fizeram mais falta — priorizar quando o backend liberar.
             </Text>
-            <Box borderRadius="$card" overflow="hidden">
+            <View className="rounded-card overflow-hidden">
               {awaited.map(([feature, count]) => (
-                <HStack
+                <View
                   key={feature}
-                  bg="$brandSurface"
-                  px="$4"
-                  py="$3"
-                  borderBottomWidth="$1"
-                  borderBottomColor="$brandBorder"
-                  alignItems="center"
+                  className="flex-row bg-vupth-surface px-4 py-3 border-b border-vupth-border items-center"
                 >
-                  <Text size="sm" flex={1}>
+                  <Text className="font-body text-sm text-vupth-textPrimary flex-1">
                     {COMING_SOON_LABELS[feature as ComingSoonFeature] ?? feature}
                   </Text>
-                  <Box bg="$greenTint" borderRadius="$full" px="$3" py="$1">
-                    <Text size="xs" fontFamily="$heading" color="$forest">
+                  <View className="bg-vupth-greenTint rounded-full px-3 py-1">
+                    <Text className="font-heading text-xs text-vupth-forest">
                       {count}×
                     </Text>
-                  </Box>
-                </HStack>
+                  </View>
+                </View>
               ))}
-            </Box>
-          </VStack>
+            </View>
+          </View>
         )}
-      </VStack>
+      </View>
     </ScrollView>
   );
 }
