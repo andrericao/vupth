@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
-import { Alert, TouchableOpacity, ScrollView, Modal } from "react-native";
+import { Alert, TouchableOpacity, ScrollView, Modal, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import {
-  VStack,
-  Box,
-  Text,
-  HStack,
-  Center,
-} from "@gluestack-ui/themed";
 import { Check, Calendar, Scissors, Repeat2 } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
@@ -320,11 +313,11 @@ export function ServiceSelection() {
     // conteudo PULA quando carrega. `pt={60}` era chute; o cabecalho real usa
     // `safe-area + 12`.
     return (
-      <VStack flex={1} px={16} style={{ paddingTop: insets.top + 12 }} pb={30} bg="$brandBackground">
-        <VStack mt="$6">
+      <View className="flex-1 px-4 pb-[30px] bg-vupth-background" style={{ paddingTop: insets.top + 12 }}>
+        <View className="mt-6">
           <SkeletonList count={4} />
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     );
   }
 
@@ -333,38 +326,38 @@ export function ServiceSelection() {
     // conteudo PULA quando carrega. `pt={60}` era chute; o cabecalho real usa
     // `safe-area + 12`.
     return (
-      <VStack flex={1} px={16} style={{ paddingTop: insets.top + 12 }} pb={30} bg="$brandBackground">
-        <Center flex={1}>
-          <Text color="$brandDanger" textAlign="center">{error}</Text>
+      <View className="flex-1 px-4 pb-[30px] bg-vupth-background" style={{ paddingTop: insets.top + 12 }}>
+        <View className="items-center justify-center flex-1">
+          <Text className="font-body text-vupth-danger text-center text-md">{error}</Text>
           <Button className="mt-4" title="Voltar" onPress={() => navigation.goBack()} />
-        </Center>
-      </VStack>
+        </View>
+      </View>
     );
   }
 
   return (
-    <VStack flex={1} pb={30} bg="$brandBackground">
-      <Box px={16}>
+    <View className="flex-1 pb-[30px] bg-vupth-background">
+      <View className="px-4">
         <ScreenHeader
           title="O QUE VOCÊ QUER?"
           subtitle={`Com ${professionalName} · ${establishmentName}`}
         />
-      </Box>
+      </View>
 
       {services.length === 0 ? (
-        <Center flex={1} px={16}>
-          <Text color="$brandTextSecondary" textAlign="center">
+        <View className="items-center justify-center flex-1 px-4">
+          <Text className="font-body text-vupth-textSecondary text-center text-md">
             Nenhum serviço disponível para este profissional
           </Text>
           <Button className="mt-4" title="Voltar" onPress={() => navigation.goBack()} />
-        </Center>
+        </View>
       ) : (
         <>
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 200 }}
           >
-            <VStack gap="$2.5">
+            <View className="gap-2.5">
               {services.map((service) => {
                 const isSelected = selectedIds.includes(service.id);
                 return (
@@ -373,113 +366,97 @@ export function ServiceSelection() {
                     onPress={() => toggleService(service.id)}
                     testID={`service-${service.id}`}
                   >
-                    <HStack
-                      bg={isSelected ? "$greenTint" : "$brandSurface"}
-                      p="$4"
-                      borderRadius={16}
-                      borderWidth={isSelected ? 1.5 : 0}
-                      borderColor="$forest"
-                      gap="$3"
-                      alignItems="center"
+                    <View
+                      className={`flex-row ${isSelected ? "bg-vupth-greenTint" : "bg-vupth-surface"} p-4 rounded-[16px] border-vupth-forest gap-3 items-center`}
+                      style={{ borderWidth: isSelected ? 1.5 : 0 }}
                     >
                       {/* Caixa de selecao: cheia quando marcado, contorno quando
                           nao — o estado tem de ler sem depender so da cor. */}
-                      <Center
-                        width={22}
-                        height={22}
-                        borderRadius={6}
-                        bg={isSelected ? "$forest" : "transparent"}
-                        borderWidth={isSelected ? 0 : 1.5}
-                        borderColor="$brandBorder"
+                      <View
+                        className={`items-center justify-center w-[22px] h-[22px] rounded-[6px] ${isSelected ? "bg-vupth-forest" : "bg-transparent"} border-vupth-border`}
+                        style={{ borderWidth: isSelected ? 0 : 1.5 }}
                       >
                         {isSelected && <Check size={14} color="#FFFFFF" />}
-                      </Center>
-                      <VStack flex={1} gap="$0.5">
-                        <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                      </View>
+                      <View className="flex-1 gap-0.5">
+                        <Text className="font-heading text-sm text-vupth-forest">
                           {service.customName}
                         </Text>
-                        <Text size="xs" color="$brandTextSecondary">
+                        <Text className="font-body text-xs text-vupth-textSecondary">
                           {duracaoDoServico(service)} min
                         </Text>
-                      </VStack>
-                      <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                      </View>
+                      <Text className="font-heading text-sm text-vupth-forest">
                         R$ {service.price.toFixed(2)}
                       </Text>
-                    </HStack>
+                    </View>
                   </TouchableOpacity>
                 );
               })}
-            </VStack>
+            </View>
 
             {/* Resumo (Pencil): o que a escolha significa em tempo e posicao,
                 ANTES de confirmar. So aparece com servico marcado — sem selecao
                 nao ha duracao nem preco a resumir. */}
             {selectedIds.length > 0 && (
-              <VStack
-                bg="$forest"
-                borderRadius={18}
-                gap="$2.5"
-                p="$4.5"
-                mt="$4"
-                style={summaryShadow}
-              >
-                <HStack justifyContent="space-between" alignItems="center">
-                  <Text size="sm" color="#FFFFFFB3">
+              <View className="bg-vupth-forest rounded-[18px] gap-2.5 p-[18px] mt-4" style={summaryShadow}>
+                <View className="flex-row justify-between items-center">
+                  <Text className="font-body text-sm text-[#FFFFFFB3]">
                     Duração estimada
                   </Text>
-                  <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
+                  <Text className="font-heading text-sm text-vupth-green">
                     {formatWaitTime(totalMinutes)}
                   </Text>
-                </HStack>
+                </View>
                 {/* Posicao so entra quando a tela sabe o tamanho da fila. Quem
                     chega aqui por outro caminho (volta do login) nao recebe o
                     dado — melhor omitir a linha do que chutar um numero. */}
                 {queueCount != null && vaiPraFila && (
-                  <HStack justifyContent="space-between" alignItems="center">
-                    <Text size="sm" color="#FFFFFFB3">
+                  <View className="flex-row justify-between items-center">
+                    <Text className="font-body text-sm text-[#FFFFFFB3]">
                       Sua posição
                     </Text>
-                    <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
+                    <Text className="font-heading text-sm text-vupth-green">
                       {queueCount + 1}º da fila
                     </Text>
-                  </HStack>
+                  </View>
                 )}
                 {vaiPraFila && (
-                  <HStack justifyContent="space-between" alignItems="center">
-                    <Text size="sm" color="#FFFFFFB3">
+                  <View className="flex-row justify-between items-center">
+                    <Text className="font-body text-sm text-[#FFFFFFB3]">
                       Começa por volta de
                     </Text>
-                    <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
+                    <Text className="font-heading text-sm text-vupth-green">
                       {estimatedStartTime(openedAt, estimatedWaitMinutes)}
                     </Text>
-                  </HStack>
+                  </View>
                 )}
                 {/* DEC-1 (Andre, 01/10): a multa nao aparece na escolha — so no
                     total, numa linha somada ao valor, com o link para a explicacao
                     (cada multa: motivo, quem, quando). */}
                 {multas.length > 0 && (
-                  <HStack justifyContent="space-between" alignItems="center" testID="multas-pendentes">
+                  <View className="flex-row justify-between items-center" testID="multas-pendentes">
                     <TouchableOpacity onPress={() => setShowMultas(true)} testID="ver-multas">
-                      <Text size="sm" color="#FFFFFFB3" textDecorationLine="underline">
+                      <Text className="font-body text-sm text-[#FFFFFFB3] underline">
                         Multa pendente · entenda
                       </Text>
                     </TouchableOpacity>
-                    <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">+ {reais(conta.totalMultas)}</Text>
-                  </HStack>
+                    <Text className="font-heading text-sm text-vupth-green">+ {reais(conta.totalMultas)}</Text>
+                  </View>
                 )}
                 {/* A regra da multa ANTES do toque que coloca na fila (CDC).
                     Ate 25/09 o app so falava de multa na hora de sair. */}
                 {vaiPraFila && (
-                  <Text size="xs" color="#FFFFFFB3" testID="regra-da-multa">
+                  <Text className="font-body text-xs text-[#FFFFFFB3]" testID="regra-da-multa">
                     {regraDaMulta()}
                   </Text>
                 )}
-              </VStack>
+              </View>
             )}
           </ScrollView>
 
           {selectedIds.length > 0 && (
-            <VStack position="absolute" bottom={30} left={20} right={20} gap="$2">
+            <View className="absolute bottom-[30px] left-[20px] right-[20px] gap-2">
               {/* Uma ação primária só (Andre 2026-08-01): loja aberta = entrar na
                   fila; fechada = agendar (badge AGENDAR). Com a fila aberta o
                   agendar vem logo abaixo, como segunda porta (C20). O resto —
@@ -510,7 +487,7 @@ export function ServiceSelection() {
                 />
               )}
               {soAgenda && (
-                <Text size="xs" color="$brandTextSecondary" textAlign="center" testID="so-agenda">
+                <Text className="font-body text-xs text-vupth-textSecondary text-center" testID="so-agenda">
                   {MENSAGEM_SO_AGENDA}
                 </Text>
               )}
@@ -522,7 +499,7 @@ export function ServiceSelection() {
                   onPress={() => setShowMoreOptions(true)}
                 />
               )}
-            </VStack>
+            </View>
           )}
         </>
       )}
@@ -538,21 +515,21 @@ export function ServiceSelection() {
 
       {/* A explicacao das multas que entram no total (DEC-1). */}
       <Modal visible={showMultas} transparent animationType="fade" onRequestClose={() => setShowMultas(false)}>
-        <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-          <VStack bg="$white" borderRadius="$card" p="$6" gap="$3" testID="explicacao-multas">
-            <Text fontFamily="$heading" fontSize="$lg" color="$forest">Multa pendente</Text>
-            <Text size="sm" color="$brandTextSecondary">
+        <View className="flex-1 justify-center px-6" style={{ backgroundColor: "rgba(0,0,0,0.45)" }}>
+          <View className="bg-white rounded-card p-6 gap-3" testID="explicacao-multas">
+            <Text className="font-heading text-lg text-vupth-forest">Multa pendente</Text>
+            <Text className="font-body text-sm text-vupth-textSecondary">
               Entra no valor do seu próximo atendimento, separada do serviço.
             </Text>
             {multas.map((m) => (
-              <HStack key={m.penaltyId} justifyContent="space-between" alignItems="flex-start" gap="$2">
-                <Text size="sm" color="$brandTextPrimary" flex={1}>{origemDaMulta(m)}</Text>
-                <Text fontFamily="$heading" fontSize="$sm" color="$forest">{reais(Number(m.amount) || 0)}</Text>
-              </HStack>
+              <View className="flex-row justify-between items-start gap-2" key={m.penaltyId}>
+                <Text className="font-body text-sm text-vupth-textPrimary flex-1">{origemDaMulta(m)}</Text>
+                <Text className="font-heading text-sm text-vupth-forest">{reais(Number(m.amount) || 0)}</Text>
+              </View>
             ))}
             <Button className="mt-2" title="Entendi" onPress={() => setShowMultas(false)} />
-          </VStack>
-        </Box>
+          </View>
+        </View>
       </Modal>
       <ScheduleModal
         visible={showSchedule}
@@ -564,6 +541,7 @@ export function ServiceSelection() {
         onPrecisaLogin={goToLoginAndComeBack}
         onAgendado={() => navigation.navigate("home")}
       />
-    </VStack>
+    </View>
   );
 }
+
