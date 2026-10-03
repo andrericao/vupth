@@ -6,6 +6,8 @@ import { WS_URL } from "@services/api";
 import { useWsDiagnosticsStore } from "@stores/wsDiagnosticsStore";
 import type { WsChannel } from "@domain/ws/diagnostics";
 import { shouldReconnectOnForeground } from "@domain/ws/diagnostics";
+import { precisaRenovar, tokenRecusado } from "@domain/ws/socketAuth";
+import { useAuthStore } from "@stores/authStore";
 
 const TOKEN_KEY = "vupth_access_token";
 
@@ -21,7 +23,10 @@ const TOKEN_KEY = "vupth_access_token";
 // O que ja valia nos dois hooks continua valendo aqui, uma vez so:
 // - token lido a CADA tentativa (partner C16): o access token dura 1h e o
 //   `reconnectDelay` reconecta sozinho — capturado no mount, a reconexao levava
-//   o header vencido e o canal autenticado morria calado;
+//   o header vencido e o canal autenticado morria calado. E RENOVADO antes de
+//   conectar quando vence em ate 2 min, ou depois de um ERROR INVALID_TOKEN
+//   (renovar-token-no-ws, 03/10 — pre-requisito para o Backend recusar o
+//   CONNECT invalido);
 // - sem `forceBinaryWSFrames`/`appendMissingNULLonIncoming` (01/08: atrapalham
 //   o parse com o Spring correto);
 // - C18: o Android suspende o processo e o socket morre sem evento — ao voltar
@@ -36,6 +41,8 @@ type Assinatura = {
 
 let cliente: Client | null = null;
 let aoVoltar: NativeEventSubscription | null = null;
+// O servidor recusou o ultimo CONNECT pelo token: a proxima tentativa renova.
+let renovarNaProxima = false;
 const assinaturas = new Set<Assinatura>();
 
 const diag = () => useWsDiagnosticsStore.getState();
@@ -55,7 +62,19 @@ function conectar() {
     webSocketFactory: () => new WebSocket(WS_URL),
     reconnectDelay: 5000,
     beforeConnect: async () => {
-      const token = await SecureStore.getItemAsync(TOKEN_KEY);
+      let token = await SecureStore.getItemAsync(TOKEN_KEY);
+      if (token && (renovarNaProxima || precisaRenovar(token))) {
+        renovarNaProxima = false;
+        // Best-effort: se o refresh falhar (offline, refresh vencido), conecta
+        // com o que houver — o interceptor do axios trata a sessao morta no
+        // proximo request HTTP.
+        try {
+          await useAuthStore.getState().refreshTokens();
+          token = await SecureStore.getItemAsync(TOKEN_KEY);
+        } catch {
+          // segue com o token atual
+        }
+      }
       c.connectHeaders = token ? { Authorization: `Bearer ${token}` } : {};
     },
     // O frame CONNECTED traz `heart-beat` e `user-name` — o que decide qualquer
@@ -69,6 +88,7 @@ function conectar() {
       canaisVivos().forEach((canal) => diag().markError(canal, `${motivo} · ${WS_URL}`));
     },
     onStompError: (frame) => {
+      if (tokenRecusado(frame?.headers?.message)) renovarNaProxima = true;
       canaisVivos().forEach((canal) => diag().markError(canal, `STOMP: ${frame?.headers?.message ?? "erro"}`));
     },
   });
