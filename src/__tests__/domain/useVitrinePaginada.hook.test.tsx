@@ -50,7 +50,8 @@ describe('useVitrinePaginada', () => {
       await result.current.fetchNextPage();
     });
     expect(mockGetPage).toHaveBeenCalledWith(1, null);
-    expect(result.current.data?.map((e) => e.id)).toEqual(['a', 'b', 'c']);
+    // O CI (03/10) leu `data` antes do novo desenho do hook: espera o render.
+    await waitFor(() => expect(result.current.data?.map((e) => e.id)).toEqual(['a', 'b', 'c']));
     expect(result.current.hasNextPage).toBe(false);
   });
 
