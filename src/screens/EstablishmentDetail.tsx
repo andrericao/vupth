@@ -1,15 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { SectionList, TouchableOpacity, Alert, Linking, Share, Pressable, StyleSheet } from "react-native";
+import { SectionList, TouchableOpacity, Alert, Linking, Share, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import {
-  VStack,
-  Box,
-  Text,
-  HStack,
-  Center,
-} from "@gluestack-ui/themed";
 import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Copy } from "lucide-react-native";
 import { copiarTexto } from "@utils/copiar";
 import { FotoAmpliada } from "@components/FotoAmpliada";
@@ -78,8 +71,8 @@ function ProfessionalRow({
 
   return (
     <TouchableOpacity onPress={onPress} testID={`professional-${professional.id}`}>
-      <Box bg="$brandSurface" p="$3" mb="$3" borderRadius="$card">
-        <HStack alignItems="center" gap="$3">
+      <View className="bg-vupth-surface p-3 mb-3 rounded-card">
+        <View className="flex-row items-center gap-3">
           {/* Foto quando o profissional tiver (Partner 1.4.0); sem ela, ou com
               URL quebrada, o PlaceAvatar volta para as iniciais. */}
           {professional.profile_image_url && onVerFoto ? (
@@ -93,32 +86,32 @@ function ProfessionalRow({
           ) : (
             <PlaceAvatar name={professional.name} photoUrl={professional.profile_image_url} />
           )}
-          <VStack flex={1}>
-            <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+          <View className="flex-1">
+            <Text className="font-heading text-sm text-vupth-forest">
               {professional.name}
             </Text>
             {/* ⚠️ Com a LOJA FECHADA, "Sem fila · Agora" convidava a ir agora
                 dentro de uma tela que diz "Fechada agora" — o mesmo defeito ja
                 corrigido na Home. Fechada, a linha diz o que da pra fazer. */}
-            <HStack alignItems="center" gap="$2" mt="$0.5">
+            <View className="flex-row items-center gap-2 mt-0.5">
               {!lojaAberta ? (
-                <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
+                <Text className="font-heading text-xs text-vupth-textSecondary">
                   Agendar
                 </Text>
               ) : fora ? (
                 /* Quem esta fora do expediente nao recebe: anunciar "Sem fila ·
                    Agora" aqui convidava para uma fila que ninguem vai atender —
                    e era o defeito que o Partner reportou em 07/09. */
-                <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
+                <Text className="font-heading text-xs text-vupth-textSecondary">
                   Fila fechada
                 </Text>
               ) : (
                 <>
-                  <Text size="xs" color="$brandTextPrimary" fontFamily="$heading">
+                  <Text className="font-heading text-xs text-vupth-textPrimary">
                     {queueCount === 0 ? "Sem fila" : `${queueCount} na fila`}
                   </Text>
-                  <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
-                  <Text size="xs" color="$brandTextSecondary">
+                  <View className="items-center justify-center w-[3px] h-[3px] rounded-full bg-vupth-textSecondary" />
+                  <Text className="font-body text-xs text-vupth-textSecondary">
                     {queueCount === 0
                       ? "Agora"
                       : `~${formatWaitTime(professional.estimated_wait_minutes ?? 0)}`}
@@ -128,42 +121,42 @@ function ProfessionalRow({
                       mas com o rotulo, senao a espera anunciada engana. */}
                   {estaNoExpediente(professional.work_status) && professional.accepting_new === false && (
                     <>
-                      <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
-                      <Text size="xs" color="$brandTextSecondary" fontFamily="$heading" testID={`fila-fechada-${professional.id}`}>
+                      <View className="items-center justify-center w-[3px] h-[3px] rounded-full bg-vupth-textSecondary" />
+                      <Text className="font-heading text-xs text-vupth-textSecondary" testID={`fila-fechada-${professional.id}`}>
                         Fila fechada
                       </Text>
                     </>
                   )}
                   {emIntervalo(professional.work_status) && (
                     <>
-                      <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
-                      <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
+                      <View className="items-center justify-center w-[3px] h-[3px] rounded-full bg-vupth-textSecondary" />
+                      <Text className="font-heading text-xs text-vupth-textSecondary">
                         Em intervalo
                       </Text>
                     </>
                   )}
                 </>
               )}
-            </HStack>
-            <HStack alignItems="center" gap="$2" mt="$0.5">
+            </View>
+            <View className="flex-row items-center gap-2 mt-0.5">
               {/* `specialty` e texto livre no backend, mas parte dos cadastros
                   veio com a categoria em INGLES — era isso que aparecia aqui
                   (Andre 2026-08-06). `formatSpecialty` traduz o que reconhece e
                   preserva quem escreveu a especialidade de verdade. */}
-              <Text size="2xs" color="$brandTextSecondary" numberOfLines={1} flex={1}>
+              <Text className="font-body text-f10 text-vupth-textSecondary flex-1" numberOfLines={1}>
                 {formatSpecialty(professional.specialty)}
               </Text>
-              <HStack alignItems="center" gap="$1">
+              <View className="flex-row items-center gap-1">
                 <Star size={11} color="#163300" fill="#163300" />
-                <Text size="2xs" color="$brandTextSecondary" fontFamily="$heading">
+                <Text className="font-heading text-f10 text-vupth-textSecondary">
                   {r.value.toFixed(1)}
                 </Text>
-              </HStack>
-            </HStack>
-          </VStack>
+              </View>
+            </View>
+          </View>
           <ChevronRight size={18} color="#454745" />
-        </HStack>
-      </Box>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -255,19 +248,19 @@ export function EstablishmentDetail() {
     // conteudo PULA quando carrega. `pt={60}` era chute; o cabecalho real usa
     // `safe-area + 12`.
     return (
-      <VStack flex={1} px={16} style={{ paddingTop: insets.top + 12 }} pb={30} bg="$brandBackground">
-        <VStack mt="$6">
+      <View className="flex-1 px-4 pb-[30px] bg-vupth-background" style={{ paddingTop: insets.top + 12 }}>
+        <View className="mt-6">
           <SkeletonList count={4} />
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     );
   }
 
   if (isError || !establishment) {
     return (
-      <Center flex={1} bg="$brandBackground">
-        <Text color="$brandTextSecondary">Estabelecimento não encontrado</Text>
-      </Center>
+      <View className="items-center justify-center flex-1 bg-vupth-background">
+        <Text className="font-body text-vupth-textSecondary text-md">Estabelecimento não encontrado</Text>
+      </View>
     );
   }
 
@@ -322,7 +315,7 @@ export function EstablishmentDetail() {
   );
 
   const acoes = (
-    <HStack gap="$2">
+    <View className="flex-row gap-2">
       <HeaderIconButton
         onPress={handleCopiarLink}
         ground={showPhoto ? "foto" : "claro"}
@@ -332,18 +325,18 @@ export function EstablishmentDetail() {
         <Copy size={20} color="#163300" />
       </HeaderIconButton>
       {favorito}
-    </HStack>
+    </View>
   );
 
   return (
-    <VStack flex={1} bg="$brandBackground">
+    <View className="flex-1 bg-vupth-background">
       {/* O hero existe pra FOTO. Sem foto — ou com `urlImage` quebrada, que e
           comum nos cadastros — nao vira faixa de cor: cai no mesmo cabecalho
           simples das outras telas (voltar sobre o fundo claro). Faixa verde
           lisa nao carrega informacao nenhuma e so empurrava o conteudo pra
           baixo. */}
       {showPhoto ? (
-        <Box height={210} width="$full">
+        <View className="h-[210px] w-full">
           <Pressable
             style={{ flex: 1 }}
             onPress={() => setFotoAmpliada(establishment.urlImage!)}
@@ -360,56 +353,50 @@ export function EstablishmentDetail() {
             onError={() => setHeroFailed(true)}
             testID="foto-da-loja-imagem"
           />
-          <Box px={16}>
+          <View className="px-4">
             <ScreenHeader ground="foto" action={acoes} />
-          </Box>
+          </View>
           </Pressable>
-        </Box>
+        </View>
       ) : (
         // SEM foto o nome da loja e o titulo do cabecalho — voltar · nome ·
         // favoritar na mesma linha, como nas demais telas. Com foto ele nao
         // cabe ali (ficaria por cima da imagem) e desce pro corpo.
-        <Box px={16}>
+        <View className="px-4">
           <ScreenHeader title={establishment.name} action={acoes} />
-        </Box>
+        </View>
       )}
 
-      <VStack px={16} pt={showPhoto ? "$5" : "$0"} gap="$1.5">
+      <View className={`px-4 ${showPhoto ? "pt-5" : "pt-0"} gap-1.5`}>
         {showPhoto && (
           <Text
-            fontFamily="$display"
-            fontSize={fs(26)}
-            lineHeight={fs(30)}
-            letterSpacing={-1}
-            color="$forest"
+            className="font-display text-f26 text-vupth-forest"
+            style={{ lineHeight: fs(30), letterSpacing: -1 }}
           >
             {establishment.name}
           </Text>
         )}
-        <HStack alignItems="center" gap="$2">
+        <View className="flex-row items-center gap-2">
           <Star size={14} color="#163300" fill="#163300" />
-          <Text size="sm" fontFamily="$heading" color="$brandTextPrimary">
+          <Text className="font-heading text-sm text-vupth-textPrimary">
             {rating.value.toFixed(1)}
           </Text>
-          <Text size="sm" color="$brandTextSecondary">
+          <Text className="font-body text-sm text-vupth-textSecondary">
             {rating.real && rating.count != null ? `(${rating.count} avaliações)` : ""}
             {establishment.distance_km != null
               ? `${rating.real && rating.count != null ? " · " : ""}${establishment.distance_km.toFixed(1)} km`
               : ""}
           </Text>
-        </HStack>
+        </View>
         {/* O estado ("Aberto agora") responde SE dá para ir; o horário de hoje e
             o "reabre" respondem QUANDO — e são coisas diferentes. Loja que ainda
             não definiu a semana não ganha linha nenhuma: inventar horário é pior
             que não ter. */}
-        <HStack alignItems="center" gap="$2" mt="$0.5">
-          <Center
-            width={7}
-            height={7}
-            borderRadius="$full"
-            bg={isOpen ? "$brandGreen" : "$brandWarning"}
+        <View className="flex-row items-center gap-2 mt-0.5">
+          <View
+            className={`items-center justify-center w-[7px] h-[7px] rounded-full ${isOpen ? "bg-vupth-green" : "bg-vupth-warning"}`}
           />
-          <Text size="sm" color="$brandTextSecondary" fontFamily="$heading">
+          <Text className="font-heading text-sm text-vupth-textSecondary">
             {/* `isOpen` e a LOJA, nao a fila. Dizer "fila fechada" aqui
                 misturava dois estados que o app trata separado (a loja pode
                 estar aberta com a fila drenando). */}
@@ -417,15 +404,15 @@ export function EstablishmentDetail() {
           </Text>
           {isOpen && trabalhando.length > 0 && (
             <>
-              <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
+              <View className="items-center justify-center w-[3px] h-[3px] rounded-full bg-vupth-textSecondary" />
               {/* `formatWaitTime(0)` devolve "Agora" — "menor espera Agora" fica
                   estranho, entao sem fila vira "sem espera". */}
-              <Text size="sm" color="$brandTextSecondary">
+              <Text className="font-body text-sm text-vupth-textSecondary">
                 {minWait < 1 ? "sem espera" : `menor espera ${formatWaitTime(minWait)}`}
               </Text>
             </>
           )}
-        </HStack>
+        </View>
 
         {(hojeTexto || reabre) && (
           <TouchableOpacity
@@ -435,9 +422,9 @@ export function EstablishmentDetail() {
             accessibilityLabel="Horário de funcionamento"
             testID="horario-hoje"
           >
-            <HStack alignItems="center" gap="$2" mt="$2">
+            <View className="flex-row items-center gap-2 mt-2">
               <Clock size={14} color="#454745" />
-              <Text size="sm" color="$brandTextSecondary">
+              <Text className="font-body text-sm text-vupth-textSecondary">
                 {hojeTexto}
                 {reabre ? ` · ${reabre}` : ""}
               </Text>
@@ -448,7 +435,7 @@ export function EstablishmentDetail() {
                   style={{ transform: [{ rotate: mostrarSemana ? "180deg" : "0deg" }] }}
                 />
               )}
-            </HStack>
+            </View>
           </TouchableOpacity>
         )}
 
@@ -462,60 +449,56 @@ export function EstablishmentDetail() {
             accessibilityLabel={`Endereço: ${endereco}. Abrir no mapa`}
             testID="endereco-da-loja"
           >
-            <HStack alignItems="flex-start" gap="$2" mt="$2">
+            <View className="flex-row items-start gap-2 mt-2">
               <MapPin size={14} color="#454745" style={{ marginTop: 3 }} />
-              <Text size="sm" color="$brandTextSecondary" flex={1}>
+              <Text className="font-body text-sm text-vupth-textSecondary flex-1">
                 {endereco}
                 {mapa ? (
-                  <Text size="sm" color="$forest" fontFamily="$heading">
+                  <Text className="font-heading text-sm text-vupth-forest">
                     {"  "}Como chegar
                   </Text>
                 ) : null}
               </Text>
-            </HStack>
+            </View>
           </TouchableOpacity>
         )}
 
         {mostrarSemana && semana.length > 0 && (
-          <VStack mt="$2" gap="$1" testID="semana">
+          <View className="mt-2 gap-1" testID="semana">
             {semana.map((linha) => (
-              <HStack key={linha.dia} justifyContent="space-between">
+              <View className="flex-row justify-between" key={linha.dia}>
                 <Text
-                  size="sm"
-                  color={linha.ehHoje ? "$brandTextPrimary" : "$brandTextSecondary"}
-                  fontWeight={linha.ehHoje ? "$semibold" : "$normal"}
+                  className={`font-body text-sm ${linha.ehHoje ? "text-vupth-textPrimary" : "text-vupth-textSecondary"} ${linha.ehHoje ? "font-semibold" : "font-normal"}`}
                 >
                   {linha.nome}
                 </Text>
                 <Text
-                  size="sm"
-                  color={linha.ehHoje ? "$brandTextPrimary" : "$brandTextSecondary"}
-                  fontWeight={linha.ehHoje ? "$semibold" : "$normal"}
+                  className={`font-body text-sm ${linha.ehHoje ? "text-vupth-textPrimary" : "text-vupth-textSecondary"} ${linha.ehHoje ? "font-semibold" : "font-normal"}`}
                 >
                   {linha.texto}
                 </Text>
-              </HStack>
+              </View>
             ))}
-          </VStack>
+          </View>
         )}
-      </VStack>
+      </View>
 
-      <VStack flex={1} px={16} pt="$5">
-        <HStack justifyContent="space-between" alignItems="center" mb="$3">
-          <Text fontFamily="$display" fontSize="$lg" color="$forest">
+      <View className="flex-1 px-4 pt-5">
+        <View className="flex-row justify-between items-center mb-3">
+          <Text className="font-display text-lg text-vupth-forest">
             Quem está atendendo
           </Text>
           {isOpen && (
-            <Box bg="$greenTint" borderRadius="$full" px="$3" py="$1">
-              <HStack alignItems="center" gap="$1">
+            <View className="bg-vupth-greenTint rounded-full px-3 py-1">
+              <View className="flex-row items-center gap-1">
                 <LiveDot size={5} color="#163300" />
-                <Text size="2xs" fontFamily="$heading" color="$forest">
+                <Text className="font-heading text-f10 text-vupth-forest">
                   Ao vivo
                 </Text>
-              </HStack>
-            </Box>
+              </View>
+            </View>
           )}
-        </HStack>
+        </View>
 
         {/* O cabecalho "Trabalhando" so aparece quando existe a OUTRA secao:
             numa loja com todo mundo em expediente ele seria rotulo sem
@@ -530,10 +513,7 @@ export function EstablishmentDetail() {
           renderSectionHeader={({ section }) =>
             secoes.length > 1 || section.key === "fora" ? (
               <Text
-                size="xs"
-                fontFamily="$heading"
-                color="$brandTextSecondary"
-                mb="$2"
+                className="font-heading text-xs text-vupth-textSecondary mb-2"
                 testID={`secao-${section.key}`}
               >
                 {section.title}
@@ -550,14 +530,14 @@ export function EstablishmentDetail() {
             />
           )}
           ListEmptyComponent={
-            <Center mt="$4">
-              <Text color="$brandTextSecondary">Nenhum profissional disponível</Text>
-            </Center>
+            <View className="items-center justify-center mt-4">
+              <Text className="font-body text-vupth-textSecondary text-md">Nenhum profissional disponível</Text>
+            </View>
           }
         />
-      </VStack>
+      </View>
 
-      <VStack px={16} pb={32}>
+      <View className="px-4 pb-8">
         {isOpen && trabalhando.length > 0 && (
           <Button title="Entrar com menor espera" onPress={handleSelectShortestQueue} />
         )}
@@ -574,24 +554,20 @@ export function EstablishmentDetail() {
               )
             }
           >
-            <Box
-              bg="$brandWarning"
-              borderRadius="$card"
-              px="$4"
-              py="$3"
-            >
-              <HStack alignItems="center" gap="$2">
+            <View className="bg-vupth-warning rounded-card px-4 py-3">
+              <View className="flex-row items-center gap-2">
                 <Info size={18} color="#163300" />
-                <Text size="xs" color="$forest" fontFamily="$heading" flex={1}>
+                <Text className="font-heading text-xs text-vupth-forest flex-1">
                   Fechada agora — escolha um profissional para agendar ou
                   solicitar um corte.
                 </Text>
-              </HStack>
-            </Box>
+              </View>
+            </View>
           </TouchableOpacity>
         )}
-      </VStack>
+      </View>
       <FotoAmpliada uri={fotoAmpliada} onClose={() => setFotoAmpliada(null)} />
-    </VStack>
+    </View>
   );
 }
+
