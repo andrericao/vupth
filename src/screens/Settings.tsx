@@ -1,16 +1,8 @@
 import { useState, useCallback } from "react";
-import { Alert, TouchableOpacity } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import * as Updates from "expo-updates";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
-  VStack,
-  Text,
-  Box,
-  HStack,
-  ScrollView,
-  Center,
-} from "@gluestack-ui/themed";
 import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone, Palette } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
@@ -40,21 +32,21 @@ function MenuItem({
 }) {
   return (
     <TouchableOpacity onPress={onPress}>
-      <HStack px={16} py={15} gap="$3" alignItems="center">
+      <View className="flex-row px-4 py-[15px] gap-3 items-center">
         {icon}
-        <VStack flex={1} gap="$0.5">
-          <Text size="xs" color="$brandTextSecondary">
+        <View className="flex-1 gap-0.5">
+          <Text className="font-body text-xs text-vupth-textSecondary">
             {label}
           </Text>
           {value && (
-            <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary" numberOfLines={1}>
+            <Text className="font-body text-sm font-semibold text-vupth-textPrimary" numberOfLines={1}>
               {value}
             </Text>
           )}
-        </VStack>
+        </View>
         <ChevronRight size={18} color="#454745" />
-      </HStack>
-      {!last && <Box height={1} bg="$brandBorder" />}
+      </View>
+      {!last && <View className="h-px bg-vupth-border" />}
     </TouchableOpacity>
   );
 }
@@ -63,14 +55,14 @@ function MenuItem({
 // (Andre 2026-09-16: "o menu igual o do partner, com submenus").
 function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <VStack gap="$2" testID={`grupo-${label}`}>
-      <Text fontSize={fs(11)} fontWeight="$bold" letterSpacing={0.6} color="$brandTextSecondary">
+    <View className="gap-2" testID={`grupo-${label}`}>
+      <Text className="font-body text-f11 font-bold tracking-[0.6px] text-vupth-textSecondary">
         {label.toUpperCase()}
       </Text>
-      <Box borderRadius="$card" overflow="hidden" bg="$brandSurface">
+      <View className="rounded-card overflow-hidden bg-vupth-surface">
         {children}
-      </Box>
-    </VStack>
+      </View>
+    </View>
   );
 }
 
@@ -175,9 +167,9 @@ export function Settings() {
   }
 
   return (
+    // NativeWind (DEC-5): mesmas medidas do v1.
     <ScrollView
-      flex={1}
-      bg="$brandBackground"
+      className="flex-1 bg-vupth-background"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
@@ -190,30 +182,30 @@ export function Settings() {
           loja. Sem conta, o cabecalho e o mesmo da aba Atendimentos: titulo
           em Archivo sobre o fundo claro. */}
       {isAuthenticated ? (
-        <VStack bg="$forest" style={{ paddingTop: insets.top + 24 }} pb={32} px={16} gap="$3" alignItems="center">
-          <Center width={88} height={88} borderRadius={44} bg="$brandGreen">
-            <Text fontFamily="$display" fontSize={fs(32)} color="$forest">
+        <View className="bg-vupth-forest pb-8 px-4 gap-3 items-center" style={{ paddingTop: insets.top + 24 }}>
+          <View className="w-[88px] h-[88px] rounded-full bg-vupth-green items-center justify-center">
+            <Text className="font-display text-f32 text-vupth-forest">
               {initials}
             </Text>
-          </Center>
-          <VStack gap="$1" alignItems="center">
-            <Text fontFamily="$display" fontSize={fs(24)} letterSpacing={-0.8} color="$white">
+          </View>
+          <View className="gap-1 items-center">
+            <Text className="font-display text-white" style={{ fontSize: fs(24), letterSpacing: -0.8 }}>
               {nomeDoTopo}
             </Text>
             {user?.email && (
-              <Text size="sm" color="$brandGreen">
+              <Text className="font-body text-sm text-vupth-green">
                 {user.email}
               </Text>
             )}
-          </VStack>
-        </VStack>
+          </View>
+        </View>
       ) : (
-        <Box px={16}>
+        <View className="px-4">
           <ScreenHeader root title="Perfil" />
-        </Box>
+        </View>
       )}
 
-      <VStack flex={1} px={16} pt={20} pb={30}>
+      <View className="flex-1 px-4 pt-5 pb-[30px]">
 
         {/* Opções de CONTA só para quem tem conta (visitante não vê trocar senha,
             e-mail, endereço nem deletar — boa prática; pedido Andre 2026-07-23). */}
@@ -251,34 +243,26 @@ export function Settings() {
                 vermelho fica reservado pro que e irreversivel (deletar), la
                 embaixo. */}
             <TouchableOpacity onPress={handleLogout} testID="logout">
-              <HStack
-                bg="$brandSurface"
-                borderRadius="$card"
-                px={16}
-                py={15}
-                mt="$4"
-                gap="$2.5"
-                alignItems="center"
-              >
+              <View className="flex-row bg-vupth-surface rounded-card px-4 py-[15px] mt-4 gap-2.5 items-center">
                 <LogOut size={19} color="#163300" />
-                <Text size="sm" fontWeight="$semibold" color="$forest">
+                <Text className="font-body text-sm font-semibold text-vupth-forest">
                   Sair da conta
                 </Text>
-              </HStack>
+              </View>
             </TouchableOpacity>
           </>
         ) : (
           /* Pro VISITANTE o convite e o UNICO conteudo da tela. Encostado no
              topo, ele deixava um vazio grande no meio que fazia a tela parecer
              inacabada; centrado, o espaco vira respiro em vez de falta. */
-          <Box bg="$brandSurface" borderRadius="$card" p="$4" mt="$6">
-            <Text size="sm" color="$brandTextSecondary" mb="$3">
+          <View className="bg-vupth-surface rounded-card p-4 mt-6">
+            <Text className="font-body text-sm text-vupth-textSecondary mb-3">
               Você está navegando como visitante. Entre ou crie uma conta para
               gerenciar seu perfil, senha e endereço.
             </Text>
             {/* Mesma hierarquia do Perfil: criar conta é a pílula sólida, entrar
                 fica como secundária (Andre 2026-08-05). */}
-            <VStack gap="$3">
+            <View className="gap-3">
               <Button
                 title="Criar conta grátis"
                 onPress={() =>
@@ -292,15 +276,15 @@ export function Settings() {
                   navigation.getParent()?.navigate("homeTab", { screen: "login", params: {} })
                 }
               />
-            </VStack>
-          </Box>
+            </View>
+          </View>
         )}
 
         {/* Aparencia (Andre, 26/09): tema e tamanho da fonte num submenu. So de
             quem tem conta (Andre, 02/10): o visitante ve o convite — Entrar e
             Criar conta —, os Termos e a versao no rodape, e nada mais. */}
         {isAuthenticated && (
-        <VStack mt="$6">
+        <View className="mt-6">
           <Grupo label="Aparência">
             <MenuItem
               icon={<Palette size={20} color="#163300" />}
@@ -309,13 +293,13 @@ export function Settings() {
               last
             />
           </Grupo>
-        </VStack>
+        </View>
         )}
 
         {/* O menu "Versão do app" (e os 7 toques do diagnostico) e so de quem
             tem conta (Andre, 26/09). O visitante ve a versao e a data no rodape. */}
         {isAuthenticated && (
-        <VStack mt="$6">
+        <View className="mt-6">
           <Grupo label="Sistema">
             <MenuItem
               icon={<Smartphone size={20} color="#163300" />}
@@ -324,38 +308,38 @@ export function Settings() {
               last
             />
           </Grupo>
-        </VStack>
+        </View>
         )}
 
         {/* `flex-end` empurra o rodape pro fim: antes ele vinha logo abaixo do
             conteudo e sobrava um vazio grande embaixo, que fazia a tela
             parecer inacabada — principalmente pro VISITANTE, que so tem o
             convite de conta acima. */}
-        <VStack flex={1} justifyContent="flex-end" mt="$10" alignItems="center" gap="$3">
+        <View className="flex-1 justify-end mt-10 items-center gap-3">
           {/* Deletar conta desce pra ca como LINK: e irreversivel, entao nao
               disputa atencao com o resto — mas continua alcancavel por quem
               procura (era um botao de mesmo peso que "sair"). */}
-          <HStack gap="$4" alignItems="center">
+          <View className="flex-row gap-4 items-center">
             <TouchableOpacity onPress={() => navigation.navigate("terms")} testID="terms">
-              <Text size="xs" color="$brandTextSecondary">
+              <Text className="font-body text-xs text-vupth-textSecondary">
                 Termos e Privacidade
               </Text>
             </TouchableOpacity>
             {isAuthenticated && (
               <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
-                <Text size="xs" fontWeight="$semibold" color="$brandDanger">
+                <Text className="font-body text-xs font-semibold text-vupth-danger">
                   Deletar minha conta
                 </Text>
               </TouchableOpacity>
             )}
-          </HStack>
+          </View>
           {!isAuthenticated && (
-            <Text size="2xs" color="$brandTextSecondary" testID="versao-visitante">
+            <Text className="font-body text-f10 text-vupth-textSecondary" testID="versao-visitante">
               {rotuloDaVersao(Updates.runtimeVersion, Updates.createdAt)}
             </Text>
           )}
-        </VStack>
-      </VStack>
+        </View>
+      </View>
 
       <DeleteAccountModal
         visible={showDelete}
