@@ -3,6 +3,7 @@ import { Establishment } from '@domain/establishment/types';
 import { Coords } from '@domain/location/gps';
 import { ProfessionalWithQueue, ServiceItemResponse } from '@domain/professional/types';
 import { HorariosDaLoja } from '@domain/establishment/horarios';
+import { LOJAS_POR_PAGINA, PaginaDeLojas } from '@domain/establishment/paginacao';
 
 export interface EstablishmentWithProfessionals {
   id: string;
@@ -41,6 +42,22 @@ export const establishmentService = {
     // 17/09) — o cliente pode agendar para a reabertura. O `includeAll` saiu.
     return api.get<Establishment[]>('/establishment', {
       params: {
+        // Tem de ir o PAR: coordenada pela metade é 422 no backend.
+        ...(coords ? { lat: coords.latitude, lng: coords.longitude } : {}),
+      },
+    });
+  },
+
+  /**
+   * Uma pagina da vitrine (lista-paginada, contrato de 03/10). Devolve
+   * `PaginaDeLojas` — ou o array, se o servidor ainda nao tiver o e0f072f
+   * (`comoPagina` trata os dois).
+   */
+  getPage(page: number, coords?: Coords | null, size: number = LOJAS_POR_PAGINA) {
+    return api.get<PaginaDeLojas | Establishment[]>('/establishment', {
+      params: {
+        page,
+        size,
         // Tem de ir o PAR: coordenada pela metade é 422 no backend.
         ...(coords ? { lat: coords.latitude, lng: coords.longitude } : {}),
       },

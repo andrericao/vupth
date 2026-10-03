@@ -1,9 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { establishmentService } from '../services/establishmentService';
 import { useLocationStore } from '@stores/locationStore';
 import { coordsDaLista, listaPodeBuscar } from '@domain/location/abertura';
+import { comoPagina, juntarPaginas, proximaPagina } from '@domain/establishment/paginacao';
 
-export function useEstablishments() {
+/** `ligado: false` segura a busca — a Home so a usa com busca ou categoria. */
+export function useEstablishments(ligado: boolean = true) {
   const coords = coordsDaLista(useLocationStore((s) => s.coords));
   const hydrated = useLocationStore((s) => s.hydrated);
   const gpsPending = useLocationStore((s) => s.gpsPending);
@@ -15,11 +17,11 @@ export function useEstablishments() {
     // busca e a lista era pedida duas ou três vezes por abertura.
     queryKey: ['establishments', coords?.latitude ?? null, coords?.longitude ?? null],
     queryFn: () => establishmentService.getAll(coords).then((res) => res.data),
-    enabled: listaPodeBuscar({ hydrated, gpsPending }),
+    enabled: ligado && listaPodeBuscar({ hydrated, gpsPending }),
     staleTime: 60000,
     // WebSocket ainda não funciona no device → polling para atualizar sozinho
     // (tempos de espera) sem puxar. Só roda com o app em foreground.
-    refetchInterval: 60000,
+    refetchInterval: ligado ? 60000 : false,
     retry: 2,
     retryDelay: (attempt) => Math.min(3000 * (attempt + 1), 10000),
   });
@@ -105,4 +107,32 @@ export function useEstablishmentHours(establishmentId: string) {
     // Loja antiga (ou backend sem a rota) devolve 404: não insistir.
     retry: false,
   });
+}
+
+/**
+ * A vitrine da Home em paginas de 20 (lista-paginada, 03/10): a primeira ao
+ * abrir, a proxima ao chegar no fim da lista, enquanto `hasNext`. A mesma
+ * espera pela localizacao decidida e o mesmo poll da lista inteira — o poll
+ * relê as paginas ja carregadas.
+ */
+export function useVitrinePaginada(ligado: boolean) {
+  const coords = coordsDaLista(useLocationStore((s) => s.coords));
+  const hydrated = useLocationStore((s) => s.hydrated);
+  const gpsPending = useLocationStore((s) => s.gpsPending);
+
+  const query = useInfiniteQuery({
+    queryKey: ['establishments-paginas', coords?.latitude ?? null, coords?.longitude ?? null],
+    queryFn: ({ pageParam }) =>
+      establishmentService.getPage(pageParam, coords).then((res) => comoPagina(res.data, pageParam)),
+    initialPageParam: 0,
+    getNextPageParam: proximaPagina,
+    enabled: ligado && listaPodeBuscar({ hydrated, gpsPending }),
+    staleTime: 60000,
+    refetchInterval: ligado ? 60000 : false,
+    retry: 2,
+    retryDelay: (attempt) => Math.min(3000 * (attempt + 1), 10000),
+  });
+
+  const data = query.data ? juntarPaginas(query.data.pages) : undefined;
+  return { ...query, data, isLoading: query.isPending };
 }
