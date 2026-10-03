@@ -37,6 +37,8 @@ export interface ActiveQueue {
   // mexida: é o que permite dizer "você já passou N pessoas" (progresso feito),
   // e não só quantas faltam. Sem ela a tela só sabe o que resta.
   initialPosition?: number;
+  /** A advertência da multa (abaixo de 1h30) já apareceu para este atendimento. */
+  multaAdvertida?: boolean;
 }
 
 interface QueueState {
