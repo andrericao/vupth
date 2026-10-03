@@ -25,6 +25,10 @@
         "EXPO_PUBLIC_API_ENV": "staging"
       }
     },
+    "preview-nativewind": {
+      "extends": "preview",
+      "channel": "nativewind"
+    },
     "production": {
       "autoIncrement": true,
       "channel": "production",
