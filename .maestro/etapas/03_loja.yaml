@@ -11,3 +11,27 @@ appId: ${APP_ID}
 - assertNotVisible:
     id: "fila-fechada-${PROF_ID}"
     label: "03.03 · não vê fila-fechada-${PROF_ID}"
+
+# Pra ontem (Andre, 26/09): ligado, a lista mostra so lojas abertas e livres —
+# a de teste, sem ninguem na fila, aparece; "ver todas" desliga.
+- tapOn:
+    text: "Início"
+    label: "03.04 · toca em Início"
+- tapOn:
+    id: "pra-ontem"
+    label: "03.05 · liga o Pra ontem"
+- extendedWaitUntil:
+    visible:
+      id: "pra-ontem-sair"
+    timeout: 30000
+    label: "03.06 · espera pra-ontem-sair"
+- extendedWaitUntil:
+    visible: ${LOJA}
+    timeout: 30000
+    label: "03.07 · vê ${LOJA} entre as livres"
+- tapOn:
+    id: "pra-ontem-sair"
+    label: "03.08 · desliga o Pra ontem"
+- assertNotVisible:
+    id: "pra-ontem-sair"
+    label: "03.09 · não vê pra-ontem-sair"
