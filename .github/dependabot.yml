@@ -29,6 +29,18 @@ updates:
       - dependency-name: react-test-renderer
       - dependency-name: eslint
         update-types: ["version-update:semver-major"]
+      # Majors presos ao Expo SDK (03/10, PRs #55, #56 e #58 vermelhos no CI):
+      # sobem no upgrade do SDK, junto com o resto.
+      # TypeScript 7: o verify do Expo quebra (TypeError 'Cjs').
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      # RNTL 14: o render vira Promise — getByTestId some em dezenas de testes.
+      - dependency-name: "@testing-library/react-native"
+        update-types: ["version-update:semver-major"]
+      # async-storage 3: o AppBoot e o queryPersist nao rodam. O "react-native-*"
+      # de cima nao pega o nome com escopo.
+      - dependency-name: "@react-native-async-storage/async-storage"
+        update-types: ["version-update:semver-major"]
     groups:
       menores:
         update-types: [minor, patch]
