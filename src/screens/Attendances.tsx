@@ -1,16 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { Alert, TouchableOpacity, RefreshControl } from "react-native";
+import { Alert, TouchableOpacity, RefreshControl, ScrollView, Text, View } from "react-native";
 import { useNavigation, useFocusEffect, useScrollToTop } from "@react-navigation/native";
-import {
-  VStack,
-  Text,
-  Box,
-  HStack,
-  Center,
-  ScrollView,
-  Badge,
-  BadgeText,
-} from "@gluestack-ui/themed";
 import { Users, Clock, ChevronRight, Calendar, Repeat2, Star } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
@@ -203,13 +193,13 @@ export function Attendances() {
   }
 
   return (
-    <VStack flex={1} bg="$brandBackground">
-      <Box px={16}>
+    <View className="flex-1 bg-vupth-background">
+      <View className="px-4">
         <ScreenHeader root title="Atendimentos" />
-      </Box>
-      <Box px={16} alignItems="flex-start">
+      </View>
+      <View className="px-4 items-start">
         <AtualizarNoNavegador atualizando={isRefetching} onPress={() => refetch()} />
-      </Box>
+      </View>
 
       <ScrollView
         ref={rolagemRef}
@@ -222,43 +212,39 @@ export function Attendances() {
         }
       >
         {semAvaliar && (
-          <Box px={16} mt="$5">
+          <View className="px-4 mt-5">
             <TouchableOpacity onPress={() => setDetailFor(semAvaliar)} testID="convite-avaliar">
-              <HStack bg="$greenTint" borderRadius="$card" p="$4" gap="$3" alignItems="center">
+              <View className="flex-row bg-vupth-greenTint rounded-card p-4 gap-3 items-center">
                 <Star size={20} color="#163300" />
-                <VStack flex={1}>
-                  <Text fontFamily="$heading" size="sm" color="$forest">
+                <View className="flex-1">
+                  <Text className="font-heading text-sm text-vupth-forest">
                     Como foi com {semAvaliar.professionalName}?
                   </Text>
-                  <Text size="xs" color="$brandTextSecondary">
+                  <Text className="font-body text-xs text-vupth-textSecondary">
                     Sua avaliação ajuda quem vem depois — toque para ver o atendimento.
                   </Text>
-                </VStack>
+                </View>
                 <TouchableOpacity
                   onPress={() =>
                     setRatingFor({ id: semAvaliar.id, name: semAvaliar.professionalName ?? "" })
                   }
                   testID="avaliar-agora"
                 >
-                  <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
-                    <Text fontFamily="$heading" fontSize={fs(12)} color="$forest">
+                  <View className="bg-vupth-green rounded-full px-3 py-1.5">
+                    <Text className="font-heading text-vupth-forest" style={{ fontSize: fs(12) }}>
                       Avaliar
                     </Text>
-                  </Box>
+                  </View>
                 </TouchableOpacity>
-              </HStack>
+              </View>
             </TouchableOpacity>
-          </Box>
+          </View>
         )}
 
-        <VStack mt="$6" px={16}>
+        <View className="mt-6 px-4">
           <Text
-            fontFamily="$body"
-            fontSize={fs(11)}
-            fontWeight="$bold"
-            letterSpacing={0.8}
-            color="$brandTextSecondary"
-            mb="$2.5"
+            className="font-body text-f11 font-bold text-vupth-textSecondary mb-2.5"
+            style={{ letterSpacing: 0.8 }}
           >
             EM ANDAMENTO
           </Text>
@@ -269,39 +255,26 @@ export function Attendances() {
             <TouchableOpacity onPress={handleGoToQueue}>
               {/* Unico card com borda verde-marca da tela: e o atendimento
                   VIVO, o que a pessoa abriu o app pra ver. */}
-              <VStack
-                bg="$brandBackground"
-                p="$4"
-                borderRadius="$card"
-                borderWidth={2}
-                borderColor="$brandGreen"
-                gap="$2"
-              >
-                <HStack alignItems="center" gap="$2.5">
+              <View className="bg-vupth-background p-4 rounded-card border-2 border-vupth-green gap-2">
+                <View className="flex-row items-center gap-2.5">
                   <Users size={20} color="#163300" />
-                  <VStack flex={1} gap="$0.5">
-                    <Text fontFamily="$display" fontSize={fs(16)} letterSpacing={-0.4} color="$forest">
+                  <View className="flex-1 gap-0.5">
+                    <Text className="font-display text-vupth-forest" style={{ fontSize: fs(16), letterSpacing: -0.4 }}>
                       {activeQueue.establishmentName}
                     </Text>
-                    <Text size="xs" color="$brandTextSecondary">
+                    <Text className="font-body text-xs text-vupth-textSecondary">
                       {activeQueue.professionalName}
                     </Text>
-                  </VStack>
+                  </View>
                   <ChevronRight size={18} color="#454745" />
-                </HStack>
-                <HStack
-                  bg="$brandGreen"
-                  borderRadius="$full"
-                  px={12}
-                  py={6}
-                  gap="$1.5"
-                  alignItems="center"
-                  alignSelf="flex-start"
+                </View>
+                <View
+                  className="flex-row bg-vupth-green rounded-full px-3 py-1.5 gap-1.5 items-center self-start"
                 >
                   {/* Pausado NAO pisca: o atendimento esta parado, e ponto
                       piscando sinalizaria movimento. */}
                   <LiveDot size={8} color="#163300" pulsing={!isPaused} />
-                  <Text size="xs" fontWeight="$semibold" color="$forest">
+                  <Text className="font-body text-xs font-semibold text-vupth-forest">
                     {isBeingAttended
                       ? "Em atendimento"
                       : isPaused
@@ -312,124 +285,112 @@ export function Attendances() {
                           ? "Calculando..."
                           : formatWaitTime(remaining)}
                   </Text>
-                </HStack>
-              </VStack>
+                </View>
+              </View>
             </TouchableOpacity>
           ) : (
-            <Box bg="$brandSurface" p="$4" borderRadius="$card">
-              <Text size="sm" color="$brandTextSecondary" textAlign="center">
+            <View className="bg-vupth-surface p-4 rounded-card">
+              <Text className="font-body text-sm text-vupth-textSecondary text-center">
                 Nenhum atendimento em andamento
               </Text>
-            </Box>
+            </View>
           )}
-        </VStack>
+        </View>
 
         {pendingSwaps.length > 0 && (
-          <VStack mt="$6" px={16}>
+          <View className="mt-6 px-4">
             <Text
-              fontFamily="$body"
-              fontSize={fs(11)}
-              fontWeight="$bold"
-              letterSpacing={0.8}
-              color="$brandTextSecondary"
-              mb="$2.5"
+              className="font-body text-f11 font-bold text-vupth-textSecondary mb-2.5"
+              style={{ letterSpacing: 0.8 }}
             >
               PEDIDOS DE TROCA
             </Text>
 
-            <VStack gap="$3">
+            <View className="gap-3">
               {pendingSwaps.map((s) => (
-                <Box key={s.offerId} bg="$brandSurface" p="$4" borderRadius="$card">
-                  <HStack alignItems="center" gap="$3">
+                <View className="bg-vupth-surface p-4 rounded-card" key={s.offerId}>
+                  <View className="flex-row items-center gap-3">
                     <Repeat2 size={22} color="#163300" />
-                    <VStack flex={1}>
-                      <Text fontFamily="$heading" size="sm">
+                    <View className="flex-1">
+                      <Text className="font-heading text-sm text-vupth-textPrimary">
                         {s.professionalName}
                       </Text>
-                      <Text size="xs" color="$brandTextSecondary">
+                      <Text className="font-body text-xs text-vupth-textSecondary">
                         {s.establishmentName}
                       </Text>
-                      <Text size="xs" color="$brandTextSecondary" mt="$1">
+                      <Text className="font-body text-xs text-vupth-textSecondary mt-1">
                         Aguardando alguém da fila ceder o lugar
                       </Text>
-                    </VStack>
+                    </View>
                     <TouchableOpacity
                       onPress={() => handleCancelSwap(s.offerId, s.professionalName)}
                       disabled={cancellingSwapId === s.offerId}
                     >
-                      <Text size="xs" color="$brandDanger" fontFamily="$heading">
+                      <Text className="font-heading text-xs text-vupth-danger">
                         {cancellingSwapId === s.offerId ? "Cancelando..." : "Cancelar"}
                       </Text>
                     </TouchableOpacity>
-                  </HStack>
-                </Box>
+                  </View>
+                </View>
               ))}
-            </VStack>
-          </VStack>
+            </View>
+          </View>
         )}
 
         {intentionGroups.length > 0 && (
-          <VStack mt="$6" px={16}>
+          <View className="mt-6 px-4">
             <Text
-              fontFamily="$body"
-              fontSize={fs(11)}
-              fontWeight="$bold"
-              letterSpacing={0.8}
-              color="$brandTextSecondary"
-              mb="$2.5"
+              className="font-body text-f11 font-bold text-vupth-textSecondary mb-2.5"
+              style={{ letterSpacing: 0.8 }}
             >
               AGENDAMENTOS
             </Text>
 
-            <VStack gap="$3">
+            <View className="gap-3">
               {intentionGroups.map((group) => (
-                <VStack key={group.day.toISOString()} gap="$2">
-                  <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
+                <View className="gap-2" key={group.day.toISOString()}>
+                  <Text className="font-heading text-xs text-vupth-textSecondary">
                     {group.dayLabel}
                   </Text>
                   {group.items.map((i) => (
-                    <Box key={i.id} bg="$brandSurface" p="$4" borderRadius="$card">
-                      <HStack alignItems="center" gap="$3">
+                    <View className="bg-vupth-surface p-4 rounded-card" key={i.id}>
+                      <View className="flex-row items-center gap-3">
                         <Calendar size={22} color="#163300" />
-                        <VStack flex={1}>
-                          <Text fontFamily="$heading" size="sm">
+                        <View className="flex-1">
+                          <Text className="font-heading text-sm text-vupth-textPrimary">
                             {i.professionalName}
                           </Text>
-                          <Text size="xs" color="$brandTextSecondary">
+                          <Text className="font-body text-xs text-vupth-textSecondary">
                             {i.services.map((s) => s.customName).join(", ") || i.establishmentName}
                           </Text>
-                          <Text size="xs" color="$brandTextSecondary" mt="$1">
+                          <Text className="font-body text-xs text-vupth-textSecondary mt-1">
                             Pedido para às {formatClockTime(new Date(i.desiredTime))}
                             {i.estimatedStartTime && i.estimatedStartTime !== i.desiredTime
                               ? ` · previsto ~${formatClockTime(new Date(i.estimatedStartTime))}`
                               : ""}
                           </Text>
-                        </VStack>
+                        </View>
                         <TouchableOpacity
                           onPress={() => handleCancelIntention(i.id, i.professionalName)}
                           disabled={cancellingId === i.id}
                         >
-                          <Text size="xs" color="$brandDanger" fontFamily="$heading">
+                          <Text className="font-heading text-xs text-vupth-danger">
                             {cancellingId === i.id ? "Cancelando..." : "Cancelar"}
                           </Text>
                         </TouchableOpacity>
-                      </HStack>
-                    </Box>
+                      </View>
+                    </View>
                   ))}
-                </VStack>
+                </View>
               ))}
-            </VStack>
-          </VStack>
+            </View>
+          </View>
         )}
 
-        <VStack mt="$6" px={16}>
+        <View className="mt-6 px-4">
           <Text
-            fontFamily="$body"
-            fontSize={fs(11)}
-            fontWeight="$bold"
-            letterSpacing={0.8}
-            color="$brandTextSecondary"
-            mb="$2.5"
+            className="font-body text-f11 font-bold text-vupth-textSecondary mb-2.5"
+            style={{ letterSpacing: 0.8 }}
           >
             REALIZADOS
           </Text>
@@ -437,14 +398,14 @@ export function Attendances() {
           {isLoading ? (
             <SkeletonList count={3} />
           ) : realizados.length === 0 ? (
-            <Center py="$8">
+            <View className="items-center justify-center py-8">
               <Clock size={40} color="#9CA3AF" />
-              <Text size="sm" color="$brandTextSecondary" mt="$2">
+              <Text className="font-body text-sm text-vupth-textSecondary mt-2">
                 Nenhum atendimento realizado ainda
               </Text>
-            </Center>
+            </View>
           ) : (
-            <VStack gap="$3">
+            <View className="gap-3">
               {realizados.map((a) => {
                 const st = HISTORY_STATUS[a.status] ?? {
                   label: STATUS_DESCONHECIDO,
@@ -454,46 +415,47 @@ export function Attendances() {
                 const canRate = podeAvaliar(a, ratedIds);
                 return (
                   <TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => setDetailFor(a)}>
-                    <Box bg="$brandSurface" p="$4" borderRadius="$card">
-                      <HStack justifyContent="space-between" alignItems="flex-start">
-                        <VStack flex={1} pr="$2">
-                          <Text fontFamily="$heading" size="sm">
+                    <View className="bg-vupth-surface p-4 rounded-card">
+                      <View className="flex-row justify-between items-start">
+                        <View className="flex-1 pr-2">
+                          <Text className="font-heading text-sm text-vupth-textPrimary">
                             {a.professionalName}
                           </Text>
-                          <Text size="xs" color="$brandTextSecondary">
+                          <Text className="font-body text-xs text-vupth-textSecondary">
                             {a.services.map((s) => s.customName).join(", ") || "—"}
                           </Text>
-                          <Text size="xs" color="$brandTextSecondary" mt="$1">
+                          <Text className="font-body text-xs text-vupth-textSecondary mt-1">
                             {formatDateTime(a.startTime ?? a.scheduledTime)}
                           </Text>
-                        </VStack>
-                        <VStack alignItems="flex-end" gap="$1">
-                          <Badge bg={st.bg} borderRadius="$full" px="$3" py="$1">
-                            <BadgeText color={st.fg} size="xs" fontFamily="$heading">
+                        </View>
+                        <View className="items-end gap-1">
+                          {/* O par (fundo, texto) do status vem em hex: `style`. */}
+                          <View className="rounded-full px-3 py-1" style={{ backgroundColor: st.bg }}>
+                            <Text className="font-heading text-xs" style={{ color: st.fg }}>
                               {st.label}
-                            </BadgeText>
-                          </Badge>
-                          <Text size="xs" color="$brandTextSecondary">
+                            </Text>
+                          </View>
+                          <Text className="font-body text-xs text-vupth-textSecondary">
                             {/* Sem valor a tela nao quebra: `toFixed` em
                                  undefined derruba a lista inteira, e um card
                                  sem preco e melhor que uma tela branca. */}
                             {a.totalValue != null ? `R$ ${a.totalValue.toFixed(2)}` : "—"}
                           </Text>
-                        </VStack>
-                      </HStack>
-                      <HStack alignItems="center" gap="$1" mt="$3">
+                        </View>
+                      </View>
+                      <View className="flex-row items-center gap-1 mt-3">
                         <ChevronRight size={13} color={canRate ? "#163300" : "#454745"} />
-                        <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
+                        <Text className="font-heading text-xs text-vupth-textSecondary">
                           {canRate ? "Toque para detalhes e avaliar" : "Toque para ver detalhes"}
                         </Text>
-                      </HStack>
-                    </Box>
+                      </View>
+                    </View>
                   </TouchableOpacity>
                 );
               })}
-            </VStack>
+            </View>
           )}
-        </VStack>
+        </View>
       </ScrollView>
       <PilulaVoltarAoTopo
         visivel={pilula.visivel}
@@ -523,6 +485,7 @@ export function Attendances() {
         professionalName={ratingFor?.name}
         onClose={() => setRatingFor(null)}
       />
-    </VStack>
+    </View>
   );
 }
+
