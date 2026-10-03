@@ -1,5 +1,4 @@
-import { TouchableOpacity } from "react-native";
-import { VStack, HStack, Text, Box, Center, ScrollView } from "@gluestack-ui/themed";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Users } from "lucide-react-native";
 
 import { goToLoginAfterOnboarding } from "@routes/navigationRef";
@@ -39,62 +38,60 @@ export function Onboarding() {
     // tem 330px fixos e num telefone pequeno o texto + os botoes passam da
     // altura util. Sem isso o "Ver filas perto de mim" ficaria inalcancavel.
     <ScrollView
-      flex={1}
-      bg="$brandBackground"
+      className="flex-1 bg-vupth-background"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} bg="$brandBackground">
+      {/* NativeWind (DEC-5): mesmas medidas do v1; o heroi e o corpo seguem
+          com tamanho e altura de linha em `style`. */}
+      <View className="flex-1 bg-vupth-background">
       {/* O Pencil usa uma foto de barbearia aqui. Nao entrou porque nao ha
           arte de onboarding no projeto — e ir buscar uma foto de banco de
           imagem por conta propria seria escolher a cara da marca sem combinar.
           No lugar, o painel usa o "V" sobre o verde-claro: e material que ja
-          e nosso. Quando a arte existir, ela entra neste Box. */}
-      <Box px={16} pt={8}>
-        <Center height={330} borderRadius={28} overflow="hidden" bg="$greenTint">
+          e nosso. Quando a arte existir, ela entra nesta caixa. */}
+      <View className="px-4 pt-2">
+        <View className="h-[330px] rounded-[28px] overflow-hidden bg-vupth-greenTint items-center justify-center">
           <BrandMark size={104} />
-        </Center>
-      </Box>
+        </View>
+      </View>
 
-      <VStack flex={1} px={16} pt="$7" gap="$3">
+      <View className="flex-1 px-4 pt-7 gap-3">
         <Text
-          fontFamily="$display"
-          fontSize={fs(38)}
-          lineHeight={fs(39)}
-          letterSpacing={-1.7}
-          color="$forest"
+          className="font-display text-vupth-forest"
+          style={{ fontSize: fs(38), lineHeight: fs(39), letterSpacing: -1.7 }}
         >
           CHEGA DE FILA
         </Text>
-        <Text size="md" color="$brandTextSecondary" lineHeight={fs(23)}>
+        <Text className="font-body text-md text-vupth-textSecondary" style={{ lineHeight: fs(23) }}>
           Veja quem está livre perto de você e entre na fila.
         </Text>
         {openNow > 0 && (
-          <HStack gap="$2" alignItems="center" mt="$1">
+          <View className="flex-row gap-2 items-center mt-1">
             <Users size={16} color="#163300" />
-            <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary">
+            <Text className="font-body text-sm font-semibold text-vupth-textPrimary">
               {openNow === 1
                 ? "1 lugar aberto agora perto de você"
                 : `${openNow} lugares abertos agora perto de você`}
             </Text>
-          </HStack>
+          </View>
         )}
-      </VStack>
+      </View>
 
-      <VStack px={16} pb={32} gap="$3.5" alignItems="center">
+      <View className="px-4 pb-8 gap-3.5 items-center">
         <Button title="Ver filas perto de mim" onPress={() => go("home")} testID="onboarding-start" />
-        <HStack gap="$1.5" alignItems="center">
-          <Text size="sm" color="$brandTextSecondary">
+        <View className="flex-row gap-1.5 items-center">
+          <Text className="font-body text-sm text-vupth-textSecondary">
             Já tem conta?
           </Text>
           <TouchableOpacity onPress={() => go("login")} testID="onboarding-login">
-            <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+            <Text className="font-heading text-sm text-vupth-forest">
               Entrar
             </Text>
           </TouchableOpacity>
-        </HStack>
-      </VStack>
-      </VStack>
+        </View>
+      </View>
+      </View>
     </ScrollView>
   );
 }
