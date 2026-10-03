@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Alert, TouchableOpacity } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { ScrollView, Text, VStack, HStack } from "@gluestack-ui/themed";
 import { UserRound } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
@@ -83,51 +82,41 @@ export function CompleteProfile() {
     }
   }
 
+  // NativeWind (DEC-5): mesmas medidas do v1; o heroi e o corpo seguem com
+  // tamanho e altura de linha do v1 em `style`.
   return (
     <ScrollView
-      flex={1}
-      bg="$brandBackground"
+      className="flex-1 bg-vupth-background"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} px={16} pb={32}>
+      <View className="flex-1 px-4 pb-8">
         {/* Sem voltar: a conta JA foi criada. Voltar pro cadastro seria
             oferecer refazer o que ja esta feito. A saida daqui e "Agora nao". */}
         <ScreenHeader root />
 
-        <VStack gap="$2.5" mt="$2">
-          <HStack
-            bg="$greenTint"
-            borderRadius="$full"
-            px={14}
-            py={8}
-            gap="$2"
-            alignItems="center"
-            alignSelf="flex-start"
-          >
+        <View className="gap-2.5 mt-2">
+          <View className="flex-row self-start items-center gap-2 bg-vupth-greenTint rounded-full px-[14px] py-2">
             <UserRound size={15} color="#163300" />
-            <Text fontFamily="$heading" fontSize={fs(12)} color="$forest">
+            <Text className="font-heading text-vupth-forest" style={{ fontSize: fs(12) }}>
               CONTA CRIADA
             </Text>
-          </HStack>
+          </View>
 
           <Text
-            fontFamily="$display"
-            fontSize={fs(34)}
-            lineHeight={fs(36)}
-            letterSpacing={-1.5}
-            color="$forest"
+            className="font-display text-vupth-forest"
+            style={{ fontSize: fs(34), lineHeight: fs(36), letterSpacing: -1.5 }}
           >
             QUASE LÁ
           </Text>
-          <Text size="md" color="$brandTextSecondary" lineHeight={fs(23)}>
+          <Text className="font-body text-md text-vupth-textSecondary" style={{ lineHeight: fs(23) }}>
             {daFila
               ? "Só o seu nome — é por ele que o profissional vai te chamar."
               : "Só o seu nome, para o profissional saber quem chamar."}
           </Text>
-        </VStack>
+        </View>
 
-        <VStack mt="$7">
+        <View className="mt-7">
           <Input2
             placeholder="Como podemos te chamar?"
             value={nome}
@@ -138,9 +127,9 @@ export function CompleteProfile() {
             onSubmitEditing={salvar}
             testID="complete-profile-name"
           />
-        </VStack>
+        </View>
 
-        <VStack flex={1} justifyContent="flex-end" gap="$3" alignItems="center">
+        <View className="flex-1 justify-end gap-3 items-center">
           <Button
             title={salvando ? "Salvando..." : "Continuar"}
             isDisabled={nome.trim().length === 0 || salvando}
@@ -150,12 +139,12 @@ export function CompleteProfile() {
           {/* Pular e legitimo: sem nome o app funciona. O link some do caminho
               principal sem esconder a saida. */}
           <TouchableOpacity onPress={seguir} disabled={salvando} testID="complete-profile-skip">
-            <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
+            <Text className="font-body text-sm font-semibold text-vupth-textSecondary">
               Agora não
             </Text>
           </TouchableOpacity>
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
   );
 }
