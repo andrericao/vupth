@@ -37,8 +37,11 @@ export function notificationRoute(data: unknown): string | null {
 // máquina de permissão 100% testável sem tocar em módulo nativo.
 export type PushEnv = {
   isDevice: boolean;
-  getPermissionsAsync: () => Promise<{ status: string }>;
+  getPermissionsAsync: () => Promise<{ status: string; canAskAgain?: boolean }>;
   requestPermissionsAsync: () => Promise<{ status: string }>;
+  /** Já houve a caixa do sistema neste aparelho (persistido por quem chama). */
+  jaPerguntou?: () => Promise<boolean>;
+  marcarPerguntado?: () => Promise<void>;
   getExpoPushTokenAsync: (opts: { projectId?: string }) => Promise<{ data: string }>;
   projectId?: string;
 };
@@ -73,8 +76,11 @@ export async function acquireExpoPushToken(env: PushEnv): Promise<ResultadoPush>
   if (!env.isDevice) return { token: null, motivo: 'emulador' };
 
   try {
-    let { status } = await env.getPermissionsAsync();
-    if (status !== 'granted') {
+    let { status, canAskAgain } = await env.getPermissionsAsync();
+    // Pede só quando ainda não foi respondida (Andre, 02/10: a caixa voltava a
+    // cada abertura). Negou uma vez, fica negado até ele mudar nos ajustes.
+    if (status === 'undetermined' && canAskAgain !== false && !(await env.jaPerguntou?.())) {
+      await env.marcarPerguntado?.();
       status = (await env.requestPermissionsAsync()).status;
     }
     if (status !== 'granted') return { token: null, motivo: 'sem-permissao' };

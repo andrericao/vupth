@@ -126,6 +126,48 @@ describe('acquireExpoPushToken', () => {
     expect(r.motivo).toBe('sem-token');
   });
 
+  it('já respondida (negada) → não pede de novo a cada abertura', async () => {
+    const request = jest.fn(async () => ({ status: 'granted' }));
+    const r = await acquireExpoPushToken(
+      baseEnv({
+        getPermissionsAsync: async () => ({ status: 'denied', canAskAgain: true }),
+        requestPermissionsAsync: request,
+      }),
+    );
+    expect(request).not.toHaveBeenCalled();
+    expect(r.motivo).toBe('sem-permissao');
+  });
+
+  it('o sistema não deixa perguntar de novo → não pede', async () => {
+    const request = jest.fn(async () => ({ status: 'granted' }));
+    await acquireExpoPushToken(
+      baseEnv({
+        getPermissionsAsync: async () => ({ status: 'undetermined', canAskAgain: false }),
+        requestPermissionsAsync: request,
+      }),
+    );
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it('a caixa já apareceu neste aparelho → não pede; a primeira vez marca', async () => {
+    const request = jest.fn(async () => ({ status: 'denied' }));
+    const marcar = jest.fn(async () => {});
+    const undetermined = async () => ({ status: 'undetermined' });
+
+    await acquireExpoPushToken(
+      baseEnv({ getPermissionsAsync: undetermined, requestPermissionsAsync: request,
+        jaPerguntou: async () => false, marcarPerguntado: marcar }),
+    );
+    expect(marcar).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(1);
+
+    await acquireExpoPushToken(
+      baseEnv({ getPermissionsAsync: undetermined, requestPermissionsAsync: request,
+        jaPerguntou: async () => true, marcarPerguntado: marcar }),
+    );
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
   it('pede permissão só quando ainda não concedida', async () => {
     const request = jest.fn(async () => ({ status: 'granted' }));
     await acquireExpoPushToken(
