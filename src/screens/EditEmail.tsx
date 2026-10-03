@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { VStack, Text, ScrollView } from "@gluestack-ui/themed";
 
 import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
@@ -46,45 +45,44 @@ export function EditEmail() {
     }
   }
 
+  // NativeWind (DEC-5): primeira tela convertida — mesmas medidas do v1
+  // (px 16, pb 30, pt 24; gap $4 = 16, $1 = 4; mt $8 = 32).
   return (
     <ScrollView
-      flex={1}
-      bg="$brandBackground"
+      className="flex-1 bg-vupth-background"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} pb={30} px={16} bg="$brandBackground">
+      <View className="flex-1 pb-[30px] px-4 bg-vupth-background">
         <ScreenHeader title="ALTERAR E-MAIL" />
 
-        <VStack pt={24} flex={1}>
+        <View className="pt-6 flex-1">
+          <View className="gap-4">
+            <View className="gap-1">
+              <Text className="font-body text-sm text-vupth-textSecondary">E-mail atual</Text>
+              <Text className="font-heading text-md text-vupth-textPrimary">{user?.email}</Text>
+            </View>
 
-        <VStack gap="$4">
-          <VStack gap="$1">
-            <Text size="sm" color="$brandTextSecondary">E-mail atual</Text>
-            <Text size="md" fontFamily="$heading">{user?.email}</Text>
-          </VStack>
+            <View className="gap-1">
+              <Text className="font-body text-sm text-vupth-textSecondary">Novo e-mail</Text>
+              <Input2
+                placeholder="novo@email.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
 
-          <VStack gap="$1">
-            <Text size="sm" color="$brandTextSecondary">Novo e-mail</Text>
-            <Input2
-              placeholder="novo@email.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </VStack>
-        </VStack>
-
-        <VStack mt="$8">
           <Button
             title={isSaving ? "Salvando..." : "Salvar"}
             onPress={handleSave}
             isDisabled={isSaving}
+            className="mt-8"
           />
-        </VStack>
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
   );
 }
