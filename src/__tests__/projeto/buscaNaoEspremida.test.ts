@@ -16,7 +16,8 @@ describe('a busca da Home não espreme o texto', () => {
   });
 
   it('a caixa tem altura mínima, e o texto altura de linha', () => {
-    expect(campo).toMatch(/minHeight=\{50\}/);
+    // NativeWind (DEC-5): a altura minima e a classe `min-h-[50px]` da caixa.
+    expect(campo).toMatch(/min-h-\[50px\]/);
     // O tamanho escolhido nas Configuracoes soma aqui tambem (fs).
     expect(campo).toMatch(/lineHeight: fs\(20\)/);
   });
