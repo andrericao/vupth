@@ -7,6 +7,7 @@
 # branch da pasta no GitHub — a dev e o OTA do canal preview), roda o roteiro e devolve o
 # autofill e o corretor (restaurar.sh), mesmo se a rodada falhar.
 #
+# Ao fim, o relatorio etapa a etapa (✅/❌/⏭), na tela e em relatorio.txt.
 # Os logs e prints de cada rodada caem em .maestro/logs/<data> (no .gitignore,
 # logs-da-bateria-na-pasta): a equipe le o erro sem o Andre colar. Rodada
 # verde nao guarda nada; a falha fica ate uma rodada seguinte passar do passo
@@ -51,6 +52,20 @@ FALHOU=""
 if [ "$STATUS" -ne 0 ]; then
   FALHOU=$(passos RUNNING | grep -vxFf <(passos 'COMPLETED|SKIPPED') | tail -1)
 fi
+
+# Relatorio etapa a etapa (bateria-nao-para, 03/10): cada "00.NN · ..." do
+# roteiro com ✅ (terminou), ❌ (comecou e nao terminou) ou ⏭ (nao rodou) —
+# mesmo parando numa altura, da para saber o que passou.
+relatorio() {
+  grep -oP 'label: "\K00\.\d\d · [^"]*' "$DIR/bateria_completa.yaml" | while IFS= read -r etapa; do
+    if passos 'COMPLETED|SKIPPED' | grep -qxF "$etapa"; then echo "✅ $etapa"
+    elif passos RUNNING | grep -qxF "$etapa"; then echo "❌ $etapa"
+    else echo "⏭  $etapa (nao rodou)"; fi
+  done
+}
+echo ""
+echo "=== Relatorio da rodada ==="
+relatorio | tee "$RODADA/relatorio.txt"
 
 # Rodadas antigas: sai a que falhou num passo que esta rodada passou (ou toda
 # falha, se esta passou inteira) e a que ficou sem marca (interrompida).
