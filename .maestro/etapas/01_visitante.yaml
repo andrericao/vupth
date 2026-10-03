@@ -21,9 +21,11 @@ appId: ${APP_ID}
 - assertVisible:
     id: "terms"
     label: "01.06 · vê terms"
-- assertVisible:
-    id: "versao-visitante"
-    label: "01.07 · vê versao-visitante"
+# A versao e o primeiro lugar em que o commit aparece: se nao for o esperado,
+# a bateria para aqui (bateria-confere-versao, 03/10).
+- runFlow:
+    file: ../apoio/confere_versao.yaml
+    label: "01.07 · confere a versão (commit) em versao-visitante"
 - assertNotVisible:
     text: "APARÊNCIA"
     label: "01.08 · não vê APARÊNCIA"

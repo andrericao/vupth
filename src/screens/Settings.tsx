@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { Alert, TouchableOpacity } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import * as Updates from "expo-updates";
+import Constants from "expo-constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   VStack,
@@ -16,7 +17,7 @@ import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone, Palette } f
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { nomeDeExibicao } from "@domain/auth/displayName";
-import { rotuloDaVersao } from "@domain/versao";
+import { commitDoApp, rotuloDaVersao } from "@domain/versao";
 import { Button } from "@components/Button";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
@@ -351,7 +352,7 @@ export function Settings() {
           </HStack>
           {!isAuthenticated && (
             <Text size="2xs" color="$brandTextSecondary" testID="versao-visitante">
-              {rotuloDaVersao(Updates.runtimeVersion, Updates.createdAt)}
+              {rotuloDaVersao(Updates.runtimeVersion, Updates.createdAt, commitDoApp(Constants.expoConfig?.extra))}
             </Text>
           )}
         </VStack>

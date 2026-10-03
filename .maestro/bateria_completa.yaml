@@ -19,6 +19,9 @@ env:
   APP_ID: com.vupth.client.preview
   API: https://vupth-backend-ia.onrender.com
   SENHA: "Teste@123"
+  # O commit que o app deve rodar — a 01.07 para a bateria se nao bater.
+  # O setup.sh imprime o comando com ele (o ultimo da origin/dev).
+  COMMIT: ""
 ---
 - evalScript:
     script: ${output.TAG = String(Date.now()).slice(-6)}

@@ -1,0 +1,35 @@
+# Confere que o app no aparelho roda o commit esperado (Andre, 03/10 —
+# bateria-confere-versao). Chamado no Perfil do visitante, o primeiro lugar em
+# que a versao aparece; se nao bater, a bateria PARA aqui, antes de criar conta.
+#
+# Por que pode nao bater de primeira: o `launchApp clearState` da 00.05 apaga o
+# OTA baixado, e o app abre no bundle EMBUTIDO do APK. O OTA novo baixa nessa
+# abertura e so vale na proxima — entao, se o commit nao bate, fecha e abre de
+# novo (sem limpar) ate 3 vezes, dando tempo ao download.
+#
+# Entrada: COMMIT (o setup.sh imprime o comando com ele).
+appId: ${APP_ID}
+---
+- copyTextFrom:
+    id: "versao-visitante"
+- evalScript: ${output.VERSAO_OK = !!COMMIT && maestro.copiedText.toLowerCase().indexOf(String(COMMIT).trim().toLowerCase().slice(0, 8)) >= 0}
+- repeat:
+    times: 3
+    while:
+      true: ${!!COMMIT && !output.VERSAO_OK}
+    commands:
+      - stopApp
+      - launchApp
+      - extendedWaitUntil:
+          visible:
+            text: "Perfil"
+          timeout: 120000
+      - runFlow:
+          file: fechar_aviso.yaml
+      - tapOn:
+          text: "Perfil"
+      - copyTextFrom:
+          id: "versao-visitante"
+      - evalScript: ${output.VERSAO_OK = maestro.copiedText.toLowerCase().indexOf(String(COMMIT).trim().toLowerCase().slice(0, 8)) >= 0}
+- runScript:
+    file: ../scripts/confere_versao.js
