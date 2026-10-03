@@ -29,8 +29,9 @@ appId: ${APP_ID}
     visible: "Sair da fila?"
     timeout: 10000
     label: "05.07 · espera Sair da fila?"
+# Pelo id: o "Sim, sair" muda de posicao com o "Adiar minha vez".
 - tapOn:
-    text: "Sim, sair"
+    id: "dialogo-botao-destrutivo"
     label: "05.08 · toca em Sim, sair"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
