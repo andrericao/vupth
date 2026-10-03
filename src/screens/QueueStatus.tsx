@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
+import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
 import { Info, Repeat2, Check, ChevronRight } from "lucide-react-native";
 import * as SecureStore from "expo-secure-store";
 
@@ -593,28 +592,25 @@ export function QueueStatus() {
 
   if (isCreating) {
     return (
-      <Center flex={1} bg="$brandBackground" px={16}>
+      <View className="flex-1 items-center justify-center bg-vupth-background px-4">
         <ActivityIndicator size="large" color="#163300" />
-        <Text mt="$2" color="$brandTextSecondary">{createMsg}</Text>
-        <Text mt="$1" size="xs" color="$brandTextSecondary" textAlign="center">
+        <Text className="font-body text-md text-vupth-textSecondary mt-2">{createMsg}</Text>
+        <Text className="font-body text-xs text-vupth-textSecondary text-center mt-1">
           Na primeira vez pode levar até ~50s para o servidor acordar.
         </Text>
-      </Center>
+      </View>
     );
   }
 
   if (createError) {
     return (
-      <VStack flex={1} px={16} pb={30} bg="$brandBackground">
+      <View className="flex-1 px-4 pb-[30px] bg-vupth-background">
         <ScreenHeader title="NÃO DEU CERTO" onBack={() => navigation.goBack()} />
-        <Center flex={1}>
+        <View className="flex-1 items-center justify-center">
           <Text
             // [contraste] Era `$gray500` (#DDDEDF, 1,35:1 no branco) — a mensagem
             // sumia justo no caso NAO-erro. O neutro da marca e brandTextSecondary.
-            color={canRequestCut ? "$brandTextSecondary" : "$brandDanger"}
-            fontSize="$lg"
-            fontFamily="$heading"
-            textAlign="center"
+            className={`font-heading text-lg text-center ${canRequestCut ? "text-vupth-textSecondary" : "text-vupth-danger"}`}
           >
             {createError}
           </Text>
@@ -671,8 +667,8 @@ export function QueueStatus() {
               navigation.goBack();
             }}
           />
-        </Center>
-      </VStack>
+        </View>
+      </View>
     );
   }
 
@@ -702,47 +698,38 @@ export function QueueStatus() {
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
-        <VStack flex={1} bg="$brandBackground">
+        <View className="flex-1 bg-vupth-background">
           {/* Sem cabecalho: e um heroi de sucesso, sem voltar. Mas o topo vem
               do safe-area, nao de um 56 chutado. */}
-          <VStack style={{ paddingTop: insets.top + 12 }} px={16} gap="$4" alignItems="center">
-            <Center width={96} height={96} borderRadius={48} bg="$brandGreen">
+          <View style={{ paddingTop: insets.top + 12 }} className="px-4 gap-4 items-center">
+            <View className="w-24 h-24 rounded-[48px] bg-vupth-green items-center justify-center">
               <Check size={48} color="#163300" />
-            </Center>
-            <Text
-              fontFamily="$display"
-              fontSize={fs(32)}
-              letterSpacing={-1.4}
-              color="$forest"
-              textAlign="center"
-            >
+            </View>
+            <Text className="font-display text-f32 text-vupth-forest text-center" style={{ letterSpacing: -1.4 }}>
               PRONTO!
             </Text>
-            <Text size="sm" color="$brandTextSecondary" textAlign="center">
+            <Text className="font-body text-sm text-vupth-textSecondary text-center">
               {activeQueue?.professionalName ?? paramProfName ?? "Atendimento"}
               {servicos != null ? ` · ${formatWaitTime(servicos)}` : ""}
             </Text>
-          </VStack>
+          </View>
 
-          <VStack flex={1} px={16} pt="$8" gap="$4">
+          <View className="flex-1 px-4 pt-8 gap-4">
             {/* O convite pra avaliar so aparece se ainda nao avaliou — depois
                 de enviar, insistir e so ruido. */}
             {attendanceId && !jaAvaliou && (
-              <VStack bg="$brandSurface" borderRadius={20} p={20} gap="$4" alignItems="center">
+              <View className="bg-vupth-surface rounded-card p-5 gap-4 items-center">
                 <Text
-                  fontFamily="$display"
-                  fontSize={fs(17)}
-                  letterSpacing={-0.3}
-                  color="$brandTextPrimary"
-                  textAlign="center"
+                  className="font-display text-vupth-textPrimary text-center"
+                  style={{ fontSize: fs(17), letterSpacing: -0.3 }}
                 >
                   Como foi o atendimento?
                 </Text>
                 <Button title="Avaliar atendimento" onPress={() => setShowRating(true)} />
-                <Text size="xs" color="$brandTextSecondary" textAlign="center">
+                <Text className="font-body text-xs text-vupth-textSecondary text-center">
                   Sua nota aparece para outros clientes
                 </Text>
-              </VStack>
+              </View>
             )}
 
             {/* "Marcar de novo": o caminho de volta pro mesmo profissional, que
@@ -756,27 +743,27 @@ export function QueueStatus() {
                 }}
                 testID="book-again"
               >
-                <HStack bg="$greenTint" borderRadius={18} p={16} gap="$3.5" alignItems="center">
+                <View className="flex-row bg-vupth-greenTint rounded-[18px] p-4 gap-3.5 items-center">
                   <PlaceAvatar
                     name={activeQueue.professionalName ?? "?"}
                     size={52}
                     bg="$brandGreen"
                   />
-                  <VStack flex={1} gap="$0.5">
-                    <Text fontFamily="$heading" fontSize={fs(15)} color="$forest">
+                  <View className="flex-1 gap-0.5">
+                    <Text className="font-heading text-f15 text-vupth-forest">
                       Marcar de novo com {activeQueue.professionalName ?? "o profissional"}
                     </Text>
-                    <Text size="xs" color="$forest">
+                    <Text className="font-body text-xs text-vupth-forest">
                       {activeQueue.establishmentName ?? ""}
                     </Text>
-                  </VStack>
+                  </View>
                   <ChevronRight size={20} color="#163300" />
-                </HStack>
+                </View>
               </TouchableOpacity>
             )}
-          </VStack>
+          </View>
 
-          <VStack px={16} pt="$6" gap="$3" alignItems="center">
+          <View className="px-4 pt-6 gap-3 items-center">
             <Button
               title="Voltar ao início"
               variant="outline"
@@ -786,8 +773,8 @@ export function QueueStatus() {
               }}
               testID="finish-home"
             />
-          </VStack>
-        </VStack>
+          </View>
+        </View>
 
         <RatingModal
           visible={showRating}
@@ -801,10 +788,10 @@ export function QueueStatus() {
 
   if (waitingInQueue) {
     return (
-      <VStack flex={1} bg="$brandGreen">
+      <View className="flex-1 bg-vupth-green">
         {/* `ground="marca"` porque o hero e brand-green: os botoes vao de
             forest translucido. O verde-claro padrao sumiria sobre o verde. */}
-        <Box px={16}>
+        <View className="px-4">
           <ScreenHeader
             ground="marca"
             onBack={() => navigation.navigate("home")}
@@ -819,7 +806,7 @@ export function QueueStatus() {
               </HeaderIconButton>
             }
           />
-        </Box>
+        </View>
 
         <ScrollView
           contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 20 }}
@@ -828,13 +815,7 @@ export function QueueStatus() {
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#163300" colors={["#163300"]} />
           }
         >
-          <Text
-            fontFamily="$body"
-            fontSize={fs(13)}
-            fontWeight="$bold"
-            letterSpacing={1}
-            color="$forest"
-          >
+          <Text className="font-body text-f13 font-bold text-vupth-forest" style={{ letterSpacing: 1 }}>
             PARA A SUA VEZ
           </Text>
 
@@ -844,22 +825,13 @@ export function QueueStatus() {
           {peopleAhead != null ? (
             <>
               <Text
-                fontFamily="$display"
-                fontSize={fs(110)}
-                lineHeight={fs(112)}
-                letterSpacing={-6}
-                color="$forest"
+                className="font-display text-vupth-forest"
+                style={{ fontSize: fs(110), lineHeight: fs(112), letterSpacing: -6 }}
                 testID="queue-position"
               >
                 {peopleAhead}
               </Text>
-              <Text
-                fontFamily="$display"
-                fontSize={fs(26)}
-                letterSpacing={-0.8}
-                color="$forest"
-                textAlign="center"
-              >
+              <Text className="font-display text-f26 text-vupth-forest text-center" style={{ letterSpacing: -0.8 }}>
                 {peopleAhead === 0
                   ? "você é o próximo"
                   : peopleAhead === 1
@@ -869,11 +841,8 @@ export function QueueStatus() {
             </>
           ) : (
             <Text
-              fontFamily="$display"
-              fontSize={fs(72)}
-              lineHeight={fs(78)}
-              letterSpacing={-3}
-              color="$forest"
+              className="font-display text-vupth-forest"
+              style={{ fontSize: fs(72), lineHeight: fs(78), letterSpacing: -3 }}
               testID="queue-time"
             >
               {timeLabel}
@@ -884,7 +853,7 @@ export function QueueStatus() {
               da tela ele hierarquiza sem virar uma segunda cor. So o ALPHA
               subiu — 0x99 dava 3,40:1 sobre o verde e reprovava no AA; 0xBF da
               4,99:1 e continua mais leve que o forest chapado do numero. */}
-          <Text fontFamily="$body" fontSize={fs(15)} color="#163300BF" mt="$1">
+          <Text className="font-body text-f15 text-[#163300BF] mt-1">
             {semPrevisao
               ? "calculando a espera"
               : remaining! <= 0
@@ -897,34 +866,31 @@ export function QueueStatus() {
               zerada no primeiro segundo nao informa nada. */}
           {passed > 0 && initial != null && (
             <>
-              <HStack gap="$2" alignItems="center" mt="$6">
+              <View className="flex-row gap-2 items-center mt-6">
                 {Array.from({ length: Math.min(initial, 8) }).map((_, i) => {
                   const done = i < Math.min(passed, 8);
                   return (
-                    <Center
+                    <View
                       key={i}
-                      width={done ? 12 : 8}
-                      height={done ? 12 : 8}
-                      borderRadius="$full"
                       // O ponto apagado e TRILHA (decoracao), nao informacao:
-                      // quem informa e o ponto cheio, em $forest e maior. Por
+                      // quem informa e o ponto cheio, em forest e maior. Por
                       // isso o alpha baixo fica.
-                      bg={done ? "$forest" : "#16330040"}
+                      className={`rounded-full ${done ? "w-3 h-3 bg-vupth-forest" : "w-2 h-2 bg-[#16330040]"}`}
                     />
                   );
                 })}
-              </HStack>
+              </View>
               {/* [contraste] Mesma logica do subtitulo acima: alpha 0xB3 dava
                   4,38:1 sobre o verde, 0xCC da 5,69:1. Fica um degrau ACIMA do
                   subtitulo, como era antes. */}
-              <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color="#163300CC" mt="$3">
+              <Text className="font-body text-f13 font-semibold text-[#163300CC] mt-3">
                 Você já passou {passed} {passed === 1 ? "pessoa" : "pessoas"}
               </Text>
             </>
           )}
-          <Box mt="$5">
+          <View className="mt-5">
             <AtualizarNoNavegador atualizando={refreshing} onPress={handleRefresh} />
-          </Box>
+          </View>
         </ScrollView>
 
         {/* A faixa fixa de 20/09 saiu (teste de 25/09): ela empurrava "Sair da
@@ -940,27 +906,24 @@ export function QueueStatus() {
         <FaixaDaTolerancia key={activeQueue?.toleranceUntil ?? 0} ate={activeQueue?.toleranceUntil} />
 
         {mostrarFaixaDeSaida && (
-          <Box px={16} pb="$2">
-            <Box
+          <View className="px-4 pb-2">
+            <View
               // Com multa, ambar: e o estado que pede atencao. Sem multa, o forest
               // translucido do resto da tela verde.
-              bg={saidaAtual.confirmacao ? "$brandWarning" : "#1633001A"}
-              borderRadius="$card"
-              px="$3.5"
-              py="$2.5"
+              className={`rounded-card px-3.5 py-2.5 ${saidaAtual.confirmacao ? "bg-vupth-warning" : "bg-[#1633001A]"}`}
               testID="faixa-de-saida"
             >
-              <HStack alignItems="center" gap="$2">
+              <View className="flex-row items-center gap-2">
                 <Info size={16} color="#163300" />
-                <Text size="xs" color="$forest" flex={1}>
+                <Text className="font-body text-xs text-vupth-forest flex-1">
                   {saidaAtual.faixa}
                 </Text>
-              </HStack>
-            </Box>
-          </Box>
+              </View>
+            </View>
+          </View>
         )}
 
-        <VStack px={16} style={{ paddingBottom: Math.max(28, insets.bottom + 16) }} gap="$3.5" alignItems="center">
+        <View className="px-4 gap-3.5 items-center" style={{ paddingBottom: Math.max(28, insets.bottom + 16) }}>
           {canReshuffle && (
             <TouchableOpacity
               onPress={handleOpenChangeTurn}
@@ -968,21 +931,14 @@ export function QueueStatus() {
               style={{ width: "100%" }}
               testID="change-turn"
             >
-              <HStack
-                bg="$forest"
-                borderRadius="$full"
-                gap="$2"
-                px={24}
-                py={15}
-                justifyContent="center"
-                alignItems="center"
-                opacity={isRemanejando ? 0.6 : 1}
+              <View
+                className={`flex-row bg-vupth-forest rounded-full gap-2 px-6 py-[15px] justify-center items-center ${isRemanejando ? "opacity-60" : ""}`}
               >
                 <Repeat2 size={17} color="#9FE870" />
-                <Text fontFamily="$heading" fontSize={fs(15)} color="$brandGreen">
+                <Text className="font-heading text-f15 text-vupth-green">
                   {isRemanejando ? "Um instante..." : "Mudar minha vez"}
                 </Text>
-              </HStack>
+              </View>
             </TouchableOpacity>
           )}
           {/* Os pedidos de troca — os que eu posso aceitar, com o lugar e o
@@ -990,7 +946,7 @@ export function QueueStatus() {
               solicitacao depois"). A tela verde nao tinha como chegar neles. */}
           {canReshuffle && (
             <TouchableOpacity onPress={() => setShowSwapOffers(true)} testID="ver-trocas">
-              <Text fontFamily="$heading" fontSize={fs(14)} color="$forest">
+              <Text className="font-heading text-f14 text-vupth-forest">
                 {acceptableCount > 0 ? `Pedidos de troca (${acceptableCount})` : "Pedidos de troca"}
               </Text>
             </TouchableOpacity>
@@ -1000,12 +956,12 @@ export function QueueStatus() {
               para quem procura, sem gritar para quem nao esta procurando. */}
           {canCancel && (
             <TouchableOpacity onPress={handleCancel} disabled={isRemanejando} testID="leave-queue">
-              <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color="#163300CC">
+              <Text className="font-body text-f13 font-semibold text-[#163300CC]">
                 Sair da fila
               </Text>
             </TouchableOpacity>
           )}
-        </VStack>
+        </View>
 
         <RescheduleModal
           visible={showReschedule}
@@ -1040,12 +996,12 @@ export function QueueStatus() {
           onChanged={refresh}
         />
         <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
-      </VStack>
+      </View>
     );
   }
 
   return (
-    <VStack flex={1} px={16} pb={30} bg="$brandBackground">
+    <View className="flex-1 px-4 pb-[30px] bg-vupth-background">
       <ScreenHeader title="SUA VEZ" onBack={() => navigation.navigate("home")} />
 
       <ScrollView
@@ -1055,8 +1011,8 @@ export function QueueStatus() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#163300" colors={["#163300"]} />
         }
       >
-      <Center flex={1}>
-        <Heading fontFamily="$heading" fontSize="$2xl" textAlign="center">
+      <View className="flex-1 items-center justify-center">
+        <Text className="font-heading text-2xl text-vupth-textPrimary text-center">
           {isFinished
             ? "Atendimento concluído ✅"
             : isPaused
@@ -1064,21 +1020,15 @@ export function QueueStatus() {
               : isBeingAttended
                 ? "Em atendimento!"
                 : "Você está na fila!"}
-        </Heading>
+        </Text>
 
-        <Box
-          bg="$brandSurface"
-          p="$6"
-          mt="$6"
-          borderRadius="$card"
-          borderWidth="$2"
-          borderColor={borderColor}
-          w="$full"
-          alignItems="center"
+        <View
+          className="bg-vupth-surface p-6 mt-6 rounded-card border-2 w-full items-center"
+          style={{ borderColor }}
         >
           {!isFinished && (
-            <HStack alignItems="center" gap="$1">
-              <Text size="sm" color="$brandTextSecondary">
+            <View className="flex-row items-center gap-1">
+              <Text className="font-body text-sm text-vupth-textSecondary">
                 {isBeingAttended ? "Tempo de atendimento" : "Duração estimada"}
               </Text>
               {!isBeingAttended && (
@@ -1095,83 +1045,82 @@ export function QueueStatus() {
                   <Info size={16} color="#454745" />
                 </TouchableOpacity>
               )}
-            </HStack>
+            </View>
           )}
-          <Heading
-            fontFamily="$heading"
-            fontSize="$4xl"
-            color={timeColor}
+          <Text
+            className="font-heading"
+            style={{ fontSize: fs(36), lineHeight: fs(44), color: timeColor }}
             testID="queue-time"
           >
             {timeLabel}
-          </Heading>
+          </Text>
 
-          <Box w="$full" h="$px" bg="$brandBorder" my="$4" />
+          <View className="w-full h-px bg-vupth-border my-4" />
 
           {isInQueue && (
-            <HStack w="$full" justifyContent="space-between" mb="$3">
-              <Text size="sm" color="$brandTextSecondary">Previsão de início</Text>
-              <Text size="sm" fontFamily="$heading">
+            <View className="flex-row w-full justify-between mb-3">
+              <Text className="font-body text-sm text-vupth-textSecondary">Previsão de início</Text>
+              <Text className="font-heading text-sm text-vupth-textPrimary">
                 {semPrevisao ? "Calculando..." : remaining! <= 0 ? "A qualquer momento" : startTimeLabel}
               </Text>
-            </HStack>
+            </View>
           )}
 
           {isBeingAttended && activeQueue?.serviceMinutes != null && (
-            <HStack w="$full" justifyContent="space-between" mb="$3">
-              <Text size="sm" color="$brandTextSecondary">Duração estimada</Text>
-              <Text size="sm" fontFamily="$heading">
+            <View className="flex-row w-full justify-between mb-3">
+              <Text className="font-body text-sm text-vupth-textSecondary">Duração estimada</Text>
+              <Text className="font-heading text-sm text-vupth-textPrimary">
                 {formatWaitTime(activeQueue.serviceMinutes)}
               </Text>
-            </HStack>
+            </View>
           )}
 
           {endTimeLabel && (
-            <HStack w="$full" justifyContent="space-between" mb="$3">
-              <Text size="sm" color="$brandTextSecondary">Horário de término</Text>
-              <Text size="sm" fontFamily="$heading">{endTimeLabel}</Text>
-            </HStack>
+            <View className="flex-row w-full justify-between mb-3">
+              <Text className="font-body text-sm text-vupth-textSecondary">Horário de término</Text>
+              <Text className="font-heading text-sm text-vupth-textPrimary">{endTimeLabel}</Text>
+            </View>
           )}
 
-          <HStack w="$full" justifyContent="space-between" mb="$3">
-            <Text size="sm" color="$brandTextSecondary">Estabelecimento</Text>
-            <Text size="sm" fontFamily="$heading">
+          <View className="flex-row w-full justify-between mb-3">
+            <Text className="font-body text-sm text-vupth-textSecondary">Estabelecimento</Text>
+            <Text className="font-heading text-sm text-vupth-textPrimary">
               {activeQueue?.establishmentName ?? paramEstName ?? "..."}
             </Text>
-          </HStack>
+          </View>
 
-          <HStack w="$full" justifyContent="space-between" mb="$3">
-            <Text size="sm" color="$brandTextSecondary">Profissional</Text>
-            <Text size="sm" fontFamily="$heading">
+          <View className="flex-row w-full justify-between mb-3">
+            <Text className="font-body text-sm text-vupth-textSecondary">Profissional</Text>
+            <Text className="font-heading text-sm text-vupth-textPrimary">
               {activeQueue?.professionalName ?? paramProfName ?? "..."}
             </Text>
-          </HStack>
+          </View>
 
-          <HStack w="$full" justifyContent="space-between">
-            <Text size="sm" color="$brandTextSecondary">Status</Text>
-            <Text size="sm" fontFamily="$heading">
+          <View className="flex-row w-full justify-between">
+            <Text className="font-body text-sm text-vupth-textSecondary">Status</Text>
+            <Text className="font-heading text-sm text-vupth-textPrimary">
               {STATUS_LABELS[status] ?? STATUS_DESCONHECIDO}
             </Text>
-          </HStack>
-        </Box>
+          </View>
+        </View>
 
         {/* No navegador nao ha "arrastar para baixo": a dica vira o botao. */}
         {ehNavegador() ? (
-          <Box mt="$4">
+          <View className="mt-4">
             <AtualizarNoNavegador atualizando={refreshing} onPress={handleRefresh} />
-          </Box>
+          </View>
         ) : (
-          <Text size="xs" color="$brandTextSecondary" mt="$4" textAlign="center">
+          <Text className="font-body text-xs text-vupth-textSecondary text-center mt-4">
             A fila atualiza sozinha — arraste para baixo para atualizar agora
           </Text>
         )}
-      </Center>
+      </View>
       </ScrollView>
 
-      <VStack gap="$3" mt="$4">
+      <View className="gap-3 mt-4">
         {canReshuffle && (
           <>
-            <Text size="xs" color="$brandTextSecondary" textAlign="center">
+            <Text className="font-body text-xs text-vupth-textSecondary text-center">
               Não pode esperar agora? Você pode adiantar ou atrasar a sua vez.
             </Text>
             <Button
@@ -1210,7 +1159,7 @@ export function QueueStatus() {
             onPress={handleCancel}
           />
         )}
-      </VStack>
+      </View>
 
       <RescheduleModal
         visible={showReschedule}
@@ -1252,6 +1201,6 @@ export function QueueStatus() {
         professionalName={activeQueue?.professionalName ?? paramProfName}
         onClose={() => setShowRating(false)}
       />
-    </VStack>
+    </View>
   );
 }
