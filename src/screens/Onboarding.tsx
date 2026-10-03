@@ -5,6 +5,7 @@ import { Users } from "lucide-react-native";
 import { goToLoginAfterOnboarding } from "@routes/navigationRef";
 import { Button } from "@components/Button";
 import { BrandMark } from "@components/BrandMark";
+import { VersaoDoApp } from "@components/VersaoDoApp";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { isEffectivelyOpen } from "@domain/establishment/types";
@@ -93,6 +94,7 @@ export function Onboarding() {
             </Text>
           </TouchableOpacity>
         </HStack>
+        <VersaoDoApp testID="versao-entrada" />
       </VStack>
       </VStack>
     </ScrollView>
