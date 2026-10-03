@@ -19,7 +19,13 @@
   },
   "jest": {
     "preset": "jest-expo",
-    "coverageReporters": ["json", "json-summary", "lcov", "text", "clover"],
+    "coverageReporters": [
+      "json",
+      "json-summary",
+      "lcov",
+      "text",
+      "clover"
+    ],
     "transformIgnorePatterns": [
       "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|react-navigation|@react-navigation/.*|@gluestack-ui/.*|@gluestack-style/.*|@legendapp/.*|lucide-react-native)"
     ],
@@ -45,6 +51,14 @@
       "\\.svg$": "<rootDir>/src/__tests__/__mocks__/svgMock.js",
       "^lucide-react-native$": "<rootDir>/node_modules/lucide-react-native/dist/cjs/lucide-react-native.js",
       "^@react-native-async-storage/async-storage$": "<rootDir>/node_modules/@react-native-async-storage/async-storage/jest/async-storage-mock.js"
+    },
+    "coverageThreshold": {
+      "global": {
+        "lines": 81,
+        "branches": 72,
+        "functions": 75,
+        "statements": 80
+      }
     }
   },
   "dependencies": {
