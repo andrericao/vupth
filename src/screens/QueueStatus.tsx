@@ -104,6 +104,8 @@ export function QueueStatus() {
   const [canRequestCut, setCanRequestCut] = useState(false);
   const [isRequestingCut, setIsRequestingCut] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  // Ja se sabe se o aviso da estimativa abre? Ate la, nenhum outro dialogo.
+  const [disclaimerDecidido, setDisclaimerDecidido] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isRemanejando, setIsRemanejando] = useState(false);
@@ -133,8 +135,12 @@ export function QueueStatus() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const hidden = await SecureStore.getItemAsync(DISCLAIMER_KEY);
-      if (active && hidden !== "1") setShowDisclaimer(true);
+      try {
+        const hidden = await SecureStore.getItemAsync(DISCLAIMER_KEY);
+        if (active && hidden !== "1") setShowDisclaimer(true);
+      } finally {
+        if (active) setDisclaimerDecidido(true);
+      }
     })();
     return () => {
       active = false;
@@ -412,10 +418,12 @@ export function QueueStatus() {
   // vez, uma vez por atendimento, a politica com as saidas sem custo. Adiar
   // nao da tolerancia nova — o `toleranceUntil` segue o da entrada.
   // O ref segura o segundo aviso enquanto a marca no store ainda esta sendo gravada.
+  // Espera o aviso da estimativa ("Entendi") fechar: os dois abriam juntos na
+  // entrada e, no Android, a advertencia sumia com ele (bateria 03/10, 05.05).
   const advertiu = useRef<string | null>(null);
   useEffect(() => {
     const id = activeQueue?.attendanceId;
-    if (!id) return;
+    if (!id || !disclaimerDecidido || showDisclaimer) return;
     const jaAdvertido = !!activeQueue.multaAdvertida || advertiu.current === id;
     if (!deveAdvertir({ restante: semPrevisao ? null : remaining, aguardando: canReshuffle, jaAdvertido })) return;
     advertiu.current = id;
@@ -429,7 +437,7 @@ export function QueueStatus() {
       ...(aviso.sairDeGraca ? [{ text: aviso.sairDeGraca, onPress: () => { sair(null); } }] : []),
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeQueue?.attendanceId, activeQueue?.multaAdvertida, remaining, semPrevisao, canReshuffle]);
+  }, [activeQueue?.attendanceId, activeQueue?.multaAdvertida, remaining, semPrevisao, canReshuffle, disclaimerDecidido, showDisclaimer]);
 
   // D15 (Andre, 24/09): "Sair da fila" pede DOIS toques seguidos. O primeiro so
   // mostra a faixa — o que acontece se sair, e a instrucao. Com multa (ou sem

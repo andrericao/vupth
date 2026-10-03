@@ -1,4 +1,5 @@
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ForgotPassword } from '@screens/ForgotPassword';
@@ -12,6 +13,8 @@ import { authService } from '@services/authService';
 // Este teste fixa o contrato do conserto: tentativas curtas, aviso de que a
 // espera é o servidor acordando, e uma desistência que NÃO dispara o POST.
 
+const mockNavigate = jest.fn();
+
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 // Mock PARCIAL, de proposito. Substituir o modulo inteiro derruba quem depende
@@ -21,7 +24,7 @@ jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }))
 // `(0, _native.createNavigatorFactory) is not a function`.
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
-  useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
+  useNavigation: () => ({ navigate: mockNavigate, goBack: jest.fn() }),
   useRoute: () => ({ params: {} }),
 }));
 jest.mock('@services/healthService', () => ({ waitForBackend: jest.fn() }));
@@ -123,5 +126,62 @@ describe('ForgotPassword — passo 1 (enviar código)', () => {
 
     expect(mockForgotPassword).toHaveBeenCalledWith('cliente@vupth.com');
     expect(await findByPlaceholderText('Código de 6 dígitos')).toBeTruthy();
+  });
+});
+
+describe('ForgotPassword — e-mail sem conta e muitas tentativas (Backend, 03/10)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockWaitForBackend.mockResolvedValue(true);
+  });
+
+  async function renderAndSend() {
+    const utils = renderWithProviders(<ForgotPassword />);
+    fireEvent.changeText(utils.getByPlaceholderText('E-mail'), ' semconta@vupth.com ');
+    await act(async () => {
+      fireEvent.press(utils.getByTestId('forgot-send'));
+    });
+    return utils;
+  }
+
+  it('404 EMAIL_NOT_FOUND: avisa, não vai para o passo do código e oferece o cadastro', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    mockForgotPassword.mockRejectedValue({ response: { status: 404, data: { code: 'EMAIL_NOT_FOUND' } } });
+
+    const { queryByPlaceholderText } = await renderAndSend();
+
+    await waitFor(() => expect(alert).toHaveBeenCalled());
+    const [titulo, , botoes] = alert.mock.calls[0];
+    expect(titulo).toBe('E-mail sem conta');
+    expect(queryByPlaceholderText('Código de 6 dígitos')).toBeNull();
+
+    const criar = (botoes as { text: string; onPress?: () => void }[]).find((b) => b.text === 'Criar conta');
+    criar?.onPress?.();
+    expect(mockNavigate).toHaveBeenCalledWith('signUp', { email: 'semconta@vupth.com' });
+    alert.mockRestore();
+  });
+
+  it('429: "muitas tentativas" com o tempo do Retry-After', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    mockForgotPassword.mockRejectedValue({
+      response: { status: 429, data: { code: 'TOO_MANY_REQUESTS' }, headers: { 'retry-after': '45' } },
+    });
+
+    await renderAndSend();
+
+    await waitFor(() =>
+      expect(alert).toHaveBeenCalledWith('Muitas tentativas', 'Muitas tentativas seguidas. Tente de novo em 45 s.'),
+    );
+    alert.mockRestore();
+  });
+
+  it('outro erro: a mensagem do servidor', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    mockForgotPassword.mockRejectedValue({ response: { status: 500, data: { message: 'Falhou' } } });
+
+    await renderAndSend();
+
+    await waitFor(() => expect(alert).toHaveBeenCalledWith('Erro', 'Falhou'));
+    alert.mockRestore();
   });
 });

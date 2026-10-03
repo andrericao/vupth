@@ -6,8 +6,10 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
+import { VersaoDoApp } from "@components/VersaoDoApp";
 import { validateLogin } from "@domain/auth/validateAuth";
 import { postAuthRoute } from "@domain/auth/postAuthRoute";
+import { AVISO_SEM_CONTA, erroDeAcesso } from "@domain/auth/errosDeAcesso";
 import { useAuthStore } from "@stores/authStore";
 import { useTabBarInset } from "@hooks/useTabBarInset";
 import { fs } from "@stores/fonteStore";
@@ -59,9 +61,20 @@ export function Login() {
       } else {
         navigation.replace(destino.rota as never, destino.params as never);
       }
-    } catch (error: any) {
-      const message = error.response?.data?.message || "Erro ao fazer login";
-      Alert.alert("Erro", message);
+    } catch (error) {
+      const erro = erroDeAcesso(error, "Erro ao fazer login");
+      if (erro.tipo === "sem-conta") {
+        // 401 EMAIL_NOT_FOUND: em vez de "senha errada", oferecer o cadastro
+        // com o e-mail já digitado (contrato do Backend, 03/10).
+        Alert.alert(AVISO_SEM_CONTA.titulo, AVISO_SEM_CONTA.mensagem, [
+          { text: AVISO_SEM_CONTA.corrigir, style: "cancel" },
+          { text: AVISO_SEM_CONTA.criar, onPress: handleSignUp },
+        ]);
+      } else if (erro.tipo === "muitas-tentativas") {
+        Alert.alert(erro.titulo, erro.mensagem);
+      } else {
+        Alert.alert("Erro", erro.mensagem);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -69,6 +82,7 @@ export function Login() {
 
   function handleSignUp() {
     navigation.navigate("signUp", {
+      email: email.trim() || undefined,
       redirectTo: params.redirectTo,
       establishmentId: params.establishmentId,
       professionalId: params.professionalId,
@@ -166,6 +180,7 @@ export function Login() {
               </Text>
             </TouchableOpacity>
           </View>
+          <VersaoDoApp testID="versao-login" />
         </View>
       </View>
     </ScrollView>

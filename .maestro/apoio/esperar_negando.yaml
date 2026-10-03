@@ -1,0 +1,30 @@
+# Espera o elemento ALVO aparecer NEGANDO a caixa de permissao do sistema que
+# vier no meio da espera (Andre, 03/10 — bateria-ainda-pede-mao). O
+# `extendedWaitUntil` so olha: a caixa da localizacao (na abertura, 00.06) e a
+# da notificacao (depois do cadastro, 02.10) cobriam a tela e a espera vencia
+# — o Andre tinha de tocar no aparelho. Aqui, a cada 3 s, se a caixa estiver
+# na tela, nega; senao, espera mais um pouco. 40 voltas ~ 2 min.
+#
+# Entrada: ALVO (o testID esperado)
+appId: ${APP_ID}
+---
+- repeat:
+    times: 40
+    while:
+      notVisible:
+        id: ${ALVO}
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: "com.android.permissioncontroller:id/permission_deny_button"
+          commands:
+            - tapOn:
+                id: "com.android.permissioncontroller:id/permission_deny_button"
+      - extendedWaitUntil:
+          visible:
+            id: ${ALVO}
+          timeout: 3000
+          optional: true
+- assertVisible:
+    id: ${ALVO}

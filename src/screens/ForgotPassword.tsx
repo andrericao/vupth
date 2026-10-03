@@ -8,6 +8,7 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { PasswordRules } from "@components/PasswordRules";
 import { getPasswordRules } from "@domain/auth/validateAuth";
+import { AVISO_SEM_CONTA, erroDeAcesso } from "@domain/auth/errosDeAcesso";
 import { authService } from "@services/authService";
 import { waitForBackend } from "@services/healthService";
 import { useTabBarInset } from "@hooks/useTabBarInset";
@@ -96,7 +97,8 @@ export function ForgotPassword() {
 
       const isResend = step === "reset";
       await authService.forgotPassword(email.trim());
-      // Sempre 200 (anti-enumeração) — não revelamos se o e-mail existe.
+      // E-mail sem conta agora volta 404 EMAIL_NOT_FOUND (Backend, 03/10) e
+      // cai no catch: a tela não segue para esperar um código que não vem.
       if (isResend) {
         Alert.alert("Código reenviado", "Confira seu e-mail (vale 15 minutos).");
       } else {
@@ -114,8 +116,20 @@ export function ForgotPassword() {
         setStep("reset");
         return;
       }
-      const msg = error.response?.data?.message || error.message || "Erro ao enviar o código";
-      Alert.alert("Erro", msg);
+      const erro = erroDeAcesso(error, "Erro ao enviar o código");
+      if (erro.tipo === "sem-conta") {
+        Alert.alert(AVISO_SEM_CONTA.titulo, AVISO_SEM_CONTA.mensagem, [
+          { text: AVISO_SEM_CONTA.corrigir, style: "cancel" },
+          {
+            text: AVISO_SEM_CONTA.criar,
+            onPress: () => navigation.navigate("signUp", { email: email.trim() }),
+          },
+        ]);
+      } else if (erro.tipo === "muitas-tentativas") {
+        Alert.alert(erro.titulo, erro.mensagem);
+      } else {
+        Alert.alert("Erro", erro.mensagem);
+      }
     } finally {
       setSendPhase("idle");
       setIsSubmitting(false);

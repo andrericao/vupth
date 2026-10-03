@@ -78,3 +78,31 @@ describe('os perfis do eas.json casam com as variantes', () => {
     expect(prodApk.env.EXPO_PUBLIC_API_ENV).toBe(easJson.build.production.env.EXPO_PUBLIC_API_ENV);
   });
 });
+
+describe('o commit carimbado no bundle (a bateria confere a versão, 03/10)', () => {
+  const carimbo = (env: Record<string, string | undefined>) => {
+    const antes = { ...process.env };
+    Object.assign(process.env, env);
+    for (const [k, v] of Object.entries(env)) if (v === undefined) delete process.env[k];
+    try {
+      return (appConfig({ config: appJson }) as unknown as { extra: { commit?: string; eas: unknown } }).extra;
+    } finally {
+      process.env = antes;
+    }
+  };
+
+  it('no OTA vem do GITHUB_SHA, e o extra do app.json continua', () => {
+    const extra = carimbo({ GITHUB_SHA: 'c65338e7aaaa', EAS_BUILD_GIT_COMMIT_HASH: 'ffff' });
+    expect(extra.commit).toBe('c65338e7aaaa');
+    expect(extra.eas).toEqual(appJson.extra.eas);
+  });
+
+  it('no build do EAS vem do EAS_BUILD_GIT_COMMIT_HASH', () => {
+    expect(carimbo({ GITHUB_SHA: undefined, EAS_BUILD_GIT_COMMIT_HASH: 'abcdef12' }).commit).toBe('abcdef12');
+  });
+
+  it('local, vem do git', () => {
+    const extra = carimbo({ GITHUB_SHA: undefined, EAS_BUILD_GIT_COMMIT_HASH: undefined });
+    expect(extra.commit).toMatch(/^[0-9a-f]{40}$/);
+  });
+});

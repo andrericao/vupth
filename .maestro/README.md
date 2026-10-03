@@ -5,11 +5,26 @@ Roda no **APK de preview** (`com.vupth.client.preview`), contra o **staging**
 no celular.
 
 ```bash
-bash .maestro/setup.sh      # confere celular e APK, desliga corretor e autofill, acorda o staging
-# o setup.sh imprime o comando final:
-maestro test -e APP_ID=com.vupth.client.preview -e API=https://vupth-backend-ia.onrender.com -e SENHA=Teste@123 .maestro/bateria_completa.yaml
-bash .maestro/restaurar.sh  # devolve o autofill e o corretor
+bash .maestro/bateria.sh    # um comando só (03/10)
 ```
+
+O `bateria.sh` chama o `setup.sh` (celular, APK, corretor e autofill, acorda o
+staging), acha o `COMMIT` esperado sozinho (o último da `origin/dev`), roda o
+roteiro e, no fim — verde ou não —, o `restaurar.sh`.
+
+**Os logs ficam na pasta (03/10).** Cada rodada grava o `console.txt`, o
+`maestro.log`, os prints e o `falhou_em` (o passo `NN.MM` que falhou) em
+`.maestro/logs/<data>/`, no `.gitignore` — a equipe lê o erro direto dali.
+Rodada verde não guarda nada; os logs de uma falha somem sozinhos quando uma
+rodada seguinte passa daquele passo.
+
+**A versão antes de tudo (03/10).** O app mostra o commit do JS que roda no
+fim da versão — no Perfil do visitante e no rodapé das Boas-vindas e do Entrar (`Versão 1.0.3 · 03/10/2026 · c65338e7`). A 01.07
+compara com o `COMMIT` — o `bateria.sh` usa o último da `origin/dev`, que é o
+do OTA do canal preview. O `clearState` da 00.05 apaga o OTA baixado e o app
+abre no bundle do APK; por isso a 01.07 fecha e abre o app (sem limpar) até
+3 vezes, para o OTA novo entrar. Não bateu: a bateria para com o instalado e
+o esperado na mensagem.
 
 Cada rodada cria contas e uma loja **novas** (sufixo = hora da rodada). A loja
 não vem do app do Partner: `scripts/loja_aberta.js` a monta pela API —
@@ -21,7 +36,7 @@ dono e profissional na mesma conta, trabalhando, com um serviço, aberta das
 
 | # | Etapa | O que confere |
 |---|-------|---------------|
-| 01 | `visitante` | Sem conta, o Perfil mostra só Criar conta, Entrar, os Termos e a versão — nenhum grupo de menu (Andre, 02/10) |
+| 01 | `visitante` | Sem conta, o Perfil mostra só Criar conta, Entrar, os Termos e a versão — nenhum grupo de menu (Andre, 02/10). Na 01.07 a versão tem de mostrar o `COMMIT` esperado; se não, a bateria para ali (03/10) |
 | 02 | `cadastro` | Cadastro pelo convite do Perfil, nome na tela seguinte; logado, o Perfil mostra Conta e Aparência |
 | 03 | `loja` | A loja aparece na busca do Início, com o profissional trabalhando e a fila aberta; o "Pra ontem" a mostra entre as livres |
 | 04 | `fim_de_fila_hibrido` | As duas portas (Entrar na fila e Agendar um horário), a regra da multa antes de entrar e o "Mais opções" só com a troca (C20) |
@@ -35,7 +50,8 @@ dono e profissional na mesma conta, trabalhando, com um serviço, aberta das
 | 12 | `aparencia` | Perfil → Aparência: o tema avisa "Tema escuro", a fonte +2 salva e continua na tela; volta ao Normal |
 
 `apoio/` tem os pedaços repetidos (abrir a loja, escolher o serviço, fechar
-um aviso) e `scripts/` as chamadas à API.
+um aviso, conferir a versão e o `esperar_negando`, que espera uma tela negando a
+caixa de permissão do sistema que vier no meio — 00.06 e 02.10, 03/10) e `scripts/` as chamadas à API.
 
 ## O que a bateria não cobre
 

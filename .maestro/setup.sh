@@ -2,7 +2,8 @@
 # Prepara a bateria do Maestro do CLIENT (roteiro: .maestro/bateria_completa.yaml).
 # Espelha o setup.sh do vupth-partner.
 #
-# Uso:  bash .maestro/setup.sh
+# Uso:  bash .maestro/bateria.sh (chama este setup, roda e restaura). Sozinho,
+#       bash .maestro/setup.sh so prepara o celular.
 #
 # Precisa de: celular com "Depuracao USB" ligada, conectado no cabo, com o APK
 # de PREVIEW instalado (com.vupth.client.preview — aponta para o staging).
@@ -66,9 +67,10 @@ if [ "$HORA" -ge 2330 ]; then
   echo "AVISO: sao $(date +%H:%M). A loja de teste fecha as 23:59 — rode depois da meia-noite."
 fi
 
+# Chamado pela bateria.sh (BATERIA=1), ela segue sozinha daqui.
+[ -n "$BATERIA" ] && exit 0
+
 echo ""
-echo "Tudo pronto. Rode:"
+echo "Tudo pronto. A bateria inteira, com o commit esperado e os logs, e um comando so:"
 echo ""
-echo "  maestro test -e APP_ID=$APP_ID -e API=$API -e SENHA=Teste@123 .maestro/bateria_completa.yaml"
-echo ""
-echo "Ao terminar, devolva o preenchimento automatico:  bash .maestro/restaurar.sh"
+echo "  bash .maestro/bateria.sh"

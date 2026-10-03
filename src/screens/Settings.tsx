@@ -1,15 +1,14 @@
 import { useState, useCallback } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import * as Updates from "expo-updates";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone, Palette } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { nomeDeExibicao } from "@domain/auth/displayName";
-import { rotuloDaVersao } from "@domain/versao";
 import { Button } from "@components/Button";
+import { VersaoDoApp } from "@components/VersaoDoApp";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
@@ -334,9 +333,7 @@ export function Settings() {
             )}
           </View>
           {!isAuthenticated && (
-            <Text className="font-body text-f10 text-vupth-textSecondary" testID="versao-visitante">
-              {rotuloDaVersao(Updates.runtimeVersion, Updates.createdAt)}
-            </Text>
+            <VersaoDoApp testID="versao-visitante" />
           )}
         </View>
       </View>
