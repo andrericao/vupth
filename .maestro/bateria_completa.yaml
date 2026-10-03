@@ -53,16 +53,22 @@ env:
       id: "onboarding-start"
     timeout: 120000
     label: "00.06 · espera onboarding-start"
+# A caixa de localizacao do sistema vem por cima da abertura, mesmo com o
+# `permissions: deny` (Android 13+) — nega aqui, antes do primeiro toque, para
+# ninguem precisar tocar no aparelho (bateria-sozinha).
+- runFlow:
+    file: apoio/fechar_aviso.yaml
+    label: "00.07 · nega a caixa do sistema, se vier"
 
 - runFlow:
     file: etapas/01_visitante.yaml
-    label: "00.07 · roda 01_visitante"
+    label: "00.08 · roda 01_visitante"
 - runFlow:
     file: etapas/02_cadastro.yaml
     env:
       EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
       NOME_CLIENTE: ${output.NOME_CLIENTE}
-    label: "00.08 · roda 02_cadastro"
+    label: "00.09 · roda 02_cadastro"
 - runFlow:
     file: etapas/03_loja.yaml
     env:
@@ -70,16 +76,16 @@ env:
       LOJA: ${output.LOJA}
       PROF: ${output.PROF}
       PROF_ID: ${output.PROF_ID}
-    label: "00.09 · roda 03_loja"
+    label: "00.10 · roda 03_loja"
 - runFlow:
     file: etapas/04_fim_de_fila_hibrido.yaml
     env:
       PROF_ID: ${output.PROF_ID}
       SERVICO_ID: ${output.SERVICO_ID}
-    label: "00.10 · roda 04_fim_de_fila_hibrido"
+    label: "00.11 · roda 04_fim_de_fila_hibrido"
 - runFlow:
     file: etapas/05_entra_e_sai_com_multa.yaml
-    label: "00.11 · roda 05_entra_e_sai_com_multa"
+    label: "00.12 · roda 05_entra_e_sai_com_multa"
 - runFlow:
     file: etapas/06_multa_no_total.yaml
     env:
@@ -87,12 +93,12 @@ env:
       LOJA: ${output.LOJA}
       PROF_ID: ${output.PROF_ID}
       SERVICO_ID: ${output.SERVICO_ID}
-    label: "00.12 · roda 06_multa_no_total"
+    label: "00.13 · roda 06_multa_no_total"
 - runFlow:
     file: etapas/07_agendar_pela_barra.yaml
     env:
       PROF: ${output.PROF}
-    label: "00.13 · roda 07_agendar_pela_barra"
+    label: "00.14 · roda 07_agendar_pela_barra"
 - runFlow:
     file: etapas/08_fila_fechada.yaml
     env:
@@ -101,12 +107,12 @@ env:
       PROF_ID: ${output.PROF_ID}
       SERVICO_ID: ${output.SERVICO_ID}
       EMAIL_PROF: ${output.EMAIL_PROF}
-    label: "00.14 · roda 08_fila_fechada"
+    label: "00.15 · roda 08_fila_fechada"
 - runFlow:
     file: etapas/09_login.yaml
     env:
       EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
-    label: "00.15 · roda 09_login"
+    label: "00.16 · roda 09_login"
 - runFlow:
     file: etapas/10_pedido_de_corte.yaml
     env:
@@ -115,10 +121,10 @@ env:
       PROF_ID: ${output.PROF_ID}
       SERVICO_ID: ${output.SERVICO_ID}
       EMAIL_PROF: ${output.EMAIL_PROF}
-    label: "00.16 · roda 10_pedido_de_corte"
+    label: "00.17 · roda 10_pedido_de_corte"
 - runFlow:
     file: etapas/11_reabrir_o_app.yaml
-    label: "00.17 · roda 11_reabrir_o_app"
+    label: "00.18 · roda 11_reabrir_o_app"
 - runFlow:
     file: etapas/12_aparencia.yaml
-    label: "00.18 · roda 12_aparencia"
+    label: "00.19 · roda 12_aparencia"
