@@ -13,6 +13,8 @@ const mockNavigate = jest.fn();
 const mockLeave = jest.fn();
 let mockRemaining = 20;
 let mockValor: number | null = null;
+// A advertência da multa (CLI-12) já apareceu — aqui o assunto é a saída.
+let mockAdvertida = true;
 
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn().mockResolvedValue('1'),
@@ -39,6 +41,7 @@ jest.mock('@hooks/useQueueCountdown', () => ({
     refresh: jest.fn(),
     activeQueue: {
       attendanceId: 'a1',
+      multaAdvertida: mockAdvertida,
       professionalId: 'p1',
       professionalName: 'Carlos',
       establishmentId: 'e1',
@@ -88,6 +91,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     jest.clearAllMocks();
     mockRemaining = 20;
     mockValor = null;
+    mockAdvertida = true;
   });
 
   it('um toque só mostra a faixa — não sai, não pergunta nada', () => {
@@ -212,6 +216,61 @@ describe('QueueStatus — sair da fila (D15)', () => {
     expect(attendanceService.cancel).toHaveBeenCalledTimes(1);
     expect(mockNavigate).not.toHaveBeenCalled();
     expect(mockLeave).not.toHaveBeenCalled();
+    alerta.mockRestore();
+  });
+});
+
+// CLI-12 (Andre, 03/10): abaixo de 1h30, uma vez, a política da multa com as
+// saídas sem custo. Adiar não dá tolerância nova.
+describe('QueueStatus — advertência antes da multa', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockValor = null;
+    mockAdvertida = false;
+  });
+
+  it('com 1h20 para a vez: avisa as faixas e oferece adiar e sair de graça', () => {
+    mockRemaining = 80;
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    renderWithProviders(<QueueStatus />);
+    expect(alerta).toHaveBeenCalledTimes(1);
+    const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
+    expect(titulo).toBe('Sua vez está chegando');
+    expect(mensagem).toMatch(/R\$ 3,00/);
+    expect(mensagem).toMatch(/R\$ 5,00/);
+    expect(botoes.map((b) => b.text)).toEqual(['Continuar na fila', 'Adiar minha vez', 'Sair agora de graça']);
+    alerta.mockRestore();
+  });
+
+  it('"Sair agora de graça" sai sem a ciência de multa', async () => {
+    mockRemaining = 80;
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    renderWithProviders(<QueueStatus />);
+    const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
+    await act(async () => {
+      await botoes.find((b) => b.text === 'Sair agora de graça')!.onPress!();
+    });
+    expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk', undefined);
+    alerta.mockRestore();
+  });
+
+  it('com menos de 1h, sair já custa: só adiar ou continuar', () => {
+    mockRemaining = 20;
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    renderWithProviders(<QueueStatus />);
+    const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
+    expect(botoes.map((b) => b.text)).toEqual(['Continuar na fila', 'Adiar minha vez']);
+    alerta.mockRestore();
+  });
+
+  it('com 1h30 ou mais, ou já avisado, não aparece', () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    mockRemaining = 120;
+    renderWithProviders(<QueueStatus />);
+    mockRemaining = 40;
+    mockAdvertida = true;
+    renderWithProviders(<QueueStatus />);
+    expect(alerta).not.toHaveBeenCalled();
     alerta.mockRestore();
   });
 });

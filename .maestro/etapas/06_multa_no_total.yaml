@@ -3,15 +3,26 @@
 # env: TAG, LOJA, PROF_ID, SERVICO_ID
 appId: ${APP_ID}
 ---
-- runFlow: ../apoio/abrir_a_loja.yaml
-- runFlow: ../apoio/escolher_servico.yaml
+- runFlow:
+    file: ../apoio/abrir_a_loja.yaml
+    label: "06.01 · roda abrir_a_loja"
+- runFlow:
+    file: ../apoio/escolher_servico.yaml
+    label: "06.02 · roda escolher_servico"
 - extendedWaitUntil:
     visible:
       id: "multas-pendentes"
     timeout: 30000
+    label: "06.03 · espera multas-pendentes"
 - tapOn:
     id: "ver-multas"
+    label: "06.04 · toca em ver-multas"
 - assertVisible:
     id: "explicacao-multas"
-- assertVisible: "Multa pendente"
-- tapOn: "Entendi"
+    label: "06.05 · vê explicacao-multas"
+- assertVisible:
+    text: "Multa pendente"
+    label: "06.06 · vê Multa pendente"
+- tapOn:
+    text: "Entendi"
+    label: "06.07 · toca em Entendi"

@@ -1,3 +1,5 @@
+import * as SecureStore from 'expo-secure-store';
+
 import { assinar, estadoDaConexao } from '@services/stompCompartilhado';
 
 // C17 (reportado pelo Partner): o Client abria DUAS conexões STOMP — uma do
@@ -8,6 +10,7 @@ const mockClientes: MockClient[] = [];
 
 type MockClient = {
   connected: boolean;
+  connectHeaders?: Record<string, string>;
   config: Record<string, any>;
   subscribe: jest.Mock;
   activate: jest.Mock;
@@ -29,6 +32,10 @@ jest.mock('@stomp/stompjs', () => ({
 }));
 jest.mock('expo-secure-store');
 jest.mock('@services/api', () => ({ WS_URL: 'ws://teste' }));
+const mockRenovar = jest.fn();
+jest.mock('@stores/authStore', () => ({
+  useAuthStore: { getState: () => ({ refreshTokens: mockRenovar }) },
+}));
 
 function conectou(c: MockClient) {
   c.connected = true;
@@ -82,6 +89,75 @@ describe('a conexão STOMP única (C17)', () => {
     const [, entregar] = mockClientes[0].subscribe.mock.calls[0];
     entregar({ body: '{}' });
     expect(aoReceber).toHaveBeenCalledWith({ body: '{}' });
+    sair();
+  });
+});
+
+// C16 (renovar-token-no-ws, 03/10): renovar antes de conectar com token
+// vencido, e depois de um ERROR INVALID_TOKEN.
+describe('o token do CONNECT', () => {
+  const b64url = (o: object) =>
+    btoa(JSON.stringify(o)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const jwt = (exp: number) => `${b64url({ alg: 'HS256' })}.${b64url({ exp })}.x`;
+  const vencido = jwt(Math.floor(Date.now() / 1000) - 60);
+  const novo = jwt(Math.floor(Date.now() / 1000) + 3600);
+  const ler = SecureStore.getItemAsync as jest.Mock;
+
+  beforeEach(() => {
+    mockClientes.length = 0;
+    mockRenovar.mockReset();
+    ler.mockReset();
+  });
+
+  it('vencido: renova e conecta com o token novo', async () => {
+    ler.mockResolvedValueOnce(vencido).mockResolvedValueOnce(novo);
+    const sair = assinar('/user/queue/notifications', 'personal', jest.fn());
+    const c = mockClientes[0];
+    await c.config.beforeConnect();
+    expect(mockRenovar).toHaveBeenCalledTimes(1);
+    expect(c.connectHeaders).toEqual({ Authorization: `Bearer ${novo}` });
+    sair();
+  });
+
+  it('válido: não renova', async () => {
+    ler.mockResolvedValue(novo);
+    const sair = assinar('/topic/a', 'public', jest.fn());
+    const c = mockClientes[0];
+    await c.config.beforeConnect();
+    expect(mockRenovar).not.toHaveBeenCalled();
+    expect(c.connectHeaders).toEqual({ Authorization: `Bearer ${novo}` });
+    sair();
+  });
+
+  it('visitante: conecta anônimo, sem renovar', async () => {
+    ler.mockResolvedValue(null);
+    const sair = assinar('/topic/a', 'public', jest.fn());
+    const c = mockClientes[0];
+    await c.config.beforeConnect();
+    expect(mockRenovar).not.toHaveBeenCalled();
+    expect(c.connectHeaders).toEqual({});
+    sair();
+  });
+
+  it('ERROR INVALID_TOKEN: a próxima tentativa renova mesmo com o exp em dia', async () => {
+    ler.mockResolvedValue(novo);
+    const sair = assinar('/topic/a', 'public', jest.fn());
+    const c = mockClientes[0];
+    c.config.onStompError({ headers: { message: 'INVALID_TOKEN' } });
+    await c.config.beforeConnect();
+    expect(mockRenovar).toHaveBeenCalledTimes(1);
+    await c.config.beforeConnect();
+    expect(mockRenovar).toHaveBeenCalledTimes(1);
+    sair();
+  });
+
+  it('o refresh falhando não impede a conexão', async () => {
+    ler.mockResolvedValue(vencido);
+    mockRenovar.mockRejectedValue(new Error('offline'));
+    const sair = assinar('/topic/a', 'public', jest.fn());
+    const c = mockClientes[0];
+    await c.config.beforeConnect();
+    expect(c.connectHeaders).toEqual({ Authorization: `Bearer ${vencido}` });
     sair();
   });
 });

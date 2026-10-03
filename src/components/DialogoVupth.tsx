@@ -134,7 +134,10 @@ export function DialogoVupth() {
               return (
                 <Pressable
                   key={`${botao.texto}-${i}`}
-                  testID={`dialogo-botao-${i}`}
+                  // O destrutivo tem id próprio: a posição dele muda com os
+                  // botões do meio (ex.: "Adiar minha vez"), e a bateria
+                  // Maestro não achava o "Sim, sair" pelo texto (02/10).
+                  testID={botao.estilo === "destructive" ? "dialogo-botao-destrutivo" : `dialogo-botao-${i}`}
                   accessibilityRole="button"
                   onPress={() => responder(i)}
                   style={{

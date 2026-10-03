@@ -16,6 +16,7 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor } from "@domain/queue/saidaDaFila";
+import { advertenciaDaMulta, deveAdvertir } from "@domain/queue/advertenciaDaMulta";
 import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
@@ -365,6 +366,72 @@ export function QueueStatus() {
     return () => clearTimeout(t);
   }, [mostrarFaixaDeSaida]);
 
+  // Tira da fila. `valorConfirmado` e a ciencia da multa (null = sem multa).
+  const sair = async (valorConfirmado: number | null) => {
+    setMostrarFaixaDeSaida(false);
+    // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
+    // de 2026-09-07 ("sai da fila e o app fecha sozinho").
+    //
+    // 1. O `catch {}` era VAZIO. Se o cancelamento falhasse, o cliente
+    //    saia da tela sem ter saido da fila: a vez e a multa seguiam de
+    //    pe e ninguem ficava sabendo — nem ele, nem quem fosse
+    //    investigar depois. Engolir o erro nao e "nao atrapalhar o
+    //    usuario"; e mentir pra ele sobre o que aconteceu.
+    //
+    // 2. Limpar o store ANTES de navegar re-renderiza esta tela com
+    //    `activeQueue` nulo. Navegar primeiro tira a tela do caminho.
+    try {
+      if (attendanceId && accessToken) {
+        await attendanceService.cancel(attendanceId, accessToken, valorConfirmado ?? undefined);
+      }
+    } catch (error) {
+      // Ciencia da multa: o servidor so tira da fila com o "Sim" ao valor que
+      // ELE cobra. Sem o valor (ou com um menor), 409 — e o cliente continua
+      // na fila. Mostra o aviso com o valor dele e repete no "Sim".
+      const valorDoServidor = multaSemCiencia(error);
+      if (valorDoServidor != null) {
+        const aviso = avisoDaMultaDoServidor(valorDoServidor);
+        Alert.alert(aviso.titulo, aviso.mensagem, [
+          { text: aviso.nao, style: "cancel" },
+          { text: aviso.sim, style: "destructive", onPress: () => sair(valorDoServidor) },
+        ]);
+        return;
+      }
+      // Ja nao esta na fila (o profissional removeu, ou um toque duplo
+      // cancelou antes): o objetivo do usuario esta cumprido. Segue pra
+      // limpeza, senao ele fica preso numa tela de fila que nao existe.
+      if (!jaSaiuDaFila(error)) {
+        Alert.alert("Nao foi possivel sair da fila", mensagemDeFalhaAoSair(error));
+        return;
+      }
+    }
+    navigation.navigate("home");
+    await leaveQueue();
+  };
+
+  // Advertencia antes da multa (CLI-12, Andre 03/10): abaixo de 1h30 para a
+  // vez, uma vez por atendimento, a politica com as saidas sem custo. Adiar
+  // nao da tolerancia nova — o `toleranceUntil` segue o da entrada.
+  // O ref segura o segundo aviso enquanto a marca no store ainda esta sendo gravada.
+  const advertiu = useRef<string | null>(null);
+  useEffect(() => {
+    const id = activeQueue?.attendanceId;
+    if (!id) return;
+    const jaAdvertido = !!activeQueue.multaAdvertida || advertiu.current === id;
+    if (!deveAdvertir({ restante: semPrevisao ? null : remaining, aguardando: canReshuffle, jaAdvertido })) return;
+    advertiu.current = id;
+    updateQueue({ multaAdvertida: true });
+    const naTolerancia = !!activeQueue.toleranceUntil && Date.now() < activeQueue.toleranceUntil;
+    const regra = regraDaSaida(naTolerancia);
+    const aviso = advertenciaDaMulta({ sairCustaAgora: regra.multa || !!regra.semPrevisao, podeAdiar: canReshuffle });
+    Alert.alert(aviso.titulo, aviso.mensagem, [
+      { text: aviso.ficar, style: "cancel" },
+      ...(aviso.adiar ? [{ text: aviso.adiar, onPress: () => { handleOpenChangeTurn(); } }] : []),
+      ...(aviso.sairDeGraca ? [{ text: aviso.sairDeGraca, onPress: () => { sair(null); } }] : []),
+    ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeQueue?.attendanceId, activeQueue?.multaAdvertida, remaining, semPrevisao, canReshuffle]);
+
   // D15 (Andre, 24/09): "Sair da fila" pede DOIS toques seguidos. O primeiro so
   // mostra a faixa — o que acontece se sair, e a instrucao. Com multa (ou sem
   // saber), os dois toques abrem "Sim / Nao"; sem multa, tiram direto.
@@ -379,48 +446,6 @@ export function QueueStatus() {
       return;
     }
     ultimoToqueEmSair.current = null;
-
-    const sair = async (valorConfirmado: number | null) => {
-      setMostrarFaixaDeSaida(false);
-      // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
-      // de 2026-09-07 ("sai da fila e o app fecha sozinho").
-      //
-      // 1. O `catch {}` era VAZIO. Se o cancelamento falhasse, o cliente
-      //    saia da tela sem ter saido da fila: a vez e a multa seguiam de
-      //    pe e ninguem ficava sabendo — nem ele, nem quem fosse
-      //    investigar depois. Engolir o erro nao e "nao atrapalhar o
-      //    usuario"; e mentir pra ele sobre o que aconteceu.
-      //
-      // 2. Limpar o store ANTES de navegar re-renderiza esta tela com
-      //    `activeQueue` nulo. Navegar primeiro tira a tela do caminho.
-      try {
-        if (attendanceId && accessToken) {
-          await attendanceService.cancel(attendanceId, accessToken, valorConfirmado ?? undefined);
-        }
-      } catch (error) {
-        // Ciencia da multa: o servidor so tira da fila com o "Sim" ao valor que
-        // ELE cobra. Sem o valor (ou com um menor), 409 — e o cliente continua
-        // na fila. Mostra o aviso com o valor dele e repete no "Sim".
-        const valorDoServidor = multaSemCiencia(error);
-        if (valorDoServidor != null) {
-          const aviso = avisoDaMultaDoServidor(valorDoServidor);
-          Alert.alert(aviso.titulo, aviso.mensagem, [
-            { text: aviso.nao, style: "cancel" },
-            { text: aviso.sim, style: "destructive", onPress: () => sair(valorDoServidor) },
-          ]);
-          return;
-        }
-        // Ja nao esta na fila (o profissional removeu, ou um toque duplo
-        // cancelou antes): o objetivo do usuario esta cumprido. Segue pra
-        // limpeza, senao ele fica preso numa tela de fila que nao existe.
-        if (!jaSaiuDaFila(error)) {
-          Alert.alert("Nao foi possivel sair da fila", mensagemDeFalhaAoSair(error));
-          return;
-        }
-      }
-      navigation.navigate("home");
-      await leaveQueue();
-    };
 
     if (!saida.confirmacao) {
       sair(null);

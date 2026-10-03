@@ -28,6 +28,11 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('@services/establishmentService', () => ({
   establishmentService: { getServiceItemsByProfessional: jest.fn() },
 }));
+// O snapshot da loja (WS) vem do cache do react-query, que a tela da loja
+// mantem; aqui nao ha loja atras — sem snapshot.
+jest.mock('@hooks/useEstablishments', () => ({
+  useSnapshotDaLoja: () => undefined,
+}));
 jest.mock('@services/swapOfferService', () => ({
   swapOfferService: { create: jest.fn() },
 }));
@@ -317,5 +322,18 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
       expect(queryByTestId('multas-pendentes')).toBeNull();
     });
+  });
+});
+
+describe('ServiceSelection — tempo do serviço (tempo-do-servico)', () => {
+  it('mostra o tempo configurado pelo profissional, não a média da semana', async () => {
+    setRouteParams({ ...OPEN_PARAMS });
+    mockGetServices.mockResolvedValue({
+      data: [{ id: 's1', customName: 'Corte', price: 30, estimatedMinutes: 45, weeklyAverageDurationInMinutes: 30 }],
+    });
+    const { findByText, queryByText } = renderWithProviders(<ServiceSelection />);
+
+    expect(await findByText('45 min', {}, { timeout: 15000 })).toBeTruthy();
+    expect(queryByText('30 min')).toBeNull();
   });
 });

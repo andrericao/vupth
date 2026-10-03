@@ -1,0 +1,38 @@
+# Fechar e abrir o app com o cliente na fila (o pedido aceito da etapa 10):
+# nada do que ja foi respondido volta — a caixa de notificacao do app e a do
+# sistema (permissoes-repetidas) e o aviso da politica da multa, que e uma vez
+# por atendimento (adiar-no-atraso).
+appId: ${APP_ID}
+---
+- stopApp:
+    label: "11.01 · fecha o app"
+- launchApp:
+    label: "11.02 · abre o app de novo (sem limpar)"
+- extendedWaitUntil:
+    visible:
+      id: "card-da-fila"
+    timeout: 120000
+    label: "11.03 · espera card-da-fila no Início"
+- waitForAnimationToEnd:
+    timeout: 3000
+    label: "11.04 · espera a tela parar"
+- assertNotVisible:
+    id: "com.android.permissioncontroller:id/permission_deny_button"
+    label: "11.05 · não vê a caixa de permissão do sistema"
+- assertNotVisible:
+    id: "push-skip"
+    label: "11.06 · não vê a caixa de notificação do app"
+- tapOn:
+    id: "card-da-fila"
+    label: "11.07 · toca em card-da-fila"
+- extendedWaitUntil:
+    visible:
+      id: "queue-position"
+    timeout: 30000
+    label: "11.08 · espera queue-position"
+- waitForAnimationToEnd:
+    timeout: 3000
+    label: "11.09 · espera a tela parar"
+- assertNotVisible:
+    text: "Sua vez está chegando"
+    label: "11.10 · não vê o aviso da política da multa de novo"

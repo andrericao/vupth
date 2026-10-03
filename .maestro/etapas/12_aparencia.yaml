@@ -1,0 +1,58 @@
+# Perfil -> Aparencia (Andre, 26/09): o tema avisa que o escuro chega em breve;
+# o tamanho da fonte abre a demonstracao e so vale no Salvar — o app se
+# redesenha e continua na mesma tela. Volta ao Normal no fim.
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Perfil"
+    label: "12.01 · toca em Perfil"
+- scrollUntilVisible:
+    element:
+      text: "Tema e tamanho da fonte"
+    label: "12.02 · rola até Tema e tamanho da fonte"
+- tapOn:
+    text: "Tema e tamanho da fonte"
+    label: "12.03 · toca em Tema e tamanho da fonte"
+- tapOn:
+    id: "aparencia-tema"
+    label: "12.04 · toca em aparencia-tema"
+- extendedWaitUntil:
+    visible: "Tema escuro"
+    timeout: 10000
+    label: "12.05 · espera Tema escuro"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "12.06 · roda fechar_aviso"
+- tapOn:
+    id: "aparencia-fonte"
+    label: "12.07 · toca em aparencia-fonte"
+- assertVisible:
+    id: "amostra-da-fonte"
+    label: "12.08 · vê amostra-da-fonte"
+- tapOn:
+    id: "fonte-2"
+    label: "12.09 · escolhe +2"
+- tapOn:
+    id: "salvar-fonte"
+    label: "12.10 · toca em salvar-fonte"
+- extendedWaitUntil:
+    visible:
+      id: "aparencia-fonte"
+    timeout: 15000
+    label: "12.11 · continua na Aparência"
+- assertVisible:
+    text: "\\+2"
+    label: "12.12 · vê +2"
+- tapOn:
+    id: "aparencia-fonte"
+    label: "12.13 · toca em aparencia-fonte"
+- tapOn:
+    id: "fonte-0"
+    label: "12.14 · escolhe Normal"
+- tapOn:
+    id: "salvar-fonte"
+    label: "12.15 · toca em salvar-fonte"
+- extendedWaitUntil:
+    visible: "Normal"
+    timeout: 15000
+    label: "12.16 · vê Normal"

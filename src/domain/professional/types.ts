@@ -28,6 +28,9 @@ export interface ProfessionalWithQueue extends Professional {
   // backend implementar; quando ausente, o front usa placeholder (pseudoRating).
   rating_average?: number | null;
   rating_count?: number;
+  // Servicos com o tempo configurado (Backend: o snapshot do WS chega quando o
+  // profissional edita um servico, 0f314f5).
+  service_items?: { id: string; estimatedMinutes?: number | null }[];
 }
 
 export interface AttendanceInQueue {
@@ -57,5 +60,7 @@ export interface ServiceItemResponse {
   serviceItemType: string;
   customName: string;
   price: number;
+  /** Tempo configurado pelo profissional — o que o cliente ve (Backend d1165a2). */
+  estimatedMinutes?: number | null;
   weeklyAverageDurationInMinutes: number | null;
 }

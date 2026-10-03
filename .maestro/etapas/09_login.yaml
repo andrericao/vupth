@@ -1,0 +1,65 @@
+# Login (fluxo critico, DEC-7): o cliente sai da conta e entra de novo com o
+# e-mail e a senha do cadastro da etapa 02.
+# env: EMAIL_CLIENTE
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Perfil"
+    label: "09.01 · toca em Perfil"
+- scrollUntilVisible:
+    element:
+      text: "Sair da conta"
+    label: "09.02 · rola até Sair da conta"
+- tapOn:
+    text: "Sair da conta"
+    label: "09.03 · toca em Sair da conta"
+# Confirmacao: "Sair" e o botao destrutivo.
+- tapOn:
+    id: "dialogo-botao-destrutivo"
+    label: "09.04 · toca em Sair (confirmação)"
+# Depois de sair o app pode voltar a tela de entrada.
+- runFlow:
+    when:
+      visible:
+        id: "onboarding-start"
+    commands:
+      - tapOn:
+          id: "onboarding-start"
+    label: "09.05 · passa pela tela de entrada, se aparecer"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "09.06 · roda fechar_aviso"
+- tapOn:
+    text: "Perfil"
+    label: "09.07 · toca em Perfil"
+- tapOn:
+    text: "Já tenho conta"
+    label: "09.08 · toca em Já tenho conta"
+- tapOn:
+    text: "E-mail"
+    label: "09.09 · toca em E-mail"
+- inputText:
+    text: ${EMAIL_CLIENTE}
+    label: "09.10 · digita ${EMAIL_CLIENTE}"
+- tapOn:
+    text: "Senha"
+    label: "09.11 · toca em Senha"
+- inputText:
+    text: ${SENHA}
+    label: "09.12 · digita ${SENHA}"
+- hideKeyboard:
+    label: "09.13 · fecha o teclado"
+- tapOn:
+    id: "primary-login"
+    label: "09.14 · toca em primary-login"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "09.15 · roda fechar_aviso"
+- tapOn:
+    text: "Perfil"
+    label: "09.16 · toca em Perfil"
+- scrollUntilVisible:
+    element:
+      text: "Sair da conta"
+    timeout: 30000
+    label: "09.17 · rola até Sair da conta (logado de novo)"

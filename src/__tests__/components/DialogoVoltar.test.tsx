@@ -48,3 +48,24 @@ describe('o voltar do Android com um diálogo na tela', () => {
     expect(useDialogoStore.getState().atual?.titulo).toBe('Você foi chamado');
   });
 });
+
+describe('os ids dos botões (bateria Maestro)', () => {
+  beforeEach(() => useDialogoStore.setState({ atual: null, fila: [] }));
+
+  it('o destrutivo tem id fixo, qualquer que seja a posição; os outros, pela posição', () => {
+    const { getByTestId } = render(<DialogoVupth />);
+    act(() => {
+      abrirDialogo({
+        titulo: 'Sair da fila?',
+        botoes: [
+          { texto: 'Não', estilo: 'cancel' },
+          { texto: 'Adiar minha vez' },
+          { texto: 'Sim, sair', estilo: 'destructive' },
+        ],
+      });
+    });
+    expect(getByTestId('dialogo-botao-0')).toBeTruthy();
+    expect(getByTestId('dialogo-botao-1')).toBeTruthy();
+    expect(getByTestId('dialogo-botao-destrutivo')).toBeTruthy();
+  });
+});

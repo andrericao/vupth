@@ -4,22 +4,44 @@ appId: ${APP_ID}
 ---
 - tapOn:
     id: "primary-queue"
+    label: "05.01 · toca em primary-queue"
 - extendedWaitUntil:
     visible: "Entendi"
     timeout: 60000
-- tapOn: "Entendi"
+    label: "05.02 · espera Entendi"
+- tapOn:
+    text: "Entendi"
+    label: "05.03 · toca em Entendi"
 - extendedWaitUntil:
     visible:
       id: "queue-position"
     timeout: 30000
+    label: "05.04 · espera queue-position"
+
+# CLI-12: abaixo de 1h30 para a vez, a politica da multa aparece uma vez.
+- extendedWaitUntil:
+    visible: "Sua vez está chegando"
+    timeout: 10000
+    label: "05.05 · espera o aviso da política da multa"
+- tapOn:
+    id: "dialogo-botao-0"
+    label: "05.06 · toca em Continuar na fila"
 
 # Sair da fila: dois toques seguidos e a confirmacao com o valor.
 - tapOn:
     id: "leave-queue"
+    label: "05.07 · toca em leave-queue"
 - tapOn:
     id: "leave-queue"
+    label: "05.08 · toca em leave-queue"
 - extendedWaitUntil:
     visible: "Sair da fila?"
     timeout: 10000
-- tapOn: "Sim, sair"
-- runFlow: ../apoio/fechar_aviso.yaml
+    label: "05.09 · espera Sair da fila?"
+# Pelo id: o "Sim, sair" muda de posicao com o "Adiar minha vez".
+- tapOn:
+    id: "dialogo-botao-destrutivo"
+    label: "05.10 · toca em Sim, sair"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "05.11 · roda fechar_aviso"

@@ -8,9 +8,13 @@ import * as SecureStore from "expo-secure-store";
 import {
   acquireExpoPushToken,
   avisoDoPush,
+  ACAO_OK,
+  CANAL_ALERTAS,
+  CATEGORIA_CIENCIA,
   mapPlatform,
   notificationRoute,
   registrarComRetentativa,
+  tocouNoOk,
 } from "@domain/push";
 import { pushService } from "@services/pushService";
 import { oferecerVezAdiantada } from "@utils/vezAdiantada";
@@ -21,6 +25,8 @@ import { usePushDiagnosticsStore } from "@stores/pushDiagnosticsStore";
 // Chave onde o Expo Push Token registrado é guardado, p/ o logout desregistrar
 // (authStore.logout → DELETE /devices). Mesmo valor do authStore.
 const PUSH_TOKEN_KEY = "vupth_push_token";
+// A caixa de permissão do sistema já apareceu neste aparelho: não volta.
+const PUSH_PERGUNTADO_KEY = "vupth_push_perguntado";
 
 // Push em foreground: banner/lista/som (o WS já cobre a UI in-app; o banner
 // reforça). Registrado uma vez no módulo.
@@ -60,13 +66,34 @@ export function usePushRegistration() {
   useEffect(() => {
     if (Platform.OS === "android") {
       try {
+        // HIGH (Andre, 02/10): aparece no topo na hora, sem esperar. O Backend
+        // manda o push com prioridade alta; o canal precisa acompanhar.
         Notifications.setNotificationChannelAsync("default", {
           name: "default",
-          importance: Notifications.AndroidImportance.DEFAULT,
+          importance: Notifications.AndroidImportance.HIGH,
+        }).catch(() => {});
+        // ⚠️ O Android NAO muda a importancia de um canal que ja existe: quem
+        // instalou antes segue com o "default" em DEFAULT. O canal "alertas"
+        // nasce HIGH em todo aparelho — o Backend passa a mandar channelId "alertas".
+        Notifications.setNotificationChannelAsync(CANAL_ALERTAS, {
+          name: "Avisos",
+          importance: Notifications.AndroidImportance.HIGH,
         }).catch(() => {});
       } catch {
         // binário sem o módulo nativo de push.
       }
+    }
+  }, []);
+
+  // O botao "OK" na propria notificacao (app fechado): so fecha, nao abre o app.
+  // Aparece quando o push vem com categoryId "CIENCIA" (Backend).
+  useEffect(() => {
+    try {
+      Notifications.setNotificationCategoryAsync(CATEGORIA_CIENCIA, [
+        { identifier: ACAO_OK, buttonTitle: "OK", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+    } catch {
+      // binário sem o módulo nativo de push.
     }
   }, []);
 
@@ -95,6 +122,8 @@ export function usePushRegistration() {
           isDevice: Device.isDevice,
           getPermissionsAsync: Notifications.getPermissionsAsync,
           requestPermissionsAsync: Notifications.requestPermissionsAsync,
+          jaPerguntou: async () => (await SecureStore.getItemAsync(PUSH_PERGUNTADO_KEY)) === "1",
+          marcarPerguntado: () => SecureStore.setItemAsync(PUSH_PERGUNTADO_KEY, "1"),
           getExpoPushTokenAsync: Notifications.getExpoPushTokenAsync,
           projectId,
         });
@@ -166,6 +195,11 @@ export function usePushRegistration() {
   useEffect(() => {
     try {
       const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+        // "OK" só fecha a notificação — não navega.
+        if (tocouNoOk(response)) {
+          Notifications.dismissNotificationAsync(response.notification.request.identifier).catch(() => {});
+          return;
+        }
         const data = response.notification.request.content.data;
         navigateFromNotification(notificationRoute(data));
       });

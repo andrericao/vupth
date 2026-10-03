@@ -510,6 +510,7 @@ export function Home() {
       {(isInQueue || isLate) && activeQueue && (
         <Box px={16} pt={20}>
           <TouchableOpacity
+            testID="card-da-fila"
             onPress={() =>
               navigation.navigate("queueStatus", {
                 professionalId: activeQueue.professionalId,

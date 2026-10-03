@@ -1,5 +1,9 @@
 import {
   avisoDoPush,
+  tocouNoOk,
+  ACAO_OK,
+  CANAL_ALERTAS,
+  CATEGORIA_CIENCIA,
   mapPlatform,
   deviceDeletePath,
   notificationRoute,
@@ -122,6 +126,48 @@ describe('acquireExpoPushToken', () => {
     expect(r.motivo).toBe('sem-token');
   });
 
+  it('já respondida (negada) → não pede de novo a cada abertura', async () => {
+    const request = jest.fn(async () => ({ status: 'granted' }));
+    const r = await acquireExpoPushToken(
+      baseEnv({
+        getPermissionsAsync: async () => ({ status: 'denied', canAskAgain: true }),
+        requestPermissionsAsync: request,
+      }),
+    );
+    expect(request).not.toHaveBeenCalled();
+    expect(r.motivo).toBe('sem-permissao');
+  });
+
+  it('o sistema não deixa perguntar de novo → não pede', async () => {
+    const request = jest.fn(async () => ({ status: 'granted' }));
+    await acquireExpoPushToken(
+      baseEnv({
+        getPermissionsAsync: async () => ({ status: 'undetermined', canAskAgain: false }),
+        requestPermissionsAsync: request,
+      }),
+    );
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it('a caixa já apareceu neste aparelho → não pede; a primeira vez marca', async () => {
+    const request = jest.fn(async () => ({ status: 'denied' }));
+    const marcar = jest.fn(async () => {});
+    const undetermined = async () => ({ status: 'undetermined' });
+
+    await acquireExpoPushToken(
+      baseEnv({ getPermissionsAsync: undetermined, requestPermissionsAsync: request,
+        jaPerguntou: async () => false, marcarPerguntado: marcar }),
+    );
+    expect(marcar).toHaveBeenCalledTimes(1);
+    expect(request).toHaveBeenCalledTimes(1);
+
+    await acquireExpoPushToken(
+      baseEnv({ getPermissionsAsync: undetermined, requestPermissionsAsync: request,
+        jaPerguntou: async () => true, marcarPerguntado: marcar }),
+    );
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
   it('pede permissão só quando ainda não concedida', async () => {
     const request = jest.fn(async () => ({ status: 'granted' }));
     await acquireExpoPushToken(
@@ -148,5 +194,17 @@ describe('o push com o app aberto', () => {
     expect(avisoDoPush({ title: null, body: 'Oi' })).toEqual({ titulo: 'VUPTH', mensagem: 'Oi' });
     expect(avisoDoPush({ title: ' ', body: '' })).toBeNull();
     expect(avisoDoPush({})).toBeNull();
+  });
+});
+
+describe('notificação de ciência (app fechado)', () => {
+  it('o botão OK só fecha; o toque no corpo segue navegando', () => {
+    expect(tocouNoOk({ actionIdentifier: ACAO_OK })).toBe(true);
+    expect(tocouNoOk({ actionIdentifier: 'expo.modules.notifications.actions.DEFAULT' })).toBe(false);
+  });
+
+  it('ids combinados com o Backend e o Partner', () => {
+    expect(CATEGORIA_CIENCIA).toBe('CIENCIA');
+    expect(CANAL_ALERTAS).toBe('alertas');
   });
 });
