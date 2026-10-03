@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Platform, Pressable, TextInput, View, type TextInputProps } from "react-native";
 import { Eye, EyeOff, Search, CircleX } from "lucide-react-native";
 
+import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
+
 // NativeWind (DEC-5, passo 3): o campo deixa o Gluestack com a mesma API de
 // antes — props do TextInput + isPassword, showSearchIcon e onClear —, entao
 // as telas nao mudam.
@@ -50,7 +52,7 @@ export function Input2({
         // textSecondary dos rotulos, senao rotulo e resposta pesam igual.
         className="flex-1 font-body text-vupth-textPrimary"
         style={[RESET_WEB, style] as TextInputProps["style"]}
-        placeholderTextColor="#6B706B"
+        placeholderTextColor={COR_DO_PLACEHOLDER}
         secureTextEntry={isSecure}
         value={value}
         onFocus={(e) => {
