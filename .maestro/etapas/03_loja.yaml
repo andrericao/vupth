@@ -35,3 +35,10 @@ appId: ${APP_ID}
 - assertNotVisible:
     id: "pra-ontem-sair"
     label: "03.09 · não vê pra-ontem-sair"
+
+# O Pra ontem deixa o roteiro no Inicio; a 04 comeca tocando no profissional,
+# que esta na tela da loja (bateria-fim-de-fila, 03/10: o 04.01 nao achava
+# professional-<id> porque a tela era o Inicio). Volta para a loja aqui.
+- runFlow:
+    file: ../apoio/abrir_a_loja.yaml
+    label: "03.10 · volta para a loja (roda abrir_a_loja)"

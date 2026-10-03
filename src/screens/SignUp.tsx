@@ -10,11 +10,13 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
 import { PasswordRules } from "@components/PasswordRules";
 import { validateSignUp, getPasswordRules } from "@domain/auth/validateAuth";
+import { erroDeAcesso } from "@domain/auth/errosDeAcesso";
 import { useAuthStore } from "@stores/authStore";
 import { useTabBarInset } from "@hooks/useTabBarInset";
 import { fs } from "@stores/fonteStore";
 
 type RouteParams = {
+  email?: string;
   redirectTo?: string;
   establishmentId?: string;
   professionalId?: string;
@@ -27,16 +29,16 @@ type RouteParams = {
 };
 
 export function SignUp() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const tabBarInset = useTabBarInset();
   const params = (route.params as RouteParams) ?? {};
+
+  const [email, setEmail] = useState(params.email ?? "");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const register = useAuthStore((s) => s.register);
   const login = useAuthStore((s) => s.login);
 
@@ -80,9 +82,10 @@ export function SignUp() {
         targetTime: params.targetTime,
         establishmentOpen: params.establishmentOpen,
       });
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Erro ao cadastrar";
-      Alert.alert("Erro", message);
+    } catch (error) {
+      const erro = erroDeAcesso(error, "Erro ao cadastrar");
+      if (erro.tipo === "muitas-tentativas") Alert.alert(erro.titulo, erro.mensagem);
+      else Alert.alert("Erro", erro.tipo === "outro" ? erro.mensagem : "Erro ao cadastrar");
     } finally {
       setIsSubmitting(false);
     }

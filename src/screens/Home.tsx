@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, memo } from "react";
-import { FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle, ScrollView } from "react-native";
+import { ActivityIndicator, FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle, ScrollView } from "react-native";
 import { useNavigation, useRoute, useScrollToTop, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import { Search, SlidersHorizontal, ChevronRight, Zap } from "lucide-react-native";
@@ -11,7 +11,8 @@ import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity"
 import { statusTag } from "@domain/establishment/statusTag";
 import { serviceTypeLabel } from "@domain/establishment/serviceType";
 import { primeiroNome } from "@domain/auth/displayName";
-import { useEstablishments, usePraOntem } from "@hooks/useEstablishments";
+import { useEstablishments, usePraOntem, useVitrinePaginada } from "@hooks/useEstablishments";
+import { vitrinePaginada } from "@domain/establishment/paginacao";
 import { ordenarPraOntem, rotuloPraOntem } from "@domain/establishment/praOntem";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useClientAttendances } from "@hooks/useAttendances";
@@ -251,9 +252,20 @@ export function Home() {
   useScrollToTop(listaRef as never);
   const pilula = usePilulaDeTopo();
   const route = useRoute<RouteProp<AppRoutes, "home">>();
-  const todas = useEstablishments();
+  // Lista paginada (03/10): a vitrine pura vem de 20 em 20; com busca ou
+  // categoria, a lista inteira, filtrada aqui como antes.
+  const paginada = vitrinePaginada({ busca: search, categoria: selectedFilter, praOntem });
+  const vitrine = useVitrinePaginada(paginada);
+  const todas = useEstablishments(!praOntem && !paginada);
   const livres = usePraOntem(praOntem);
-  const { data: establishments = [], isLoading, isError, refetch, isRefetching } = praOntem ? livres : todas;
+  const { data: establishments = [], isLoading, isError, refetch, isRefetching } = praOntem
+    ? livres
+    : paginada
+      ? vitrine
+      : todas;
+  const carregarMais = useCallback(() => {
+    if (paginada && vitrine.hasNextPage && !vitrine.isFetchingNextPage) vitrine.fetchNextPage();
+  }, [paginada, vitrine]);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const { activeQueue, remaining, isInQueue, isLate } = useQueueCountdown();
@@ -356,6 +368,13 @@ export function Home() {
         scrollEventThrottle={32}
         data={isLoading || isError ? [] : filteredEstablishments}
         keyExtractor={(item) => item.id}
+        onEndReached={carregarMais}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          paginada && vitrine.isFetchingNextPage ? (
+            <ActivityIndicator color="#163300" style={{ paddingVertical: 16 }} testID="carregando-mais-lojas" />
+          ) : null
+        }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
         refreshControl={

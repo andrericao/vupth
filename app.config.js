@@ -1,9 +1,9 @@
 // Identidade de cada variante do app.
 //
 // O `app.json` continua sendo a fonte de tudo — o Expo le ele primeiro e
-// entrega aqui como `config`. Este arquivo so troca DUAS coisas, e so quando
-// o build e de uma variante de teste: o `package`/`bundleIdentifier` e o nome
-// que aparece embaixo do icone.
+// entrega aqui como `config`. Este arquivo carimba o commit (`extra.commit`,
+// sempre) e troca DUAS coisas, so quando o build e de uma variante de teste:
+// o `package`/`bundleIdentifier` e o nome que aparece embaixo do icone.
 //
 // Por que: o Android identifica app pelo `package`. Dois builds com o mesmo id
 // sao o MESMO app, entao instalar o APK de teste DESINSTALA o de producao (e
@@ -27,7 +27,22 @@ const VARIANTES = {
   preview: { sufixo: ".preview", nome: "VUPTH preview" },
 };
 
-module.exports = ({ config }) => {
+// O commit do JS que vai no bundle (Andre, 03/10 — a bateria confere a versao
+// antes de comecar). No OTA o GitHub Actions da o GITHUB_SHA; no build o EAS da
+// o EAS_BUILD_GIT_COMMIT_HASH; local, o git. Vai em `extra.commit`, que o app le
+// pelo `Constants.expoConfig` — no OTA, e o do update que esta rodando.
+function commitAtual() {
+  const doAmbiente = process.env.GITHUB_SHA || process.env.EAS_BUILD_GIT_COMMIT_HASH;
+  if (doAmbiente) return doAmbiente;
+  try {
+    return require("child_process").execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
+  } catch {
+    return undefined;
+  }
+}
+
+module.exports = ({ config: base }) => {
+  const config = { ...base, extra: { ...base.extra, commit: commitAtual() } };
   const variante = VARIANTES[process.env.EAS_BUILD_PROFILE];
   if (!variante) return config;
 

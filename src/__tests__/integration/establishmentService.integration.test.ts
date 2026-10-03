@@ -37,6 +37,16 @@ describe('EstablishmentService', () => {
     expect(semGps.data[0]).toEqual({ openNow: true, hasAvailability: true, sort: 'wait' });
   });
 
+  it('getPage pede a página com size 20 (lista-paginada), com a coordenada em par', async () => {
+    mock.onGet('/establishment').reply((config) => [200, { items: [], params: config.params }]);
+
+    const semGps = await establishmentService.getPage(0);
+    expect((semGps.data as unknown as { params: unknown }).params).toEqual({ page: 0, size: 20 });
+
+    const comGps = await establishmentService.getPage(2, { latitude: -22.9, longitude: -43.2 }, 10);
+    expect((comGps.data as unknown as { params: unknown }).params).toEqual({ page: 2, size: 10, lat: -22.9, lng: -43.2 });
+  });
+
   it('getById deve retornar estabelecimento específico', async () => {
     mock.onGet('/establishment/id/est-1').reply(200, {
       id: 'est-1',

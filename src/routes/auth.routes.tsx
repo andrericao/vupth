@@ -45,6 +45,8 @@ export type AppRoutes = {
     establishmentOpen?: boolean;
   };
   signUp: {
+    // O e-mail que o login ou o "esqueci" achou sem conta, já preenchido.
+    email?: string;
     redirectTo?: string;
     establishmentId?: string;
     professionalId?: string;

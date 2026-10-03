@@ -1,0 +1,17 @@
+// Para a bateria se o app no aparelho nao roda o commit esperado (Andre, 03/10).
+// O texto vem do copyTextFrom da versao do Perfil ("Versão 1.0.3 · 03/10/2026 · c65338e7").
+//
+// Entrada (env da bateria): COMMIT
+
+var esperado = (typeof COMMIT === "undefined" || COMMIT == null ? "" : String(COMMIT)).trim().toLowerCase().slice(0, 8);
+var instalado = String(maestro.copiedText || "");
+
+if (!esperado) {
+  throw new Error("Falta o commit esperado: rode com -e COMMIT=<commit> (o setup.sh imprime o comando).");
+}
+if (instalado.toLowerCase().indexOf(esperado) < 0) {
+  throw new Error(
+    "Versao errada no aparelho. Instalado: \"" + instalado + "\". Esperado: o commit " + esperado +
+      ". Instale o APK certo ou espere o OTA da dev e rode de novo."
+  );
+}

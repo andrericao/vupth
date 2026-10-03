@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Alert, TouchableOpacity } from "react-native";
 import * as Updates from "expo-updates";
+import Constants from "expo-constants";
 import { VStack, Text, Heading, Box, HStack, ScrollView } from "@gluestack-ui/themed";
 import { RefreshCw } from "lucide-react-native";
 
@@ -11,6 +12,7 @@ import { PushDiagnostics } from "@components/PushDiagnostics";
 import { useComingSoonStore } from "@stores/comingSoonStore";
 import { COMING_SOON_LABELS, ComingSoonFeature } from "@domain/comingSoon";
 import { fs } from "@stores/fonteStore";
+import { commitDoApp } from "@domain/versao";
 
 // A versao e o que a cerca (atualizar, diagnosticos) saiu da tela de Perfil
 // para esta, atras do item "Versão do app" — o mesmo desenho do partner
@@ -103,7 +105,7 @@ export function Sistema() {
           >
             {/* Junta so o que EXISTE: em dev o runtime e o canal vem vazios. */}
             <Text fontFamily="$mono" fontSize={fs(10)} color="$brandTextSecondary" textAlign="center">
-              {[Updates.runtimeVersion, Updates.channel, otaInfo].filter(Boolean).join(" · ")}
+              {[Updates.runtimeVersion, Updates.channel, otaInfo, commitDoApp(Constants.expoConfig?.extra)].filter(Boolean).join(" · ")}
             </Text>
           </TouchableOpacity>
 
