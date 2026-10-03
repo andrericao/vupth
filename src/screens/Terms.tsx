@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { TouchableOpacity } from "react-native";
-import { VStack, HStack, Text, Box, Center, ScrollView } from "@gluestack-ui/themed";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 import { ScreenHeader } from "@components/ScreenHeader";
 import { regraDaMulta } from "@domain/queue/saidaDaFila";
@@ -83,18 +82,20 @@ export function Terms() {
   const [aba, setAba] = useState<Aba>("uso");
   const secoes = aba === "uso" ? TERMOS : PRIVACIDADE;
 
+  // NativeWind (DEC-5): mesmas medidas do v1. O corpo segue com a altura de
+  // linha do v1 (fs(20)) em `style`: a do text-xs e mais apertada para o
+  // texto corrido dos termos.
   return (
     <ScrollView
-      flex={1}
-      bg="$brandBackground"
+      className="flex-1 bg-vupth-background"
       contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }}
       showsVerticalScrollIndicator={false}
     >
-      <Box px={16}>
+      <View className="px-4">
         <ScreenHeader title="Termos e Privacidade" />
-      </Box>
+      </View>
 
-      <HStack px={16} gap="$2">
+      <View className="flex-row px-4 gap-2">
         {(
           [
             ["uso", "Termos de Uso"],
@@ -109,40 +110,31 @@ export function Terms() {
               style={{ flex: 1 }}
               testID={`tab-${key}`}
             >
-              <Center
-                bg={ativa ? "$forest" : "$brandSurface"}
-                borderRadius="$full"
-                py={11}
-                px={16}
+              <View
+                className={`items-center justify-center rounded-full py-[11px] px-4 ${ativa ? "bg-vupth-forest" : "bg-vupth-surface"}`}
               >
-                <Text
-                  fontFamily="$heading"
-                  fontSize={fs(14)}
-                  color={ativa ? "$brandGreen" : "$brandTextSecondary"}
-                >
+                <Text className={`font-heading text-f14 ${ativa ? "text-vupth-green" : "text-vupth-textSecondary"}`}>
                   {label}
                 </Text>
-              </Center>
+              </View>
             </TouchableOpacity>
           );
         })}
-      </HStack>
+      </View>
 
-      <VStack px={16} pt={24} gap="$4.5">
+      <View className="px-4 pt-6 gap-[18px]">
         {secoes.map((s) => (
-          <VStack key={s.titulo} gap="$1.5">
-            <Text fontFamily="$heading" fontSize={fs(15)} color="$brandTextPrimary">
-              {s.titulo}
-            </Text>
-            <Text size="xs" color="$brandTextSecondary" lineHeight={fs(20)}>
+          <View key={s.titulo} className="gap-1.5">
+            <Text className="font-heading text-f15 text-vupth-textPrimary">{s.titulo}</Text>
+            <Text className="font-body text-xs text-vupth-textSecondary" style={{ lineHeight: fs(20) }}>
               {s.corpo}
             </Text>
-          </VStack>
+          </View>
         ))}
-        <Text fontFamily="$mono" fontSize={fs(11)} color="$brandTextSecondary" mt="$2">
+        <Text className="font-mono text-f11 text-vupth-textSecondary mt-2">
           Atualizado em 21 de agosto de 2026
         </Text>
-      </VStack>
+      </View>
     </ScrollView>
   );
 }
