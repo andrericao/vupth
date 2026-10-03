@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect, useRef, memo } from "react";
-import { FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle, ScrollView } from "react-native";
+import { FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle, ScrollView, Text, View } from "react-native";
 import { useNavigation, useRoute, useScrollToTop, RouteProp } from "@react-navigation/native";
-import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import { Search, SlidersHorizontal, ChevronRight, Zap } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
@@ -81,26 +80,18 @@ function timeAgoLabel(iso: string | null | undefined): string | null {
  */
 function StatusPill({ label, live }: { label: string; live: boolean }) {
   return (
-    <HStack
-      bg={live ? "$brandGreen" : "transparent"}
-      borderWidth={live ? 0 : 1}
-      borderColor="$brandBorder"
-      borderRadius="$full"
-      gap={6}
-      px={12}
-      py={6}
-      alignItems="center"
+    <View
+      className={`flex-row ${live ? "bg-vupth-green" : "bg-transparent"} border-vupth-border rounded-full gap-1.5 px-3 py-1.5 items-center`}
+      style={{ borderWidth: live ? 0 : 1 }}
     >
       {live && <LiveDot size={8} color="#163300" pulsing />}
       <Text
-        fontFamily="$display"
-        fontSize={fs(12)}
-        fontWeight="$bold"
-        color={live ? "$forest" : "$brandTextSecondary"}
+        className={`font-display font-bold ${live ? "text-vupth-forest" : "text-vupth-textSecondary"}`}
+        style={{ fontSize: fs(12) }}
       >
         {label}
       </Text>
-    </HStack>
+    </View>
   );
 }
 
@@ -146,14 +137,9 @@ const EstablishmentRow = memo(function EstablishmentRow({
           texto que ja tinha passado no contraste. A 0,7 o nome da loja cai pra
           3,82:1 e reprova no AA; a 0,8 fica em 4,92:1. E o apagado mais forte
           que ainda deixa ler. */}
-      <HStack
-        bg="$brandSurface"
-        borderRadius={18}
-        gap={14}
-        p={14}
-        mb={12}
-        alignItems="center"
-        opacity={tag.live ? 1 : 0.8}
+      <View
+        className="flex-row bg-vupth-surface rounded-[18px] gap-3.5 p-3.5 mb-3 items-center"
+        style={{ opacity: tag.live ? 1 : 0.8 }}
       >
         {/* Avatar APAGADO quando fechada — o mesmo sinal da lista cheia. Era
             verde nas duas situacoes, entao a linha fechada so se distinguia
@@ -164,29 +150,29 @@ const EstablishmentRow = memo(function EstablishmentRow({
           bg={tag.live ? "$greenTint" : "$brandBorder"}
           color={tag.live ? "$forest" : "$brandTextSecondary"}
         />
-        <VStack flex={1} gap={4}>
-          <Text fontFamily="$display" fontSize={fs(15)} fontWeight="$bold" color="$brandTextPrimary">
+        <View className="flex-1 gap-1">
+          <Text className="font-display text-f15 font-bold text-vupth-textPrimary">
             {establishment.name}
           </Text>
-          <HStack gap={8} alignItems="center">
+          <View className="flex-row gap-2 items-center">
             {/* O ponto SEPARA, entao nao vem antes do primeiro item. Antes a
                 linha comecava com o `queueLabel` e a meta so completava; sem
                 ele, o separador virou um "·" orfao no comeco. */}
             {meta.map((m, i) => (
-              <HStack key={m} gap={8} alignItems="center">
+              <View className="flex-row gap-2 items-center" key={m}>
                 {i > 0 && (
-                  <Center width={3} height={3} borderRadius={1.5} bg="$brandTextSecondary" />
+                  <View className="items-center justify-center w-[3px] h-[3px] rounded-[1.5px] bg-vupth-textSecondary" />
                 )}
-                <Text fontFamily="$body" fontSize={fs(13)} color="$brandTextSecondary">
+                <Text className="font-body text-f13 text-vupth-textSecondary">
                   {m}
                 </Text>
-              </HStack>
+              </View>
             ))}
-          </HStack>
-        </VStack>
+          </View>
+        </View>
         {/* Fechada nao e beco sem saida: ainda da pra agendar (Andre 2026-07-23). */}
         <StatusPill {...tag} />
-      </HStack>
+      </View>
     </TouchableOpacity>
   );
 });
@@ -217,19 +203,14 @@ function PilulaDeFiltro({
       accessibilityLabel={accessibilityLabel}
       testID={testID}
     >
-      <HStack
-        bg={ativa ? "$forest" : "$brandSurface"}
-        borderRadius="$full"
-        gap={6}
-        px={12}
-        py={7}
-        alignItems="center"
+      <View
+        className={`flex-row ${ativa ? "bg-vupth-forest" : "bg-vupth-surface"} rounded-full gap-1.5 px-3 py-[7px] items-center`}
       >
         {icone}
-        <Text fontFamily="$display" fontSize={fs(13)} fontWeight="$bold" color={ativa ? "$brandGreen" : "$forest"}>
+        <Text className={`font-display text-f13 font-bold ${ativa ? "text-vupth-green" : "text-vupth-forest"}`}>
           {rotulo}
         </Text>
-      </HStack>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -324,14 +305,14 @@ export function Home() {
   );
   const renderLoja = useCallback(
     ({ item }: { item: Establishment }) => (
-      <Box px={16}>
+      <View className="px-4">
         <EstablishmentRow
           establishment={item}
           distanceKm={item.distance_km ?? null}
           destaque={praOntem ? rotuloPraOntem(item) : null}
           onPress={handleEstablishmentPress}
         />
-      </Box>
+      </View>
     ),
     [handleEstablishmentPress, praOntem],
   );
@@ -343,7 +324,7 @@ export function Home() {
   const firstName = primeiroNome(user);
 
   return (
-    <VStack flex={1} bg="$brandBackground">
+    <View className="flex-1 bg-vupth-background">
       {/* A Home ROLA INTEIRA. Antes, tudo daqui até "Perto de você" ficava FORA
           da lista — saudação, busca, card da fila e Recentes ficavam colados no
           topo e só os estabelecimentos rolavam, o que dava a sensação de uma
@@ -371,7 +352,7 @@ export function Home() {
       {/* A saudacao e o TITULO da Home, nao um par sobreposto: como eyebrow
           (linha pequena por cima) ela empurrava o nome pra baixo e a Home
           comecava numa altura diferente de todas as outras telas. */}
-      <Box px={16}>
+      <View className="px-4">
         <ScreenHeader
           root
           title={
@@ -395,33 +376,26 @@ export function Home() {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
-                <Text fontFamily="$display" fontSize={fs(14)} fontWeight="$bold" color="$forest">
+                <Text className="font-display text-f14 font-bold text-vupth-forest">
                   Cadastrar
                 </Text>
               </TouchableOpacity>
             )
           }
         />
-      </Box>
+      </View>
 
       {/* Busca */}
-      <Box px={16} pt={16}>
+      <View className="px-4 pt-4">
         {/* 🔴 Andre, 24/09: "o texto fica espremido no input de buscar". O campo
             tinha `padding: 0` e nenhuma altura: no Android a caixa ficava do
             tamanho do glifo e cortava acento e descendente; na web o <input> do
             navegador ainda trazia borda e anel de foco proprios. Agora: altura
             minima no campo, altura de linha, sem o respiro de fonte do Android,
             e o mesmo reset de web do Partner (b829ad5). */}
-        <HStack
-          bg="$brandSurface"
-          borderRadius="$full"
-          gap={10}
-          px={16}
-          minHeight={50}
-          alignItems="center"
-        >
+        <View className="flex-row bg-vupth-surface rounded-full gap-2.5 px-4 min-h-[50px] items-center">
           <Search size={18} color="#454745" />
-          <Box flex={1}>
+          <View className="flex-1">
             <TextInput
               value={search}
               onChangeText={setSearch}
@@ -443,7 +417,7 @@ export function Home() {
               returnKeyType="search"
               testID="busca-home"
             />
-          </Box>
+          </View>
           {/* Era um icone SOLTO: parecia botao e nao fazia nada (QA Alexia).
               Agora abre o filtro e MOSTRA quando ha um ativo — lista filtrada
               sem indicacao visivel e o usuario achando que sumiu loja. */}
@@ -458,20 +432,18 @@ export function Home() {
             }
             testID="open-filter"
           >
-            <Box
-              bg={selectedFilter === "ALL" ? "transparent" : "$forest"}
-              borderRadius="$full"
-              px={selectedFilter === "ALL" ? 0 : 8}
-              py={selectedFilter === "ALL" ? 0 : 6}
+            <View
+              className={`${selectedFilter === "ALL" ? "bg-transparent" : "bg-vupth-forest"} rounded-full`}
+              style={{ paddingHorizontal: selectedFilter === "ALL" ? 0 : 8, paddingVertical: selectedFilter === "ALL" ? 0 : 6 }}
             >
               <SlidersHorizontal
                 size={18}
                 color={selectedFilter === "ALL" ? "#163300" : "#9FE870"}
               />
-            </Box>
+            </View>
           </TouchableOpacity>
-        </HStack>
-      </Box>
+        </View>
+      </View>
 
       {/* "Pra ontem" e as categorias numa faixa so, que rola de lado (Andre,
           26/09: "volte os filtros ao lado do pra ontem" e "diminua a pilula").
@@ -508,7 +480,7 @@ export function Home() {
       {/* Fila ativa. O atrasado (LATE) tambem: ele segue na fila — sem o card,
           o Inicio dizia que nao havia nada, e o teste de 25/09 leu "acabou". */}
       {(isInQueue || isLate) && activeQueue && (
-        <Box px={16} pt={20}>
+        <View className="px-4 pt-5">
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("queueStatus", {
@@ -521,40 +493,26 @@ export function Home() {
               })
             }
           >
-            <VStack bg="$brandGreen" borderRadius={24} gap={14} p={20}>
-              <HStack justifyContent="space-between" alignItems="center">
+            <View className="bg-vupth-green rounded-[24px] gap-3.5 p-5">
+              <View className="flex-row justify-between items-center">
                 <Text
-                  fontFamily="$body"
-                  fontSize={fs(12)}
-                  fontWeight="$bold"
-                  letterSpacing={0.8}
-                  color="$forest"
+                  className="font-body font-bold text-vupth-forest"
+                  style={{ fontSize: fs(12), letterSpacing: 0.8 }}
                 >
                   {isLate ? "VOCÊ FOI CHAMADO" : "VOCÊ ESTÁ NA FILA"}
                 </Text>
-                <HStack
-                  bg="$forest"
-                  borderRadius="$full"
-                  gap={6}
-                  px={12}
-                  py={6}
-                  alignItems="center"
-                >
+                <View className="flex-row bg-vupth-forest rounded-full gap-1.5 px-3 py-1.5 items-center">
                   <LiveDot size={8} color="#9FE870" />
-                  <Text fontFamily="$display" fontSize={fs(12)} fontWeight="$bold" color="$brandGreen">
+                  <Text className="font-display font-bold text-vupth-green" style={{ fontSize: fs(12) }}>
                     Ao vivo
                   </Text>
-                </HStack>
-              </HStack>
-              <HStack gap={16} alignItems="center">
-                <VStack flex={1}>
+                </View>
+              </View>
+              <View className="flex-row gap-4 items-center">
+                <View className="flex-1">
                   <Text
-                    fontFamily="$display"
-                    fontSize={fs(46)}
-                    fontWeight="$extrabold"
-                    letterSpacing={-2}
-                    lineHeight={fs(46)}
-                    color="$forest"
+                    className="font-display font-extrabold text-vupth-forest"
+                    style={{ fontSize: fs(46), letterSpacing: -2, lineHeight: fs(46) }}
                   >
                     {/* Posicao real (GET wait-time). Ate o 1o poll chegar, cai no
                         tempo — nunca inventa um numero de pessoas. */}
@@ -566,52 +524,46 @@ export function Home() {
                         ? "Calculando..."
                         : formatWaitTime(remaining)}
                   </Text>
-                  <Text fontFamily="$body" fontSize={fs(14)} color="$forest">
+                  <Text className="font-body text-f14 text-vupth-forest">
                     {remaining == null ? "" : `~${formatWaitTime(remaining)} · `}
                     {activeQueue.establishmentName}
                   </Text>
-                </VStack>
+                </View>
                 <ChevronRight size={24} color="#163300" />
-              </HStack>
-            </VStack>
+              </View>
+            </View>
           </TouchableOpacity>
-        </Box>
+        </View>
       )}
 
       {/* Pedido de corte esperando resposta. Sem isto o cliente pedia e ficava no
           escuro ate o fim dos 5 minutos (teste de 25/09); o desfecho chega em
           aviso pelo usePedidoDeCorte. */}
       {pedidosDeCorte.map((p) => (
-        <Box px={16} pt={20} key={p.id}>
-          <VStack bg="$brandSurface" borderRadius={24} gap={6} p={20} testID="pedido-de-corte">
+        <View className="px-4 pt-5" key={p.id}>
+          <View className="bg-vupth-surface rounded-[24px] gap-1.5 p-5" testID="pedido-de-corte">
             <Text
-              fontFamily="$body"
-              fontSize={fs(12)}
-              fontWeight="$bold"
-              letterSpacing={0.8}
-              color="$forest"
+              className="font-body font-bold text-vupth-forest"
+              style={{ fontSize: fs(12), letterSpacing: 0.8 }}
             >
               PEDIDO DE CORTE ENVIADO
             </Text>
-            <Text fontFamily="$display" fontSize={fs(18)} letterSpacing={-0.4} color="$forest">
+            <Text className="font-display text-vupth-forest" style={{ fontSize: fs(18), letterSpacing: -0.4 }}>
               Aguardando {p.professionalName || "o profissional"} responder
             </Text>
-            <Text fontFamily="$body" fontSize={fs(14)} color="$brandTextSecondary">
+            <Text className="font-body text-f14 text-vupth-textSecondary">
               {p.establishmentName ? `${p.establishmentName} · ` : ""}resposta até {formatClockTime(new Date(p.expiraEm))}
             </Text>
-          </VStack>
-        </Box>
+          </View>
+        </View>
       ))}
 
       {/* Recentes */}
       {lastVisit && (
-        <VStack px={16} pt={22} gap={12}>
+        <View className="px-4 pt-[22px] gap-3">
           <Text
-            fontFamily="$display"
-            fontSize={fs(17)}
-            fontWeight="$bold"
-            letterSpacing={-0.3}
-            color="$brandTextPrimary"
+            className="font-display font-bold text-vupth-textPrimary"
+            style={{ fontSize: fs(17), letterSpacing: -0.3 }}
           >
             Recentes
           </Text>
@@ -622,43 +574,40 @@ export function Home() {
               })
             }
           >
-            <HStack bg="$brandSurface" borderRadius={18} gap={14} p={14} alignItems="center">
+            <View className="flex-row bg-vupth-surface rounded-[18px] gap-3.5 p-3.5 items-center">
               <PlaceAvatar name={lastVisit.professionalName} bg="$accentPeach" />
-              <VStack flex={1} gap={3}>
-                <Text fontFamily="$display" fontSize={fs(15)} fontWeight="$bold" color="$brandTextPrimary">
+              <View className="flex-1 gap-[3px]">
+                <Text className="font-display text-f15 font-bold text-vupth-textPrimary">
                   {lastVisit.professionalName}
                   {lastVisit.services?.length
                     ? ` · ${lastVisit.services.map((s) => s.customName).join(" + ")}`
                     : ""}
                 </Text>
                 {timeAgoLabel(lastVisit.endTime ?? lastVisit.scheduledTime) && (
-                  <Text fontFamily="$body" fontSize={fs(13)} color="$brandTextSecondary">
+                  <Text className="font-body text-f13 text-vupth-textSecondary">
                     Última vez {timeAgoLabel(lastVisit.endTime ?? lastVisit.scheduledTime)}
                   </Text>
                 )}
-              </VStack>
-              <Box bg="$forest" borderRadius="$full" px={14} py={9}>
-                <Text fontFamily="$display" fontSize={fs(13)} fontWeight="$bold" color="$brandGreen">
+              </View>
+              <View className="bg-vupth-forest rounded-full px-3.5 py-[9px]">
+                <Text className="font-display text-f13 font-bold text-vupth-green">
                   Repetir
                 </Text>
-              </Box>
-            </HStack>
+              </View>
+            </View>
           </TouchableOpacity>
-        </VStack>
+        </View>
       )}
 
       {/* A secao lista o que esta PERTO, aberto ou nao — a ordem e distancia
           pura (decisao do Andre, 2026-08-06). "Livres agora" prometia so as
           abertas e listava fechada logo abaixo; quem diz quem esta aberto e a
           tag de cada linha. */}
-        <VStack px={16} pt={22} gap={12}>
-        <HStack justifyContent="space-between" alignItems="center">
+        <View className="px-4 pt-[22px] gap-3">
+        <View className="flex-row justify-between items-center">
           <Text
-            fontFamily="$display"
-            fontSize={fs(17)}
-            fontWeight="$bold"
-            letterSpacing={-0.3}
-            color="$brandTextPrimary"
+            className="font-display font-bold text-vupth-textPrimary"
+            style={{ fontSize: fs(17), letterSpacing: -0.3 }}
           >
             {praOntem ? "Pra ontem" : "Perto de você"}
           </Text>
@@ -667,7 +616,7 @@ export function Home() {
               Home — era um link morto. */}
           {praOntem ? (
             <TouchableOpacity onPress={() => setPraOntem(false)} testID="pra-ontem-sair">
-              <Text fontFamily="$body" fontSize={fs(14)} fontWeight="$semibold" color="$brandTextSecondary">
+              <Text className="font-body text-f14 font-semibold text-vupth-textSecondary">
                 Ver todas
               </Text>
             </TouchableOpacity>
@@ -676,20 +625,20 @@ export function Home() {
               onPress={() => navigation.navigate("establishmentList", { filter: selectedFilter })}
               testID="see-all"
             >
-              <Text fontFamily="$body" fontSize={fs(14)} fontWeight="$semibold" color="$brandTextSecondary">
+              <Text className="font-body text-f14 font-semibold text-vupth-textSecondary">
                 Ver todos
               </Text>
             </TouchableOpacity>
           )}
-        </HStack>
+        </View>
         {praOntem && (
-          <Text fontFamily="$body" fontSize={fs(13)} color="$brandTextSecondary">
+          <Text className="font-body text-f13 text-vupth-textSecondary">
             {coords
               ? "Abertas agora, de quem te atende primeiro — já contando o caminho até lá."
               : "Abertas agora, da menor espera. Ligue a localização para contar o caminho."}
           </Text>
         )}
-        </VStack>
+        </View>
           </>
         }
         renderItem={renderLoja}
@@ -703,19 +652,19 @@ export function Home() {
         removeClippedSubviews={Platform.OS === "android"}
         ListEmptyComponent={
           isLoading ? (
-            <Box px={16}>
+            <View className="px-4">
               <SkeletonList count={4} />
-            </Box>
+            </View>
           ) : isError ? (
-            <Center mt={40}>
-              <Text color="$brandDanger">Erro ao carregar estabelecimentos</Text>
-            </Center>
+            <View className="items-center justify-center mt-10">
+              <Text className="font-body text-vupth-danger text-md">Erro ao carregar estabelecimentos</Text>
+            </View>
           ) : (
-            <Center mt={40}>
-              <Text color="$brandTextSecondary">
+            <View className="items-center justify-center mt-10">
+              <Text className="font-body text-vupth-textSecondary text-md">
                 {praOntem ? "Nenhuma loja aberta e livre agora" : "Nenhum estabelecimento encontrado"}
               </Text>
-            </Center>
+            </View>
           )
         }
       />
@@ -730,6 +679,7 @@ export function Home() {
         visivel={pilula.visivel}
         onPress={() => listaRef.current?.scrollToOffset({ offset: 0, animated: true })}
       />
-    </VStack>
+    </View>
   );
 }
+
