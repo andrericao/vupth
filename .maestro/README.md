@@ -43,7 +43,8 @@ dono e profissional na mesma conta, trabalhando, com um serviço, aberta das
 | 12 | `aparencia` | Perfil → Aparência: o tema avisa "Tema escuro", a fonte +2 salva e continua na tela; volta ao Normal |
 
 `apoio/` tem os pedaços repetidos (abrir a loja, escolher o serviço, fechar
-um aviso) e `scripts/` as chamadas à API.
+um aviso, conferir a versão e o `esperar_negando`, que espera uma tela negando a
+caixa de permissão do sistema que vier no meio — 00.06 e 02.10, 03/10) e `scripts/` as chamadas à API.
 
 ## O que a bateria não cobre
 

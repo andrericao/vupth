@@ -29,11 +29,13 @@ appId: ${APP_ID}
     id: "primary-signup"
     label: "02.09 · toca em primary-signup"
 
-- extendedWaitUntil:
-    visible:
-      id: "complete-profile-name"
-    timeout: 60000
-    label: "02.10 · espera complete-profile-name"
+# A caixa da notificacao vem logo depois do cadastro, durante esta espera
+# (bateria-ainda-pede-mao, 03/10): a espera nega a caixa enquanto espera.
+- runFlow:
+    file: ../apoio/esperar_negando.yaml
+    env:
+      ALVO: "complete-profile-name"
+    label: "02.10 · espera complete-profile-name (negando a caixa do sistema)"
 - tapOn:
     id: "complete-profile-name"
     label: "02.11 · toca em complete-profile-name"

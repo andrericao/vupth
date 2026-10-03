@@ -51,11 +51,13 @@ env:
       location: deny
       notifications: deny
     label: "00.05 · abre o app"
-- extendedWaitUntil:
-    visible:
-      id: "onboarding-start"
-    timeout: 120000
-    label: "00.06 · espera onboarding-start"
+# A caixa da localizacao vem durante esta espera e cobria a tela: a espera
+# nega a caixa enquanto espera (bateria-ainda-pede-mao, 03/10).
+- runFlow:
+    file: apoio/esperar_negando.yaml
+    env:
+      ALVO: "onboarding-start"
+    label: "00.06 · espera onboarding-start (negando a caixa do sistema)"
 # A caixa de localizacao do sistema vem por cima da abertura, mesmo com o
 # `permissions: deny` (Android 13+) — nega aqui, antes do primeiro toque, para
 # ninguem precisar tocar no aparelho (bateria-sozinha).

@@ -20,10 +20,25 @@ appId: ${APP_ID}
     commands:
       - stopApp
       - launchApp
-      - extendedWaitUntil:
-          visible:
-            text: "Perfil"
-          timeout: 120000
+      # Espera o Inicio negando a caixa do sistema que vier (como o esperar_negando).
+      - repeat:
+          times: 40
+          while:
+            notVisible:
+              text: "Perfil"
+          commands:
+            - runFlow:
+                when:
+                  visible:
+                    id: "com.android.permissioncontroller:id/permission_deny_button"
+                commands:
+                  - tapOn:
+                      id: "com.android.permissioncontroller:id/permission_deny_button"
+            - extendedWaitUntil:
+                visible:
+                  text: "Perfil"
+                timeout: 3000
+                optional: true
       - runFlow:
           file: fechar_aviso.yaml
       - tapOn:
