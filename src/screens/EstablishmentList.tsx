@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
+import { FlatList, TouchableOpacity, RefreshControl, Text, TextInput, View } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import { Search, ChevronRight, Zap, ArrowUpDown, Star } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
@@ -40,11 +39,11 @@ function OpenRow({
   );
   return (
     <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>
-      <Box bg="$brandSurface" p="$3" mb="$3" borderRadius="$card">
-        <HStack alignItems="center" gap="$3">
+      <View className="bg-vupth-surface p-3 mb-3 rounded-card">
+        <View className="flex-row items-center gap-3">
           <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} />
-          <VStack flex={1}>
-            <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+          <View className="flex-1">
+            <Text className="font-heading text-sm text-vupth-forest">
               {establishment.name}
             </Text>
             {/* A ESPERA MORA NA TAG. Ela estava aqui E na pilula ao lado, que
@@ -52,33 +51,33 @@ function OpenRow({
                 diferenca (aberta com fila x sem fila) e repetiam o que esta
                 linha ja dizia melhor. A linha fica com onde fica e o quanto
                 vale. */}
-            <HStack alignItems="center" gap="$2" mt="$0.5">
+            <View className="flex-row items-center gap-2 mt-0.5">
               {establishment.distance_km != null && (
                 <>
-                  <Text size="xs" color="$brandTextSecondary">
+                  <Text className="font-body text-xs text-vupth-textSecondary">
                     {formatDistanceKm(establishment.distance_km)}
                   </Text>
-                  <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
+                  <View className="w-[3px] h-[3px] rounded-full bg-vupth-textSecondary" />
                 </>
               )}
-              <HStack alignItems="center" gap="$1">
+              <View className="flex-row items-center gap-1">
                 <Star size={11} color="#163300" fill="#163300" />
-                <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
+                <Text className="font-heading text-xs text-vupth-textSecondary">
                   {r.value.toFixed(1)}
                 </Text>
-              </HStack>
-            </HStack>
-          </VStack>
+              </View>
+            </View>
+          </View>
           {/* Mesma tag da Home — uma regra so pras duas telas. Aqui so chega
               loja ABERTA (a fechada tem linha propria), entao ela sai "Livre"
               ou com o tempo. */}
-          <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
-            <Text size="2xs" fontFamily="$heading" color="$forest">
+          <View className="bg-vupth-green rounded-full px-3 py-1.5">
+            <Text className="font-heading text-f10 text-vupth-forest">
               {statusTag(establishment).label}
             </Text>
-          </Box>
-        </HStack>
-      </Box>
+          </View>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -106,36 +105,30 @@ function ClosedRow({
           0,8 e nao 0,7: medido, `opacity` multiplica sobre TUDO, inclusive o
           texto que ja tinha passado no contraste. A 0,7 o nome da loja cai pra
           3,82:1 e reprova no AA; a 0,8 fica em 4,92:1. */}
-      <Box bg="$brandSurface" p="$3" mb="$3" borderRadius="$card" opacity={0.8}>
-        <HStack alignItems="center" gap="$3">
+      <View className="bg-vupth-surface p-3 mb-3 rounded-card opacity-80">
+        <View className="flex-row items-center gap-3">
           <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} bg="$brandBorder" color="$brandTextSecondary" />
-          <VStack flex={1}>
-            <Text fontFamily="$heading" fontSize="$sm" color="$brandTextSecondary">
+          <View className="flex-1">
+            <Text className="font-heading text-sm text-vupth-textSecondary">
               {establishment.name}
             </Text>
-            <Text size="xs" color="$brandTextSecondary" mt="$0.5">
+            <Text className="font-body text-xs text-vupth-textSecondary mt-0.5">
               {serviceTypeLabel(establishment.serviceType ?? "")}
               {establishment.distance_km != null
                 ? ` · ${formatDistanceKm(establishment.distance_km)}`
                 : ""}
             </Text>
-          </VStack>
+          </View>
           {/* Mesma tag das outras duas telas. Aqui ela dizia "Fechada" e o
               subtitulo dizia "Toque para agendar" — o estado e a acao
               separados, com vocabulario que so existia nesta tela. */}
-          <Box
-            borderWidth={1}
-            borderColor="$brandBorder"
-            borderRadius="$full"
-            px="$3"
-            py="$1.5"
-          >
-            <Text size="2xs" fontFamily="$heading" color="$brandTextSecondary">
+          <View className="border border-vupth-border rounded-full px-3 py-1.5">
+            <Text className="font-heading text-f10 text-vupth-textSecondary">
               {statusTag(establishment).label}
             </Text>
-          </Box>
-        </HStack>
-      </Box>
+          </View>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 }
@@ -179,22 +172,16 @@ export function EstablishmentList() {
   }
 
   return (
-    <VStack flex={1} bg="$brandBackground">
-      <Box px={16}>
+    // NativeWind (DEC-5): mesmas medidas do v1. O "2xs" (10) virou text-f10.
+    <View className="flex-1 bg-vupth-background">
+      <View className="px-4">
         <ScreenHeader title={serviceTypeTitle(filter).toUpperCase()} />
-      </Box>
+      </View>
 
-      <VStack px={16} gap="$3.5">
-        <HStack
-          bg="$brandSurface"
-          borderRadius="$full"
-          gap={10}
-          px={16}
-          py={13}
-          alignItems="center"
-        >
+      <View className="px-4 gap-3.5">
+        <View className="flex-row bg-vupth-surface rounded-full gap-2.5 px-4 py-[13px] items-center">
           <Search size={18} color="#454745" />
-          <Box flex={1}>
+          <View className="flex-1">
             <TextInput
               value={search}
               onChangeText={setSearch}
@@ -203,38 +190,32 @@ export function EstablishmentList() {
               style={{ fontFamily: "Inter_400Regular", fontSize: fs(15), color: "#163300", padding: 0 }}
               returnKeyType="search"
             />
-          </Box>
-        </HStack>
+          </View>
+        </View>
 
         {/* Atalho da menor espera — o mesmo padrao do CTA da tela da loja: e um
             caminho rapido entre os ABERTOS, nao uma promessa sobre todos. */}
         {best && (
           <TouchableOpacity onPress={() => goToDetail(best.id)} testID="shortest-wait-shortcut">
-            <HStack
-              bg="$forest"
-              borderRadius={20}
-              gap={12}
-              p={16}
-              alignItems="center"
-            >
-              <Center width={38} height={38} borderRadius="$full" bg="$brandGreen">
+            <View className="flex-row bg-vupth-forest rounded-card gap-3 p-4 items-center">
+              <View className="w-[38px] h-[38px] rounded-full bg-vupth-green items-center justify-center">
                 <Zap size={20} color="#163300" />
-              </Center>
-              <VStack flex={1} gap={2}>
-                <Text fontFamily="$heading" fontSize={fs(15)} color="$white">
+              </View>
+              <View className="flex-1 gap-0.5">
+                <Text className="font-heading text-f15 text-white">
                   Entrar com menor espera
                 </Text>
-                <Text fontFamily="$body" fontSize={fs(13)} color="$brandGreen">
+                <Text className="font-body text-f13 text-vupth-green">
                   {best.name} · {waitLabel(best).replace("~", "")}
                 </Text>
-              </VStack>
+              </View>
               <ChevronRight size={20} color="#9FE870" />
-            </HStack>
+            </View>
           </TouchableOpacity>
         )}
 
-        <HStack justifyContent="space-between" alignItems="center">
-          <Text size="sm" color="$brandTextSecondary" fontFamily="$heading">
+        <View className="flex-row justify-between items-center">
+          <Text className="font-heading text-sm text-vupth-textSecondary">
             {open.length === 0
               ? "Nenhuma aberta agora"
               : `${open.length} ${open.length === 1 ? "aberta agora" : "abertas agora"}`}
@@ -244,31 +225,24 @@ export function EstablishmentList() {
               onPress={() => setSortBy((s) => (s === "wait" ? "distance" : "wait"))}
               testID="sort-toggle"
             >
-              <HStack
-                bg="$brandSurface"
-                borderRadius="$full"
-                gap={6}
-                px={12}
-                py={7}
-                alignItems="center"
-              >
+              <View className="flex-row bg-vupth-surface rounded-full gap-1.5 px-3 py-[7px] items-center">
                 <ArrowUpDown size={13} color="#163300" />
-                <Text fontFamily="$heading" fontSize={fs(12)} color="$brandTextPrimary">
+                <Text className="font-heading text-vupth-textPrimary" style={{ fontSize: fs(12) }}>
                   {sortBy === "wait" ? "Menor espera" : "Mais perto"}
                 </Text>
-              </HStack>
+              </View>
             </TouchableOpacity>
           )}
-        </HStack>
-      </VStack>
+        </View>
+      </View>
 
-      <VStack flex={1} px={16} pt="$4">
+      <View className="flex-1 px-4 pt-4">
         {isLoading ? (
           <SkeletonList count={5} />
         ) : isError ? (
-          <Center mt={40}>
-            <Text color="$brandDanger">Erro ao carregar estabelecimentos</Text>
-          </Center>
+          <View className="mt-10 items-center">
+            <Text className="font-body text-md text-vupth-danger">Erro ao carregar estabelecimentos</Text>
+          </View>
         ) : (
           <FlatList
             data={[...sortedOpen, ...closed]}
@@ -291,15 +265,15 @@ export function EstablishmentList() {
               )
             }
             ListEmptyComponent={
-              <Center mt={40}>
-                <Text color="$brandTextSecondary">
+              <View className="mt-10 items-center">
+                <Text className="font-body text-md text-vupth-textSecondary">
                   {search ? "Nada encontrado para essa busca" : "Nenhum estabelecimento por aqui"}
                 </Text>
-              </Center>
+              </View>
             }
           />
         )}
-      </VStack>
-    </VStack>
+      </View>
+    </View>
   );
 }
