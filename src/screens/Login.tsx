@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Alert, TouchableOpacity } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { Text, VStack, HStack, ScrollView } from "@gluestack-ui/themed";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
@@ -91,34 +90,32 @@ export function Login() {
       {/* pb soma a faixa da tab bar: estas telas vivem dentro do
           Tab.Navigator, e sem a reserva o CTA do rodape nasce POR BAIXO
           da barra — o toque nao chega nele. */}
-      <VStack flex={1} pb={32 + tabBarInset} px={16}>
+      <View className="flex-1 px-4" style={{ paddingBottom: 32 + tabBarInset }}>
         {/* Sem titulo: "OLA DE NOVO" e o heroi da tela, em 34px no corpo. O
             cabecalho aqui existe pelo voltar — e pra que o topo respeite o
             safe-area como em todas as outras telas. */}
         <ScreenHeader />
 
-        <VStack gap="$2" mt="$3">
+        <View className="gap-2 mt-3">
+          {/* O heroi segue com as medidas do v1 em `style` (34/36, ls -1.5). */}
           <Text
-            fontFamily="$display"
-            fontSize={fs(34)}
-            lineHeight={fs(36)}
-            letterSpacing={-1.5}
-            color="$forest"
+            className="font-display text-vupth-forest"
+            style={{ fontSize: fs(34), lineHeight: fs(36), letterSpacing: -1.5 }}
           >
             OLÁ DE NOVO
           </Text>
-          <Text size="md" color="$brandTextSecondary">
+          <Text className="font-body text-md text-vupth-textSecondary">
             Entre para acompanhar sua fila.
           </Text>
-        </VStack>
+        </View>
 
         {/* O Pencil desenha "Continuar com Google/Apple" aqui. Nao entrou: o
             backend nao tem OAuth (so /auth/login com e-mail e senha), e botao
             que nao funciona e pior do que botao ausente. Quando o login social
             existir, e neste ponto que ele entra, acima do divisor. */}
 
-        <VStack gap="$3" mt="$7">
-          <VStack gap="$1">
+        <View className="gap-3 mt-7">
+          <View className="gap-1">
             <Input2
               keyboardType="email-address"
               autoCapitalize="none"
@@ -126,29 +123,29 @@ export function Login() {
               value={email}
               onChangeText={(text: string) => { setEmail(text); setErrors({}); }}
             />
-            {errors.email && <Text color="$brandDanger" size="xs">{errors.email}</Text>}
-          </VStack>
+            {errors.email && <Text className="font-body text-xs text-vupth-danger">{errors.email}</Text>}
+          </View>
 
-          <VStack gap="$1">
+          <View className="gap-1">
             <Input2
               isPassword
               placeholder="Senha"
               value={password}
               onChangeText={(text: string) => { setPassword(text); setErrors({}); }}
             />
-            {errors.password && <Text color="$brandDanger" size="xs">{errors.password}</Text>}
-          </VStack>
+            {errors.password && <Text className="font-body text-xs text-vupth-danger">{errors.password}</Text>}
+          </View>
 
-          <HStack justifyContent="flex-end">
+          <View className="flex-row justify-end">
             <TouchableOpacity onPress={() => navigation.navigate("forgotPassword", { email })}>
-              <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
+              <Text className="font-body text-sm font-semibold text-vupth-textSecondary">
                 Esqueci minha senha
               </Text>
             </TouchableOpacity>
-          </HStack>
-        </VStack>
+          </View>
+        </View>
 
-        <VStack flex={1} justifyContent="flex-end" gap="$4">
+        <View className="flex-1 justify-end gap-4">
           <Button
             title={isSubmitting ? "Entrando..." : "Entrar"}
             onPress={handleLogin}
@@ -159,18 +156,18 @@ export function Login() {
               (Andre 2026-08-05: "entrar e cadastrar nao podem ter o mesmo
               peso") — o link leva a decisao ainda mais longe do caminho
               principal, sem esconder. */}
-          <HStack justifyContent="center" gap="$1.5" alignItems="center">
-            <Text size="sm" color="$brandTextSecondary">
+          <View className="flex-row justify-center gap-1.5 items-center">
+            <Text className="font-body text-sm text-vupth-textSecondary">
               Ainda não tem conta?
             </Text>
             <TouchableOpacity onPress={handleSignUp} testID="go-signup">
-              <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+              <Text className="font-heading text-sm text-vupth-forest">
                 Criar conta
               </Text>
             </TouchableOpacity>
-          </HStack>
-        </VStack>
-      </VStack>
+          </View>
+        </View>
+      </View>
     </ScrollView>
   );
 }
