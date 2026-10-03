@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Alert, ScrollView } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { VStack, Text } from "@gluestack-ui/themed";
 
 import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
@@ -71,71 +70,74 @@ export function EditProfile() {
     }
   }
 
+  // NativeWind (DEC-5): mesmas medidas do v1 (px 16, pb 30, pt 24, gaps
+  // 16/4/8, botao a 32 dos campos).
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} pb={30} px={16} bg="$brandBackground">
+    <ScrollView
+      className="flex-1 bg-vupth-background"
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="flex-1 pb-[30px] px-4 bg-vupth-background">
         <ScreenHeader title="DADOS PESSOAIS" />
 
-        <VStack pt={24} flex={1}>
+        <View className="pt-6 flex-1">
+          <View className="gap-4">
+            <View className="gap-1">
+              <Text className="font-body text-sm text-vupth-textSecondary">Nome</Text>
+              <Input2 placeholder="Nome" value={firstName} onChangeText={setFirstName} />
+            </View>
 
-        <VStack gap="$4">
-          <VStack gap="$1">
-            <Text size="sm" color="$brandTextSecondary">Nome</Text>
-            <Input2 placeholder="Nome" value={firstName} onChangeText={setFirstName} />
-          </VStack>
+            <View className="gap-1">
+              <Text className="font-body text-sm text-vupth-textSecondary">Sobrenome</Text>
+              <Input2 placeholder="Sobrenome" value={lastName} onChangeText={setLastName} />
+            </View>
 
-          <VStack gap="$1">
-            <Text size="sm" color="$brandTextSecondary">Sobrenome</Text>
-            <Input2 placeholder="Sobrenome" value={lastName} onChangeText={setLastName} />
-          </VStack>
+            <View className="gap-1">
+              <Text className="font-body text-sm text-vupth-textSecondary">Telefone</Text>
+              <Input2
+                placeholder="11999998888"
+                value={phone}
+                onChangeText={setPhone}
+                keyboardType="phone-pad"
+              />
+            </View>
 
-          <VStack gap="$1">
-            <Text size="sm" color="$brandTextSecondary">Telefone</Text>
-            <Input2
-              placeholder="11999998888"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-            />
-          </VStack>
+            <View className="gap-1">
+              <Text className="font-body text-sm text-vupth-textSecondary">Data de nascimento</Text>
+              <Input2
+                placeholder="1990-01-15"
+                value={birthDate}
+                onChangeText={setBirthDate}
+              />
+            </View>
 
-          <VStack gap="$1">
-            <Text size="sm" color="$brandTextSecondary">Data de nascimento</Text>
-            <Input2
-              placeholder="1990-01-15"
-              value={birthDate}
-              onChangeText={setBirthDate}
-            />
-          </VStack>
+            <View className="gap-1">
+              <Text className="font-body text-sm text-vupth-textSecondary">Gênero</Text>
+              <View className="gap-2">
+                {GENDER_OPTIONS.map((g) => (
+                  // Sem altura fixa: a de 40 brigava com a minima de 54 do
+                  // Button e o "Salvar" subia por cima do "Outro" (print do
+                  // Andre, 26/09).
+                  <Button
+                    key={g}
+                    title={GENDER_LABELS[g]}
+                    variant={gender === g ? "solid" : "outline"}
+                    onPress={() => setGender(g)}
+                  />
+                ))}
+              </View>
+            </View>
+          </View>
 
-          <VStack gap="$1">
-            <Text size="sm" color="$brandTextSecondary">Gênero</Text>
-            <VStack gap="$2">
-              {GENDER_OPTIONS.map((g) => (
-                // Sem `h`: a altura fixa de 40 brigava com a altura minima de 54 do
-                // Button — o botao era DESENHADO com 54, mas o layout reservava 40.
-                // Com quatro opcoes a diferenca somava quase um botao, e o "Salvar"
-                // subia por cima do "Outro" (print do Andre, 26/09).
-                <Button
-                  key={g}
-                  title={GENDER_LABELS[g]}
-                  variant={gender === g ? "solid" : "outline"}
-                  onPress={() => setGender(g)}
-                />
-              ))}
-            </VStack>
-          </VStack>
-        </VStack>
-
-        <VStack mt="$8">
           <Button
             title={isSaving ? "Salvando..." : "Salvar"}
             onPress={handleSave}
             isDisabled={isSaving}
+            className="mt-8"
           />
-        </VStack>
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
   );
 }

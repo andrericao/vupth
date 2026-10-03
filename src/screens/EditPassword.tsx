@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Alert } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { VStack, ScrollView } from "@gluestack-ui/themed";
 
 import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
@@ -59,57 +58,52 @@ export function EditPassword() {
     }
   }
 
+  // NativeWind (DEC-5): mesmas medidas do v1 (px 16, pb 30, pt 24, gaps
+  // 16/4, botao a 32 dos campos).
   return (
     <ScrollView
-      flex={1}
-      bg="$brandBackground"
+      className="flex-1 bg-vupth-background"
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} pb={30} px={16} bg="$brandBackground">
+      <View className="flex-1 pb-[30px] px-4 bg-vupth-background">
         <ScreenHeader title="ALTERAR SENHA" />
 
-        <VStack pt={24} flex={1}>
-
-        <VStack gap="$4">
-          <VStack gap="$1">
+        <View className="pt-6 flex-1">
+          <View className="gap-4">
             <Input2
               isPassword
               placeholder="Senha atual"
               value={currentPassword}
               onChangeText={setCurrentPassword}
             />
-          </VStack>
 
-          <VStack gap="$1">
-            <Input2
-              isPassword
-              placeholder="Nova senha"
-              value={password}
-              onChangeText={setPassword}
-            />
-            {password.length > 0 && <PasswordRules rules={rules} />}
-          </VStack>
+            <View className="gap-1">
+              <Input2
+                isPassword
+                placeholder="Nova senha"
+                value={password}
+                onChangeText={setPassword}
+              />
+              {password.length > 0 && <PasswordRules rules={rules} />}
+            </View>
 
-          <VStack gap="$1">
             <Input2
               isPassword
               placeholder="Confirmar nova senha"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
             />
-          </VStack>
-        </VStack>
+          </View>
 
-        <VStack mt="$8">
           <Button
             title={isSaving ? "Salvando..." : "Salvar"}
             onPress={handleSave}
             isDisabled={!canSave}
+            className="mt-8"
           />
-        </VStack>
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
   );
 }
