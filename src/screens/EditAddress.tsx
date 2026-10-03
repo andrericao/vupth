@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Alert, ScrollView, TouchableOpacity } from "react-native";
-import { VStack, Text, Box, HStack } from "@gluestack-ui/themed";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Star, Trash2, Pencil, MapPin } from "lucide-react-native";
 
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -236,132 +235,139 @@ export function EditAddress() {
   }
 
   if (mode === "form") {
+    // NativeWind (DEC-5): mesmas medidas do v1 (px 16, pb 30, pt 24, gaps
+    // 12/4, botoes a 32 dos campos).
     return (
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <VStack flex={1} pb={30} px={16} bg="$brandBackground">
+      <ScrollView
+        className="flex-1 bg-vupth-background"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="flex-1 pb-[30px] px-4 bg-vupth-background">
           <ScreenHeader title={editingId ? "EDITAR ENDEREÇO" : "NOVO ENDEREÇO"} />
-          <VStack pt={24} flex={1}>
-
-          <Button
-            className="mb-4"
-            title={gpsLoading ? "Localizando..." : "Usar minha localização (GPS)"}
-            variant="outline"
-            isDisabled={gpsLoading}
-            testID="address-use-gps"
-            onPress={handleUseGps}
-          />
-          <HStack alignItems="center" gap="$1" mb="$4">
-            <MapPin size={12} color="#454745" />
-            <Text size="xs" color="$brandTextSecondary" flex={1}>
-              Com o GPS a gente já preenche o endereço e calcula sua distância até os estabelecimentos.
-            </Text>
-          </HStack>
-
-          <VStack gap="$3">
-            <VStack gap="$1">
-              <Text size="sm" color="$brandTextSecondary">Rua *</Text>
-              <Input2 placeholder="Rua das Flores" value={form.street} onChangeText={(v: string) => updateField("street", v)} />
-            </VStack>
-            <HStack gap="$3">
-              <VStack gap="$1" flex={1}>
-                <Text size="sm" color="$brandTextSecondary">Número *</Text>
-                <Input2 placeholder="123" value={form.number} onChangeText={(v: string) => updateField("number", v)} />
-              </VStack>
-              <VStack gap="$1" flex={1}>
-                <Text size="sm" color="$brandTextSecondary">Complemento</Text>
-                <Input2 placeholder="Apt 4B" value={form.complement} onChangeText={(v: string) => updateField("complement", v)} />
-              </VStack>
-            </HStack>
-            <VStack gap="$1">
-              <Text size="sm" color="$brandTextSecondary">Bairro *</Text>
-              <Input2 placeholder="Centro" value={form.neighborhood} onChangeText={(v: string) => updateField("neighborhood", v)} />
-            </VStack>
-            <HStack gap="$3">
-              <VStack gap="$1" flex={2}>
-                <Text size="sm" color="$brandTextSecondary">Cidade *</Text>
-                <Input2 placeholder="São Paulo" value={form.city} onChangeText={(v: string) => updateField("city", v)} />
-              </VStack>
-              <VStack gap="$1" flex={1}>
-                <Text size="sm" color="$brandTextSecondary">UF *</Text>
-                <Input2 placeholder="SP" value={form.state} onChangeText={(v: string) => updateField("state", v)} autoCapitalize="characters" maxLength={2} />
-              </VStack>
-            </HStack>
-            <VStack gap="$1">
-              <Text size="sm" color="$brandTextSecondary">
-                CEP *{cepLoading ? " — buscando endereço..." : ""}
+          <View className="pt-6 flex-1">
+            <Button
+              className="mb-4"
+              title={gpsLoading ? "Localizando..." : "Usar minha localização (GPS)"}
+              variant="outline"
+              isDisabled={gpsLoading}
+              testID="address-use-gps"
+              onPress={handleUseGps}
+            />
+            <View className="flex-row items-center gap-1 mb-4">
+              <MapPin size={12} color="#454745" />
+              <Text className="font-body text-xs text-vupth-textSecondary flex-1">
+                Com o GPS a gente já preenche o endereço e calcula sua distância até os estabelecimentos.
               </Text>
-              <Input2 placeholder="01310-100" value={form.zipCode} onChangeText={handleCepChange} keyboardType="numeric" maxLength={9} />
-            </VStack>
-            <VStack gap="$1">
-              <Text size="sm" color="$brandTextSecondary">Referência</Text>
-              <Input2 placeholder="Próximo ao metrô" value={form.reference} onChangeText={(v: string) => updateField("reference", v)} />
-            </VStack>
-          </VStack>
+            </View>
 
-          <VStack mt="$8" gap="$3">
-            <Button title={isSaving ? "Salvando..." : "Salvar"} onPress={handleSave} isDisabled={isSaving} />
-            <Button title="Cancelar" variant="outline" onPress={() => setMode("list")} />
-          </VStack>
-          </VStack>
-        </VStack>
+            <View className="gap-3">
+              <View className="gap-1">
+                <Text className="font-body text-sm text-vupth-textSecondary">Rua *</Text>
+                <Input2 placeholder="Rua das Flores" value={form.street} onChangeText={(v: string) => updateField("street", v)} />
+              </View>
+              <View className="flex-row gap-3">
+                <View className="gap-1 flex-1">
+                  <Text className="font-body text-sm text-vupth-textSecondary">Número *</Text>
+                  <Input2 placeholder="123" value={form.number} onChangeText={(v: string) => updateField("number", v)} />
+                </View>
+                <View className="gap-1 flex-1">
+                  <Text className="font-body text-sm text-vupth-textSecondary">Complemento</Text>
+                  <Input2 placeholder="Apt 4B" value={form.complement} onChangeText={(v: string) => updateField("complement", v)} />
+                </View>
+              </View>
+              <View className="gap-1">
+                <Text className="font-body text-sm text-vupth-textSecondary">Bairro *</Text>
+                <Input2 placeholder="Centro" value={form.neighborhood} onChangeText={(v: string) => updateField("neighborhood", v)} />
+              </View>
+              <View className="flex-row gap-3">
+                <View className="gap-1 flex-[2]">
+                  <Text className="font-body text-sm text-vupth-textSecondary">Cidade *</Text>
+                  <Input2 placeholder="São Paulo" value={form.city} onChangeText={(v: string) => updateField("city", v)} />
+                </View>
+                <View className="gap-1 flex-1">
+                  <Text className="font-body text-sm text-vupth-textSecondary">UF *</Text>
+                  <Input2 placeholder="SP" value={form.state} onChangeText={(v: string) => updateField("state", v)} autoCapitalize="characters" maxLength={2} />
+                </View>
+              </View>
+              <View className="gap-1">
+                <Text className="font-body text-sm text-vupth-textSecondary">
+                  CEP *{cepLoading ? " — buscando endereço..." : ""}
+                </Text>
+                <Input2 placeholder="01310-100" value={form.zipCode} onChangeText={handleCepChange} keyboardType="numeric" maxLength={9} />
+              </View>
+              <View className="gap-1">
+                <Text className="font-body text-sm text-vupth-textSecondary">Referência</Text>
+                <Input2 placeholder="Próximo ao metrô" value={form.reference} onChangeText={(v: string) => updateField("reference", v)} />
+              </View>
+            </View>
+
+            <View className="mt-8 gap-3">
+              <Button title={isSaving ? "Salvando..." : "Salvar"} onPress={handleSave} isDisabled={isSaving} />
+              <Button title="Cancelar" variant="outline" onPress={() => setMode("list")} />
+            </View>
+          </View>
+        </View>
       </ScrollView>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-      <VStack flex={1} pb={30} px={16} bg="$brandBackground">
+    <ScrollView
+      className="flex-1 bg-vupth-background"
+      contentContainerStyle={{ flexGrow: 1 }}
+      showsVerticalScrollIndicator={false}
+    >
+      <View className="flex-1 pb-[30px] px-4 bg-vupth-background">
         <ScreenHeader title="ENDEREÇOS" />
-        <VStack pt={24} flex={1}>
-        {isLoading ? (
-          <SkeletonList count={3} />
-        ) : addresses.length === 0 ? (
-          <Text color="$brandTextSecondary">Nenhum endereço cadastrado</Text>
-        ) : (
-          <VStack gap="$3">
-            {addresses.map((addr) => (
-              <Box key={addr.userAddressId} bg="$brandSurface" p="$4" borderRadius="$card">
-                <HStack justifyContent="space-between" alignItems="flex-start">
-                  <VStack flex={1} mr="$2">
-                    <Text fontFamily="$heading" size="sm">
-                      {addr.street}, {addr.number}
-                      {addr.complement ? ` - ${addr.complement}` : ""}
-                    </Text>
-                    <Text size="xs" color="$brandTextSecondary">
-                      {addr.neighborhood} — {addr.city}/{addr.state}
-                    </Text>
-                    <Text size="xs" color="$brandTextSecondary">CEP: {addr.zipCode}</Text>
-                    {addr.isMain && (
-                      <HStack alignItems="center" gap="$1" mt="$1">
-                        <Star size={14} color="#163300" fill="#163300" />
-                        <Text size="xs" color="$forest" fontFamily="$heading">Principal</Text>
-                      </HStack>
-                    )}
-                  </VStack>
-                  <HStack gap="$3">
-                    {!addr.isMain && (
-                      <TouchableOpacity onPress={() => handleSetMain(addr.userAddressId)}>
-                        <Star size={20} color="#454745" />
+        <View className="pt-6 flex-1">
+          {isLoading ? (
+            <SkeletonList count={3} />
+          ) : addresses.length === 0 ? (
+            <Text className="font-body text-md text-vupth-textSecondary">Nenhum endereço cadastrado</Text>
+          ) : (
+            <View className="gap-3">
+              {addresses.map((addr) => (
+                <View key={addr.userAddressId} className="bg-vupth-surface p-4 rounded-card">
+                  <View className="flex-row justify-between items-start">
+                    <View className="flex-1 mr-2">
+                      <Text className="font-heading text-sm text-vupth-textPrimary">
+                        {addr.street}, {addr.number}
+                        {addr.complement ? ` - ${addr.complement}` : ""}
+                      </Text>
+                      <Text className="font-body text-xs text-vupth-textSecondary">
+                        {addr.neighborhood} — {addr.city}/{addr.state}
+                      </Text>
+                      <Text className="font-body text-xs text-vupth-textSecondary">CEP: {addr.zipCode}</Text>
+                      {addr.isMain && (
+                        <View className="flex-row items-center gap-1 mt-1">
+                          <Star size={14} color="#163300" fill="#163300" />
+                          <Text className="font-heading text-xs text-vupth-forest">Principal</Text>
+                        </View>
+                      )}
+                    </View>
+                    <View className="flex-row gap-3">
+                      {!addr.isMain && (
+                        <TouchableOpacity onPress={() => handleSetMain(addr.userAddressId)}>
+                          <Star size={20} color="#454745" />
+                        </TouchableOpacity>
+                      )}
+                      <TouchableOpacity onPress={() => handleEdit(addr)}>
+                        <Pencil size={20} color="#163300" />
                       </TouchableOpacity>
-                    )}
-                    <TouchableOpacity onPress={() => handleEdit(addr)}>
-                      <Pencil size={20} color="#163300" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)}>
-                      <Trash2 size={20} color="#B3261E" />
-                    </TouchableOpacity>
-                  </HStack>
-                </HStack>
-              </Box>
-            ))}
-          </VStack>
-        )}
+                      <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)}>
+                        <Trash2 size={20} color="#B3261E" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
 
-        <VStack mt="$6">
-          <Button title="Adicionar endereço" onPress={handleNew} />
-        </VStack>
-        </VStack>
-      </VStack>
+          <Button title="Adicionar endereço" onPress={handleNew} className="mt-6" />
+        </View>
+      </View>
     </ScrollView>
   );
 }
