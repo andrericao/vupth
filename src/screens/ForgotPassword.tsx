@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, TouchableOpacity } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { VStack, Text, ScrollView } from "@gluestack-ui/themed";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -145,11 +144,11 @@ export function ForgotPassword() {
   }
 
   return (
-    <ScrollView flex={1} bg="$brandBackground" contentContainerStyle={{ flexGrow: 1 }}>
+    <ScrollView className="flex-1 bg-vupth-background" contentContainerStyle={{ flexGrow: 1 }}>
       {/* pb soma a faixa da tab bar: estas telas vivem dentro do
           Tab.Navigator, e sem a reserva o CTA do rodape nasce POR BAIXO
           da barra — o toque nao chega nele. */}
-      <VStack flex={1} pb={30 + tabBarInset} px={16} bg="$brandBackground">
+      <View className="flex-1 px-4 bg-vupth-background" style={{ paddingBottom: 30 + tabBarInset }}>
         {/* Sem titulo no cabecalho: esta e uma tela de ENTRADA, e as tres do
             fluxo (login, cadastro, esqueci a senha) tem o mesmo desenho — o
             voltar sozinho em cima, o heroi em 34px no corpo. Antes o titulo
@@ -157,33 +156,30 @@ export function ForgotPassword() {
             texto recuado ao lado do botao. */}
         <ScreenHeader />
 
-        <VStack gap="$2" mt="$3">
+        <View className="gap-2 mt-3">
           {/* O titulo acompanha o PASSO: quem ja recebeu o codigo nao esta
               mais "esquecendo a senha", esta criando uma nova. */}
           <Text
-            fontFamily="$display"
-            fontSize={fs(34)}
-            lineHeight={fs(36)}
-            letterSpacing={-1.5}
-            color="$forest"
+            className="font-display text-vupth-forest"
+            style={{ fontSize: fs(34), lineHeight: fs(36), letterSpacing: -1.5 }}
           >
             {step === "email" ? "ESQUECEU A SENHA?" : "NOVA SENHA"}
           </Text>
-          <Text size="md" color="$brandTextSecondary">
+          <Text className="font-body text-md text-vupth-textSecondary">
             {step === "email"
               ? "Manda o e-mail — te ajudamos a voltar em menos de 1 minuto."
               : "Use o código que enviamos e escolha uma senha nova."}
           </Text>
-        </VStack>
+        </View>
 
-        <VStack pt={24} flex={1}>
+        <View className="pt-6 flex-1">
 
         {step === "email" && (
           /* Campo em cima, CTA ANCORADO no rodape — o mesmo desenho do login e
              do cadastro. Colado no campo, ele deixava metade da tela vazia
              embaixo e a tela parecia inacabada. O `flex-end` interno empurra
              so o botao; o campo fica onde esta. */
-          <VStack flex={1} gap="$4">
+          <View className="flex-1 gap-4">
             <Input2
               placeholder="E-mail"
               value={email}
@@ -191,7 +187,7 @@ export function ForgotPassword() {
               autoCapitalize="none"
               keyboardType="email-address"
             />
-            <VStack flex={1} justifyContent="flex-end" gap="$4">
+            <View className="flex-1 justify-end gap-4">
             <Button
               title={
                 isWakingServer
@@ -205,25 +201,25 @@ export function ForgotPassword() {
               testID="forgot-send"
             />
             {isWakingServer && (
-              <VStack gap="$3">
-                <Text size="xs" color="$brandTextSecondary" textAlign="center">
+              <View className="gap-3">
+                <Text className="font-body text-xs text-vupth-textSecondary text-center">
                   O servidor hiberna quando fica sem uso e pode levar até 1 minuto para
                   responder. Não feche o app.
                 </Text>
                 <TouchableOpacity onPress={handleCancel} testID="forgot-cancel-wait">
-                  <Text size="sm" color="$brandTextSecondary" fontFamily="$heading" textAlign="center">
+                  <Text className="font-heading text-sm text-vupth-textSecondary text-center">
                     Cancelar espera
                   </Text>
                 </TouchableOpacity>
-              </VStack>
+              </View>
             )}
-            </VStack>
-          </VStack>
+            </View>
+          </View>
         )}
 
         {step === "reset" && (
-          <VStack gap="$4">
-            <Text size="sm" color="$brandTextSecondary">
+          <View className="gap-4">
+            <Text className="font-body text-sm text-vupth-textSecondary">
               Se o e-mail estiver cadastrado, você receberá um código de 6 dígitos
               (vale 15 minutos). Digite-o abaixo com a nova senha.
             </Text>
@@ -234,7 +230,7 @@ export function ForgotPassword() {
               keyboardType="number-pad"
               maxLength={6}
             />
-            <VStack gap="$1">
+            <View className="gap-1">
               <Input2
                 isPassword
                 placeholder="Nova senha"
@@ -242,7 +238,7 @@ export function ForgotPassword() {
                 onChangeText={setPassword}
               />
               {password.length > 0 && <PasswordRules rules={rules} />}
-            </VStack>
+            </View>
             <Input2
               isPassword
               placeholder="Confirmar nova senha"
@@ -255,7 +251,7 @@ export function ForgotPassword() {
               isDisabled={!canReset}
             />
             <TouchableOpacity onPress={handleSendCode} disabled={isSubmitting}>
-              <Text size="sm" color="$forest" fontFamily="$heading" textAlign="center">
+              <Text className="font-heading text-sm text-vupth-forest text-center">
                 {isWakingServer
                   ? `Acordando o servidor... ${elapsed}s`
                   : isSubmitting
@@ -263,10 +259,10 @@ export function ForgotPassword() {
                     : "Reenviar código"}
               </Text>
             </TouchableOpacity>
-          </VStack>
+          </View>
         )}
-        </VStack>
-      </VStack>
+        </View>
+      </View>
     </ScrollView>
   );
 }
