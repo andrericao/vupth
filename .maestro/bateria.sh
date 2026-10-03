@@ -4,7 +4,7 @@
 #   bash .maestro/bateria.sh
 #
 # Prepara o celular (setup.sh), acha sozinha o commit esperado (o ultimo da
-# origin/dev, que e o do OTA do canal preview), roda o roteiro e devolve o
+# branch da pasta no GitHub — a dev e o OTA do canal preview), roda o roteiro e devolve o
 # autofill e o corretor (restaurar.sh), mesmo se a rodada falhar.
 #
 # Os logs e prints de cada rodada caem em .maestro/logs/<data> (no .gitignore,
@@ -21,9 +21,11 @@ API="https://vupth-backend-ia.onrender.com"
 BATERIA=1 bash "$DIR/setup.sh" || exit 1
 trap 'bash "$DIR/restaurar.sh"' EXIT
 
-git -C "$REPO" fetch -q origin dev 2>/dev/null
-COMMIT=$(git -C "$REPO" rev-parse --short=8 origin/dev)
-echo "Commit esperado no app: $COMMIT (origin/dev)"
+# A branch da pasta: a dev no vupth, a feat/nativewind na worktree dela.
+BRANCH=$(git -C "$REPO" branch --show-current)
+git -C "$REPO" fetch -q origin "$BRANCH" 2>/dev/null
+COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
+echo "Commit esperado no app: $COMMIT (origin/$BRANCH)"
 
 LOGS="$DIR/logs"
 RODADA="$LOGS/$(date +%Y-%m-%d_%H%M%S)"
