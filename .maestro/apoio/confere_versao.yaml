@@ -7,7 +7,7 @@
 # abertura e so vale na proxima — entao, se o commit nao bate, fecha e abre de
 # novo (sem limpar) ate 3 vezes, dando tempo ao download.
 #
-# Entrada: COMMIT (o setup.sh imprime o comando com ele).
+# Entrada: COMMIT (a bateria.sh o passa sozinha).
 appId: ${APP_ID}
 ---
 - copyTextFrom:

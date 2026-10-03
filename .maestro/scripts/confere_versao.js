@@ -7,7 +7,7 @@ var esperado = (typeof COMMIT === "undefined" || COMMIT == null ? "" : String(CO
 var instalado = String(maestro.copiedText || "");
 
 if (!esperado) {
-  throw new Error("Falta o commit esperado: rode com -e COMMIT=<commit> (o setup.sh imprime o comando).");
+  throw new Error("Falta o commit esperado: rode pela bateria.sh (bash .maestro/bateria.sh), que o acha sozinha.");
 }
 if (instalado.toLowerCase().indexOf(esperado) < 0) {
   throw new Error(
