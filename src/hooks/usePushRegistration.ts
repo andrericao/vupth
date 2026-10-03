@@ -25,6 +25,8 @@ import { usePushDiagnosticsStore } from "@stores/pushDiagnosticsStore";
 // Chave onde o Expo Push Token registrado é guardado, p/ o logout desregistrar
 // (authStore.logout → DELETE /devices). Mesmo valor do authStore.
 const PUSH_TOKEN_KEY = "vupth_push_token";
+// A caixa de permissão do sistema já apareceu neste aparelho: não volta.
+const PUSH_PERGUNTADO_KEY = "vupth_push_perguntado";
 
 // Push em foreground: banner/lista/som (o WS já cobre a UI in-app; o banner
 // reforça). Registrado uma vez no módulo.
@@ -120,6 +122,8 @@ export function usePushRegistration() {
           isDevice: Device.isDevice,
           getPermissionsAsync: Notifications.getPermissionsAsync,
           requestPermissionsAsync: Notifications.requestPermissionsAsync,
+          jaPerguntou: async () => (await SecureStore.getItemAsync(PUSH_PERGUNTADO_KEY)) === "1",
+          marcarPerguntado: () => SecureStore.setItemAsync(PUSH_PERGUNTADO_KEY, "1"),
           getExpoPushTokenAsync: Notifications.getExpoPushTokenAsync,
           projectId,
         });

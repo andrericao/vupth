@@ -13,9 +13,9 @@ appId: ${APP_ID}
 - tapOn:
     text: "Sair da conta"
     label: "09.03 · toca em Sair da conta"
-# Confirmacao: "Cancelar" e o botao 0, "Sair" e o 1.
+# Confirmacao: "Sair" e o botao destrutivo.
 - tapOn:
-    id: "dialogo-botao-1"
+    id: "dialogo-botao-destrutivo"
     label: "09.04 · toca em Sair (confirmação)"
 # Depois de sair o app pode voltar a tela de entrada.
 - runFlow:

@@ -1,4 +1,5 @@
-# Fecha a caixa de AVISO (um botao so: "OK"/"Entendi") se ela estiver na tela.
+# Fecha a caixa de AVISO (um botao so: "OK"/"Entendi") e a de PERMISSAO do
+# sistema, se estiverem na tela.
 # Nunca use depois de uma CONFIRMACAO: la o botao 0 pode ser o "Nao".
 # O Alert do app e o DialogoVupth nas duas plataformas, com testID por botao.
 appId: ${APP_ID}
@@ -12,3 +13,13 @@ appId: ${APP_ID}
     commands:
       - tapOn:
           id: "dialogo-botao-0"
+# A caixa de PERMISSAO do sistema (localizacao na primeira abertura, notificacao
+# depois do login): o app pede uma vez so, mas o `permissions: deny` do
+# launchApp nao a impede no Android — ela aparece e o roteiro nega aqui.
+- runFlow:
+    when:
+      visible:
+        id: "com.android.permissioncontroller:id/permission_deny_button"
+    commands:
+      - tapOn:
+          id: "com.android.permissioncontroller:id/permission_deny_button"

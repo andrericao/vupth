@@ -49,6 +49,7 @@ function fila(over: Record<string, unknown> = {}) {
     refresh: jest.fn(),
     activeQueue: {
       attendanceId: 'a1',
+      multaAdvertida: true,
       professionalId: 'p1',
       professionalName: 'Carlos',
       establishmentId: 'e1',
