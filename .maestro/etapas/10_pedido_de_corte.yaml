@@ -27,7 +27,7 @@ appId: ${APP_ID}
 # Partner do segundo celular.
 - runFlow:
     when:
-      true: ${SUPERVISAO != '2'}
+      true: ${typeof SUPERVISAO === 'undefined' || SUPERVISAO != '2'}
     commands:
       - runScript:
           file: ../scripts/responder_pedido.js
@@ -39,7 +39,7 @@ appId: ${APP_ID}
           label: "10.07 · o profissional aceita (API)"
 - runFlow:
     when:
-      true: ${SUPERVISAO == '2'}
+      true: ${typeof SUPERVISAO !== 'undefined' && SUPERVISAO == '2'}
     commands:
       - extendedWaitUntil:
           visible: "Pedido aceito"

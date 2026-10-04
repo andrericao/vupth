@@ -7,7 +7,7 @@ appId: ${APP_ID}
 # Partner do segundo celular — a bateria.sh mostrou a conta.
 - runFlow:
     when:
-      true: ${SUPERVISAO != '2'}
+      true: ${typeof SUPERVISAO === 'undefined' || SUPERVISAO != '2'}
     commands:
       - runScript:
           file: ../scripts/fechar_fila.js
@@ -21,7 +21,7 @@ appId: ${APP_ID}
     label: "08.02 · roda abrir_a_loja"
 - runFlow:
     when:
-      true: ${SUPERVISAO == '2'}
+      true: ${typeof SUPERVISAO !== 'undefined' && SUPERVISAO == '2'}
     commands:
       - extendedWaitUntil:
           visible:
