@@ -294,6 +294,8 @@ describe('QueueStatus — advertência antes da multa', () => {
     const entendi = await findByText('Entendi');
     expect(alerta).not.toHaveBeenCalled();
     fireEvent.press(entendi);
+    // Nem logo depois do Entendi: o Modal ainda esta no fade (bateria 03/10 21h25).
+    expect(alerta).not.toHaveBeenCalled();
     await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1));
     expect(alerta.mock.calls[0][0]).toBe('Sua vez está chegando');
     alerta.mockRestore();

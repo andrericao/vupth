@@ -27,21 +27,30 @@ appId: ${APP_ID}
     id: "dialogo-botao-0"
     label: "05.06 · toca em Continuar na fila"
 
+# A etapa e de SAIR COM MULTA (Andre, 04/10): dentro da tolerancia ("Voce pode
+# sair da fila sem custo ate HH:MM") a saida e de graca. Espera a faixa sumir —
+# o horario dela e o do servidor — e so entao sai.
+- extendedWaitUntil:
+    notVisible:
+      id: "faixa-da-tolerancia"
+    timeout: 900000
+    label: "05.07 · espera a tolerância acabar (a faixa sem custo some)"
+
 # Sair da fila: dois toques seguidos e a confirmacao com o valor.
 - tapOn:
     id: "leave-queue"
-    label: "05.07 · toca em leave-queue"
+    label: "05.08 · toca em leave-queue"
 - tapOn:
     id: "leave-queue"
-    label: "05.08 · toca em leave-queue"
+    label: "05.09 · toca em leave-queue"
 - extendedWaitUntil:
     visible: "Sair da fila?"
     timeout: 10000
-    label: "05.09 · espera Sair da fila?"
+    label: "05.10 · espera Sair da fila?"
 # Pelo id: o "Sim, sair" muda de posicao com o "Adiar minha vez".
 - tapOn:
     id: "dialogo-botao-destrutivo"
-    label: "05.10 · toca em Sim, sair"
+    label: "05.11 · toca em Sim, sair"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
-    label: "05.11 · roda fechar_aviso"
+    label: "05.12 · roda fechar_aviso"
