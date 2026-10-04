@@ -28,7 +28,7 @@ env:
   SUPERVISAO: "0"
 ---
 - evalScript:
-    script: ${output.TAG = TAG ? String(TAG) : String(Date.now()).slice(-6)}
+    script: "${output.TAG = TAG ? String(TAG) : String(Date.now()).slice(-6)}"
     label: "00.01 · calcula TAG"
 - evalScript:
     script: ${output.EMAIL_CLIENTE = 'client_c' + output.TAG + '@teste.com'}
