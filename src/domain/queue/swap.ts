@@ -80,6 +80,23 @@ export function outOfQueueOfferErrorMessage(code?: string, status?: number): str
 }
 
 /**
+ * Mensagem de erro ao ACEITAR uma oferta de troca (o modal das ofertas e o
+ * convite). D14 (Backend a69d4e5): a troca so acontece entre atendimentos com
+ * ate 10 min de diferenca de duracao — 422 QUEUE_SWAP_DURATION_INCOMPATIBLE; a
+ * fila nao muda e a oferta segue aberta para outro.
+ */
+export function acceptOfferErrorMessage(code?: string): string {
+  switch (code) {
+    case 'QUEUE_SWAP_DURATION_INCOMPATIBLE':
+      return 'A troca só vale entre serviços de duração parecida — a sua vez continua a mesma.';
+    case 'QUEUE_SWAP_OFFER_NOT_FOUND':
+      return 'Essa oferta não está mais disponível.';
+    default:
+      return 'A oferta pode ter sido aceita por outra pessoa ou expirado.';
+  }
+}
+
+/**
  * Onde fica a vaga de um atendimento na fila, e por volta de que horas ela e
  * chamada (Andre, 26/09: "como o cliente decidiria se iria trocar sem saber em
  * que horario?"). Aceitar uma troca e ficar com a vaga de quem pediu — e ela

@@ -4,7 +4,7 @@ import { VStack, HStack, Box, Text, Heading, Divider, Spinner } from "@gluestack
 
 import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
-import { acceptOfferText, myOfferText, vagaNaFila } from "@domain/queue/swap";
+import { acceptOfferErrorMessage, acceptOfferText, myOfferText, vagaNaFila } from "@domain/queue/swap";
 import { formatClockTime } from "@domain/queue/types";
 import { queueService, QueueResponse } from "@services/queueService";
 import { swapOfferService, SwapOfferResponse } from "@services/swapOfferService";
@@ -70,13 +70,7 @@ export function SwapOffersModal({ visible, professionalId, establishmentId, onCl
       onChanged();
       onClose();
     } catch (error: any) {
-      const code = error.response?.data?.code;
-      Alert.alert(
-        "Não foi possível aceitar",
-        code === "QUEUE_SWAP_OFFER_NOT_FOUND"
-          ? "Essa oferta não está mais disponível."
-          : "A oferta pode ter sido aceita por outra pessoa ou expirado.",
-      );
+      Alert.alert("Não foi possível aceitar", acceptOfferErrorMessage(error.response?.data?.code));
       load();
     } finally {
       setBusyId(null);
