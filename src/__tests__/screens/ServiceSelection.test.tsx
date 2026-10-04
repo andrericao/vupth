@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ServiceSelection } from '@screens/ServiceSelection';
@@ -335,5 +335,35 @@ describe('ServiceSelection — tempo do serviço (tempo-do-servico)', () => {
 
     expect(await findByText('45 min', {}, { timeout: 15000 })).toBeTruthy();
     expect(queryByText('30 min')).toBeNull();
+  });
+});
+
+// CLI-10 (Backend 02dd5ef): o contato que o profissional expoe. null = nada.
+describe('ServiceSelection — contato do profissional', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetServices.mockResolvedValue({
+      data: [{ id: 's1', customName: 'Corte', price: 30, weeklyAverageDurationInMinutes: 30 }],
+    });
+  });
+
+  it('com contact_phone: mostra o número, e Ligar e WhatsApp abrem o link certo', async () => {
+    setRouteParams({ ...OPEN_PARAMS, contactPhone: '+55 (11) 98888-7777' });
+    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    const { findByTestId, getByText } = renderWithProviders(<ServiceSelection />);
+    await findByTestId('contato-do-profissional', {}, { timeout: 15000 });
+    expect(getByText('+55 (11) 98888-7777')).toBeTruthy();
+    fireEvent.press(getByText('Ligar'));
+    fireEvent.press(getByText('WhatsApp'));
+    expect(abrir).toHaveBeenNthCalledWith(1, 'tel:+5511988887777');
+    expect(abrir).toHaveBeenNthCalledWith(2, 'https://wa.me/5511988887777');
+    abrir.mockRestore();
+  });
+
+  it('sem contact_phone (null): nenhum contato na tela', async () => {
+    setRouteParams({ ...OPEN_PARAMS, contactPhone: null });
+    const { findByTestId, queryByTestId } = renderWithProviders(<ServiceSelection />);
+    await findByTestId('service-s1', {}, { timeout: 15000 });
+    expect(queryByTestId('contato-do-profissional')).toBeNull();
   });
 });

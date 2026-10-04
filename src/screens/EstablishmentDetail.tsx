@@ -217,6 +217,7 @@ export function EstablishmentDetail() {
       profissionalFora: fora,
       soAgenda: ehSoAgenda(prof),
       queueCount: prof?.queue_count ?? 0,
+      contactPhone: prof?.contact_phone ?? null,
     });
   }
 

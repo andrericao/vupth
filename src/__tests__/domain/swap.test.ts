@@ -1,4 +1,5 @@
 import {
+  acceptOfferErrorMessage,
   acceptOfferText,
   myOfferText,
   outOfQueueOfferErrorMessage,
@@ -86,5 +87,16 @@ describe('swap text', () => {
       ];
       expect(findSwapAttendance(history, 'p1')).toBeUndefined();
     });
+  });
+});
+
+// D14 (Backend a69d4e5): troca so entre duracoes parecidas — 422 no aceite.
+describe('acceptOfferErrorMessage', () => {
+  it('duracao incompativel: diz a regra e que a vez nao mudou', () => {
+    expect(acceptOfferErrorMessage('QUEUE_SWAP_DURATION_INCOMPATIBLE')).toMatch(/duração parecida/);
+  });
+  it('oferta sumida e o caso geral seguem como antes', () => {
+    expect(acceptOfferErrorMessage('QUEUE_SWAP_OFFER_NOT_FOUND')).toBe('Essa oferta não está mais disponível.');
+    expect(acceptOfferErrorMessage(undefined)).toMatch(/aceita por outra pessoa/);
   });
 });

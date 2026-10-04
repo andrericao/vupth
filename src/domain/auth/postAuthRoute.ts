@@ -20,6 +20,7 @@ export type PostAuthParams = {
   serviceItemIds?: string[];
   targetTime?: string;
   establishmentOpen?: boolean;
+  contactPhone?: string | null;
 };
 
 export type PostAuthDestino =
@@ -43,6 +44,7 @@ export function postAuthRoute(params: PostAuthParams = {}): PostAuthDestino {
         estimatedWaitMinutes: params.estimatedWaitMinutes ?? 0,
         serviceItemIds: params.serviceItemIds,
         establishmentOpen: params.establishmentOpen,
+        contactPhone: params.contactPhone,
       },
     };
   }

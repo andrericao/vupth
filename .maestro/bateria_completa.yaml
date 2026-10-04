@@ -19,12 +19,16 @@ env:
   APP_ID: com.vupth.client.preview
   API: https://vupth-backend-ia.onrender.com
   SENHA: "Teste@123"
-  # O commit que o app deve rodar — a 01.07 para a bateria se nao bater.
-  # A bateria.sh o passa sozinha (o ultimo da origin/dev).
-  COMMIT: ""
+# ⚠️ COMMIT, TAG e SUPERVISAO NAO entram aqui: o env do fluxo e aplicado DEPOIS
+# do -e da linha de comando e o apaga (rodada de 04/10 13h10 — COMMIT vazio
+# pulou a 01.07, o app rodou o bundle embutido do APK e a 05.05 falhou de novo).
+# A bateria.sh os passa por -e: COMMIT = o ultimo da origin/dev (a 01.07 para
+# se nao bater); TAG = o sufixo das contas (mostrado antes); SUPERVISAO (DEC-15)
+# = 0 sozinha, 1 o Andre acompanha, 2 ele faz o Partner. Sem eles (maestro test
+# direto), cada expressao testa typeof e segue sem conferir / sem supervisao.
 ---
 - evalScript:
-    script: ${output.TAG = String(Date.now()).slice(-6)}
+    script: "${output.TAG = typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)}"
     label: "00.01 · calcula TAG"
 - evalScript:
     script: ${output.EMAIL_CLIENTE = 'client_c' + output.TAG + '@teste.com'}

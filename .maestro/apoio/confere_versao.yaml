@@ -12,11 +12,11 @@ appId: ${APP_ID}
 ---
 - copyTextFrom:
     id: "versao-visitante"
-- evalScript: ${output.VERSAO_OK = !!COMMIT && maestro.copiedText.toLowerCase().indexOf(String(COMMIT).trim().toLowerCase().slice(0, 8)) >= 0}
+- evalScript: ${output.VERSAO_OK = typeof COMMIT !== 'undefined' && !!COMMIT && maestro.copiedText.toLowerCase().indexOf(String(COMMIT).trim().toLowerCase().slice(0, 8)) >= 0}
 - repeat:
     times: 3
     while:
-      true: ${!!COMMIT && !output.VERSAO_OK}
+      true: ${typeof COMMIT !== 'undefined' && !!COMMIT && !output.VERSAO_OK}
     commands:
       - stopApp
       - launchApp

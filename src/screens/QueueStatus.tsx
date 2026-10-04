@@ -76,6 +76,9 @@ const STATUS_LABELS: Record<string, string> = {
   REMOVED: "Retirado pela loja",
 };
 
+// O fade do Modal do aviso da estimativa (~300ms) com folga.
+const FADE_DO_AVISO_MS = 600;
+
 export function QueueStatus() {
   const insets = useSafeAreaInsets();
   const route = useRoute();
@@ -147,6 +150,25 @@ export function QueueStatus() {
       active = false;
     };
   }, []);
+
+  // O aviso da estimativa ja saiu da tela? Fechar nao basta: o Modal ainda faz
+  // o fade, e um Alert aberto nesse meio some com ele no Android (bateria
+  // 03/10 21h25, 05.05 — a advertencia da multa nunca apareceu).
+  const [avisoDaEstimativaSaiu, setAvisoDaEstimativaSaiu] = useState(false);
+  const disclaimerAbriu = useRef(false);
+  useEffect(() => {
+    if (showDisclaimer) {
+      disclaimerAbriu.current = true;
+      return;
+    }
+    if (!disclaimerDecidido) return;
+    if (!disclaimerAbriu.current) {
+      setAvisoDaEstimativaSaiu(true);
+      return;
+    }
+    const t = setTimeout(() => setAvisoDaEstimativaSaiu(true), FADE_DO_AVISO_MS);
+    return () => clearTimeout(t);
+  }, [showDisclaimer, disclaimerDecidido]);
 
   async function handleCloseDisclaimer(dontShowAgain: boolean) {
     setShowDisclaimer(false);
@@ -419,12 +441,12 @@ export function QueueStatus() {
   // vez, uma vez por atendimento, a politica com as saidas sem custo. Adiar
   // nao da tolerancia nova — o `toleranceUntil` segue o da entrada.
   // O ref segura o segundo aviso enquanto a marca no store ainda esta sendo gravada.
-  // Espera o aviso da estimativa ("Entendi") fechar: os dois abriam juntos na
-  // entrada e, no Android, a advertencia sumia com ele (bateria 03/10, 05.05).
+  // Espera o aviso da estimativa ("Entendi") sair da tela: os dois abriam juntos
+  // na entrada e, no Android, a advertencia sumia com ele (bateria 03/10, 05.05).
   const advertiu = useRef<string | null>(null);
   useEffect(() => {
     const id = activeQueue?.attendanceId;
-    if (!id || !disclaimerDecidido || showDisclaimer) return;
+    if (!id || !avisoDaEstimativaSaiu) return;
     const jaAdvertido = !!activeQueue.multaAdvertida || advertiu.current === id;
     if (!deveAdvertir({ restante: semPrevisao ? null : remaining, aguardando: canReshuffle, jaAdvertido })) return;
     advertiu.current = id;
@@ -438,7 +460,7 @@ export function QueueStatus() {
       ...(aviso.sairDeGraca ? [{ text: aviso.sairDeGraca, onPress: () => { sair(null); } }] : []),
     ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeQueue?.attendanceId, activeQueue?.multaAdvertida, remaining, semPrevisao, canReshuffle, disclaimerDecidido, showDisclaimer]);
+  }, [activeQueue?.attendanceId, activeQueue?.multaAdvertida, remaining, semPrevisao, canReshuffle, avisoDaEstimativaSaiu]);
 
   // D15 (Andre, 24/09): "Sair da fila" pede DOIS toques seguidos. O primeiro so
   // mostra a faixa — o que acontece se sair, e a instrucao. Com multa (ou sem

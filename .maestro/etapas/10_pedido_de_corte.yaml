@@ -23,14 +23,28 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "10.06 · roda fechar_aviso"
-- runScript:
-    file: ../scripts/responder_pedido.js
-    env:
-      API: ${API}
-      SENHA: ${SENHA}
-      EMAIL_PROF: ${EMAIL_PROF}
-      ACAO: accept
-    label: "10.07 · o profissional aceita (API)"
+# Supervisionada com os dois usuarios (DEC-15): quem aceita e o Andre, no
+# Partner do segundo celular.
+- runFlow:
+    when:
+      true: ${typeof SUPERVISAO === 'undefined' || SUPERVISAO != '2'}
+    commands:
+      - runScript:
+          file: ../scripts/responder_pedido.js
+          env:
+            API: ${API}
+            SENHA: ${SENHA}
+            EMAIL_PROF: ${EMAIL_PROF}
+            ACAO: accept
+          label: "10.07 · o profissional aceita (API)"
+- runFlow:
+    when:
+      true: ${typeof SUPERVISAO !== 'undefined' && SUPERVISAO == '2'}
+    commands:
+      - extendedWaitUntil:
+          visible: "Pedido aceito"
+          timeout: 300000
+          label: "10.0A · espera o Andre aceitar o pedido no Partner (até 5 min)"
 # O app confere o historico a cada 15 s enquanto ha pedido esperando.
 - extendedWaitUntil:
     visible: "Pedido aceito"

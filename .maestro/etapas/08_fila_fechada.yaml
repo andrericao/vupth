@@ -3,16 +3,31 @@
 # env: TAG, LOJA, PROF_ID, SERVICO_ID, EMAIL_PROF
 appId: ${APP_ID}
 ---
-- runScript:
-    file: ../scripts/fechar_fila.js
-    env:
-      API: ${API}
-      SENHA: ${SENHA}
-      EMAIL_PROF: ${EMAIL_PROF}
-    label: "08.01 · roda fechar_fila"
+# Supervisionada com os dois usuarios (DEC-15): quem fecha e o Andre, no
+# Partner do segundo celular — a bateria.sh mostrou a conta.
+- runFlow:
+    when:
+      true: ${typeof SUPERVISAO === 'undefined' || SUPERVISAO != '2'}
+    commands:
+      - runScript:
+          file: ../scripts/fechar_fila.js
+          env:
+            API: ${API}
+            SENHA: ${SENHA}
+            EMAIL_PROF: ${EMAIL_PROF}
+          label: "08.01 · roda fechar_fila"
 - runFlow:
     file: ../apoio/abrir_a_loja.yaml
     label: "08.02 · roda abrir_a_loja"
+- runFlow:
+    when:
+      true: ${typeof SUPERVISAO !== 'undefined' && SUPERVISAO == '2'}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "fila-fechada-${PROF_ID}"
+          timeout: 300000
+          label: "08.0A · espera o Andre fechar a fila no Partner (até 5 min)"
 - extendedWaitUntil:
     visible:
       id: "fila-fechada-${PROF_ID}"

@@ -4,6 +4,7 @@ import { X } from "lucide-react-native";
 
 import { DURACAO_DO_CONVITE_MS, textoDoConvite } from "@domain/queue/conviteDeTroca";
 import { swapOfferService } from "@services/swapOfferService";
+import { acceptOfferErrorMessage } from "@domain/queue/swap";
 import { useAuthStore } from "@stores/authStore";
 import { useConviteDeTrocaStore } from "@stores/conviteDeTrocaStore";
 import { fs } from "@stores/fonteStore";
@@ -77,12 +78,7 @@ export function ConviteDeTroca() {
       Alert.alert("Troca feita", "Sua posição na fila foi atualizada.");
     } catch (error: any) {
       fechar();
-      Alert.alert(
-        "Não foi possível aceitar",
-        error?.response?.data?.code === "QUEUE_SWAP_OFFER_NOT_FOUND"
-          ? "Essa oferta não está mais disponível."
-          : "A oferta pode ter sido aceita por outra pessoa ou expirado.",
-      );
+      Alert.alert("Não foi possível aceitar", acceptOfferErrorMessage(error?.response?.data?.code));
     } finally {
       aceitandoRef.current = false;
       setAceitando(false);
