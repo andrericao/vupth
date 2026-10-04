@@ -43,6 +43,7 @@ export type AppRoutes = {
     serviceItemIds?: string[];
     targetTime?: string;
     establishmentOpen?: boolean;
+    contactPhone?: string | null;
   };
   signUp: {
     // O e-mail que o login ou o "esqueci" achou sem conta, já preenchido.
@@ -78,6 +79,8 @@ export type AppRoutes = {
     // este número + 1 (ele entra no fim). Opcional: fluxos que não sabem (ex.:
     // volta do login) simplesmente não mostram a linha de posição.
     queueCount?: number;
+    // O contato que o profissional expoe (CLI-10); null/ausente = sem contato.
+    contactPhone?: string | null;
   };
   queueStatus: {
     professionalId: string;

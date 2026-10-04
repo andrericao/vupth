@@ -21,6 +21,9 @@ export interface ProfessionalWithQueue extends Professional {
   operation_mode?: 'QUEUE' | 'AGENDA_ONLY' | null;
   // Foto de perfil (Backend 46f1f74, em producao) — null sem foto: ficam as iniciais.
   profile_image_url?: string | null;
+  // Contato que o profissional escolheu expor (Backend 02dd5ef) — null = nao
+  // expor. Nao e o telefone da conta. Ver `@domain/professional/contato`.
+  contact_phone?: string | null;
   waiting_list: AttendanceInQueue[];
   queue_count: number;
   estimated_wait_minutes: number;
