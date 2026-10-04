@@ -16,15 +16,7 @@ roteiro e, no fim — verde ou não —, o `restaurar.sh`.
 `maestro.log`, os prints e o `falhou_em` (o passo `NN.MM` que falhou) em
 `.maestro/logs/<data>/`, no `.gitignore` — a equipe lê o erro direto dali.
 Rodada verde não guarda nada; os logs de uma falha somem sozinhos quando uma
-rodada seguinte passa daquele passo. Na falha, o print da tela vai também como
-`FALHA_<NN.MM>_<passo>.png` (DEC-16) — é ele que o Andre manda.
-
-**Supervisão (04/10, DEC-15).** Ao começar, a bateria pergunta "Teste com
-supervisão? (s/N)" — sem resposta em 1 min, segue sozinha. Com `s`, "um tipo de
-usuário ou os dois?": com `2`, o Andre é o profissional no Partner do segundo
-celular (a conta aparece na tela, senha `Teste@123`) — fecha a fila no `08.0A`
-e aceita o pedido de corte no `10.0A`; a bateria espera até 5 min cada. Uma
-bateria por vez: se já há um Maestro rodando, ela avisa e sai (DEC-17).
+rodada seguinte passa daquele passo.
 
 **A versão antes de tudo (03/10).** O app mostra o commit do JS que roda no
 fim da versão — no Perfil do visitante e no rodapé das Boas-vindas e do Entrar (`Versão 1.0.3 · 03/10/2026 · c65338e7`). A 01.07
