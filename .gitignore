@@ -43,3 +43,5 @@ coverage/
 .maestro/.autofill_antes
 # Maestro: logs e prints de cada rodada (bateria.sh — somem quando o erro e sanado)
 .maestro/logs/
+# Falhas dos testes do pre-push (DEC-22 — o hook do vupth-docs le daqui)
+.logs-teste/

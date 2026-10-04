@@ -15,6 +15,21 @@ echo "🧠 [2/3] Typecheck..."
 npm run typecheck
 
 echo "🧪 [3/3] Testes..."
-npm test -- --ci
+# DEC-22: a falha do jest fica em .logs-teste/<data>_jest_FALHA.txt (o hook do
+# vupth-docs acorda a equipe com ela); verde apaga as falhas antigas do jest.
+LOGS=.logs-teste
+mkdir -p "$LOGS"
+SAIDA=$(mktemp)
+CODIGO=$(mktemp)
+{ npm test -- --ci 2>&1; echo $? > "$CODIGO"; } | tee "$SAIDA"
+RC=$(cat "$CODIGO")
+rm -f "$CODIGO"
+if [ "$RC" != "0" ]; then
+  LOG="$LOGS/$(date +%Y-%m-%d_%H%M%S)_jest_FALHA.txt"
+  mv "$SAIDA" "$LOG"
+  echo "❌ Testes falharam — log em $LOG"
+  exit "$RC"
+fi
+rm -f "$SAIDA" "$LOGS"/*_jest_FALHA.txt
 
 echo "✅ Lint + Typecheck + Testes OK. Push liberado."
