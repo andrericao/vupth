@@ -79,3 +79,11 @@ describe('Login — erros do contrato de 03/10', () => {
     );
   });
 });
+
+// Andre, 03/10 (commit-sem-flag): o commit aparece sem login, no rodapé do Entrar.
+describe('Login — versão no rodapé', () => {
+  it('mostra a versão do app', () => {
+    const { getByTestId } = renderWithProviders(<Login />);
+    expect(getByTestId('versao-login').props.children).toMatch(/^Versão /);
+  });
+});

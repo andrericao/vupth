@@ -1,5 +1,6 @@
 import { Alert } from 'react-native';
-import { act, fireEvent } from '@testing-library/react-native';
+import { act, fireEvent, waitFor } from '@testing-library/react-native';
+import * as SecureStore from 'expo-secure-store';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
@@ -76,7 +77,13 @@ jest.mock('@components/SwapOffersModal', () => {
 jest.mock('@components/ChangeTurnModal', () => ({ ChangeTurnModal: () => null }));
 jest.mock('@components/RescheduleModal', () => ({ RescheduleModal: () => null }));
 jest.mock('@components/RatingModal', () => ({ RatingModal: () => null }));
-jest.mock('@components/QueueDisclaimerModal', () => ({ QueueDisclaimerModal: () => null }));
+jest.mock('@components/QueueDisclaimerModal', () => {
+  const { Text } = jest.requireActual('react-native');
+  return {
+    QueueDisclaimerModal: ({ visible, onClose }: { visible: boolean; onClose: (n: boolean) => void }) =>
+      visible ? <Text onPress={() => onClose(false)}>Entendi</Text> : null,
+  };
+});
 
 type BotaoDoAlert = { text: string; onPress?: () => unknown };
 
@@ -229,11 +236,11 @@ describe('QueueStatus — advertência antes da multa', () => {
     mockAdvertida = false;
   });
 
-  it('com 1h20 para a vez: avisa as faixas e oferece adiar e sair de graça', () => {
+  it('com 1h20 para a vez: avisa as faixas e oferece adiar e sair de graça', async () => {
     mockRemaining = 80;
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     renderWithProviders(<QueueStatus />);
-    expect(alerta).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1));
     const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
     expect(titulo).toBe('Sua vez está chegando');
     expect(mensagem).toMatch(/R\$ 3,00/);
@@ -246,6 +253,7 @@ describe('QueueStatus — advertência antes da multa', () => {
     mockRemaining = 80;
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(alerta).toHaveBeenCalled());
     const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
     await act(async () => {
       await botoes.find((b) => b.text === 'Sair agora de graça')!.onPress!();
@@ -254,23 +262,40 @@ describe('QueueStatus — advertência antes da multa', () => {
     alerta.mockRestore();
   });
 
-  it('com menos de 1h, sair já custa: só adiar ou continuar', () => {
+  it('com menos de 1h, sair já custa: só adiar ou continuar', async () => {
     mockRemaining = 20;
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(alerta).toHaveBeenCalled());
     const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
     expect(botoes.map((b) => b.text)).toEqual(['Continuar na fila', 'Adiar minha vez']);
     alerta.mockRestore();
   });
 
-  it('com 1h30 ou mais, ou já avisado, não aparece', () => {
+  it('com 1h30 ou mais, ou já avisado, não aparece', async () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     mockRemaining = 120;
     renderWithProviders(<QueueStatus />);
     mockRemaining = 40;
     mockAdvertida = true;
     renderWithProviders(<QueueStatus />);
+    await act(async () => {});
     expect(alerta).not.toHaveBeenCalled();
+    alerta.mockRestore();
+  });
+
+  // Bateria 03/10 (05.05): o aviso da estimativa e a advertência abriam juntos
+  // e, no Android, a advertência sumia. Agora ela espera o "Entendi".
+  it('com o aviso da estimativa aberto, a advertência só vem depois do Entendi', async () => {
+    mockRemaining = 20;
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(null);
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { findByText } = renderWithProviders(<QueueStatus />);
+    const entendi = await findByText('Entendi');
+    expect(alerta).not.toHaveBeenCalled();
+    fireEvent.press(entendi);
+    await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1));
+    expect(alerta.mock.calls[0][0]).toBe('Sua vez está chegando');
     alerta.mockRestore();
   });
 });

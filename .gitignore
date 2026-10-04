@@ -41,3 +41,5 @@ ios/
 coverage/
 # Maestro: o autofill guardado pelo setup.sh (o restaurar.sh devolve e apaga)
 .maestro/.autofill_antes
+# Maestro: logs e prints de cada rodada (bateria.sh — somem quando o erro e sanado)
+.maestro/logs/
