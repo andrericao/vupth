@@ -85,6 +85,15 @@ if [ "$STATUS" -eq 0 ]; then
 else
   echo "${FALHOU:-sem passo NN.MM (falhou antes da 00.01)}" > "$RODADA/falhou_em"
   echo "Bateria parou em: ${FALHOU:-antes da 00.01}"
+  # print-da-falha (DEC-16): o print da falha com o nome do passo, para o Andre
+  # mandar e a equipe achar o log — ex.: FALHA_05.05_espera-o-aviso-da-politica-da-multa.png
+  PRINT=$(ls -t "$RODADA"/screenshot-❌-*.png 2>/dev/null | head -1)
+  if [ -n "$PRINT" ]; then
+    NOME=$(printf '%s' "${FALHOU:-00.00 · antes da 00.01}" | iconv -f utf-8 -t ascii//TRANSLIT 2>/dev/null |
+      tr '[:upper:]' '[:lower:]' | sed -E 's/^([0-9]{2}\.[0-9]{2})[^a-z0-9]*/\1_/; s/[^a-z0-9._]+/-/g; s/-+$//')
+    cp "$PRINT" "$RODADA/FALHA_${NOME}.png"
+    echo "Print da falha: ${RODADA#$REPO/}/FALHA_${NOME}.png"
+  fi
   echo "Logs e prints em: ${RODADA#$REPO/}"
 fi
 exit "$STATUS"
