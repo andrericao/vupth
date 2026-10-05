@@ -30,6 +30,7 @@ jest.mock('expo-notifications', () => ({
   requestPermissionsAsync: jest.fn().mockResolvedValue({ status: 'denied' }),
   getExpoPushTokenAsync: jest.fn(),
   addNotificationResponseReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
+  getLastNotificationResponseAsync: jest.fn().mockResolvedValue(null),
   AndroidImportance: { DEFAULT: 3 },
 }));
 // netinfo é nativo: sem mock, o `setupOnlineManager()` do boot tenta sondar a

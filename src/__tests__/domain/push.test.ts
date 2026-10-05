@@ -38,10 +38,13 @@ describe('notificationRoute', () => {
       'CUT_ACCEPTED',
       'CUT_REFUSED',
       'CUT_EXPIRED',
-      'QUEUE_NEXT_IN_LINE',
     ]) {
       expect(notificationRoute({ type })).toBe('attendances');
     }
+  });
+
+  it('"É quase a sua vez!" (QUEUE_NEXT_IN_LINE) → a própria fila (Andre, 05/10)', () => {
+    expect(notificationRoute({ type: 'QUEUE_NEXT_IN_LINE' })).toBe('fila');
   });
 
   it('tipo desconhecido/ausente/inválido → null', () => {
