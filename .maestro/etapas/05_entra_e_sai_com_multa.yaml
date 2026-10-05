@@ -65,21 +65,23 @@ appId: ${APP_ID}
     timeout: 900000
     label: "05.11 · espera a tolerância acabar (a faixa sem custo some)"
 
-# Sair da fila: dois toques seguidos e a confirmacao com o valor.
-- tapOn:
+# Sair da fila: dois toques seguidos (D15) e a confirmacao com o valor. Dois
+# tapOn saem ~2 s um do outro, fora da janela de 1,5 s (JANELA_DO_TOQUE_DUPLO_MS):
+# cada um so mostrava a faixa e a confirmacao nunca abria. O doubleTapOn toca
+# duas vezes dentro da janela.
+- doubleTapOn:
     id: "leave-queue"
-    label: "05.12 · toca em leave-queue"
-- tapOn:
-    id: "leave-queue"
-    label: "05.13 · toca em leave-queue"
+    label: "05.12 · toque duplo em leave-queue"
+# O "?" escapado: o texto e um regex, e "Sair da fila?" casava com o proprio
+# botao "Sair da fila" (o ? deixava o "a" opcional) — passava sem a caixa.
 - extendedWaitUntil:
-    visible: "Sair da fila?"
+    visible: "Sair da fila\\?"
     timeout: 10000
-    label: "05.14 · espera Sair da fila?"
+    label: "05.13 · espera Sair da fila?"
 # Pelo id: o "Sim, sair" muda de posicao com o "Adiar minha vez".
 - tapOn:
     id: "dialogo-botao-destrutivo"
-    label: "05.15 · toca em Sim, sair"
+    label: "05.14 · toca em Sim, sair"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
-    label: "05.16 · roda fechar_aviso"
+    label: "05.15 · roda fechar_aviso"
