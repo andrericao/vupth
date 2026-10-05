@@ -4,19 +4,20 @@
 #   bash tools/apk-para-o-r2.sh
 #
 # Pega o ultimo build `prod-apk` terminado no EAS, baixa e sobe no bucket R2
-# como `vupth.apk` (nome fixo). O site redireciona `/baixar` para ele
+# de PRODUCAO do Backend (o das fotos), em `apk/vupth.apk` (nome fixo). O site
+# redireciona `/baixar` para ele
 # (public/_redirects), entao o link que circula nunca muda. Rodar depois de
 # cada `eas build --profile prod-apk`.
 #
-# Precisa: login no EAS (`eas whoami`), jq, e no ambiente
-#   R2_BUCKET              nome do bucket (ex.: vupth-apk)
-#   CLOUDFLARE_API_TOKEN   token com R2 Edit
-#   CLOUDFLARE_ACCOUNT_ID  a conta do Cloudflare
+# Precisa: login no EAS (`eas whoami`), jq, curl 7.75+ (assina o S3 sozinho) e
+# as mesmas chaves S3 do Backend, as de PRODUCAO, no ambiente:
+#   R2_ACCOUNT_ID  R2_ACCESS_KEY_ID  R2_SECRET_ACCESS_KEY  R2_BUCKET
 set -euo pipefail
 
-: "${R2_BUCKET:?defina R2_BUCKET}"
-: "${CLOUDFLARE_API_TOKEN:?defina CLOUDFLARE_API_TOKEN}"
-: "${CLOUDFLARE_ACCOUNT_ID:?defina CLOUDFLARE_ACCOUNT_ID}"
+: "${R2_ACCOUNT_ID:?defina R2_ACCOUNT_ID}"
+: "${R2_ACCESS_KEY_ID:?defina R2_ACCESS_KEY_ID}"
+: "${R2_SECRET_ACCESS_KEY:?defina R2_SECRET_ACCESS_KEY}"
+: "${R2_BUCKET:?defina R2_BUCKET (o de producao)}"
 
 BUILD=$(npx --yes eas-cli build:list --platform android --build-profile prod-apk \
   --status finished --limit 1 --json --non-interactive)
@@ -32,10 +33,12 @@ trap 'rm -rf "$TMP"' EXIT
 echo "Baixando o APK $VERSAO: $URL"
 curl -fL --retry 3 -o "$TMP/vupth.apk" "$URL"
 
-echo "Subindo para r2://$R2_BUCKET/vupth.apk"
-npx --yes wrangler r2 object put "$R2_BUCKET/vupth.apk" --remote \
-  --file "$TMP/vupth.apk" \
-  --content-type application/vnd.android.package-archive \
-  --cache-control "no-cache"
+echo "Subindo para r2://$R2_BUCKET/apk/vupth.apk"
+curl -fsS --aws-sigv4 "aws:amz:auto:s3" \
+  --user "$R2_ACCESS_KEY_ID:$R2_SECRET_ACCESS_KEY" \
+  -H "Content-Type: application/vnd.android.package-archive" \
+  -H "Cache-Control: no-cache" \
+  -T "$TMP/vupth.apk" \
+  "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com/$R2_BUCKET/apk/vupth.apk"
 
 echo "Pronto: /baixar entrega o $VERSAO."
