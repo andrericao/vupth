@@ -977,9 +977,9 @@ export function QueueStatus() {
         {mostrarFaixaDeSaida && (
           <Box px={16} pb="$2">
             <Box
-              // Com multa, ambar: e o estado que pede atencao. Sem multa, o forest
-              // translucido do resto da tela verde.
-              bg={saidaAtual.confirmacao ? "$brandWarning" : "#1633001A"}
+              // Com multa, ambar: e o estado que pede atencao. Sem multa, branco:
+              // o forest translucido sumia sobre a tela verde (mesma cor do fundo).
+              bg={saidaAtual.confirmacao ? "$brandWarning" : "$brandBackground"}
               borderRadius="$card"
               px="$3.5"
               py="$2.5"

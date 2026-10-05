@@ -25,8 +25,11 @@ export function FaixaDaTolerancia({ ate }: { ate: number | null | undefined }) {
 
   if (!ate || !dentro) return null;
 
+  // Fundo branco (`$brandBackground`), nao o forest translucido: a faixa vive
+  // na tela verde da fila (Aguardando), e o #1633001A sobre o brandGreen saia
+  // da mesma cor da tela — nao se via a faixa (contraste-sair-sem-custo).
   return (
-    <Box bg="#1633001A" borderRadius="$card" px="$3.5" py="$2.5" mx={16} mb="$2" testID="faixa-da-tolerancia">
+    <Box bg="$brandBackground" borderRadius="$card" px="$3.5" py="$2.5" mx={16} mb="$2" testID="faixa-da-tolerancia">
       <HStack alignItems="center" gap="$2">
         <Info size={16} color="#163300" />
         <Text size="xs" color="$forest" flex={1}>
