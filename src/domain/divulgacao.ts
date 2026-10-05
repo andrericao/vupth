@@ -15,11 +15,10 @@ export function ehIOS(userAgent: string | undefined | null): boolean {
 }
 
 /**
- * O `/baixar` ja aponta para o APK? Liga quando o bucket R2 e o redirecionamento
- * do `public/_redirects` estiverem no ar (Solicitadas, 05/10). Desligado, a
- * faixa nao aparece — melhor nada que um "Baixar" que cai no Inicio.
+ * O `/baixar` ja aponta para o APK (bucket R2 de producao, `public/_redirects`).
+ * Desligar aqui esconde a faixa sem mexer no resto.
  */
-export const APK_NO_AR = false;
+export const APK_NO_AR = true;
 
 /**
  * O endereco fixo do APK: o site redireciona `/baixar` para o APK mais novo

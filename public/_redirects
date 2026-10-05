@@ -10,9 +10,7 @@
 
 # /baixar (link-de-divulgacao, 05/10): o endereco fixo do APK mais novo, no
 # bucket R2 de producao, em apk/vupth.apk (tools/apk-para-o-r2.sh). Vem ANTES
-# do fallback, senao o /* o engole. Falta a URL publica do bucket
-# (R2_PUBLIC_BASE_URL) — com ela, descomentar e ligar o APK_NO_AR em
-# src/domain/divulgacao.ts:
-# /baixar   <R2_PUBLIC_BASE_URL>/apk/vupth.apk   302
+# do fallback, senao o /* o engole. Quando houver Play Store, so este destino muda.
+/baixar   https://pub-0d03974681d54d339611a4708d7c7535.r2.dev/apk/vupth.apk   302
 
 /*    /index.html   200
