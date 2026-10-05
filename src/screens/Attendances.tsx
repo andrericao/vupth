@@ -460,6 +460,11 @@ export function Attendances() {
                           <Text fontFamily="$heading" size="sm">
                             {a.professionalName}
                           </Text>
+                          {a.establishmentName ? (
+                            <Text size="xs" color="$brandTextSecondary" testID={`historico-loja-${a.id}`}>
+                              {a.establishmentName}
+                            </Text>
+                          ) : null}
                           <Text size="xs" color="$brandTextSecondary">
                             {a.services.map((s) => s.customName).join(", ") || "—"}
                           </Text>

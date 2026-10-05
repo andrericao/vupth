@@ -125,6 +125,21 @@ describe('Atendimentos — o servidor manda quando o aparelho esqueceu', () => {
     expect(queryByText(/R\$/)).toBeNull();
   });
 
+  it('com establishmentName (Backend a883210), o card do histórico diz a loja; sem ele, omite', () => {
+    semFilaLocal();
+    mockHistory.mockReturnValue({
+      data: [
+        { ...aguardando, status: 'FINISHED', totalValue: 30, establishmentName: 'Barbearia do Zé' },
+        { ...aguardando, id: 'a2', status: 'FINISHED', totalValue: 30 },
+      ],
+      isLoading: false, refetch: jest.fn(), isRefetching: false,
+    });
+    const { getByTestId, getByText, queryByTestId } = renderWithProviders(<Attendances />);
+    expect(getByTestId('historico-loja-a1')).toBeTruthy();
+    expect(getByText('Barbearia do Zé')).toBeTruthy();
+    expect(queryByTestId('historico-loja-a2')).toBeNull();
+  });
+
   it('histórico só com atendimento encerrado não inventa fila', () => {
     semFilaLocal();
     mockHistory.mockReturnValue({
