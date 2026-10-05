@@ -1,0 +1,135 @@
+# Perfil -> Conta: Enderecos (novo, digitado), Senha e E-mail (maestro-maximo —
+# telas de configuracao que so tinham o unitario, DEC-7). Conta propria da
+# etapa: trocar a senha e o e-mail nao afeta as outras.
+# env: TAG
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Perfil"
+    label: "16.01 · toca em Perfil"
+- tapOn:
+    text: "Endereços"
+    label: "16.02 · toca em Endereços"
+- tapOn:
+    text: "Adicionar endereço"
+    label: "16.03 · toca em Adicionar endereço"
+- tapOn:
+    text: "Prefiro digitar"
+    label: "16.04 · recusa o GPS"
+- tapOn:
+    text: "Rua das Flores"
+    label: "16.05 · toca na rua"
+- inputText:
+    text: "Rua da Bateria"
+    label: "16.06 · digita a rua"
+- tapOn:
+    text: "123"
+    label: "16.07 · toca no número"
+- inputText:
+    text: "10"
+    label: "16.08 · digita o número"
+- tapOn:
+    text: "Centro"
+    label: "16.09 · toca no bairro"
+- inputText:
+    text: "Centro"
+    label: "16.0A · digita o bairro"
+- tapOn:
+    text: "São Paulo"
+    label: "16.0B · toca na cidade"
+- inputText:
+    text: "São Paulo"
+    label: "16.0C · digita a cidade"
+- tapOn:
+    text: "SP"
+    label: "16.0D · toca na UF"
+- inputText:
+    text: "SP"
+    label: "16.0E · digita a UF"
+- hideKeyboard:
+    label: "16.0F · fecha o teclado"
+- scrollUntilVisible:
+    element:
+      text: "01310-100"
+    label: "16.0G · rola até o CEP"
+- tapOn:
+    text: "01310-100"
+    label: "16.0H · toca no CEP"
+- inputText:
+    text: "01310100"
+    label: "16.0I · digita o CEP"
+- hideKeyboard:
+    label: "16.0J · fecha o teclado"
+- scrollUntilVisible:
+    element:
+      text: "Salvar"
+    label: "16.0K · rola até Salvar"
+- tapOn:
+    text: "Salvar"
+    label: "16.0L · toca em Salvar"
+- extendedWaitUntil:
+    visible: "Rua da Bateria.*"
+    timeout: 30000
+    label: "16.0M · o endereço aparece na lista"
+- tapOn:
+    id: "back-button"
+    label: "16.0N · volta ao Perfil"
+
+- tapOn:
+    text: "Senha"
+    label: "16.0O · toca em Senha"
+- tapOn:
+    text: "Senha atual"
+    label: "16.0P · toca em Senha atual"
+- inputText:
+    text: ${SENHA}
+    label: "16.0Q · digita a senha atual"
+- tapOn:
+    text: "Nova senha"
+    label: "16.0R · toca em Nova senha"
+- inputText:
+    text: "Teste@1234"
+    label: "16.0S · digita a nova senha"
+- tapOn:
+    text: "Confirmar nova senha"
+    label: "16.0T · toca em Confirmar nova senha"
+- inputText:
+    text: "Teste@1234"
+    label: "16.0U · confirma a nova senha"
+- hideKeyboard:
+    label: "16.0V · fecha o teclado"
+- tapOn:
+    text: "Salvar"
+    label: "16.0W · toca em Salvar"
+- extendedWaitUntil:
+    visible: "Senha atualizada!"
+    timeout: 30000
+    label: "16.0X · espera Senha atualizada!"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "16.0Y · fecha o aviso"
+
+- tapOn:
+    text: "Perfil"
+    label: "16.0Z · volta ao Perfil"
+- tapOn:
+    text: "E-mail"
+    label: "16.10 · toca em E-mail"
+- tapOn:
+    text: "novo@email.com"
+    label: "16.11 · toca no novo e-mail"
+- inputText:
+    text: "client_c${TAG}novo@teste.com"
+    label: "16.12 · digita o novo e-mail"
+- hideKeyboard:
+    label: "16.13 · fecha o teclado"
+- tapOn:
+    text: "Salvar"
+    label: "16.14 · toca em Salvar"
+- extendedWaitUntil:
+    visible: "E-mail atualizado!"
+    timeout: 30000
+    label: "16.15 · espera E-mail atualizado!"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "16.16 · fecha o aviso"
