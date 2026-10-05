@@ -1,0 +1,52 @@
+# Informacoes do profissional (informacoes-do-profissional, Andre 05/10): pela
+# ⓘ da loja e pelo nome no topo da escolha do servico. O telefone aparece so
+# como texto — a loja de teste nao tem contact_phone, entao nao ha a linha —, e
+# nunca Ligar nem WhatsApp. Comeca na tela da loja.
+# env: PROF, PROF_ID, SERVICO_ID
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "info-${PROF_ID}"
+    label: "14.01 · toca na ⓘ do profissional"
+- extendedWaitUntil:
+    visible:
+      id: "perfil-do-profissional"
+    timeout: 30000
+    label: "14.02 · espera perfil-do-profissional"
+- assertVisible:
+    text: ${PROF}
+    label: "14.03 · vê ${PROF}"
+- extendedWaitUntil:
+    visible:
+      id: "servico-${SERVICO_ID}"
+    timeout: 30000
+    label: "14.04 · vê o serviço com o preço"
+- assertNotVisible:
+    id: "contato-do-profissional"
+    label: "14.05 · sem contact_phone, sem a linha do telefone"
+- assertNotVisible:
+    text: "(Ligar|WhatsApp)"
+    label: "14.06 · não vê Ligar nem WhatsApp"
+- assertVisible:
+    id: "compartilhar"
+    label: "14.07 · vê compartilhar"
+- tapOn:
+    id: "back-button"
+    label: "14.08 · volta para a loja"
+- tapOn:
+    id: "professional-${PROF_ID}"
+    label: "14.09 · toca no profissional"
+- tapOn:
+    id: "ver-profissional"
+    label: "14.0A · toca no nome no topo da escolha do serviço"
+- extendedWaitUntil:
+    visible:
+      id: "perfil-do-profissional"
+    timeout: 30000
+    label: "14.0B · espera perfil-do-profissional"
+- tapOn:
+    id: "back-button"
+    label: "14.0C · volta para a escolha do serviço"
+- assertNotVisible:
+    text: "(Ligar|WhatsApp)"
+    label: "14.0D · a escolha do serviço não tem Ligar nem WhatsApp"

@@ -79,7 +79,7 @@ echo ""
 # commit errado no aparelho, nenhuma etapa diz nada.
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
-ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13"}
+ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15"}
 
 # bateria-pula-aprovados (Andre, 05/10): a etapa verde grava a marca com o
 # commit em aprovados.txt (no .gitignore); a proxima rodada no MESMO commit a
