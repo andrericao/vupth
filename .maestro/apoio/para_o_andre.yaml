@@ -5,4 +5,4 @@
 appId: ${APP_ID}
 ---
 - takeScreenshot: para-o-andre_${NOME}
-- evalScript: ${console.log('PARA-O-ANDRE: ' + NOME + ' — ' + O_QUE)}
+- evalScript: "${console.log('PARA-O-ANDRE: ' + NOME + ' — ' + O_QUE)}"

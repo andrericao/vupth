@@ -137,10 +137,10 @@ print_da_falha() {
 
 STATUS=0
 : > "$RODADA/relatorio.txt"
-if ! rodar 00_confere_versao; then
-  PASSO=$(falhou_em "$RODADA/00_confere_versao")
+if ! rodar 00_atualizacao; then
+  PASSO=$(falhou_em "$RODADA/00_atualizacao")
   echo "❌ 00 · versão — ${PASSO:-antes do primeiro passo}" | tee -a "$RODADA/relatorio.txt"
-  print_da_falha "$RODADA/00_confere_versao" "$PASSO"
+  print_da_falha "$RODADA/00_atualizacao" "$PASSO"
   echo "A versão no aparelho não é a $COMMIT: nenhuma etapa rodou."
   STATUS=1
 else

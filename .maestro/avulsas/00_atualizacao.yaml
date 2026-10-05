@@ -1,5 +1,6 @@
 # Etapa avulsa 00 (bateria-nao-para): roda num maestro test proprio.
-# So a versao: se o app nao roda o commit esperado, a bateria para aqui.
+# A fatia de atualizacao (fatia-de-atualizacao): entra, toca em "Verificar
+# atualizacao" e confere o commit. Se nao bater, a bateria para aqui.
 appId: ${APP_ID}
 env:
   APP_ID: com.vupth.client.preview
@@ -11,7 +12,7 @@ env:
     env:
       ETAPA: "00"
       LOJA: "0"
-      CONTA: "0"
+      CONTA: "1"
       ABERTURA: "1"
       FILA_FECHADA: "0"
     label: "00.P0 · prepara a etapa"

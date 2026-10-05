@@ -16,7 +16,7 @@ roteiro e, no fim — verde ou não —, o `restaurar.sh`.
 `avulsas/NN_*.yaml` roda num `maestro test` próprio e prepara o estado dela
 pela API (`apoio/preparo.yaml`: loja, cliente, fila fechada), com contas
 próprias (TAG + número da etapa). Se uma falha, ela fica no relatório e a
-próxima roda. Só a `00_confere_versao` para tudo. Onde a API não cria o estado,
+próxima roda. Só a `00_atualizacao` para tudo: ela entra, toca em "Verificar atualização" (Perfil → Versão do app) e confere o commit; as etapas logadas fazem o mesmo no preparo, em vez de fechar e abrir o app (fatia-de-atualizacao). Onde a API não cria o estado,
 a avulsa roda antes a etapa de que depende (a 06 roda a 05; a 11, a 10). Uma
 etapa só: `ETAPAS="05 06" bash .maestro/bateria.sh`. O `bateria_completa.yaml`
 segue como roteiro único, para rodar à mão com `maestro test`.

@@ -73,7 +73,7 @@ appId: ${APP_ID}
     label: "${ETAPA}.P8 · nega a caixa do sistema, se vier"
 
 # O clearState apaga o OTA baixado: sem conferir a versao a cada etapa, ela
-# rodaria o bundle embutido do APK. Conferir e no Perfil do visitante.
+# rodaria o bundle embutido do APK.
 - runFlow:
     when:
       true: ${ABERTURA == '1'}
@@ -82,11 +82,7 @@ appId: ${APP_ID}
           id: "onboarding-start"
       - runFlow:
           file: fechar_aviso.yaml
-      - tapOn:
-          text: "Perfil"
-      - runFlow:
-          file: confere_versao.yaml
-    label: "${ETAPA}.P9 · passa a abertura e confere a versão"
+    label: "${ETAPA}.P9 · passa a abertura"
 - runFlow:
     when:
       true: ${CONTA == '1'}
@@ -96,3 +92,21 @@ appId: ${APP_ID}
           env:
             EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
     label: "${ETAPA}.PA · entra com o cliente"
+# Logado: a fatia de atualizacao (Verificar atualizacao, sem reabrir o app).
+- runFlow:
+    when:
+      true: ${CONTA == '1'}
+    commands:
+      - runFlow:
+          file: atualizar.yaml
+    label: "${ETAPA}.PB · atualiza o app e confere a versão"
+# Visitante (sem o menu Versao do app): fecha e abre ate o OTA valer.
+- runFlow:
+    when:
+      true: ${CONTA != '1' && ABERTURA == '1'}
+    commands:
+      - tapOn:
+          text: "Perfil"
+      - runFlow:
+          file: confere_versao.yaml
+    label: "${ETAPA}.PC · confere a versão no Perfil do visitante"
