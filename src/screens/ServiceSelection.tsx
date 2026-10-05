@@ -20,6 +20,7 @@ import { MoreOptionsModal, MoreOption } from "@components/MoreOptionsModal";
 import { formatWaitTime, estimatedStartTime } from "@domain/queue/types";
 import { ServiceItemResponse } from "@domain/professional/types";
 import { outOfQueueOfferErrorMessage } from "@domain/queue/swap";
+import { mostraPosicao } from "@domain/queue/posicao";
 import { establishmentService } from "@services/establishmentService";
 import { comTempoAtual, duracaoDoServico } from "@domain/professional/duracaoDoServico";
 import { useSnapshotDaLoja } from "@hooks/useEstablishments";
@@ -479,7 +480,7 @@ export function ServiceSelection() {
                 {/* Posicao so entra quando a tela sabe o tamanho da fila. Quem
                     chega aqui por outro caminho (volta do login) nao recebe o
                     dado — melhor omitir a linha do que chutar um numero. */}
-                {queueCount != null && vaiPraFila && (
+                {queueCount != null && vaiPraFila && mostraPosicao(snapshot, professionalId) && (
                   <HStack justifyContent="space-between" alignItems="center">
                     <Text size="sm" color="#FFFFFFB3">
                       Sua posição

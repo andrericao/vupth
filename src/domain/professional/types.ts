@@ -24,6 +24,9 @@ export interface ProfessionalWithQueue extends Professional {
   // Contato que o profissional escolheu expor (Backend 02dd5ef) — null = nao
   // expor. Nao e o telefone da conta. Ver `@domain/professional/contato`.
   contact_phone?: string | null;
+  // Interruptor da posicao (Backend 35d57c0): false = esconder a posicao de
+  // quem esta na fila dele. Ver `@domain/queue/posicao`.
+  show_position?: boolean | null;
   waiting_list: AttendanceInQueue[];
   queue_count: number;
   estimated_wait_minutes: number;

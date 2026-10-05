@@ -52,6 +52,8 @@ import { swapOfferService, SwapOfferDirection } from "@services/swapOfferService
 import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
+import { useMostraPosicao } from "@hooks/useMostraPosicao";
+import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
 
 type RouteParams = {
@@ -100,6 +102,7 @@ export function QueueStatus() {
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
   const { remaining, semPrevisao, elapsedSeconds, color, isInQueue, isBeingAttended, isPaused, isFinished, activeQueue, refresh } = useQueueCountdown();
+  const mostraPosicao = useMostraPosicao(activeQueue?.establishmentId, activeQueue?.professionalId);
 
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState("Entrando na fila...");
@@ -711,7 +714,9 @@ export function QueueStatus() {
   // o verde cheio e o sinal de "voce esta esperando a sua vez" e perde o
   // sentido se valer para tudo.
   const waitingInQueue = isInQueue && !isBeingAttended && !isPaused && !isFinished;
-  const position = activeQueue?.position;
+  // Fonte unica da posicao (decisao de 05/09): escondida pelo profissional,
+  // o numero grande e as bolinhas somem e o tempo assume o lugar.
+  const position = posicaoVisivel(activeQueue?.position, mostraPosicao);
   const peopleAhead = position != null ? Math.max(0, position - 1) : null;
   const initial = activeQueue?.initialPosition;
   // Progresso feito. So existe depois de andar na fila — no primeiro poll

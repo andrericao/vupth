@@ -30,8 +30,9 @@ jest.mock('@services/establishmentService', () => ({
 }));
 // O snapshot da loja (WS) vem do cache do react-query, que a tela da loja
 // mantem; aqui nao ha loja atras — sem snapshot.
+let mockSnapshot: unknown = undefined;
 jest.mock('@hooks/useEstablishments', () => ({
-  useSnapshotDaLoja: () => undefined,
+  useSnapshotDaLoja: () => mockSnapshot,
 }));
 jest.mock('@services/swapOfferService', () => ({
   swapOfferService: { create: jest.fn() },
@@ -365,5 +366,38 @@ describe('ServiceSelection — contato do profissional', () => {
     const { findByTestId, queryByTestId } = renderWithProviders(<ServiceSelection />);
     await findByTestId('service-s1', {}, { timeout: 15000 });
     expect(queryByTestId('contato-do-profissional')).toBeNull();
+  });
+});
+
+// Decisão de 05/09 (Backend 35d57c0): o "Nº da fila" do resumo obedece ao
+// interruptor do profissional, pela mesma fonte da QueueStatus e da Home.
+describe('ServiceSelection — o interruptor da posição', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useAuthStore.setState({ isAuthenticated: true });
+    setRouteParams({ ...OPEN_PARAMS, queueCount: 2 });
+    mockGetServices.mockResolvedValue({
+      data: [{ id: 's1', customName: 'Corte', price: 30, weeklyAverageDurationInMinutes: 30 }],
+    });
+  });
+
+  afterAll(() => {
+    mockSnapshot = undefined;
+  });
+
+  it('liberada: o resumo diz "3º da fila"', async () => {
+    mockSnapshot = [{ id: 'p1', show_position: true }];
+    const { findByTestId, getByText } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    expect(getByText('3º da fila')).toBeTruthy();
+  });
+
+  it('escondida: sem a linha da posição — a previsão continua', async () => {
+    mockSnapshot = [{ id: 'p1', show_position: false }];
+    const { findByTestId, queryByText, getByText } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    expect(queryByText('Sua posição')).toBeNull();
+    expect(queryByText(/º da fila/)).toBeNull();
+    expect(getByText('Começa por volta de')).toBeTruthy();
   });
 });
