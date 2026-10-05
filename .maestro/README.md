@@ -21,6 +21,12 @@ a avulsa roda antes a etapa de que depende (a 06 roda a 05; a 11, a 10). Uma
 etapa só: `ETAPAS="05 06" bash .maestro/bateria.sh`. O `bateria_completa.yaml`
 segue como roteiro único, para rodar à mão com `maestro test`.
 
+**Conjunta (bateria-conjunta, 05/10).** As etapas 18 e 19 abrem o Partner no
+mesmo celular e conferem no Client: o tempo do serviço novo (18) e o só agenda
+(19). Os subfluxos são os do Partner, lidos do clone ao lado
+(`../vupth-partner/.maestro/conjunta`). Sem esse clone ou sem o APK do Partner,
+elas aparecem como ⏭.
+
 **Pula as aprovadas (bateria-pula-aprovados, 05/10).** A etapa verde grava
 `NN <commit>` em `aprovados.txt` (fora do git); no mesmo commit, a próxima
 rodada a pula. `bash .maestro/bateria.sh --completa` roda tudo de novo.

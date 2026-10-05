@@ -1,0 +1,25 @@
+# Bateria conjunta (Andre, 05/10 — verificacao dos dois lados): o profissional
+# muda o tempo do servico no Partner e o Client, na escolha do servico, mostra
+# o novo (tempo-do-servico). Comeca na escolha, com o servico marcado.
+# env: EMAIL_PROF
+appId: ${APP_ID}
+---
+- assertVisible:
+    text: "30 min"
+    label: "18.01 · o Client mostra 30 min"
+- runFlow:
+    file: ../apoio/abrir_partner.yaml
+    label: "18.02 · abre o Partner como o profissional"
+- runFlow:
+    file: ../../../vupth-partner/.maestro/conjunta/prof_tempo_do_servico.yaml
+    env:
+      APP_ID: com.vupth.partner.preview
+      MINUTOS: "45"
+    label: "18.03 · no Partner, o serviço passa a 45 min"
+- launchApp:
+    appId: ${APP_ID}
+    label: "18.04 · volta ao Client (sem limpar)"
+- extendedWaitUntil:
+    visible: "45 min"
+    timeout: 60000
+    label: "18.05 · o Client mostra 45 min"
