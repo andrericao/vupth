@@ -1,0 +1,64 @@
+# Bateria conjunta: o profissional atende e finaliza no Partner; no Client, o
+# historico mostra a loja embaixo do profissional e o detalhe tem "Local"
+# (usar-campos-do-historico); o convite de avaliar aparece, a avaliacao vai, e
+# o atendimento avaliado nao oferece mais "Avaliar" (avaliar-so-sem-nota).
+# Comeca logado, ja na fila (entrou pela API).
+# env: EMAIL_PROF, NOME_CLIENTE, LOJA, PROF
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/abrir_partner.yaml
+    label: "22.01 · abre o Partner como o profissional"
+- runFlow:
+    file: ../../../vupth-partner/.maestro/conjunta/prof_finalizar.yaml
+    env:
+      APP_ID: com.vupth.partner.preview
+      CLIENTE: ${NOME_CLIENTE}
+    label: "22.02 · no Partner, atende e finaliza ${NOME_CLIENTE}"
+- launchApp:
+    appId: ${APP_ID}
+    label: "22.03 · volta ao Client (sem limpar)"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "22.04 · fecha as caixas"
+- tapOn:
+    text: "Atendimentos"
+    label: "22.05 · toca em Atendimentos"
+- extendedWaitUntil:
+    visible:
+      id: "convite-avaliar"
+    timeout: 60000
+    label: "22.06 · o convite de avaliar aparece"
+- assertVisible:
+    text: ${LOJA}
+    label: "22.07 · o realizado mostra ${LOJA}"
+- tapOn:
+    id: "convite-avaliar"
+    label: "22.08 · abre o detalhe"
+- assertVisible:
+    text: "Local"
+    label: "22.09 · o detalhe tem Local"
+- tapOn:
+    text: "Avaliar atendimento"
+    label: "22.0A · toca em Avaliar atendimento"
+- tapOn:
+    id: "star-5"
+    label: "22.0B · dá 5 estrelas"
+- tapOn:
+    text: "Enviar avaliação"
+    label: "22.0C · envia"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "22.0D · fecha as caixas"
+- extendedWaitUntil:
+    notVisible:
+      id: "convite-avaliar"
+    timeout: 30000
+    label: "22.0E · o convite some"
+- tapOn:
+    text: ${PROF}
+    index: 0
+    label: "22.0F · abre o atendimento avaliado"
+- assertNotVisible:
+    text: "Avaliar atendimento"
+    label: "22.0G · avaliado não oferece Avaliar"
