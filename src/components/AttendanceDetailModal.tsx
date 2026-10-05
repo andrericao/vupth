@@ -83,6 +83,7 @@ export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = t
 
             <ScrollView showsVerticalScrollIndicator={false}>
               <Row label="Profissional" value={a.professionalName} />
+              {a.establishmentName ? <Row label="Local" value={a.establishmentName} /> : null}
               <Row
                 label="Serviços"
                 value={a.services.map((s) => s.customName).join(", ") || "—"}

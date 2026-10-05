@@ -40,6 +40,8 @@ export interface ClientAttendance {
   professionalId: string;
   professionalName: string;
   establishmentId: string;
+  /** Nome da loja (Backend a883210). Ausente = backend anterior: a tela omite. */
+  establishmentName?: string | null;
   services: AttendanceServiceLine[];
   status: string;
   totalValue: number;

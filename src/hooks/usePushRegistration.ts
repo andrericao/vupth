@@ -193,16 +193,28 @@ export function usePushRegistration() {
 
   // Toque na notificação → navega conforme o data.type.
   useEffect(() => {
+    // O mesmo toque pode chegar pelos dois caminhos (o listener e a ultima
+    // resposta da abertura): navega uma vez so.
+    const tratadas = new Set<string>();
+    const tratar = (response: Notifications.NotificationResponse) => {
+      const id = response.notification.request.identifier;
+      if (tratadas.has(id)) return;
+      tratadas.add(id);
+      // "OK" só fecha a notificação — não navega.
+      if (tocouNoOk(response)) {
+        Notifications.dismissNotificationAsync(id).catch(() => {});
+        return;
+      }
+      const data = response.notification.request.content.data;
+      navigateFromNotification(notificationRoute(data));
+    };
     try {
-      const sub = Notifications.addNotificationResponseReceivedListener((response) => {
-        // "OK" só fecha a notificação — não navega.
-        if (tocouNoOk(response)) {
-          Notifications.dismissNotificationAsync(response.notification.request.identifier).catch(() => {});
-          return;
-        }
-        const data = response.notification.request.content.data;
-        navigateFromNotification(notificationRoute(data));
-      });
+      const sub = Notifications.addNotificationResponseReceivedListener(tratar);
+      // Com o app FECHADO, o toque que o abriu nao passa pelo listener (ele
+      // ainda nao existia): vem na ultima resposta (Andre, 05/10 — abria a Home).
+      Notifications.getLastNotificationResponseAsync()
+        .then((ultima) => { if (ultima) tratar(ultima); })
+        .catch(() => {});
       return () => sub.remove();
     } catch {
       // binário sem o módulo nativo de push — sem listener de toque.

@@ -20,6 +20,8 @@ import { useAuthStore } from "@stores/authStore";
 import { useLocationStore } from "@stores/locationStore";
 import { addressService } from "@services/addressService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
+import { useMostraPosicao } from "@hooks/useMostraPosicao";
+import { posicaoVisivel } from "@domain/queue/posicao";
 import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
@@ -269,6 +271,9 @@ export function Home() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
   const { activeQueue, remaining, isInQueue, isLate } = useQueueCountdown();
+  // "Faltam N" so com o profissional deixando mostrar (fonte unica, 05/09).
+  const mostraPosicao = useMostraPosicao(activeQueue?.establishmentId, activeQueue?.professionalId);
+  const posicao = posicaoVisivel(activeQueue?.position, mostraPosicao);
   const pedidosDeCorte = usePedidoDeCorteStore((s) => s.pedidos);
   // "Recentes": ultimo atendimento CONCLUIDO de verdade. O backend nao tem
   // "favorito", entao usamos o historico. Sem historico, a secao nao aparece.
@@ -578,10 +583,10 @@ export function Home() {
                   >
                     {/* Posicao real (GET wait-time). Ate o 1o poll chegar, cai no
                         tempo — nunca inventa um numero de pessoas. */}
-                    {activeQueue.position != null
-                      ? activeQueue.position <= 1
+                    {posicao != null
+                      ? posicao <= 1
                         ? "É a sua vez"
-                        : `Faltam ${activeQueue.position - 1}`
+                        : `Faltam ${posicao - 1}`
                       : remaining == null
                         ? "Calculando..."
                         : formatWaitTime(remaining)}

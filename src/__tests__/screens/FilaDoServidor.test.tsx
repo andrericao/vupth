@@ -23,6 +23,7 @@ jest.mock('@react-navigation/native', () => ({
 }));
 jest.mock('@hooks/useAttendances', () => ({ useClientAttendances: jest.fn() }));
 jest.mock('@hooks/useIntentions', () => ({ useClientIntentions: () => ({ data: null, refetch: jest.fn() }) }));
+jest.mock('@hooks/useMostraPosicao', () => ({ useMostraPosicao: () => true }));
 jest.mock('@hooks/useQueueCountdown', () => ({ useQueueCountdown: jest.fn() }));
 jest.mock('@hooks/useOutOfQueueSwap', () => ({
   useOutOfQueueSwap: () => ({ pending: [], refetchMyOffers: jest.fn() }),
@@ -122,6 +123,21 @@ describe('Atendimentos — o servidor manda quando o aparelho esqueceu', () => {
     // preço vira travessão.
     expect(getAllByText('—').length).toBeGreaterThan(0);
     expect(queryByText(/R\$/)).toBeNull();
+  });
+
+  it('com establishmentName (Backend a883210), o card do histórico diz a loja; sem ele, omite', () => {
+    semFilaLocal();
+    mockHistory.mockReturnValue({
+      data: [
+        { ...aguardando, status: 'FINISHED', totalValue: 30, establishmentName: 'Barbearia do Zé' },
+        { ...aguardando, id: 'a2', status: 'FINISHED', totalValue: 30 },
+      ],
+      isLoading: false, refetch: jest.fn(), isRefetching: false,
+    });
+    const { getByTestId, getByText, queryByTestId } = renderWithProviders(<Attendances />);
+    expect(getByTestId('historico-loja-a1')).toBeTruthy();
+    expect(getByText('Barbearia do Zé')).toBeTruthy();
+    expect(queryByTestId('historico-loja-a2')).toBeNull();
   });
 
   it('histórico só com atendimento encerrado não inventa fila', () => {

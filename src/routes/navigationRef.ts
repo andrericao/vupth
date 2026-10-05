@@ -1,5 +1,8 @@
 import { createNavigationContainerRef } from "@react-navigation/native";
 
+import type { RotaDaNotificacao } from "@domain/push";
+import { useQueueStore } from "@stores/queueStore";
+
 // Ref global de navegação — permite navegar de FORA da árvore de componentes
 // (ex.: ao tocar numa notificação push, em usePushRegistration). Anexado ao
 // NavigationContainer em routes/index.tsx.
@@ -7,20 +10,43 @@ export const navigationRef = createNavigationContainerRef();
 
 /**
  * Navega ao tocar numa notificação. `route` vem de `notificationRoute` (domain/push).
- * Best-effort: no-op se a navegação ainda não montou. Hoje o único destino é a
- * aba Atendimentos (fila ao vivo + agendamentos).
+ *
+ * Com o app FECHADO, o toque chega antes de a navegacao montar (o portao do
+ * servidor vem antes): ate 05/10 o toque se perdia e o app abria na Home. Agora
+ * espera o mount (ate ~15 s) e so entao navega.
+ *
+ * "fila": com a fila no aparelho, abre a tela dela; sem (app recem-aberto, a
+ * fila ainda nao voltou do servidor), cai em Atendimentos — que reconstroi a
+ * fila pelo servidor e mostra o cartao dela.
  */
-export function navigateFromNotification(route: string | null): void {
-  if (!route || !navigationRef.isReady()) return;
-  if (route === "attendances") {
-    // Atendimentos vive numa aba (tab navigator) — navigate afrouxado pois o ref
-    // é destipado (o app usa vários navigators aninhados).
-    const navigate = navigationRef.navigate as unknown as (
-      name: string,
-      params?: object,
-    ) => void;
-    navigate("atendimentosTab", { screen: "attendances" });
+export function navigateFromNotification(
+  route: RotaDaNotificacao | null,
+  tentativa = 0,
+  espera: (fn: () => void, ms: number) => void = (fn, ms) => { setTimeout(fn, ms); },
+): void {
+  if (!route) return;
+  if (!navigationRef.isReady()) {
+    if (tentativa < 75) espera(() => navigateFromNotification(route, tentativa + 1, espera), 200);
+    return;
   }
+  // Atendimentos vive numa aba (tab navigator) — navigate afrouxado pois o ref
+  // é destipado (o app usa vários navigators aninhados).
+  const navigate = navigationRef.navigate as unknown as (name: string, params?: object) => void;
+  const fila = route === "fila" ? useQueueStore.getState().activeQueue : null;
+  if (fila) {
+    navigate("homeTab", {
+      screen: "queueStatus",
+      params: {
+        professionalId: fila.professionalId,
+        establishmentId: fila.establishmentId,
+        professionalName: fila.professionalName,
+        establishmentName: fila.establishmentName,
+        estimatedWaitMinutes: fila.estimatedMinutes,
+      },
+    });
+    return;
+  }
+  navigate("atendimentosTab", { screen: "attendances" });
 }
 
 /**

@@ -6,6 +6,7 @@ import { establishmentService } from '@services/establishmentService';
 import { swapOfferService } from '@services/swapOfferService';
 import { cutRequestService } from '@services/cutRequestService';
 import { useAuthStore } from '@stores/authStore';
+import { dataISO } from '@domain/establishment/horarios';
 
 const mockNavigate = jest.fn();
 
@@ -26,12 +27,20 @@ jest.mock('@react-navigation/native', () => ({
   useRoute: () => ({ params: mockRouteParams }),
 }));
 jest.mock('@services/establishmentService', () => ({
-  establishmentService: { getServiceItemsByProfessional: jest.fn() },
+  establishmentService: {
+    getServiceItemsByProfessional: jest.fn(),
+    // A escolha do horario do corte (ScheduleModal) le o horario da loja.
+    getHours: jest.fn(() => Promise.resolve({ data: null })),
+  },
+}));
+jest.mock('@services/intentionsService', () => ({
+  intentionsService: { getPublicAgenda: jest.fn(() => Promise.resolve({ data: null })), create: jest.fn() },
 }));
 // O snapshot da loja (WS) vem do cache do react-query, que a tela da loja
 // mantem; aqui nao ha loja atras — sem snapshot.
+let mockSnapshot: unknown = undefined;
 jest.mock('@hooks/useEstablishments', () => ({
-  useSnapshotDaLoja: () => undefined,
+  useSnapshotDaLoja: () => mockSnapshot,
 }));
 jest.mock('@services/swapOfferService', () => ({
   swapOfferService: { create: jest.fn() },
@@ -47,6 +56,7 @@ jest.mock('@services/cutRequestService', () => ({
 const mockGetServices = establishmentService.getServiceItemsByProfessional as jest.Mock;
 const mockCreateOffer = swapOfferService.create as jest.Mock;
 const mockCreateCut = cutRequestService.create as jest.Mock;
+const mockGetHours = establishmentService.getHours as jest.Mock;
 
 function setRouteParams(params: Record<string, unknown>) {
   Object.keys(mockRouteParams).forEach((k) => delete mockRouteParams[k]);
@@ -91,11 +101,12 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
     );
   });
 
-  it('com serviço escolhido, o resumo diz a regra da multa ANTES de entrar (CDC)', async () => {
+  it('com serviço escolhido, o resumo não fala de multa nem da saída sem custo (DEC-1, Andre 05/10)', async () => {
     useAuthStore.setState({ isAuthenticated: true });
-    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    const { queryByTestId, queryByText, findByTestId } = renderWithProviders(<ServiceSelection />);
     fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
-    expect(getByTestId('regra-da-multa')).toBeTruthy();
+    expect(queryByTestId('regra-da-multa')).toBeNull();
+    expect(queryByText(/multa|sem custo/i)).toBeNull();
   });
 
   it('LOGADO: confirmar vai direto pra queueStatus', async () => {
@@ -199,6 +210,8 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
 
     fireEvent.press(getByTestId('more-options'));
     fireEvent.press(getByTestId('more-option-cut'));
+    // S26: o menu abre a escolha de quando; "Assim que abrir" = sem horario.
+    fireEvent.press(await findByTestId('corte-assim-que-abrir'));
 
     await waitFor(() =>
       expect(mockCreateCut).toHaveBeenCalledWith(
@@ -267,8 +280,9 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
       fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
       fireEvent.press(getByTestId('more-options'));
+      fireEvent.press(getByTestId('more-option-cut'));
       await act(async () => {
-        fireEvent.press(getByTestId('more-option-cut'));
+        fireEvent.press(getByTestId('corte-assim-que-abrir'));
       });
       const [, mensagem] = alerta.mock.calls[0] as [string, string];
       expect(mensagem).toMatch(/está fora agora/);
@@ -365,5 +379,120 @@ describe('ServiceSelection — contato do profissional', () => {
     const { findByTestId, queryByTestId } = renderWithProviders(<ServiceSelection />);
     await findByTestId('service-s1', {}, { timeout: 15000 });
     expect(queryByTestId('contato-do-profissional')).toBeNull();
+  });
+});
+
+// Decisão de 05/09 (Backend 35d57c0): o "Nº da fila" do resumo obedece ao
+// interruptor do profissional, pela mesma fonte da QueueStatus e da Home.
+describe('ServiceSelection — o interruptor da posição', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useAuthStore.setState({ isAuthenticated: true });
+    setRouteParams({ ...OPEN_PARAMS, queueCount: 2 });
+    mockGetServices.mockResolvedValue({
+      data: [{ id: 's1', customName: 'Corte', price: 30, weeklyAverageDurationInMinutes: 30 }],
+    });
+  });
+
+  afterAll(() => {
+    mockSnapshot = undefined;
+  });
+
+  it('liberada: o resumo diz "3º da fila"', async () => {
+    mockSnapshot = [{ id: 'p1', show_position: true }];
+    const { findByTestId, getByText } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    expect(getByText('3º da fila')).toBeTruthy();
+  });
+
+  it('escondida: sem a linha da posição — a previsão continua', async () => {
+    mockSnapshot = [{ id: 'p1', show_position: false }];
+    const { findByTestId, queryByText, getByText } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    expect(queryByText('Sua posição')).toBeNull();
+    expect(queryByText(/º da fila/)).toBeNull();
+    expect(getByText('Começa por volta de')).toBeTruthy();
+  });
+});
+
+// S26 (Backend 36c4359): o pedido de corte leva o dia e o horário escolhidos.
+describe('ServiceSelection — pedido de corte com dia e horário', () => {
+  const amanha = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    setRouteParams({ ...OPEN_PARAMS, establishmentOpen: false });
+    mockGetServices.mockResolvedValue({
+      data: [{ id: 's1', customName: 'Corte', price: 30, weeklyAverageDurationInMinutes: 30 }],
+    });
+    // Amanhã a loja abre das 09:00 às 11:00.
+    mockGetHours.mockResolvedValue({
+      data: {
+        configured: true,
+        weekly: [],
+        exceptions: [],
+        upcoming: [{ date: dataISO(amanha()), day: 'MONDAY', closed: false, opens: '09:00', closes: '11:00' }],
+      },
+    });
+  });
+
+  afterAll(() => mockGetHours.mockImplementation(() => Promise.resolve({ data: null })));
+
+  async function escolherAmanhaAs0930() {
+    const tela = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await tela.findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent.press(tela.getByTestId('more-options'));
+    fireEvent.press(tela.getByTestId('more-option-cut'));
+    await tela.findByTestId('corte-assim-que-abrir');
+    await act(async () => {});
+    // O modal e o ultimo a desenhar: o dia dele e o ultimo texto com o numero.
+    const dias = tela.getAllByText(String(amanha().getDate()));
+    fireEvent.press(dias[dias.length - 1]);
+    fireEvent.press(await tela.findByTestId('horario-09:30'));
+    await act(async () => {
+      fireEvent.press(tela.getByTestId('confirmar-agendamento'));
+    });
+    return tela;
+  }
+
+  it('manda o desiredTime com o fuso e diz para quando foi o pedido', async () => {
+    mockCreateCut.mockResolvedValue({ data: { id: 'cut-1', expires_at: new Date().toISOString() } });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    await escolherAmanhaAs0930();
+    const [dados, token] = mockCreateCut.mock.calls[0];
+    expect(token).toBe('tok');
+    expect(dados).toEqual(
+      expect.objectContaining({ professionalId: 'p1', establishmentId: 'e1', serviceItemIds: ['s1'] }),
+    );
+    expect(dados.desiredTime).toMatch(/T09:30:00[+-]\d{2}:\d{2}$/);
+    expect(alerta).toHaveBeenCalledWith('Pedido enviado! ⏳', expect.stringMatching(/amanhã às 09:30/));
+    expect(mockNavigate).toHaveBeenCalledWith('home');
+    alerta.mockRestore();
+  });
+
+  it('horário que já passou (422 fieldErrors.desiredTime): pede outro', async () => {
+    mockCreateCut.mockRejectedValue({
+      response: { status: 422, data: { code: 'VALIDATION_ERROR', fieldErrors: { desiredTime: 'must be in the future' } } },
+    });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    await escolherAmanhaAs0930();
+    expect(alerta).toHaveBeenCalledWith('Erro', 'Esse horário já passou. Escolha outro.');
+    alerta.mockRestore();
+  });
+
+  it('VISITANTE: o menu leva ao login antes de perguntar quando', async () => {
+    useAuthStore.setState({ isAuthenticated: false, accessToken: null });
+    const { getByTestId, findByTestId, queryByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent.press(getByTestId('more-options'));
+    fireEvent.press(getByTestId('more-option-cut'));
+    expect(mockNavigate).toHaveBeenCalledWith('login', expect.anything());
+    expect(queryByTestId('corte-assim-que-abrir')).toBeNull();
+    expect(mockCreateCut).not.toHaveBeenCalled();
   });
 });

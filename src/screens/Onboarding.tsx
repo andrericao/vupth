@@ -1,4 +1,5 @@
 import { TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VStack, HStack, Text, Box, Center, ScrollView } from "@gluestack-ui/themed";
 import { Users } from "lucide-react-native";
 
@@ -20,6 +21,7 @@ import { fs } from "@stores/fonteStore";
  */
 export function Onboarding() {
   const markOnboardingSeen = useFirstRunStore((s) => s.markOnboardingSeen);
+  const insets = useSafeAreaInsets();
   const { data: establishments = [] } = useEstablishments();
 
   // Prova social com dado REAL: quantas lojas estao abertas agora. O Pencil
@@ -51,7 +53,7 @@ export function Onboarding() {
           imagem por conta propria seria escolher a cara da marca sem combinar.
           No lugar, o painel usa o "V" sobre o verde-claro: e material que ja
           e nosso. Quando a arte existir, ela entra neste Box. */}
-      <Box px={16} pt={8}>
+      <Box px={16} style={{ paddingTop: insets.top + 8 }}>
         <Center height={330} borderRadius={28} overflow="hidden" bg="$greenTint">
           <BrandMark size={104} />
         </Center>
@@ -82,7 +84,11 @@ export function Onboarding() {
         )}
       </VStack>
 
-      <VStack px={16} pb={32} gap="$3.5" alignItems="center">
+      {/* Esta tela fica FORA do navegador (routes/index): nao ha tab bar nem
+          cabecalho reservando as bordas. Sem as insets, no Android de ponta a
+          ponta o "Entrar" nascia atras da barra de navegacao do celular e o
+          toque nao chegava (Andre, 05/10, no aparelho). */}
+      <VStack px={16} gap="$3.5" alignItems="center" style={{ paddingBottom: insets.bottom + 32 }} testID="onboarding-rodape">
         <Button title="Ver filas perto de mim" onPress={() => go("home")} testID="onboarding-start" />
         <HStack gap="$1.5" alignItems="center">
           <Text size="sm" color="$brandTextSecondary">

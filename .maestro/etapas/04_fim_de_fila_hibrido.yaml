@@ -12,9 +12,10 @@ appId: ${APP_ID}
 - assertVisible:
     id: "second-door-schedule"
     label: "04.03 · vê second-door-schedule"
-- assertVisible:
+# Na escolha do servico, nenhum aviso de multa (DEC-1; Andre, 05/10).
+- assertNotVisible:
     id: "regra-da-multa"
-    label: "04.04 · vê regra-da-multa"
+    label: "04.04 · não vê regra-da-multa"
 # O agendar saiu do "Mais opcoes": la sobra so a troca.
 - tapOn:
     id: "more-options"

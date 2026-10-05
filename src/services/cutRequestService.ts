@@ -10,6 +10,8 @@ export interface CreateCutRequest {
   professionalId: string;
   establishmentId: string;
   serviceItemIds: string[];
+  /** Dia e horario desejados (S26), ISO-8601 com fuso. Ausente = "assim que abrir"; no passado = 422. */
+  desiredTime?: string;
 }
 
 export interface CutRequestResponse {
@@ -22,11 +24,14 @@ export interface CutRequestResponse {
   expires_at: string;
   created_at: string;
   resulting_attendance_id: string | null;
+  /** O horario pedido, ou null quando foi "assim que abrir". */
+  desired_time?: string | null;
 }
 
 export const cutRequestService = {
   // Erros: 409 CUT_REQUEST_NOT_ALLOWED (loja aberta agora — entrar via fila normal),
-  // 422 SERVICE_ITEM_NOT_OF_PROFESSIONAL, 404, 401.
+  // 422 SERVICE_ITEM_NOT_OF_PROFESSIONAL, 422 VALIDATION_ERROR com
+  // fieldErrors.desiredTime (horario no passado), 404, 401.
   create(data: CreateCutRequest, accessToken: string) {
     return api.post<CutRequestResponse>('/attendances/cut-requests', data, {
       headers: { Authorization: `Bearer ${accessToken}` },

@@ -18,17 +18,20 @@ export function deviceDeletePath(token: string): string {
 }
 
 // Roteia o toque na notificação pelo `data.type` que o backend manda no push.
-// No app-cliente os tipos conhecidos levam para a aba Atendimentos (fila ao vivo +
-// agendamentos); tipo desconhecido/ausente => null (não navega).
-export function notificationRoute(data: unknown): string | null {
+// "É quase a sua vez!" (QUEUE_NEXT_IN_LINE) leva à própria fila (Andre, 05/10:
+// o toque abria a Home); os outros tipos conhecidos, à aba Atendimentos (fila
+// ao vivo + agendamentos); tipo desconhecido/ausente => null (não navega).
+export type RotaDaNotificacao = 'fila' | 'attendances';
+
+export function notificationRoute(data: unknown): RotaDaNotificacao | null {
   const type = (data as { type?: unknown } | null | undefined)?.type;
   if (typeof type !== 'string') return null;
+  if (type === 'QUEUE_NEXT_IN_LINE') return 'fila';
   const known =
     type === 'ATTENDANCE_STARTED' ||
     type === 'ATTENDANCE_FINISHED' ||
     type === 'ATTENDANCE_PROMOTED' ||
     type === 'ATTENDANCE_CANCELLED' ||
-    type === 'QUEUE_NEXT_IN_LINE' ||
     type.startsWith('CUT_');
   return known ? 'attendances' : null;
 }
