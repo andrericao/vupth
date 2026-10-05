@@ -1,0 +1,40 @@
+# Etapa avulsa 05 (bateria-nao-para): roda num maestro test proprio.
+# 05 comeca na escolha do servico, com o servico marcado.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "05"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "05.P0 · prepara a etapa"
+- runFlow:
+    file: ../apoio/abrir_a_loja.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "05.L1 · abre a loja de teste"
+- runFlow:
+    file: ../apoio/escolher_servico.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "05.L2 · escolhe o serviço"
+- runFlow:
+    file: ../etapas/05_entra_e_sai_com_multa.yaml
+    label: "05.E1 · roda 05_entra_e_sai_com_multa"

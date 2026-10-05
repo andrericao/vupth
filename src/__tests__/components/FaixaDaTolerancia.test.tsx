@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import { act } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
@@ -36,5 +37,12 @@ describe('FaixaDaTolerancia', () => {
   it('horário já vencido não aparece', () => {
     const { queryByTestId } = renderWithProviders(<FaixaDaTolerancia ate={Date.now() - 1000} />);
     expect(queryByTestId('faixa-da-tolerancia')).toBeNull();
+  });
+
+  it('contraste: fundo branco, nao o forest translucido que sumia na tela verde da fila', () => {
+    jest.useFakeTimers({ now: new Date(2026, 8, 26, 14, 30) });
+    const { getByTestId } = renderWithProviders(<FaixaDaTolerancia ate={Date.now() + 60000} />);
+    const fundo = StyleSheet.flatten(getByTestId('faixa-da-tolerancia').props.style)?.backgroundColor;
+    expect(fundo).toBe('#FFFFFF');
   });
 });

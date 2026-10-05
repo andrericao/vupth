@@ -14,6 +14,7 @@ import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Copy } fro
 import { copiarTexto } from "@utils/copiar";
 import { FotoAmpliada } from "@components/FotoAmpliada";
 import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
+import { textoDeDivulgacao } from "@domain/divulgacao";
 import { API_ENV } from "@services/api";
 
 import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
@@ -57,8 +58,11 @@ function ProfessionalRow({
   fora,
   onPress,
   onVerFoto,
+  onInfo,
 }: {
   professional: ProfessionalWithQueue;
+  /** A ⓘ abre "Informacoes do profissional" (foto, servicos, telefone). */
+  onInfo: () => void;
   /** Tocar na foto abre em tela cheia (so quando ha foto). */
   onVerFoto?: (uri: string) => void;
   /** Loja fechada: ninguem esta sendo atendido, entao a linha nao pode falar
@@ -161,6 +165,15 @@ function ProfessionalRow({
               </HStack>
             </HStack>
           </VStack>
+          <TouchableOpacity
+            onPress={onInfo}
+            accessibilityRole="button"
+            accessibilityLabel={`Informações de ${professional.name}`}
+            testID={`info-${professional.id}`}
+            hitSlop={8}
+          >
+            <Info size={18} color="#163300" />
+          </TouchableOpacity>
           <ChevronRight size={18} color="#454745" />
         </HStack>
       </Box>
@@ -217,7 +230,6 @@ export function EstablishmentDetail() {
       profissionalFora: fora,
       soAgenda: ehSoAgenda(prof),
       queueCount: prof?.queue_count ?? 0,
-      contactPhone: prof?.contact_phone ?? null,
     });
   }
 
@@ -304,7 +316,7 @@ export function EstablishmentDetail() {
       Alert.alert("Link copiado", "Cole onde quiser para indicar esta loja.");
       return;
     }
-    Share.share({ message: link }).catch(() => {});
+    Share.share({ message: textoDeDivulgacao({ loja: establishment!.name, link }) }).catch(() => {});
   }
   // Um so botao de favorito pros dois ramos (com foto e sem): antes cada ramo
   // desenhava o proprio, e eles ja tinham saido com tamanhos diferentes.
@@ -548,6 +560,13 @@ export function EstablishmentDetail() {
               fora={section.key === "fora"}
               onPress={() => handleSelectProfessional(item.id)}
               onVerFoto={setFotoAmpliada}
+              onInfo={() =>
+                navigation.navigate("professionalInfo", {
+                  professionalId: item.id,
+                  establishmentId,
+                  professionalName: item.name,
+                })
+              }
             />
           )}
           ListEmptyComponent={

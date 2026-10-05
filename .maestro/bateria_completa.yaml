@@ -2,8 +2,8 @@
 # BATERIA COMPLETA do client — Maestro, no APK de PREVIEW, contra o STAGING
 # (Render). Mesmo formato da bateria do vupth-partner.
 #
-#   bash .maestro/bateria.sh     # prepara, acha o commit, roda e restaura
-#   (logs e prints de cada rodada em .maestro/logs/<data>)
+#   maestro test .maestro/bateria_completa.yaml   # o roteiro unico, a mao
+# A bateria.sh roda as etapas de avulsas/, cada uma sozinha (bateria-nao-para).
 #
 # Cada rodada cria contas e uma loja NOVAS (sufixo = hora da rodada), entao
 # pode repetir a vontade. A loja nao vem do app do Partner: e montada pela API

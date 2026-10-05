@@ -1,0 +1,31 @@
+# Bateria conjunta: o profissional liga o "so agenda" no Partner e o Client, na
+# escolha do servico, so oferece Agendar — sem Entrar na fila (so-agenda).
+# Comeca na tela da loja. env: EMAIL_PROF, PROF_ID, SERVICO_ID
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../apoio/abrir_partner.yaml
+    label: "19.01 · abre o Partner como o profissional"
+- runFlow:
+    file: ../../../vupth-partner/.maestro/conjunta/prof_so_agenda.yaml
+    env:
+      APP_ID: com.vupth.partner.preview
+      MODO: "AGENDA_ONLY"
+    label: "19.02 · no Partner, liga o só agenda"
+- launchApp:
+    appId: ${APP_ID}
+    label: "19.03 · volta ao Client (sem limpar)"
+- runFlow:
+    file: ../apoio/escolher_servico.yaml
+    label: "19.04 · escolhe o serviço"
+- extendedWaitUntil:
+    visible:
+      id: "primary-schedule"
+    timeout: 60000
+    label: "19.05 · a ação é Agendar"
+- assertNotVisible:
+    id: "primary-queue"
+    label: "19.06 · não vê Entrar na fila"
+- assertVisible:
+    id: "so-agenda"
+    label: "19.07 · vê o aviso de só agenda"

@@ -1,0 +1,8 @@
+# Print para o olho do Andre (bateria-nao-para): o que o Maestro nao confere
+# sozinho (um layout, uma cor). A bateria.sh junta os prints em
+# logs/<data>/para-o-andre/ e as linhas em para-o-andre.txt.
+# Entradas: NOME (curto, sem espaco), O_QUE (o que olhar no print)
+appId: ${APP_ID}
+---
+- takeScreenshot: para-o-andre_${NOME}
+- evalScript: "${console.log('PARA-O-ANDRE: ' + NOME + ' — ' + O_QUE)}"

@@ -1,0 +1,22 @@
+# Etapa avulsa 17 (maestro-maximo): roda num maestro test proprio.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "17"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "17.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/17_lista_de_lojas.yaml
+    env:
+      LOJA_ID: ${output.LOJA_ID}
+      PROF_ID: ${output.PROF_ID}
+    label: "17.E1 · roda 17_lista_de_lojas"

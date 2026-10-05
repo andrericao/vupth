@@ -12,11 +12,35 @@ O `bateria.sh` chama o `setup.sh` (celular, APK, corretor e autofill, acorda o
 staging), acha o `COMMIT` esperado sozinho (o último da `origin/dev`), roda o
 roteiro e, no fim — verde ou não —, o `restaurar.sh`.
 
+**Uma etapa não para as outras (bateria-nao-para, 05/10).** Cada etapa de
+`avulsas/NN_*.yaml` roda num `maestro test` próprio e prepara o estado dela
+pela API (`apoio/preparo.yaml`: loja, cliente, fila fechada), com contas
+próprias (TAG + número da etapa). Se uma falha, ela fica no relatório e a
+próxima roda. Só a `00_atualizacao` para tudo: ela entra, toca em "Verificar atualização" (Perfil → Versão do app) e confere o commit; as etapas logadas fazem o mesmo no preparo, em vez de fechar e abrir o app (fatia-de-atualizacao). Onde a API não cria o estado,
+a avulsa roda antes a etapa de que depende (a 06 roda a 05; a 11, a 10). Uma
+etapa só: `ETAPAS="05 06" bash .maestro/bateria.sh`. O `bateria_completa.yaml`
+segue como roteiro único, para rodar à mão com `maestro test`.
+
+**Conjunta (bateria-conjunta, 05/10).** As etapas 18, 19, 21 e 22 abrem o
+Partner no mesmo celular e conferem no Client: o tempo do serviço novo (18), o
+só agenda (19), o atraso marcado (21) e o atendimento finalizado e avaliado (22). Os subfluxos são os do Partner, lidos do clone ao lado
+(`../vupth-partner/.maestro/conjunta`). Sem esse clone ou sem o APK do Partner,
+elas aparecem como ⏭.
+
+**Pula as aprovadas (bateria-pula-aprovados, 05/10).** A etapa verde grava
+`NN <commit>` em `aprovados.txt` (fora do git); no mesmo commit, a próxima
+rodada a pula. `bash .maestro/bateria.sh --completa` roda tudo de novo.
+
+**Para o Andre (05/10).** O que só o olho confere: a etapa chama
+`apoio/para_o_andre.yaml` (NOME, O_QUE) e o print vai para
+`logs/<data>/para-o-andre/`, com a linha do que olhar em `para-o-andre.txt`.
+Rodada verde com prints para o Andre guarda só essa pasta.
+
 **Os logs ficam na pasta (03/10).** Cada rodada grava o `console.txt`, o
 `maestro.log`, os prints e o `falhou_em` (o passo `NN.MM` que falhou) em
 `.maestro/logs/<data>/`, no `.gitignore` — a equipe lê o erro direto dali.
-Rodada verde não guarda nada; os logs de uma falha somem sozinhos quando uma
-rodada seguinte passa daquele passo.
+Rodada verde não guarda nada; rodada vermelha apaga as antigas e fica só a
+dela — a mesma regra do Partner (limpar-logs, 05/10).
 
 **A versão antes de tudo (03/10).** O app mostra o commit do JS que roda no
 fim da versão — no Perfil do visitante e no rodapé das Boas-vindas e do Entrar (`Versão 1.0.3 · 03/10/2026 · c65338e7`). A 01.07

@@ -1,0 +1,45 @@
+# A fatia de atualizacao (Andre, 05/10): em vez de fechar e abrir o app ate o
+# OTA valer, o cliente logado vai em Perfil -> Versao do app e toca em
+# "Verificar atualizacao". Se baixou, o OK reinicia o app no OTA novo. No fim
+# confere o commit na linha da versao (para a etapa se nao bater).
+#
+# Comeca logado, em qualquer tela com a barra de abas. Termina na tela Sistema.
+# Entrada: COMMIT (a bateria.sh o passa)
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Perfil"
+- scrollUntilVisible:
+    element:
+      text: "Versão do app"
+- tapOn:
+    text: "Versão do app"
+- tapOn:
+    id: "check-update"
+- extendedWaitUntil:
+    visible: "(Atualização baixada|Tudo certo|Não foi possível verificar)"
+    timeout: 60000
+# "Atualização baixada": o OK chama o reloadAsync e o app recomeca no Inicio.
+- runFlow:
+    when:
+      visible: "Atualização baixada"
+    commands:
+      - tapOn:
+          id: "dialogo-botao-0"
+      - runFlow:
+          file: esperar_negando.yaml
+          env:
+            ALVO: "busca-home"
+      - tapOn:
+          text: "Perfil"
+      - scrollUntilVisible:
+          element:
+            text: "Versão do app"
+      - tapOn:
+          text: "Versão do app"
+- runFlow:
+    file: fechar_aviso.yaml
+- copyTextFrom:
+    id: "version-line"
+- runScript:
+    file: ../scripts/confere_versao.js

@@ -24,8 +24,11 @@ export interface PedidoDeCorte {
   establishmentName: string;
   /** ms — quando o pedido foi criado. */
   criadoEm: number;
-  /** ms — o `expires_at` do servidor (5 min depois da criacao). */
-  expiraEm: number;
+  /**
+   * ms — o `expires_at` do servidor (5 min depois da criacao). `null` = pedido
+   * para outro dia (DEC-27, Backend d8039b5): vale ate o profissional decidir.
+   */
+  expiraEm: number | null;
 }
 
 /** O timer do servidor nega no prazo; a folga cobre relogio e poll atrasados. */
@@ -50,7 +53,7 @@ export function desfechoDoPedido(
     (a) => a.professionalId === pedido.professionalId && estaAtivo(a.status),
   );
   if (atendimento) return { tipo: 'aceito', atendimento };
-  if (agora > pedido.expiraEm + FOLGA_DO_PRAZO_MS) return { tipo: 'sem_resposta' };
+  if (pedido.expiraEm != null && agora > pedido.expiraEm + FOLGA_DO_PRAZO_MS) return { tipo: 'sem_resposta' };
   return { tipo: 'aguardando' };
 }
 
@@ -61,7 +64,9 @@ export function pedidoDaResposta(
   agora: number,
 ): PedidoDeCorte {
   const criadoEm = Date.parse(resposta.created_at ?? '') || agora;
-  // Sem `expires_at` legivel, vale o contrato: 5 minutos.
+  // `expires_at: null` = pedido para outro dia, sem prazo (DEC-27). Sem o campo
+  // (backend anterior) ou ilegivel, vale o contrato antigo: 5 minutos.
+  if (resposta.expires_at === null) return { id: resposta.id, ...contexto, criadoEm, expiraEm: null };
   const expiraEm = Date.parse(resposta.expires_at ?? '') || criadoEm + 5 * 60_000;
   return { id: resposta.id, ...contexto, criadoEm, expiraEm };
 }

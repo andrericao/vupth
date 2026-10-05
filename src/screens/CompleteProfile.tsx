@@ -54,7 +54,8 @@ export function CompleteProfile() {
       navigation.reset({ index: 0, routes: [{ name: "home" }] });
       return;
     }
-    navigation.replace(destino.rota as never, destino.params as never);
+    // Afrouxado: no v7 o `replace` tipado nao aceita a uniao de rotas.
+    (navigation.replace as (rota: string, params?: object) => void)(destino.rota, destino.params);
   }
 
   async function salvar() {

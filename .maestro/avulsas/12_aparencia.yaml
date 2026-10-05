@@ -1,0 +1,19 @@
+# Etapa avulsa 12 (bateria-nao-para): roda num maestro test proprio.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "12"
+      LOJA: "0"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "12.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/12_aparencia.yaml
+    label: "12.E1 · roda 12_aparencia"

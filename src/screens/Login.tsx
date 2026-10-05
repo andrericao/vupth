@@ -60,7 +60,8 @@ export function Login() {
       if (destino.tipo === "reset") {
         navigation.reset({ index: 0, routes: [{ name: "home" }] });
       } else {
-        navigation.replace(destino.rota as never, destino.params as never);
+        // Afrouxado: no v7 o `replace` tipado nao aceita a uniao de rotas.
+        (navigation.replace as (rota: string, params?: object) => void)(destino.rota, destino.params);
       }
     } catch (error) {
       const erro = erroDeAcesso(error, "Erro ao fazer login");
@@ -93,7 +94,7 @@ export function Login() {
       serviceItemIds: params.serviceItemIds,
       targetTime: params.targetTime,
       establishmentOpen: params.establishmentOpen,
-    });
+    }, { pop: true });
   }
 
   return (

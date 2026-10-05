@@ -1,0 +1,21 @@
+# Etapa avulsa 16 (maestro-maximo): roda num maestro test proprio.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "16"
+      LOJA: "0"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "16.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/16_conta.yaml
+    env:
+      TAG: ${output.TAG}
+    label: "16.E1 · roda 16_conta"

@@ -622,7 +622,9 @@ export function Home() {
               Aguardando {p.professionalName || "o profissional"} responder
             </Text>
             <Text fontFamily="$body" fontSize={fs(14)} color="$brandTextSecondary">
-              {p.establishmentName ? `${p.establishmentName} · ` : ""}resposta até {formatClockTime(new Date(p.expiraEm))}
+              {p.establishmentName ? `${p.establishmentName} · ` : ""}
+              {/* Pedido para outro dia (DEC-27): sem prazo — ele decide quando abrir a agenda. */}
+              {p.expiraEm != null ? `resposta até ${formatClockTime(new Date(p.expiraEm))}` : "o profissional responde quando abrir a agenda"}
             </Text>
           </VStack>
         </Box>

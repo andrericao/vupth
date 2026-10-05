@@ -1,0 +1,31 @@
+# Etapa avulsa 11 (bateria-nao-para): roda num maestro test proprio.
+# 11 reabre o app com o cliente na fila e confere que a politica da multa nao
+# volta — ela precisa ter sido vista antes, entao a 10 (pedido aceito) roda antes.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "11"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "1"
+    label: "11.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/10_pedido_de_corte.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "11.E1 · roda 10_pedido_de_corte"
+- runFlow:
+    file: ../etapas/11_reabrir_o_app.yaml
+    label: "11.E2 · roda 11_reabrir_o_app"
