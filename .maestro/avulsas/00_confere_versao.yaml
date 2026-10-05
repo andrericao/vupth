@@ -1,0 +1,17 @@
+# Etapa avulsa 00 (bateria-nao-para): roda num maestro test proprio.
+# So a versao: se o app nao roda o commit esperado, a bateria para aqui.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "00"
+      LOJA: "0"
+      CONTA: "0"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "00.P0 · prepara a etapa"

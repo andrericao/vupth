@@ -1,0 +1,30 @@
+# Entra com uma conta que ja existe, a partir do Perfil do visitante (o mesmo
+# caminho da 09.07–09.15). Termina logado, com as caixas fechadas.
+# Entrada: EMAIL_CLIENTE
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Perfil"
+- tapOn:
+    text: "Já tenho conta"
+- tapOn:
+    text: "E-mail"
+- inputText:
+    text: ${EMAIL_CLIENTE}
+- tapOn:
+    text: "Senha"
+- inputText:
+    text: ${SENHA}
+- hideKeyboard
+- tapOn:
+    id: "primary-login"
+- runFlow:
+    file: fechar_aviso.yaml
+- tapOn:
+    text: "Perfil"
+- scrollUntilVisible:
+    element:
+      text: "Sair da conta"
+    timeout: 30000
+- runFlow:
+    file: fechar_aviso.yaml

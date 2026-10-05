@@ -58,10 +58,11 @@ case "$SUPERVISAO" in
   0) echo "Sem supervisao." ;;
   1) echo "Supervisionada, so o Client." ;;
   2) echo "Supervisionada, Client e Partner. No segundo celular, o Partner (senha Teste@123):"
-     echo "   👤 conta do profissional: prop_c${TAG}@teste.com — Prof${TAG}, na Loja C${TAG}"
-     echo "      (a bateria cria a conta no comeco; entre depois do passo 00.04)"
-     echo "   👤 quando aparecer \"08.0A\": feche a fila do Prof${TAG} (ate 5 min)"
-     echo "   👤 quando aparecer \"10.0A\": aceite o pedido de corte do Cliente${TAG} (ate 5 min)" ;;
+     # Cada etapa tem a conta dela (TAG + numero da etapa); entre na conta
+     # quando a etapa comecar (depois do passo NN.P3).
+     echo "   👤 etapa 08: entre em prop_c${TAG}08@teste.com e, quando aparecer \"08.0A\", feche a fila (ate 5 min)"
+     echo "   👤 etapa 10: entre em prop_c${TAG}10@teste.com e, quando aparecer \"10.0A\", aceite o pedido (ate 5 min)"
+     echo "   👤 etapa 11: entre em prop_c${TAG}11@teste.com e, quando aparecer \"10.0A\", aceite o pedido (ate 5 min)" ;;
 esac
 echo ""
 
@@ -71,39 +72,76 @@ mkdir -p "$RODADA"
 echo "Logs desta rodada: ${RODADA#$REPO/}"
 echo ""
 
-maestro test \
-  -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
-  -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" \
-  --debug-output "$RODADA" --flatten-debug-output \
-  --test-output-dir "$RODADA" \
-  "$DIR/bateria_completa.yaml" 2>&1 | tee "$RODADA/console.txt"
-STATUS=${PIPESTATUS[0]}
+# bateria-nao-para (modelo do Partner): cada etapa de avulsas/ roda num
+# `maestro test` proprio e prepara o estado dela pela API. Se uma falha, ela
+# fica registrada e a proxima roda. So a 00 (a versao) para tudo: com o
+# commit errado no aparelho, nenhuma etapa diz nada.
+#
+# Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
+ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12"}
 
-# O maestro.log tem uma linha "<label> RUNNING" quando o passo comeca e
-# "<label> COMPLETED" (ou SKIPPED) quando termina; a falha nao tem linha. O
-# passo que falhou e o ULTIMO "NN.MM · ..." que comecou e nao terminou — o mais
-# de dentro (a etapa que o chamou tambem nao terminou, mas comecou antes).
-LOG="$RODADA/maestro.log"
-passos() { grep -oP 'runCommands\$lambda\$\d+: \K\d\d\.[\dA-Z]{2} · .*(?= ('"$1"')$)' "$LOG" 2>/dev/null; }
+# O passo NN.MM que falhou: o ULTIMO "NN.MM · ..." que comecou e nao terminou
+# no maestro.log da etapa (o mais de dentro).
+passos() { grep -oP 'runCommands\$lambda\$\d+: \K\d\d\.[\dA-Z]{2} · .*(?= ('"$2"')$)' "$1/maestro.log" 2>/dev/null; }
+falhou_em() { passos "$1" RUNNING | grep -vxFf <(passos "$1" 'COMPLETED|SKIPPED') | tail -1; }
 
-FALHOU=""
-if [ "$STATUS" -ne 0 ]; then
-  FALHOU=$(passos RUNNING | grep -vxFf <(passos 'COMPLETED|SKIPPED') | tail -1)
+# Roda uma etapa na pasta dela; devolve o status do maestro.
+rodar() {
+  local nome="$1" pasta="$RODADA/$1"
+  mkdir -p "$pasta"
+  echo "=== $nome ==="
+  maestro test \
+    -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
+    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" \
+    --debug-output "$pasta" --flatten-debug-output \
+    --test-output-dir "$pasta" \
+    "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"
+  return "${PIPESTATUS[0]}"
+}
+
+# O print da falha com o nome do passo (DEC-16), na pasta da rodada.
+print_da_falha() {
+  local pasta="$1" passo="$2" print nome
+  print=$(ls -t "$pasta"/screenshot-❌-*.png 2>/dev/null | head -1)
+  [ -n "$print" ] || return 0
+  nome=$(printf '%s' "${passo:-00.00 · antes do primeiro passo}" | iconv -f utf-8 -t ascii//TRANSLIT 2>/dev/null |
+    tr '[:upper:]' '[:lower:]' | sed -E 's/^([0-9]{2}\.[0-9a-z]{2})[^a-z0-9]*/\1_/; s/[^a-z0-9._]+/-/g; s/-+$//')
+  cp "$print" "$RODADA/FALHA_${nome}.png"
+  echo "   print: ${RODADA#$REPO/}/FALHA_${nome}.png"
+}
+
+STATUS=0
+: > "$RODADA/relatorio.txt"
+if ! rodar 00_confere_versao; then
+  PASSO=$(falhou_em "$RODADA/00_confere_versao")
+  echo "❌ 00 · versão — ${PASSO:-antes do primeiro passo}" | tee -a "$RODADA/relatorio.txt"
+  print_da_falha "$RODADA/00_confere_versao" "$PASSO"
+  echo "A versão no aparelho não é a $COMMIT: nenhuma etapa rodou."
+  STATUS=1
+else
+  echo "✅ 00 · versão" >> "$RODADA/relatorio.txt"
+  for n in $ETAPAS; do
+    arquivo=$(basename "$(ls "$DIR"/avulsas/"$n"_*.yaml 2>/dev/null | head -1)" .yaml)
+    if [ -z "$arquivo" ]; then
+      echo "⏭  $n (não existe em avulsas/)" >> "$RODADA/relatorio.txt"
+      continue
+    fi
+    if rodar "$arquivo"; then
+      echo "✅ $arquivo" >> "$RODADA/relatorio.txt"
+      rm -rf "${RODADA:?}/$arquivo"   # verde: a pasta da etapa nao guarda nada
+    else
+      STATUS=1
+      PASSO=$(falhou_em "$RODADA/$arquivo")
+      echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo}" >> "$RODADA/relatorio.txt"
+      echo "${PASSO:-}" > "$RODADA/$arquivo/falhou_em"
+      print_da_falha "$RODADA/$arquivo" "$PASSO"
+    fi
+  done
 fi
 
-# Relatorio etapa a etapa (bateria-nao-para, 03/10): cada "00.NN · ..." do
-# roteiro com ✅ (terminou), ❌ (comecou e nao terminou) ou ⏭ (nao rodou) —
-# mesmo parando numa altura, da para saber o que passou.
-relatorio() {
-  grep -oP 'label: "\K00\.\d\d · [^"]*' "$DIR/bateria_completa.yaml" | while IFS= read -r etapa; do
-    if passos 'COMPLETED|SKIPPED' | grep -qxF "$etapa"; then echo "✅ $etapa"
-    elif passos RUNNING | grep -qxF "$etapa"; then echo "❌ $etapa"
-    else echo "⏭  $etapa (nao rodou)"; fi
-  done
-}
 echo ""
 echo "=== Relatorio da rodada ==="
-relatorio | tee "$RODADA/relatorio.txt"
+cat "$RODADA/relatorio.txt"
 
 # Rodadas antigas (limpar-logs, a regra do Partner): ja foram lidas — a
 # rodada desta vez e o estado atual. Verde ou vermelha, so ela pode ficar.
@@ -117,17 +155,6 @@ if [ "$STATUS" -eq 0 ]; then
   rm -rf "$RODADA"
   echo "Bateria verde — nenhum log guardado."
 else
-  echo "${FALHOU:-sem passo NN.MM (falhou antes da 00.01)}" > "$RODADA/falhou_em"
-  echo "Bateria parou em: ${FALHOU:-antes da 00.01}"
-  # print-da-falha (DEC-16): o print da falha com o nome do passo, para o Andre
-  # mandar e a equipe achar o log — ex.: FALHA_05.05_espera-o-aviso-da-politica-da-multa.png
-  PRINT=$(ls -t "$RODADA"/screenshot-❌-*.png 2>/dev/null | head -1)
-  if [ -n "$PRINT" ]; then
-    NOME=$(printf '%s' "${FALHOU:-00.00 · antes da 00.01}" | iconv -f utf-8 -t ascii//TRANSLIT 2>/dev/null |
-      tr '[:upper:]' '[:lower:]' | sed -E 's/^([0-9]{2}\.[0-9a-z]{2})[^a-z0-9]*/\1_/; s/[^a-z0-9._]+/-/g; s/-+$//')
-    cp "$PRINT" "$RODADA/FALHA_${NOME}.png"
-    echo "Print da falha: ${RODADA#$REPO/}/FALHA_${NOME}.png"
-  fi
   echo "Logs e prints em: ${RODADA#$REPO/}"
 fi
 exit "$STATUS"

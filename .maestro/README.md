@@ -12,6 +12,15 @@ O `bateria.sh` chama o `setup.sh` (celular, APK, corretor e autofill, acorda o
 staging), acha o `COMMIT` esperado sozinho (o último da `origin/dev`), roda o
 roteiro e, no fim — verde ou não —, o `restaurar.sh`.
 
+**Uma etapa não para as outras (bateria-nao-para, 05/10).** Cada etapa de
+`avulsas/NN_*.yaml` roda num `maestro test` próprio e prepara o estado dela
+pela API (`apoio/preparo.yaml`: loja, cliente, fila fechada), com contas
+próprias (TAG + número da etapa). Se uma falha, ela fica no relatório e a
+próxima roda. Só a `00_confere_versao` para tudo. Onde a API não cria o estado,
+a avulsa roda antes a etapa de que depende (a 06 roda a 05; a 11, a 10). Uma
+etapa só: `ETAPAS="05 06" bash .maestro/bateria.sh`. O `bateria_completa.yaml`
+segue como roteiro único, para rodar à mão com `maestro test`.
+
 **Os logs ficam na pasta (03/10).** Cada rodada grava o `console.txt`, o
 `maestro.log`, os prints e o `falhou_em` (o passo `NN.MM` que falhou) em
 `.maestro/logs/<data>/`, no `.gitignore` — a equipe lê o erro direto dali.
