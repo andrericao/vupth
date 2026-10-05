@@ -101,11 +101,12 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
     );
   });
 
-  it('com serviço escolhido, o resumo diz a regra da multa ANTES de entrar (CDC)', async () => {
+  it('com serviço escolhido, o resumo não fala de multa nem da saída sem custo (DEC-1, Andre 05/10)', async () => {
     useAuthStore.setState({ isAuthenticated: true });
-    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    const { queryByTestId, queryByText, findByTestId } = renderWithProviders(<ServiceSelection />);
     fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
-    expect(getByTestId('regra-da-multa')).toBeTruthy();
+    expect(queryByTestId('regra-da-multa')).toBeNull();
+    expect(queryByText(/multa|sem custo/i)).toBeNull();
   });
 
   it('LOGADO: confirmar vai direto pra queueStatus', async () => {

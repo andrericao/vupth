@@ -31,7 +31,6 @@ import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
-import { regraDaMulta } from "@domain/queue/saidaDaFila";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
 import { contatoDoProfissional } from "@domain/professional/contato";
@@ -517,7 +516,8 @@ export function ServiceSelection() {
                 )}
                 {/* DEC-1 (Andre, 01/10): a multa nao aparece na escolha — so no
                     total, numa linha somada ao valor, com o link para a explicacao
-                    (cada multa: motivo, quem, quando). */}
+                    (cada multa: motivo, quem, quando). Nem a regra da saida
+                    (Andre, 05/10): ela fica nos Termos e nos avisos da fila. */}
                 {multas.length > 0 && (
                   <HStack justifyContent="space-between" alignItems="center" testID="multas-pendentes">
                     <TouchableOpacity onPress={() => setShowMultas(true)} testID="ver-multas">
@@ -527,13 +527,6 @@ export function ServiceSelection() {
                     </TouchableOpacity>
                     <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">+ {reais(conta.totalMultas)}</Text>
                   </HStack>
-                )}
-                {/* A regra da multa ANTES do toque que coloca na fila (CDC).
-                    Ate 25/09 o app so falava de multa na hora de sair. */}
-                {vaiPraFila && (
-                  <Text size="xs" color="#FFFFFFB3" testID="regra-da-multa">
-                    {regraDaMulta()}
-                  </Text>
                 )}
               </VStack>
             )}
