@@ -61,6 +61,9 @@
       }
     }
   },
+  "engines": {
+    "node": ">=20.19.4"
+  },
   "dependencies": {
     "@gluestack-style/react": "^1.0.57",
     "@gluestack-ui/config": "^1.1.20",
