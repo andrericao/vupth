@@ -272,7 +272,7 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       expect(queryByTestId('regra-da-multa')).toBeNull();
     });
 
-    it('servidor recusando o corte com a loja aberta: diz que o profissional está fora — não manda entrar na fila', async () => {
+    it('backend anterior recusando o corte (409): diz que ele não recebe pedidos agora — não manda entrar na fila (DEC-27)', async () => {
       mockCreateCut.mockRejectedValue(
         Object.assign(new Error('409'), { response: { status: 409, data: { code: 'CUT_REQUEST_NOT_ALLOWED' } } }),
       );
@@ -285,10 +285,32 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
         fireEvent.press(getByTestId('corte-assim-que-abrir'));
       });
       const [, mensagem] = alerta.mock.calls[0] as [string, string];
-      expect(mensagem).toMatch(/está fora agora/);
-      expect(mensagem).not.toMatch(/entrar na fila normalmente/);
+      expect(mensagem).toMatch(/não está recebendo pedidos agora/);
+      expect(mensagem).not.toMatch(/entrar na fila/);
       alerta.mockRestore();
     });
+  });
+
+  // DEC-27 (Backend d8039b5): pedido para outro dia vem sem prazo (expires_at nulo).
+  it('pedido aceito pelo servidor sem prazo: avisa que ele responde quando abrir a agenda', async () => {
+    setRouteParams({ ...OPEN_PARAMS, profissionalFora: true });
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    mockGetServices.mockResolvedValue({
+      data: [{ id: 's1', customName: 'Corte', price: 30, weeklyAverageDurationInMinutes: 30 }],
+    });
+    mockCreateCut.mockResolvedValue({ data: { id: 'cr1', created_at: null, expires_at: null } });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent.press(getByTestId('more-options'));
+    fireEvent.press(getByTestId('more-option-cut'));
+    await act(async () => {
+      fireEvent.press(getByTestId('corte-assim-que-abrir'));
+    });
+    const [, mensagem] = alerta.mock.calls[0] as [string, string];
+    expect(mensagem).toMatch(/responde quando abrir a agenda/);
+    expect(mensagem).not.toMatch(/5 minutos/);
+    alerta.mockRestore();
   });
 
   describe('profissional "só agenda" (Backend 8e6c00f)', () => {

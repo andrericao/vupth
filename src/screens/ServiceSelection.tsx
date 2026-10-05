@@ -265,12 +265,16 @@ export function ServiceSelection() {
       );
       // Guarda o pedido: e o que deixa o app avisar a RESPOSTA (usePedidoDeCorte).
       // Sem isto o cliente nunca sabia se foi aceito (teste de 25/09).
-      await guardarPedidoDeCorte(
-        pedidoDaResposta(pedido, { professionalId, professionalName, establishmentId, establishmentName }, agora()),
-      );
+      const guardado = pedidoDaResposta(pedido, { professionalId, professionalName, establishmentId, establishmentName }, agora());
+      await guardarPedidoDeCorte(guardado);
+      // Pedido para outro dia (DEC-27): sem prazo — o profissional decide quando
+      // abrir a agenda daquele dia.
+      const prazo = guardado.expiraEm != null
+        ? "O profissional tem 5 minutos para responder."
+        : "O profissional responde quando abrir a agenda desse dia.";
       Alert.alert(
         "Pedido enviado! ⏳",
-        `${horario ? `Você pediu para ${quandoDoPedido(horario, agora())}. ` : ""}O profissional tem 5 minutos para responder. A resposta aparece aqui no app — o pedido fica no Início enquanto isso.`,
+        `${horario ? `Você pediu para ${quandoDoPedido(horario, agora())}. ` : ""}${prazo} A resposta aparece aqui no app — o pedido fica no Início enquanto isso.`,
       );
       navigation.navigate("home", undefined, { pop: true });
     } catch (error: any) {
@@ -280,12 +284,9 @@ export function ServiceSelection() {
         : code === "PROFESSIONAL_AGENDA_ONLY"
           ? MENSAGEM_SO_AGENDA
           : code === "CUT_REQUEST_NOT_ALLOWED"
-          ? profissionalFora
-            ? // O servidor ainda recusa corte com a loja aberta (pedido de 07/09,
-              // reforcado em 24/09). Dizer "entre na fila" aqui mandaria a
-              // pessoa para a fila de quem nao esta atendendo.
-              `${professionalName || "Este profissional"} está fora agora e ainda não recebe pedidos por aqui. Escolha alguém que está trabalhando, ou agende.`
-            : "A loja está aberta agora — dá para entrar na fila normalmente."
+          ? // Desde o Backend d8039b5 (DEC-27) o servidor aceita o pedido com o
+            // profissional em Fora; o codigo so volta de backend anterior.
+            `${professionalName || "Este profissional"} não está recebendo pedidos agora. Escolha outro horário, ou agende.`
           : error.response?.data?.message || "Erro ao enviar o pedido de corte";
       Alert.alert("Erro", msg);
     } finally {
@@ -311,9 +312,10 @@ export function ServiceSelection() {
       key: "cut",
       icon: Scissors,
       title: isRequestingCut ? "Enviando pedido..." : "Solicitar corte",
+      // DEC-27: o cliente sempre pode pedir; quem decide e o profissional.
       description: profissionalFora
-        ? "A fila está fechada — peça o corte e o profissional tem 5 minutos para responder."
-        : "A loja está fechada — o profissional tem 5 minutos para responder.",
+        ? "A fila está fechada — peça o corte e o profissional decide."
+        : "A loja está fechada — peça o corte e o profissional decide.",
       disabled: isRequestingCut,
       onPress: abrirPedidoDeCorte,
     },

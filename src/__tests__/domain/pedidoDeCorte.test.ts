@@ -35,12 +35,12 @@ describe('o desfecho do pedido de corte', () => {
   });
 
   it('passado o prazo e a folga sem atendimento: sem resposta', () => {
-    expect(desfechoDoPedido(pedido, [], pedido.expiraEm + FOLGA_DO_PRAZO_MS - 1).tipo).toBe('aguardando');
-    expect(desfechoDoPedido(pedido, [], pedido.expiraEm + FOLGA_DO_PRAZO_MS + 1).tipo).toBe('sem_resposta');
+    expect(desfechoDoPedido(pedido, [], pedido.expiraEm! + FOLGA_DO_PRAZO_MS - 1).tipo).toBe('aguardando');
+    expect(desfechoDoPedido(pedido, [], pedido.expiraEm! + FOLGA_DO_PRAZO_MS + 1).tipo).toBe('sem_resposta');
   });
 
   it('o aceite ganha do prazo: chegou tarde, ainda é aceito', () => {
-    expect(desfechoDoPedido(pedido, [att({})], pedido.expiraEm + 10 * 60_000).tipo).toBe('aceito');
+    expect(desfechoDoPedido(pedido, [att({})], pedido.expiraEm! + 10 * 60_000).tipo).toBe('aceito');
   });
 });
 
@@ -57,8 +57,14 @@ describe('o pedido a partir da resposta do servidor', () => {
     expect(p.expiraEm).toBe(CRIADO + 5 * 60_000);
   });
 
-  it('sem datas legíveis, vale o contrato: 5 minutos a partir de agora', () => {
-    const p = pedidoDaResposta({ id: 'cr1', created_at: null, expires_at: null }, ctx, CRIADO);
+  it('sem expires_at (backend anterior), vale o contrato antigo: 5 minutos a partir de agora', () => {
+    const p = pedidoDaResposta({ id: 'cr1', created_at: null }, ctx, CRIADO);
     expect(p.expiraEm).toBe(CRIADO + 5 * 60_000);
+  });
+
+  it('expires_at nulo (DEC-27, pedido para outro dia): sem prazo, nunca vira "sem resposta"', () => {
+    const p = pedidoDaResposta({ id: 'cr1', created_at: null, expires_at: null }, ctx, CRIADO);
+    expect(p.expiraEm).toBeNull();
+    expect(desfechoDoPedido(p, [], CRIADO + 3 * 24 * 3_600_000).tipo).toBe('aguardando');
   });
 });
