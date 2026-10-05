@@ -1,7 +1,8 @@
 #!/bin/bash
 # A bateria do Client com UM comando (Andre, 03/10 — commit-sem-flag):
 #
-#   bash .maestro/bateria.sh
+#   bash .maestro/bateria.sh              # pula as etapas ja aprovadas neste commit
+#   bash .maestro/bateria.sh --completa   # roda todas
 #
 # Prepara o celular (setup.sh), acha sozinha o commit esperado (o ultimo da
 # branch da pasta no GitHub — a dev e o OTA do canal preview), roda o roteiro e devolve o
@@ -80,6 +81,30 @@ echo ""
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
 ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12"}
 
+# bateria-pula-aprovados (Andre, 05/10): a etapa verde grava a marca com o
+# commit em aprovados.txt (no .gitignore); a proxima rodada no MESMO commit a
+# pula. --completa roda tudo e recomeca as marcas.
+APROVADOS="$DIR/aprovados.txt"
+if [ "${1:-}" = "--completa" ]; then
+  rm -f "$APROVADOS"
+  echo "Completa: todas as etapas rodam."
+fi
+touch "$APROVADOS"
+aprovada() { grep -qxF "$1 $COMMIT" "$APROVADOS"; }
+aprovar() { grep -vE "^$1 " "$APROVADOS" > "$APROVADOS.tmp"; echo "$1 $COMMIT" >> "$APROVADOS.tmp"; mv "$APROVADOS.tmp" "$APROVADOS"; }
+
+# Os prints "para o Andre" (apoio/para_o_andre.yaml) e a linha do que olhar.
+PARA_O_ANDRE="$RODADA/para-o-andre"
+juntar_para_o_andre() {
+  local pasta="$1" achados
+  achados=$(find "$pasta" "$PWD" -maxdepth 2 -name 'para-o-andre_*.png' 2>/dev/null)
+  grep -q 'PARA-O-ANDRE:' "$pasta/console.txt" 2>/dev/null || [ -n "$achados" ] || return 0
+  mkdir -p "$PARA_O_ANDRE"
+  grep -oP 'PARA-O-ANDRE: \K.*' "$pasta/console.txt" >> "$PARA_O_ANDRE/para-o-andre.txt" 2>/dev/null
+  [ -n "$achados" ] && echo "$achados" | while IFS= read -r f; do mv "$f" "$PARA_O_ANDRE/"; done
+  return 0
+}
+
 # O passo NN.MM que falhou: o ULTIMO "NN.MM · ..." que comecou e nao terminou
 # no maestro.log da etapa (o mais de dentro).
 passos() { grep -oP 'runCommands\$lambda\$\d+: \K\d\d\.[\dA-Z]{2} · .*(?= ('"$2"')$)' "$1/maestro.log" 2>/dev/null; }
@@ -126,8 +151,16 @@ else
       echo "⏭  $n (não existe em avulsas/)" >> "$RODADA/relatorio.txt"
       continue
     fi
-    if rodar "$arquivo"; then
+    if aprovada "$n"; then
+      echo "⏭  $arquivo (aprovada no $COMMIT — --completa roda de novo)" >> "$RODADA/relatorio.txt"
+      continue
+    fi
+    rodar "$arquivo"
+    VOLTA=$?
+    juntar_para_o_andre "$RODADA/$arquivo"
+    if [ "$VOLTA" -eq 0 ]; then
       echo "✅ $arquivo" >> "$RODADA/relatorio.txt"
+      aprovar "$n"
       rm -rf "${RODADA:?}/$arquivo"   # verde: a pasta da etapa nao guarda nada
     else
       STATUS=1
@@ -151,9 +184,14 @@ for antiga in "$LOGS"/*/; do
 done
 
 echo ""
-if [ "$STATUS" -eq 0 ]; then
+if [ -d "$PARA_O_ANDRE" ]; then
+  echo "👀 Para o Andre olhar: ${PARA_O_ANDRE#$REPO/} (o que olhar em para-o-andre.txt)"
+fi
+if [ "$STATUS" -eq 0 ] && [ ! -d "$PARA_O_ANDRE" ]; then
   rm -rf "$RODADA"
   echo "Bateria verde — nenhum log guardado."
+elif [ "$STATUS" -eq 0 ]; then
+  echo "Bateria verde — fica só a pasta para-o-andre."
 else
   echo "Logs e prints em: ${RODADA#$REPO/}"
 fi

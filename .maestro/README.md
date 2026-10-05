@@ -21,6 +21,15 @@ a avulsa roda antes a etapa de que depende (a 06 roda a 05; a 11, a 10). Uma
 etapa só: `ETAPAS="05 06" bash .maestro/bateria.sh`. O `bateria_completa.yaml`
 segue como roteiro único, para rodar à mão com `maestro test`.
 
+**Pula as aprovadas (bateria-pula-aprovados, 05/10).** A etapa verde grava
+`NN <commit>` em `aprovados.txt` (fora do git); no mesmo commit, a próxima
+rodada a pula. `bash .maestro/bateria.sh --completa` roda tudo de novo.
+
+**Para o Andre (05/10).** O que só o olho confere: a etapa chama
+`apoio/para_o_andre.yaml` (NOME, O_QUE) e o print vai para
+`logs/<data>/para-o-andre/`, com a linha do que olhar em `para-o-andre.txt`.
+Rodada verde com prints para o Andre guarda só essa pasta.
+
 **Os logs ficam na pasta (03/10).** Cada rodada grava o `console.txt`, o
 `maestro.log`, os prints e o `falhou_em` (o passo `NN.MM` que falhou) em
 `.maestro/logs/<data>/`, no `.gitignore` — a equipe lê o erro direto dali.
