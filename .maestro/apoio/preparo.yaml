@@ -59,9 +59,10 @@ appId: ${APP_ID}
 # do sistema negada enquanto espera.
 - launchApp:
     clearState: true
+    # NOTIFICACOES "allow" so na etapa do push (push-na-bateria); as outras negam.
     permissions:
       location: deny
-      notifications: deny
+      notifications: "${typeof NOTIFICACOES !== 'undefined' && NOTIFICACOES ? NOTIFICACOES : 'deny'}"
     label: "${ETAPA}.P6 · abre o app limpo"
 - runFlow:
     file: esperar_negando.yaml
