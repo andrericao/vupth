@@ -23,6 +23,12 @@ type Props = {
   /** Visitante: o agendar passa pelo login (a selecao volta com ele). */
   onPrecisaLogin?: () => void;
   onAgendado?: () => void;
+  /**
+   * Pedido de corte com dia e horario (S26, Backend 36c4359): a mesma barra de
+   * encaixe, mas quem confirma e o dono da tela — o modal so devolve o horario.
+   * Com ele, o modal tambem oferece "Assim que abrir" (sem horario).
+   */
+  corte?: { onEscolher: (horario: Date | null) => void };
 };
 
 // "Agendar" = INTENCAO (Item ②). Escolhe o dia, ve a BARRA DE ENCAIXE daquele
@@ -30,7 +36,7 @@ type Props = {
 // incluir essa funcionalidade"). Os horarios vem da agenda publica do
 // profissional (piso da fila e reservados, anonimos) e do horario da loja.
 export function ScheduleModal({
-  visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado,
+  visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado, corte,
 }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -72,6 +78,11 @@ export function ScheduleModal({
 
   async function confirmar() {
     if (!horario || !professionalId) return;
+    if (corte) {
+      close();
+      corte.onEscolher(horario);
+      return;
+    }
     if (!accessToken) {
       close();
       onPrecisaLogin?.();
@@ -99,11 +110,26 @@ export function ScheduleModal({
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
         <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
-            Agendar
+            {corte ? "Solicitar corte" : "Agendar"}
           </Heading>
           <Text size="sm" color="$brandTextSecondary" mt="$1">
-            Escolha o dia e o horário.
+            {corte
+              ? "Para quando? O profissional tem 5 minutos para responder."
+              : "Escolha o dia e o horário."}
           </Text>
+
+          {corte && (
+            <Button
+              title="Assim que abrir"
+              variant="outline"
+              mt="$4"
+              onPress={() => {
+                close();
+                corte.onEscolher(null);
+              }}
+              testID="corte-assim-que-abrir"
+            />
+          )}
 
           <Box mt="$5">
             <DaySelector
@@ -148,7 +174,7 @@ export function ScheduleModal({
           )}
 
           <Button
-            title={enviando ? "Agendando..." : "Confirmar"}
+            title={enviando ? "Agendando..." : corte ? "Pedir neste horário" : "Confirmar"}
             mt="$5"
             isDisabled={horario == null || enviando}
             opacity={horario == null ? 0.5 : 1}

@@ -121,3 +121,45 @@ describe('ScheduleModal — barra de encaixe', () => {
     expect(props.onClose).toHaveBeenCalledTimes(1);
   });
 });
+
+// Pedido de corte com dia e horário (S26): a mesma barra, mas o modal só
+// devolve a escolha — quem pede o corte é a tela.
+describe('ScheduleModal — modo corte', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useAuthStore.setState({ accessToken: 'tk' });
+    (intentionsService.getPublicAgenda as jest.Mock).mockResolvedValue({ data: { frame: null, blocks: [] } });
+    (establishmentService.getHours as jest.Mock).mockResolvedValue({
+      data: { configured: true, weekly: [], exceptions: [], upcoming: [{ date: dataISO(amanha()), day: 'MONDAY', closed: false, opens: '09:00', closes: '11:00' }] },
+    });
+  });
+
+  it('"Assim que abrir" devolve null e fecha, sem agendar', async () => {
+    const onEscolher = jest.fn();
+    const { getByTestId, getByText, props } = abrir({ corte: { onEscolher } });
+    await act(async () => {});
+    expect(getByText('Solicitar corte')).toBeTruthy();
+    fireEvent.press(getByTestId('corte-assim-que-abrir'));
+    expect(onEscolher).toHaveBeenCalledWith(null);
+    expect(props.onClose).toHaveBeenCalled();
+    expect(intentionsService.create).not.toHaveBeenCalled();
+  });
+
+  it('com dia e horário escolhidos, devolve o horário — sem criar intenção', async () => {
+    const onEscolher = jest.fn();
+    const { getAllByRole, findByTestId, getByTestId, getByText, props } = abrir({ corte: { onEscolher } });
+    await act(async () => {});
+    // O 1º botão é o "Assim que abrir"; depois vêm hoje e amanhã.
+    fireEvent.press(getAllByRole('button')[2]);
+    fireEvent.press(await findByTestId('horario-09:30'));
+    expect(getByText('Pedir neste horário')).toBeTruthy();
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    const [horario] = onEscolher.mock.calls[0] as [Date];
+    expect(horario.getHours()).toBe(9);
+    expect(horario.getMinutes()).toBe(30);
+    expect(props.onClose).toHaveBeenCalled();
+    expect(intentionsService.create).not.toHaveBeenCalled();
+  });
+});

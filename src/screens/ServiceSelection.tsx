@@ -30,6 +30,7 @@ import { useAuthStore } from "@stores/authStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
+import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
 import { regraDaMulta } from "@domain/queue/saidaDaFila";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
@@ -114,6 +115,8 @@ export function ServiceSelection() {
   const [showSchedule, setShowSchedule] = useState(false);
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [isRequestingCut, setIsRequestingCut] = useState(false);
+  // Pedido de corte com dia e horario (S26): o menu abre a escolha do horario.
+  const [showCorte, setShowCorte] = useState(false);
   const [isPublishingSwap, setIsPublishingSwap] = useState(false);
   // "Agora" ancorado na ABERTURA da tela: Date.now() no render e impuro
   // (react-hooks/purity) e faria a previsao pular a cada re-render. Mesmo
@@ -242,17 +245,29 @@ export function ServiceSelection() {
 
   // Fila fechada agora: "Solicitar corte" (BUG5 C2) — pedido sob aprovação com
   // validade de 5min. Visitante loga e volta pra cá com a seleção intacta.
-  async function handleRequestCut() {
+  // O menu so abre a escolha de quando; o pedido sai em handleRequestCut.
+  function abrirPedidoDeCorte() {
     if (selectedIds.length === 0 || isRequestingCut) return;
+    setShowMoreOptions(false);
     if (!isAuthenticated || !accessToken) {
-      setShowMoreOptions(false);
       goToLoginAndComeBack();
       return;
     }
+    setShowCorte(true);
+  }
+
+  // `horario` null = "assim que abrir" (o desiredTime nao vai).
+  async function handleRequestCut(horario: Date | null) {
+    if (selectedIds.length === 0 || isRequestingCut || !accessToken) return;
     setIsRequestingCut(true);
     try {
       const { data: pedido } = await cutRequestService.create(
-        { professionalId, establishmentId, serviceItemIds: selectedIds },
+        {
+          professionalId,
+          establishmentId,
+          serviceItemIds: selectedIds,
+          ...(horario ? { desiredTime: comFuso(horario) } : {}),
+        },
         accessToken,
       );
       // Guarda o pedido: e o que deixa o app avisar a RESPOSTA (usePedidoDeCorte).
@@ -260,16 +275,16 @@ export function ServiceSelection() {
       await guardarPedidoDeCorte(
         pedidoDaResposta(pedido, { professionalId, professionalName, establishmentId, establishmentName }, agora()),
       );
-      setShowMoreOptions(false);
       Alert.alert(
         "Pedido enviado! ⏳",
-        "O profissional tem 5 minutos para responder. A resposta aparece aqui no app — o pedido fica no Início enquanto isso.",
+        `${horario ? `Você pediu para ${quandoDoPedido(horario, agora())}. ` : ""}O profissional tem 5 minutos para responder. A resposta aparece aqui no app — o pedido fica no Início enquanto isso.`,
       );
       navigation.navigate("home");
     } catch (error: any) {
       const code = error.response?.data?.code;
-      const msg =
-        code === "PROFESSIONAL_AGENDA_ONLY"
+      const msg = error.response?.data?.fieldErrors?.desiredTime
+        ? "Esse horário já passou. Escolha outro."
+        : code === "PROFESSIONAL_AGENDA_ONLY"
           ? MENSAGEM_SO_AGENDA
           : code === "CUT_REQUEST_NOT_ALLOWED"
           ? profissionalFora
@@ -307,7 +322,7 @@ export function ServiceSelection() {
         ? "A fila está fechada — peça o corte e o profissional tem 5 minutos para responder."
         : "A loja está fechada — o profissional tem 5 minutos para responder.",
       disabled: isRequestingCut,
-      onPress: handleRequestCut,
+      onPress: abrirPedidoDeCorte,
     },
     swap: {
       key: "swap",
@@ -609,6 +624,15 @@ export function ServiceSelection() {
         minutosDoServico={totalMinutes}
         onPrecisaLogin={goToLoginAndComeBack}
         onAgendado={() => navigation.navigate("home")}
+      />
+      <ScheduleModal
+        visible={showCorte}
+        onClose={() => setShowCorte(false)}
+        professionalId={professionalId}
+        establishmentId={establishmentId}
+        serviceItemIds={selectedIds}
+        minutosDoServico={totalMinutes}
+        corte={{ onEscolher: handleRequestCut }}
       />
     </VStack>
   );
