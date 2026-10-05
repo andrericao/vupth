@@ -1,0 +1,63 @@
+# Bateria conjunta: o profissional marca no Partner que o cliente nao chegou;
+# o Client mostra "Atrasado" e o aviso "Este e o seu 1º atraso" com Entendi
+# (aviso-de-atraso, contagem-de-atrasos). O Partner so marca 5 min depois do
+# horario: a etapa espera. Comeca logado, ja na fila (entrou pela API).
+# env: EMAIL_PROF, NOME_CLIENTE
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Início"
+    label: "21.01 · toca em Início"
+- extendedWaitUntil:
+    visible:
+      id: "card-da-fila"
+    timeout: 60000
+    label: "21.02 · espera card-da-fila"
+- tapOn:
+    id: "card-da-fila"
+    label: "21.03 · abre a fila"
+- extendedWaitUntil:
+    visible:
+      id: "queue-position"
+    timeout: 30000
+    label: "21.04 · espera queue-position"
+# A politica da multa (menos de 1h30) aparece uma vez: fecha.
+- runFlow:
+    when:
+      visible: "Sua vez está chegando"
+    commands:
+      - tapOn:
+          id: "dialogo-botao-0"
+    label: "21.05 · fecha a política da multa, se vier"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "21.06 · fecha as caixas"
+# O Partner so deixa marcar atraso 5 min depois do horario.
+- extendedWaitUntil:
+    visible: "esta-tela-nao-tem-este-texto"
+    timeout: 330000
+    optional: true
+    label: "21.07 · espera 5 min e meio"
+- runFlow:
+    file: ../apoio/abrir_partner.yaml
+    label: "21.08 · abre o Partner como o profissional"
+- runFlow:
+    file: ../../../vupth-partner/.maestro/conjunta/prof_marcar_atraso.yaml
+    env:
+      APP_ID: com.vupth.partner.preview
+      CLIENTE: ${NOME_CLIENTE}
+    label: "21.09 · no Partner, marca que ${NOME_CLIENTE} não chegou"
+- launchApp:
+    appId: ${APP_ID}
+    label: "21.0A · volta ao Client (sem limpar)"
+- extendedWaitUntil:
+    visible: ".*Este é o seu 1º atraso.*"
+    timeout: 60000
+    label: "21.0B · o aviso do 1º atraso aparece"
+- tapOn:
+    text: "Entendi"
+    label: "21.0C · toca em Entendi"
+- extendedWaitUntil:
+    visible: "Atrasado"
+    timeout: 30000
+    label: "21.0D · a fila mostra Atrasado"

@@ -79,12 +79,12 @@ echo ""
 # commit errado no aparelho, nenhuma etapa diz nada.
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
-ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20"}
+ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21"}
 
 # bateria-conjunta: as etapas que abrem o Partner no mesmo celular. Precisam do
 # APK do Partner instalado e do vupth-partner clonado ao lado do vupth (os
 # subfluxos sao lidos de la). Sem um dos dois, elas ficam como ⏭.
-CONJUNTAS="18 19"
+CONJUNTAS="18 19 21"
 PARTNER_OK=1
 [ -d "$(dirname "$REPO")/vupth-partner/.maestro/conjunta" ] || PARTNER_OK=0
 adb shell pm list packages 2>/dev/null | grep -q "com.vupth.partner.preview" || PARTNER_OK=0
