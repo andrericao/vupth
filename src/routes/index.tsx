@@ -11,6 +11,7 @@ import { useFirstRunStore } from "@stores/firstRunStore";
 import { gluestackUIConfig } from "config/gluestack-ui.config";
 import { Box } from "@gluestack-ui/themed";
 import { OfflineBanner } from "@components/OfflineBanner";
+import { FaixaBaixarApp } from "@components/FaixaBaixarApp";
 
 const theme = {
 	...DefaultTheme,
@@ -32,6 +33,8 @@ export function Routes(){
 	return(
 		<SafeAreaProvider>
 		<Box flex={1} bg="$white">
+		{/* Na web: "Baixar o app" ou "Continuar na web" (link-de-divulgacao). */}
+		<FaixaBaixarApp />
 		{/* Na web a navegacao entra no historico do navegador — sem isto o voltar
 		    do celular saia do site (ver linking.ts). No aparelho, nada muda. */}
 		<NavigationContainer

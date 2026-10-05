@@ -76,11 +76,23 @@ export const linkingWeb: LinkingOptions<any> = {
  * loja, ou a loja ja abrindo um profissional. O profissional vai como
  * `?profissional=` — o unico parametro que atravessa a barra de endereco, de
  * proposito: sem ele o link abriria a loja e a pessoa teria de procurar.
+ *
+ * `ref` (link-de-divulgacao, 05/10): o codigo de quem indicou, para a campanha
+ * de indicacao futura. Ainda sem regra — o link so o carrega.
  */
-export function linkParaCompartilhar(base: string, establishmentId: string, professionalId?: string): string {
+export function linkParaCompartilhar(
+  base: string,
+  establishmentId: string,
+  professionalId?: string,
+  ref?: string,
+): string {
   const raiz = base.replace(/\/+$/, "");
   const loja = `${raiz}/loja/${encodeURIComponent(establishmentId)}`;
-  return professionalId ? `${loja}?profissional=${encodeURIComponent(professionalId)}` : loja;
+  const query = [
+    professionalId ? `profissional=${encodeURIComponent(professionalId)}` : null,
+    ref ? `ref=${encodeURIComponent(ref)}` : null,
+  ].filter(Boolean);
+  return query.length ? `${loja}?${query.join("&")}` : loja;
 }
 
 /**

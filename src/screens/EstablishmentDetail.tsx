@@ -14,6 +14,7 @@ import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Copy } fro
 import { copiarTexto } from "@utils/copiar";
 import { FotoAmpliada } from "@components/FotoAmpliada";
 import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
+import { textoDeDivulgacao } from "@domain/divulgacao";
 import { API_ENV } from "@services/api";
 
 import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
@@ -315,7 +316,7 @@ export function EstablishmentDetail() {
       Alert.alert("Link copiado", "Cole onde quiser para indicar esta loja.");
       return;
     }
-    Share.share({ message: link }).catch(() => {});
+    Share.share({ message: textoDeDivulgacao({ loja: establishment!.name, link }) }).catch(() => {});
   }
   // Um so botao de favorito pros dois ramos (com foto e sem): antes cada ramo
   // desenhava o proprio, e eles ja tinham saido com tamanhos diferentes.

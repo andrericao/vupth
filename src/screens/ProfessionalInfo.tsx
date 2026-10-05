@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { ScrollView, TouchableOpacity } from "react-native";
+import { Alert, ScrollView, Share, TouchableOpacity } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
-import { Star, Phone } from "lucide-react-native";
+import { Star, Phone, Share2 } from "lucide-react-native";
 
-import { ScreenHeader } from "@components/ScreenHeader";
+import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
+import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
+import { API_ENV } from "@services/api";
+import { copiarTexto } from "@utils/copiar";
+import { textoDeDivulgacao } from "@domain/divulgacao";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { SkeletonList } from "@components/Skeleton";
 import { FotoAmpliada } from "@components/FotoAmpliada";
@@ -27,8 +31,8 @@ type RouteParams = {
 // Informacoes do profissional (mockup-contato v2, Andre 05/10): foto, nome,
 // loja, nota, servicos com preco e o telefone SO COMO TEXTO — sem Ligar e sem
 // WhatsApp. Chega-se pela ⓘ da loja, pelo nome no topo da escolha do servico e
-// pelo "Ver profissional" do detalhe do atendimento. O Compartilhar fica para o
-// link-de-divulgacao.
+// pelo "Ver profissional" do detalhe do atendimento. O Compartilhar manda o
+// texto do link-de-divulgacao (a loja ja abrindo este profissional).
 export function ProfessionalInfo() {
   const route = useRoute();
   const { professionalId, establishmentId, professionalName } = route.params as RouteParams;
@@ -50,10 +54,29 @@ export function ProfessionalInfo() {
   const nota = resolveRating(prof?.rating_average, prof?.rating_count, professionalId);
   const foto = prof?.profile_image_url ?? null;
 
+  // O compartilhar do sistema; onde ele nao existe (navegador sem Web Share),
+  // copia o texto.
+  async function compartilhar() {
+    const link = linkParaCompartilhar(raizDoSite(API_ENV), establishmentId, professionalId);
+    const texto = textoDeDivulgacao({ loja: establishment?.name ?? "loja", profissional: nome || undefined, link });
+    try {
+      await Share.share({ message: texto });
+    } catch {
+      if (await copiarTexto(texto)) Alert.alert("Link copiado", "Cole onde quiser para indicar este profissional.");
+    }
+  }
+
   return (
     <VStack flex={1} bg="$brandBackground">
       <Box px={16}>
-        <ScreenHeader title="Profissional" />
+        <ScreenHeader
+          title="Profissional"
+          action={
+            <HeaderIconButton onPress={compartilhar} testID="compartilhar" accessibilityLabel={`Compartilhar ${nome}`}>
+              <Share2 size={20} color="#163300" />
+            </HeaderIconButton>
+          }
+        />
       </Box>
 
       {isLoading && !prof ? (

@@ -1,3 +1,5 @@
+import { Share } from 'react-native';
+import { fireEvent } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ProfessionalInfo } from '@screens/ProfessionalInfo';
@@ -81,5 +83,19 @@ describe('ProfessionalInfo (informacoes-do-profissional)', () => {
     const { findByText, queryByTestId } = montar();
     await findByText('Corte', {}, { timeout: 15000 });
     expect(queryByTestId('contato-do-profissional')).toBeNull();
+  });
+
+  it('Compartilhar manda o texto com o link da loja ja abrindo o profissional, sem o telefone', async () => {
+    mockGetProfs.mockResolvedValue({
+      data: { professionals: [profissional({ contact_phone: '+55 (11) 98888-7777' })] },
+    });
+    const share = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' });
+    const { findByText, getByTestId } = montar();
+    await findByText('Barbearia do Zé', {}, { timeout: 15000 });
+    fireEvent.press(getByTestId('compartilhar'));
+    const { message } = share.mock.calls[0][0] as { message: string };
+    expect(message).toMatch(/^Conheça o Carlos Lima na Barbearia do Zé — .*\/loja\/e1\?profissional=p1$/);
+    expect(message).not.toContain('98888');
+    share.mockRestore();
   });
 });

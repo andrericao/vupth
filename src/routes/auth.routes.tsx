@@ -33,7 +33,8 @@ export type AppRoutes = {
   establishmentList: { filter?: ServiceType | "ALL" } | undefined;
   // `profissional`: chegou por link compartilhado apontando um profissional
   // (`/loja/:id?profissional=...`, 24/09) — a tela abre direto os servicos dele.
-  establishmentDetail: { establishmentId: string; profissional?: string };
+  // `ref`: quem indicou (link-de-divulgacao) — por ora so chega, sem regra.
+  establishmentDetail: { establishmentId: string; profissional?: string; ref?: string };
   login: {
     redirectTo?: string;
     establishmentId?: string;

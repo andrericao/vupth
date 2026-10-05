@@ -8,4 +8,10 @@
 # O 200 e o que faz o host SERVIR o index sem trocar a URL da barra
 # (301/302 mandariam o usuario para "/" e ele perderia a rota).
 
+# /baixar (link-de-divulgacao, 05/10): o endereco fixo do APK mais novo, no
+# bucket R2 (tools/apk-para-o-r2.sh). Vem ANTES do fallback, senao o /* o
+# engole. Falta a URL publica do bucket — com ela, descomentar e ligar o
+# APK_NO_AR em src/domain/divulgacao.ts:
+# /baixar   https://<url-publica-do-bucket>/vupth.apk   302
+
 /*    /index.html   200
