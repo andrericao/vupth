@@ -10,8 +10,8 @@
 # Ao fim, o relatorio etapa a etapa (✅/❌/⏭), na tela e em relatorio.txt.
 # Os logs e prints de cada rodada caem em .maestro/logs/<data> (no .gitignore,
 # logs-da-bateria-na-pasta): a equipe le o erro sem o Andre colar. Rodada
-# verde nao guarda nada; a falha fica ate uma rodada seguinte passar do passo
-# que falhou — ai os logs dela sao apagados sozinhos.
+# verde nao guarda nada; rodada vermelha apaga as antigas e fica so a dela —
+# a mesma regra do Partner (limpar-logs, 05/10).
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(dirname "$DIR")"
@@ -105,15 +105,11 @@ echo ""
 echo "=== Relatorio da rodada ==="
 relatorio | tee "$RODADA/relatorio.txt"
 
-# Rodadas antigas: sai a que falhou num passo que esta rodada passou (ou toda
-# falha, se esta passou inteira) e a que ficou sem marca (interrompida).
+# Rodadas antigas (limpar-logs, a regra do Partner): ja foram lidas — a
+# rodada desta vez e o estado atual. Verde ou vermelha, so ela pode ficar.
 for antiga in "$LOGS"/*/; do
   antiga="${antiga%/}"
-  [ "$antiga" = "$RODADA" ] && continue
-  if [ "$STATUS" -eq 0 ] || [ ! -f "$antiga/falhou_em" ] ||
-     passos COMPLETED | grep -qxF "$(cat "$antiga/falhou_em")"; then
-    rm -rf "$antiga"
-  fi
+  [ "$antiga" = "$RODADA" ] || rm -rf "$antiga"
 done
 
 echo ""

@@ -15,8 +15,8 @@ roteiro e, no fim — verde ou não —, o `restaurar.sh`.
 **Os logs ficam na pasta (03/10).** Cada rodada grava o `console.txt`, o
 `maestro.log`, os prints e o `falhou_em` (o passo `NN.MM` que falhou) em
 `.maestro/logs/<data>/`, no `.gitignore` — a equipe lê o erro direto dali.
-Rodada verde não guarda nada; os logs de uma falha somem sozinhos quando uma
-rodada seguinte passa daquele passo.
+Rodada verde não guarda nada; rodada vermelha apaga as antigas e fica só a
+dela — a mesma regra do Partner (limpar-logs, 05/10).
 
 **A versão antes de tudo (03/10).** O app mostra o commit do JS que roda no
 fim da versão — no Perfil do visitante e no rodapé das Boas-vindas e do Entrar (`Versão 1.0.3 · 03/10/2026 · c65338e7`). A 01.07
