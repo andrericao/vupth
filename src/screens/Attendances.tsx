@@ -192,6 +192,7 @@ export function Attendances() {
     // queueStatus vive na aba Início (pai = tabs).
     navigation.getParent()?.navigate("homeTab", {
       screen: "queueStatus",
+      pop: true,
       params: {
         professionalId: activeQueue.professionalId,
         establishmentId: activeQueue.establishmentId,

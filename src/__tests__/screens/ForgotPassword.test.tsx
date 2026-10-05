@@ -157,7 +157,7 @@ describe('ForgotPassword — e-mail sem conta e muitas tentativas (Backend, 03/1
 
     const criar = (botoes as { text: string; onPress?: () => void }[]).find((b) => b.text === 'Criar conta');
     criar?.onPress?.();
-    expect(mockNavigate).toHaveBeenCalledWith('signUp', { email: 'semconta@vupth.com' });
+    expect(mockNavigate).toHaveBeenCalledWith('signUp', { email: 'semconta@vupth.com' }, { pop: true });
     alert.mockRestore();
   });
 

@@ -124,7 +124,7 @@ export function Settings() {
         style: "destructive",
         onPress: async () => {
           await logout();
-          navigation.getParent()?.navigate("homeTab", { screen: "home" });
+          navigation.getParent()?.navigate("homeTab", { screen: "home", pop: true });
         },
       },
     ]);
@@ -150,7 +150,7 @@ export function Settings() {
       setShowDelete(false);
       await logout();
       // Settings vive na aba Config.; volta para a aba Home (pai = tabs).
-      navigation.getParent()?.navigate("homeTab", { screen: "home" });
+      navigation.getParent()?.navigate("homeTab", { screen: "home", pop: true });
     } catch (error: any) {
       const code = error.response?.data?.code;
       const msg = error.response?.data?.message;
@@ -281,14 +281,14 @@ export function Settings() {
               <Button
                 title="Criar conta grátis"
                 onPress={() =>
-                  navigation.getParent()?.navigate("homeTab", { screen: "signUp", params: {} })
+                  navigation.getParent()?.navigate("homeTab", { screen: "signUp", params: {}, pop: true })
                 }
               />
               <Button
                 variant="outline"
                 title="Já tenho conta"
                 onPress={() =>
-                  navigation.getParent()?.navigate("homeTab", { screen: "login", params: {} })
+                  navigation.getParent()?.navigate("homeTab", { screen: "login", params: {}, pop: true })
                 }
               />
             </VStack>

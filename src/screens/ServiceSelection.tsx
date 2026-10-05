@@ -222,7 +222,7 @@ export function ServiceSelection() {
         "Pedido publicado",
         "Quem está na fila pode ceder o lugar para você. Se alguém aceitar, você entra na fila naquela posição — acompanhe em Atendimentos.",
       );
-      navigation.navigate("home");
+      navigation.navigate("home", undefined, { pop: true });
     } catch (error: any) {
       Alert.alert(
         "Não foi possível publicar",
@@ -272,7 +272,7 @@ export function ServiceSelection() {
         "Pedido enviado! ⏳",
         `${horario ? `Você pediu para ${quandoDoPedido(horario, agora())}. ` : ""}O profissional tem 5 minutos para responder. A resposta aparece aqui no app — o pedido fica no Início enquanto isso.`,
       );
-      navigation.navigate("home");
+      navigation.navigate("home", undefined, { pop: true });
     } catch (error: any) {
       const code = error.response?.data?.code;
       const msg = error.response?.data?.fieldErrors?.desiredTime
@@ -591,7 +591,7 @@ export function ServiceSelection() {
         serviceItemIds={selectedIds}
         minutosDoServico={totalMinutes}
         onPrecisaLogin={goToLoginAndComeBack}
-        onAgendado={() => navigation.navigate("home")}
+        onAgendado={() => navigation.navigate("home", undefined, { pop: true })}
       />
       <ScheduleModal
         visible={showCorte}

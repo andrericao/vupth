@@ -471,7 +471,7 @@ describe('ServiceSelection — pedido de corte com dia e horário', () => {
     );
     expect(dados.desiredTime).toMatch(/T09:30:00[+-]\d{2}:\d{2}$/);
     expect(alerta).toHaveBeenCalledWith('Pedido enviado! ⏳', expect.stringMatching(/amanhã às 09:30/));
-    expect(mockNavigate).toHaveBeenCalledWith('home');
+    expect(mockNavigate).toHaveBeenCalledWith('home', undefined, { pop: true });
     alerta.mockRestore();
   });
 

@@ -436,7 +436,7 @@ export function QueueStatus() {
         return;
       }
     }
-    navigation.navigate("home");
+    navigation.navigate("home", undefined, { pop: true });
     await leaveQueue();
   };
 
@@ -787,7 +787,7 @@ export function QueueStatus() {
                 onPress={() => {
                   const establishmentId = activeQueue.establishmentId;
                   leaveQueue();
-                  navigation.navigate("establishmentDetail", { establishmentId });
+                  navigation.navigate("establishmentDetail", { establishmentId }, { pop: true });
                 }}
                 testID="book-again"
               >
@@ -817,7 +817,7 @@ export function QueueStatus() {
               variant="outline"
               onPress={() => {
                 leaveQueue();
-                navigation.navigate("home");
+                navigation.navigate("home", undefined, { pop: true });
               }}
               testID="finish-home"
             />
@@ -842,7 +842,7 @@ export function QueueStatus() {
         <Box px={16}>
           <ScreenHeader
             ground="marca"
-            onBack={() => navigation.navigate("home")}
+            onBack={() => navigation.navigate("home", undefined, { pop: true })}
             action={
               <HeaderIconButton
                 onPress={() => setShowDisclaimer(true)}
@@ -1081,7 +1081,7 @@ export function QueueStatus() {
 
   return (
     <VStack flex={1} px={16} pb={30} bg="$brandBackground">
-      <ScreenHeader title="SUA VEZ" onBack={() => navigation.navigate("home")} />
+      <ScreenHeader title="SUA VEZ" onBack={() => navigation.navigate("home", undefined, { pop: true })} />
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -1230,11 +1230,11 @@ export function QueueStatus() {
             variant="outline"
             onPress={() => {
               leaveQueue();
-              navigation.navigate("home");
+              navigation.navigate("home", undefined, { pop: true });
             }}
           />
         ) : (
-          <Button title="Voltar ao início" onPress={() => navigation.navigate("home")} />
+          <Button title="Voltar ao início" onPress={() => navigation.navigate("home", undefined, { pop: true })} />
         )}
         {/* Sair da fila: vermelho e SEMPRE a última opção (pedido do Andre). */}
         {canCancel && (

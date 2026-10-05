@@ -35,8 +35,10 @@ describe('navigateFromNotification', () => {
     mockRef.isReady.mockReturnValue(true);
     useQueueStore.setState({ activeQueue: FILA } as never);
     navigateFromNotification('fila');
+    // pop (React Navigation 7): volta a fila que ja estiver na pilha, sem empilhar outra.
     expect(mockRef.navigate).toHaveBeenCalledWith('homeTab', {
       screen: 'queueStatus',
+      pop: true,
       params: {
         professionalId: 'p1',
         establishmentId: 'e1',
@@ -50,13 +52,13 @@ describe('navigateFromNotification', () => {
   it('"fila" sem a fila no aparelho cai em Atendimentos, que a reconstrói pelo servidor', () => {
     mockRef.isReady.mockReturnValue(true);
     navigateFromNotification('fila');
-    expect(mockRef.navigate).toHaveBeenCalledWith('atendimentosTab', { screen: 'attendances' });
+    expect(mockRef.navigate).toHaveBeenCalledWith('atendimentosTab', { screen: 'attendances', pop: true });
   });
 
   it('"attendances" vai à aba Atendimentos', () => {
     mockRef.isReady.mockReturnValue(true);
     navigateFromNotification('attendances');
-    expect(mockRef.navigate).toHaveBeenCalledWith('atendimentosTab', { screen: 'attendances' });
+    expect(mockRef.navigate).toHaveBeenCalledWith('atendimentosTab', { screen: 'attendances', pop: true });
   });
 
   it('com a navegação ainda montando, espera e navega quando ela fica pronta', () => {

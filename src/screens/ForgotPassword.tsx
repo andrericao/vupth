@@ -123,7 +123,7 @@ export function ForgotPassword() {
           { text: AVISO_SEM_CONTA.corrigir, style: "cancel" },
           {
             text: AVISO_SEM_CONTA.criar,
-            onPress: () => navigation.navigate("signUp", { email: email.trim() }),
+            onPress: () => navigation.navigate("signUp", { email: email.trim() }, { pop: true }),
           },
         ]);
       } else if (erro.tipo === "muitas-tentativas") {
@@ -143,7 +143,7 @@ export function ForgotPassword() {
     try {
       await authService.resetPassword(email.trim(), code.trim(), password);
       Alert.alert("Senha redefinida", "Faça login com a sua nova senha.");
-      navigation.navigate("login", {});
+      navigation.navigate("login", {}, { pop: true });
     } catch (error: any) {
       const codeErr = error.response?.data?.code;
       const msg =

@@ -101,7 +101,7 @@ export function SignUp() {
       estimatedWaitMinutes: params.estimatedWaitMinutes,
       serviceItemIds: params.serviceItemIds,
       targetTime: params.targetTime,
-    });
+    }, { pop: true });
   }
 
   return (
