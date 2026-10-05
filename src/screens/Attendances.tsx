@@ -516,6 +516,15 @@ export function Attendances() {
         attendance={detailFor}
         canRate={!!detailFor && podeAvaliar(detailFor, ratedIds)}
         onClose={() => setDetailFor(null)}
+        onVerProfissional={() => {
+          if (!detailFor) return;
+          navigation.navigate("professionalInfo", {
+            professionalId: detailFor.professionalId,
+            establishmentId: detailFor.establishmentId,
+            professionalName: detailFor.professionalName,
+          });
+          setDetailFor(null);
+        }}
         onRate={() => {
           if (detailFor) setRatingFor({ id: detailFor.id, name: detailFor.professionalName });
           setDetailFor(null);

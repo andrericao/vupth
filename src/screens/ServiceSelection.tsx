@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Alert, Linking, TouchableOpacity, ScrollView, Modal } from "react-native";
+import { Alert, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -9,7 +9,7 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Check, Calendar, Scissors, Repeat2, Phone, MessageCircle } from "lucide-react-native";
+import { Check, Calendar, Scissors, Repeat2, Info } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
@@ -33,7 +33,6 @@ import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
-import { contatoDoProfissional } from "@domain/professional/contato";
 import { acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
@@ -63,8 +62,6 @@ type RouteParams = {
   serviceItemIds?: string[];
   // Tamanho da fila do profissional: a posição do cliente é este número + 1.
   queueCount?: number;
-  // O contato que o profissional expoe (CLI-10); null/ausente = sem contato.
-  contactPhone?: string | null;
 };
 
 // Fora do corpo do componente: o relogio so e lido no toque, nunca no render.
@@ -85,9 +82,7 @@ export function ServiceSelection() {
     queueCount,
     profissionalFora,
     soAgenda = false,
-    contactPhone,
   } = route.params as RouteParams;
-  const contato = contatoDoProfissional(contactPhone);
   // Ausente = aberta (fluxos legados). false = fila fechada agora.
   const storeOpen = establishmentOpen ?? true;
   const situacao = { soAgenda, fora: !!profissionalFora, lojaAberta: storeOpen };
@@ -192,7 +187,6 @@ export function ServiceSelection() {
       estimatedWaitMinutes,
       serviceItemIds: selectedIds,
       establishmentOpen,
-      contactPhone,
     });
   }
 
@@ -366,49 +360,30 @@ export function ServiceSelection() {
   return (
     <VStack flex={1} pb={30} bg="$brandBackground">
       <Box px={16}>
-        <ScreenHeader
-          title="O QUE VOCÊ QUER?"
-          subtitle={`Com ${professionalName} · ${establishmentName}`}
-        />
-        {/* CLI-10: o contato que o profissional escolheu expor — sem ele, nada. */}
-        {contato && (
-          <HStack
-            bg="$brandSurface"
-            borderRadius={16}
-            px="$4"
-            py="$3"
-            mt="$3"
-            alignItems="center"
-            gap="$3"
-            testID="contato-do-profissional"
-          >
-            <Phone size={18} color="#163300" />
-            <Text flex={1} color="$forest" fontWeight="$semibold" numberOfLines={1}>
-              {contato.exibir}
+        <ScreenHeader title="O QUE VOCÊ QUER?" />
+        {/* O nome leva a "Informacoes do profissional" (foto, servicos, o
+            telefone so como texto). O contato saiu daqui (Andre, 05/10). O
+            recuo de 52 alinha com o titulo, como o subtitulo do cabecalho. */}
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("professionalInfo", { professionalId, establishmentId, professionalName })
+          }
+          accessibilityRole="button"
+          accessibilityLabel={`Ver informações de ${professionalName}`}
+          testID="ver-profissional"
+          style={{ marginLeft: 52, marginTop: -12 }}
+        >
+          <HStack alignItems="center" gap="$1.5">
+            <Text size="sm" color="$brandTextSecondary" numberOfLines={2} flexShrink={1}>
+              Com{" "}
+              <Text size="sm" color="$forest" fontFamily="$heading" textDecorationLine="underline">
+                {professionalName}
+              </Text>
+              {` · ${establishmentName}`}
             </Text>
-            <TouchableOpacity
-              onPress={() => Linking.openURL(contato.ligar)}
-              accessibilityRole="button"
-              accessibilityLabel={`Ligar para ${professionalName}`}
-              testID="contato-ligar"
-              hitSlop={8}
-            >
-              <Text color="$forest" fontWeight="$bold">Ligar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => Linking.openURL(contato.whatsapp)}
-              accessibilityRole="button"
-              accessibilityLabel={`WhatsApp de ${professionalName}`}
-              testID="contato-whatsapp"
-              hitSlop={8}
-            >
-              <HStack alignItems="center" gap="$1">
-                <MessageCircle size={16} color="#163300" />
-                <Text color="$forest" fontWeight="$bold">WhatsApp</Text>
-              </HStack>
-            </TouchableOpacity>
+            <Info size={14} color="#163300" />
           </HStack>
-        )}
+        </TouchableOpacity>
       </Box>
 
       {services.length === 0 ? (
