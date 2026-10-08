@@ -3,7 +3,6 @@ import { useNavigation } from "@react-navigation/native";
 import { VStack, Text, Box, ScrollView } from "@gluestack-ui/themed";
 
 import { ScreenHeader } from "@components/ScreenHeader";
-import { CONTATO_DO_TITULAR } from "@screens/Terms";
 import { fs } from "@stores/fonteStore";
 import type { AppNavigatorRoutesProps } from "@routes/auth.routes";
 
@@ -15,7 +14,12 @@ type Secao = { titulo: string; corpo: string };
  * para os dois apps. A exclusao em si continua a do Perfil (senha atual,
  * DeleteAccountModal) — que na web ja funciona.
  *
- * ⚠️ RASCUNHO juridico, como a tela de Termos: o contato espera o Andre.
+ * Ninguem recebe pedido por e-mail (Andre, 08/10): o titular exclui sozinho.
+ * Sem a senha, o "Esqueci a senha" (codigo no e-mail cadastrado) devolve o
+ * acesso. A exclusao por link no e-mail vem com o excluir-pela-web (contrato
+ * do Backend, exclusao-por-link).
+ *
+ * ⚠️ RASCUNHO juridico, como a tela de Termos.
  */
 export const COMO_EXCLUIR: Secao[] = [
   {
@@ -32,13 +36,14 @@ export const COMO_EXCLUIR: Secao[] = [
       "Entre na sua conta em vupth.pages.dev e vá em Perfil → Deletar conta. O botão abaixo leva até lá.",
   },
   {
-    titulo: "Sem acesso à conta",
-    corpo: `Escreva para ${CONTATO_DO_TITULAR} do e-mail cadastrado, pedindo a exclusão.`,
+    titulo: "Esqueceu a senha",
+    corpo:
+      "No Entrar, toque em \"Esqueci a senha\": o código chega no e-mail cadastrado. Com a senha nova, exclua pelo Perfil.",
   },
   {
     titulo: "O que é apagado",
     corpo:
-      "Seus dados pessoais: nome, e-mail, telefone, endereço e foto. Os atendimentos que você já fez continuam no histórico do profissional, sem o seu nome, porque são também dele e do estabelecimento.",
+      "Seus dados pessoais: nome, e-mail, telefone, endereço e foto. Os atendimentos que você já fez continuam no histórico do profissional, como \"usuário removido\", porque são também dele e do estabelecimento.",
   },
 ];
 

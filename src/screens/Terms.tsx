@@ -53,15 +53,16 @@ const TERMOS: Secao[] = [
 
 // paginas-legais (Evolucao, Degrau 1, 08/10): a mesma politica e publicada na
 // web em /privacidade, a URL que a Play Store pede. Vale para os dois apps.
-// RASCUNHO: o que esta entre colchetes espera as respostas do Andre (vupth-docs,
-// Solicitadas do Client).
-export const CONTROLADOR = "[razão social ou nome do responsável — a definir]";
-export const CONTATO_DO_TITULAR = "[e-mail de contato — a definir]";
+// Respostas do Andre (08/10): pessoa fisica responde; ninguem recebe pedido por
+// e-mail — o titular resolve no app ou no /excluir-conta; retencao pelas boas
+// praticas (backup 35 dias, registros de acesso 6 meses). RASCUNHO: falta o
+// nome completo, entre colchetes, e a revisao do Andre.
+export const CONTROLADOR = "[nome completo do responsável], pessoa física";
 
 const PRIVACIDADE: Secao[] = [
   {
     titulo: "1. Quem somos",
-    corpo: `A Vupth é operada por ${CONTROLADOR}, responsável pelos seus dados. Esta política vale para o app do cliente e para o app do profissional (VUPTH Parceiros). Dúvidas e pedidos sobre os seus dados: ${CONTATO_DO_TITULAR}.`,
+    corpo: `A Vupth é mantida por ${CONTROLADOR}, responsável pelos seus dados. Esta política vale para o app do cliente e para o app do profissional (VUPTH Parceiros).`,
   },
   {
     titulo: "2. O que coletamos",
@@ -91,11 +92,12 @@ const PRIVACIDADE: Secao[] = [
   {
     titulo: "7. Por quanto tempo guardamos",
     corpo:
-      "Enquanto a sua conta existir. Ao excluir a conta, seus dados pessoais são apagados; os atendimentos que você já fez continuam no histórico do profissional, sem o seu nome. [Prazo das cópias de segurança — a definir.]",
+      "Enquanto a sua conta existir. Ao excluir a conta, seus dados pessoais são apagados; os atendimentos que você já fez continuam no histórico do profissional, como \"usuário removido\". As cópias de segurança são apagadas em até 35 dias, e uma restauração não traz de volta quem excluiu a conta. Os registros de acesso (data, hora e IP) ficam 6 meses, como pede o Marco Civil da Internet (art. 15). Dados de pagamento, quando houver, ficam pelo prazo fiscal de 5 anos, só o necessário.",
   },
   {
     titulo: "8. Seus direitos",
-    corpo: `Pela LGPD, você pode ver, corrigir e apagar seus dados. Corrija no app e apague a conta quando quiser, pelo app ou pela web (vupth.pages.dev/excluir-conta). Sem acesso à conta, escreva para ${CONTATO_DO_TITULAR}.`,
+    corpo:
+      "Pela LGPD, você pode ver, corrigir e apagar seus dados, sem pedir a ninguém: corrija no app (Perfil) e exclua a conta quando quiser, pelo app ou pela web (vupth.pages.dev/excluir-conta). Quem confirma é você, com o e-mail cadastrado na conta e a sua senha.",
   },
 ];
 

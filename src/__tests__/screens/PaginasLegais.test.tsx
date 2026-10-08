@@ -32,6 +32,8 @@ describe('páginas legais', () => {
     expect(getByText('1. Quem somos')).toBeTruthy();
     expect(getByText('7. Por quanto tempo guardamos')).toBeTruthy();
     expect(getByText(/excluir-conta/)).toBeTruthy();
+    expect(getByText(/35 dias/)).toBeTruthy();
+    expect(getByText(/pessoa física/)).toBeTruthy();
   });
 
   it('a aba troca para os Termos', () => {
@@ -45,6 +47,7 @@ describe('páginas legais', () => {
     expect(getByText('No app do cliente')).toBeTruthy();
     expect(getByText('No app do profissional (VUPTH Parceiros)')).toBeTruthy();
     expect(getByText('Pela web, sem o app')).toBeTruthy();
+    expect(getByText('Esqueceu a senha')).toBeTruthy();
     expect(getByText('O que é apagado')).toBeTruthy();
   });
 
