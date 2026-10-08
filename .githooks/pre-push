@@ -19,9 +19,10 @@ echo "🧠 [2/4] Typecheck..."
 npm run --silent typecheck
 
 echo "🧪 [3/4] Testes + cobertura (o mesmo gate do CI)..."
-# DEC-22: a falha do jest fica em .logs-teste/<data>_jest_FALHA.txt (o hook do
-# vupth-docs acorda a equipe com ela); verde apaga as falhas antigas do jest.
-LOGS=.logs-teste
+# DEC-22/DEC-28: a falha do jest fica em logs/testes/<data>_jest_FALHA.txt, no
+# repositorio (o hook do vupth-docs acorda a equipe com ela); verde apaga as
+# falhas antigas do jest.
+LOGS=logs/testes
 mkdir -p "$LOGS"
 SAIDA=$(mktemp)
 CODIGO=$(mktemp)
