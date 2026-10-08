@@ -340,14 +340,14 @@ export function EditAddress() {
                   </VStack>
                   <HStack gap="$3">
                     {!addr.isMain && (
-                      <TouchableOpacity onPress={() => handleSetMain(addr.userAddressId)}>
+                      <TouchableOpacity onPress={() => handleSetMain(addr.userAddressId)} testID={`endereco-principal-${addr.userAddressId}`}>
                         <Star size={20} color="#454745" />
                       </TouchableOpacity>
                     )}
-                    <TouchableOpacity onPress={() => handleEdit(addr)}>
+                    <TouchableOpacity onPress={() => handleEdit(addr)} testID={`endereco-editar-${addr.userAddressId}`}>
                       <Pencil size={20} color="#163300" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)}>
+                    <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)} testID={`endereco-remover-${addr.userAddressId}`}>
                       <Trash2 size={20} color="#B3261E" />
                     </TouchableOpacity>
                   </HStack>
