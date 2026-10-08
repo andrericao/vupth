@@ -25,6 +25,8 @@ import { filaDoAtendimento } from "@domain/queue/reconciliar";
 import { avisoDepoisDoIntervalo, avisoDoReagendamento } from "@domain/queue/horarioPedido";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
 import { ehNavegador } from "@utils/ehNavegador";
+import { podeOferecerPush } from "@hooks/ofertaDePush";
+import { useFirstRunStore } from "@stores/firstRunStore";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
 import { SwapOffersModal } from "@components/SwapOffersModal";
 import { useSwapOffers } from "@hooks/useSwapOffers";
@@ -85,6 +87,20 @@ export function QueueStatus() {
   const insets = useSafeAreaInsets();
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const oferecerPush = useFirstRunStore((s) => s.oferecerPush);
+
+  // ligar-push-permission (Andre, 05/10): a primeira vez na fila e quando o
+  // aviso faz sentido — a tela 10 explica antes da caixa do sistema.
+  useEffect(() => {
+    let vivo = true;
+    podeOferecerPush().then((pode) => {
+      if (pode && vivo) oferecerPush();
+    });
+    return () => {
+      vivo = false;
+    };
+  }, [oferecerPush]);
+
   const {
     professionalId,
     professionalName: paramProfName,

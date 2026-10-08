@@ -6,6 +6,7 @@ import { AuthRoutes } from "./auth.routes";
 import { navigationRef, guardarEstadoDaNavegacao, estadoDaNavegacao } from "./navigationRef";
 import { linkingWeb } from "./linking";
 import { Onboarding } from "@screens/Onboarding";
+import { PushPermission } from "@screens/PushPermission";
 import { useFirstRunStore } from "@stores/firstRunStore";
 
 import { gluestackUIConfig } from "config/gluestack-ui.config";
@@ -29,6 +30,7 @@ export function Routes(){
 	// ate o SecureStore responder.
 	const onboardingSeen = useFirstRunStore((s) => s.onboardingSeen);
 	const restored = useFirstRunStore((s) => s.restored);
+	const pushOferta = useFirstRunStore((s) => s.pushOferta);
 
 	return(
 		<SafeAreaProvider>
@@ -48,6 +50,12 @@ export function Routes(){
 		>
 			{restored && !onboardingSeen ? <Onboarding /> : <AuthRoutes />}
 		</NavigationContainer>
+		{/* Tela 10 (ligar-push-permission): por cima, sem desmontar a fila. */}
+		{pushOferta && (
+			<Box position="absolute" top={0} bottom={0} left={0} right={0} testID="oferta-de-push">
+				<PushPermission />
+			</Box>
+		)}
 		<OfflineBanner />
 		</Box>
 		</SafeAreaProvider>

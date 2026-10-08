@@ -20,13 +20,14 @@ import { pushService } from "@services/pushService";
 import { oferecerVezAdiantada } from "@utils/vezAdiantada";
 import { navigateFromNotification } from "@routes/navigationRef";
 import { useAuthStore } from "@stores/authStore";
+import { useFirstRunStore } from "@stores/firstRunStore";
+import { PUSH_PERGUNTADO_KEY } from "@hooks/ofertaDePush";
 import { usePushDiagnosticsStore } from "@stores/pushDiagnosticsStore";
 
 // Chave onde o Expo Push Token registrado é guardado, p/ o logout desregistrar
 // (authStore.logout → DELETE /devices). Mesmo valor do authStore.
 const PUSH_TOKEN_KEY = "vupth_push_token";
-// A caixa de permissão do sistema já apareceu neste aparelho: não volta.
-const PUSH_PERGUNTADO_KEY = "vupth_push_perguntado";
+// A chave "a caixa do sistema ja apareceu" e a tela 10 moram em ofertaDePush.
 
 // Push em foreground: banner/lista/som (o WS já cobre a UI in-app; o banner
 // reforça). Registrado uma vez no módulo.
@@ -61,6 +62,10 @@ export function usePushRegistration() {
   const didRegister = useRef(false);
   const registrarTentativa = usePushDiagnosticsStore((s) => s.registrarTentativa);
   const registrarEnvio = usePushDiagnosticsStore((s) => s.registrarEnvio);
+  // A caixa do sistema so vem depois da tela 10 (ligar-push-permission): antes
+  // dela, quem nunca respondeu fica sem token — o efeito roda de novo quando a
+  // tela e respondida.
+  const pushAsked = useFirstRunStore((s) => s.pushAsked);
 
   // Android exige um canal para exibir notificações.
   useEffect(() => {
@@ -122,7 +127,8 @@ export function usePushRegistration() {
           isDevice: Device.isDevice,
           getPermissionsAsync: Notifications.getPermissionsAsync,
           requestPermissionsAsync: Notifications.requestPermissionsAsync,
-          jaPerguntou: async () => (await SecureStore.getItemAsync(PUSH_PERGUNTADO_KEY)) === "1",
+          jaPerguntou: async () =>
+            !pushAsked || (await SecureStore.getItemAsync(PUSH_PERGUNTADO_KEY)) === "1",
           marcarPerguntado: () => SecureStore.setItemAsync(PUSH_PERGUNTADO_KEY, "1"),
           getExpoPushTokenAsync: Notifications.getExpoPushTokenAsync,
           projectId,
@@ -164,7 +170,7 @@ export function usePushRegistration() {
       clearTimeout(timer);
       acordar?.();
     };
-  }, [isAuthenticated, accessToken, registrarTentativa, registrarEnvio]);
+  }, [isAuthenticated, accessToken, pushAsked, registrarTentativa, registrarEnvio]);
 
   // Ao deslogar, permitir novo registro na próxima sessão.
   useEffect(() => {
