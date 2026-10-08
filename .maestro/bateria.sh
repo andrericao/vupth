@@ -34,6 +34,9 @@ trap 'bash "$DIR/restaurar.sh"' EXIT
 
 # A branch da pasta: a dev no vupth, a feat/nativewind na worktree dela.
 BRANCH=$(git -C "$REPO" branch --show-current)
+# Na cloud (DEC-26) nao ha OTA: o celular roda o da dev, depois do merge
+# cloud->dev do Andre — o commit na linha da versao e o do merge.
+[ "$BRANCH" = "cloud" ] && BRANCH=dev
 git -C "$REPO" fetch -q origin "$BRANCH" 2>/dev/null
 COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
 echo "Commit esperado no app: $COMMIT (origin/$BRANCH)"
