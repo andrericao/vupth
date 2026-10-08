@@ -46,3 +46,5 @@ coverage/
 .maestro/aprovados.txt.tmp
 # A pasta antiga dos logs da bateria (antes da DEC-28); os novos vao em logs/
 .maestro/logs/
+# Falhas dos testes do pre-push (DEC-22, fora do repositorio — DEC-28 ajustada: so o log do Maestro sobe)
+.logs-teste/
