@@ -15,16 +15,21 @@ const PUSH_ASKED_KEY = 'vupth_push_asked';
 interface FirstRunState {
   onboardingSeen: boolean;
   pushAsked: boolean;
+  /** A tela 10 esta na frente agora (ligar-push-permission, 05/10). */
+  pushOferta: boolean;
   /** false ate o SecureStore responder — evita piscar o onboarding no boot. */
   restored: boolean;
   markOnboardingSeen: () => Promise<void>;
   markPushAsked: () => Promise<void>;
+  /** Mostra a tela 10, se ela ainda nao foi mostrada. */
+  oferecerPush: () => void;
   restoreFirstRun: () => Promise<void>;
 }
 
 export const useFirstRunStore = create<FirstRunState>((set) => ({
   onboardingSeen: false,
   pushAsked: false,
+  pushOferta: false,
   restored: false,
 
   markOnboardingSeen: async () => {
@@ -34,8 +39,10 @@ export const useFirstRunStore = create<FirstRunState>((set) => ({
     } catch {}
   },
 
+  oferecerPush: () => set((st) => (st.restored && !st.pushAsked ? { pushOferta: true } : {})),
+
   markPushAsked: async () => {
-    set({ pushAsked: true });
+    set({ pushAsked: true, pushOferta: false });
     try {
       await SecureStore.setItemAsync(PUSH_ASKED_KEY, '1');
     } catch {}

@@ -9,8 +9,9 @@
 # autofill e o corretor (restaurar.sh), mesmo se a rodada falhar.
 #
 # Ao fim, o relatorio etapa a etapa (✅/❌/⏭), na tela e em relatorio.txt.
-# Os logs e prints de cada rodada caem em .maestro/logs/<data> (no .gitignore,
-# logs-da-bateria-na-pasta): a equipe le o erro sem o Andre colar. Rodada
+# Os logs e prints de cada rodada caem em logs/maestro/<data>, no repositorio
+# (DEC-28 · tudo-no-github): ao fim, a bateria commita SO a pasta logs/ e da
+# push, e a equipe le o erro no GitHub, no PC ou na nuvem. Rodada
 # verde nao guarda nada; rodada vermelha apaga as antigas e fica so a dela —
 # a mesma regra do Partner (limpar-logs, 05/10).
 
@@ -34,6 +35,10 @@ trap 'bash "$DIR/restaurar.sh"' EXIT
 
 # A branch da pasta: a dev no vupth, a feat/nativewind na worktree dela.
 BRANCH=$(git -C "$REPO" branch --show-current)
+BRANCH_PASTA="$BRANCH"  # para onde vao os logs (DEC-28)
+# Na cloud (DEC-26) nao ha OTA: o celular roda o da dev, depois do merge
+# cloud->dev do Andre — o commit na linha da versao e o do merge.
+[ "$BRANCH" = "cloud" ] && BRANCH=dev
 git -C "$REPO" fetch -q origin "$BRANCH" 2>/dev/null
 COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
 echo "Commit esperado no app: $COMMIT (origin/$BRANCH)"
@@ -67,7 +72,7 @@ case "$SUPERVISAO" in
 esac
 echo ""
 
-LOGS="$DIR/logs"
+LOGS="$REPO/logs/maestro"
 RODADA="$LOGS/$(date +%Y-%m-%d_%H%M%S)"
 mkdir -p "$RODADA"
 echo "Logs desta rodada: ${RODADA#$REPO/}"
@@ -206,5 +211,22 @@ elif [ "$STATUS" -eq 0 ]; then
   echo "Bateria verde — fica só a pasta para-o-andre."
 else
   echo "Logs e prints em: ${RODADA#$REPO/}"
+fi
+
+# DEC-28: os logs vao para o GitHub. Commit so de logs/ (o pathspec deixa de
+# fora o que mais estiver mudado na pasta). O push so sai se o que sobe for so
+# logs/ — codigo sem push espera o push do Andre.
+cd "$REPO" || exit "$STATUS"
+git add -A logs/
+if ! git diff --cached --quiet -- logs/; then
+  git commit -q -m "chore(logs): bateria Maestro $(basename "$RODADA") — $([ "$STATUS" -eq 0 ] && echo verde || echo FALHA)" -- logs/
+  git pull -q --rebase --autostash origin "$BRANCH_PASTA" 2>/dev/null
+  if git diff --name-only "origin/$BRANCH_PASTA"..HEAD | grep -qv '^logs/'; then
+    echo "📝 Logs commitados; sobem no proximo push (ha codigo sem push na $BRANCH_PASTA)."
+  elif git push -q origin "HEAD:$BRANCH_PASTA"; then
+    echo "📤 Logs no GitHub (origin/$BRANCH_PASTA)."
+  else
+    echo "⚠️  Push dos logs falhou — sobem no proximo push."
+  fi
 fi
 exit "$STATUS"

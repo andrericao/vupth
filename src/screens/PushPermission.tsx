@@ -1,12 +1,11 @@
 import { TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { VStack, HStack, Text, Center, ScrollView } from "@gluestack-ui/themed";
 import { BellRing, Check } from "lucide-react-native";
 
-import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { fs } from "@stores/fonteStore";
+import { recusarAvisoDePush } from "@hooks/ofertaDePush";
 
 const PROMESSAS = [
   "Avisamos faltando 2 pessoas",
@@ -26,14 +25,17 @@ const PROMESSAS = [
  * real de quem ja levou spam de outro app.
  */
 export function PushPermission() {
-  const navigation = useNavigation<AppNavigatorRoutesProps>();
   const markPushAsked = useFirstRunStore((s) => s.markPushAsked);
 
   // Os dois caminhos marcam como perguntado: recusar tambem e resposta, e
-  // repetir a tela depois seria insistir em cima de um "nao".
-  async function finish() {
+  // repetir a tela depois seria insistir em cima de um "nao". Aceitar deixa o
+  // `usePushRegistration` mostrar a caixa do sistema; recusar a dispensa.
+  async function aceitar() {
     await markPushAsked();
-    navigation.goBack();
+  }
+  async function recusar() {
+    await recusarAvisoDePush();
+    await markPushAsked();
   }
 
   return (
@@ -79,10 +81,10 @@ export function PushPermission() {
 
       <VStack px={16} pt="$7" pb={32} gap="$3" alignItems="center">
         {/* Nao pedimos a permissao aqui: quem pede e o `usePushRegistration`,
-            no login, que e onde o token faz sentido. Esta tela so prepara o
-            terreno e marca que a conversa ja aconteceu. */}
-        <Button title="Quero ser avisada" onPress={finish} testID="push-accept" />
-        <TouchableOpacity onPress={finish} testID="push-skip">
+            assim que esta tela e respondida. Ela aparece na primeira entrada
+            numa fila (ligar-push-permission, 05/10), sobre a tela da fila. */}
+        <Button title="Quero ser avisada" onPress={aceitar} testID="push-accept" />
+        <TouchableOpacity onPress={recusar} testID="push-skip">
           <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
             Prefiro acompanhar pelo app
           </Text>
