@@ -34,6 +34,9 @@ const TELAS = {
       editPassword: "perfil/senha",
       editAddress: "perfil/endereco",
       terms: "termos",
+      // paginas-legais (08/10): as URLs publicas que a Play Store pede.
+      privacy: "privacidade",
+      excluirConta: "excluir-conta",
       sistema: "sistema",
     },
   },

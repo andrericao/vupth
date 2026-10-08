@@ -51,36 +51,56 @@ const TERMOS: Secao[] = [
   },
 ];
 
+// paginas-legais (Evolucao, Degrau 1, 08/10): a mesma politica e publicada na
+// web em /privacidade, a URL que a Play Store pede. Vale para os dois apps.
+// RASCUNHO: o que esta entre colchetes espera as respostas do Andre (vupth-docs,
+// Solicitadas do Client).
+export const CONTROLADOR = "[razão social ou nome do responsável — a definir]";
+export const CONTATO_DO_TITULAR = "[e-mail de contato — a definir]";
+
 const PRIVACIDADE: Secao[] = [
   {
-    titulo: "1. O que coletamos",
-    corpo:
-      "E-mail e senha para a sua conta; nome, telefone e endereço quando você preenche; e sua localização, se autorizar, para mostrar os lugares mais perto.",
+    titulo: "1. Quem somos",
+    corpo: `A Vupth é operada por ${CONTROLADOR}, responsável pelos seus dados. Esta política vale para o app do cliente e para o app do profissional (VUPTH Parceiros). Dúvidas e pedidos sobre os seus dados: ${CONTATO_DO_TITULAR}.`,
   },
   {
-    titulo: "2. Para que usamos",
+    titulo: "2. O que coletamos",
+    corpo:
+      "E-mail e senha para a sua conta; nome, telefone e endereço quando você preenche; e sua localização, se autorizar, para mostrar os lugares mais perto. Do profissional, também a foto, os serviços e os horários que ele cadastra.",
+  },
+  {
+    titulo: "3. Para que usamos",
     corpo:
       "Para colocar você na fila, avisar quando for sua vez e mostrar seu histórico de atendimentos. Não vendemos seus dados.",
   },
   {
-    titulo: "3. O que o estabelecimento vê",
+    titulo: "4. O que o estabelecimento vê",
     corpo:
       "O profissional que vai te atender vê seu nome e os serviços escolhidos — é o que ele precisa para te atender.",
   },
   {
-    titulo: "4. Notificações",
+    titulo: "5. Com quem compartilhamos",
+    corpo:
+      "Só com os serviços que fazem o app funcionar: a hospedagem do servidor e do banco de dados, o envio de notificações (Google Firebase e Expo) e o envio de e-mails, como o código de recuperação de senha.",
+  },
+  {
+    titulo: "6. Notificações",
     corpo:
       "Se você autorizar, enviamos avisos sobre a sua vez na fila. Você pode desligar a qualquer momento nas configurações do celular.",
   },
   {
-    titulo: "5. Seus direitos",
+    titulo: "7. Por quanto tempo guardamos",
     corpo:
-      "Você pode corrigir seus dados no app e apagar sua conta quando quiser — apagar a conta remove seus dados pessoais.",
+      "Enquanto a sua conta existir. Ao excluir a conta, seus dados pessoais são apagados; os atendimentos que você já fez continuam no histórico do profissional, sem o seu nome. [Prazo das cópias de segurança — a definir.]",
+  },
+  {
+    titulo: "8. Seus direitos",
+    corpo: `Pela LGPD, você pode ver, corrigir e apagar seus dados. Corrija no app e apague a conta quando quiser, pelo app ou pela web (vupth.pages.dev/excluir-conta). Sem acesso à conta, escreva para ${CONTATO_DO_TITULAR}.`,
   },
 ];
 
-export function Terms() {
-  const [aba, setAba] = useState<Aba>("uso");
+export function Terms({ abaInicial = "uso" }: { abaInicial?: Aba }) {
+  const [aba, setAba] = useState<Aba>(abaInicial);
   const secoes = aba === "uso" ? TERMOS : PRIVACIDADE;
 
   return (
@@ -140,9 +160,14 @@ export function Terms() {
           </VStack>
         ))}
         <Text fontFamily="$mono" fontSize={fs(11)} color="$brandTextSecondary" mt="$2">
-          Atualizado em 21 de agosto de 2026
+          Rascunho de 8 de outubro de 2026
         </Text>
       </VStack>
     </ScrollView>
   );
+}
+
+/** /privacidade na web (paginas-legais): a mesma tela, ja na aba Privacidade. */
+export function Privacy() {
+  return <Terms abaInicial="privacidade" />;
 }
