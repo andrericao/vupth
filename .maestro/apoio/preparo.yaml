@@ -8,6 +8,7 @@
 #   CONTA        "1" = cria o cliente pela API e entra no app com ele
 #   ABERTURA     "1" = passa a abertura e confere a versao (a 01 faz isso nela)
 #   FILA_FECHADA "1" = o profissional fecha a fila pela API (fechar_fila.js)
+#   PROF_FORA    "1" = o profissional fica em Fora pela API (profissional_fora.js)
 # Saidas (output): TAG, EMAIL_CLIENTE, NOME_CLIENTE e as da loja_aberta.js
 appId: ${APP_ID}
 ---
@@ -42,6 +43,17 @@ appId: ${APP_ID}
             SENHA: ${SENHA}
             EMAIL_PROF: ${output.EMAIL_PROF}
     label: "${ETAPA}.P4 · fecha a fila pela API"
+- runFlow:
+    when:
+      true: ${typeof PROF_FORA !== 'undefined' && PROF_FORA == '1'}
+    commands:
+      - runScript:
+          file: ../scripts/profissional_fora.js
+          env:
+            API: ${API}
+            SENHA: ${SENHA}
+            EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "${ETAPA}.P4b · põe o profissional em Fora pela API"
 - runFlow:
     when:
       true: ${CONTA == '1'}

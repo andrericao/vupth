@@ -53,6 +53,18 @@ appId: ${APP_ID}
 - tapOn:
     id: "tab-privacidade"
     label: "15.0F · toca em Privacidade"
+# paginas-legais (10245bc, 732a9c1, 665276f): quem responde e a retencao.
+- extendedWaitUntil:
+    visible: "1. Quem somos"
+    timeout: 15000
+    label: "15.0H · vê Quem somos na Privacidade"
+- scrollUntilVisible:
+    element:
+      text: "7. Por quanto tempo guardamos"
+    label: "15.0I · rola até Por quanto tempo guardamos"
+- assertVisible:
+    text: ".*35 dias.*"
+    label: "15.0J · vê as cópias de segurança em até 35 dias"
 - tapOn:
     id: "back-button"
     label: "15.0G · volta ao Perfil"

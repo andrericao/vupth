@@ -1,0 +1,51 @@
+# A tela 10 (ligar-push-permission, 62e8ae9): na primeira entrada numa fila,
+# antes da caixa do sistema. "Quero ser avisada" deixa a caixa vir.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "primary-queue"
+    label: "24.01 · toca em primary-queue"
+- extendedWaitUntil:
+    visible: "Entendi"
+    timeout: 60000
+    label: "24.02 · espera Entendi"
+- tapOn:
+    text: "Entendi"
+    label: "24.03 · toca em Entendi"
+# Antes de qualquer fechar_aviso: ele tocaria em "Prefiro acompanhar pelo app".
+- extendedWaitUntil:
+    visible: "PODE FECHAR O APP"
+    timeout: 30000
+    label: "24.04 · espera a tela 10"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: "24_tela_do_push"
+      O_QUE: "A tela 10 por cima da fila, antes da caixa do sistema"
+    label: "24.05 · print para o André"
+- tapOn:
+    id: "push-accept"
+    label: "24.06 · toca em Quero ser avisada"
+- extendedWaitUntil:
+    visible:
+      id: "com.android.permissioncontroller:id/permission_allow_button"
+    timeout: 30000
+    label: "24.07 · a caixa do sistema aparece"
+- tapOn:
+    id: "com.android.permissioncontroller:id/permission_allow_button"
+    label: "24.08 · permite"
+- assertNotVisible:
+    text: "PODE FECHAR O APP"
+    label: "24.09 · a tela 10 saiu"
+# Daqui, os avisos da fila de sempre (a politica da multa, o push da vez).
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "24.10 · roda fechar_aviso"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "24.11 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible:
+      id: "queue-position"
+    timeout: 30000
+    label: "24.12 · a fila segue na tela"
