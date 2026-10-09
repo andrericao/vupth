@@ -42,7 +42,11 @@ appId: ${APP_ID}
             API: ${API}
             SENHA: ${SENHA}
             EMAIL_PROF: ${output.EMAIL_PROF}
-    label: "${ETAPA}.P4 · fecha a fila pela API"
+            TAG: ${output.TAG}
+            PROF_ID: ${output.PROF_ID}
+            LOJA_ID: ${output.LOJA_ID}
+            SERVICO_ID: ${output.SERVICO_ID}
+    label: "${ETAPA}.P4 · fecha a fila pela API (um cliente entra antes)"
 - runFlow:
     when:
       true: ${typeof PROF_FORA !== 'undefined' && PROF_FORA == '1'}

@@ -1,6 +1,6 @@
 # O profissional fecha a fila (pela API, o papel do Partner): a loja mostra
 # "Fila fechada" no card dele — o app nao oferece entrar.
-# env: TAG, LOJA, PROF_ID, SERVICO_ID, EMAIL_PROF
+# env: TAG, LOJA, LOJA_ID, PROF_ID, SERVICO_ID, EMAIL_PROF
 appId: ${APP_ID}
 ---
 # Supervisionada com os dois usuarios (DEC-15): quem fecha e o Andre, no
@@ -15,7 +15,11 @@ appId: ${APP_ID}
             API: ${API}
             SENHA: ${SENHA}
             EMAIL_PROF: ${EMAIL_PROF}
-          label: "08.01 · roda fechar_fila"
+            TAG: ${TAG}
+            PROF_ID: ${PROF_ID}
+            LOJA_ID: ${LOJA_ID}
+            SERVICO_ID: ${SERVICO_ID}
+          label: "08.01 · roda fechar_fila (um cliente entra na fila antes)"
 - runFlow:
     file: ../apoio/abrir_a_loja.yaml
     label: "08.02 · roda abrir_a_loja"
