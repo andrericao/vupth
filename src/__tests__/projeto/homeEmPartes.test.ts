@@ -8,6 +8,8 @@ import { join } from 'path';
 // a varredura trava o que importa.
 
 const HOME = readFileSync(join(__dirname, '../../screens/Home.tsx'), 'utf8');
+// A linha da loja mora no proprio arquivo desde 09/10 (distancia-e-nota-no-card).
+const CARD = readFileSync(join(__dirname, '../../components/CardDaLoja.tsx'), 'utf8');
 
 describe('a Home desenha as lojas em partes', () => {
   it('a lista desenha a primeira dobra e o resto em lotes', () => {
@@ -17,7 +19,8 @@ describe('a Home desenha as lojas em partes', () => {
   });
 
   it('a linha é memorizada, e o toque e o renderItem são estáveis', () => {
-    expect(HOME).toMatch(/const EstablishmentRow = memo\(/);
+    expect(CARD).toMatch(/export const CardDaLoja = memo\(/);
+    expect(HOME).toMatch(/<CardDaLoja\b/);
     expect(HOME).toMatch(/renderItem=\{renderLoja\}/);
     expect(HOME).toMatch(/const handleEstablishmentPress = useCallback\(/);
   });

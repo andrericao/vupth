@@ -1,5 +1,6 @@
+import { fireEvent } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
-import { EstablishmentRow } from '@screens/Home';
+import { CardDaLoja } from '@components/CardDaLoja';
 import { Establishment } from '@domain/establishment/types';
 
 // distancia-e-nota-no-card (Andre, 09/10): "a distancia do estabelecimento e a
@@ -8,11 +9,6 @@ import { Establishment } from '@domain/establishment/types';
 
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
-jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({ navigate: jest.fn() }),
-  useRoute: () => ({ params: {} }),
-  useScrollToTop: jest.fn(),
-}));
 
 jest.setTimeout(90000);
 
@@ -35,7 +31,7 @@ function loja(extra: Partial<Establishment> = {}): Establishment {
 describe('o card da loja na Home', () => {
   it('mostra a nota (a melhor da loja) e a distância', async () => {
     const { findByText, getByText, getByTestId } = renderWithProviders(
-      <EstablishmentRow establishment={loja({ rating_best: 4.8, rating_average: 4.2 })} distanceKm={1.25} onPress={jest.fn()} />,
+      <CardDaLoja establishment={loja({ rating_best: 4.8, rating_average: 4.2 })} distanceKm={1.25} onPress={jest.fn()} />,
     );
     expect(await findByText('4.8', {}, { timeout: 15000 })).toBeTruthy();
     expect(getByTestId('nota-e1')).toBeTruthy();
@@ -44,10 +40,22 @@ describe('o card da loja na Home', () => {
 
   it('sem nota no servidor, usa a média; sem GPS, a distância some e a loja fica', async () => {
     const { findByText, queryByText } = renderWithProviders(
-      <EstablishmentRow establishment={loja({ rating_average: 4.5 })} distanceKm={null} onPress={jest.fn()} />,
+      <CardDaLoja establishment={loja({ rating_average: 4.5 })} distanceKm={null} onPress={jest.fn()} />,
     );
     expect(await findByText('4.5', {}, { timeout: 15000 })).toBeTruthy();
     expect(queryByText(/km/)).toBeNull();
     expect(queryByText('Barbearia do Zé')).toBeTruthy();
+  });
+
+  it('loja fechada: a etiqueta Agendar; sem tipo, a linha fica só com a nota; o toque abre a loja', async () => {
+    const onPress = jest.fn();
+    const e = loja({ is_open: false, open_status: 'CLOSED' as Establishment['open_status'], serviceType: undefined });
+    const { findByText, getByTestId } = renderWithProviders(
+      <CardDaLoja establishment={e} distanceKm={null} destaque="Senta em ~10 min" onPress={onPress} />,
+    );
+    expect(await findByText('Agendar', {}, { timeout: 15000 })).toBeTruthy();
+    expect(await findByText('Senta em ~10 min')).toBeTruthy();
+    fireEvent.press(getByTestId('establishment-e1'));
+    expect(onPress).toHaveBeenCalledWith(e);
   });
 });
