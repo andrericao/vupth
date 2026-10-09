@@ -2,9 +2,20 @@
 # Criar conta e Entrar —, os Termos e a versao. Nenhum grupo de menu.
 appId: ${APP_ID}
 ---
+# entrar-atras-da-barra (Andre, 09/10): o "Já tem conta? Entrar" ficava atras
+# da barra de navegacao do celular. O toque do Maestro cai no centro do
+# elemento: se ele estiver sob a barra, o toque vai para o sistema e o login
+# nao abre. Entra pelo "Entrar" e volta: o visitante segue sem conta.
 - tapOn:
-    id: "onboarding-start"
-    label: "01.01 · toca em onboarding-start"
+    id: "onboarding-login"
+    label: "01.01 · toca em Já tem conta? Entrar"
+- extendedWaitUntil:
+    visible:
+      id: "primary-login"
+    timeout: 10000
+    label: "01.01b · o login abriu (o Entrar não está atrás da barra)"
+- back:
+    label: "01.01c · volta ao Início, sem conta"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "01.02 · roda fechar_aviso"

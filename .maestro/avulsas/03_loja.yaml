@@ -1,0 +1,26 @@
+# Etapa avulsa 03 (bateria-nao-para): roda num maestro test proprio.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "03"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "03.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/03_loja.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "03.E1 · roda 03_loja"

@@ -1,17 +1,19 @@
 #!/bin/bash
 # A bateria do Client com UM comando (Andre, 03/10 — commit-sem-flag):
 #
-#   bash .maestro/bateria.sh
+#   bash .maestro/bateria.sh              # pula as etapas ja aprovadas neste commit
+#   bash .maestro/bateria.sh --completa   # roda todas
 #
 # Prepara o celular (setup.sh), acha sozinha o commit esperado (o ultimo da
 # branch da pasta no GitHub — a dev e o OTA do canal preview), roda o roteiro e devolve o
 # autofill e o corretor (restaurar.sh), mesmo se a rodada falhar.
 #
 # Ao fim, o relatorio etapa a etapa (✅/❌/⏭), na tela e em relatorio.txt.
-# Os logs e prints de cada rodada caem em .maestro/logs/<data> (no .gitignore,
-# logs-da-bateria-na-pasta): a equipe le o erro sem o Andre colar. Rodada
-# verde nao guarda nada; a falha fica ate uma rodada seguinte passar do passo
-# que falhou — ai os logs dela sao apagados sozinhos.
+# Os logs e prints de cada rodada caem em .maestro/logs/<data>, versionada
+# (DEC-29): ao fim, a bateria commita SO a pasta .maestro/logs/ e da push, e a
+# equipe le o erro no GitHub, no PC ou na nuvem. Rodada
+# verde nao guarda nada; rodada vermelha apaga as antigas e fica so a dela —
+# a mesma regra do Partner (limpar-logs, 05/10).
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO="$(dirname "$DIR")"
@@ -33,6 +35,10 @@ trap 'bash "$DIR/restaurar.sh"' EXIT
 
 # A branch da pasta: a dev no vupth, a feat/nativewind na worktree dela.
 BRANCH=$(git -C "$REPO" branch --show-current)
+BRANCH_PASTA="$BRANCH"  # para onde vao os logs (DEC-28)
+# Na cloud (DEC-26) nao ha OTA: o celular roda o da dev, depois do merge
+# cloud->dev do Andre — o commit na linha da versao e o do merge.
+[ "$BRANCH" = "cloud" ] && BRANCH=dev
 git -C "$REPO" fetch -q origin "$BRANCH" 2>/dev/null
 COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
 echo "Commit esperado no app: $COMMIT (origin/$BRANCH)"
@@ -58,10 +64,11 @@ case "$SUPERVISAO" in
   0) echo "Sem supervisao." ;;
   1) echo "Supervisionada, so o Client." ;;
   2) echo "Supervisionada, Client e Partner. No segundo celular, o Partner (senha Teste@123):"
-     echo "   👤 conta do profissional: prop_c${TAG}@teste.com — Prof${TAG}, na Loja C${TAG}"
-     echo "      (a bateria cria a conta no comeco; entre depois do passo 00.04)"
-     echo "   👤 quando aparecer \"08.0A\": feche a fila do Prof${TAG} (ate 5 min)"
-     echo "   👤 quando aparecer \"10.0A\": aceite o pedido de corte do Cliente${TAG} (ate 5 min)" ;;
+     # Cada etapa tem a conta dela (TAG + numero da etapa); entre na conta
+     # quando a etapa comecar (depois do passo NN.P3).
+     echo "   👤 etapa 08: entre em prop_c${TAG}08@teste.com e, quando aparecer \"08.0A\", feche a fila (ate 5 min)"
+     echo "   👤 etapa 10: entre em prop_c${TAG}10@teste.com e, quando aparecer \"10.0A\", aceite o pedido (ate 5 min)"
+     echo "   👤 etapa 11: entre em prop_c${TAG}11@teste.com e, quando aparecer \"10.0A\", aceite o pedido (ate 5 min)" ;;
 esac
 echo ""
 
@@ -71,67 +78,155 @@ mkdir -p "$RODADA"
 echo "Logs desta rodada: ${RODADA#$REPO/}"
 echo ""
 
-maestro test \
-  -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
-  -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" \
-  --debug-output "$RODADA" --flatten-debug-output \
-  --test-output-dir "$RODADA" \
-  "$DIR/bateria_completa.yaml" 2>&1 | tee "$RODADA/console.txt"
-STATUS=${PIPESTATUS[0]}
+# bateria-nao-para (modelo do Partner): cada etapa de avulsas/ roda num
+# `maestro test` proprio e prepara o estado dela pela API. Se uma falha, ela
+# fica registrada e a proxima roda. So a 00 (a versao) para tudo: com o
+# commit errado no aparelho, nenhuma etapa diz nada.
+#
+# Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
+ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24"}
 
-# O maestro.log tem uma linha "<label> RUNNING" quando o passo comeca e
-# "<label> COMPLETED" (ou SKIPPED) quando termina; a falha nao tem linha. O
-# passo que falhou e o ULTIMO "NN.MM · ..." que comecou e nao terminou — o mais
-# de dentro (a etapa que o chamou tambem nao terminou, mas comecou antes).
-LOG="$RODADA/maestro.log"
-passos() { grep -oP 'runCommands\$lambda\$\d+: \K\d\d\.[\dA-Z]{2} · .*(?= ('"$1"')$)' "$LOG" 2>/dev/null; }
+# bateria-conjunta: as etapas que abrem o Partner no mesmo celular. Precisam do
+# APK do Partner instalado e do vupth-partner clonado ao lado do vupth (os
+# subfluxos sao lidos de la). Sem um dos dois, elas ficam como ⏭.
+CONJUNTAS="18 19 21 22"
+PARTNER_OK=1
+[ -d "$(dirname "$REPO")/vupth-partner/.maestro/conjunta" ] || PARTNER_OK=0
+adb shell pm list packages 2>/dev/null | grep -q "com.vupth.partner.preview" || PARTNER_OK=0
 
-FALHOU=""
-if [ "$STATUS" -ne 0 ]; then
-  FALHOU=$(passos RUNNING | grep -vxFf <(passos 'COMPLETED|SKIPPED') | tail -1)
+# bateria-pula-aprovados (Andre, 05/10): a etapa verde grava a marca com o
+# commit em aprovados.txt (no .gitignore); a proxima rodada no MESMO commit a
+# pula. --completa roda tudo e recomeca as marcas.
+APROVADOS="$DIR/aprovados.txt"
+if [ "${1:-}" = "--completa" ]; then
+  rm -f "$APROVADOS"
+  echo "Completa: todas as etapas rodam."
+fi
+touch "$APROVADOS"
+aprovada() { grep -qxF "$1 $COMMIT" "$APROVADOS"; }
+aprovar() { grep -vE "^$1 " "$APROVADOS" > "$APROVADOS.tmp"; echo "$1 $COMMIT" >> "$APROVADOS.tmp"; mv "$APROVADOS.tmp" "$APROVADOS"; }
+
+# Os prints "para o Andre" (apoio/para_o_andre.yaml) e a linha do que olhar.
+PARA_O_ANDRE="$RODADA/para-o-andre"
+juntar_para_o_andre() {
+  local pasta="$1" achados
+  achados=$(find "$pasta" "$PWD" -maxdepth 2 -name 'para-o-andre_*.png' 2>/dev/null)
+  grep -q 'PARA-O-ANDRE:' "$pasta/console.txt" 2>/dev/null || [ -n "$achados" ] || return 0
+  mkdir -p "$PARA_O_ANDRE"
+  grep -oP 'PARA-O-ANDRE: \K.*' "$pasta/console.txt" >> "$PARA_O_ANDRE/para-o-andre.txt" 2>/dev/null
+  [ -n "$achados" ] && echo "$achados" | while IFS= read -r f; do mv "$f" "$PARA_O_ANDRE/"; done
+  return 0
+}
+
+# O passo NN.MM que falhou: o ULTIMO "NN.MM · ..." que comecou e nao terminou
+# no maestro.log da etapa (o mais de dentro).
+passos() { grep -oP 'runCommands\$lambda\$\d+: \K\d\d\.[\dA-Z]{2} · .*(?= ('"$2"')$)' "$1/maestro.log" 2>/dev/null; }
+falhou_em() { passos "$1" RUNNING | grep -vxFf <(passos "$1" 'COMPLETED|SKIPPED') | tail -1; }
+
+# Roda uma etapa na pasta dela; devolve o status do maestro.
+rodar() {
+  local nome="$1" pasta="$RODADA/$1"
+  mkdir -p "$pasta"
+  echo "=== $nome ==="
+  maestro test \
+    -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
+    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" \
+    --debug-output "$pasta" --flatten-debug-output \
+    --test-output-dir "$pasta" \
+    "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"
+  return "${PIPESTATUS[0]}"
+}
+
+# O print da falha com o nome do passo (DEC-16), na pasta da rodada.
+print_da_falha() {
+  local pasta="$1" passo="$2" print nome
+  print=$(ls -t "$pasta"/screenshot-❌-*.png 2>/dev/null | head -1)
+  [ -n "$print" ] || return 0
+  nome=$(printf '%s' "${passo:-00.00 · antes do primeiro passo}" | iconv -f utf-8 -t ascii//TRANSLIT 2>/dev/null |
+    tr '[:upper:]' '[:lower:]' | sed -E 's/^([0-9]{2}\.[0-9a-z]{2})[^a-z0-9]*/\1_/; s/[^a-z0-9._]+/-/g; s/-+$//')
+  cp "$print" "$RODADA/FALHA_${nome}.png"
+  echo "   print: ${RODADA#$REPO/}/FALHA_${nome}.png"
+}
+
+STATUS=0
+: > "$RODADA/relatorio.txt"
+if ! rodar 00_atualizacao; then
+  PASSO=$(falhou_em "$RODADA/00_atualizacao")
+  echo "❌ 00 · versão — ${PASSO:-antes do primeiro passo}" | tee -a "$RODADA/relatorio.txt"
+  print_da_falha "$RODADA/00_atualizacao" "$PASSO"
+  echo "A versão no aparelho não é a $COMMIT: nenhuma etapa rodou."
+  STATUS=1
+else
+  echo "✅ 00 · versão" >> "$RODADA/relatorio.txt"
+  for n in $ETAPAS; do
+    arquivo=$(basename "$(ls "$DIR"/avulsas/"$n"_*.yaml 2>/dev/null | head -1)" .yaml)
+    if [ -z "$arquivo" ]; then
+      echo "⏭  $n (não existe em avulsas/)" >> "$RODADA/relatorio.txt"
+      continue
+    fi
+    if [ "$PARTNER_OK" = 0 ] && echo " $CONJUNTAS " | grep -q " $n "; then
+      echo "⏭  $arquivo (conjunta: falta o APK do Partner ou o clone ../vupth-partner)" >> "$RODADA/relatorio.txt"
+      continue
+    fi
+    if aprovada "$n"; then
+      echo "⏭  $arquivo (aprovada no $COMMIT — --completa roda de novo)" >> "$RODADA/relatorio.txt"
+      continue
+    fi
+    rodar "$arquivo"
+    VOLTA=$?
+    juntar_para_o_andre "$RODADA/$arquivo"
+    if [ "$VOLTA" -eq 0 ]; then
+      echo "✅ $arquivo" >> "$RODADA/relatorio.txt"
+      aprovar "$n"
+      rm -rf "${RODADA:?}/$arquivo"   # verde: a pasta da etapa nao guarda nada
+    else
+      STATUS=1
+      PASSO=$(falhou_em "$RODADA/$arquivo")
+      echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo}" >> "$RODADA/relatorio.txt"
+      echo "${PASSO:-}" > "$RODADA/$arquivo/falhou_em"
+      print_da_falha "$RODADA/$arquivo" "$PASSO"
+    fi
+  done
 fi
 
-# Relatorio etapa a etapa (bateria-nao-para, 03/10): cada "00.NN · ..." do
-# roteiro com ✅ (terminou), ❌ (comecou e nao terminou) ou ⏭ (nao rodou) —
-# mesmo parando numa altura, da para saber o que passou.
-relatorio() {
-  grep -oP 'label: "\K00\.\d\d · [^"]*' "$DIR/bateria_completa.yaml" | while IFS= read -r etapa; do
-    if passos 'COMPLETED|SKIPPED' | grep -qxF "$etapa"; then echo "✅ $etapa"
-    elif passos RUNNING | grep -qxF "$etapa"; then echo "❌ $etapa"
-    else echo "⏭  $etapa (nao rodou)"; fi
-  done
-}
 echo ""
 echo "=== Relatorio da rodada ==="
-relatorio | tee "$RODADA/relatorio.txt"
+cat "$RODADA/relatorio.txt"
 
-# Rodadas antigas: sai a que falhou num passo que esta rodada passou (ou toda
-# falha, se esta passou inteira) e a que ficou sem marca (interrompida).
+# Rodadas antigas (limpar-logs, a regra do Partner): ja foram lidas — a
+# rodada desta vez e o estado atual. Verde ou vermelha, so ela pode ficar.
 for antiga in "$LOGS"/*/; do
   antiga="${antiga%/}"
-  [ "$antiga" = "$RODADA" ] && continue
-  if [ "$STATUS" -eq 0 ] || [ ! -f "$antiga/falhou_em" ] ||
-     passos COMPLETED | grep -qxF "$(cat "$antiga/falhou_em")"; then
-    rm -rf "$antiga"
-  fi
+  [ "$antiga" = "$RODADA" ] || rm -rf "$antiga"
 done
 
 echo ""
-if [ "$STATUS" -eq 0 ]; then
+if [ -d "$PARA_O_ANDRE" ]; then
+  echo "👀 Para o Andre olhar: ${PARA_O_ANDRE#$REPO/} (o que olhar em para-o-andre.txt)"
+fi
+if [ "$STATUS" -eq 0 ] && [ ! -d "$PARA_O_ANDRE" ]; then
   rm -rf "$RODADA"
   echo "Bateria verde — nenhum log guardado."
+elif [ "$STATUS" -eq 0 ]; then
+  echo "Bateria verde — fica só a pasta para-o-andre."
 else
-  echo "${FALHOU:-sem passo NN.MM (falhou antes da 00.01)}" > "$RODADA/falhou_em"
-  echo "Bateria parou em: ${FALHOU:-antes da 00.01}"
-  # print-da-falha (DEC-16): o print da falha com o nome do passo, para o Andre
-  # mandar e a equipe achar o log — ex.: FALHA_05.05_espera-o-aviso-da-politica-da-multa.png
-  PRINT=$(ls -t "$RODADA"/screenshot-❌-*.png 2>/dev/null | head -1)
-  if [ -n "$PRINT" ]; then
-    NOME=$(printf '%s' "${FALHOU:-00.00 · antes da 00.01}" | iconv -f utf-8 -t ascii//TRANSLIT 2>/dev/null |
-      tr '[:upper:]' '[:lower:]' | sed -E 's/^([0-9]{2}\.[0-9a-z]{2})[^a-z0-9]*/\1_/; s/[^a-z0-9._]+/-/g; s/-+$//')
-    cp "$PRINT" "$RODADA/FALHA_${NOME}.png"
-    echo "Print da falha: ${RODADA#$REPO/}/FALHA_${NOME}.png"
-  fi
   echo "Logs e prints em: ${RODADA#$REPO/}"
+fi
+
+# DEC-28/29: os logs vao para o GitHub. Commit so de .maestro/logs/ (o pathspec
+# deixa de fora o que mais estiver mudado na pasta). O push so sai se o que sobe
+# for so os logs — codigo sem push espera o push do Andre.
+cd "$REPO" || exit "$STATUS"
+git add -A .maestro/logs/
+if ! git diff --cached --quiet -- .maestro/logs/; then
+  git commit -q -m "chore(logs): bateria Maestro $(basename "$RODADA") — $([ "$STATUS" -eq 0 ] && echo verde || echo FALHA)" -- .maestro/logs/
+  git pull -q --rebase --autostash origin "$BRANCH_PASTA" 2>/dev/null
+  if git diff --name-only "origin/$BRANCH_PASTA"..HEAD | grep -qv '^.maestro/logs/'; then
+    echo "📝 Logs commitados; sobem no proximo push (ha codigo sem push na $BRANCH_PASTA)."
+  elif git push -q origin "HEAD:$BRANCH_PASTA"; then
+    echo "📤 Logs no GitHub (origin/$BRANCH_PASTA)."
+  else
+    echo "⚠️  Push dos logs falhou — sobem no proximo push."
+  fi
 fi
 exit "$STATUS"

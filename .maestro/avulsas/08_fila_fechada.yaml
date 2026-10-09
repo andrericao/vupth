@@ -1,0 +1,28 @@
+# Etapa avulsa 08 (bateria-nao-para): roda num maestro test proprio.
+# 08 fecha a fila ela mesma (pela API ou, supervisionada, o Andre no Partner).
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "08"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "08.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/08_fila_fechada.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      LOJA_ID: ${output.LOJA_ID}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "08.E1 · roda 08_fila_fechada"

@@ -5,6 +5,12 @@ appId: ${APP_ID}
 - tapOn:
     id: "second-door-schedule"
     label: "07.01 · toca em second-door-schedule"
+# A barra so aparece depois de escolher o dia (o modal abre sem dia marcado;
+# era o "barra-de-encaixe is visible" que falhou em 05/10). Hoje: a loja da
+# bateria esta aberta agora (loja_aberta).
+- tapOn:
+    text: "Hoje"
+    label: "07.01b · escolhe o dia: Hoje"
 - extendedWaitUntil:
     visible:
       id: "barra-de-encaixe"

@@ -1,0 +1,23 @@
+# Etapa avulsa 02 (bateria-nao-para): roda num maestro test proprio.
+# 02 cadastro pela tela: a conta nasce na etapa, nao pela API.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "02"
+      LOJA: "0"
+      CONTA: "0"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "02.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/02_cadastro.yaml
+    env:
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+      NOME_CLIENTE: ${output.NOME_CLIENTE}
+    label: "02.E1 · roda 02_cadastro"

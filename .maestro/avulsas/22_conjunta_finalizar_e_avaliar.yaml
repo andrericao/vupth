@@ -1,0 +1,37 @@
+# Etapa avulsa 21 (bateria-conjunta): Client e Partner no mesmo celular. Precisa
+# do APK do Partner instalado e do vupth-partner clonado ao lado do vupth.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "22"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "22.P0 · prepara a etapa"
+- runScript:
+    file: ../scripts/fila_pela_api.js
+    env:
+      ACAO: "entrar"
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+      PROF_ID: ${output.PROF_ID}
+      LOJA_ID: ${output.LOJA_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+    label: "22.PD · entra na fila pela API"
+- runFlow:
+    file: ../etapas/22_conjunta_finalizar_e_avaliar.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      NOME_CLIENTE: ${output.NOME_CLIENTE}
+    label: "22.E1 · roda 22_conjunta_finalizar_e_avaliar"

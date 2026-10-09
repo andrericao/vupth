@@ -1,0 +1,27 @@
+# Etapa avulsa 10 (bateria-nao-para): roda num maestro test proprio.
+# 10 precisa da fila fechada: o preparo a fecha pela API.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "10"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "1"
+    label: "10.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/10_pedido_de_corte.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "10.E1 · roda 10_pedido_de_corte"

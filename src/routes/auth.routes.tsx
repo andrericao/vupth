@@ -20,10 +20,12 @@ import { EditProfile } from "@screens/EditProfile";
 import { EditEmail } from "@screens/EditEmail";
 import { EditPassword } from "@screens/EditPassword";
 import { EditAddress } from "@screens/EditAddress";
-import { Terms } from "@screens/Terms";
+import { Privacy, Terms } from "@screens/Terms";
+import { ExcluirConta } from "@screens/ExcluirConta";
 import { Sistema } from "@screens/Sistema";
 import { Aparencia } from "@screens/Aparencia";
 import { ServiceSelection } from "@screens/ServiceSelection";
+import { ProfessionalInfo } from "@screens/ProfessionalInfo";
 import { TabPill, TabLabel, TAB_ACTIVE, TAB_INACTIVE, tabBarShadow } from "@components/TabPill";
 import { ServiceType } from "@domain/establishment/types";
 
@@ -32,7 +34,8 @@ export type AppRoutes = {
   establishmentList: { filter?: ServiceType | "ALL" } | undefined;
   // `profissional`: chegou por link compartilhado apontando um profissional
   // (`/loja/:id?profissional=...`, 24/09) — a tela abre direto os servicos dele.
-  establishmentDetail: { establishmentId: string; profissional?: string };
+  // `ref`: quem indicou (link-de-divulgacao) — por ora so chega, sem regra.
+  establishmentDetail: { establishmentId: string; profissional?: string; ref?: string };
   login: {
     redirectTo?: string;
     establishmentId?: string;
@@ -43,7 +46,6 @@ export type AppRoutes = {
     serviceItemIds?: string[];
     targetTime?: string;
     establishmentOpen?: boolean;
-    contactPhone?: string | null;
   };
   signUp: {
     // O e-mail que o login ou o "esqueci" achou sem conta, já preenchido.
@@ -79,8 +81,13 @@ export type AppRoutes = {
     // este número + 1 (ele entra no fim). Opcional: fluxos que não sabem (ex.:
     // volta do login) simplesmente não mostram a linha de posição.
     queueCount?: number;
-    // O contato que o profissional expoe (CLI-10); null/ausente = sem contato.
-    contactPhone?: string | null;
+  };
+  // Informacoes do profissional (foto, loja, nota, servicos, telefone so como
+  // texto). Le tudo da loja pelos ids; o nome so cobre o carregamento.
+  professionalInfo: {
+    professionalId: string;
+    establishmentId: string;
+    professionalName?: string;
   };
   queueStatus: {
     professionalId: string;
@@ -113,6 +120,8 @@ export type AppRoutes = {
   editPassword: undefined;
   editAddress: undefined;
   terms: undefined;
+  privacy: undefined;
+  excluirConta: undefined;
   sistema: undefined;
   aparencia: undefined;
 };
@@ -127,6 +136,7 @@ function HomeStack() {
       <HomeStackNav.Screen name="establishmentList" component={EstablishmentList} />
       <HomeStackNav.Screen name="establishmentDetail" component={EstablishmentDetail} />
       <HomeStackNav.Screen name="serviceSelection" component={ServiceSelection} />
+      <HomeStackNav.Screen name="professionalInfo" component={ProfessionalInfo} />
       <HomeStackNav.Screen name="queueStatus" component={QueueStatus} />
       <HomeStackNav.Screen name="login" component={Login} />
       <HomeStackNav.Screen name="signUp" component={SignUp} />
@@ -141,6 +151,7 @@ function AttendancesStack() {
   return (
     <AttendancesStackNav.Navigator screenOptions={{ headerShown: false }}>
       <AttendancesStackNav.Screen name="attendances" component={Attendances} />
+      <AttendancesStackNav.Screen name="professionalInfo" component={ProfessionalInfo} />
     </AttendancesStackNav.Navigator>
   );
 }
@@ -155,6 +166,8 @@ function SettingsStack() {
       <SettingsStackNav.Screen name="editPassword" component={EditPassword} />
       <SettingsStackNav.Screen name="editAddress" component={EditAddress} />
       <SettingsStackNav.Screen name="terms" component={Terms} />
+      <SettingsStackNav.Screen name="privacy" component={Privacy} />
+      <SettingsStackNav.Screen name="excluirConta" component={ExcluirConta} />
       <SettingsStackNav.Screen name="sistema" component={Sistema} />
       <SettingsStackNav.Screen name="aparencia" component={Aparencia} />
     </SettingsStackNav.Navigator>

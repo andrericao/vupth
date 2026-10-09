@@ -1,0 +1,41 @@
+# Etapa avulsa 23 (maestro-em-dia, DEC-29): roda num maestro test proprio.
+# O profissional fica em Fora pela API (DEC-27, 0c1b968).
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "23"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+      PROF_FORA: "1"
+    label: "23.P0 · prepara a etapa"
+- runFlow:
+    file: ../apoio/abrir_a_loja.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "23.L1 · abre a loja de teste"
+- runFlow:
+    file: ../apoio/escolher_servico.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "23.L2 · escolhe o serviço"
+- runFlow:
+    file: ../etapas/23_corte_com_profissional_fora.yaml
+    label: "23.E1 · roda 23_corte_com_profissional_fora"

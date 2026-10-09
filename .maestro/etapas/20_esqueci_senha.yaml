@@ -1,0 +1,62 @@
+# Esqueci a senha e e-mail sem conta (esqueci-senha-sem-email, maestro-maximo):
+# no "Esqueci", e-mail sem conta avisa e nao vai para o passo do codigo; no
+# login, oferece "Criar conta" ja com o e-mail. O codigo que chega por e-mail e
+# as 11 tentativas do limite ficam a mao. Comeca como visitante.
+# env: EMAIL_SEM_CONTA
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Perfil"
+    label: "20.01 · toca em Perfil"
+- tapOn:
+    text: "Já tenho conta"
+    label: "20.02 · toca em Já tenho conta"
+- tapOn:
+    text: "E-mail"
+    label: "20.03 · toca em E-mail"
+- inputText:
+    text: ${EMAIL_SEM_CONTA}
+    label: "20.04 · digita um e-mail sem conta"
+- hideKeyboard:
+    label: "20.05 · fecha o teclado"
+- tapOn:
+    text: "Esqueci minha senha"
+    label: "20.06 · toca em Esqueci minha senha"
+- tapOn:
+    id: "forgot-send"
+    label: "20.07 · pede o código"
+- extendedWaitUntil:
+    visible: "E-mail sem conta"
+    timeout: 30000
+    label: "20.08 · avisa E-mail sem conta"
+- tapOn:
+    text: "Corrigir"
+    label: "20.09 · toca em Corrigir"
+- assertNotVisible:
+    text: "Código de 6 dígitos"
+    label: "20.0A · não foi para o passo do código"
+- tapOn:
+    id: "back-button"
+    label: "20.0B · volta ao login"
+- tapOn:
+    text: "Senha"
+    label: "20.0C · toca em Senha"
+- inputText:
+    text: ${SENHA}
+    label: "20.0D · digita a senha"
+- hideKeyboard:
+    label: "20.0E · fecha o teclado"
+- tapOn:
+    id: "primary-login"
+    label: "20.0F · tenta entrar"
+- extendedWaitUntil:
+    visible: "E-mail sem conta"
+    timeout: 30000
+    label: "20.0G · avisa E-mail sem conta"
+- tapOn:
+    text: "Criar conta"
+    label: "20.0H · toca em Criar conta"
+- extendedWaitUntil:
+    visible: ${EMAIL_SEM_CONTA}
+    timeout: 15000
+    label: "20.0I · o cadastro abre com o e-mail no campo"

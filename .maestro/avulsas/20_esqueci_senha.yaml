@@ -1,0 +1,21 @@
+# Etapa avulsa 20 (maestro-maximo): roda num maestro test proprio.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "20"
+      LOJA: "0"
+      CONTA: "0"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "20.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/20_esqueci_senha.yaml
+    env:
+      EMAIL_SEM_CONTA: "semconta_${output.TAG}@teste.com"
+    label: "20.E1 · roda 20_esqueci_senha"

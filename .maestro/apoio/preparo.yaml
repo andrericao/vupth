@@ -1,0 +1,129 @@
+# O estado de partida de uma etapa avulsa (bateria-nao-para, modelo do
+# Partner): cada etapa roda num `maestro test` proprio e prepara o que precisa
+# pela API, sem herdar nada da anterior. Se uma falha, as outras rodam.
+#
+# Entradas:
+#   ETAPA        "01".."12" — o sufixo das contas e o prefixo dos passos (NN.Pn)
+#   LOJA         "1" = monta a loja de teste pela API (loja_aberta.js)
+#   CONTA        "1" = cria o cliente pela API e entra no app com ele
+#   ABERTURA     "1" = passa a abertura e confere a versao (a 01 faz isso nela)
+#   FILA_FECHADA "1" = o profissional fecha a fila pela API (fechar_fila.js)
+#   PROF_FORA    "1" = o profissional fica em Fora pela API (profissional_fora.js)
+# Saidas (output): TAG, EMAIL_CLIENTE, NOME_CLIENTE e as da loja_aberta.js
+appId: ${APP_ID}
+---
+# A TAG da rodada (bateria.sh) mais o numero da etapa: cada etapa tem contas
+# e loja proprias. Sem TAG (maestro test direto), o relogio.
+- evalScript:
+    script: "${output.TAG = (typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)) + ETAPA}"
+    label: "${ETAPA}.P1 · calcula TAG"
+- evalScript:
+    script: "${output.EMAIL_CLIENTE = 'client_c' + output.TAG + '@teste.com'; output.NOME_CLIENTE = 'Cliente' + output.TAG}"
+    label: "${ETAPA}.P2 · calcula o cliente"
+
+- runFlow:
+    when:
+      true: ${LOJA == '1'}
+    commands:
+      - runScript:
+          file: ../scripts/loja_aberta.js
+          env:
+            API: ${API}
+            SENHA: ${SENHA}
+            TAG: ${output.TAG}
+    label: "${ETAPA}.P3 · monta a loja pela API"
+- runFlow:
+    when:
+      true: ${FILA_FECHADA == '1'}
+    commands:
+      - runScript:
+          file: ../scripts/fechar_fila.js
+          env:
+            API: ${API}
+            SENHA: ${SENHA}
+            EMAIL_PROF: ${output.EMAIL_PROF}
+            TAG: ${output.TAG}
+            PROF_ID: ${output.PROF_ID}
+            LOJA_ID: ${output.LOJA_ID}
+            SERVICO_ID: ${output.SERVICO_ID}
+    label: "${ETAPA}.P4 · fecha a fila pela API (um cliente entra antes)"
+- runFlow:
+    when:
+      true: ${typeof PROF_FORA !== 'undefined' && PROF_FORA == '1'}
+    commands:
+      - runScript:
+          file: ../scripts/profissional_fora.js
+          env:
+            API: ${API}
+            SENHA: ${SENHA}
+            EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "${ETAPA}.P4b · põe o profissional em Fora pela API"
+- runFlow:
+    when:
+      true: ${CONTA == '1'}
+    commands:
+      - runScript:
+          file: ../scripts/cliente.js
+          env:
+            API: ${API}
+            SENHA: ${SENHA}
+            EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+            NOME_CLIENTE: ${output.NOME_CLIENTE}
+    label: "${ETAPA}.P5 · cria o cliente pela API"
+
+# Mesma abertura da bateria completa (00.05–00.07): sem permissoes, e a caixa
+# do sistema negada enquanto espera.
+- launchApp:
+    clearState: true
+    # NOTIFICACOES "allow" so na etapa do push (push-na-bateria); as outras negam.
+    permissions:
+      location: deny
+      notifications: "${typeof NOTIFICACOES !== 'undefined' && NOTIFICACOES ? NOTIFICACOES : 'deny'}"
+    label: "${ETAPA}.P6 · abre o app limpo"
+- runFlow:
+    file: esperar_negando.yaml
+    env:
+      ALVO: "onboarding-start"
+    label: "${ETAPA}.P7 · espera onboarding-start (negando a caixa do sistema)"
+- runFlow:
+    file: fechar_aviso.yaml
+    label: "${ETAPA}.P8 · nega a caixa do sistema, se vier"
+
+# O clearState apaga o OTA baixado: sem conferir a versao a cada etapa, ela
+# rodaria o bundle embutido do APK.
+- runFlow:
+    when:
+      true: ${ABERTURA == '1'}
+    commands:
+      - tapOn:
+          id: "onboarding-start"
+      - runFlow:
+          file: fechar_aviso.yaml
+    label: "${ETAPA}.P9 · passa a abertura"
+- runFlow:
+    when:
+      true: ${CONTA == '1'}
+    commands:
+      - runFlow:
+          file: entrar.yaml
+          env:
+            EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+    label: "${ETAPA}.PA · entra com o cliente"
+# Logado: a fatia de atualizacao (Verificar atualizacao, sem reabrir o app).
+- runFlow:
+    when:
+      true: ${CONTA == '1'}
+    commands:
+      - runFlow:
+          file: atualizar.yaml
+    label: "${ETAPA}.PB · atualiza o app e confere a versão"
+# Visitante (sem o menu Versao do app): fecha e abre ate o OTA valer.
+- runFlow:
+    when:
+      true: ${CONTA != '1' && ABERTURA == '1'}
+    commands:
+      - tapOn:
+          text: "Perfil"
+      - runFlow:
+          file: confere_versao.yaml
+    label: "${ETAPA}.PC · confere a versão no Perfil do visitante"

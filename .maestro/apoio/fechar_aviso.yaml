@@ -23,3 +23,12 @@ appId: ${APP_ID}
     commands:
       - tapOn:
           id: "com.android.permissioncontroller:id/permission_deny_button"
+# A tela 10 (ligar-push-permission): na primeira entrada numa fila, antes da
+# caixa do sistema. "Prefiro acompanhar pelo app" = o mesmo que negar.
+- runFlow:
+    when:
+      visible:
+        id: "push-skip"
+    commands:
+      - tapOn:
+          id: "push-skip"

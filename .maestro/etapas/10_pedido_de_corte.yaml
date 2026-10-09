@@ -16,6 +16,11 @@ appId: ${APP_ID}
 - tapOn:
     id: "more-option-cut"
     label: "10.04 · toca em more-option-cut"
+# Desde o 77b918d o pedido abre a barra de quando: "Assim que abrir" e o
+# pedido de sempre (o profissional tem 5 minutos).
+- tapOn:
+    id: "corte-assim-que-abrir"
+    label: "10.0B · toca em Assim que abrir"
 - extendedWaitUntil:
     visible: "Pedido enviado!.*"
     timeout: 30000

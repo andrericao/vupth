@@ -1,0 +1,94 @@
+# Etapa avulsa 13 (push-na-bateria, Andre 05/10): o push "É quase a sua vez!"
+# chega na gaveta do Android e o toque abre a fila (push-abre-a-fila); depois,
+# o botao OK da notificacao so a tira, sem abrir o app (notificacao-de-ciencia).
+# O primeiro da fila recebe o push ao entrar; a entrada vem pela API com o app
+# fechado ou em segundo plano. Notificacoes PERMITIDAS so nesta etapa.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "13"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+      NOTIFICACOES: "allow"
+    label: "13.P0 · prepara a etapa (notificações permitidas)"
+
+# 1) App FECHADO: entra pela API, o push chega, o toque abre a fila.
+- stopApp:
+    label: "13.01 · fecha o app"
+- runScript:
+    file: ../scripts/fila_pela_api.js
+    env:
+      ACAO: "entrar"
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+      PROF_ID: ${output.PROF_ID}
+      LOJA_ID: ${output.LOJA_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+    label: "13.02 · entra na fila pela API"
+- swipe:
+    start: "50%, 0%"
+    end: "50%, 80%"
+    label: "13.03 · abre a gaveta de notificações"
+- extendedWaitUntil:
+    visible: "É quase a sua vez!"
+    timeout: 90000
+    label: "13.04 · espera o push É quase a sua vez!"
+- tapOn:
+    text: "É quase a sua vez!"
+    label: "13.05 · toca no corpo do push"
+# Com a fila no aparelho abre a tela dela; app recem-aberto, Atendimentos com o
+# cartao da fila (push-abre-a-fila). Nunca o Inicio.
+- extendedWaitUntil:
+    visible:
+      id: "(queue-position|card-da-fila)"
+    timeout: 60000
+    label: "13.06 · abriu a fila ou o cartão da fila"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "13.07 · fecha as caixas"
+
+# 2) App em SEGUNDO PLANO: sai e entra de novo pela API; o OK so tira a notificacao.
+- runScript:
+    file: ../scripts/fila_pela_api.js
+    env:
+      ACAO: "sair"
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+      ATENDIMENTO_ID: ${output.ATENDIMENTO_ID}
+    label: "13.08 · sai da fila pela API (na tolerância)"
+- pressKey: Home
+- runScript:
+    file: ../scripts/fila_pela_api.js
+    env:
+      ACAO: "entrar"
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+      PROF_ID: ${output.PROF_ID}
+      LOJA_ID: ${output.LOJA_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+    label: "13.09 · entra de novo pela API, com o app em segundo plano"
+- swipe:
+    start: "50%, 0%"
+    end: "50%, 80%"
+    label: "13.0A · abre a gaveta de notificações"
+- extendedWaitUntil:
+    visible: "É quase a sua vez!"
+    timeout: 90000
+    label: "13.0B · espera o push de novo"
+# O botao de acao da notificacao (categoryId CIENCIA): "OK".
+- tapOn:
+    text: "OK"
+    label: "13.0C · toca no OK da notificação"
+- extendedWaitUntil:
+    notVisible: "É quase a sua vez!"
+    timeout: 10000
+    label: "13.0D · a notificação sumiu"
+- assertNotVisible:
+    id: "queue-position"
+    label: "13.0E · o OK não abriu o app"
+- pressKey: Back

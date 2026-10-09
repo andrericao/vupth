@@ -1,0 +1,20 @@
+# Etapa avulsa 01 (bateria-nao-para): roda num maestro test proprio.
+# 01 visitante: a etapa passa a abertura e confere a versao ela mesma.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "01"
+      LOJA: "0"
+      CONTA: "0"
+      ABERTURA: "0"
+      FILA_FECHADA: "0"
+    label: "01.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/01_visitante.yaml
+    label: "01.E1 · roda 01_visitante"

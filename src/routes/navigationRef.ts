@@ -36,6 +36,8 @@ export function navigateFromNotification(
   if (fila) {
     navigate("homeTab", {
       screen: "queueStatus",
+      // v7: sem o pop, uma fila ja aberta na pilha ganhava outra por cima.
+      pop: true,
       params: {
         professionalId: fila.professionalId,
         establishmentId: fila.establishmentId,
@@ -46,7 +48,7 @@ export function navigateFromNotification(
     });
     return;
   }
-  navigate("atendimentosTab", { screen: "attendances" });
+  navigate("atendimentosTab", { screen: "attendances", pop: true });
 }
 
 /**
@@ -64,7 +66,7 @@ export function goToLoginAfterOnboarding(): void {
         name: string,
         params?: object,
       ) => void;
-      navigate("homeTab", { screen: "login", params: {} });
+      navigate("homeTab", { screen: "login", params: {}, pop: true });
       return;
     }
     // Ate ~1s de espera pelo mount; depois desiste e deixa na Home, que e um
@@ -86,7 +88,7 @@ export function abrirMudarMinhaVez(fila: {
 }): void {
   if (!navigationRef.isReady()) return;
   const navigate = navigationRef.navigate as unknown as (name: string, params?: object) => void;
-  navigate("homeTab", { screen: "queueStatus", params: { ...fila, serviceItemIds: [], abrirMudarVez: true } });
+  navigate("homeTab", { screen: "queueStatus", pop: true, params: { ...fila, serviceItemIds: [], abrirMudarVez: true } });
 }
 
 // O estado da navegacao, guardado para a arvore remontar no mesmo lugar — ao

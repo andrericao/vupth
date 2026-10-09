@@ -1,0 +1,41 @@
+# Inicio -> "Ver todos": a lista de lojas, com a ordem trocavel, e o toque abre
+# a loja de teste (maestro-maximo). Com o Pra ontem ligado o link e "Ver todas"
+# (desliga o filtro); entao o "Ver todos" aparece.
+# env: LOJA_ID, PROF_ID
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Início"
+    label: "17.01 · toca em Início"
+- runFlow:
+    when:
+      notVisible:
+        id: "see-all"
+    commands:
+      - tapOn:
+          text: "Ver todas"
+    label: "17.02 · desliga o Pra ontem, se estiver ligado"
+- tapOn:
+    id: "see-all"
+    label: "17.03 · toca em Ver todos"
+- extendedWaitUntil:
+    visible:
+      id: "sort-toggle"
+    timeout: 30000
+    label: "17.04 · espera a lista de lojas"
+- tapOn:
+    id: "sort-toggle"
+    label: "17.05 · troca a ordem"
+- scrollUntilVisible:
+    element:
+      id: "establishment-${LOJA_ID}"
+    timeout: 60000
+    label: "17.06 · acha a loja de teste na lista"
+- tapOn:
+    id: "establishment-${LOJA_ID}"
+    label: "17.07 · abre a loja"
+- extendedWaitUntil:
+    visible:
+      id: "professional-${PROF_ID}"
+    timeout: 30000
+    label: "17.08 · a loja abre com o profissional"

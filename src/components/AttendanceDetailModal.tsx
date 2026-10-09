@@ -59,11 +59,13 @@ type Props = {
   onRate: () => void;
   // false quando o atendimento já foi avaliado (esconde o "Avaliar").
   canRate?: boolean;
+  // "Ver profissional": abre as informações dele (foto, serviços, telefone).
+  onVerProfissional?: () => void;
 };
 
 // Detalhes de um atendimento (quem atendeu, quando, serviços, duração, valor) +
 // opção de avaliar (quando FINISHED e ainda não avaliado).
-export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = true }: Props) {
+export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = true, onVerProfissional }: Props) {
   const a = attendance;
   const st = a ? STATUS[a.status] ?? { label: STATUS_DESCONHECIDO, bg: "#F3F5F1", fg: "#454745" } : null;
 
@@ -99,6 +101,15 @@ export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = t
 
             {a.status === "FINISHED" && canRate && (
               <Button title="Avaliar atendimento" mt="$5" onPress={onRate} />
+            )}
+            {onVerProfissional && (
+              <Button
+                title="Ver profissional"
+                variant="outline"
+                mt="$3"
+                testID="ver-profissional"
+                onPress={onVerProfissional}
+              />
             )}
             <Button title="Fechar" variant="outline" mt="$3" onPress={onClose} />
           </VStack>

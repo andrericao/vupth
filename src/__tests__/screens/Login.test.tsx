@@ -56,7 +56,11 @@ describe('Login — erros do contrato de 03/10', () => {
     expect(textos).toEqual(['Corrigir', 'Criar conta']);
 
     (botoes as { text: string; onPress?: () => void }[])[1].onPress?.();
-    expect(mockNavigate).toHaveBeenCalledWith('signUp', expect.objectContaining({ email: 'semconta@vupth.com' }));
+    expect(mockNavigate).toHaveBeenCalledWith(
+      'signUp',
+      expect.objectContaining({ email: 'semconta@vupth.com' }),
+      { pop: true },
+    );
   });
 
   it('401 BAD_CREDENTIALS: a mensagem do servidor, como antes', async () => {

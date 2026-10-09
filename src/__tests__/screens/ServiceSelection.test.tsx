@@ -1,4 +1,4 @@
-import { Alert, Linking } from 'react-native';
+import { Alert } from 'react-native';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ServiceSelection } from '@screens/ServiceSelection';
@@ -272,7 +272,7 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       expect(queryByTestId('regra-da-multa')).toBeNull();
     });
 
-    it('servidor recusando o corte com a loja aberta: diz que o profissional está fora — não manda entrar na fila', async () => {
+    it('backend anterior recusando o corte (409): diz que ele não recebe pedidos agora — não manda entrar na fila (DEC-27)', async () => {
       mockCreateCut.mockRejectedValue(
         Object.assign(new Error('409'), { response: { status: 409, data: { code: 'CUT_REQUEST_NOT_ALLOWED' } } }),
       );
@@ -285,10 +285,32 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
         fireEvent.press(getByTestId('corte-assim-que-abrir'));
       });
       const [, mensagem] = alerta.mock.calls[0] as [string, string];
-      expect(mensagem).toMatch(/está fora agora/);
-      expect(mensagem).not.toMatch(/entrar na fila normalmente/);
+      expect(mensagem).toMatch(/não está recebendo pedidos agora/);
+      expect(mensagem).not.toMatch(/entrar na fila/);
       alerta.mockRestore();
     });
+  });
+
+  // DEC-27 (Backend d8039b5): pedido para outro dia vem sem prazo (expires_at nulo).
+  it('pedido aceito pelo servidor sem prazo: avisa que ele responde quando abrir a agenda', async () => {
+    setRouteParams({ ...OPEN_PARAMS, profissionalFora: true });
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    mockGetServices.mockResolvedValue({
+      data: [{ id: 's1', customName: 'Corte', price: 30, weeklyAverageDurationInMinutes: 30 }],
+    });
+    mockCreateCut.mockResolvedValue({ data: { id: 'cr1', created_at: null, expires_at: null } });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent.press(getByTestId('more-options'));
+    fireEvent.press(getByTestId('more-option-cut'));
+    await act(async () => {
+      fireEvent.press(getByTestId('corte-assim-que-abrir'));
+    });
+    const [, mensagem] = alerta.mock.calls[0] as [string, string];
+    expect(mensagem).toMatch(/responde quando abrir a agenda/);
+    expect(mensagem).not.toMatch(/5 minutos/);
+    alerta.mockRestore();
   });
 
   describe('profissional "só agenda" (Backend 8e6c00f)', () => {
@@ -352,33 +374,33 @@ describe('ServiceSelection — tempo do serviço (tempo-do-servico)', () => {
   });
 });
 
-// CLI-10 (Backend 02dd5ef): o contato que o profissional expoe. null = nada.
-describe('ServiceSelection — contato do profissional', () => {
+// Informacoes do profissional (Andre, 05/10): o contato saiu da escolha do
+// servico — sem Ligar e sem WhatsApp. O nome no topo leva a tela dele.
+describe('ServiceSelection — o profissional no topo', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    setRouteParams({ ...OPEN_PARAMS });
     mockGetServices.mockResolvedValue({
       data: [{ id: 's1', customName: 'Corte', price: 30, weeklyAverageDurationInMinutes: 30 }],
     });
   });
 
-  it('com contact_phone: mostra o número, e Ligar e WhatsApp abrem o link certo', async () => {
-    setRouteParams({ ...OPEN_PARAMS, contactPhone: '+55 (11) 98888-7777' });
-    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
-    const { findByTestId, getByText } = renderWithProviders(<ServiceSelection />);
-    await findByTestId('contato-do-profissional', {}, { timeout: 15000 });
-    expect(getByText('+55 (11) 98888-7777')).toBeTruthy();
-    fireEvent.press(getByText('Ligar'));
-    fireEvent.press(getByText('WhatsApp'));
-    expect(abrir).toHaveBeenNthCalledWith(1, 'tel:+5511988887777');
-    expect(abrir).toHaveBeenNthCalledWith(2, 'https://wa.me/5511988887777');
-    abrir.mockRestore();
-  });
-
-  it('sem contact_phone (null): nenhum contato na tela', async () => {
-    setRouteParams({ ...OPEN_PARAMS, contactPhone: null });
-    const { findByTestId, queryByTestId } = renderWithProviders(<ServiceSelection />);
+  it('nao ha Ligar, WhatsApp nem contato na escolha do servico', async () => {
+    const { findByTestId, queryByTestId, queryByText } = renderWithProviders(<ServiceSelection />);
     await findByTestId('service-s1', {}, { timeout: 15000 });
     expect(queryByTestId('contato-do-profissional')).toBeNull();
+    expect(queryByText('Ligar')).toBeNull();
+    expect(queryByText('WhatsApp')).toBeNull();
+  });
+
+  it('tocar no nome abre as informacoes do profissional', async () => {
+    const { findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('ver-profissional', {}, { timeout: 15000 }));
+    expect(mockNavigate).toHaveBeenCalledWith('professionalInfo', {
+      professionalId: 'p1',
+      establishmentId: 'e1',
+      professionalName: 'Carlos',
+    });
   });
 });
 
@@ -471,7 +493,7 @@ describe('ServiceSelection — pedido de corte com dia e horário', () => {
     );
     expect(dados.desiredTime).toMatch(/T09:30:00[+-]\d{2}:\d{2}$/);
     expect(alerta).toHaveBeenCalledWith('Pedido enviado! ⏳', expect.stringMatching(/amanhã às 09:30/));
-    expect(mockNavigate).toHaveBeenCalledWith('home');
+    expect(mockNavigate).toHaveBeenCalledWith('home', undefined, { pop: true });
     alerta.mockRestore();
   });
 

@@ -1,0 +1,70 @@
+# Perfil logado: Dados pessoais salva o nome, e os Termos abrem nas duas abas
+# (maestro-maximo — telas de configuracao que so tinham o unitario, DEC-7).
+# env: NOME_CLIENTE
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Perfil"
+    label: "15.01 · toca em Perfil"
+- tapOn:
+    text: "Dados pessoais"
+    label: "15.02 · toca em Dados pessoais"
+- extendedWaitUntil:
+    visible: "DADOS PESSOAIS"
+    timeout: 15000
+    label: "15.03 · espera DADOS PESSOAIS"
+- tapOn:
+    text: "Sobrenome"
+    label: "15.04 · toca em Sobrenome"
+- inputText:
+    text: "Bateria"
+    label: "15.05 · digita Bateria"
+- hideKeyboard:
+    label: "15.06 · fecha o teclado"
+- scrollUntilVisible:
+    element:
+      text: "Salvar"
+    label: "15.07 · rola até Salvar"
+- tapOn:
+    text: "Salvar"
+    label: "15.08 · toca em Salvar"
+- extendedWaitUntil:
+    visible: "Dados atualizados!"
+    timeout: 30000
+    label: "15.09 · espera Dados atualizados!"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "15.0A · fecha o aviso"
+- tapOn:
+    text: "Perfil"
+    label: "15.0B · volta ao Perfil"
+- scrollUntilVisible:
+    element:
+      id: "terms"
+    label: "15.0C · rola até terms"
+- tapOn:
+    id: "terms"
+    label: "15.0D · toca em terms"
+- extendedWaitUntil:
+    visible:
+      id: "tab-uso"
+    timeout: 15000
+    label: "15.0E · vê a aba Termos de Uso"
+- tapOn:
+    id: "tab-privacidade"
+    label: "15.0F · toca em Privacidade"
+# paginas-legais (10245bc, 732a9c1, 665276f): quem responde e a retencao.
+- extendedWaitUntil:
+    visible: "1. Quem somos"
+    timeout: 15000
+    label: "15.0H · vê Quem somos na Privacidade"
+- scrollUntilVisible:
+    element:
+      text: "7. Por quanto tempo guardamos"
+    label: "15.0I · rola até Por quanto tempo guardamos"
+- assertVisible:
+    text: ".*35 dias.*"
+    label: "15.0J · vê as cópias de segurança em até 35 dias"
+- tapOn:
+    id: "back-button"
+    label: "15.0G · volta ao Perfil"

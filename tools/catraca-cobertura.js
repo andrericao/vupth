@@ -42,4 +42,4 @@ function main(raiz = path.join(__dirname, '..')) {
 
 if (require.main === module) main();
 
-module.exports = { subirCatraca, METRICAS };
+module.exports = { subirCatraca, METRICAS, main };

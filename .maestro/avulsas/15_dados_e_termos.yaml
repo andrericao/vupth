@@ -1,0 +1,21 @@
+# Etapa avulsa 15 (maestro-maximo): roda num maestro test proprio.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "15"
+      LOJA: "0"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "15.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/15_dados_e_termos.yaml
+    env:
+      NOME_CLIENTE: ${output.NOME_CLIENTE}
+    label: "15.E1 · roda 15_dados_e_termos"

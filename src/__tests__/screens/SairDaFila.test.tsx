@@ -142,7 +142,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     });
     // Ciência da multa (Backend 0caf229): o "Sim" leva o valor que o aviso mostrou.
     expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk', 3);
-    expect(mockNavigate).toHaveBeenCalledWith('home');
+    expect(mockNavigate).toHaveBeenCalledWith('home', undefined, { pop: true });
     expect(mockLeave).toHaveBeenCalled();
     alerta.mockRestore();
   });
@@ -202,7 +202,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
       await segundo.find((b) => b.text === 'Sim, sair')!.onPress!();
     });
     expect(attendanceService.cancel).toHaveBeenLastCalledWith('a1', 'tk', 5);
-    expect(mockNavigate).toHaveBeenCalledWith('home');
+    expect(mockNavigate).toHaveBeenCalledWith('home', undefined, { pop: true });
     expect(mockLeave).toHaveBeenCalled();
     alerta.mockRestore();
   });

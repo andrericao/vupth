@@ -66,4 +66,10 @@ describe('o link para compartilhar (24/09)', () => {
     expect(estado).toContain('establishmentDetail');
     expect(estado).toContain('"profissional":"p9"');
   });
+
+  it('as páginas legais têm URL pública (paginas-legais: a Play Store pede)', () => {
+    expect(JSON.stringify(telaDoCaminho('/privacidade', opcoes))).toContain('privacy');
+    expect(JSON.stringify(telaDoCaminho('/excluir-conta', opcoes))).toContain('excluirConta');
+    expect(JSON.stringify(telaDoCaminho('/termos', opcoes))).toContain('terms');
+  });
 });
