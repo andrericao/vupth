@@ -38,7 +38,7 @@ Rodada verde com prints para o Andre guarda só essa pasta.
 
 **Os logs ficam na pasta (03/10).** Cada rodada grava o `console.txt`, o
 `maestro.log`, os prints e o `falhou_em` (o passo `NN.MM` que falhou) em
-`logs/maestro/<data>/`, no repositório (DEC-28): a bateria commita só `logs/` e dá push — a equipe lê o erro no GitHub.
+`.maestro/logs/<data>/`, versionada (DEC-29): a bateria commita só essa pasta e dá push — a equipe lê o erro no GitHub.
 Rodada verde não guarda nada; rodada vermelha apaga as antigas e fica só a
 dela — a mesma regra do Partner (limpar-logs, 05/10).
 

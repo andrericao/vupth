@@ -55,7 +55,8 @@ const TERMOS: Secao[] = [
 // web em /privacidade, a URL que a Play Store pede. Vale para os dois apps.
 // Respostas do Andre (08/10): pessoa fisica responde; ninguem recebe pedido por
 // e-mail — o titular resolve no app ou no /excluir-conta; retencao pelas boas
-// praticas (backup 35 dias, registros de acesso 6 meses). RASCUNHO: falta o
+// praticas (backup 35 dias; registros de acesso "pelo tempo exigido em lei" ate
+// o registro-de-acesso existir). RASCUNHO: falta o
 // nome completo, entre colchetes, e a revisao do Andre.
 export const CONTROLADOR = "[nome completo do responsável], pessoa física";
 
@@ -92,7 +93,7 @@ const PRIVACIDADE: Secao[] = [
   {
     titulo: "7. Por quanto tempo guardamos",
     corpo:
-      "Enquanto a sua conta existir. Ao excluir a conta, seus dados pessoais são apagados; os atendimentos que você já fez continuam no histórico do profissional, como \"usuário removido\". As cópias de segurança são apagadas em até 35 dias, e uma restauração não traz de volta quem excluiu a conta. Os registros de acesso (data, hora e IP) ficam 6 meses, como pede o Marco Civil da Internet (art. 15). Dados de pagamento, quando houver, ficam pelo prazo fiscal de 5 anos, só o necessário.",
+      "Enquanto a sua conta existir. Ao excluir a conta, seus dados pessoais são apagados; os atendimentos que você já fez continuam no histórico do profissional, como \"usuário removido\". As cópias de segurança são apagadas em até 35 dias, e uma restauração não traz de volta quem excluiu a conta. Os registros de acesso (data, hora e IP) ficam pelo tempo exigido em lei (Marco Civil da Internet, art. 15). Dados de pagamento, quando houver, ficam pelo prazo fiscal de 5 anos, só o necessário.",
   },
   {
     titulo: "8. Seus direitos",

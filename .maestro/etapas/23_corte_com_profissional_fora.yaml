@@ -1,0 +1,40 @@
+# Pedido de corte com o profissional em Fora (DEC-27, 0c1b968): o pedido
+# vai sem prazo — a confirmacao nao promete 5 minutos, e o Inicio diz que o
+# profissional responde quando abrir a agenda.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "more-options"
+    label: "23.01 · toca em more-options"
+- assertVisible:
+    text: ".*A fila está fechada — peça o corte e o profissional decide.*"
+    label: "23.02 · o menu diz que quem decide é o profissional"
+- tapOn:
+    id: "more-option-cut"
+    label: "23.03 · toca em more-option-cut"
+- tapOn:
+    id: "corte-assim-que-abrir"
+    label: "23.04 · toca em Assim que abrir"
+- extendedWaitUntil:
+    visible: "Pedido enviado!.*"
+    timeout: 30000
+    label: "23.05 · espera Pedido enviado!"
+- assertVisible:
+    text: ".*responde quando abrir a agenda desse dia.*"
+    label: "23.06 · a confirmação não promete 5 minutos"
+- assertNotVisible:
+    text: ".*5 minutos.*"
+    label: "23.07 · sem os 5 minutos"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "23.08 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible: ".*o profissional responde quando abrir a agenda.*"
+    timeout: 30000
+    label: "23.09 · o Início mostra o pedido sem prazo"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: "23_pedido_sem_prazo"
+      O_QUE: "O pedido de corte no Início, sem prazo, com o profissional em Fora"
+    label: "23.10 · print para o André"
