@@ -1,7 +1,6 @@
 import { AppState } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
 
-import { assinar, estadoDaConexao } from '@services/stompCompartilhado';
+import { assinar } from '@services/stompCompartilhado';
 
 // C17 (reportado pelo Partner): o Client abria DUAS conexões STOMP — uma do
 // tópico da loja e outra do canal pessoal. Agora é uma só, com as assinaturas
