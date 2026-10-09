@@ -5,10 +5,23 @@ appId: ${APP_ID}
 - tapOn:
     id: "primary-queue"
     label: "05.01 · toca em primary-queue"
+# O push "É quase a sua vez!" pode chegar antes do Entendi e cobri-lo
+# (bateria 09/10 15:13): espera o que vier primeiro e fecha o push, se for ele.
+- extendedWaitUntil:
+    visible: "(Entendi|É quase a sua vez!)"
+    timeout: 60000
+    label: "05.02 · espera Entendi ou o push da vez"
+- runFlow:
+    when:
+      visible: "É quase a sua vez!"
+    commands:
+      - tapOn:
+          id: "dialogo-botao-0"
+    label: "05.02b · fecha o push da vez, se veio antes do Entendi"
 - extendedWaitUntil:
     visible: "Entendi"
-    timeout: 60000
-    label: "05.02 · espera Entendi"
+    timeout: 10000
+    label: "05.02c · espera Entendi"
 - tapOn:
     text: "Entendi"
     label: "05.03 · toca em Entendi"
