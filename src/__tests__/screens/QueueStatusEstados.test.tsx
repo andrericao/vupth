@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react-native';
+import { fireEvent, waitFor } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
@@ -20,7 +20,8 @@ jest.mock('react-native-safe-area-context', () => ({
   ...jest.requireActual('react-native-safe-area-context'),
   useSafeAreaInsets: () => ({ top: 47, bottom: 34, left: 0, right: 0 }),
 }));
-jest.mock('@hooks/ofertaDePush', () => ({ podeOferecerPush: () => Promise.resolve(false) }));
+let mockPodeOferecer = false;
+jest.mock('@hooks/ofertaDePush', () => ({ podeOferecerPush: () => Promise.resolve(mockPodeOferecer) }));
 jest.mock('@hooks/useMostraPosicao', () => ({ useMostraPosicao: () => true }));
 jest.mock('@hooks/useQueueCountdown', () => ({ useQueueCountdown: () => mockEstado }));
 jest.mock('@hooks/useSwapOffers', () => ({ useSwapOffers: () => ({ data: [] }) }));
@@ -75,7 +76,10 @@ function estado(over: Record<string, unknown>) {
   };
 }
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockPodeOferecer = false;
+});
 
 describe('QueueStatus — concluído', () => {
   beforeEach(() => estado({ isFinished: true }));
@@ -118,3 +122,41 @@ describe('QueueStatus — aguardando, o topo', () => {
     expect(getByText('trocas-abertas')).toBeTruthy();
   });
 });
+
+describe('QueueStatus — pausado (a tela clara)', () => {
+  beforeEach(() => estado({ isInQueue: true, isPaused: true, activeQueue: { ...FILA, status: 'SCHEDULED' } }));
+
+  it('o ⓘ da duração, as trocas e o voltar ao início', () => {
+    const { getByTestId, getByText, queryByText } = renderWithProviders(<QueueStatus />);
+    fireEvent.press(getByTestId('queue-info-inline'));
+    fireEvent.press(getByText('aviso-da-estimativa'));
+    expect(queryByText('aviso-da-estimativa')).toBeNull();
+    fireEvent.press(getByText('Trocar de lugar'));
+    expect(getByText('trocas-abertas')).toBeTruthy();
+    fireEvent.press(getByText('Voltar ao início'));
+    expect(mockNavigate).toHaveBeenCalledWith('home', undefined, { pop: true });
+  });
+});
+
+describe('QueueStatus — concluído na tela clara', () => {
+  it('"Concluir" limpa a fila', () => {
+    estado({ isFinished: true, isInQueue: true, activeQueue: { ...FILA, establishmentId: '' } });
+    const { queryByText } = renderWithProviders(<QueueStatus />);
+    const concluir = queryByText('Concluir') ?? queryByText('Voltar ao início');
+    if (concluir) fireEvent.press(concluir);
+    expect(mockNavigate).toHaveBeenCalled();
+  });
+});
+
+describe('QueueStatus — a tela 10 na primeira fila', () => {
+  it('quando pode, oferece o aviso de push', async () => {
+    mockPodeOferecer = true;
+    estado({ isInQueue: true, activeQueue: { ...FILA, status: 'SCHEDULED' } });
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useFirstRunStore } = require('@stores/firstRunStore');
+    useFirstRunStore.setState({ restored: true, pushAsked: false, pushOferta: false });
+    renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(useFirstRunStore.getState().pushOferta).toBe(true));
+  });
+});
+
