@@ -55,7 +55,7 @@ A falha do jest no pre-push fica em `.logs-teste/`, fora do git.
 As contas de teste vêm da API (cada etapa cria a sua) e de
 `.maestro/TEST_ACCOUNTS.md`. A senha das contas de teste é pública (`Teste@123`).
 A bateria não usa arquivo de fora do repositório. Os logs ficam em
-`logs/maestro/<rodada>/` e sobem para o GitHub ao fim da rodada.
+`.maestro/logs/<rodada>/` e sobem para o GitHub ao fim da rodada.
 
 ## 6. Claude Code
 

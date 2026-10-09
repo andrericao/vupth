@@ -9,9 +9,9 @@
 # autofill e o corretor (restaurar.sh), mesmo se a rodada falhar.
 #
 # Ao fim, o relatorio etapa a etapa (✅/❌/⏭), na tela e em relatorio.txt.
-# Os logs e prints de cada rodada caem em logs/maestro/<data>, no repositorio
-# (DEC-28 · tudo-no-github): ao fim, a bateria commita SO a pasta logs/ e da
-# push, e a equipe le o erro no GitHub, no PC ou na nuvem. Rodada
+# Os logs e prints de cada rodada caem em .maestro/logs/<data>, versionada
+# (DEC-29): ao fim, a bateria commita SO a pasta .maestro/logs/ e da push, e a
+# equipe le o erro no GitHub, no PC ou na nuvem. Rodada
 # verde nao guarda nada; rodada vermelha apaga as antigas e fica so a dela —
 # a mesma regra do Partner (limpar-logs, 05/10).
 
@@ -72,7 +72,7 @@ case "$SUPERVISAO" in
 esac
 echo ""
 
-LOGS="$REPO/logs/maestro"
+LOGS="$DIR/logs"
 RODADA="$LOGS/$(date +%Y-%m-%d_%H%M%S)"
 mkdir -p "$RODADA"
 echo "Logs desta rodada: ${RODADA#$REPO/}"
@@ -213,15 +213,15 @@ else
   echo "Logs e prints em: ${RODADA#$REPO/}"
 fi
 
-# DEC-28: os logs vao para o GitHub. Commit so de logs/ (o pathspec deixa de
-# fora o que mais estiver mudado na pasta). O push so sai se o que sobe for so
-# logs/ — codigo sem push espera o push do Andre.
+# DEC-28/29: os logs vao para o GitHub. Commit so de .maestro/logs/ (o pathspec
+# deixa de fora o que mais estiver mudado na pasta). O push so sai se o que sobe
+# for so os logs — codigo sem push espera o push do Andre.
 cd "$REPO" || exit "$STATUS"
-git add -A logs/
-if ! git diff --cached --quiet -- logs/; then
-  git commit -q -m "chore(logs): bateria Maestro $(basename "$RODADA") — $([ "$STATUS" -eq 0 ] && echo verde || echo FALHA)" -- logs/
+git add -A .maestro/logs/
+if ! git diff --cached --quiet -- .maestro/logs/; then
+  git commit -q -m "chore(logs): bateria Maestro $(basename "$RODADA") — $([ "$STATUS" -eq 0 ] && echo verde || echo FALHA)" -- .maestro/logs/
   git pull -q --rebase --autostash origin "$BRANCH_PASTA" 2>/dev/null
-  if git diff --name-only "origin/$BRANCH_PASTA"..HEAD | grep -qv '^logs/'; then
+  if git diff --name-only "origin/$BRANCH_PASTA"..HEAD | grep -qv '^.maestro/logs/'; then
     echo "📝 Logs commitados; sobem no proximo push (ha codigo sem push na $BRANCH_PASTA)."
   elif git push -q origin "HEAD:$BRANCH_PASTA"; then
     echo "📤 Logs no GitHub (origin/$BRANCH_PASTA)."
