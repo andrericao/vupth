@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef, memo } from "react";
 import { ActivityIndicator, FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle, ScrollView } from "react-native";
 import { useNavigation, useRoute, useScrollToTop, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
-import { Search, SlidersHorizontal, ChevronRight, Zap } from "lucide-react-native";
+import { Search, SlidersHorizontal, ChevronRight, Zap, Star } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType } from "@domain/establishment/types";
@@ -10,6 +10,7 @@ import { filterEstablishments } from "@domain/establishment/filter";
 import { orderForHome, formatDistanceKm } from "@domain/establishment/proximity";
 import { statusTag } from "@domain/establishment/statusTag";
 import { serviceTypeLabel } from "@domain/establishment/serviceType";
+import { resolveRating } from "@domain/establishment/rating";
 import { primeiroNome } from "@domain/auth/displayName";
 import { useEstablishments, usePraOntem, useVitrinePaginada } from "@hooks/useEstablishments";
 import { vitrinePaginada } from "@domain/establishment/paginacao";
@@ -110,7 +111,7 @@ function StatusPill({ label, live }: { label: string; live: boolean }) {
 // Memorizada (Andre, 18/09: "apresentar de acordo como o usuario vai
 // scrollando"): a Home re-renderiza a cada tique do countdown, a cada letra da
 // busca e quando a pilula aparece — e cada vez redesenhava TODAS as linhas.
-const EstablishmentRow = memo(function EstablishmentRow({
+export const EstablishmentRow = memo(function EstablishmentRow({
   establishment,
   distanceKm,
   destaque,
@@ -139,6 +140,14 @@ const EstablishmentRow = memo(function EstablishmentRow({
   const meta: string[] = destaque ? [destaque] : [];
   if (establishment.serviceType) meta.push(serviceTypeLabel(establishment.serviceType));
   if (distanceKm != null) meta.push(formatDistanceKm(distanceKm));
+  // A nota voltou ao card (Andre, 09/10: "a distancia e a avaliacao devem
+  // aparecer no card da home"). Tinha saido no redesenho de 16/08 (7344e150).
+  // A mesma fonte da tela da loja: a melhor nota da loja, senao a media.
+  const nota = resolveRating(
+    establishment.rating_best ?? establishment.rating_average,
+    establishment.rating_count,
+    establishment.id,
+  );
 
   return (
     <TouchableOpacity onPress={() => onPress(establishment)} testID={`establishment-${establishment.id}`}>
@@ -171,15 +180,19 @@ const EstablishmentRow = memo(function EstablishmentRow({
           <Text fontFamily="$display" fontSize={fs(15)} fontWeight="$bold" color="$brandTextPrimary">
             {establishment.name}
           </Text>
-          <HStack gap={8} alignItems="center">
+          <HStack gap={8} alignItems="center" flexWrap="wrap">
+            <HStack gap={3} alignItems="center" testID={`nota-${establishment.id}`}>
+              <Star size={12} color="#163300" fill="#163300" />
+              <Text fontFamily="$heading" fontSize={fs(13)} color="$brandTextPrimary">
+                {nota.value.toFixed(1)}
+              </Text>
+            </HStack>
             {/* O ponto SEPARA, entao nao vem antes do primeiro item. Antes a
                 linha comecava com o `queueLabel` e a meta so completava; sem
                 ele, o separador virou um "·" orfao no comeco. */}
-            {meta.map((m, i) => (
+            {meta.map((m) => (
               <HStack key={m} gap={8} alignItems="center">
-                {i > 0 && (
-                  <Center width={3} height={3} borderRadius={1.5} bg="$brandTextSecondary" />
-                )}
+                <Center width={3} height={3} borderRadius={1.5} bg="$brandTextSecondary" />
                 <Text fontFamily="$body" fontSize={fs(13)} color="$brandTextSecondary">
                   {m}
                 </Text>

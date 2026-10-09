@@ -29,6 +29,11 @@ appId: ${APP_ID}
     visible: ${LOJA}
     timeout: 30000
     label: "03.07 · vê ${LOJA} entre as livres"
+# A nota voltou ao card do Inicio (distancia-e-nota-no-card, 09/10). A
+# distancia nao: a bateria nega a localizacao, entao o servidor nao a manda.
+- assertVisible:
+    id: "nota-.*"
+    label: "03.0A · o card da loja mostra a nota"
 - tapOn:
     id: "pra-ontem-sair"
     label: "03.08 · desliga o Pra ontem"
