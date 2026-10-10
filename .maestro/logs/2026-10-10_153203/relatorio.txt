@@ -1,0 +1,25 @@
+✅ 00 · versão
+❌ 01_visitante — parou em 01.01 · toca em Já tem conta? Entrar
+⏭  02_cadastro (já passou no 85dcd02c — a completa roda de novo)
+⏭  03_loja (já passou no 85dcd02c — a completa roda de novo)
+⏭  04_fim_de_fila_hibrido (já passou no 545a2374 — a completa roda de novo)
+⏭  05_entra_e_sai_com_multa (já passou no 85dcd02c — a completa roda de novo)
+⏭  06_multa_no_total (já passou no 85dcd02c — a completa roda de novo)
+⏭  07_agendar_pela_barra (já passou no 85dcd02c — a completa roda de novo)
+⏭  08_fila_fechada (já passou no 85dcd02c — a completa roda de novo)
+⏭  09_login (já passou no 545a2374 — a completa roda de novo)
+⏭  10_pedido_de_corte (já passou no 545a2374 — a completa roda de novo)
+❌ 11_reabrir_o_app — parou em 11.08 · espera queue-position (fecha o aviso da estimativa)
+⏭  12_aparencia (já passou no 545a2374 — a completa roda de novo)
+❌ 13_push_da_vez — parou em 13.AD · rola até Versão do app
+⏭  14_informacoes_do_profissional (já passou no 545a2374 — a completa roda de novo)
+⏭  15_dados_e_termos (já passou no 545a2374 — a completa roda de novo)
+❌ 16_conta — parou em 16.15 · espera E-mail atualizado!
+⏭  17_lista_de_lojas (já passou no 545a2374 — a completa roda de novo)
+✅ 18_conjunta_tempo_do_servico
+✅ 19_conjunta_so_agenda
+⏭  20_esqueci_senha (já passou no 545a2374 — a completa roda de novo)
+❌ 21_conjunta_atraso — parou em 21.04 · espera queue-position (fecha o aviso da estimativa)
+⏭  22_conjunta_finalizar_e_avaliar (já passou no 545a2374 — a completa roda de novo)
+⏭  23_corte_com_profissional_fora (já passou no 545a2374 — a completa roda de novo)
+✅ 24_tela_do_push
