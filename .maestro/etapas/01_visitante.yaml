@@ -55,9 +55,20 @@ appId: ${APP_ID}
     file: ../apoio/fechar_aviso.yaml
     label: "01.02 · roda fechar_aviso"
 
-- tapOn:
-    text: "Perfil"
-    label: "01.03 · toca em Perfil"
+# No emulador lento (bateria 10/10 17:30, 01.04) o toque levou 41 s e nao
+# trocou a aba: toca de novo ate o Perfil do visitante abrir.
+- repeat:
+    times: 4
+    while:
+      notVisible: "Criar conta grátis"
+    commands:
+      - tapOn:
+          text: "Perfil"
+      - extendedWaitUntil:
+          visible: "Criar conta grátis"
+          timeout: 10000
+          optional: true
+    label: "01.03 · toca em Perfil (de novo, se a aba não trocou)"
 - assertVisible:
     text: "Criar conta grátis"
     label: "01.04 · vê Criar conta grátis"
