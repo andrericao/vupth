@@ -4,6 +4,8 @@
 # O Alert do app e o DialogoVupth nas duas plataformas, com testID por botao.
 appId: ${APP_ID}
 ---
+- runFlow:
+    file: esperar_o_sistema.yaml
 - waitForAnimationToEnd:
     timeout: 3000
 - runFlow:
