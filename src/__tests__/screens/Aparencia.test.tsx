@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { act, fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
@@ -53,5 +53,16 @@ describe('Aparência', () => {
     fireEvent.press(getByTestId('aparencia-tema'));
     expect(alerta).toHaveBeenCalledWith('Tema escuro', expect.stringMatching(/em breve/));
     alerta.mockRestore();
+  });
+
+  it('cancelar-cortado (09/10): o Cancelar fecha a janela sem salvar, e os botões crescem com a fonte', () => {
+    useFonteStore.setState({ passo: 2 });
+    const { getByTestId, queryByTestId } = renderWithProviders(<Aparencia />);
+    fireEvent.press(getByTestId('aparencia-fonte'));
+    expect(StyleSheet.flatten(getByTestId('cancelar-fonte').props.style).minHeight).toBe(54);
+    fireEvent.press(getByTestId('fonte-0'));
+    fireEvent.press(getByTestId('cancelar-fonte'));
+    expect(queryByTestId('janela-da-fonte')).toBeNull();
+    expect(useFonteStore.getState().passo).toBe(2);
   });
 });

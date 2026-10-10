@@ -43,6 +43,25 @@ appId: ${APP_ID}
 - assertVisible:
     text: "\\+2"
     label: "12.12 · vê +2"
+# cancelar-cortado (Andre, 09/10): com a fonte em +2, o "Cancelar" passava da
+# borda de baixo da janela. Abre com +2, fecha pelo Cancelar e confere que nada
+# foi salvo. O corte em si (cartao menor que o botao) o Maestro nao mede: fica
+# no teste manual.
+- tapOn:
+    id: "aparencia-fonte"
+    label: "12.C1 · abre a janela com a fonte em +2"
+- assertVisible:
+    id: "cancelar-fonte"
+    label: "12.C2 · vê o Cancelar dentro da janela"
+- tapOn:
+    id: "cancelar-fonte"
+    label: "12.C3 · toca em Cancelar"
+- assertNotVisible:
+    id: "janela-da-fonte"
+    label: "12.C4 · a janela fechou"
+- assertVisible:
+    text: "\\+2"
+    label: "12.C5 · continua +2 (Cancelar não salva)"
 - tapOn:
     id: "aparencia-fonte"
     label: "12.13 · toca em aparencia-fonte"
