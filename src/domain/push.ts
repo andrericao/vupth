@@ -72,6 +72,17 @@ export type ResultadoPush = {
   detalhe?: string;
 };
 
+/**
+ * A caixa do sistema ainda pode vir? No Android 13+ o expo-notifications
+ * responde `denied` (e nao `undetermined`) para quem NUNCA foi perguntado: o
+ * `areNotificationsEnabled()` e falso antes da permissao (bateria 10/10 08:06 —
+ * a tela 10 nunca aparecia e o token nunca vinha). Quem decide e o
+ * `canAskAgain`; o "ja perguntamos" fica com a chave de quem chama.
+ */
+export function aindaDaParaPedir(p: { status: string; canAskAgain?: boolean }): boolean {
+  return p.status !== 'granted' && p.canAskAgain !== false;
+}
+
 // Pede permissão (se preciso) e devolve o Expo Push Token com o MOTIVO do
 // desfecho. Best-effort: nunca lança — quem chama não pode quebrar por push.
 export async function acquireExpoPushToken(env: PushEnv): Promise<ResultadoPush> {
@@ -79,10 +90,11 @@ export async function acquireExpoPushToken(env: PushEnv): Promise<ResultadoPush>
   if (!env.isDevice) return { token: null, motivo: 'emulador' };
 
   try {
-    let { status, canAskAgain } = await env.getPermissionsAsync();
+    const atual = await env.getPermissionsAsync();
+    let status = atual.status;
     // Pede só quando ainda não foi respondida (Andre, 02/10: a caixa voltava a
     // cada abertura). Negou uma vez, fica negado até ele mudar nos ajustes.
-    if (status === 'undetermined' && canAskAgain !== false && !(await env.jaPerguntou?.())) {
+    if (aindaDaParaPedir(atual) && !(await env.jaPerguntou?.())) {
       await env.marcarPerguntado?.();
       status = (await env.requestPermissionsAsync()).status;
     }
