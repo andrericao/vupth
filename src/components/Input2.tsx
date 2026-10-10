@@ -45,7 +45,12 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
           {...rest}
         />
         {isPassword && (
-          <TouchableOpacity onPress={() => setVisible((v) => !v)} hitSlop={8}>
+          <TouchableOpacity
+            onPress={() => setVisible((v) => !v)}
+            hitSlop={8}
+            accessibilityLabel={visible ? "Esconder a senha" : "Mostrar a senha"}
+            testID="input-ver-senha"
+          >
             {visible ? (
               <Eye size={22} color="#454745" />
             ) : (
@@ -57,7 +62,7 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
           <Search size={20} color="#454745" />
         )}
         {showSearchIcon && hasValue && onClear && (
-          <TouchableOpacity onPress={onClear} hitSlop={8}>
+          <TouchableOpacity onPress={onClear} hitSlop={8} accessibilityLabel="Limpar" testID="input-limpar">
             <CircleX size={22} color="#454745" />
           </TouchableOpacity>
         )}
