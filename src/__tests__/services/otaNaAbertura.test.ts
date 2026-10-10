@@ -5,17 +5,22 @@ import { aplicarOtaNaAbertura } from '@services/otaNaAbertura';
 // card-oscila (Andre, 10/10): a primeira abertura depois de instalar ou limpar
 // os dados roda o bundle do APK; com OTA novo, baixa e recomeca nele na hora.
 
+// Getters, nao valores: o import * copia o modulo ao importar, e trocar o
+// valor no teste depois nao chegaria ao servico.
+const mockFlags = { isEnabled: true, isEmbeddedLaunch: true };
 jest.mock('expo-updates', () => ({
-  isEnabled: true,
-  isEmbeddedLaunch: true,
+  get isEnabled() {
+    return mockFlags.isEnabled;
+  },
+  get isEmbeddedLaunch() {
+    return mockFlags.isEmbeddedLaunch;
+  },
   checkForUpdateAsync: jest.fn(),
   fetchUpdateAsync: jest.fn(),
   reloadAsync: jest.fn(),
 }));
 
 const mockUpdates = jest.requireMock('expo-updates') as {
-  isEnabled: boolean;
-  isEmbeddedLaunch: boolean;
   checkForUpdateAsync: jest.Mock;
   fetchUpdateAsync: jest.Mock;
   reloadAsync: jest.Mock;
@@ -28,8 +33,8 @@ beforeEach(() => {
   jest.clearAllMocks();
   Platform.OS = 'android';
   (global as { __DEV__?: boolean }).__DEV__ = false;
-  mockUpdates.isEnabled = true;
-  mockUpdates.isEmbeddedLaunch = true;
+  mockFlags.isEnabled = true;
+  mockFlags.isEmbeddedLaunch = true;
   mockUpdates.checkForUpdateAsync.mockResolvedValue({ isAvailable: true });
   mockUpdates.fetchUpdateAsync.mockResolvedValue({ isNew: true });
   mockUpdates.reloadAsync.mockResolvedValue(undefined);
@@ -48,7 +53,7 @@ describe('aplicarOtaNaAbertura', () => {
   });
 
   it('quem já roda um OTA não reinicia sozinho', async () => {
-    mockUpdates.isEmbeddedLaunch = false;
+    mockFlags.isEmbeddedLaunch = false;
     expect(await aplicarOtaNaAbertura()).toBe(false);
     expect(mockUpdates.checkForUpdateAsync).not.toHaveBeenCalled();
   });
@@ -71,7 +76,7 @@ describe('aplicarOtaNaAbertura', () => {
   });
 
   it('updates desligado (build de desenvolvimento): nada', async () => {
-    mockUpdates.isEnabled = false;
+    mockFlags.isEnabled = false;
     expect(await aplicarOtaNaAbertura()).toBe(false);
   });
 
