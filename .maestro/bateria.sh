@@ -1,8 +1,9 @@
 #!/bin/bash
 # A bateria do Client com UM comando (Andre, 03/10 — commit-sem-flag):
 #
-#   bash .maestro/bateria.sh              # pula as etapas ja aprovadas neste commit
-#   bash .maestro/bateria.sh --completa   # roda todas
+#   bash .maestro/bateria.sh              # pergunta: completa ou so as que nao passaram
+#   bash .maestro/bateria.sh --completa   # roda todas, sem perguntar
+#   bash .maestro/bateria.sh --falhas     # so as que nao passaram, sem perguntar
 #
 # Prepara o celular (setup.sh), acha sozinha o commit esperado (o ultimo da
 # branch da pasta no GitHub — a dev e o OTA do canal preview), roda o roteiro e devolve o
@@ -97,13 +98,26 @@ adb shell pm list packages 2>/dev/null | grep -q "com.vupth.partner.preview" || 
 # bateria-pula-aprovados (Andre, 05/10): a etapa verde grava a marca com o
 # commit em aprovados.txt (no .gitignore); a proxima rodada no MESMO commit a
 # pula. --completa roda tudo e recomeca as marcas.
+#
+# A pergunta (Andre, 09/10 noite: "quero que o script pergunte se e para rodar
+# o teste completo ou apenas os que nao passaram"). "So as que nao passaram"
+# pula toda etapa ja verde em aprovados.txt, de qualquer commit; sem resposta
+# em 1 min, segue assim.
 APROVADOS="$DIR/aprovados.txt"
-if [ "${1:-}" = "--completa" ]; then
+MODO="${1:-}"
+if [ "$MODO" != "--completa" ] && [ "$MODO" != "--falhas" ]; then
+  read -r -t 60 -p "Rodar a bateria completa ou só as que não passaram? (c = completa / F = só as falhas) " RESP
+  echo ""
+  if [ "$RESP" = "c" ] || [ "$RESP" = "C" ]; then MODO="--completa"; else MODO="--falhas"; fi
+fi
+if [ "$MODO" = "--completa" ]; then
   rm -f "$APROVADOS"
   echo "Completa: todas as etapas rodam."
+else
+  echo "Só as que não passaram: as etapas já verdes em aprovados.txt ficam como ⏭."
 fi
 touch "$APROVADOS"
-aprovada() { grep -qxF "$1 $COMMIT" "$APROVADOS"; }
+aprovada() { grep -q "^$1 " "$APROVADOS"; }
 aprovar() { grep -vE "^$1 " "$APROVADOS" > "$APROVADOS.tmp"; echo "$1 $COMMIT" >> "$APROVADOS.tmp"; mv "$APROVADOS.tmp" "$APROVADOS"; }
 
 # Os prints "para o Andre" (apoio/para_o_andre.yaml) e a linha do que olhar.
@@ -169,7 +183,7 @@ else
       continue
     fi
     if aprovada "$n"; then
-      echo "⏭  $arquivo (aprovada no $COMMIT — --completa roda de novo)" >> "$RODADA/relatorio.txt"
+      echo "⏭  $arquivo (já passou no $(grep "^$n " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RODADA/relatorio.txt"
       continue
     fi
     rodar "$arquivo"
