@@ -1,0 +1,27 @@
+# A cortina de notificacoes (Andre, 09/10 noite): uma etapa que abre a gaveta
+# do Android (13, 24) e falha antes de fecha-la deixa a cortina puxada — a
+# proxima etapa abre o app por baixo dela e nada funciona. Este subfluxo
+# confere e fecha: no comeco de cada etapa (preparo.yaml) e no onFlowComplete
+# das etapas que abrem a gaveta (roda mesmo se a etapa falhar).
+# A cortina se reconhece pelos botoes dela (ingles ou portugues) e pelos ids
+# do systemui; o Voltar a fecha sem mexer no app que esta por baixo.
+appId: ${APP_ID}
+---
+- repeat:
+    times: 3
+    while:
+      visible:
+        text: "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)"
+    commands:
+      - pressKey: Back
+      - waitForAnimationToEnd:
+          timeout: 2000
+- repeat:
+    times: 3
+    while:
+      visible:
+        id: "com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view)"
+    commands:
+      - pressKey: Back
+      - waitForAnimationToEnd:
+          timeout: 2000

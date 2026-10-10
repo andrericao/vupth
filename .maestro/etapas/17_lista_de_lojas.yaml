@@ -18,14 +18,20 @@ appId: ${APP_ID}
 - tapOn:
     id: "see-all"
     label: "17.03 · toca em Ver todos"
+# A troca de ordem (sort-toggle) so existe com distancia, e a bateria nega a
+# localizacao: espera a contagem da lista (bateria 09/10 20:30, 17.04).
 - extendedWaitUntil:
-    visible:
-      id: "sort-toggle"
+    visible: "(Nenhuma aberta agora|[0-9]+ abertas? agora)"
     timeout: 30000
     label: "17.04 · espera a lista de lojas"
-- tapOn:
-    id: "sort-toggle"
-    label: "17.05 · troca a ordem"
+- runFlow:
+    when:
+      visible:
+        id: "sort-toggle"
+    commands:
+      - tapOn:
+          id: "sort-toggle"
+    label: "17.05 · troca a ordem, se houver distância"
 - scrollUntilVisible:
     element:
       id: "establishment-${LOJA_ID}"

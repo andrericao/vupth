@@ -71,6 +71,11 @@ appId: ${APP_ID}
             NOME_CLIENTE: ${output.NOME_CLIENTE}
     label: "${ETAPA}.P5 · cria o cliente pela API"
 
+# A cortina de notificacoes puxada (uma etapa anterior que falhou com a
+# gaveta aberta) cobre o app: confere e fecha antes e depois de abri-lo.
+- runFlow:
+    file: fechar_cortina.yaml
+    label: "${ETAPA}.P5c · confere que a cortina de notificações está fechada"
 # Mesma abertura da bateria completa (00.05–00.07): sem permissoes, e a caixa
 # do sistema negada enquanto espera.
 - launchApp:
@@ -80,6 +85,9 @@ appId: ${APP_ID}
       location: deny
       notifications: "${typeof NOTIFICACOES !== 'undefined' && NOTIFICACOES ? NOTIFICACOES : 'deny'}"
     label: "${ETAPA}.P6 · abre o app limpo"
+- runFlow:
+    file: fechar_cortina.yaml
+    label: "${ETAPA}.P6b · fecha a cortina, se o app abriu por baixo dela"
 - runFlow:
     file: esperar_negando.yaml
     env:

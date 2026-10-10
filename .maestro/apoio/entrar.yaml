@@ -18,8 +18,31 @@ appId: ${APP_ID}
 - hideKeyboard
 - tapOn:
     id: "primary-login"
+# O login pode demorar com o servidor lento e voltar com uma caixa de erro
+# (bateria 09/10 20:30, 07.PA: a caixa fechou, o app seguiu deslogado e o
+# "Sair da conta" nunca apareceu). Espera o desfecho e, se ainda estiver na
+# tela de login, tenta mais uma vez (os campos continuam preenchidos).
+- extendedWaitUntil:
+    visible:
+      id: "(dialogo-botao-0|busca-home)"
+    timeout: 90000
+    optional: true
 - runFlow:
     file: fechar_aviso.yaml
+- runFlow:
+    when:
+      visible:
+        id: "primary-login"
+    commands:
+      - tapOn:
+          id: "primary-login"
+      - extendedWaitUntil:
+          visible:
+            id: "(dialogo-botao-0|busca-home)"
+          timeout: 90000
+          optional: true
+      - runFlow:
+          file: fechar_aviso.yaml
 - tapOn:
     text: "Perfil"
 - scrollUntilVisible:

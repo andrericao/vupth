@@ -72,11 +72,47 @@ appId: ${APP_ID}
 # A etapa e de SAIR COM MULTA (Andre, 04/10): dentro da tolerancia ("Voce pode
 # sair da fila sem custo ate HH:MM") a saida e de graca. Espera a faixa sumir —
 # o horario dela e o do servidor — e so entao sai.
+# Em laço, conferindo de novo depois de 5 s: a faixa pode sumir por um
+# instante num re-render, e um notVisible so passava cedo (bateria 09/10
+# 20:30, 06: passou em 33 s com "sem custo até 20:50" na tela, e a saida foi de
+# graca, sem a caixa "Sair da fila?").
+- repeat:
+    times: 20
+    while:
+      visible:
+        text: ".*sem custo até.*"
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            text: ".*sem custo até.*"
+          timeout: 60000
+          optional: true
+      # A pausa de 5 s antes de conferir de novo: espera a faixa voltar.
+      - extendedWaitUntil:
+          visible:
+            text: ".*sem custo até.*"
+          timeout: 5000
+          optional: true
+    label: "05.11 · espera a tolerância acabar (a faixa sem custo some)"
+# Uma caixa por cima (o push da vez com o app aberto) tambem esconde a faixa:
+# fecha e confere de novo, com a tela livre.
+- runFlow:
+    when:
+      visible: "É quase a sua vez!"
+    commands:
+      - tapOn:
+          id: "dialogo-botao-0"
+    label: "05.1A · fecha o push da vez, se cobriu a faixa"
+- extendedWaitUntil:
+    visible:
+      id: "leave-queue"
+    timeout: 10000
+    label: "05.1B · a tela da fila está livre"
 - extendedWaitUntil:
     notVisible:
-      id: "faixa-da-tolerancia"
+      text: ".*sem custo até.*"
     timeout: 900000
-    label: "05.11 · espera a tolerância acabar (a faixa sem custo some)"
+    label: "05.1C · a faixa sem custo saiu de vez"
 
 # Sair da fila: dois toques seguidos (D15) e a confirmacao com o valor. Dois
 # tapOn saem ~2 s um do outro, fora da janela de 1,5 s (JANELA_DO_TOQUE_DUPLO_MS):

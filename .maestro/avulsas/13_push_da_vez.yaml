@@ -8,6 +8,11 @@ env:
   APP_ID: com.vupth.client.preview
   API: https://vupth-backend-ia.onrender.com
   SENHA: "Teste@123"
+# Roda mesmo se a etapa falhar: a gaveta aberta (13.03/13.0A) nao pode ficar
+# puxada por cima da etapa seguinte (cortina de notificacoes, Andre 09/10).
+onFlowComplete:
+  - runFlow:
+      file: ../apoio/fechar_cortina.yaml
 ---
 - runFlow:
     file: ../apoio/preparo.yaml
@@ -19,6 +24,25 @@ env:
       FILA_FECHADA: "0"
       NOTIFICACOES: "allow"
     label: "13.P0 · prepara a etapa (notificações permitidas)"
+
+# O preparo termina na tela Sistema (atualizar.yaml). Antes de fechar o app, o
+# backend precisa ter o token (POST /devices, com retentativas de ate ~66s no
+# cold start): fechar antes matava o registro e o push nunca chegava (13.04
+# vermelha em todas as rodadas ate 09/10). Os 7 toques na versao abrem o painel.
+- repeat:
+    times: 7
+    commands:
+      - tapOn:
+          id: "version-line"
+    label: "13.T1 · abre o diagnóstico de push (7 toques na versão)"
+- scrollUntilVisible:
+    element:
+      text: "backend sabe\\?"
+    label: "13.T2 · rola até o painel de push"
+- extendedWaitUntil:
+    visible: "sim \\(POST /devices\\)"
+    timeout: 90000
+    label: "13.T3 · o backend tem o token de push (POST /devices)"
 
 # 1) App FECHADO: entra pela API, o push chega, o toque abre a fila.
 - stopApp:
