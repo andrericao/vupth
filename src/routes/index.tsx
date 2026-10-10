@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context";
 
 import { AuthRoutes } from "./auth.routes";
 import { navigationRef, guardarEstadoDaNavegacao, estadoDaNavegacao } from "./navigationRef";
@@ -32,8 +32,11 @@ export function Routes(){
 	const restored = useFirstRunStore((s) => s.restored);
 	const pushOferta = useFirstRunStore((s) => s.pushOferta);
 
+	// As insets ja na primeira pintura (entrar-atras-da-barra): sem as metricas
+	// iniciais, o primeiro quadro vinha com inset 0 e o rodape da entrada
+	// nascia atras da barra do celular.
 	return(
-		<SafeAreaProvider>
+		<SafeAreaProvider initialMetrics={initialWindowMetrics}>
 		<Box flex={1} bg="$white">
 		{/* Na web: "Baixar o app" ou "Continuar na web" (link-de-divulgacao). */}
 		<FaixaBaixarApp />

@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react-native';
+import { fireEvent, within } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { CardDaLoja } from '@components/CardDaLoja';
 import { Establishment } from '@domain/establishment/types';
@@ -45,6 +45,31 @@ describe('o card da loja na Home', () => {
     expect(await findByText('4.5', {}, { timeout: 15000 })).toBeTruthy();
     expect(queryByText(/km/)).toBeNull();
     expect(queryByText('Barbearia do Zé')).toBeTruthy();
+  });
+
+  it('a distância vem com o ícone de local (distancia-no-card, 09/10)', async () => {
+    const { findByTestId } = renderWithProviders(
+      <CardDaLoja establishment={loja()} distanceKm={0.85} onPress={jest.fn()} />,
+    );
+    const distancia = await findByTestId('distancia-e1', {}, { timeout: 15000 });
+    expect(within(distancia).getByText('850 m')).toBeTruthy();
+  });
+
+  it('sem GPS no aparelho, "Ligue o GPS" no lugar da distância', async () => {
+    const { findByText, getByTestId } = renderWithProviders(
+      <CardDaLoja establishment={loja()} distanceKm={null} semGps onPress={jest.fn()} />,
+    );
+    expect(await findByText('Ligue o GPS', {}, { timeout: 15000 })).toBeTruthy();
+    expect(getByTestId('distancia-e1')).toBeTruthy();
+  });
+
+  it('com GPS e loja sem coordenada, a distância some (sem o aviso)', async () => {
+    const { findByText, queryByTestId, queryByText } = renderWithProviders(
+      <CardDaLoja establishment={loja({ rating_average: 4.5 })} distanceKm={null} semGps={false} onPress={jest.fn()} />,
+    );
+    expect(await findByText('4.5', {}, { timeout: 15000 })).toBeTruthy();
+    expect(queryByTestId('distancia-e1')).toBeNull();
+    expect(queryByText('Ligue o GPS')).toBeNull();
   });
 
   it('loja fechada: a etiqueta Agendar; sem tipo, a linha fica só com a nota; o toque abre a loja', async () => {

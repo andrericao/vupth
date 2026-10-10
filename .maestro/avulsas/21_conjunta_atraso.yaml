@@ -24,6 +24,20 @@ env:
       LOJA_ID: ${output.LOJA_ID}
       SERVICO_ID: ${output.SERVICO_ID}
     label: "21.PD · entra na fila pela API"
+# Com o app aberto, a entrada pela API nao chega ao Inicio (o puxar para
+# atualizar so recarrega as lojas): sem o card-da-fila (bateria 09/10 20:30,
+# 21.02). Reabrir o app traz a fila ativa do servidor — sem clearState, o OTA
+# e o login ficam.
+- stopApp:
+    label: "21.PE · fecha o app"
+- launchApp:
+    permissions:
+      location: deny
+      notifications: deny
+    label: "21.PF · abre o app de novo (traz a fila ativa)"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "21.PG · fecha as caixas"
 - runFlow:
     file: ../etapas/21_conjunta_atraso.yaml
     env:

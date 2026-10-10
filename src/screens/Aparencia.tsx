@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Alert, Modal, Pressable, TouchableOpacity } from "react-native";
+import { Alert, Modal, Pressable, Text as TextoNativo, TouchableOpacity, View } from "react-native";
 import { VStack, HStack, Box, Text, ScrollView } from "@gluestack-ui/themed";
 import { ChevronRight, Moon, Type } from "lucide-react-native";
 
 import { ScreenHeader } from "@components/ScreenHeader";
-import { Button } from "@components/Button";
 import { PASSOS_DA_FONTE, rotuloDoPasso } from "@domain/fonte";
-import { useFonteStore } from "@stores/fonteStore";
+import { fs, useFonteStore } from "@stores/fonteStore";
 
 // "Aparência" (Andre, 26/09): o tema e o tamanho da fonte num submenu. O
 // tamanho abre uma janela com a DEMONSTRACAO e so vale no "Salvar" — antes
@@ -32,6 +31,30 @@ function Linha({ icone, rotulo, valor, onPress, testID, last }: {
       </HStack>
       {!last && <Box height={1} bg="$brandBorder" />}
     </TouchableOpacity>
+  );
+}
+
+function BotaoDaJanela({ titulo, solido, onPress, testID }: {
+  titulo: string; solido?: boolean; onPress: () => void; testID: string;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      testID={testID}
+      style={{
+        minHeight: 54,
+        borderRadius: 9999,
+        paddingHorizontal: 24,
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: solido ? 0 : 1.5,
+        borderColor: "#163300",
+        backgroundColor: solido ? "#9FE870" : "transparent",
+      }}
+    >
+      <TextoNativo style={{ fontFamily: "Archivo_700Bold", fontSize: fs(16), color: "#163300" }}>{titulo}</TextoNativo>
+    </Pressable>
   );
 }
 
@@ -80,7 +103,11 @@ export function Aparencia() {
           style={{ flex: 1, backgroundColor: "#16330073", justifyContent: "center", paddingHorizontal: 24 }}
         >
           <Pressable onPress={() => {}} testID="janela-da-fonte">
-            <VStack bg="$white" borderRadius={20} p={22} gap="$4">
+            {/* cancelar-cortado (Andre, 09/10, fonte +2): com o VStack e o Button
+                do Gluestack o cartao media menos que o conteudo e o "Cancelar"
+                passava da borda de baixo. O mesmo molde do DialogoVupth, que nao
+                corta: View e Pressable puros, altura pelo conteudo. */}
+            <View style={{ backgroundColor: "#FFFFFF", borderRadius: 20, padding: 22, gap: 16 }}>
               <Text fontFamily="$heading" fontSize={18} color="$forest">Tamanho da fonte</Text>
               {/* A demonstracao: o tamanho que vai ficar, antes de salvar. */}
               <Box bg="$brandSurface" borderRadius={14} p={14} testID="amostra-da-fonte">
@@ -110,9 +137,11 @@ export function Aparencia() {
                   </TouchableOpacity>
                 ))}
               </HStack>
-              <Button title="Salvar" onPress={salvar} testID="salvar-fonte" />
-              <Button title="Cancelar" variant="outline" onPress={() => setJanela(false)} />
-            </VStack>
+              <View style={{ gap: 12 }}>
+                <BotaoDaJanela titulo="Salvar" solido onPress={salvar} testID="salvar-fonte" />
+                <BotaoDaJanela titulo="Cancelar" onPress={() => setJanela(false)} testID="cancelar-fonte" />
+              </View>
+            </View>
           </Pressable>
         </Pressable>
       </Modal>

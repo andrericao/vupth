@@ -1,4 +1,4 @@
-import { TouchableOpacity } from "react-native";
+import { Platform, StatusBar, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VStack, HStack, Text, Box, Center, ScrollView } from "@gluestack-ui/themed";
 import { Users } from "lucide-react-native";
@@ -12,6 +12,22 @@ import { useEstablishments } from "@hooks/useEstablishments";
 import { isEffectivelyOpen } from "@domain/establishment/types";
 import { fs } from "@stores/fonteStore";
 
+// Bateria de 09/10 23:42 (01.01, no aparelho): na primeira abertura as insets
+// chegam ZERADAS nesta tela, com o app de ponta a ponta — o painel de cima
+// nasce colado na barra de status e o "Entrar" cai atras da barra de
+// navegacao. Nas abas, depois, elas vem certas. Rodape fixo e initialMetrics
+// nao bastaram; no Android, um piso: a barra de status do proprio sistema
+// (StatusBar.currentHeight) e a barra de 3 botoes (48dp, a mais alta).
+export const PISO_BARRA_DE_NAVEGACAO = 48;
+
+export function bordasDaEntrada(insets: { top: number; bottom: number }) {
+  if (Platform.OS !== "android") return { top: insets.top, bottom: insets.bottom };
+  return {
+    top: Math.max(insets.top, StatusBar.currentHeight ?? 0),
+    bottom: Math.max(insets.bottom, PISO_BARRA_DE_NAVEGACAO),
+  };
+}
+
 /**
  * Abertura do app na PRIMEIRA vez (Pencil CLIENT · 02 Onboarding).
  *
@@ -21,7 +37,7 @@ import { fs } from "@stores/fonteStore";
  */
 export function Onboarding() {
   const markOnboardingSeen = useFirstRunStore((s) => s.markOnboardingSeen);
-  const insets = useSafeAreaInsets();
+  const { top, bottom } = bordasDaEntrada(useSafeAreaInsets());
   const { data: establishments = [] } = useEstablishments();
 
   // Prova social com dado REAL: quantas lojas estao abertas agora. O Pencil
@@ -38,57 +54,63 @@ export function Onboarding() {
   }
 
   return (
-    // Rolagem obrigatoria (regra do projeto, nasceu de bug em device): a arte
-    // tem 330px fixos e num telefone pequeno o texto + os botoes passam da
-    // altura util. Sem isso o "Ver filas perto de mim" ficaria inalcancavel.
-    <ScrollView
-      flex={1}
-      bg="$brandBackground"
-      contentContainerStyle={{ flexGrow: 1 }}
-      showsVerticalScrollIndicator={false}
-    >
-      <VStack flex={1} bg="$brandBackground">
-      {/* O Pencil usa uma foto de barbearia aqui. Nao entrou porque nao ha
-          arte de onboarding no projeto — e ir buscar uma foto de banco de
-          imagem por conta propria seria escolher a cara da marca sem combinar.
-          No lugar, o painel usa o "V" sobre o verde-claro: e material que ja
-          e nosso. Quando a arte existir, ela entra neste Box. */}
-      <Box px={16} style={{ paddingTop: insets.top + 8 }}>
-        <Center height={330} borderRadius={28} overflow="hidden" bg="$greenTint">
-          <BrandMark size={104} />
-        </Center>
-      </Box>
+    <VStack flex={1} bg="$brandBackground">
+      {/* Rolagem obrigatoria (regra do projeto, nasceu de bug em device): a arte
+          tem 330px fixos e num telefone pequeno o texto passa da altura util. So
+          a arte e o texto rolam; o rodape fica fixo embaixo (rodape-fixo). */}
+      <ScrollView
+        flex={1}
+        bg="$brandBackground"
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        testID="onboarding-rolagem"
+      >
+        {/* O Pencil usa uma foto de barbearia aqui. Nao entrou porque nao ha
+            arte de onboarding no projeto — e ir buscar uma foto de banco de
+            imagem por conta propria seria escolher a cara da marca sem combinar.
+            No lugar, o painel usa o "V" sobre o verde-claro: e material que ja
+            e nosso. Quando a arte existir, ela entra neste Box. */}
+        <Box px={16} style={{ paddingTop: top + 8 }}>
+          <Center height={330} borderRadius={28} overflow="hidden" bg="$greenTint">
+            <BrandMark size={104} />
+          </Center>
+        </Box>
 
-      <VStack flex={1} px={16} pt="$7" gap="$3">
-        <Text
-          fontFamily="$display"
-          fontSize={fs(38)}
-          lineHeight={fs(39)}
-          letterSpacing={-1.7}
-          color="$forest"
-        >
-          CHEGA DE FILA
-        </Text>
-        <Text size="md" color="$brandTextSecondary" lineHeight={fs(23)}>
-          Veja quem está livre perto de você e entre na fila.
-        </Text>
-        {openNow > 0 && (
-          <HStack gap="$2" alignItems="center" mt="$1">
-            <Users size={16} color="#163300" />
-            <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary">
-              {openNow === 1
-                ? "1 lugar aberto agora perto de você"
-                : `${openNow} lugares abertos agora perto de você`}
-            </Text>
-          </HStack>
-        )}
-      </VStack>
+        <VStack flex={1} px={16} pt="$7" gap="$3">
+          <Text
+            fontFamily="$display"
+            fontSize={fs(38)}
+            lineHeight={fs(39)}
+            letterSpacing={-1.7}
+            color="$forest"
+          >
+            CHEGA DE FILA
+          </Text>
+          <Text size="md" color="$brandTextSecondary" lineHeight={fs(23)}>
+            Veja quem está livre perto de você e entre na fila.
+          </Text>
+          {openNow > 0 && (
+            <HStack gap="$2" alignItems="center" mt="$1">
+              <Users size={16} color="#163300" />
+              <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary">
+                {openNow === 1
+                  ? "1 lugar aberto agora perto de você"
+                  : `${openNow} lugares abertos agora perto de você`}
+              </Text>
+            </HStack>
+          )}
+        </VStack>
+      </ScrollView>
 
       {/* Esta tela fica FORA do navegador (routes/index): nao ha tab bar nem
           cabecalho reservando as bordas. Sem as insets, no Android de ponta a
           ponta o "Entrar" nascia atras da barra de navegacao do celular e o
-          toque nao chegava (Andre, 05/10, no aparelho). */}
-      <VStack px={16} gap="$3.5" alignItems="center" style={{ paddingBottom: insets.bottom + 32 }} testID="onboarding-rodape">
+          toque nao chegava (Andre, 05/10, no aparelho).
+          Fixo, fora da rolagem (entrar-atras-da-barra, Andre 09/10): dentro
+          dela, o rodape descia ate a barra quando a inset chegava depois da
+          primeira pintura. A inset ja vem pronta (initialMetrics no
+          SafeAreaProvider) e o rodape nao depende do tamanho do conteudo. */}
+      <VStack px={16} pt="$3" gap="$3.5" alignItems="center" style={{ paddingBottom: bottom + 32 }} testID="onboarding-rodape">
         <Button title="Ver filas perto de mim" onPress={() => go("home")} testID="onboarding-start" />
         <HStack gap="$1.5" alignItems="center">
           <Text size="sm" color="$brandTextSecondary">
@@ -102,7 +124,6 @@ export function Onboarding() {
         </HStack>
         <VersaoDoApp testID="versao-entrada" />
       </VStack>
-      </VStack>
-    </ScrollView>
+    </VStack>
   );
 }

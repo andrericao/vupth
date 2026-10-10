@@ -12,7 +12,21 @@ appId: ${APP_ID}
 - tapOn:
     text: "Entendi"
     label: "24.03 · toca em Entendi"
-# Antes de qualquer fechar_aviso: ele tocaria em "Prefiro acompanhar pelo app".
+# A politica da multa ("Sua vez está chegando") e o push da vez sao caixas
+# (Modal) e ficam POR CIMA da tela 10, que e uma camada na raiz: com uma delas
+# aberta o texto da tela 10 nem aparece na arvore (bateria 09/10 20:30, 24.04).
+# Fecha as duas pelo botao 0 ("Continuar na fila" / "OK") — nunca o
+# fechar_aviso aqui: ele tocaria em "Prefiro acompanhar pelo app".
+- repeat:
+    times: 3
+    while:
+      visible: "(Sua vez está chegando|É quase a sua vez!)"
+    commands:
+      - tapOn:
+          id: "dialogo-botao-0"
+      - waitForAnimationToEnd:
+          timeout: 3000
+    label: "24.0A · fecha a política da multa e o push da vez, se cobrem a tela 10"
 - extendedWaitUntil:
     visible: "PODE FECHAR O APP"
     timeout: 30000

@@ -5,10 +5,12 @@
 //   entrar: PROF_ID, LOJA_ID, SERVICO_ID — saida: output.ATENDIMENTO_ID
 //   sair:   ATENDIMENTO_ID (dentro da tolerancia, sem multa)
 
+// PATCH/PUT sem corpo: o http do Maestro (OkHttp) recusa ("method PATCH must
+// have a request body", bateria 09/10 20:30, 10.07) — vai um "{}".
 function pedir(metodo, url, corpo, token) {
   var headers = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = "Bearer " + token;
-  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });
+  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : (metodo === "GET" ? undefined : "{}") });
   if (r.status >= 300) throw new Error(metodo + " " + url + " -> " + r.status + " " + r.body);
   return r.body ? json(r.body) : null;
 }

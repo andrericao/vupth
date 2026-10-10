@@ -37,8 +37,10 @@ appId: ${APP_ID}
 - tapOn:
     text: "São Paulo"
     label: "16.0B · toca na cidade"
+# Sem acento: o inputText do Maestro so digita ASCII (bateria 09/10 20:30,
+# 16.0C — "Unicode character input is not supported").
 - inputText:
-    text: "São Paulo"
+    text: "Sao Paulo"
     label: "16.0C · digita a cidade"
 - tapOn:
     text: "SP"
