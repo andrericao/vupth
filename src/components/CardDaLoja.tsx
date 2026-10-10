@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { TouchableOpacity } from "react-native";
 import { VStack, Text, HStack, Center } from "@gluestack-ui/themed";
-import { Star } from "lucide-react-native";
+import { Star, MapPin } from "lucide-react-native";
 
 import { Establishment } from "@domain/establishment/types";
 import { formatDistanceKm } from "@domain/establishment/proximity";
@@ -64,6 +64,7 @@ function StatusPill({ label, live }: { label: string; live: boolean }) {
 export const CardDaLoja = memo(function CardDaLoja({
   establishment,
   distanceKm,
+  semGps = false,
   destaque,
   onPress,
 }: {
@@ -73,6 +74,9 @@ export const CardDaLoja = memo(function CardDaLoja({
   // Distancia real (GPS). null = device sem coordenada ou loja ainda nao
   // geocodificada pelo backend — a linha some, a loja nunca some da lista.
   distanceKm: number | null;
+  // Aparelho sem localizacao: no lugar da distancia, "Ligue o GPS" (Andre,
+  // 09/10). Com GPS e loja sem coordenada, a distancia so some.
+  semGps?: boolean;
   onPress: (establishment: Establishment) => void;
 }) {
   // "Aberta AGORA" efetiva (inclui horario de funcionamento) — loja OPEN fora
@@ -89,7 +93,9 @@ export const CardDaLoja = memo(function CardDaLoja({
 
   const meta: string[] = destaque ? [destaque] : [];
   if (establishment.serviceType) meta.push(serviceTypeLabel(establishment.serviceType));
-  if (distanceKm != null) meta.push(formatDistanceKm(distanceKm));
+  // A distancia sai da meta: tem icone proprio (distancia-no-card, Andre 09/10:
+  // "quero o icone de distancia tambem").
+  const distancia = distanceKm != null ? formatDistanceKm(distanceKm) : semGps ? "Ligue o GPS" : null;
   // A nota voltou ao card (Andre, 09/10: "a distancia e a avaliacao devem
   // aparecer no card da home"). Tinha saido no redesenho de 16/08 (7344e150).
   // A mesma fonte da tela da loja: a melhor nota da loja, senao a media.
@@ -148,6 +154,17 @@ export const CardDaLoja = memo(function CardDaLoja({
                 </Text>
               </HStack>
             ))}
+            {distancia && (
+              <HStack gap={8} alignItems="center">
+                <Center width={3} height={3} borderRadius={1.5} bg="$brandTextSecondary" />
+                <HStack gap={3} alignItems="center" testID={`distancia-${establishment.id}`}>
+                  <MapPin size={12} color="#163300" />
+                  <Text fontFamily="$body" fontSize={fs(13)} color="$brandTextSecondary">
+                    {distancia}
+                  </Text>
+                </HStack>
+              </HStack>
+            )}
           </HStack>
         </VStack>
         {/* Fechada nao e beco sem saida: ainda da pra agendar (Andre 2026-07-23). */}

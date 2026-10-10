@@ -7,6 +7,12 @@ appId: ${APP_ID}
 - tapOn:
     text: "Início"
     label: "17.01 · toca em Início"
+# distancia-no-card (Andre, 09/10): a bateria nega a localizacao, entao o card
+# mostra "Ligue o GPS" no lugar da distancia, com o icone de local.
+- extendedWaitUntil:
+    visible: "Ligue o GPS"
+    timeout: 30000
+    label: "17.0G · o card do Início diz Ligue o GPS no lugar da distância"
 - runFlow:
     when:
       notVisible:

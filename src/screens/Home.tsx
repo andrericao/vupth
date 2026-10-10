@@ -216,12 +216,13 @@ export function Home() {
         <CardDaLoja
           establishment={item}
           distanceKm={item.distance_km ?? null}
+          semGps={coords == null}
           destaque={praOntem ? rotuloPraOntem(item) : null}
           onPress={handleEstablishmentPress}
         />
       </Box>
     ),
-    [handleEstablishmentPress, praOntem],
+    [handleEstablishmentPress, praOntem, coords],
   );
 
   // Sem nome cadastrado, cai no apelido do e-mail — NUNCA no texto de
