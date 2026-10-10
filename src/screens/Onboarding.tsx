@@ -1,4 +1,4 @@
-import { TouchableOpacity } from "react-native";
+import { Platform, StatusBar, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VStack, HStack, Text, Box, Center, ScrollView } from "@gluestack-ui/themed";
 import { Users } from "lucide-react-native";
@@ -12,6 +12,22 @@ import { useEstablishments } from "@hooks/useEstablishments";
 import { isEffectivelyOpen } from "@domain/establishment/types";
 import { fs } from "@stores/fonteStore";
 
+// Bateria de 09/10 23:42 (01.01, no aparelho): na primeira abertura as insets
+// chegam ZERADAS nesta tela, com o app de ponta a ponta — o painel de cima
+// nasce colado na barra de status e o "Entrar" cai atras da barra de
+// navegacao. Nas abas, depois, elas vem certas. Rodape fixo e initialMetrics
+// nao bastaram; no Android, um piso: a barra de status do proprio sistema
+// (StatusBar.currentHeight) e a barra de 3 botoes (48dp, a mais alta).
+export const PISO_BARRA_DE_NAVEGACAO = 48;
+
+export function bordasDaEntrada(insets: { top: number; bottom: number }) {
+  if (Platform.OS !== "android") return { top: insets.top, bottom: insets.bottom };
+  return {
+    top: Math.max(insets.top, StatusBar.currentHeight ?? 0),
+    bottom: Math.max(insets.bottom, PISO_BARRA_DE_NAVEGACAO),
+  };
+}
+
 /**
  * Abertura do app na PRIMEIRA vez (Pencil CLIENT · 02 Onboarding).
  *
@@ -21,7 +37,7 @@ import { fs } from "@stores/fonteStore";
  */
 export function Onboarding() {
   const markOnboardingSeen = useFirstRunStore((s) => s.markOnboardingSeen);
-  const insets = useSafeAreaInsets();
+  const { top, bottom } = bordasDaEntrada(useSafeAreaInsets());
   const { data: establishments = [] } = useEstablishments();
 
   // Prova social com dado REAL: quantas lojas estao abertas agora. O Pencil
@@ -54,7 +70,7 @@ export function Onboarding() {
             imagem por conta propria seria escolher a cara da marca sem combinar.
             No lugar, o painel usa o "V" sobre o verde-claro: e material que ja
             e nosso. Quando a arte existir, ela entra neste Box. */}
-        <Box px={16} style={{ paddingTop: insets.top + 8 }}>
+        <Box px={16} style={{ paddingTop: top + 8 }}>
           <Center height={330} borderRadius={28} overflow="hidden" bg="$greenTint">
             <BrandMark size={104} />
           </Center>
@@ -94,7 +110,7 @@ export function Onboarding() {
           dela, o rodape descia ate a barra quando a inset chegava depois da
           primeira pintura. A inset ja vem pronta (initialMetrics no
           SafeAreaProvider) e o rodape nao depende do tamanho do conteudo. */}
-      <VStack px={16} pt="$3" gap="$3.5" alignItems="center" style={{ paddingBottom: insets.bottom + 32 }} testID="onboarding-rodape">
+      <VStack px={16} pt="$3" gap="$3.5" alignItems="center" style={{ paddingBottom: bottom + 32 }} testID="onboarding-rodape">
         <Button title="Ver filas perto de mim" onPress={() => go("home")} testID="onboarding-start" />
         <HStack gap="$1.5" alignItems="center">
           <Text size="sm" color="$brandTextSecondary">
