@@ -162,6 +162,19 @@ print_da_falha() {
   echo "   print: ${RODADA#$REPO/}/FALHA_${nome}.png"
 }
 
+# A loja de cada etapa abre das 00:00 as 23:59 (loja_aberta.js): montada antes
+# da meia-noite e conferida depois, ela vira o dia e a etapa cai sem bug nenhum
+# (bateria de 09/10 23:42: a 04 montou a loja e parou em 04.02 as 00:00:43).
+# Etapa que comecaria a partir das 23:50 espera ate 00:02.
+longe_da_meia_noite() {
+  local agora=$((10#$(date +%H) * 60 + 10#$(date +%M)))
+  [ "$agora" -ge $((23 * 60 + 50)) ] || [ "$agora" -lt 2 ] || return 0
+  local espera=$(( ($(date -d 'tomorrow 00:02' +%s) - $(date +%s)) ))
+  [ "$agora" -lt 2 ] && espera=$(( $(date -d 'today 00:02' +%s) - $(date +%s) ))
+  echo "   meia-noite perto: espera ${espera}s antes da etapa"
+  sleep "$espera"
+}
+
 STATUS=0
 : > "$RODADA/relatorio.txt"
 if ! rodar 00_atualizacao; then
@@ -186,6 +199,7 @@ else
       echo "⏭  $arquivo (já passou no $(grep "^$n " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RODADA/relatorio.txt"
       continue
     fi
+    longe_da_meia_noite
     rodar "$arquivo"
     VOLTA=$?
     juntar_para_o_andre "$RODADA/$arquivo"

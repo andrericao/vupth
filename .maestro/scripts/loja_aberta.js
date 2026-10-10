@@ -30,7 +30,7 @@ var est = pedir("POST", "/establishment/quick-create", { name: loja, serviceType
 sessao = renovar(sessao.refresh_token);
 
 // Sem horario a loja nao abre (422 ESTABLISHMENT_HOURS_REQUIRED). O dia todo,
-// para a bateria rodar a qualquer hora — menos perto da meia-noite.
+// para a bateria rodar a qualquer hora (perto da meia-noite, o bateria.sh espera).
 pedir("PATCH", "/establishment/" + est.id + "/general-infos", { opening_time: "00:00", closing_time: "23:59" }, sessao.access_token);
 
 var p = pedir("POST", "/professional/quick-create", { name: prof, establishmentId: est.id, specialty: "Corte" }, sessao.access_token);
