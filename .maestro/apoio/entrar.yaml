@@ -43,8 +43,22 @@ appId: ${APP_ID}
           optional: true
       - runFlow:
           file: fechar_aviso.yaml
-- tapOn:
-    text: "Perfil"
+# No emulador lento o toque em Perfil as vezes nao troca a aba (bateria 10/10
+# 19:16, 00.P0; a 01.03 das 17:30): toca de novo ate o Perfil logado abrir
+# (os grupos do menu, testID grupo-*).
+- repeat:
+    times: 4
+    while:
+      notVisible:
+        id: "grupo-.*"
+    commands:
+      - tapOn:
+          text: "Perfil"
+      - extendedWaitUntil:
+          visible:
+            id: "grupo-.*"
+          timeout: 10000
+          optional: true
 - scrollUntilVisible:
     element:
       text: "Sair da conta"
