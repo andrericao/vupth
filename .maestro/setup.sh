@@ -16,7 +16,8 @@ APP_ID="com.vupth.client.preview"
 echo "=== VUPTH Client — bateria Maestro (staging) ==="
 
 # 1. Celular conectado
-DEVICE=$(adb devices | grep -w "device" | head -1)
+# Com --device na bateria (DEC-33), o ANDROID_SERIAL diz qual aparelho.
+DEVICE=$(adb devices | grep -w "device" | grep "^${ANDROID_SERIAL:-}" | head -1)
 if [ -z "$DEVICE" ]; then
   echo "ERRO: nenhum celular. Ligue a Depuracao USB, conecte o cabo e aceite o aviso no celular."
   exit 1
