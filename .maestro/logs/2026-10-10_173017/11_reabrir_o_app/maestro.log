@@ -1,0 +1,14 @@
+17:45:53.909 [ INFO] maestro.cli.report.TestDebugReporter.logSystemInfo: Debug output path: /home/andre/Documentos/programacao/vupth/.maestro/logs/2026-10-10_173017/11_reabrir_o_app
+17:45:53.925 [ INFO] MAESTRO.logSystemInfo: ---- System Info ----
+17:45:53.930 [ INFO] MAESTRO.logSystemInfo: Maestro Version: 2.5.1
+17:45:53.939 [ INFO] MAESTRO.logSystemInfo: CI: Undefined
+17:45:53.943 [ INFO] MAESTRO.logSystemInfo: OS Name: Linux
+17:45:53.944 [ INFO] MAESTRO.logSystemInfo: OS Version: 7.0.0-38-generic
+17:45:53.946 [ INFO] MAESTRO.logSystemInfo: Architecture: amd64
+17:45:53.964 [ INFO] MAESTRO.logSystemInfo: Java Version: 21
+17:45:53.971 [ INFO] MAESTRO.logSystemInfo: Xcode Version: null
+17:45:53.982 [ INFO] MAESTRO.logSystemInfo: Flutter Version: Undefined
+17:45:53.991 [ INFO] MAESTRO.logSystemInfo: Flutter Channel: Undefined
+17:45:53.991 [ INFO] MAESTRO.logSystemInfo: ---------------------
+17:45:56.706 [DEBUG] io.micrometer.common.util.internal.logging.InternalLoggerFactory.newDefaultFactory: Using SLF4J as the default logging framework
+17:46:04.189 [ INFO] maestro.cli.command.TestCommand.runShardSuite: [shard 1] Selected device emulator-5554 using port 7001 with execution plan ExecutionPlan(flowsToRun=[/home/andre/Documentos/programacao/vupth/.maestro/avulsas/11_reabrir_o_app.yaml], sequence=FlowSequence(flows=[], continueOnFailure=true), workspaceConfig=WorkspaceConfig(flows=null, includeTags=null, excludeTags=null, executionOrder=null, baselineBranch=null, notifications=null, disableRetries=false, platform=PlatformConfiguration(android=AndroidConfiguration(disableAnimations=false), ios=IOSConfiguration(disableAnimations=false, snapshotKeyHonorModalViews=null)), testOutputDir=null))
