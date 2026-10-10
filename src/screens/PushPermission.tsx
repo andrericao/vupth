@@ -1,11 +1,13 @@
 import { TouchableOpacity } from "react-native";
 import { VStack, HStack, Text, Center, ScrollView } from "@gluestack-ui/themed";
 import { BellRing, Check } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@components/Button";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { fs } from "@stores/fonteStore";
 import { recusarAvisoDePush } from "@hooks/ofertaDePush";
+import { bordasDaEntrada } from "@utils/bordasDaEntrada";
 
 const PROMESSAS = [
   "Avisamos faltando 2 pessoas",
@@ -26,6 +28,11 @@ const PROMESSAS = [
  */
 export function PushPermission() {
   const markPushAsked = useFirstRunStore((s) => s.markPushAsked);
+  // Por cima de tudo, fora do navegador (routes/index): nada reserva as bordas.
+  // Sem as insets, no Android de ponta a ponta o "Prefiro acompanhar pelo app"
+  // caia atras da barra do celular (print do Andre, 10/10 16h). O mesmo piso
+  // da entrada, que tambem fica fora das abas.
+  const { top, bottom } = bordasDaEntrada(useSafeAreaInsets());
 
   // Os dois caminhos marcam como perguntado: recusar tambem e resposta, e
   // repetir a tela depois seria insistir em cima de um "nao". Aceitar deixa o
@@ -47,7 +54,7 @@ export function PushPermission() {
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
     >
-      <VStack flex={1} bg="$brandBackground">
+      <VStack flex={1} bg="$brandBackground" style={{ paddingTop: top }}>
       <Center flex={1} px={16}>
         <Center width={260} height={260} borderRadius={130} bg="$greenTint">
           <BellRing size={92} color="#163300" />
@@ -79,7 +86,7 @@ export function PushPermission() {
         </VStack>
       </VStack>
 
-      <VStack px={16} pt="$7" pb={32} gap="$3" alignItems="center">
+      <VStack px={16} pt="$7" gap="$3" alignItems="center" style={{ paddingBottom: bottom + 32 }} testID="push-rodape">
         {/* Nao pedimos a permissao aqui: quem pede e o `usePushRegistration`,
             assim que esta tela e respondida. Ela aparece na primeira entrada
             numa fila (ligar-push-permission, 05/10), sobre a tela da fila. */}

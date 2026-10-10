@@ -1,5 +1,5 @@
 import { fireEvent, waitFor } from '@testing-library/react-native';
-import { Platform } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
@@ -131,5 +131,11 @@ describe('PushPermission', () => {
     await waitFor(() => expect(useFirstRunStore.getState().pushOferta).toBe(false));
     expect(useFirstRunStore.getState().pushAsked).toBe(true);
     expect(setItem).toHaveBeenCalledWith(PUSH_PERGUNTADO_KEY, '1');
+  });
+
+  it('o "Prefiro acompanhar pelo app" fica acima da barra do celular (print do Andre, 10/10 16h)', () => {
+    const { getByTestId } = renderWithProviders(<PushPermission />);
+    const estilo = StyleSheet.flatten(getByTestId('push-rodape').props.style);
+    expect(estilo.paddingBottom).toBe(34 + 32);
   });
 });
