@@ -1,0 +1,2895 @@
+[ {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591057082,
+    "duration" : 3107,
+    "sequenceNumber" : 55,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791590985190,
+    "duration" : 3646,
+    "sequenceNumber" : 20,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791590985910,
+    "duration" : 2921,
+    "sequenceNumber" : 21,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "hideKeyboardCommand" : {
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591043259,
+    "duration" : 2133,
+    "sequenceNumber" : 48,
+    "evaluatedCommand" : {
+      "hideKeyboardCommand" : {
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "inputTextCommand" : {
+      "text" : "C${TAG}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591133619,
+    "duration" : 3545,
+    "sequenceNumber" : 100,
+    "evaluatedCommand" : {
+      "inputTextCommand" : {
+        "text" : "C58864011",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "inputTextCommand" : {
+      "text" : "${EMAIL_CLIENTE}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591029902,
+    "duration" : 5571,
+    "sequenceNumber" : 45,
+    "evaluatedCommand" : {
+      "inputTextCommand" : {
+        "text" : "client_c58864011@teste.com",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Senha",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591035475,
+    "duration" : 4420,
+    "sequenceNumber" : 46,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Senha",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "service-${SERVICO_ID}",
+          "optional" : false
+        }
+      },
+      "timeout" : "30000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591146995,
+    "duration" : 769,
+    "sequenceNumber" : 108,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "service-4638c549-4fe4-478b-aab6-578b0c016e7d",
+            "optional" : false
+          }
+        },
+        "timeout" : "30000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "repeatCommand" : {
+      "times" : "40",
+      "condition" : {
+        "notVisible" : {
+          "idRegex" : "${ALVO}",
+          "optional" : false
+        }
+      },
+      "commands" : [ {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "idRegex" : "${ALVO}",
+              "optional" : false
+            }
+          },
+          "timeout" : "3000",
+          "optional" : true
+        }
+      } ],
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791590984026,
+    "duration" : 11949,
+    "sequenceNumber" : 19,
+    "evaluatedCommand" : {
+      "repeatCommand" : {
+        "times" : "40",
+        "condition" : {
+          "notVisible" : {
+            "idRegex" : "${ALVO}",
+            "optional" : false
+          }
+        },
+        "commands" : [ {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "idRegex" : "${ALVO}",
+                "optional" : false
+              }
+            },
+            "timeout" : "3000",
+            "optional" : true
+          }
+        } ],
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "defineVariablesCommand" : {
+              "env" : {
+                "ALVO" : "busca-home"
+              },
+              "optional" : false
+            }
+          }, {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "repeatCommand" : {
+              "times" : "40",
+              "condition" : {
+                "notVisible" : {
+                  "idRegex" : "${ALVO}",
+                  "optional" : false
+                }
+              },
+              "commands" : [ {
+                "runFlowCommand" : {
+                  "commands" : [ {
+                    "tapOnElement" : {
+                      "selector" : {
+                        "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                        "optional" : false
+                      },
+                      "retryIfNoChange" : false,
+                      "waitUntilVisible" : false,
+                      "longPress" : false,
+                      "optional" : false
+                    }
+                  } ],
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "${ALVO}",
+                      "optional" : false
+                    }
+                  },
+                  "timeout" : "3000",
+                  "optional" : true
+                }
+              } ],
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "${ALVO}",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "esperar_negando.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Perfil",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "scrollUntilVisible" : {
+          "selector" : {
+            "textRegex" : "Versão do app",
+            "optional" : false
+          },
+          "direction" : "DOWN",
+          "scrollDuration" : "40",
+          "visibilityPercentage" : 100,
+          "timeout" : "20000",
+          "centerElement" : false,
+          "originalSpeedValue" : "40",
+          "optional" : false,
+          "visibilityPercentageNormalized" : 1.0
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Versão do app",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Atualização baixada",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591090391,
+    "duration" : 20768,
+    "sequenceNumber" : 73,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "defineVariablesCommand" : {
+                "env" : {
+                  "ALVO" : "busca-home"
+                },
+                "optional" : false
+              }
+            }, {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "repeatCommand" : {
+                "times" : "40",
+                "condition" : {
+                  "notVisible" : {
+                    "idRegex" : "${ALVO}",
+                    "optional" : false
+                  }
+                },
+                "commands" : [ {
+                  "runFlowCommand" : {
+                    "commands" : [ {
+                      "tapOnElement" : {
+                        "selector" : {
+                          "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                          "optional" : false
+                        },
+                        "retryIfNoChange" : false,
+                        "waitUntilVisible" : false,
+                        "longPress" : false,
+                        "optional" : false
+                      }
+                    } ],
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "${ALVO}",
+                        "optional" : false
+                      }
+                    },
+                    "timeout" : "3000",
+                    "optional" : true
+                  }
+                } ],
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "${ALVO}",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "esperar_negando.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Perfil",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "scrollUntilVisible" : {
+            "selector" : {
+              "textRegex" : "Versão do app",
+              "optional" : false
+            },
+            "direction" : "DOWN",
+            "scrollDuration" : "40",
+            "visibilityPercentage" : 100,
+            "timeout" : "20000",
+            "centerElement" : false,
+            "originalSpeedValue" : "40",
+            "optional" : false,
+            "visibilityPercentageNormalized" : 1.0
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Versão do app",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Atualização baixada",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "defineVariablesCommand" : {
+          "env" : {
+            "ALVO" : "busca-home"
+          },
+          "optional" : false
+        }
+      }, {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "repeatCommand" : {
+          "times" : "40",
+          "condition" : {
+            "notVisible" : {
+              "idRegex" : "${ALVO}",
+              "optional" : false
+            }
+          },
+          "commands" : [ {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "${ALVO}",
+                  "optional" : false
+                }
+              },
+              "timeout" : "3000",
+              "optional" : true
+            }
+          } ],
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "idRegex" : "${ALVO}",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "esperar_negando.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591095985,
+    "duration" : 7978,
+    "sequenceNumber" : 75,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "defineVariablesCommand" : {
+            "env" : {
+              "ALVO" : "busca-home"
+            },
+            "optional" : false
+          }
+        }, {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "repeatCommand" : {
+            "times" : "40",
+            "condition" : {
+              "notVisible" : {
+                "idRegex" : "${ALVO}",
+                "optional" : false
+              }
+            },
+            "commands" : [ {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "${ALVO}",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "3000",
+                "optional" : true
+              }
+            } ],
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "idRegex" : "${ALVO}",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "esperar_negando.yaml",
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791590984015,
+    "duration" : 9,
+    "sequenceNumber" : 18,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791591018558,
+    "sequenceNumber" : 36,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "runScriptCommand" : {
+          "script" : "// Fecha a fila do profissional de teste pela API (o \"fechar fila\" do Partner):\n// ele continua trabalhando, mas nao aceita cliente novo.\n//\n// Fila VAZIA fechada vira OFF (regra do Andre de 22/07, Backend 4f817a0): o\n// profissional sai do expediente e a loja fecha. Com alguem na fila ele segue\n// WORKING (\"Fila fechada\") ate o ultimo atendimento. Por isso, antes de fechar,\n// um segundo cliente (fila_c<TAG>, so pela API) entra na fila dele.\n//\n// Entradas (env do runScript): API, SENHA, EMAIL_PROF, TAG, PROF_ID, LOJA_ID, SERVICO_ID\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\nvar emailFila = \"fila_c\" + TAG + \"@teste.com\";\npedir(\"POST\", \"/auth/register\", { email: emailFila, password: SENHA });\nvar tokenFila = pedir(\"POST\", \"/auth/login\", { email: emailFila, password: SENHA }).tokens.access_token;\npedir(\"PATCH\", \"/profile/general-infos\", { first_name: \"Na fila\" }, tokenFila);\npedir(\"POST\", \"/attendances\", { professionalId: PROF_ID, establishmentId: LOJA_ID, serviceItemIds: [SERVICO_ID] }, tokenFila);\n\nvar token = pedir(\"POST\", \"/auth/login\", { email: EMAIL_PROF, password: SENHA }).tokens.access_token;\npedir(\"PATCH\", \"/professional/me/accepting-new\", { value: false }, token);\n",
+          "env" : {
+            "API" : "${API}",
+            "SENHA" : "${SENHA}",
+            "EMAIL_PROF" : "${output.EMAIL_PROF}",
+            "TAG" : "${output.TAG}",
+            "PROF_ID" : "${output.PROF_ID}",
+            "LOJA_ID" : "${output.LOJA_ID}",
+            "SERVICO_ID" : "${output.SERVICO_ID}"
+          },
+          "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/fechar_fila.js",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "scriptCondition" : "${FILA_FECHADA == '1'}"
+      },
+      "label" : "${ETAPA}.P4 · fecha a fila pela API (um cliente entra antes)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791590976890,
+    "duration" : 4171,
+    "sequenceNumber" : 10,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "runScriptCommand" : {
+            "script" : "// Fecha a fila do profissional de teste pela API (o \"fechar fila\" do Partner):\n// ele continua trabalhando, mas nao aceita cliente novo.\n//\n// Fila VAZIA fechada vira OFF (regra do Andre de 22/07, Backend 4f817a0): o\n// profissional sai do expediente e a loja fecha. Com alguem na fila ele segue\n// WORKING (\"Fila fechada\") ate o ultimo atendimento. Por isso, antes de fechar,\n// um segundo cliente (fila_c<TAG>, so pela API) entra na fila dele.\n//\n// Entradas (env do runScript): API, SENHA, EMAIL_PROF, TAG, PROF_ID, LOJA_ID, SERVICO_ID\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\nvar emailFila = \"fila_c\" + TAG + \"@teste.com\";\npedir(\"POST\", \"/auth/register\", { email: emailFila, password: SENHA });\nvar tokenFila = pedir(\"POST\", \"/auth/login\", { email: emailFila, password: SENHA }).tokens.access_token;\npedir(\"PATCH\", \"/profile/general-infos\", { first_name: \"Na fila\" }, tokenFila);\npedir(\"POST\", \"/attendances\", { professionalId: PROF_ID, establishmentId: LOJA_ID, serviceItemIds: [SERVICO_ID] }, tokenFila);\n\nvar token = pedir(\"POST\", \"/auth/login\", { email: EMAIL_PROF, password: SENHA }).tokens.access_token;\npedir(\"PATCH\", \"/professional/me/accepting-new\", { value: false }, token);\n",
+            "env" : {
+              "API" : "${API}",
+              "SENHA" : "${SENHA}",
+              "EMAIL_PROF" : "${output.EMAIL_PROF}",
+              "TAG" : "${output.TAG}",
+              "PROF_ID" : "${output.PROF_ID}",
+              "LOJA_ID" : "${output.LOJA_ID}",
+              "SERVICO_ID" : "${output.SERVICO_ID}"
+            },
+            "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/fechar_fila.js",
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "scriptCondition" : "true"
+        },
+        "label" : "11.P4 · fecha a fila pela API (um cliente entra antes)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "professional-${PROF_ID}",
+          "optional" : false
+        }
+      },
+      "timeout" : "30000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591143994,
+    "duration" : 420,
+    "sequenceNumber" : 104,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "professional-501c7047-5c70-4451-ad85-812277995ca4",
+            "optional" : false
+          }
+        },
+        "timeout" : "30000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791590996262,
+    "duration" : 22,
+    "sequenceNumber" : 25,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791591072651,
+    "sequenceNumber" : 62,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.TAG = (typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)) + ETAPA}",
+      "label" : "${ETAPA}.P1 · calcula TAG",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791590971477,
+    "duration" : 93,
+    "sequenceNumber" : 6,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.TAG = (typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)) + ETAPA}",
+        "label" : "${ETAPA}.P1 · calcula TAG",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "onboarding-start",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "3000",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "push-skip",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "push-skip",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_aviso.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "scriptCondition" : "${ABERTURA == '1'}"
+      },
+      "label" : "${ETAPA}.P9 · passa a abertura",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591005811,
+    "duration" : 14950,
+    "sequenceNumber" : 30,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "onboarding-start",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "3000",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "push-skip",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "push-skip",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_aviso.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "scriptCondition" : "true"
+        },
+        "label" : "11.P9 · passa a abertura",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "primary-login",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591045393,
+    "duration" : 2680,
+    "sequenceNumber" : 49,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "primary-login",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591071560,
+    "duration" : 17,
+    "sequenceNumber" : 60,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "${LOJA}",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591139548,
+    "duration" : 4445,
+    "sequenceNumber" : 103,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Loja C58864011",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "more-option-cut",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "label" : "10.04 · toca em more-option-cut",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591152873,
+    "duration" : 3424,
+    "sequenceNumber" : 111,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "more-option-cut",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "label" : "10.04 · toca em more-option-cut",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791591049693,
+    "sequenceNumber" : 53,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Monta, pela API do staging, uma loja ABERTA com um profissional TRABALHANDO\n// e um servico — o papel do app do Partner, para a bateria do client nao\n// depender dele. Solo shop: o dono e o proprio profissional.\n//\n// Entradas (env do runScript): API, SENHA, TAG\n// Saidas: output.LOJA, output.LOJA_ID, output.PROF, output.PROF_ID,\n//         output.SERVICO_ID, output.EMAIL_PROF\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\n// Cada papel novo (OWNER, PROFESSIONAL) so vale no token depois do refresh.\nfunction renovar(refresh) {\n  return pedir(\"POST\", \"/auth/refresh\", { refresh_token: refresh });\n}\n\nvar loja = \"Loja C\" + TAG;\nvar prof = \"Prof\" + TAG;\nvar email = \"prop_c\" + TAG + \"@teste.com\";\n\npedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\nvar sessao = pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens;\n\nvar est = pedir(\"POST\", \"/establishment/quick-create\", { name: loja, serviceType: \"BARBER\" }, sessao.access_token);\nsessao = renovar(sessao.refresh_token);\n\n// Sem horario a loja nao abre (422 ESTABLISHMENT_HOURS_REQUIRED). O dia todo,\n// para a bateria rodar a qualquer hora — menos perto da meia-noite.\npedir(\"PATCH\", \"/establishment/\" + est.id + \"/general-infos\", { opening_time: \"00:00\", closing_time: \"23:59\" }, sessao.access_token);\n\nvar p = pedir(\"POST\", \"/professional/quick-create\", { name: prof, establishmentId: est.id, specialty: \"Corte\" }, sessao.access_token);\nsessao = renovar(sessao.refresh_token);\n\nvar servico = pedir(\"POST\", \"/establishment/\" + est.id + \"/service-items\", {\n  establishmentId: est.id,\n  serviceItemType: \"CORTE_MAQUINA\",\n  customName: \"Corte \" + TAG,\n  price: 40.0,\n  estimatedMinutes: 30\n}, sessao.access_token);\n\n// Trabalhando: a loja abre sozinha (open_status derivado, S1 fatia 2).\npedir(\"PATCH\", \"/professional/me/status\", { status: \"WORKING\" }, sessao.access_token);\n\noutput.LOJA = loja;\noutput.LOJA_ID = est.id;\noutput.PROF = prof;\noutput.PROF_ID = p.id;\noutput.SERVICO_ID = servico.id;\noutput.EMAIL_PROF = email;\n",
+      "env" : {
+        "API" : "${API}",
+        "SENHA" : "${SENHA}",
+        "TAG" : "${output.TAG}"
+      },
+      "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/loja_aberta.js",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791590971628,
+    "duration" : 5254,
+    "sequenceNumber" : 9,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// Monta, pela API do staging, uma loja ABERTA com um profissional TRABALHANDO\n// e um servico — o papel do app do Partner, para a bateria do client nao\n// depender dele. Solo shop: o dono e o proprio profissional.\n//\n// Entradas (env do runScript): API, SENHA, TAG\n// Saidas: output.LOJA, output.LOJA_ID, output.PROF, output.PROF_ID,\n//         output.SERVICO_ID, output.EMAIL_PROF\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\n// Cada papel novo (OWNER, PROFESSIONAL) so vale no token depois do refresh.\nfunction renovar(refresh) {\n  return pedir(\"POST\", \"/auth/refresh\", { refresh_token: refresh });\n}\n\nvar loja = \"Loja C\" + TAG;\nvar prof = \"Prof\" + TAG;\nvar email = \"prop_c\" + TAG + \"@teste.com\";\n\npedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\nvar sessao = pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens;\n\nvar est = pedir(\"POST\", \"/establishment/quick-create\", { name: loja, serviceType: \"BARBER\" }, sessao.access_token);\nsessao = renovar(sessao.refresh_token);\n\n// Sem horario a loja nao abre (422 ESTABLISHMENT_HOURS_REQUIRED). O dia todo,\n// para a bateria rodar a qualquer hora — menos perto da meia-noite.\npedir(\"PATCH\", \"/establishment/\" + est.id + \"/general-infos\", { opening_time: \"00:00\", closing_time: \"23:59\" }, sessao.access_token);\n\nvar p = pedir(\"POST\", \"/professional/quick-create\", { name: prof, establishmentId: est.id, specialty: \"Corte\" }, sessao.access_token);\nsessao = renovar(sessao.refresh_token);\n\nvar servico = pedir(\"POST\", \"/establishment/\" + est.id + \"/service-items\", {\n  establishmentId: est.id,\n  serviceItemType: \"CORTE_MAQUINA\",\n  customName: \"Corte \" + TAG,\n  price: 40.0,\n  estimatedMinutes: 30\n}, sessao.access_token);\n\n// Trabalhando: a loja abre sozinha (open_status derivado, S1 fatia 2).\npedir(\"PATCH\", \"/professional/me/status\", { status: \"WORKING\" }, sessao.access_token);\n\noutput.LOJA = loja;\noutput.LOJA_ID = est.id;\noutput.PROF = prof;\noutput.PROF_ID = p.id;\noutput.SERVICO_ID = servico.id;\noutput.EMAIL_PROF = email;\n",
+        "env" : {
+          "API" : "https://vupth-backend-ia.onrender.com",
+          "SENHA" : "Teste@123",
+          "TAG" : "58864011"
+        },
+        "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/loja_aberta.js",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "push-skip",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "push-skip",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1791591170993,
+    "sequenceNumber" : 120,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "push-skip",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "push-skip",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Perfil",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "scrollUntilVisible" : {
+          "selector" : {
+            "textRegex" : "Versão do app",
+            "optional" : false
+          },
+          "direction" : "DOWN",
+          "scrollDuration" : "40",
+          "visibilityPercentage" : 100,
+          "timeout" : "20000",
+          "centerElement" : false,
+          "originalSpeedValue" : "40",
+          "optional" : false,
+          "visibilityPercentageNormalized" : 1.0
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Versão do app",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "check-update",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "(Atualização baixada|Tudo certo|Não foi possível verificar)",
+              "optional" : false
+            }
+          },
+          "timeout" : "60000",
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "tapOnElement" : {
+              "selector" : {
+                "idRegex" : "dialogo-botao-0",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "defineVariablesCommand" : {
+                  "env" : {
+                    "ALVO" : "busca-home"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "applyConfigurationCommand" : {
+                  "config" : {
+                    "appId" : "${APP_ID}"
+                  },
+                  "optional" : false
+                }
+              }, {
+                "repeatCommand" : {
+                  "times" : "40",
+                  "condition" : {
+                    "notVisible" : {
+                      "idRegex" : "${ALVO}",
+                      "optional" : false
+                    }
+                  },
+                  "commands" : [ {
+                    "runFlowCommand" : {
+                      "commands" : [ {
+                        "tapOnElement" : {
+                          "selector" : {
+                            "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                            "optional" : false
+                          },
+                          "retryIfNoChange" : false,
+                          "waitUntilVisible" : false,
+                          "longPress" : false,
+                          "optional" : false
+                        }
+                      } ],
+                      "condition" : {
+                        "visible" : {
+                          "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                          "optional" : false
+                        }
+                      },
+                      "optional" : false
+                    }
+                  }, {
+                    "assertConditionCommand" : {
+                      "condition" : {
+                        "visible" : {
+                          "idRegex" : "${ALVO}",
+                          "optional" : false
+                        }
+                      },
+                      "timeout" : "3000",
+                      "optional" : true
+                    }
+                  } ],
+                  "optional" : false
+                }
+              }, {
+                "assertConditionCommand" : {
+                  "condition" : {
+                    "visible" : {
+                      "idRegex" : "${ALVO}",
+                      "optional" : false
+                    }
+                  },
+                  "optional" : false
+                }
+              } ],
+              "sourceDescription" : "esperar_negando.yaml",
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "Perfil",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          }, {
+            "scrollUntilVisible" : {
+              "selector" : {
+                "textRegex" : "Versão do app",
+                "optional" : false
+              },
+              "direction" : "DOWN",
+              "scrollDuration" : "40",
+              "visibilityPercentage" : 100,
+              "timeout" : "20000",
+              "centerElement" : false,
+              "originalSpeedValue" : "40",
+              "optional" : false,
+              "visibilityPercentageNormalized" : 1.0
+            }
+          }, {
+            "tapOnElement" : {
+              "selector" : {
+                "textRegex" : "Versão do app",
+                "optional" : false
+              },
+              "retryIfNoChange" : false,
+              "waitUntilVisible" : false,
+              "longPress" : false,
+              "optional" : false
+            }
+          } ],
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Atualização baixada",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "runFlowCommand" : {
+          "commands" : [ {
+            "applyConfigurationCommand" : {
+              "config" : {
+                "appId" : "${APP_ID}"
+              },
+              "optional" : false
+            }
+          }, {
+            "waitForAnimationToEndCommand" : {
+              "timeout" : "3000",
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "push-skip",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "push-skip",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          } ],
+          "sourceDescription" : "fechar_aviso.yaml",
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "copyTextCommand" : {
+          "selector" : {
+            "textRegex" : ".* · [0-9a-f]{8}",
+            "optional" : false
+          },
+          "optional" : false
+        }
+      }, {
+        "runScriptCommand" : {
+          "script" : "// Para a bateria se o app no aparelho nao roda o commit esperado (Andre, 03/10).\n// O texto vem do copyTextFrom da versao do Perfil (\"Versão 1.0.3 · 03/10/2026 · c65338e7\").\n//\n// Entrada (env da bateria): COMMIT\n\nvar esperado = (typeof COMMIT === \"undefined\" || COMMIT == null ? \"\" : String(COMMIT)).trim().toLowerCase().slice(0, 8);\nvar instalado = String(maestro.copiedText || \"\");\n\n// Sem COMMIT (rodada fora da bateria.sh, 03/10): nao trava a bateria — avisa\n// que a versao nao foi conferida e segue.\nif (!esperado) {\n  console.log(\n    \"AVISO: versao NAO conferida (sem COMMIT). Instalado: \\\"\" + instalado +\n      \"\\\". Para conferir, rode pela bateria.sh: bash .maestro/bateria.sh\"\n  );\n} else if (instalado.toLowerCase().indexOf(esperado) < 0) {\n  throw new Error(\n    \"Versao errada no aparelho. Instalado: \\\"\" + instalado + \"\\\". Esperado: o commit \" + esperado +\n      \". Instale o APK certo ou espere o OTA da dev e rode de novo.\"\n  );\n}\n",
+          "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/confere_versao.js",
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "atualizar.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591081704,
+    "duration" : 40141,
+    "sequenceNumber" : 66,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Perfil",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "scrollUntilVisible" : {
+            "selector" : {
+              "textRegex" : "Versão do app",
+              "optional" : false
+            },
+            "direction" : "DOWN",
+            "scrollDuration" : "40",
+            "visibilityPercentage" : 100,
+            "timeout" : "20000",
+            "centerElement" : false,
+            "originalSpeedValue" : "40",
+            "optional" : false,
+            "visibilityPercentageNormalized" : 1.0
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Versão do app",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "check-update",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "(Atualização baixada|Tudo certo|Não foi possível verificar)",
+                "optional" : false
+              }
+            },
+            "timeout" : "60000",
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "tapOnElement" : {
+                "selector" : {
+                  "idRegex" : "dialogo-botao-0",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "defineVariablesCommand" : {
+                    "env" : {
+                      "ALVO" : "busca-home"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "applyConfigurationCommand" : {
+                    "config" : {
+                      "appId" : "${APP_ID}"
+                    },
+                    "optional" : false
+                  }
+                }, {
+                  "repeatCommand" : {
+                    "times" : "40",
+                    "condition" : {
+                      "notVisible" : {
+                        "idRegex" : "${ALVO}",
+                        "optional" : false
+                      }
+                    },
+                    "commands" : [ {
+                      "runFlowCommand" : {
+                        "commands" : [ {
+                          "tapOnElement" : {
+                            "selector" : {
+                              "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                              "optional" : false
+                            },
+                            "retryIfNoChange" : false,
+                            "waitUntilVisible" : false,
+                            "longPress" : false,
+                            "optional" : false
+                          }
+                        } ],
+                        "condition" : {
+                          "visible" : {
+                            "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                            "optional" : false
+                          }
+                        },
+                        "optional" : false
+                      }
+                    }, {
+                      "assertConditionCommand" : {
+                        "condition" : {
+                          "visible" : {
+                            "idRegex" : "${ALVO}",
+                            "optional" : false
+                          }
+                        },
+                        "timeout" : "3000",
+                        "optional" : true
+                      }
+                    } ],
+                    "optional" : false
+                  }
+                }, {
+                  "assertConditionCommand" : {
+                    "condition" : {
+                      "visible" : {
+                        "idRegex" : "${ALVO}",
+                        "optional" : false
+                      }
+                    },
+                    "optional" : false
+                  }
+                } ],
+                "sourceDescription" : "esperar_negando.yaml",
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "Perfil",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            }, {
+              "scrollUntilVisible" : {
+                "selector" : {
+                  "textRegex" : "Versão do app",
+                  "optional" : false
+                },
+                "direction" : "DOWN",
+                "scrollDuration" : "40",
+                "visibilityPercentage" : 100,
+                "timeout" : "20000",
+                "centerElement" : false,
+                "originalSpeedValue" : "40",
+                "optional" : false,
+                "visibilityPercentageNormalized" : 1.0
+              }
+            }, {
+              "tapOnElement" : {
+                "selector" : {
+                  "textRegex" : "Versão do app",
+                  "optional" : false
+                },
+                "retryIfNoChange" : false,
+                "waitUntilVisible" : false,
+                "longPress" : false,
+                "optional" : false
+              }
+            } ],
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Atualização baixada",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "runFlowCommand" : {
+            "commands" : [ {
+              "applyConfigurationCommand" : {
+                "config" : {
+                  "appId" : "${APP_ID}"
+                },
+                "optional" : false
+              }
+            }, {
+              "waitForAnimationToEndCommand" : {
+                "timeout" : "3000",
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "dialogo-botao-0",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "dialogo-botao-0",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "push-skip",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "push-skip",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            } ],
+            "sourceDescription" : "fechar_aviso.yaml",
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "copyTextCommand" : {
+            "selector" : {
+              "textRegex" : ".* · [0-9a-f]{8}",
+              "optional" : false
+            },
+            "optional" : false
+          }
+        }, {
+          "runScriptCommand" : {
+            "script" : "// Para a bateria se o app no aparelho nao roda o commit esperado (Andre, 03/10).\n// O texto vem do copyTextFrom da versao do Perfil (\"Versão 1.0.3 · 03/10/2026 · c65338e7\").\n//\n// Entrada (env da bateria): COMMIT\n\nvar esperado = (typeof COMMIT === \"undefined\" || COMMIT == null ? \"\" : String(COMMIT)).trim().toLowerCase().slice(0, 8);\nvar instalado = String(maestro.copiedText || \"\");\n\n// Sem COMMIT (rodada fora da bateria.sh, 03/10): nao trava a bateria — avisa\n// que a versao nao foi conferida e segue.\nif (!esperado) {\n  console.log(\n    \"AVISO: versao NAO conferida (sem COMMIT). Instalado: \\\"\" + instalado +\n      \"\\\". Para conferir, rode pela bateria.sh: bash .maestro/bateria.sh\"\n  );\n} else if (instalado.toLowerCase().indexOf(esperado) < 0) {\n  throw new Error(\n    \"Versao errada no aparelho. Instalado: \\\"\" + instalado + \"\\\". Esperado: o commit \" + esperado +\n      \". Instale o APK certo ou espere o OTA da dev e rode de novo.\"\n  );\n}\n",
+            "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/confere_versao.js",
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "atualizar.yaml",
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Perfil",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591067959,
+    "duration" : 3104,
+    "sequenceNumber" : 57,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Perfil",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "check-update",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591087640,
+    "duration" : 2568,
+    "sequenceNumber" : 71,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "check-update",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591121933,
+    "duration" : 9,
+    "sequenceNumber" : 94,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "visible" : {
+          "idRegex" : "dialogo-botao-0",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591160834,
+    "duration" : 2695,
+    "sequenceNumber" : 117,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "dialogo-botao-0",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "visible" : {
+            "idRegex" : "dialogo-botao-0",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "runScriptCommand" : {
+          "script" : "// Cria, pela API do staging, a conta do cliente de uma etapa avulsa\n// (bateria-nao-para): cada etapa roda sozinha e nao herda o cadastro da 02.\n// Ja com o nome, para o login nao parar na tela \"Como podemos te chamar?\".\n//\n// Entradas (env do runScript): API, SENHA, EMAIL_CLIENTE, NOME_CLIENTE\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\npedir(\"POST\", \"/auth/register\", { email: EMAIL_CLIENTE, password: SENHA });\nvar token = pedir(\"POST\", \"/auth/login\", { email: EMAIL_CLIENTE, password: SENHA }).tokens.access_token;\npedir(\"PATCH\", \"/profile/general-infos\", { first_name: NOME_CLIENTE }, token);\n",
+          "env" : {
+            "API" : "${API}",
+            "SENHA" : "${SENHA}",
+            "EMAIL_CLIENTE" : "${output.EMAIL_CLIENTE}",
+            "NOME_CLIENTE" : "${output.NOME_CLIENTE}"
+          },
+          "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/cliente.js",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "scriptCondition" : "${CONTA == '1'}"
+      },
+      "label" : "${ETAPA}.P5 · cria o cliente pela API",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791590981163,
+    "duration" : 2092,
+    "sequenceNumber" : 13,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "runScriptCommand" : {
+            "script" : "// Cria, pela API do staging, a conta do cliente de uma etapa avulsa\n// (bateria-nao-para): cada etapa roda sozinha e nao herda o cadastro da 02.\n// Ja com o nome, para o login nao parar na tela \"Como podemos te chamar?\".\n//\n// Entradas (env do runScript): API, SENHA, EMAIL_CLIENTE, NOME_CLIENTE\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\npedir(\"POST\", \"/auth/register\", { email: EMAIL_CLIENTE, password: SENHA });\nvar token = pedir(\"POST\", \"/auth/login\", { email: EMAIL_CLIENTE, password: SENHA }).tokens.access_token;\npedir(\"PATCH\", \"/profile/general-infos\", { first_name: NOME_CLIENTE }, token);\n",
+            "env" : {
+              "API" : "${API}",
+              "SENHA" : "${SENHA}",
+              "EMAIL_CLIENTE" : "${output.EMAIL_CLIENTE}",
+              "NOME_CLIENTE" : "${output.NOME_CLIENTE}"
+            },
+            "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/cliente.js",
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "scriptCondition" : "true"
+        },
+        "label" : "11.P5 · cria o cliente pela API",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Para a bateria se o app no aparelho nao roda o commit esperado (Andre, 03/10).\n// O texto vem do copyTextFrom da versao do Perfil (\"Versão 1.0.3 · 03/10/2026 · c65338e7\").\n//\n// Entrada (env da bateria): COMMIT\n\nvar esperado = (typeof COMMIT === \"undefined\" || COMMIT == null ? \"\" : String(COMMIT)).trim().toLowerCase().slice(0, 8);\nvar instalado = String(maestro.copiedText || \"\");\n\n// Sem COMMIT (rodada fora da bateria.sh, 03/10): nao trava a bateria — avisa\n// que a versao nao foi conferida e segue.\nif (!esperado) {\n  console.log(\n    \"AVISO: versao NAO conferida (sem COMMIT). Instalado: \\\"\" + instalado +\n      \"\\\". Para conferir, rode pela bateria.sh: bash .maestro/bateria.sh\"\n  );\n} else if (instalado.toLowerCase().indexOf(esperado) < 0) {\n  throw new Error(\n    \"Versao errada no aparelho. Instalado: \\\"\" + instalado + \"\\\". Esperado: o commit \" + esperado +\n      \". Instale o APK certo ou espere o OTA da dev e rode de novo.\"\n  );\n}\n",
+      "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/confere_versao.js",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591121773,
+    "duration" : 70,
+    "sequenceNumber" : 90,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// Para a bateria se o app no aparelho nao roda o commit esperado (Andre, 03/10).\n// O texto vem do copyTextFrom da versao do Perfil (\"Versão 1.0.3 · 03/10/2026 · c65338e7\").\n//\n// Entrada (env da bateria): COMMIT\n\nvar esperado = (typeof COMMIT === \"undefined\" || COMMIT == null ? \"\" : String(COMMIT)).trim().toLowerCase().slice(0, 8);\nvar instalado = String(maestro.copiedText || \"\");\n\n// Sem COMMIT (rodada fora da bateria.sh, 03/10): nao trava a bateria — avisa\n// que a versao nao foi conferida e segue.\nif (!esperado) {\n  console.log(\n    \"AVISO: versao NAO conferida (sem COMMIT). Instalado: \\\"\" + instalado +\n      \"\\\". Para conferir, rode pela bateria.sh: bash .maestro/bateria.sh\"\n  );\n} else if (instalado.toLowerCase().indexOf(esperado) < 0) {\n  throw new Error(\n    \"Versao errada no aparelho. Instalado: \\\"\" + instalado + \"\\\". Esperado: o commit \" + esperado +\n      \". Instale o APK certo ou espere o OTA da dev e rode de novo.\"\n  );\n}\n",
+        "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/confere_versao.js",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "3000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591071580,
+    "duration" : 1070,
+    "sequenceNumber" : 61,
+    "evaluatedCommand" : {
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "3000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "professional-${PROF_ID}",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591144428,
+    "duration" : 2566,
+    "sequenceNumber" : 107,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "professional-501c7047-5c70-4451-ad85-812277995ca4",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "professional-${PROF_ID}",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "idRegex" : "service-${SERVICO_ID}",
+              "optional" : false
+            }
+          },
+          "timeout" : "30000",
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "service-${SERVICO_ID}",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "../apoio/escolher_servico.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "10.02 · roda escolher_servico",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791591144415,
+    "duration" : 6005,
+    "sequenceNumber" : 105,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "professional-${PROF_ID}",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "idRegex" : "service-${SERVICO_ID}",
+                "optional" : false
+              }
+            },
+            "timeout" : "30000",
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "service-${SERVICO_ID}",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "../apoio/escolher_servico.yaml",
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "label" : "10.02 · roda escolher_servico",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "defineVariablesCommand" : {
+          "env" : {
+            "ALVO" : "onboarding-start"
+          },
+          "optional" : false
+        }
+      }, {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "${APP_ID}"
+          },
+          "optional" : false
+        }
+      }, {
+        "repeatCommand" : {
+          "times" : "40",
+          "condition" : {
+            "notVisible" : {
+              "idRegex" : "${ALVO}",
+              "optional" : false
+            }
+          },
+          "commands" : [ {
+            "runFlowCommand" : {
+              "commands" : [ {
+                "tapOnElement" : {
+                  "selector" : {
+                    "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                    "optional" : false
+                  },
+                  "retryIfNoChange" : false,
+                  "waitUntilVisible" : false,
+                  "longPress" : false,
+                  "optional" : false
+                }
+              } ],
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                  "optional" : false
+                }
+              },
+              "optional" : false
+            }
+          }, {
+            "assertConditionCommand" : {
+              "condition" : {
+                "visible" : {
+                  "idRegex" : "${ALVO}",
+                  "optional" : false
+                }
+              },
+              "timeout" : "3000",
+              "optional" : true
+            }
+          } ],
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "idRegex" : "${ALVO}",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      } ],
+      "sourceDescription" : "esperar_negando.yaml",
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "label" : "${ETAPA}.P7 · espera onboarding-start (negando a caixa do sistema)",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791590983960,
+    "duration" : 12250,
+    "sequenceNumber" : 16,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "defineVariablesCommand" : {
+            "env" : {
+              "ALVO" : "onboarding-start"
+            },
+            "optional" : false
+          }
+        }, {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "${APP_ID}"
+            },
+            "optional" : false
+          }
+        }, {
+          "repeatCommand" : {
+            "times" : "40",
+            "condition" : {
+              "notVisible" : {
+                "idRegex" : "${ALVO}",
+                "optional" : false
+              }
+            },
+            "commands" : [ {
+              "runFlowCommand" : {
+                "commands" : [ {
+                  "tapOnElement" : {
+                    "selector" : {
+                      "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                      "optional" : false
+                    },
+                    "retryIfNoChange" : false,
+                    "waitUntilVisible" : false,
+                    "longPress" : false,
+                    "optional" : false
+                  }
+                } ],
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+                    "optional" : false
+                  }
+                },
+                "optional" : false
+              }
+            }, {
+              "assertConditionCommand" : {
+                "condition" : {
+                  "visible" : {
+                    "idRegex" : "${ALVO}",
+                    "optional" : false
+                  }
+                },
+                "timeout" : "3000",
+                "optional" : true
+              }
+            } ],
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "idRegex" : "${ALVO}",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        } ],
+        "sourceDescription" : "esperar_negando.yaml",
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "label" : "11.P7 · espera onboarding-start (negando a caixa do sistema)",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "runScriptCommand" : {
+          "script" : "// O profissional responde o pedido de corte pela API (o modal do Partner):\n// pega o pedido PENDING mais novo e aceita (ACAO=accept) ou recusa (refuse).\n//\n// Entradas (env do runScript): API, SENHA, EMAIL_PROF, ACAO\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  var r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\nvar token = pedir(\"POST\", \"/auth/login\", { email: EMAIL_PROF, password: SENHA }).tokens.access_token;\nvar pendentes = pedir(\"GET\", \"/attendances/cut-requests\", null, token);\nif (!pendentes || pendentes.length === 0) throw new Error(\"nenhum pedido de corte pendente para o profissional\");\npendentes.sort(function (a, b) { return a.created_at < b.created_at ? 1 : -1; });\npedir(\"PATCH\", \"/attendances/cut-requests/\" + pendentes[0].id + \"/\" + ACAO, null, token);\noutput.PEDIDO_ID = pendentes[0].id;\n",
+          "env" : {
+            "API" : "${API}",
+            "SENHA" : "${SENHA}",
+            "EMAIL_PROF" : "${EMAIL_PROF}",
+            "ACAO" : "accept"
+          },
+          "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/responder_pedido.js",
+          "label" : "10.07 · o profissional aceita (API)",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "scriptCondition" : "${typeof SUPERVISAO === 'undefined' || SUPERVISAO != '2'}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "FAILED",
+    "timestamp" : 1791591171778,
+    "duration" : 1961,
+    "error" : {
+      "stackTrace" : [ {
+        "classLoaderName" : "app",
+        "methodName" : "method",
+        "fileName" : "Request.kt",
+        "lineNumber" : 254,
+        "className" : "okhttp3.Request$Builder",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeRequest",
+        "fileName" : "GraalJsHttp.kt",
+        "lineNumber" : 83,
+        "className" : "maestro.js.GraalJsHttp",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "request",
+        "fileName" : "GraalJsHttp.kt",
+        "lineNumber" : 64,
+        "className" : "maestro.js.GraalJsHttp",
+        "nativeMethod" : false
+      }, {
+        "methodName" : "pedir",
+        "fileName" : "<eval>",
+        "lineNumber" : 9,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "methodName" : ":program",
+        "fileName" : "<eval>",
+        "lineNumber" : 18,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "methodName" : ":anonymous",
+        "fileName" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/responder_pedido.js",
+        "lineNumber" : 1,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "methodName" : ":program",
+        "fileName" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/responder_pedido.js",
+        "lineNumber" : 1,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "eval",
+        "fileName" : "Context.java",
+        "lineNumber" : 416,
+        "className" : "org.graalvm.polyglot.Context",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "evalWithIIFE",
+        "fileName" : "GraalJsEngine.kt",
+        "lineNumber" : 134,
+        "className" : "maestro.js.GraalJsEngine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "evaluateScript",
+        "fileName" : "GraalJsEngine.kt",
+        "lineNumber" : 95,
+        "className" : "maestro.js.GraalJsEngine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "evaluateScript",
+        "fileName" : "GraalJsEngine.kt",
+        "lineNumber" : 26,
+        "className" : "maestro.js.GraalJsEngine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runScriptCommand",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 645,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeCommand",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 373,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeSubflowCommands",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 997,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "access$executeSubflowCommands",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 126,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invokeSuspend",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : -1,
+        "className" : "maestro.orchestra.Orchestra$executeSubflowCommands$1",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "resumeWith",
+        "fileName" : "ContinuationImpl.kt",
+        "lineNumber" : 34,
+        "className" : "kotlin.coroutines.jvm.internal.BaseContinuationImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "DispatchedTask.kt",
+        "lineNumber" : 100,
+        "className" : "kotlinx.coroutines.DispatchedTask",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "processNextEvent",
+        "fileName" : "EventLoop.common.kt",
+        "lineNumber" : 263,
+        "className" : "kotlinx.coroutines.EventLoopImplBase",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "joinBlocking",
+        "fileName" : "Builders.kt",
+        "lineNumber" : 94,
+        "className" : "kotlinx.coroutines.BlockingCoroutine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking",
+        "fileName" : "Builders.kt",
+        "lineNumber" : 70,
+        "className" : "kotlinx.coroutines.BuildersKt__BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking",
+        "lineNumber" : 1,
+        "className" : "kotlinx.coroutines.BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking$default",
+        "fileName" : "Builders.kt",
+        "lineNumber" : 48,
+        "className" : "kotlinx.coroutines.BuildersKt__BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking$default",
+        "lineNumber" : 1,
+        "className" : "kotlinx.coroutines.BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSingle$lambda$0",
+        "fileName" : "TestRunner.kt",
+        "lineNumber" : 75,
+        "className" : "maestro.cli.runner.TestRunner",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runCatching-ta8aW1Q",
+        "fileName" : "TestRunner.kt",
+        "lineNumber" : 204,
+        "className" : "maestro.cli.runner.TestRunner",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSingle",
+        "fileName" : "TestRunner.kt",
+        "lineNumber" : 66,
+        "className" : 
