@@ -69,8 +69,11 @@ appId: ${APP_ID}
 - tapOn:
     text: "Salvar"
     label: "16.0L · toca em Salvar"
+# O CEP digitado por ultimo faz o ViaCEP trocar a rua pela dele (01310-100 =
+# Avenida Paulista; o numero fica). Bateria 10/10 08:06: a lista mostrou
+# "Avenida Paulista, 10" — o endereco salvou certo.
 - extendedWaitUntil:
-    visible: "Rua da Bateria.*"
+    visible: "(Rua da Bateria|Avenida Paulista), 10.*"
     timeout: 30000
     label: "16.0M · o endereço aparece na lista"
 - tapOn:

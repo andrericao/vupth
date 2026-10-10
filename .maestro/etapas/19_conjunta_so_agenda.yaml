@@ -12,8 +12,11 @@ appId: ${APP_ID}
       APP_ID: com.vupth.partner.preview
       MODO: "AGENDA_ONLY"
     label: "19.02 · no Partner, liga o só agenda"
+# Sem o stopApp: false o launchApp FECHA o app antes de abrir: o Client
+# voltava ao Inicio e nao a tela em que estava (bateria 10/10 08:06).
 - launchApp:
     appId: ${APP_ID}
+    stopApp: false
     label: "19.03 · volta ao Client (sem limpar)"
 - runFlow:
     file: ../apoio/escolher_servico.yaml

@@ -22,10 +22,87 @@ onFlowComplete:
       CONTA: "1"
       ABERTURA: "1"
       FILA_FECHADA: "0"
-      NOTIFICACOES: "allow"
-    label: "13.P0 · prepara a etapa (notificações permitidas)"
+      NOTIFICACOES: "unset"
+    label: "13.P0 · prepara a etapa"
 
-# O preparo termina na tela Sistema (atualizar.yaml). Antes de fechar o app, o
+# A permissao vem pelo caminho do app (bateria 10/10 08:06, 13.T3: o "allow"
+# do launchApp nao valia no aparelho e o app, que so pede depois da tela 10,
+# ficava sem token). Entra na fila pelo app, a tela 10 vem, "Quero ser avisada"
+# e permitir na caixa do sistema; depois sai pela API, na tolerancia.
+- runFlow:
+    file: ../apoio/abrir_a_loja.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "13.A1 · abre a loja de teste"
+- runFlow:
+    file: ../apoio/escolher_servico.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "13.A2 · escolhe o serviço"
+- tapOn:
+    id: "primary-queue"
+    label: "13.A3 · toca em primary-queue"
+- extendedWaitUntil:
+    visible: "Entendi"
+    timeout: 60000
+    label: "13.A4 · espera Entendi"
+- tapOn:
+    text: "Entendi"
+    label: "13.A5 · toca em Entendi"
+- repeat:
+    times: 3
+    while:
+      visible: "(Sua vez está chegando|É quase a sua vez!)"
+    commands:
+      - tapOn:
+          id: "dialogo-botao-0"
+      - waitForAnimationToEnd:
+          timeout: 3000
+    label: "13.A6 · fecha a política da multa e o push da vez, se cobrem a tela 10"
+- extendedWaitUntil:
+    visible:
+      id: "push-accept"
+    timeout: 30000
+    label: "13.A7 · espera a tela 10"
+- tapOn:
+    id: "push-accept"
+    label: "13.A8 · toca em Quero ser avisada"
+- extendedWaitUntil:
+    visible:
+      id: "com.android.permissioncontroller:id/permission_allow_button"
+    timeout: 30000
+    label: "13.A9 · a caixa do sistema aparece"
+- tapOn:
+    id: "com.android.permissioncontroller:id/permission_allow_button"
+    label: "13.AA · permite"
+- runScript:
+    file: ../scripts/fila_pela_api.js
+    env:
+      ACAO: "sair-da-ativa"
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+    label: "13.AB · sai da fila pela API"
+- tapOn:
+    text: "Perfil"
+    label: "13.AC · toca em Perfil"
+- scrollUntilVisible:
+    element:
+      text: "Versão do app"
+    label: "13.AD · rola até Versão do app"
+- tapOn:
+    text: "Versão do app"
+    label: "13.AE · abre a tela Sistema"
+
+# Na tela Sistema. Antes de fechar o app, o
 # backend precisa ter o token (POST /devices, com retentativas de ate ~66s no
 # cold start): fechar antes matava o registro e o push nunca chegava (13.04
 # vermelha em todas as rodadas ate 09/10). Os 7 toques na versao abrem o painel.

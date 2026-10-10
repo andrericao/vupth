@@ -1,0 +1,24 @@
+# Espera a tela da fila (queue-position) fechando o aviso "Sobre o tempo
+# estimado" no meio do caminho. Ele abre a CADA entrada na tela da fila (salvo
+# "Não mostrar novamente") e, como Modal, esconde o queue-position do Maestro
+# (bateria 10/10 08:06: 11.08 e 21.04). 20 voltas ~ 1 min.
+appId: ${APP_ID}
+---
+- repeat:
+    times: 20
+    while:
+      notVisible:
+        id: "queue-position"
+    commands:
+      - runFlow:
+          when:
+            visible: "Sobre o tempo estimado"
+          commands:
+            - tapOn: "Entendi"
+      - extendedWaitUntil:
+          visible:
+            id: "queue-position"
+          timeout: 3000
+          optional: true
+- assertVisible:
+    id: "queue-position"

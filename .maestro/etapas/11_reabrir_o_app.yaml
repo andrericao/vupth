@@ -25,11 +25,9 @@ appId: ${APP_ID}
 - tapOn:
     id: "card-da-fila"
     label: "11.07 · toca em card-da-fila"
-- extendedWaitUntil:
-    visible:
-      id: "queue-position"
-    timeout: 30000
-    label: "11.08 · espera queue-position"
+- runFlow:
+    file: ../apoio/esperar_a_fila.yaml
+    label: "11.08 · espera queue-position (fecha o aviso da estimativa)"
 - waitForAnimationToEnd:
     timeout: 3000
     label: "11.09 · espera a tela parar"
