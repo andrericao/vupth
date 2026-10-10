@@ -1,5 +1,6 @@
 import { Platform } from "react-native";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context";
 
 import { AuthRoutes } from "./auth.routes";
@@ -21,6 +22,21 @@ const theme = {
 		background: gluestackUIConfig.tokens.colors.white,
 	},
 };
+
+// A tela de entrada num navegador proprio (bateria 10/10 08:06, 01.01): solta
+// direto no NavigationContainer, no Android de ponta a ponta ela media mais que
+// a tela e o "Entrar" caia atras da barra do celular — com rodape fixo e com as
+// insets, o layout nao mudava um pixel. As telas dentro de um navegador (abas,
+// Entrar) medem certo: cada uma e uma tela nativa do tamanho da janela.
+const EntradaStack = createNativeStackNavigator();
+
+function Entrada() {
+	return (
+		<EntradaStack.Navigator screenOptions={{ headerShown: false }}>
+			<EntradaStack.Screen name="entrada" component={Onboarding} />
+		</EntradaStack.Navigator>
+	);
+}
 
 export function Routes(){
 	// A abertura vem ACIMA da navegacao de abas de proposito: onboarding com a
@@ -51,7 +67,7 @@ export function Routes(){
 			initialState={Platform.OS === "web" ? undefined : (estadoDaNavegacao() as never)}
 			onStateChange={guardarEstadoDaNavegacao}
 		>
-			{restored && !onboardingSeen ? <Onboarding /> : <AuthRoutes />}
+			{restored && !onboardingSeen ? <Entrada /> : <AuthRoutes />}
 		</NavigationContainer>
 		{/* Tela 10 (ligar-push-permission): por cima, sem desmontar a fila. */}
 		{pushOferta && (

@@ -14,11 +14,16 @@ jest.mock('expo-secure-store');
 
 const navigate = jest.fn();
 let pronto = false;
+let rotasDaRaiz: string[] | undefined;
 
 beforeEach(() => {
   jest.clearAllMocks();
   pronto = false;
   jest.spyOn(navigationRef, 'isReady').mockImplementation(() => pronto);
+  rotasDaRaiz = undefined;
+  jest.spyOn(navigationRef, 'getRootState').mockImplementation(
+    () => (rotasDaRaiz ? { routeNames: rotasDaRaiz } : undefined) as never,
+  );
   (navigationRef as unknown as { navigate: unknown }).navigate = navigate;
   useQueueStore.setState({ activeQueue: null } as never);
 });
@@ -76,6 +81,21 @@ describe('goToLoginAfterOnboarding', () => {
       goToLoginAfterOnboarding();
       jest.advanceTimersByTime(2000);
       expect(navigate).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('com a entrada ainda na tela (navegador próprio), espera as abas montarem', () => {
+    jest.useFakeTimers();
+    try {
+      pronto = true;
+      rotasDaRaiz = ['entrada'];
+      goToLoginAfterOnboarding();
+      expect(navigate).not.toHaveBeenCalled();
+      rotasDaRaiz = ['homeTab', 'attendancesTab', 'profileTab'];
+      jest.advanceTimersByTime(50);
+      expect(navigate).toHaveBeenCalledWith('homeTab', { screen: 'login', params: {}, pop: true });
     } finally {
       jest.useRealTimers();
     }

@@ -3,6 +3,8 @@ import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import * as SecureStore from "expo-secure-store";
 
+import { aindaDaParaPedir } from "@domain/push";
+
 // ligar-push-permission (Andre, 05/10): a tela 10 (PushPermission) vem antes da
 // caixa do sistema, na primeira entrada numa fila. Fora do usePushRegistration
 // para a tela da fila nao carregar o hook inteiro.
@@ -29,7 +31,7 @@ export async function podeOferecerPush(): Promise<boolean> {
   if (Platform.OS === "web" || !Device.isDevice) return false;
   try {
     const { status, canAskAgain } = await Notifications.getPermissionsAsync();
-    if (status !== "undetermined" || canAskAgain === false) return false;
+    if (!aindaDaParaPedir({ status, canAskAgain })) return false;
     return (await SecureStore.getItemAsync(PUSH_PERGUNTADO_KEY)) !== "1";
   } catch {
     return false;

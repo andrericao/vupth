@@ -1,9 +1,0 @@
-✅ 00 · versão
-❌ 01_visitante — parou em 01.01 · toca em Já tem conta? Entrar
-✅ 02_cadastro
-✅ 03_loja
-❌ 04_fim_de_fila_hibrido — parou em 04.02 · vê primary-queue
-✅ 05_entra_e_sai_com_multa
-✅ 06_multa_no_total
-✅ 07_agendar_pela_barra
-✅ 08_fila_fechada

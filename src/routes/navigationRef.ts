@@ -54,14 +54,20 @@ export function navigateFromNotification(
 /**
  * Leva pro login depois do onboarding.
  *
- * O onboarding e renderizado ACIMA do navegador (ver routes/index.tsx), entao
- * nao tem `useNavigation`: quando ele sai, o navegador de abas monta pela
- * primeira vez. Por isso a navegacao espera o `isReady` em vez de disparar na
- * hora — no instante do toque a arvore ainda nao existe.
+ * O onboarding tem o navegador PROPRIO (ver routes/index.tsx): quando ele
+ * sai, o navegador de abas monta pela primeira vez. Por isso a navegacao espera
+ * as abas existirem (o `isReady` sozinho ja vale com a entrada na tela) em vez
+ * de disparar na hora — no instante do toque a arvore das abas ainda nao existe.
  */
+function abasMontadas(): boolean {
+  if (!navigationRef.isReady()) return false;
+  const nomes = (navigationRef.getRootState() as { routeNames?: string[] } | undefined)?.routeNames;
+  return !nomes || nomes.includes("homeTab");
+}
+
 export function goToLoginAfterOnboarding(): void {
   const tryNavigate = (attempt = 0) => {
-    if (navigationRef.isReady()) {
+    if (abasMontadas()) {
       const navigate = navigationRef.navigate as unknown as (
         name: string,
         params?: object,

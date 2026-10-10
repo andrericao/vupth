@@ -46,6 +46,11 @@ describe('podeOferecerPush', () => {
     expect(await podeOferecerPush()).toBe(false);
   });
 
+  it('Android 13+: oferece com "denied" de quem nunca foi perguntado (bateria 10/10 08:06)', async () => {
+    mockGetPermissions.mockResolvedValue({ status: 'denied', canAskAgain: true });
+    expect(await podeOferecerPush()).toBe(true);
+  });
+
   it('não oferece quando o sistema não deixa perguntar de novo', async () => {
     mockGetPermissions.mockResolvedValue({ status: 'undetermined', canAskAgain: false });
     expect(await podeOferecerPush()).toBe(false);

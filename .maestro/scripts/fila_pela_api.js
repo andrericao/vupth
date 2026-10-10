@@ -4,6 +4,7 @@
 // Entradas (env do runScript): API, SENHA, EMAIL_CLIENTE, ACAO ("entrar"|"sair")
 //   entrar: PROF_ID, LOJA_ID, SERVICO_ID — saida: output.ATENDIMENTO_ID
 //   sair:   ATENDIMENTO_ID (dentro da tolerancia, sem multa)
+//   sair-da-ativa: cancela a entrada em aberto do cliente (feita pelo app)
 
 // PATCH/PUT sem corpo: o http do Maestro (OkHttp) recusa ("method PATCH must
 // have a request body", bateria 09/10 20:30, 10.07) — vai um "{}".
@@ -25,6 +26,14 @@ if (ACAO === "entrar") {
   output.ATENDIMENTO_ID = at.id;
 } else if (ACAO === "sair") {
   pedir("PUT", "/attendances/" + ATENDIMENTO_ID + "/cancel", null, token);
+} else if (ACAO === "sair-da-ativa") {
+  // A entrada veio pelo app (a 13 passa pela tela 10): sem o id na mao, cancela
+  // o que ainda nao terminou.
+  var meus = pedir("GET", "/attendances/client/me", null, token) || [];
+  var fim = ["FINISHED", "CANCELLED", "REMOVED", "IN_PROGRESS", "NO_SHOW"];
+  for (var i = 0; i < meus.length; i++) {
+    if (fim.indexOf(meus[i].status) < 0) pedir("PUT", "/attendances/" + meus[i].id + "/cancel", null, token);
+  }
 } else {
-  throw new Error("ACAO deve ser entrar ou sair, veio: " + ACAO);
+  throw new Error("ACAO deve ser entrar, sair ou sair-da-ativa, veio: " + ACAO);
 }

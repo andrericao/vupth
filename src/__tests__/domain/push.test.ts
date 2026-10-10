@@ -135,10 +135,24 @@ describe('acquireExpoPushToken', () => {
       baseEnv({
         getPermissionsAsync: async () => ({ status: 'denied', canAskAgain: true }),
         requestPermissionsAsync: request,
+        jaPerguntou: async () => true,
       }),
     );
     expect(request).not.toHaveBeenCalled();
     expect(r.motivo).toBe('sem-permissao');
+  });
+
+  it('Android 13+: "denied" de quem nunca foi perguntado → pede (bateria 10/10 08:06)', async () => {
+    const request = jest.fn(async () => ({ status: 'granted' }));
+    const r = await acquireExpoPushToken(
+      baseEnv({
+        getPermissionsAsync: async () => ({ status: 'denied', canAskAgain: true }),
+        requestPermissionsAsync: request,
+        jaPerguntou: async () => false,
+      }),
+    );
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(r.motivo).toBe('ok');
   });
 
   it('o sistema não deixa perguntar de novo → não pede', async () => {

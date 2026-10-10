@@ -16,11 +16,9 @@ appId: ${APP_ID}
 - tapOn:
     id: "card-da-fila"
     label: "21.03 · abre a fila"
-- extendedWaitUntil:
-    visible:
-      id: "queue-position"
-    timeout: 30000
-    label: "21.04 · espera queue-position"
+- runFlow:
+    file: ../apoio/esperar_a_fila.yaml
+    label: "21.04 · espera queue-position (fecha o aviso da estimativa)"
 # A politica da multa (menos de 1h30) aparece uma vez: fecha.
 - runFlow:
     when:
