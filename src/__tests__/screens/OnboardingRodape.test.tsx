@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { within } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { Onboarding } from '@screens/Onboarding';
 
@@ -18,5 +19,13 @@ describe('Onboarding — o rodapé acima da barra do sistema', () => {
     const estilo = StyleSheet.flatten(getByTestId('onboarding-rodape').props.style);
     expect(estilo.paddingBottom).toBe(34 + 32);
     expect(getByTestId('onboarding-login')).toBeTruthy();
+  });
+
+  it('o rodapé fica fixo, fora da rolagem (entrar-atras-da-barra, 09/10)', () => {
+    const { getByTestId } = renderWithProviders(<Onboarding />);
+    const rolagem = getByTestId('onboarding-rolagem');
+    expect(within(rolagem).queryByTestId('onboarding-rodape')).toBeNull();
+    expect(within(rolagem).queryByTestId('onboarding-login')).toBeNull();
+    expect(getByTestId('onboarding-rodape')).toBeTruthy();
   });
 });
