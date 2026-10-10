@@ -16,13 +16,18 @@ appId: ${APP_ID}
 # A caixa de PERMISSAO do sistema (localizacao na primeira abertura, notificacao
 # depois do login): o app pede uma vez so, mas o `permissions: deny` do
 # launchApp nao a impede no Android — ela aparece e o roteiro nega aqui.
-- runFlow:
-    when:
+# Em repeticao, nao um toque so (Andre 10/10 16h, "o teste trava com o popup
+# de permissao"): o toque pode cair antes da caixa terminar de abrir e ela fica.
+- repeat:
+    times: 3
+    while:
       visible:
         id: "com.android.permissioncontroller:id/permission_deny_button"
     commands:
       - tapOn:
           id: "com.android.permissioncontroller:id/permission_deny_button"
+      - waitForAnimationToEnd:
+          timeout: 2000
 # A tela 10 (ligar-push-permission): na primeira entrada numa fila, antes da
 # caixa do sistema. "Prefiro acompanhar pelo app" = o mesmo que negar.
 - runFlow:
