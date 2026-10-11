@@ -50,6 +50,7 @@ import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
+import { aplicarOtaNaAbertura } from "@services/otaNaAbertura";
 
 import { useReconciliarFila } from "@hooks/useReconciliarFila";
 import { useAvisoDeAtraso } from "@hooks/useAvisoDeAtraso";
@@ -134,6 +135,8 @@ export default function App() {
     restoreFirstRun();
     restoreFavorites();
     restaurarFonte();
+    // Primeira abertura no bundle do APK: aplica o OTA novo na hora (card-oscila).
+    aplicarOtaNaAbertura();
     // Portao de readiness (cold start do Render): acorda o backend ANTES de liberar
     // login/cadastro/listagem. A 1a cutucada acorda a instancia; segue mesmo se
     // estourar o teto (chamadas seguintes ja pegam a instancia quente). CLAUDE.md 18c.

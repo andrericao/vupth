@@ -123,6 +123,11 @@ appId: ${APP_ID}
 - tapOn:
     text: "novo@email.com"
     label: "16.11 · toca no novo e-mail"
+# O campo nasce com o e-mail atual (bateria 10/10 15:32, 16.15: o novo foi
+# digitado no fim dele e o backend devolveu "Field validation error").
+- eraseText:
+    charactersToErase: 80
+    label: "16.11b · apaga o e-mail atual do campo"
 - inputText:
     text: "client_c${TAG}novo@teste.com"
     label: "16.12 · digita o novo e-mail"

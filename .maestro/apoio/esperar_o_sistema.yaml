@@ -1,0 +1,18 @@
+# O aviso "Process system isn't responding" / "<app> isn't responding" (Close
+# app / Wait) do emulador lento (emulador-lento, print do Andre 10/10 19h): toca
+# em "Wait" — nunca em "Close app", que fecharia o app no meio da etapa. Pelo id
+# do botao (android:id/aerr_wait), que vale em qualquer idioma.
+# Chamado no comeco de cada etapa (preparo), no fechar_aviso e nas esperas
+# longas (esperar_negando). No celular o aviso nao vem e nada acontece.
+appId: ${APP_ID}
+---
+- repeat:
+    times: 3
+    while:
+      visible:
+        id: "android:id/aerr_wait"
+    commands:
+      - tapOn:
+          id: "android:id/aerr_wait"
+      - waitForAnimationToEnd:
+          timeout: 2000

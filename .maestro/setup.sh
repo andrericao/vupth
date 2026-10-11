@@ -16,7 +16,8 @@ APP_ID="com.vupth.client.preview"
 echo "=== VUPTH Client — bateria Maestro (staging) ==="
 
 # 1. Celular conectado
-DEVICE=$(adb devices | grep -w "device" | head -1)
+# Com --device na bateria (DEC-33), o ANDROID_SERIAL diz qual aparelho.
+DEVICE=$(adb devices | grep -w "device" | grep "^${ANDROID_SERIAL:-}" | head -1)
 if [ -z "$DEVICE" ]; then
   echo "ERRO: nenhum celular. Ligue a Depuracao USB, conecte o cabo e aceite o aviso no celular."
   exit 1
@@ -44,6 +45,22 @@ if [ "$ANTES" != "null" ] && [ -n "$ANTES" ]; then
 fi
 adb shell settings put secure autofill_service null
 echo "Preenchimento automatico desligado: OK (ao terminar: bash .maestro/restaurar.sh)"
+
+# 4b. Emulador (emulador-lento, Andre 10/10 19h: "o emulador e mais lento,
+#     deve haver um preparo para isso"): sem animacoes e sem o app Google, que
+#     disputam os 2 nucleos do PC com o app e trazem o aviso "Process system
+#     isn't responding" (o apoio/esperar_o_sistema.yaml toca em "Wait").
+#     Permissoes por pm grant nao: o clearState de cada etapa as zera, e as
+#     etapas testam a caixa do sistema (negar, a tela 10, o "permitir" da 13).
+case "${ANDROID_SERIAL:-$DEVICE}" in
+  emulator-*)
+    for CHAVE in window_animation_scale transition_animation_scale animator_duration_scale; do
+      adb shell settings put global "$CHAVE" 0
+    done
+    adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox >/dev/null 2>&1
+    echo "Emulador: sem animacoes e sem o app Google: OK"
+    ;;
+esac
 
 # 5. Acordar o staging. O keep-warm (DEC-4) o mantem acordado das 6:00 as
 #    23:50; fora disso, o primeiro pedido leva ~50 s.

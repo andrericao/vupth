@@ -6,6 +6,30 @@ appId: ${APP_ID}
 # da barra de navegacao do celular. O toque do Maestro cai no centro do
 # elemento: se ele estiver sob a barra, o toque vai para o sistema e o login
 # nao abre. Entra pelo "Entrar" e volta: o visitante segue sem conta.
+#
+# A entrada so e conferida no OTA (bateria 10/10 15:32, 01.01): o clearState
+# do preparo apaga o OTA e a primeira abertura roda o bundle EMBUTIDO do APK —
+# a arvore da falha nao tinha o onboarding-rolagem nem o onboarding-rodape, e
+# nenhuma correcao da entrada chegava ao teste. Fecha e abre (sem limpar) ate
+# a versao do rodape da entrada mostrar o commit esperado; o OTA baixa na
+# primeira abertura e vale na seguinte.
+- repeat:
+    times: 3
+    while:
+      true: ${typeof COMMIT !== 'undefined' && !!COMMIT}
+      notVisible:
+        id: "versao-entrada"
+        text: ".*${typeof COMMIT !== 'undefined' ? COMMIT : ''}.*"
+    commands:
+      - stopApp
+      - launchApp
+      - runFlow:
+          file: ../apoio/esperar_negando.yaml
+          env:
+            ALVO: "onboarding-start"
+      - runFlow:
+          file: ../apoio/fechar_aviso.yaml
+    label: "01.00 · reabre até a entrada rodar o OTA (o commit no rodape)"
 - tapOn:
     id: "onboarding-login"
     label: "01.01 · toca em Já tem conta? Entrar"
@@ -16,13 +40,35 @@ appId: ${APP_ID}
     label: "01.01b · o login abriu (o Entrar não está atrás da barra)"
 - back:
     label: "01.01c · volta ao Início, sem conta"
+# card-oscila (Andre, 10/10): no bundle do APK o card da loja vinha sem a nota
+# e sem a distancia. No OTA, todo card tem a nota (a distancia depende do GPS,
+# negado na bateria: "Ligue o GPS").
+- extendedWaitUntil:
+    visible:
+      id: "nota-.*"
+    timeout: 30000
+    label: "01.01d · o card da loja mostra a nota (card-oscila)"
+- assertVisible:
+    text: "Ligue o GPS"
+    label: "01.01e · sem GPS, o card pede o GPS no lugar da distância"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "01.02 · roda fechar_aviso"
 
-- tapOn:
-    text: "Perfil"
-    label: "01.03 · toca em Perfil"
+# No emulador lento (bateria 10/10 17:30, 01.04) o toque levou 41 s e nao
+# trocou a aba: toca de novo ate o Perfil do visitante abrir.
+- repeat:
+    times: 4
+    while:
+      notVisible: "Criar conta grátis"
+    commands:
+      - tapOn:
+          text: "Perfil"
+      - extendedWaitUntil:
+          visible: "Criar conta grátis"
+          timeout: 10000
+          optional: true
+    label: "01.03 · toca em Perfil (de novo, se a aba não trocou)"
 - assertVisible:
     text: "Criar conta grátis"
     label: "01.04 · vê Criar conta grátis"

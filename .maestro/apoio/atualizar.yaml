@@ -7,8 +7,20 @@
 # Entrada: COMMIT (a bateria.sh o passa)
 appId: ${APP_ID}
 ---
-- tapOn:
-    text: "Perfil"
+# O toque em Perfil se repete ate a aba trocar (emulador lento, ver entrar.yaml).
+- repeat:
+    times: 4
+    while:
+      notVisible:
+        id: "grupo-.*"
+    commands:
+      - tapOn:
+          text: "Perfil"
+      - extendedWaitUntil:
+          visible:
+            id: "grupo-.*"
+          timeout: 10000
+          optional: true
 - scrollUntilVisible:
     element:
       text: "Versão do app"
@@ -30,8 +42,19 @@ appId: ${APP_ID}
           file: esperar_negando.yaml
           env:
             ALVO: "busca-home"
-      - tapOn:
-          text: "Perfil"
+      - repeat:
+          times: 4
+          while:
+            notVisible:
+              id: "grupo-.*"
+          commands:
+            - tapOn:
+                text: "Perfil"
+            - extendedWaitUntil:
+                visible:
+                  id: "grupo-.*"
+                timeout: 10000
+                optional: true
       - scrollUntilVisible:
           element:
             text: "Versão do app"

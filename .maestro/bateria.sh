@@ -4,6 +4,8 @@
 #   bash .maestro/bateria.sh              # pergunta: completa ou so as que nao passaram
 #   bash .maestro/bateria.sh --completa   # roda todas, sem perguntar
 #   bash .maestro/bateria.sh --falhas     # so as que nao passaram, sem perguntar
+#   bash .maestro/bateria.sh --falhas --device emulator-5554  # num aparelho
+#                                         escolhido (DEC-33, comandos.html#emulador)
 #
 # Prepara o celular (setup.sh), acha sozinha o commit esperado (o ultimo da
 # branch da pasta no GitHub — a dev e o OTA do canal preview), roda o roteiro e devolve o
@@ -21,6 +23,26 @@ REPO="$(dirname "$DIR")"
 export PATH="$PATH:$HOME/Android/Sdk/platform-tools:$HOME/.maestro/bin"
 APP_ID="com.vupth.client.preview"
 API="https://vupth-backend-ia.onrender.com"
+
+# Os argumentos: o modo (--completa/--falhas) e o aparelho (--device <serial>).
+# Antes so o $1 era lido, e o "--device emulator-5554" virava o modo (10/10).
+MODO=""
+APARELHO=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --completa|--falhas) MODO="$1" ;;
+    --device) APARELHO="$2"; shift ;;
+  esac
+  shift
+done
+# emulador (DEC-33): com o celular e o emulador no adb, --device escolhe um. O
+# ANDROID_SERIAL vale para todo adb daqui, do setup.sh e do restaurar.sh; o
+# Maestro recebe o mesmo.
+MAESTRO_APARELHO=()
+if [ -n "$APARELHO" ]; then
+  export ANDROID_SERIAL="$APARELHO"
+  MAESTRO_APARELHO=(--device "$APARELHO")
+fi
 
 # Uma bateria por vez no aparelho (DEC-17): duas sessoes do Maestro no mesmo
 # celular brigam pelo driver. Client e Partner usam o mesmo celular.
@@ -104,7 +126,6 @@ adb shell pm list packages 2>/dev/null | grep -q "com.vupth.partner.preview" || 
 # pula toda etapa ja verde em aprovados.txt, de qualquer commit; sem resposta
 # em 1 min, segue assim.
 APROVADOS="$DIR/aprovados.txt"
-MODO="${1:-}"
 if [ "$MODO" != "--completa" ] && [ "$MODO" != "--falhas" ]; then
   read -r -t 60 -p "Rodar a bateria completa ou só as que não passaram? (c = completa / F = só as falhas) " RESP
   echo ""
@@ -142,7 +163,7 @@ rodar() {
   local nome="$1" pasta="$RODADA/$1"
   mkdir -p "$pasta"
   echo "=== $nome ==="
-  maestro test \
+  maestro "${MAESTRO_APARELHO[@]}" test \
     -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
     -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" \
     --debug-output "$pasta" --flatten-debug-output \

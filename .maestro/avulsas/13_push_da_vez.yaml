@@ -94,13 +94,19 @@ onFlowComplete:
 - tapOn:
     text: "Perfil"
     label: "13.AC · toca em Perfil"
-- scrollUntilVisible:
-    element:
-      text: "Versão do app"
-    label: "13.AD · rola até Versão do app"
-- tapOn:
-    text: "Versão do app"
-    label: "13.AE · abre a tela Sistema"
+# O preparo (PB) termina na tela Sistema, e o toque em Perfil volta a ela
+# (bateria 10/10 15:32, 13.AD): so rola e abre se ainda estiver no Perfil.
+- runFlow:
+    when:
+      notVisible:
+        id: "version-line"
+    commands:
+      - scrollUntilVisible:
+          element:
+            text: "Versão do app"
+      - tapOn:
+          text: "Versão do app"
+    label: "13.AD · abre a tela Sistema, se ainda não estiver nela"
 
 # Na tela Sistema. Antes de fechar o app, o
 # backend precisa ter o token (POST /devices, com retentativas de ate ~66s no
