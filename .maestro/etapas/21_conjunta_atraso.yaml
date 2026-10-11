@@ -53,8 +53,18 @@ appId: ${APP_ID}
       APP_ID: com.vupth.partner.preview
       CLIENTE: ${NOME_CLIENTE}
     label: "21.09 · no Partner, marca que ${NOME_CLIENTE} não chegou"
+# Fecha o Partner antes: com os dois apps abertos no emulador de 1,5 GB o
+# driver do Maestro caia logo depois (21.0B: "device offline" as 09:58,
+# "UiAutomation not connected" as 11:43).
+- stopApp:
+    appId: com.vupth.partner.preview
+    label: "21.09b · fecha o Partner"
+# stopApp: false (como na 18 e na 19): sem ele o launchApp reabre o Client do
+# zero, e no emulador a leitura da tela travou 100 s logo depois, ate o driver
+# cair (21.0B, 4 vezes em 11/10; maestro.log das 13:56).
 - launchApp:
     appId: ${APP_ID}
+    stopApp: false
     label: "21.0A · volta ao Client (sem limpar)"
 - extendedWaitUntil:
     visible: ".*Este é o seu 1º atraso.*"

@@ -24,8 +24,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727658517,
-    "sequenceNumber" : 128,
+    "timestamp" : 1791738139290,
+    "sequenceNumber" : 127,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -893,9 +893,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727588322,
-    "duration" : 77931,
-    "sequenceNumber" : 97,
+    "timestamp" : 1791738067159,
+    "duration" : 80032,
+    "sequenceNumber" : 96,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -1769,8 +1769,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727414054,
-    "sequenceNumber" : 42,
+    "timestamp" : 1791737903319,
+    "sequenceNumber" : 41,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -1812,9 +1812,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727540030,
-    "duration" : 12,
-    "sequenceNumber" : 76,
+    "timestamp" : 1791738050804,
+    "duration" : 8,
+    "sequenceNumber" : 87,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -1839,9 +1839,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727602796,
-    "duration" : 3217,
-    "sequenceNumber" : 102,
+    "timestamp" : 1791738082361,
+    "duration" : 3489,
+    "sequenceNumber" : 101,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -1881,8 +1881,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727665889,
-    "sequenceNumber" : 130,
+    "timestamp" : 1791738146705,
+    "sequenceNumber" : 129,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -1922,8 +1922,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727382783,
-    "duration" : 1056,
+    "timestamp" : 1791737847500,
+    "duration" : 1529,
     "sequenceNumber" : 17,
     "evaluatedCommand" : {
       "launchAppCommand" : {
@@ -1934,29 +1934,6 @@
           "notifications" : "${typeof NOTIFICACOES !== 'undefined' && NOTIFICACOES ? NOTIFICACOES : 'deny'}"
         },
         "label" : "00.P6 · abre o app limpo",
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727371551,
-    "duration" : 28,
-    "sequenceNumber" : 5,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
         "optional" : false
       }
     }
@@ -1999,9 +1976,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727628915,
-    "duration" : 13039,
-    "sequenceNumber" : 116,
+    "timestamp" : 1791738110800,
+    "duration" : 11369,
+    "sequenceNumber" : 115,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "4",
@@ -2049,9 +2026,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727615265,
+    "timestamp" : 1791738097197,
     "duration" : 1,
-    "sequenceNumber" : 107,
+    "sequenceNumber" : 106,
     "evaluatedCommand" : {
       "defineVariablesCommand" : {
         "env" : {
@@ -2689,9 +2666,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727450101,
-    "duration" : 138206,
-    "sequenceNumber" : 58,
+    "timestamp" : 1791737937553,
+    "duration" : 129584,
+    "sequenceNumber" : 57,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -3331,8 +3308,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727367930,
-    "duration" : 25,
+    "timestamp" : 1791737834336,
+    "duration" : 17,
     "sequenceNumber" : 1,
     "evaluatedCommand" : {
       "defineVariablesCommand" : {
@@ -3371,8 +3348,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727553133,
-    "sequenceNumber" : 81,
+    "timestamp" : 1791738032443,
+    "sequenceNumber" : 80,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -3435,8 +3412,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727588334,
-    "sequenceNumber" : 99,
+    "timestamp" : 1791738067172,
+    "sequenceNumber" : 98,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "4",
@@ -3488,9 +3465,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727634842,
-    "duration" : 106,
-    "sequenceNumber" : 118,
+    "timestamp" : 1791738115136,
+    "duration" : 151,
+    "sequenceNumber" : 117,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -3519,9 +3496,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727430769,
-    "duration" : 1925,
-    "sequenceNumber" : 48,
+    "timestamp" : 1791737919288,
+    "duration" : 1873,
+    "sequenceNumber" : 47,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -3531,29 +3508,6 @@
         "retryIfNoChange" : false,
         "waitUntilVisible" : false,
         "longPress" : false,
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727432717,
-    "duration" : 12,
-    "sequenceNumber" : 50,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
         "optional" : false
       }
     }
@@ -3685,8 +3639,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727391831,
-    "duration" : 22191,
+    "timestamp" : 1791737856454,
+    "duration" : 46831,
     "sequenceNumber" : 22,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -3822,9 +3776,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727440610,
-    "duration" : 1738,
-    "sequenceNumber" : 54,
+    "timestamp" : 1791737928398,
+    "duration" : 1261,
+    "sequenceNumber" : 53,
     "evaluatedCommand" : {
       "waitForAnimationToEndCommand" : {
         "timeout" : "3000",
@@ -3841,12 +3795,12 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727469714,
-    "duration" : 17,
-    "sequenceNumber" : 65,
+    "timestamp" : 1791737957318,
+    "duration" : 23,
+    "sequenceNumber" : 64,
     "evaluatedCommand" : {
       "setClipboardCommand" : {
-        "text" : "client_c72733200@teste.com",
+        "text" : "client_c73781600@teste.com",
         "optional" : false
       }
     }
@@ -3866,44 +3820,13 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727610672,
-    "duration" : 4579,
-    "sequenceNumber" : 105,
+    "timestamp" : 1791738092321,
+    "duration" : 4863,
+    "sequenceNumber" : 104,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
           "idRegex" : "dialogo-botao-0",
-          "optional" : false
-        },
-        "retryIfNoChange" : false,
-        "waitUntilVisible" : false,
-        "longPress" : false,
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "tapOnElement" : {
-      "selector" : {
-        "textRegex" : "Perfil",
-        "optional" : false
-      },
-      "retryIfNoChange" : false,
-      "waitUntilVisible" : false,
-      "longPress" : false,
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727631102,
-    "duration" : 3739,
-    "sequenceNumber" : 117,
-    "evaluatedCommand" : {
-      "tapOnElement" : {
-        "selector" : {
-          "textRegex" : "Perfil",
           "optional" : false
         },
         "retryIfNoChange" : false,
@@ -3924,14 +3847,45 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727414046,
-    "duration" : 7,
-    "sequenceNumber" : 41,
+    "timestamp" : 1791737834362,
+    "duration" : 2686,
+    "sequenceNumber" : 2,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
           "appId" : "com.vupth.client.preview"
         },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Perfil",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791738111602,
+    "duration" : 3534,
+    "sequenceNumber" : 116,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Perfil",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
         "optional" : false
       }
     }
@@ -3962,8 +3916,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727423343,
-    "sequenceNumber" : 44,
+    "timestamp" : 1791737911752,
+    "sequenceNumber" : 43,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -4003,9 +3957,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727456174,
-    "duration" : 13537,
-    "sequenceNumber" : 64,
+    "timestamp" : 1791737942839,
+    "duration" : 14475,
+    "sequenceNumber" : 63,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -4029,9 +3983,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727666144,
-    "duration" : 107,
-    "sequenceNumber" : 132,
+    "timestamp" : 1791738147080,
+    "duration" : 110,
+    "sequenceNumber" : 131,
     "evaluatedCommand" : {
       "runScriptCommand" : {
         "script" : "// Para a bateria se o app no aparelho nao roda o commit esperado (Andre, 03/10).\n// O texto vem do copyTextFrom da versao do Perfil (\"Versão 1.0.3 · 03/10/2026 · c65338e7\").\n//\n// Entrada (env da bateria): COMMIT\n\nvar esperado = (typeof COMMIT === \"undefined\" || COMMIT == null ? \"\" : String(COMMIT)).trim().toLowerCase().slice(0, 8);\nvar instalado = String(maestro.copiedText || \"\");\n\n// Sem COMMIT (rodada fora da bateria.sh, 03/10): nao trava a bateria — avisa\n// que a versao nao foi conferida e segue.\nif (!esperado) {\n  console.log(\n    \"AVISO: versao NAO conferida (sem COMMIT). Instalado: \\\"\" + instalado +\n      \"\\\". Para conferir, rode pela bateria.sh: bash .maestro/bateria.sh\"\n  );\n} else if (instalado.toLowerCase().indexOf(esperado) < 0) {\n  throw new Error(\n    \"Versao errada no aparelho. Instalado: \\\"\" + instalado + \"\\\". Esperado: o commit \" + esperado +\n      \". Instale o APK certo ou espere o OTA da dev e rode de novo.\"\n  );\n}\n",
@@ -4072,8 +4026,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727540043,
-    "sequenceNumber" : 77,
+    "timestamp" : 1791738020121,
+    "sequenceNumber" : 76,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -4169,8 +4123,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727383845,
-    "duration" : 7983,
+    "timestamp" : 1791737849034,
+    "duration" : 7417,
     "sequenceNumber" : 18,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -4376,9 +4330,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727572247,
-    "duration" : 16058,
-    "sequenceNumber" : 87,
+    "timestamp" : 1791738050789,
+    "duration" : 16346,
+    "sequenceNumber" : 86,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -4659,9 +4613,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727657041,
-    "duration" : 9014,
-    "sequenceNumber" : 122,
+    "timestamp" : 1791738137843,
+    "duration" : 9113,
+    "sequenceNumber" : 121,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -4962,9 +4916,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727430757,
-    "duration" : 19343,
-    "sequenceNumber" : 47,
+    "timestamp" : 1791737919263,
+    "duration" : 18289,
+    "sequenceNumber" : 46,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -5139,9 +5093,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727561945,
-    "duration" : 3025,
-    "sequenceNumber" : 84,
+    "timestamp" : 1791738040752,
+    "duration" : 2692,
+    "sequenceNumber" : 83,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -5166,55 +5120,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727588329,
-    "duration" : 5,
-    "sequenceNumber" : 98,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727450128,
-    "duration" : 5,
-    "sequenceNumber" : 61,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727615269,
-    "duration" : 7,
-    "sequenceNumber" : 108,
+    "timestamp" : 1791738020071,
+    "duration" : 13,
+    "sequenceNumber" : 73,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -5250,8 +5158,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727588080,
-    "sequenceNumber" : 95,
+    "timestamp" : 1791738066903,
+    "sequenceNumber" : 94,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -5271,114 +5179,6 @@
             "idRegex" : "push-skip",
             "optional" : false
           }
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727383889,
-    "duration" : 20,
-    "sequenceNumber" : 19,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "defineVariablesCommand" : {
-      "env" : {
-        "ETAPA" : "00",
-        "LOJA" : "0",
-        "CONTA" : "1",
-        "ABERTURA" : "1",
-        "FILA_FECHADA" : "0"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727371534,
-    "duration" : 13,
-    "sequenceNumber" : 4,
-    "evaluatedCommand" : {
-      "defineVariablesCommand" : {
-        "env" : {
-          "ETAPA" : "00",
-          "LOJA" : "0",
-          "CONTA" : "1",
-          "ABERTURA" : "1",
-          "FILA_FECHADA" : "0"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "tapOnElement" : {
-      "selector" : {
-        "textRegex" : "Versão do app",
-        "optional" : false
-      },
-      "retryIfNoChange" : false,
-      "waitUntilVisible" : false,
-      "longPress" : false,
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727598044,
-    "duration" : 4751,
-    "sequenceNumber" : 101,
-    "evaluatedCommand" : {
-      "tapOnElement" : {
-        "selector" : {
-          "textRegex" : "Versão do app",
-          "optional" : false
-        },
-        "retryIfNoChange" : false,
-        "waitUntilVisible" : false,
-        "longPress" : false,
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727391890,
-    "duration" : 21,
-    "sequenceNumber" : 24,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
         },
         "optional" : false
       }
@@ -5416,8 +5216,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727617097,
-    "sequenceNumber" : 112,
+    "timestamp" : 1791738098938,
+    "sequenceNumber" : 111,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -5450,23 +5250,62 @@
   }
 }, {
   "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
+    "defineVariablesCommand" : {
+      "env" : {
+        "ETAPA" : "00",
+        "LOJA" : "0",
+        "CONTA" : "1",
+        "ABERTURA" : "1",
+        "FILA_FECHADA" : "0"
       },
       "optional" : false
     }
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727414034,
-    "duration" : 6,
-    "sequenceNumber" : 39,
+    "timestamp" : 1791737837188,
+    "duration" : 8,
+    "sequenceNumber" : 4,
     "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
+      "defineVariablesCommand" : {
+        "env" : {
+          "ETAPA" : "00",
+          "LOJA" : "0",
+          "CONTA" : "1",
+          "ABERTURA" : "1",
+          "FILA_FECHADA" : "0"
         },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Versão do app",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791738077360,
+    "duration" : 5000,
+    "sequenceNumber" : 100,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Versão do app",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
         "optional" : false
       }
     }
@@ -5480,9 +5319,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727657292,
-    "duration" : 1224,
-    "sequenceNumber" : 127,
+    "timestamp" : 1791738138134,
+    "duration" : 1155,
+    "sequenceNumber" : 126,
     "evaluatedCommand" : {
       "waitForAnimationToEndCommand" : {
         "timeout" : "3000",
@@ -5505,9 +5344,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727625842,
-    "duration" : 1427,
-    "sequenceNumber" : 114,
+    "timestamp" : 1791738109563,
+    "duration" : 791,
+    "sequenceNumber" : 113,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -5536,13 +5375,44 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727401532,
-    "duration" : 5360,
-    "sequenceNumber" : 35,
+    "timestamp" : 1791737889798,
+    "duration" : 6295,
+    "sequenceNumber" : 34,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
           "idRegex" : "com.android.permissioncontroller:id/permission_deny_button",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "android:id/aerr_wait",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791737876200,
+    "duration" : 3788,
+    "sequenceNumber" : 31,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "android:id/aerr_wait",
           "optional" : false
         },
         "retryIfNoChange" : false,
@@ -5567,9 +5437,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727406895,
-    "duration" : 1805,
-    "sequenceNumber" : 36,
+    "timestamp" : 1791737896098,
+    "duration" : 1628,
+    "sequenceNumber" : 35,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -5598,9 +5468,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727503359,
-    "duration" : 8505,
-    "sequenceNumber" : 67,
+    "timestamp" : 1791737987513,
+    "duration" : 6922,
+    "sequenceNumber" : 66,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -5799,8 +5669,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727553437,
-    "sequenceNumber" : 82,
+    "timestamp" : 1791738032739,
+    "sequenceNumber" : 81,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -5999,9 +5869,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727606014,
-    "duration" : 4617,
-    "sequenceNumber" : 103,
+    "timestamp" : 1791738085852,
+    "duration" : 6080,
+    "sequenceNumber" : 102,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -6040,8 +5910,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727371990,
-    "duration" : 3326,
+    "timestamp" : 1791737837491,
+    "duration" : 2642,
     "sequenceNumber" : 11,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -6077,9 +5947,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727375359,
-    "duration" : 23,
-    "sequenceNumber" : 14,
+    "timestamp" : 1791737857209,
+    "duration" : 22,
+    "sequenceNumber" : 27,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -6099,8 +5969,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727371694,
-    "duration" : 65,
+    "timestamp" : 1791737837324,
+    "duration" : 38,
     "sequenceNumber" : 7,
     "evaluatedCommand" : {
       "evalScriptCommand" : {
@@ -6136,8 +6006,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727449809,
-    "sequenceNumber" : 57,
+    "timestamp" : 1791737937266,
+    "sequenceNumber" : 56,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -6200,9 +6070,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727560708,
-    "duration" : 11343,
-    "sequenceNumber" : 83,
+    "timestamp" : 1791738040077,
+    "duration" : 10514,
+    "sequenceNumber" : 82,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "4",
@@ -6246,8 +6116,8 @@
         "APP_ID" : "com.vupth.client.preview",
         "API" : "https://vupth-backend-ia.onrender.com",
         "SENHA" : "Teste@123",
-        "COMMIT" : "215ec967",
-        "TAG" : "727332",
+        "COMMIT" : "a56de636",
+        "TAG" : "737816",
         "SUPERVISAO" : "0",
         "LENTO" : "2",
         "MAESTRO_FILENAME" : "00_atualizacao",
@@ -6260,8 +6130,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727367868,
-    "duration" : 51,
+    "timestamp" : 1791737834275,
+    "duration" : 53,
     "sequenceNumber" : 0,
     "evaluatedCommand" : {
       "defineVariablesCommand" : {
@@ -6269,8 +6139,8 @@
           "APP_ID" : "com.vupth.client.preview",
           "API" : "https://vupth-backend-ia.onrender.com",
           "SENHA" : "Teste@123",
-          "COMMIT" : "215ec967",
-          "TAG" : "727332",
+          "COMMIT" : "a56de636",
+          "TAG" : "737816",
           "SUPERVISAO" : "0",
           "LENTO" : "2",
           "MAESTRO_FILENAME" : "00_atualizacao",
@@ -6290,11 +6160,34 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727511881,
-    "duration" : 11815,
-    "sequenceNumber" : 69,
+    "timestamp" : 1791737994443,
+    "duration" : 11655,
+    "sequenceNumber" : 68,
     "evaluatedCommand" : {
       "pasteTextCommand" : {
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791738020108,
+    "duration" : 12,
+    "sequenceNumber" : 75,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
         "optional" : false
       }
     }
@@ -6583,8 +6476,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727666254,
-    "sequenceNumber" : 133,
+    "timestamp" : 1791738147194,
+    "sequenceNumber" : 132,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -6915,9 +6808,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727572267,
-    "duration" : 7097,
-    "sequenceNumber" : 89,
+    "timestamp" : 1791738050817,
+    "duration" : 7166,
+    "sequenceNumber" : 88,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -6990,8 +6883,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727624142,
-    "sequenceNumber" : 113,
+    "timestamp" : 1791738108303,
+    "sequenceNumber" : 112,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -7157,9 +7050,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727539997,
-    "duration" : 13439,
-    "sequenceNumber" : 73,
+    "timestamp" : 1791738020058,
+    "duration" : 12680,
+    "sequenceNumber" : 72,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -7507,9 +7400,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727610632,
-    "duration" : 39306,
-    "sequenceNumber" : 104,
+    "timestamp" : 1791738091935,
+    "duration" : 38899,
+    "sequenceNumber" : 103,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -7731,9 +7624,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727450133,
-    "duration" : 2801,
-    "sequenceNumber" : 62,
+    "timestamp" : 1791737937594,
+    "duration" : 2768,
+    "sequenceNumber" : 61,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -7773,7 +7666,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727375384,
+    "timestamp" : 1791737840192,
     "sequenceNumber" : 15,
     "evaluatedCommand" : {
       "repeatCommand" : {
@@ -7795,6 +7688,29 @@
             "optional" : false
           }
         } ],
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791738137861,
+    "duration" : 4,
+    "sequenceNumber" : 124,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
         "optional" : false
       }
     }
@@ -7823,7 +7739,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727371922,
+    "timestamp" : 1791737837445,
     "sequenceNumber" : 10,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -7879,8 +7795,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727449491,
-    "sequenceNumber" : 56,
+    "timestamp" : 1791737936933,
+    "sequenceNumber" : 55,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -7943,8 +7859,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727587813,
-    "sequenceNumber" : 94,
+    "timestamp" : 1791738066596,
+    "sequenceNumber" : 93,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -10407,8 +10323,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727371425,
-    "duration" : 294839,
+    "timestamp" : 1791737837052,
+    "duration" : 310153,
     "sequenceNumber" : 3,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -12982,9 +12898,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727414023,
-    "duration" : 16733,
-    "sequenceNumber" : 38,
+    "timestamp" : 1791737903286,
+    "duration" : 15976,
+    "sequenceNumber" : 37,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -13266,9 +13182,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727432695,
-    "duration" : 17404,
-    "sequenceNumber" : 49,
+    "timestamp" : 1791737921163,
+    "duration" : 16388,
+    "sequenceNumber" : 48,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -13456,9 +13372,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727432732,
-    "duration" : 7877,
-    "sequenceNumber" : 51,
+    "timestamp" : 1791737921187,
+    "duration" : 7210,
+    "sequenceNumber" : 50,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -13524,9 +13440,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727641955,
-    "duration" : 3538,
-    "sequenceNumber" : 119,
+    "timestamp" : 1791738122170,
+    "duration" : 4106,
+    "sequenceNumber" : 118,
     "evaluatedCommand" : {
       "scrollUntilVisible" : {
         "selector" : {
@@ -13592,9 +13508,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727401096,
-    "duration" : 308,
-    "sequenceNumber" : 31,
+    "timestamp" : 1791737857185,
+    "duration" : 32503,
+    "sequenceNumber" : 26,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -13650,9 +13566,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727421199,
-    "duration" : 2142,
-    "sequenceNumber" : 43,
+    "timestamp" : 1791737910473,
+    "duration" : 1278,
+    "sequenceNumber" : 42,
     "evaluatedCommand" : {
       "waitForAnimationToEndCommand" : {
         "timeout" : "3000",
@@ -13671,42 +13587,13 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727391882,
-    "duration" : 7,
+    "timestamp" : 1791737856480,
+    "duration" : 8,
     "sequenceNumber" : 23,
     "evaluatedCommand" : {
       "defineVariablesCommand" : {
         "env" : {
           "ALVO" : "onboarding-start"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "assertConditionCommand" : {
-      "condition" : {
-        "visible" : {
-          "idRegex" : "${ALVO}",
-          "optional" : false
-        }
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727413943,
-    "duration" : 78,
-    "sequenceNumber" : 37,
-    "evaluatedCommand" : {
-      "assertConditionCommand" : {
-        "condition" : {
-          "visible" : {
-            "idRegex" : "onboarding-start",
-            "optional" : false
-          }
         },
         "optional" : false
       }
@@ -13727,9 +13614,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727564971,
-    "duration" : 175,
-    "sequenceNumber" : 85,
+    "timestamp" : 1791738043445,
+    "duration" : 124,
+    "sequenceNumber" : 84,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -13740,6 +13627,58 @@
         },
         "timeout" : "20000",
         "optional" : true
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "${ALVO}",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791737903162,
+    "duration" : 122,
+    "sequenceNumber" : 36,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "onboarding-start",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791737937587,
+    "duration" : 6,
+    "sequenceNumber" : 60,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
       }
     }
   }
@@ -13775,8 +13714,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727552806,
-    "sequenceNumber" : 80,
+    "timestamp" : 1791738032162,
+    "sequenceNumber" : 79,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -13817,8 +13756,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727371582,
-    "duration" : 107,
+    "timestamp" : 1791737837229,
+    "duration" : 92,
     "sequenceNumber" : 6,
     "evaluatedCommand" : {
       "evalScriptCommand" : {
@@ -13836,9 +13775,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727469733,
-    "duration" : 33624,
-    "sequenceNumber" : 66,
+    "timestamp" : 1791737957348,
+    "duration" : 30163,
+    "sequenceNumber" : 65,
     "evaluatedCommand" : {
       "pasteTextCommand" : {
         "optional" : false
@@ -13971,9 +13910,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727615252,
-    "duration" : 13653,
-    "sequenceNumber" : 106,
+    "timestamp" : 1791738097186,
+    "duration" : 13613,
+    "sequenceNumber" : 105,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -14109,13 +14048,13 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727450121,
-    "duration" : 6,
-    "sequenceNumber" : 60,
+    "timestamp" : 1791737937576,
+    "duration" : 10,
+    "sequenceNumber" : 59,
     "evaluatedCommand" : {
       "defineVariablesCommand" : {
         "env" : {
-          "EMAIL_CLIENTE" : "client_c72733200@teste.com"
+          "EMAIL_CLIENTE" : "client_c73781600@teste.com"
         },
         "optional" : false
       }
@@ -14511,8 +14450,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727649940,
-    "sequenceNumber" : 121,
+    "timestamp" : 1791738130834,
+    "sequenceNumber" : 120,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "6",
@@ -14916,9 +14855,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727452935,
-    "duration" : 3235,
-    "sequenceNumber" : 63,
+    "timestamp" : 1791737940365,
+    "duration" : 2473,
+    "sequenceNumber" : 62,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -15025,8 +14964,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727391912,
-    "duration" : 22027,
+    "timestamp" : 1791737856507,
+    "duration" : 46654,
     "sequenceNumber" : 25,
     "evaluatedCommand" : {
       "repeatCommand" : {
@@ -15971,9 +15910,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727588308,
-    "duration" : 77945,
-    "sequenceNumber" : 96,
+    "timestamp" : 1791738067137,
+    "duration" : 80056,
+    "sequenceNumber" : 95,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -16835,9 +16774,32 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727540012,
-    "duration" : 9,
-    "sequenceNumber" : 74,
+    "timestamp" : 1791738050826,
+    "duration" : 5,
+    "sequenceNumber" : 89,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791737856491,
+    "duration" : 13,
+    "sequenceNumber" : 24,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -16912,8 +16874,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727375319,
-    "duration" : 7462,
+    "timestamp" : 1791737840137,
+    "duration" : 7361,
     "sequenceNumber" : 13,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -17004,8 +16966,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727442350,
-    "sequenceNumber" : 55,
+    "timestamp" : 1791737929661,
+    "sequenceNumber" : 54,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -17078,9 +17040,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727414041,
-    "duration" : 7156,
-    "sequenceNumber" : 40,
+    "timestamp" : 1791737903306,
+    "duration" : 7166,
+    "sequenceNumber" : 39,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -17746,9 +17708,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727450113,
-    "duration" : 138193,
-    "sequenceNumber" : 59,
+    "timestamp" : 1791737937567,
+    "duration" : 129569,
+    "sequenceNumber" : 58,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -18398,8 +18360,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727572285,
-    "sequenceNumber" : 91,
+    "timestamp" : 1791738050831,
+    "sequenceNumber" : 90,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -18426,29 +18388,6 @@
             "optional" : false
           }
         } ],
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727617077,
-    "duration" : 19,
-    "sequenceNumber" : 111,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
         "optional" : false
       }
     }
@@ -18501,9 +18440,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727657064,
-    "duration" : 227,
-    "sequenceNumber" : 124,
+    "timestamp" : 1791738137856,
+    "duration" : 277,
+    "sequenceNumber" : 123,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -18552,6 +18491,29 @@
   }
 }, {
   "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791737903313,
+    "duration" : 5,
+    "sequenceNumber" : 40,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "repeatCommand" : {
       "times" : "3",
       "condition" : {
@@ -18576,7 +18538,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727391232,
+    "timestamp" : 1791737856218,
     "sequenceNumber" : 21,
     "evaluatedCommand" : {
       "repeatCommand" : {
@@ -18617,9 +18579,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727533005,
-    "duration" : 6991,
-    "sequenceNumber" : 72,
+    "timestamp" : 1791738014284,
+    "duration" : 5771,
+    "sequenceNumber" : 71,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -18652,9 +18614,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727572052,
-    "duration" : 193,
-    "sequenceNumber" : 86,
+    "timestamp" : 1791738050592,
+    "duration" : 191,
+    "sequenceNumber" : 85,
     "evaluatedCommand" : {
       "scrollUntilVisible" : {
         "selector" : {
@@ -18704,8 +18666,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727665689,
-    "sequenceNumber" : 129,
+    "timestamp" : 1791738146461,
+    "sequenceNumber" : 128,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -18738,6 +18700,29 @@
   }
 }, {
   "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791737837199,
+    "duration" : 26,
+    "sequenceNumber" : 5,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "setClipboardCommand" : {
       "text" : "${SENHA}",
       "optional" : false
@@ -18745,9 +18730,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727511865,
-    "duration" : 12,
-    "sequenceNumber" : 68,
+    "timestamp" : 1791737994436,
+    "duration" : 6,
+    "sequenceNumber" : 67,
     "evaluatedCommand" : {
       "setClipboardCommand" : {
         "text" : "Teste@123",
@@ -18783,7 +18768,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727371857,
+    "timestamp" : 1791737837413,
     "sequenceNumber" : 9,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -18843,8 +18828,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727430495,
-    "sequenceNumber" : 45,
+    "timestamp" : 1791737918915,
+    "sequenceNumber" : 44,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -18901,9 +18886,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727401407,
-    "duration" : 5487,
-    "sequenceNumber" : 34,
+    "timestamp" : 1791737889689,
+    "duration" : 6406,
+    "sequenceNumber" : 33,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -18937,9 +18922,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727579365,
-    "duration" : 1251,
-    "sequenceNumber" : 92,
+    "timestamp" : 1791738057984,
+    "duration" : 1203,
+    "sequenceNumber" : 91,
     "evaluatedCommand" : {
       "waitForAnimationToEndCommand" : {
         "timeout" : "3000",
@@ -18979,8 +18964,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727657075,
-    "sequenceNumber" : 126,
+    "timestamp" : 1791738137865,
+    "sequenceNumber" : 125,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -19027,8 +19012,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727372038,
-    "duration" : 3276,
+    "timestamp" : 1791737837508,
+    "duration" : 2623,
     "sequenceNumber" : 12,
     "evaluatedCommand" : {
       "runScriptCommand" : {
@@ -19036,10 +19021,33 @@
         "env" : {
           "API" : "https://vupth-backend-ia.onrender.com",
           "SENHA" : "Teste@123",
-          "EMAIL_CLIENTE" : "client_c72733200@teste.com",
-          "NOME_CLIENTE" : "Cliente72733200"
+          "EMAIL_CLIENTE" : "client_c73781600@teste.com",
+          "NOME_CLIENTE" : "Cliente73781600"
         },
         "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/cliente.js",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791737921196,
+    "duration" : 11,
+    "sequenceNumber" : 51,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
         "optional" : false
       }
     }
@@ -19053,9 +19061,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727544113,
-    "duration" : 1418,
-    "sequenceNumber" : 78,
+    "timestamp" : 1791738022380,
+    "duration" : 2552,
+    "sequenceNumber" : 77,
     "evaluatedCommand" : {
       "waitForAnimationToEndCommand" : {
         "timeout" : "3000",
@@ -19111,9 +19119,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727540021,
-    "duration" : 4091,
-    "sequenceNumber" : 75,
+    "timestamp" : 1791738020091,
+    "duration" : 2287,
+    "sequenceNumber" : 74,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -19162,6 +19170,46 @@
   }
 }, {
   "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791737921176,
+    "duration" : 10,
+    "sequenceNumber" : 49,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "hideKeyboardCommand" : {
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791738006099,
+    "duration" : 4202,
+    "sequenceNumber" : 69,
+    "evaluatedCommand" : {
+      "hideKeyboardCommand" : {
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "runFlowCommand" : {
       "commands" : [ {
         "tapOnElement" : {
@@ -19186,8 +19234,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727545535,
-    "sequenceNumber" : 79,
+    "timestamp" : 1791738024934,
+    "sequenceNumber" : 78,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -19214,23 +19262,6 @@
   }
 }, {
   "command" : {
-    "hideKeyboardCommand" : {
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727523698,
-    "duration" : 5799,
-    "sequenceNumber" : 70,
-    "evaluatedCommand" : {
-      "hideKeyboardCommand" : {
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
     "applyConfigurationCommand" : {
       "config" : {
         "appId" : "${APP_ID}"
@@ -19240,32 +19271,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727657070,
-    "duration" : 4,
-    "sequenceNumber" : 125,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727572275,
-    "duration" : 8,
-    "sequenceNumber" : 90,
+    "timestamp" : 1791737840178,
+    "duration" : 13,
+    "sequenceNumber" : 14,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -19289,9 +19297,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727627931,
-    "duration" : 973,
-    "sequenceNumber" : 115,
+    "timestamp" : 1791738110575,
+    "duration" : 223,
+    "sequenceNumber" : 114,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -19397,9 +19405,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727615279,
-    "duration" : 12646,
-    "sequenceNumber" : 109,
+    "timestamp" : 1791738097205,
+    "duration" : 13369,
+    "sequenceNumber" : 108,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "40",
@@ -19493,29 +19501,6 @@
   }
 }, {
   "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727657052,
-    "duration" : 11,
-    "sequenceNumber" : 123,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
     "repeatCommand" : {
       "times" : "3",
       "condition" : {
@@ -19540,7 +19525,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727383912,
+    "timestamp" : 1791737849101,
     "sequenceNumber" : 20,
     "evaluatedCommand" : {
       "repeatCommand" : {
@@ -19568,6 +19553,29 @@
   }
 }, {
   "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791738067167,
+    "duration" : 4,
+    "sequenceNumber" : 97,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "scrollUntilVisible" : {
       "selector" : {
         "textRegex" : "Versão do app",
@@ -19585,9 +19593,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727595333,
-    "duration" : 2708,
-    "sequenceNumber" : 100,
+    "timestamp" : 1791738074171,
+    "duration" : 3188,
+    "sequenceNumber" : 99,
     "evaluatedCommand" : {
       "scrollUntilVisible" : {
         "selector" : {
@@ -19631,8 +19639,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727580617,
-    "sequenceNumber" : 93,
+    "timestamp" : 1791738059188,
+    "sequenceNumber" : 92,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -19652,6 +19660,29 @@
             "idRegex" : "dialogo-botao-0",
             "optional" : false
           }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791738097199,
+    "duration" : 4,
+    "sequenceNumber" : 107,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
         },
         "optional" : false
       }
@@ -19705,9 +19736,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727617060,
-    "duration" : 7079,
-    "sequenceNumber" : 110,
+    "timestamp" : 1791738098906,
+    "duration" : 9396,
+    "sequenceNumber" : 109,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -19756,6 +19787,29 @@
   }
 }, {
   "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791738098919,
+    "duration" : 15,
+    "sequenceNumber" : 110,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "copyTextCommand" : {
       "selector" : {
         "textRegex" : ".* · [0-9a-f]{8}",
@@ -19766,9 +19820,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727666056,
-    "duration" : 87,
-    "sequenceNumber" : 131,
+    "timestamp" : 1791738146959,
+    "duration" : 120,
+    "sequenceNumber" : 130,
     "evaluatedCommand" : {
       "copyTextCommand" : {
         "selector" : {
@@ -19810,9 +19864,10 @@
     }
   },
   "metadata" : {
-    "status" : "SKIPPED",
-    "timestamp" : 1791727401127,
-    "sequenceNumber" : 33,
+    "status" : "COMPLETED",
+    "timestamp" : 1791737857234,
+    "duration" : 32450,
+    "sequenceNumber" : 28,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -19854,9 +19909,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727572259,
-    "duration" : 7,
-    "sequenceNumber" : 88,
+    "timestamp" : 1791737903299,
+    "duration" : 5,
+    "sequenceNumber" : 38,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -19892,8 +19947,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727430591,
-    "sequenceNumber" : 46,
+    "timestamp" : 1791737919115,
+    "sequenceNumber" : 45,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -19944,7 +19999,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727382528,
+    "timestamp" : 1791737847219,
     "sequenceNumber" : 16,
     "evaluatedCommand" : {
       "repeatCommand" : {
@@ -19981,32 +20036,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727367966,
-    "duration" : 3456,
-    "sequenceNumber" : 2,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1791727401114,
-    "duration" : 12,
-    "sequenceNumber" : 32,
+    "timestamp" : 1791737849084,
+    "duration" : 15,
+    "sequenceNumber" : 19,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -20040,7 +20072,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727371766,
+    "timestamp" : 1791737837365,
     "sequenceNumber" : 8,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -20075,9 +20107,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727432743,
-    "duration" : 9,
-    "sequenceNumber" : 52,
+    "timestamp" : 1791738137852,
+    "duration" : 4,
+    "sequenceNumber" : 122,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -20102,9 +20134,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727529500,
-    "duration" : 3504,
-    "sequenceNumber" : 71,
+    "timestamp" : 1791738010302,
+    "duration" : 3981,
+    "sequenceNumber" : 70,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -20133,9 +20165,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1791727645494,
-    "duration" : 4443,
-    "sequenceNumber" : 120,
+    "timestamp" : 1791738126277,
+    "duration" : 4556,
+    "sequenceNumber" : 119,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -20181,8 +20213,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1791727432753,
-    "sequenceNumber" : 53,
+    "timestamp" : 1791737921211,
+    "sequenceNumber" : 52,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -20209,6 +20241,25 @@
             "optional" : false
           }
         } ],
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "2000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791737879989,
+    "duration" : 2601,
+    "sequenceNumber" : 32,
+    "evaluatedCommand" : {
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "2000",
         "optional" : false
       }
     }

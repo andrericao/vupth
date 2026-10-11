@@ -250,8 +250,8 @@ else
     # O emulador some do adb por instantes ("device offline", 21 nas baterias de
     # 11/10 06:06, 07:02 e 09:58, cada vez num passo): nao e o fluxo. Espera o
     # aparelho voltar e roda a etapa de novo, uma vez.
-    if [ "$VOLTA" -ne 0 ] && grep -q "device offline" "$RODADA/$arquivo/console.txt" 2>/dev/null; then
-      echo "↻ $arquivo: o aparelho saiu do adb (device offline) — de novo, uma vez"
+    if [ "$VOLTA" -ne 0 ] && grep -qE "device offline|UiAutomation not connected" "$RODADA/$arquivo/console.txt" 2>/dev/null; then
+      echo "↻ $arquivo: o aparelho saiu do adb ou o driver caiu — de novo, uma vez"
       timeout 120 adb wait-for-device
       sleep 10
       rm -rf "${RODADA:?}/$arquivo"
