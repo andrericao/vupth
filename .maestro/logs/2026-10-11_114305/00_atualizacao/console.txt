@@ -29,12 +29,14 @@ Running on vupth_android11
     Repeat while id: ${ALVO} is not visible (up to 40 times)...
       Run esperar_o_sistema.yaml...
         Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+          Tap on id: android:id/aerr_wait... COMPLETED
+          Wait for animation to end within 2000 ms... COMPLETED
+        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... COMPLETED
       Run esperar_o_sistema.yaml... COMPLETED
       Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible...
-      Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... SKIPPED
-      Assert that (Optional) id: ${ALVO} is visible... WARNED
         Tap on id: com.android.permissioncontroller:id/permission_deny_button... COMPLETED
+      Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... COMPLETED
+      Assert that (Optional) id: ${ALVO} is visible... COMPLETED
     Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
     Assert that id: ${ALVO} is visible... COMPLETED
   00.P7 · espera onboarding-start (negando a caixa do sistema)... COMPLETED
