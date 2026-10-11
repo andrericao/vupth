@@ -128,6 +128,11 @@ ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21
 # APK do Partner instalado e do vupth-partner clonado ao lado do vupth (os
 # subfluxos sao lidos de la). Sem um dos dois, elas ficam como ⏭.
 CONJUNTAS="18 19 21 22"
+
+# A 13 (push da vez) depende do push do sistema; no emulador o app nao oferece
+# a tela 10 nem pede token (Device.isDevice, bateria 11/10 06:06, 13.A7). Fica
+# como ⏭ no emulador e roda no celular.
+SO_NO_CELULAR="13"
 PARTNER_OK=1
 [ -d "$(dirname "$REPO")/vupth-partner/.maestro/conjunta" ] || PARTNER_OK=0
 adb shell pm list packages 2>/dev/null | grep -q "com.vupth.partner.preview" || PARTNER_OK=0
@@ -229,6 +234,10 @@ else
     fi
     if [ "$PARTNER_OK" = 0 ] && echo " $CONJUNTAS " | grep -q " $n "; then
       echo "⏭  $arquivo (conjunta: falta o APK do Partner ou o clone ../vupth-partner)" >> "$RODADA/relatorio.txt"
+      continue
+    fi
+    if [ "$LENTO" = 2 ] && echo " $SO_NO_CELULAR " | grep -q " $n "; then
+      echo "⏭  $arquivo (só no celular: o app não oferece push no emulador — Device.isDevice)" >> "$RODADA/relatorio.txt"
       continue
     fi
     if aprovada "$n"; then
