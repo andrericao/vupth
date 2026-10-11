@@ -53,6 +53,12 @@ appId: ${APP_ID}
       APP_ID: com.vupth.partner.preview
       CLIENTE: ${NOME_CLIENTE}
     label: "21.09 · no Partner, marca que ${NOME_CLIENTE} não chegou"
+# Fecha o Partner antes: com os dois apps abertos no emulador de 1,5 GB o
+# driver do Maestro caia logo depois (21.0B: "device offline" as 09:58,
+# "UiAutomation not connected" as 11:43).
+- stopApp:
+    appId: com.vupth.partner.preview
+    label: "21.09b · fecha o Partner"
 - launchApp:
     appId: ${APP_ID}
     label: "21.0A · volta ao Client (sem limpar)"
