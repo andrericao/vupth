@@ -6,7 +6,7 @@ name: Fluxo completo - check-in digital
 
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
 
 # Login primeiro
 - tapOn: "Entrar"
@@ -24,7 +24,7 @@ name: Fluxo completo - check-in digital
 
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 10000
+    timeout: ${10000 * LENTO}
 
 # Selecionar estabelecimento aberto
 - tapOn:
@@ -40,7 +40,7 @@ name: Fluxo completo - check-in digital
 # Verificar tela de fila
 - extendedWaitUntil:
     visible: "Você está na fila!"
-    timeout: 10000
+    timeout: ${10000 * LENTO}
 
 - assertVisible: "Tempo estimado"
 - assertVisible: "Tempo estimado"

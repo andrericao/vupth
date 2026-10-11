@@ -12,7 +12,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "multas-pendentes"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "06.03 · espera multas-pendentes"
 - tapOn:
     id: "ver-multas"

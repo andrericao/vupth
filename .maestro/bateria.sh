@@ -24,6 +24,17 @@ export PATH="$PATH:$HOME/Android/Sdk/platform-tools:$HOME/.maestro/bin"
 APP_ID="com.vupth.client.preview"
 API="https://vupth-backend-ia.onrender.com"
 
+# Uma bateria por vez (DEC-17). A trava unica da DEC-33 (flock -n /tmp/vupth-maestro.lock) mora aqui dentro:
+# a bateria se reabre sob o flock e segura a trava ate o restaurar.sh. So o
+# pgrep deixou o Client comecar (11/10 00:41) com o Partner ainda no setup.sh,
+# antes do java dele subir.
+if [ -z "$VUPTH_TRAVA" ]; then
+  VUPTH_TRAVA=1 flock -n -E 75 /tmp/vupth-maestro.lock bash "$0" "$@"
+  SAIDA=$?
+  [ "$SAIDA" = 75 ] && echo "ERRO: outra bateria segura /tmp/vupth-maestro.lock — espere ela terminar"
+  exit "$SAIDA"
+fi
+
 # Os argumentos: o modo (--completa/--falhas) e o aparelho (--device <serial>).
 # Antes so o $1 era lido, e o "--device emulator-5554" virava o modo (10/10).
 MODO=""
@@ -39,6 +50,10 @@ done
 # ANDROID_SERIAL vale para todo adb daqui, do setup.sh e do restaurar.sh; o
 # Maestro recebe o mesmo.
 MAESTRO_APARELHO=()
+# LENTO (Andre, 11/10: "o emulador e mais lento mesmo, entao compense"):
+# multiplica o timeout de todo extendedWaitUntil dos fluxos — 2 no emulador.
+LENTO=1
+case "$APARELHO" in emulator-*) LENTO=2 ;; esac
 if [ -n "$APARELHO" ]; then
   export ANDROID_SERIAL="$APARELHO"
   MAESTRO_APARELHO=(--device "$APARELHO")
@@ -113,6 +128,11 @@ ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21
 # APK do Partner instalado e do vupth-partner clonado ao lado do vupth (os
 # subfluxos sao lidos de la). Sem um dos dois, elas ficam como ⏭.
 CONJUNTAS="18 19 21 22"
+
+# A 13 (push da vez) depende do push do sistema; no emulador o app nao oferece
+# a tela 10 nem pede token (Device.isDevice, bateria 11/10 06:06, 13.A7). Fica
+# como ⏭ no emulador e roda no celular.
+SO_NO_CELULAR="13"
 PARTNER_OK=1
 [ -d "$(dirname "$REPO")/vupth-partner/.maestro/conjunta" ] || PARTNER_OK=0
 adb shell pm list packages 2>/dev/null | grep -q "com.vupth.partner.preview" || PARTNER_OK=0
@@ -165,7 +185,7 @@ rodar() {
   echo "=== $nome ==="
   maestro "${MAESTRO_APARELHO[@]}" test \
     -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
-    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" \
+    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" \
     --debug-output "$pasta" --flatten-debug-output \
     --test-output-dir "$pasta" \
     "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"
@@ -216,6 +236,10 @@ else
       echo "⏭  $arquivo (conjunta: falta o APK do Partner ou o clone ../vupth-partner)" >> "$RODADA/relatorio.txt"
       continue
     fi
+    if [ "$LENTO" = 2 ] && echo " $SO_NO_CELULAR " | grep -q " $n "; then
+      echo "⏭  $arquivo (só no celular: o app não oferece push no emulador — Device.isDevice)" >> "$RODADA/relatorio.txt"
+      continue
+    fi
     if aprovada "$n"; then
       echo "⏭  $arquivo (já passou no $(grep "^$n " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RODADA/relatorio.txt"
       continue
@@ -223,6 +247,21 @@ else
     longe_da_meia_noite
     rodar "$arquivo"
     VOLTA=$?
+    # O emulador some do adb por instantes ("device offline", 21 nas baterias de
+    # 11/10 06:06, 07:02 e 09:58, cada vez num passo): nao e o fluxo. Espera o
+    # aparelho voltar e roda a etapa de novo, uma vez.
+    if [ "$VOLTA" -ne 0 ] && grep -q "device offline" "$RODADA/$arquivo/console.txt" 2>/dev/null; then
+      echo "↻ $arquivo: o aparelho saiu do adb (device offline) — de novo, uma vez"
+      timeout 120 adb wait-for-device
+      sleep 10
+      rm -rf "${RODADA:?}/$arquivo"
+      # TAG novo: as contas da 1a tentativa ja existem (409 no 21.P0, 11/10 11:02).
+      TAG_DA_RODADA=$TAG
+      TAG=$(date +%s | tail -c 7)
+      rodar "$arquivo"
+      VOLTA=$?
+      TAG=$TAG_DA_RODADA
+    fi
     juntar_para_o_andre "$RODADA/$arquivo"
     if [ "$VOLTA" -eq 0 ]; then
       echo "✅ $arquivo" >> "$RODADA/relatorio.txt"

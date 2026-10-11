@@ -25,7 +25,12 @@ LOGS=.logs-teste
 mkdir -p "$LOGS"
 SAIDA=$(mktemp)
 CODIGO=$(mktemp)
-{ npm test -- --ci --coverage 2>&1; echo $? > "$CODIGO"; } | tee "$SAIDA"
+# DEC-33 (11/10): um pesado por vez na maquina — o jest espera a trava das
+# baterias (o emulador travou com bateria + jest + mvn juntos). Dentro da
+# bateria (VUPTH_TRAVA, o push dos logs) a trava ja e dela: roda direto.
+TRAVA=""
+[ -z "$VUPTH_TRAVA" ] && command -v flock >/dev/null && TRAVA="flock /tmp/vupth-maestro.lock"
+{ $TRAVA npm test -- --ci --coverage 2>&1; echo $? > "$CODIGO"; } | tee "$SAIDA"
 RC=$(cat "$CODIGO")
 rm -f "$CODIGO"
 if [ "$RC" != "0" ]; then

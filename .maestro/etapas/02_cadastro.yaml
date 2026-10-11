@@ -57,7 +57,7 @@ appId: ${APP_ID}
     label: "02.16 · toca em Perfil"
 - extendedWaitUntil:
     visible: "CONTA"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
     label: "02.17 · espera CONTA"
 - assertVisible:
     text: "APARÊNCIA"

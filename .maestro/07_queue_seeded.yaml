@@ -16,7 +16,7 @@ env:
       - tapOn: "Sair da conta"
       - extendedWaitUntil:
           visible: "Cadastrar"
-          timeout: 5000
+          timeout: ${5000 * LENTO}
 
 # === CLIENTE 1 — login e entra na fila ===
 - tapOn: "Cadastrar"
@@ -34,7 +34,7 @@ env:
 - tapOn: "Entrar"
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
 
 - tapOn:
     text: "Buscar estabelecimento..."
@@ -43,15 +43,15 @@ env:
 - hideKeyboard
 - extendedWaitUntil:
     visible: "Corte Real 97616"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
 - tapOn: "Corte Real 97616"
 - extendedWaitUntil:
     visible: "Entrar na fila (menor espera)"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
 - tapOn: "Entrar na fila (menor espera)"
 - extendedWaitUntil:
     visible: "Você está na fila!"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
 - assertVisible: "Tempo estimado"
 - tapOn: "Voltar ao início"
 - assertVisible:
@@ -63,7 +63,7 @@ env:
 - tapOn: "Sair da conta"
 - extendedWaitUntil:
     visible: "Cadastrar"
-    timeout: 5000
+    timeout: ${5000 * LENTO}
 
 # === CLIENTE 2 — login e entra na fila ===
 - tapOn: "Cadastrar"
@@ -78,7 +78,7 @@ env:
 - tapOn: "Entrar"
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
 
 - tapOn:
     text: "Buscar estabelecimento..."
@@ -87,15 +87,15 @@ env:
 - hideKeyboard
 - extendedWaitUntil:
     visible: "Corte Real 97616"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
 - tapOn: "Corte Real 97616"
 - extendedWaitUntil:
     visible: "Entrar na fila (menor espera)"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
 - tapOn: "Entrar na fila (menor espera)"
 - extendedWaitUntil:
     visible: "Você está na fila!"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
 - tapOn: "Voltar ao início"
 
 # Logout
@@ -104,7 +104,7 @@ env:
 - tapOn: "Sair da conta"
 - extendedWaitUntil:
     visible: "Cadastrar"
-    timeout: 5000
+    timeout: ${5000 * LENTO}
 
 # === CLIENTE 3 — login, entra e CANCELA ===
 - tapOn: "Cadastrar"
@@ -119,7 +119,7 @@ env:
 - tapOn: "Entrar"
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
 
 - tapOn:
     text: "Buscar estabelecimento..."
@@ -128,19 +128,19 @@ env:
 - hideKeyboard
 - extendedWaitUntil:
     visible: "Corte Real 97616"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
 - tapOn: "Corte Real 97616"
 - extendedWaitUntil:
     visible: "Entrar na fila (menor espera)"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
 - tapOn: "Entrar na fila (menor espera)"
 - extendedWaitUntil:
     visible: "Você está na fila!"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
 
 # CANCELAMENTO
 - tapOn: "Sair da fila"
 - tapOn: "Sim, sair"
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 5000
+    timeout: ${5000 * LENTO}

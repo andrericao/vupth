@@ -1,5 +1,5 @@
 import { Platform, StatusBar, StyleSheet } from 'react-native';
-import { within } from '@testing-library/react-native';
+import { fireEvent, waitFor, within } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { Onboarding, bordasDaEntrada, PISO_BARRA_DE_NAVEGACAO } from '@screens/Onboarding';
 
@@ -10,8 +10,15 @@ import { Onboarding, bordasDaEntrada, PISO_BARRA_DE_NAVEGACAO } from '@screens/O
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('expo-updates', () => ({ runtimeVersion: '1.0.3', createdAt: new Date(2026, 9, 3, 12, 0) }));
 jest.mock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { extra: { commit: 'C65338E7F00D' } } } }));
-jest.mock('@routes/navigationRef', () => ({ goToLoginAfterOnboarding: jest.fn() }));
-jest.mock('@hooks/useEstablishments', () => ({ useEstablishments: () => ({ data: [] }) }));
+const mockGoToLogin = jest.fn();
+let mockLojas: { open_status: string; is_open?: boolean }[] | undefined = [];
+jest.mock('@routes/navigationRef', () => ({ goToLoginAfterOnboarding: () => mockGoToLogin() }));
+jest.mock('@hooks/useEstablishments', () => ({ useEstablishments: () => ({ data: mockLojas }) }));
+const mockMarcarVisto = jest.fn().mockResolvedValue(undefined);
+jest.mock('@stores/firstRunStore', () => ({
+  useFirstRunStore: (sel: (s: { markOnboardingSeen: () => Promise<void> }) => unknown) =>
+    sel({ markOnboardingSeen: mockMarcarVisto }),
+}));
 
 describe('Onboarding — o rodapé acima da barra do sistema', () => {
   it('o bloco do "Entrar" soma a inset de baixo (34) ao respiro de 32', () => {
@@ -49,6 +56,52 @@ describe('Onboarding — o rodapé acima da barra do sistema', () => {
     it('fora do Android, as insets passam como vieram', () => {
       Platform.OS = 'ios';
       expect(bordasDaEntrada({ top: 0, bottom: 0 })).toEqual({ top: 0, bottom: 0 });
+    });
+  });
+
+  describe('os botões e a prova social', () => {
+    beforeEach(() => {
+      mockGoToLogin.mockClear();
+      mockMarcarVisto.mockClear();
+      mockLojas = [];
+    });
+
+    it('"Ver filas perto de mim" marca a abertura como vista e não vai ao login', async () => {
+      const { getByTestId } = renderWithProviders(<Onboarding />);
+      fireEvent.press(getByTestId('onboarding-start'));
+      await waitFor(() => expect(mockMarcarVisto).toHaveBeenCalled());
+      expect(mockGoToLogin).not.toHaveBeenCalled();
+    });
+
+    it('"Entrar" marca a abertura como vista e segue para o login', async () => {
+      const { getByTestId } = renderWithProviders(<Onboarding />);
+      fireEvent.press(getByTestId('onboarding-login'));
+      await waitFor(() => expect(mockGoToLogin).toHaveBeenCalled());
+      expect(mockMarcarVisto).toHaveBeenCalled();
+    });
+
+    it('sem loja aberta, a linha some', () => {
+      mockLojas = [{ open_status: 'CLOSED' }];
+      const { queryByText } = renderWithProviders(<Onboarding />);
+      expect(queryByText(/aberto/)).toBeNull();
+    });
+
+    it('uma loja aberta: no singular', () => {
+      mockLojas = [{ open_status: 'OPEN' }, { open_status: 'OPEN', is_open: false }];
+      const { getByText } = renderWithProviders(<Onboarding />);
+      expect(getByText('1 lugar aberto agora perto de você')).toBeTruthy();
+    });
+
+    it('várias abertas: no plural', () => {
+      mockLojas = [{ open_status: 'OPEN' }, { open_status: 'CLOSED', is_open: true }];
+      const { getByText } = renderWithProviders(<Onboarding />);
+      expect(getByText('2 lugares abertos agora perto de você')).toBeTruthy();
+    });
+
+    it('sem a lista ainda, a linha some', () => {
+      mockLojas = undefined;
+      const { queryByText } = renderWithProviders(<Onboarding />);
+      expect(queryByText(/aberto/)).toBeNull();
     });
   });
 });

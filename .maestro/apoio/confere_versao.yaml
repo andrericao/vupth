@@ -37,7 +37,7 @@ appId: ${APP_ID}
             - extendedWaitUntil:
                 visible:
                   text: "Perfil"
-                timeout: 3000
+                timeout: ${3000 * LENTO}
                 optional: true
       - runFlow:
           file: fechar_aviso.yaml

@@ -27,7 +27,7 @@ appId: ${APP_ID}
     label: "20.07 · pede o código"
 - extendedWaitUntil:
     visible: "E-mail sem conta"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "20.08 · avisa E-mail sem conta"
 - tapOn:
     text: "Corrigir"
@@ -51,12 +51,12 @@ appId: ${APP_ID}
     label: "20.0F · tenta entrar"
 - extendedWaitUntil:
     visible: "E-mail sem conta"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "20.0G · avisa E-mail sem conta"
 - tapOn:
     text: "Criar conta"
     label: "20.0H · toca em Criar conta"
 - extendedWaitUntil:
     visible: ${EMAIL_SEM_CONTA}
-    timeout: 15000
+    timeout: ${15000 * LENTO}
     label: "20.0I · o cadastro abre com o e-mail no campo"

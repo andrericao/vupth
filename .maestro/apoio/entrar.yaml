@@ -7,14 +7,17 @@ appId: ${APP_ID}
     text: "Perfil"
 - tapOn:
     text: "Já tenho conta"
+# No emulador (1 nucleo, 2 GB, swap) o inputText digita tecla a tecla e
+# estourou o prazo de 120 s do Maestro no meio do e-mail (bateria 11/10 00:49,
+# 00.P0, DEADLINE_EXCEEDED): cola pela area de transferencia.
 - tapOn:
     text: "E-mail"
-- inputText:
-    text: ${EMAIL_CLIENTE}
+- setClipboard: ${EMAIL_CLIENTE}
+- pasteText
 - tapOn:
     text: "Senha"
-- inputText:
-    text: ${SENHA}
+- setClipboard: ${SENHA}
+- pasteText
 - hideKeyboard
 - tapOn:
     id: "primary-login"
@@ -25,7 +28,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "(dialogo-botao-0|busca-home)"
-    timeout: 90000
+    timeout: ${90000 * LENTO}
     optional: true
 - runFlow:
     file: fechar_aviso.yaml
@@ -34,12 +37,18 @@ appId: ${APP_ID}
       visible:
         id: "primary-login"
     commands:
+      # O 429 do staging (limite de logins, "try again in 45 s", 11/10): espera
+      # o prazo antes de tocar de novo.
+      - extendedWaitUntil:
+          visible: "ESPERA_DO_429_NUNCA_APARECE"
+          timeout: 47000
+          optional: true
       - tapOn:
           id: "primary-login"
       - extendedWaitUntil:
           visible:
             id: "(dialogo-botao-0|busca-home)"
-          timeout: 90000
+          timeout: ${90000 * LENTO}
           optional: true
       - runFlow:
           file: fechar_aviso.yaml
@@ -57,7 +66,7 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible:
             id: "grupo-.*"
-          timeout: 10000
+          timeout: ${10000 * LENTO}
           optional: true
 - scrollUntilVisible:
     element:

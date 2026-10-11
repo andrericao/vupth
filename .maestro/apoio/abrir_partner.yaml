@@ -12,18 +12,18 @@ appId: ${APP_ID}
 # do abrir_com_ota.yaml do Partner).
 - extendedWaitUntil:
     visible: "Como você vai usar o Vupth?"
-    timeout: 120000
+    timeout: ${120000 * LENTO}
 - extendedWaitUntil:
     visible:
       id: "app-commit"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
     optional: true
 - stopApp: com.vupth.partner.preview
 - launchApp:
     appId: com.vupth.partner.preview
 - extendedWaitUntil:
     visible: "Como você vai usar o Vupth?"
-    timeout: 120000
+    timeout: ${120000 * LENTO}
 - runFlow:
     file: ../../../vupth-partner/.maestro/conjunta/prof_entrar.yaml
     env:

@@ -19,7 +19,7 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible:
             id: "grupo-.*"
-          timeout: 10000
+          timeout: ${10000 * LENTO}
           optional: true
 - scrollUntilVisible:
     element:
@@ -30,7 +30,7 @@ appId: ${APP_ID}
     id: "check-update"
 - extendedWaitUntil:
     visible: "(Atualização baixada|Tudo certo|Não foi possível verificar)"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
 # "Atualização baixada": o OK chama o reloadAsync e o app recomeca no Inicio.
 - runFlow:
     when:
@@ -53,13 +53,63 @@ appId: ${APP_ID}
             - extendedWaitUntil:
                 visible:
                   id: "grupo-.*"
-                timeout: 10000
+                timeout: ${10000 * LENTO}
                 optional: true
       - scrollUntilVisible:
           element:
             text: "Versão do app"
       - tapOn:
           text: "Versão do app"
+# O OTA ainda nao chegou (Andre, 11/10: "reabra o app ate o OTA chegar"): o
+# EAS Update pode estar publicando logo depois do push. Ate 6 voltas de 30 s:
+# fecha a caixa, espera e verifica de novo. Sem COMMIT, o ".*.*" sempre aparece
+# e a volta nao roda.
+- repeat:
+    times: 6
+    while:
+      notVisible:
+        text: ".*${COMMIT}.*"
+    commands:
+      - runFlow:
+          file: fechar_aviso.yaml
+      - extendedWaitUntil:
+          visible: "ESPERA_DO_OTA_NUNCA_APARECE"
+          timeout: ${30000 * LENTO}
+          optional: true
+      - tapOn:
+          id: "check-update"
+      - extendedWaitUntil:
+          visible: "(Atualização baixada|Tudo certo|Não foi possível verificar)"
+          timeout: ${60000 * LENTO}
+          optional: true
+      - runFlow:
+          when:
+            visible: "Atualização baixada"
+          commands:
+            - tapOn:
+                id: "dialogo-botao-0"
+            - runFlow:
+                file: esperar_negando.yaml
+                env:
+                  ALVO: "busca-home"
+            - repeat:
+                times: 4
+                while:
+                  notVisible:
+                    id: "grupo-.*"
+                commands:
+                  - tapOn:
+                      text: "Perfil"
+                  - extendedWaitUntil:
+                      visible:
+                        id: "grupo-.*"
+                      timeout: ${10000 * LENTO}
+                      optional: true
+            - scrollUntilVisible:
+                element:
+                  text: "Versão do app"
+            - tapOn:
+                text: "Versão do app"
 - runFlow:
     file: fechar_aviso.yaml
 # Pelo texto, nao pelo id: o id cai no botao, e o copyTextFrom do botao devolve

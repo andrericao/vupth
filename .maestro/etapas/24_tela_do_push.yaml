@@ -7,7 +7,7 @@ appId: ${APP_ID}
     label: "24.01 · toca em primary-queue"
 - extendedWaitUntil:
     visible: "Entendi"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
     label: "24.02 · espera Entendi"
 - tapOn:
     text: "Entendi"
@@ -29,7 +29,7 @@ appId: ${APP_ID}
     label: "24.0A · fecha a política da multa e o push da vez, se cobrem a tela 10"
 - extendedWaitUntil:
     visible: "PODE FECHAR O APP"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "24.04 · espera a tela 10"
 - runFlow:
     file: ../apoio/para_o_andre.yaml
@@ -43,7 +43,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "com.android.permissioncontroller:id/permission_allow_button"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "24.07 · a caixa do sistema aparece"
 - tapOn:
     id: "com.android.permissioncontroller:id/permission_allow_button"
@@ -61,5 +61,5 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "queue-position"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "24.12 · a fila segue na tela"

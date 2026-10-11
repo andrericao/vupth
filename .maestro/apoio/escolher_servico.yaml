@@ -7,6 +7,6 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "service-${SERVICO_ID}"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
 - tapOn:
     id: "service-${SERVICO_ID}"

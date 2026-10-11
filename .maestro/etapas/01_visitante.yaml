@@ -36,7 +36,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "primary-login"
-    timeout: 10000
+    timeout: ${10000 * LENTO}
     label: "01.01b · o login abriu (o Entrar não está atrás da barra)"
 - back:
     label: "01.01c · volta ao Início, sem conta"
@@ -46,7 +46,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "nota-.*"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "01.01d · o card da loja mostra a nota (card-oscila)"
 - assertVisible:
     text: "Ligue o GPS"
@@ -66,7 +66,7 @@ appId: ${APP_ID}
           text: "Perfil"
       - extendedWaitUntil:
           visible: "Criar conta grátis"
-          timeout: 10000
+          timeout: ${10000 * LENTO}
           optional: true
     label: "01.03 · toca em Perfil (de novo, se a aba não trocou)"
 - assertVisible:

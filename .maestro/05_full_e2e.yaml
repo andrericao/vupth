@@ -38,7 +38,7 @@ name: E2E completo - cadastro, login e check-in
 
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
 
 # Confirmar que logou automaticamente e fazer logout
 - assertVisible: "Sair"
@@ -62,7 +62,7 @@ name: E2E completo - cadastro, login e check-in
 
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
 
 - assertVisible: "Sair"
 
@@ -91,10 +91,10 @@ name: E2E completo - cadastro, login e check-in
       - tapOn: "Entrar na fila (menor espera)"
       - extendedWaitUntil:
           visible: "Você está na fila!"
-          timeout: 10000
+          timeout: ${10000 * LENTO}
       - assertVisible: "Tempo estimado"
       - tapOn: "Sair da fila"
       - tapOn: "Sim, sair"
       - extendedWaitUntil:
           visible: "Estabelecimentos"
-          timeout: 5000
+          timeout: ${5000 * LENTO}

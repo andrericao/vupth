@@ -11,9 +11,9 @@ appId: ${APP_ID}
 - hideKeyboard
 - extendedWaitUntil:
     visible: ${LOJA}
-    timeout: 30000
+    timeout: ${30000 * LENTO}
 - tapOn: ${LOJA}
 - extendedWaitUntil:
     visible:
       id: "professional-${PROF_ID}"
-    timeout: 30000
+    timeout: ${30000 * LENTO}

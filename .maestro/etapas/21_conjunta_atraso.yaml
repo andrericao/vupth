@@ -11,7 +11,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "card-da-fila"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
     label: "21.02 · espera card-da-fila"
 - tapOn:
     id: "card-da-fila"
@@ -30,11 +30,19 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "21.06 · fecha as caixas"
-# O Partner so deixa marcar atraso 5 min depois do horario.
-- extendedWaitUntil:
-    visible: "esta-tela-nao-tem-este-texto"
-    timeout: 330000
-    optional: true
+# O Partner so deixa marcar atraso 5 min depois do horario. E tempo de relogio,
+# nao de aparelho: sem LENTO (no emulador virava 11 min e o adb caia, "device
+# offline", baterias 11/10 06:06 e 07:02). 11 voltas de 30 s, com o "Wait" do
+# aviso de ANR entre elas.
+- repeat:
+    times: 11
+    commands:
+      - extendedWaitUntil:
+          visible: "esta-tela-nao-tem-este-texto"
+          timeout: 30000
+          optional: true
+      - runFlow:
+          file: ../apoio/esperar_o_sistema.yaml
     label: "21.07 · espera 5 min e meio"
 - runFlow:
     file: ../apoio/abrir_partner.yaml
@@ -50,12 +58,12 @@ appId: ${APP_ID}
     label: "21.0A · volta ao Client (sem limpar)"
 - extendedWaitUntil:
     visible: ".*Este é o seu 1º atraso.*"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
     label: "21.0B · o aviso do 1º atraso aparece"
 - tapOn:
     text: "Entendi"
     label: "21.0C · toca em Entendi"
 - extendedWaitUntil:
     visible: "Atrasado"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "21.0D · a fila mostra Atrasado"

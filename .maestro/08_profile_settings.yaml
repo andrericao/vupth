@@ -5,7 +5,7 @@ name: Perfil e Configuracoes - editar dados, email, senha, endereco
 
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
 
 # Login se nao estiver logado
 - runFlow:
@@ -23,7 +23,7 @@ name: Perfil e Configuracoes - editar dados, email, senha, endereco
       - tapOn: "Entrar"
       - extendedWaitUntil:
           visible: "Estabelecimentos"
-          timeout: 60000
+          timeout: ${60000 * LENTO}
 
 # 1. Abrir perfil
 - tapOn:
@@ -76,4 +76,4 @@ name: Perfil e Configuracoes - editar dados, email, senha, endereco
 - back
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 5000
+    timeout: ${5000 * LENTO}

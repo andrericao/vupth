@@ -11,7 +11,7 @@ appId: ${APP_ID}
 # mostra "Ligue o GPS" no lugar da distancia, com o icone de local.
 - extendedWaitUntil:
     visible: "Ligue o GPS"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "17.0G · o card do Início diz Ligue o GPS no lugar da distância"
 - runFlow:
     when:
@@ -28,7 +28,7 @@ appId: ${APP_ID}
 # localizacao: espera a contagem da lista (bateria 09/10 20:30, 17.04).
 - extendedWaitUntil:
     visible: "(Nenhuma aberta agora|[0-9]+ abertas? agora)"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "17.04 · espera a lista de lojas"
 - runFlow:
     when:
@@ -49,5 +49,5 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "professional-${PROF_ID}"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "17.08 · a loja abre com o profissional"

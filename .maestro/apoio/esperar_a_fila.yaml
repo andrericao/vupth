@@ -30,7 +30,7 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible:
             id: "queue-position"
-          timeout: 3000
+          timeout: ${3000 * LENTO}
           optional: true
 - assertVisible:
     id: "queue-position"

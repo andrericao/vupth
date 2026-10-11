@@ -11,7 +11,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "card-da-fila"
-    timeout: 120000
+    timeout: ${120000 * LENTO}
     label: "11.03 · espera card-da-fila no Início"
 - waitForAnimationToEnd:
     timeout: 3000
