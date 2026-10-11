@@ -19,7 +19,7 @@
 ⏭  18_conjunta_tempo_do_servico (já passou no 73215d97 — a completa roda de novo)
 ⏭  19_conjunta_so_agenda (já passou no 73215d97 — a completa roda de novo)
 ⏭  20_esqueci_senha (já passou no 545a2374 — a completa roda de novo)
-❌ 21_conjunta_atraso — parou em 21.07 · espera 5 min e meio
+❌ 21_conjunta_atraso — parou em 21.0B · o aviso do 1º atraso aparece
 ⏭  22_conjunta_finalizar_e_avaliar (já passou no 545a2374 — a completa roda de novo)
 ⏭  23_corte_com_profissional_fora (já passou no 545a2374 — a completa roda de novo)
 ⏭  24_tela_do_push (já passou no 73215d97 — a completa roda de novo)

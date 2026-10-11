@@ -33,9 +33,9 @@ Running on vupth_android11
         Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
       Run esperar_o_sistema.yaml... COMPLETED
       Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible...
+      Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... SKIPPED
+      Assert that (Optional) id: ${ALVO} is visible... WARNED
         Tap on id: com.android.permissioncontroller:id/permission_deny_button... COMPLETED
-      Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... COMPLETED
-      Assert that (Optional) id: ${ALVO} is visible... COMPLETED
     Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
     Assert that id: ${ALVO} is visible... COMPLETED
   21.P7 · espera onboarding-start (negando a caixa do sistema)... COMPLETED
@@ -227,7 +227,73 @@ Running on vupth_android11
     Run flow when id: push-skip is visible...
     Run flow when id: push-skip is visible... SKIPPED
   21.06 · fecha as caixas... COMPLETED
-  21.07 · espera 5 min e meio...io.grpc.StatusRuntimeException: UNAVAILABLE
+  21.07 · espera 5 min e meio...
+    Assert that (Optional) "esta-tela-nao-tem-este-texto" is visible... WARNED
+    Run ../apoio/esperar_o_sistema.yaml...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+    Run ../apoio/esperar_o_sistema.yaml... COMPLETED
+  21.07 · espera 5 min e meio... COMPLETED
+  21.08 · abre o Partner como o profissional...
+    Launch app "com.vupth.partner.preview" with clear state... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+    Assert that (Optional) id: app-commit is visible... WARNED
+    Stop com.vupth.partner.preview... COMPLETED
+    Launch app "com.vupth.partner.preview"... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+    Run ../../../vupth-partner/.maestro/conjunta/prof_entrar.yaml...
+      PJ1.01 · entra como ${EMAIL}...
+        Tap on id: go-login... COMPLETED
+        Tap on id: login-email... COMPLETED
+        Input text ${EMAIL}... COMPLETED
+        Tap on id: login-password... COMPLETED
+        Input text ${SENHA}... COMPLETED
+        Hide Keyboard... COMPLETED
+        Tap on id: login-submit... COMPLETED
+      PJ1.01 · entra como prop_c72351521@teste.com... COMPLETED
+      PJ1.02 · espera a Fila ou o Menu do dono... COMPLETED
+      PJ1.02a · fecha o aviso, se houver...
+        Wait for animation to end within 3000 ms... COMPLETED
+        Run fechar_anr.yaml...
+          Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+          Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+        Run fechar_anr.yaml... COMPLETED
+        Run flow when id: dialogo-botao-0 is visible...
+        Run flow when id: dialogo-botao-0 is visible... SKIPPED
+        Run flow when id: android:id/button1 is visible...
+        Run flow when id: android:id/button1 is visible... SKIPPED
+      PJ1.02a · fecha o aviso, se houver... COMPLETED
+      PJ1.02b · na visao de dono, troca para a de profissional...
+        Tap on id: aba-menu... COMPLETED
+        Tap on "Atender como profissional"... COMPLETED
+      PJ1.02b · na visao de dono, troca para a de profissional... COMPLETED
+      PJ1.02c · espera aba-fila... COMPLETED
+      PJ1.03 · fecha o aviso, se houver...
+        Wait for animation to end within 3000 ms... COMPLETED
+        Run fechar_anr.yaml...
+          Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+          Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+        Run fechar_anr.yaml... COMPLETED
+        Run flow when id: dialogo-botao-0 is visible...
+        Run flow when id: dialogo-botao-0 is visible... SKIPPED
+        Run flow when id: android:id/button1 is visible...
+        Run flow when id: android:id/button1 is visible... SKIPPED
+      PJ1.03 · fecha o aviso, se houver... COMPLETED
+    Run ../../../vupth-partner/.maestro/conjunta/prof_entrar.yaml... COMPLETED
+  21.08 · abre o Partner como o profissional... COMPLETED
+  21.09 · no Partner, marca que ${NOME_CLIENTE} não chegou...
+    PJ2.01 · toca em aba-fila... COMPLETED
+    PJ2.02 · espera ${CLIENTE} na fila... COMPLETED
+    PJ2.03 · abre as opcoes de ${CLIENTE}... COMPLETED
+    PJ2.04 · toca em Nao chegou... COMPLETED
+    PJ2.05 · confirma Cliente nao chegou...
+      Assert that id: dialogo-botao-1 is visible... COMPLETED
+      Tap on id: dialogo-botao-1... COMPLETED
+    PJ2.05 · confirma Cliente nao chegou... COMPLETED
+    PJ2.06 · espera o selo Atrasado... COMPLETED
+  21.09 · no Partner, marca que Cliente72351521 não chegou... COMPLETED
+  21.0A · volta ao Client (sem limpar)... COMPLETED
+  21.0B · o aviso do 1º atraso aparece...io.grpc.StatusRuntimeException: UNAVAILABLE
 	at io.grpc.stub.ClientCalls.toStatusRuntimeException(ClientCalls.java:275)
 	at io.grpc.stub.ClientCalls.getUnchecked(ClientCalls.java:256)
 	at io.grpc.stub.ClientCalls.blockingUnaryCall(ClientCalls.java:169)
@@ -266,4 +332,4 @@ Caused by: java.io.IOException: Command failed (host:transport:emulator-5554): d
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth/.maestro/logs/2026-10-11_070255/21_conjunta_atraso
+/home/andre/Documentos/programacao/vupth/.maestro/logs/2026-10-11_095835/21_conjunta_atraso
