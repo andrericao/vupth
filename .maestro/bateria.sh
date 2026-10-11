@@ -255,8 +255,12 @@ else
       timeout 120 adb wait-for-device
       sleep 10
       rm -rf "${RODADA:?}/$arquivo"
+      # TAG novo: as contas da 1a tentativa ja existem (409 no 21.P0, 11/10 11:02).
+      TAG_DA_RODADA=$TAG
+      TAG=$(date +%s | tail -c 7)
       rodar "$arquivo"
       VOLTA=$?
+      TAG=$TAG_DA_RODADA
     fi
     juntar_para_o_andre "$RODADA/$arquivo"
     if [ "$VOLTA" -eq 0 ]; then
