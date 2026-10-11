@@ -24,6 +24,17 @@ export PATH="$PATH:$HOME/Android/Sdk/platform-tools:$HOME/.maestro/bin"
 APP_ID="com.vupth.client.preview"
 API="https://vupth-backend-ia.onrender.com"
 
+# Uma bateria por vez (DEC-17). A trava unica da DEC-33 (flock -n /tmp/vupth-maestro.lock) mora aqui dentro:
+# a bateria se reabre sob o flock e segura a trava ate o restaurar.sh. So o
+# pgrep deixou o Client comecar (11/10 00:41) com o Partner ainda no setup.sh,
+# antes do java dele subir.
+if [ -z "$VUPTH_TRAVA" ]; then
+  VUPTH_TRAVA=1 flock -n -E 75 /tmp/vupth-maestro.lock bash "$0" "$@"
+  SAIDA=$?
+  [ "$SAIDA" = 75 ] && echo "ERRO: outra bateria segura /tmp/vupth-maestro.lock — espere ela terminar"
+  exit "$SAIDA"
+fi
+
 # Os argumentos: o modo (--completa/--falhas) e o aparelho (--device <serial>).
 # Antes so o $1 era lido, e o "--device emulator-5554" virava o modo (10/10).
 MODO=""
