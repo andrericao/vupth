@@ -132,7 +132,10 @@ CONJUNTAS="18 19 21 22"
 # A 13 (push da vez) depende do push do sistema; no emulador o app nao oferece
 # a tela 10 nem pede token (Device.isDevice, bateria 11/10 06:06, 13.A7). Fica
 # como ⏭ no emulador e roda no celular.
-SO_NO_CELULAR="13"
+# A 21 (atraso) derruba o emulador na 21.0B, logo que o Client deveria mostrar
+# o aviso do 1o atraso (6 vezes em 11/10; nunca passou dali). Suspeita do app:
+# vai ao celular do Andre, com o logcat (orquestrador, 11/10 15h30).
+SO_NO_CELULAR="13 21"
 PARTNER_OK=1
 [ -d "$(dirname "$REPO")/vupth-partner/.maestro/conjunta" ] || PARTNER_OK=0
 adb shell pm list packages 2>/dev/null | grep -q "com.vupth.partner.preview" || PARTNER_OK=0
@@ -246,7 +249,11 @@ else
       continue
     fi
     if [ "$LENTO" = 2 ] && echo " $SO_NO_CELULAR " | grep -q " $n "; then
-      echo "⏭  $arquivo (só no celular: o app não oferece push no emulador — Device.isDevice)" >> "$RODADA/relatorio.txt"
+      case "$n" in
+        13) por="o app não oferece push no emulador — Device.isDevice" ;;
+        *)  por="o emulador cai nela; o André roda no celular" ;;
+      esac
+      echo "⏭  $arquivo (só no celular: $por)" >> "$RODADA/relatorio.txt"
       continue
     fi
     if aprovada "$n"; then
