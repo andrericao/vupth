@@ -250,7 +250,7 @@ Running on vupth_android11
         Input text ${SENHA}... COMPLETED
         Hide Keyboard... COMPLETED
         Tap on id: login-submit... COMPLETED
-      PJ1.01 · entra como prop_c72978521@teste.com... COMPLETED
+      PJ1.01 · entra como prop_c73889921@teste.com... COMPLETED
       PJ1.02 · espera a Fila ou o Menu do dono... COMPLETED
       PJ1.02a · fecha o aviso, se houver...
         Wait for animation to end within 3000 ms... COMPLETED
@@ -291,9 +291,10 @@ Running on vupth_android11
       Tap on id: dialogo-botao-1... COMPLETED
     PJ2.05 · confirma Cliente nao chegou... COMPLETED
     PJ2.06 · espera o selo Atrasado... COMPLETED
-  21.09 · no Partner, marca que Cliente72978521 não chegou... COMPLETED
+  21.09 · no Partner, marca que Cliente73889921 não chegou... COMPLETED
+  21.09b · fecha o Partner... COMPLETED
   21.0A · volta ao Client (sem limpar)... COMPLETED
-  21.0B · o aviso do 1º atraso aparece...io.grpc.StatusRuntimeException: INTERNAL: UiAutomation not connected, UiAutomation@d722db4[id=-1, flags=0]
+  21.0B · o aviso do 1º atraso aparece...io.grpc.StatusRuntimeException: INTERNAL: UiAutomation not connected, UiAutomation@6623b03[id=-1, flags=0]
 	at io.grpc.stub.ClientCalls.toStatusRuntimeException(ClientCalls.java:275)
 	at io.grpc.stub.ClientCalls.getUnchecked(ClientCalls.java:256)
 	at io.grpc.stub.ClientCalls.blockingUnaryCall(ClientCalls.java:169)
@@ -322,4 +323,4 @@ Running on vupth_android11
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth/.maestro/logs/2026-10-11_114305/21_conjunta_atraso
+/home/andre/Documentos/programacao/vupth/.maestro/logs/2026-10-11_135656/21_conjunta_atraso
