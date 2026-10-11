@@ -28,7 +28,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "(dialogo-botao-0|busca-home)"
-    timeout: 90000
+    timeout: ${90000 * LENTO}
     optional: true
 - runFlow:
     file: fechar_aviso.yaml
@@ -42,7 +42,7 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible:
             id: "(dialogo-botao-0|busca-home)"
-          timeout: 90000
+          timeout: ${90000 * LENTO}
           optional: true
       - runFlow:
           file: fechar_aviso.yaml
@@ -60,7 +60,7 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible:
             id: "grupo-.*"
-          timeout: 10000
+          timeout: ${10000 * LENTO}
           optional: true
 - scrollUntilVisible:
     element:

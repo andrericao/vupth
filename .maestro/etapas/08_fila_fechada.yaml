@@ -30,12 +30,12 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible:
             id: "fila-fechada-${PROF_ID}"
-          timeout: 300000
+          timeout: ${300000 * LENTO}
           label: "08.0A · espera o Andre fechar a fila no Partner (até 5 min)"
 - extendedWaitUntil:
     visible:
       id: "fila-fechada-${PROF_ID}"
-    timeout: 90000
+    timeout: ${90000 * LENTO}
     label: "08.03 · espera fila-fechada-${PROF_ID}"
 
 # DEC-6 (02/10): na escolha do servico, so "Agendar" e "Mais opcoes" — o

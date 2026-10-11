@@ -6,7 +6,7 @@ name: Login de usuário
 
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
 
 - tapOn: "Entrar"
 
@@ -24,6 +24,6 @@ name: Login de usuário
 
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 10000
+    timeout: ${10000 * LENTO}
 
 - assertVisible: "Sair"

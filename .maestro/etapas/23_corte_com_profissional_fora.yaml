@@ -19,7 +19,7 @@ appId: ${APP_ID}
     label: "23.04 · toca em Assim que abrir"
 - extendedWaitUntil:
     visible: "Pedido enviado!.*"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "23.05 · espera Pedido enviado!"
 - assertVisible:
     text: ".*O profissional tem 5 minutos para responder.*"
@@ -29,7 +29,7 @@ appId: ${APP_ID}
     label: "23.08 · roda fechar_aviso"
 - extendedWaitUntil:
     visible: ".*resposta até [0-9]{2}:[0-9]{2}.*"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "23.09 · o Início mostra o pedido com o prazo"
 - runFlow:
     file: ../apoio/para_o_andre.yaml

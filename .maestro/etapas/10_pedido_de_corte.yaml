@@ -23,7 +23,7 @@ appId: ${APP_ID}
     label: "10.0B · toca em Assim que abrir"
 - extendedWaitUntil:
     visible: "Pedido enviado!.*"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "10.05 · espera Pedido enviado!"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
@@ -48,12 +48,12 @@ appId: ${APP_ID}
     commands:
       - extendedWaitUntil:
           visible: "Pedido aceito"
-          timeout: 300000
+          timeout: ${300000 * LENTO}
           label: "10.0A · espera o Andre aceitar o pedido no Partner (até 5 min)"
 # O app confere o historico a cada 15 s enquanto ha pedido esperando.
 - extendedWaitUntil:
     visible: "Pedido aceito"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
     label: "10.08 · espera Pedido aceito"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml

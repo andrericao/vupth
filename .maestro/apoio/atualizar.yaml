@@ -19,7 +19,7 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible:
             id: "grupo-.*"
-          timeout: 10000
+          timeout: ${10000 * LENTO}
           optional: true
 - scrollUntilVisible:
     element:
@@ -30,7 +30,7 @@ appId: ${APP_ID}
     id: "check-update"
 - extendedWaitUntil:
     visible: "(Atualização baixada|Tudo certo|Não foi possível verificar)"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
 # "Atualização baixada": o OK chama o reloadAsync e o app recomeca no Inicio.
 - runFlow:
     when:
@@ -53,7 +53,7 @@ appId: ${APP_ID}
             - extendedWaitUntil:
                 visible:
                   id: "grupo-.*"
-                timeout: 10000
+                timeout: ${10000 * LENTO}
                 optional: true
       - scrollUntilVisible:
           element:

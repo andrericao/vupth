@@ -54,7 +54,7 @@ onFlowComplete:
     label: "13.A3 · toca em primary-queue"
 - extendedWaitUntil:
     visible: "Entendi"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
     label: "13.A4 · espera Entendi"
 - tapOn:
     text: "Entendi"
@@ -72,7 +72,7 @@ onFlowComplete:
 - extendedWaitUntil:
     visible:
       id: "push-accept"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "13.A7 · espera a tela 10"
 - tapOn:
     id: "push-accept"
@@ -80,7 +80,7 @@ onFlowComplete:
 - extendedWaitUntil:
     visible:
       id: "com.android.permissioncontroller:id/permission_allow_button"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "13.A9 · a caixa do sistema aparece"
 - tapOn:
     id: "com.android.permissioncontroller:id/permission_allow_button"
@@ -124,7 +124,7 @@ onFlowComplete:
     label: "13.T2 · rola até o painel de push"
 - extendedWaitUntil:
     visible: "sim \\(POST /devices\\)"
-    timeout: 90000
+    timeout: ${90000 * LENTO}
     label: "13.T3 · o backend tem o token de push (POST /devices)"
 
 # 1) App FECHADO: entra pela API, o push chega, o toque abre a fila.
@@ -145,7 +145,7 @@ onFlowComplete:
     label: "13.03 · abre a gaveta de notificações"
 - extendedWaitUntil:
     visible: "É quase a sua vez!"
-    timeout: 90000
+    timeout: ${90000 * LENTO}
     label: "13.04 · espera o push É quase a sua vez!"
 - tapOn:
     text: "É quase a sua vez!"
@@ -155,7 +155,7 @@ onFlowComplete:
 - extendedWaitUntil:
     visible:
       id: "(queue-position|card-da-fila)"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
     label: "13.06 · abriu a fila ou o cartão da fila"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
@@ -185,7 +185,7 @@ onFlowComplete:
     label: "13.0A · abre a gaveta de notificações"
 - extendedWaitUntil:
     visible: "É quase a sua vez!"
-    timeout: 90000
+    timeout: ${90000 * LENTO}
     label: "13.0B · espera o push de novo"
 # O botao de acao da notificacao (categoryId CIENCIA): "OK".
 - tapOn:
@@ -193,7 +193,7 @@ onFlowComplete:
     label: "13.0C · toca no OK da notificação"
 - extendedWaitUntil:
     notVisible: "É quase a sua vez!"
-    timeout: 10000
+    timeout: ${10000 * LENTO}
     label: "13.0D · a notificação sumiu"
 - assertNotVisible:
     id: "queue-position"

@@ -6,7 +6,7 @@ name: Cadastro de usuário
 
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
 
 - tapOn: "Cadastrar"
 
@@ -29,6 +29,6 @@ name: Cadastro de usuário
 
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 10000
+    timeout: ${10000 * LENTO}
 
 - assertVisible: "Sair"

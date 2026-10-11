@@ -74,7 +74,7 @@ appId: ${APP_ID}
 # "Avenida Paulista, 10" — o endereco salvou certo.
 - extendedWaitUntil:
     visible: "(Rua da Bateria|Avenida Paulista), 10.*"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "16.0M · o endereço aparece na lista"
 - tapOn:
     id: "back-button"
@@ -108,7 +108,7 @@ appId: ${APP_ID}
     label: "16.0W · toca em Salvar"
 - extendedWaitUntil:
     visible: "Senha atualizada!"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "16.0X · espera Senha atualizada!"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
@@ -138,7 +138,7 @@ appId: ${APP_ID}
     label: "16.14 · toca em Salvar"
 - extendedWaitUntil:
     visible: "E-mail atualizado!"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "16.15 · espera E-mail atualizado!"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml

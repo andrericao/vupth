@@ -26,7 +26,7 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           visible:
             id: ${ALVO}
-          timeout: 3000
+          timeout: ${3000 * LENTO}
           optional: true
 - assertVisible:
     id: ${ALVO}

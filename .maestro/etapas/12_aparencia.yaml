@@ -18,7 +18,7 @@ appId: ${APP_ID}
     label: "12.04 · toca em aparencia-tema"
 - extendedWaitUntil:
     visible: "Tema escuro"
-    timeout: 10000
+    timeout: ${10000 * LENTO}
     label: "12.05 · espera Tema escuro"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
@@ -38,7 +38,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "aparencia-fonte"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
     label: "12.11 · continua na Aparência"
 - assertVisible:
     text: "\\+2"
@@ -73,5 +73,5 @@ appId: ${APP_ID}
     label: "12.15 · toca em salvar-fonte"
 - extendedWaitUntil:
     visible: "Normal"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
     label: "12.16 · vê Normal"

@@ -14,7 +14,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "barra-de-encaixe"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "07.02 · espera barra-de-encaixe"
 - tapOn:
     id: "horario-.*"
@@ -25,7 +25,7 @@ appId: ${APP_ID}
     label: "07.04 · toca em confirmar-agendamento"
 - extendedWaitUntil:
     visible: "Agendado"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "07.05 · espera Agendado"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
@@ -37,5 +37,5 @@ appId: ${APP_ID}
     label: "07.07 · toca em Atendimentos"
 - extendedWaitUntil:
     visible: ${PROF}
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "07.08 · espera ${PROF}"

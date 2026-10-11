@@ -11,7 +11,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "perfil-do-profissional"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "14.02 · espera perfil-do-profissional"
 - assertVisible:
     text: ${PROF}
@@ -19,7 +19,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "servico-${SERVICO_ID}"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "14.04 · vê o serviço com o preço"
 - assertNotVisible:
     id: "contato-do-profissional"
@@ -42,7 +42,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "perfil-do-profissional"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "14.0B · espera perfil-do-profissional"
 - tapOn:
     id: "back-button"

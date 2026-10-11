@@ -23,11 +23,11 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "pra-ontem-sair"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "03.06 · espera pra-ontem-sair"
 - extendedWaitUntil:
     visible: ${LOJA}
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "03.07 · vê ${LOJA} entre as livres"
 # A nota voltou ao card do Inicio (distancia-e-nota-no-card, 09/10). A
 # distancia nao: a bateria nega a localizacao, entao o servidor nao a manda.

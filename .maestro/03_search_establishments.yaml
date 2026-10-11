@@ -6,7 +6,7 @@ name: Busca e filtro de estabelecimentos
 
 - extendedWaitUntil:
     visible: "Estabelecimentos"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
 
 # Filtrar por tipo Barbearia
 - tapOn:

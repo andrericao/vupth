@@ -11,7 +11,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "card-da-fila"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
     label: "21.02 · espera card-da-fila"
 - tapOn:
     id: "card-da-fila"
@@ -33,7 +33,7 @@ appId: ${APP_ID}
 # O Partner so deixa marcar atraso 5 min depois do horario.
 - extendedWaitUntil:
     visible: "esta-tela-nao-tem-este-texto"
-    timeout: 330000
+    timeout: ${330000 * LENTO}
     optional: true
     label: "21.07 · espera 5 min e meio"
 - runFlow:
@@ -50,12 +50,12 @@ appId: ${APP_ID}
     label: "21.0A · volta ao Client (sem limpar)"
 - extendedWaitUntil:
     visible: ".*Este é o seu 1º atraso.*"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
     label: "21.0B · o aviso do 1º atraso aparece"
 - tapOn:
     text: "Entendi"
     label: "21.0C · toca em Entendi"
 - extendedWaitUntil:
     visible: "Atrasado"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "21.0D · a fila mostra Atrasado"

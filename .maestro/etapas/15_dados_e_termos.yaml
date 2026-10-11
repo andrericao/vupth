@@ -11,7 +11,7 @@ appId: ${APP_ID}
     label: "15.02 · toca em Dados pessoais"
 - extendedWaitUntil:
     visible: "DADOS PESSOAIS"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
     label: "15.03 · espera DADOS PESSOAIS"
 - tapOn:
     text: "Sobrenome"
@@ -30,7 +30,7 @@ appId: ${APP_ID}
     label: "15.08 · toca em Salvar"
 - extendedWaitUntil:
     visible: "Dados atualizados!"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "15.09 · espera Dados atualizados!"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
@@ -48,7 +48,7 @@ appId: ${APP_ID}
 - extendedWaitUntil:
     visible:
       id: "tab-uso"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
     label: "15.0E · vê a aba Termos de Uso"
 - tapOn:
     id: "tab-privacidade"
@@ -56,7 +56,7 @@ appId: ${APP_ID}
 # paginas-legais (10245bc, 732a9c1, 665276f): quem responde e a retencao.
 - extendedWaitUntil:
     visible: "1. Quem somos"
-    timeout: 15000
+    timeout: ${15000 * LENTO}
     label: "15.0H · vê Quem somos na Privacidade"
 - scrollUntilVisible:
     element:

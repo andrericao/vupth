@@ -50,6 +50,10 @@ done
 # ANDROID_SERIAL vale para todo adb daqui, do setup.sh e do restaurar.sh; o
 # Maestro recebe o mesmo.
 MAESTRO_APARELHO=()
+# LENTO (Andre, 11/10: "o emulador e mais lento mesmo, entao compense"):
+# multiplica o timeout de todo extendedWaitUntil dos fluxos — 2 no emulador.
+LENTO=1
+case "$APARELHO" in emulator-*) LENTO=2 ;; esac
 if [ -n "$APARELHO" ]; then
   export ANDROID_SERIAL="$APARELHO"
   MAESTRO_APARELHO=(--device "$APARELHO")
@@ -176,7 +180,7 @@ rodar() {
   echo "=== $nome ==="
   maestro "${MAESTRO_APARELHO[@]}" test \
     -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
-    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" \
+    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" \
     --debug-output "$pasta" --flatten-debug-output \
     --test-output-dir "$pasta" \
     "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"
