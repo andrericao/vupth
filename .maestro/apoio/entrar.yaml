@@ -7,14 +7,17 @@ appId: ${APP_ID}
     text: "Perfil"
 - tapOn:
     text: "Já tenho conta"
+# No emulador (1 nucleo, 2 GB, swap) o inputText digita tecla a tecla e
+# estourou o prazo de 120 s do Maestro no meio do e-mail (bateria 11/10 00:49,
+# 00.P0, DEADLINE_EXCEEDED): cola pela area de transferencia.
 - tapOn:
     text: "E-mail"
-- inputText:
-    text: ${EMAIL_CLIENTE}
+- setClipboard: ${EMAIL_CLIENTE}
+- pasteText
 - tapOn:
     text: "Senha"
-- inputText:
-    text: ${SENHA}
+- setClipboard: ${SENHA}
+- pasteText
 - hideKeyboard
 - tapOn:
     id: "primary-login"
