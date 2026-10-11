@@ -1,0 +1,368 @@
+[ {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "APP_ID" : "com.vupth.client.preview",
+        "API" : "https://vupth-backend-ia.onrender.com",
+        "SENHA" : "Teste@123",
+        "COMMIT" : "215ec967",
+        "TAG" : "727332",
+        "SUPERVISAO" : "0",
+        "LENTO" : "2",
+        "MAESTRO_FILENAME" : "21_conjunta_atraso",
+        "MAESTRO_DEVICE_UDID" : "emulator-5554",
+        "MAESTRO_SHARD_ID" : "1",
+        "MAESTRO_SHARD_INDEX" : "0"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791728370151,
+    "duration" : 62,
+    "sequenceNumber" : 0,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "APP_ID" : "com.vupth.client.preview",
+          "API" : "https://vupth-backend-ia.onrender.com",
+          "SENHA" : "Teste@123",
+          "COMMIT" : "215ec967",
+          "TAG" : "727332",
+          "SUPERVISAO" : "0",
+          "LENTO" : "2",
+          "MAESTRO_FILENAME" : "21_conjunta_atraso",
+          "MAESTRO_DEVICE_UDID" : "emulator-5554",
+          "MAESTRO_SHARD_ID" : "1",
+          "MAESTRO_SHARD_INDEX" : "0"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791728372771,
+    "duration" : 34,
+    "sequenceNumber" : 5,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "runScriptCommand" : {
+          "script" : "// Monta, pela API do staging, uma loja ABERTA com um profissional TRABALHANDO\n// e um servico — o papel do app do Partner, para a bateria do client nao\n// depender dele. Solo shop: o dono e o proprio profissional.\n//\n// Entradas (env do runScript): API, SENHA, TAG\n// Saidas: output.LOJA, output.LOJA_ID, output.PROF, output.PROF_ID,\n//         output.SERVICO_ID, output.EMAIL_PROF\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  // 429 do staging (limite de logins, baterias seguidas — Partner, 11/10): espera\n  // o tempo que ele pede (\"try again in N s\") e tenta de novo, ate 3 vezes.\n  var r = null;\n  for (var vez = 0; vez < 4; vez++) {\n    r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });\n    if (r.status !== 429 || vez === 3) break;\n    var n = /in (\\d+) s/.exec(r.body || \"\");\n    var ate = Date.now() + ((n ? parseInt(n[1], 10) : 30) + 2) * 1000;\n    while (Date.now() < ate) {}\n  }\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\n// Cada papel novo (OWNER, PROFESSIONAL) so vale no token depois do refresh.\nfunction renovar(refresh) {\n  return pedir(\"POST\", \"/auth/refresh\", { refresh_token: refresh });\n}\n\nvar loja = \"Loja C\" + TAG;\nvar prof = \"Prof\" + TAG;\nvar email = \"prop_c\" + TAG + \"@teste.com\";\n\npedir(\"POST\", \"/auth/register\", { email: email, password: SENHA });\nvar sessao = pedir(\"POST\", \"/auth/login\", { email: email, password: SENHA }).tokens;\n\nvar est = pedir(\"POST\", \"/establishment/quick-create\", { name: loja, serviceType: \"BARBER\" }, sessao.access_token);\nsessao = renovar(sessao.refresh_token);\n\n// Sem horario a loja nao abre (422 ESTABLISHMENT_HOURS_REQUIRED). O dia todo,\n// para a bateria rodar a qualquer hora (perto da meia-noite, o bateria.sh espera).\npedir(\"PATCH\", \"/establishment/\" + est.id + \"/general-infos\", { opening_time: \"00:00\", closing_time: \"23:59\" }, sessao.access_token);\n\nvar p = pedir(\"POST\", \"/professional/quick-create\", { name: prof, establishmentId: est.id, specialty: \"Corte\" }, sessao.access_token);\nsessao = renovar(sessao.refresh_token);\n\nvar servico = pedir(\"POST\", \"/establishment/\" + est.id + \"/service-items\", {\n  establishmentId: est.id,\n  serviceItemType: \"CORTE_MAQUINA\",\n  customName: \"Corte \" + TAG,\n  price: 40.0,\n  estimatedMinutes: 30\n}, sessao.access_token);\n\n// Trabalhando: a loja abre sozinha (open_status derivado, S1 fatia 2).\npedir(\"PATCH\", \"/professional/me/status\", { status: \"WORKING\" }, sessao.access_token);\n\noutput.LOJA = loja;\noutput.LOJA_ID = est.id;\noutput.PROF = prof;\noutput.PROF_ID = p.id;\noutput.SERVICO_ID = servico.id;\noutput.EMAIL_PROF = email;\n",
+          "env" : {
+            "API" : "${API}",
+            "SENHA" : "${SENHA}",
+            "TAG" : "${output.TAG}"
+          },
+          "sourceDescription" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/loja_aberta.js",
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "scriptCondition" : "${LOJA == '1'}"
+      },
+      "label" : "${ETAPA}.P3 · monta a loja pela API",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "FAILED",
+    "timestamp" : 1791728372944,
+    "duration" : 1985,
+    "error" : {
+      "stackTrace" : [ {
+        "methodName" : "pedir",
+        "fileName" : "<eval>",
+        "lineNumber" : 22,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "methodName" : ":program",
+        "fileName" : "<eval>",
+        "lineNumber" : 35,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "methodName" : ":anonymous",
+        "fileName" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/loja_aberta.js",
+        "lineNumber" : 1,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "methodName" : ":program",
+        "fileName" : "/home/andre/Documentos/programacao/vupth/.maestro/scripts/loja_aberta.js",
+        "lineNumber" : 1,
+        "className" : "<js>",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "eval",
+        "fileName" : "Context.java",
+        "lineNumber" : 416,
+        "className" : "org.graalvm.polyglot.Context",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "evalWithIIFE",
+        "fileName" : "GraalJsEngine.kt",
+        "lineNumber" : 134,
+        "className" : "maestro.js.GraalJsEngine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "evaluateScript",
+        "fileName" : "GraalJsEngine.kt",
+        "lineNumber" : 95,
+        "className" : "maestro.js.GraalJsEngine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "evaluateScript",
+        "fileName" : "GraalJsEngine.kt",
+        "lineNumber" : 26,
+        "className" : "maestro.js.GraalJsEngine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runScriptCommand",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 645,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeCommand",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 373,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeSubflowCommands",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 997,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "access$executeSubflowCommands",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : 126,
+        "className" : "maestro.orchestra.Orchestra",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invokeSuspend",
+        "fileName" : "Orchestra.kt",
+        "lineNumber" : -1,
+        "className" : "maestro.orchestra.Orchestra$executeSubflowCommands$1",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "resumeWith",
+        "fileName" : "ContinuationImpl.kt",
+        "lineNumber" : 34,
+        "className" : "kotlin.coroutines.jvm.internal.BaseContinuationImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "DispatchedTask.kt",
+        "lineNumber" : 100,
+        "className" : "kotlinx.coroutines.DispatchedTask",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "processNextEvent",
+        "fileName" : "EventLoop.common.kt",
+        "lineNumber" : 263,
+        "className" : "kotlinx.coroutines.EventLoopImplBase",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "joinBlocking",
+        "fileName" : "Builders.kt",
+        "lineNumber" : 94,
+        "className" : "kotlinx.coroutines.BlockingCoroutine",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking",
+        "fileName" : "Builders.kt",
+        "lineNumber" : 70,
+        "className" : "kotlinx.coroutines.BuildersKt__BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking",
+        "lineNumber" : 1,
+        "className" : "kotlinx.coroutines.BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking$default",
+        "fileName" : "Builders.kt",
+        "lineNumber" : 48,
+        "className" : "kotlinx.coroutines.BuildersKt__BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runBlocking$default",
+        "lineNumber" : 1,
+        "className" : "kotlinx.coroutines.BuildersKt",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSingle$lambda$0",
+        "fileName" : "TestRunner.kt",
+        "lineNumber" : 75,
+        "className" : "maestro.cli.runner.TestRunner",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runCatching-ta8aW1Q",
+        "fileName" : "TestRunner.kt",
+        "lineNumber" : 204,
+        "className" : "maestro.cli.runner.TestRunner",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSingle",
+        "fileName" : "TestRunner.kt",
+        "lineNumber" : 66,
+        "className" : "maestro.cli.runner.TestRunner",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSingleFlow",
+        "fileName" : "TestCommand.kt",
+        "lineNumber" : 561,
+        "className" : "maestro.cli.command.TestCommand",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runShardSuite$lambda$10",
+        "fileName" : "TestCommand.kt",
+        "lineNumber" : 529,
+        "className" : "maestro.cli.command.TestCommand",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "newSession",
+        "fileName" : "MaestroSessionManager.kt",
+        "lineNumber" : 132,
+        "className" : "maestro.cli.session.MaestroSessionManager",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "newSession$default",
+        "fileName" : "MaestroSessionManager.kt",
+        "lineNumber" : 66,
+        "className" : "maestro.cli.session.MaestroSessionManager",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runShardSuite",
+        "fileName" : "TestCommand.kt",
+        "lineNumber" : 476,
+        "className" : "maestro.cli.command.TestCommand",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "access$runShardSuite",
+        "fileName" : "TestCommand.kt",
+        "lineNumber" : 80,
+        "className" : "maestro.cli.command.TestCommand",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "invokeSuspend",
+        "fileName" : "TestCommand.kt",
+        "lineNumber" : 435,
+        "className" : "maestro.cli.command.TestCommand$handleSessions$1$results$1$1",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "resumeWith",
+        "fileName" : "ContinuationImpl.kt",
+        "lineNumber" : 34,
+        "className" : "kotlin.coroutines.jvm.internal.BaseContinuationImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "DispatchedTask.kt",
+        "lineNumber" : 100,
+        "className" : "kotlinx.coroutines.DispatchedTask",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "LimitedDispatcher.kt",
+        "lineNumber" : 124,
+        "className" : "kotlinx.coroutines.internal.LimitedDispatcher$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "Tasks.kt",
+        "lineNumber" : 89,
+        "className" : "kotlinx.coroutines.scheduling.TaskImpl",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runSafely",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 586,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "executeTask",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 820,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "runWorker",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 717,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "run",
+        "fileName" : "CoroutineScheduler.kt",
+        "lineNumber" : 704,
+        "className" : "kotlinx.coroutines.scheduling.CoroutineScheduler$Worker",
+        "nativeMethod" : false
+      } ],
+      "message" : "Error: POST /auth/register -> 409 {\"status\":409,\"message\":\"Email 'prop_c72733221@teste.com' is already registered\",\"code\":\"EMAIL_NOT_AVAILABLE\",\"timestamp\":\"2026-10-11T14:19:33.975356938Z\"}",
+      "interrupted" : false,
+      "cancelled" : false,
+      "guestObject" : {
+        "context" : {
+          "engine" : {
+            "version" : "Development Build"
