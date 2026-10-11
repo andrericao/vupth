@@ -37,6 +37,12 @@ appId: ${APP_ID}
       visible:
         id: "primary-login"
     commands:
+      # O 429 do staging (limite de logins, "try again in 45 s", 11/10): espera
+      # o prazo antes de tocar de novo.
+      - extendedWaitUntil:
+          visible: "ESPERA_DO_429_NUNCA_APARECE"
+          timeout: 47000
+          optional: true
       - tapOn:
           id: "primary-login"
       - extendedWaitUntil:
