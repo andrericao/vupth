@@ -183,13 +183,22 @@ rodar() {
   local nome="$1" pasta="$RODADA/$1"
   mkdir -p "$pasta"
   echo "=== $nome ==="
+  # O logcat (avisos e erros) da etapa: a 21 derruba o aparelho na 21.0B e o
+  # Maestro nao tem print desse instante (11/10, 5 vezes). Fica so na etapa que
+  # falha (a verde apaga a pasta), cortado nas ultimas 3000 linhas.
+  adb logcat -c 2>/dev/null
+  adb logcat -v time '*:W' > "$pasta/logcat.txt" 2>/dev/null &
+  local logcat=$!
   maestro "${MAESTRO_APARELHO[@]}" test \
     -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
     -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" \
     --debug-output "$pasta" --flatten-debug-output \
     --test-output-dir "$pasta" \
     "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"
-  return "${PIPESTATUS[0]}"
+  local volta="${PIPESTATUS[0]}"
+  kill "$logcat" 2>/dev/null
+  tail -n 3000 "$pasta/logcat.txt" > "$pasta/logcat.tmp" 2>/dev/null && mv "$pasta/logcat.tmp" "$pasta/logcat.txt"
+  return "$volta"
 }
 
 # O print da falha com o nome do passo (DEC-16), na pasta da rodada.
@@ -254,7 +263,7 @@ else
       echo "↻ $arquivo: o aparelho saiu do adb ou o driver caiu — de novo, uma vez"
       timeout 120 adb wait-for-device
       sleep 10
-      rm -rf "${RODADA:?}/$arquivo"
+      mv "$RODADA/$arquivo" "$RODADA/${arquivo}_1a_tentativa"   # guarda o logcat da queda
       # TAG novo: as contas da 1a tentativa ja existem (409 no 21.P0, 11/10 11:02).
       TAG_DA_RODADA=$TAG
       TAG=$(date +%s | tail -c 7)
