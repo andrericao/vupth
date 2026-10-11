@@ -1,32 +1,31 @@
 Running on vupth_android11
- > Flow 13_push_da_vez
-  > On Flow Complete
-13.P0 · prepara a etapa...
+ > Flow 21_conjunta_atraso
+21.P0 · prepara a etapa...
   ${ETAPA}.P1 · calcula TAG... COMPLETED
   ${ETAPA}.P2 · calcula o cliente... COMPLETED
   ${ETAPA}.P3 · monta a loja pela API...
     Run /home/andre/Documentos/programacao/vupth/.maestro/scripts/loja_aberta.js... COMPLETED
-  13.P3 · monta a loja pela API... COMPLETED
+  21.P3 · monta a loja pela API... COMPLETED
   ${ETAPA}.P4 · fecha a fila pela API (um cliente entra antes)...
-  13.P4 · fecha a fila pela API (um cliente entra antes)... SKIPPED
+  21.P4 · fecha a fila pela API (um cliente entra antes)... SKIPPED
   ${ETAPA}.P4b · põe o profissional em Fora pela API...
-  13.P4b · põe o profissional em Fora pela API... SKIPPED
+  21.P4b · põe o profissional em Fora pela API... SKIPPED
   ${ETAPA}.P5 · cria o cliente pela API...
     Run /home/andre/Documentos/programacao/vupth/.maestro/scripts/cliente.js... COMPLETED
-  13.P5 · cria o cliente pela API... COMPLETED
+  21.P5 · cria o cliente pela API... COMPLETED
   ${ETAPA}.P5c · confere que a cortina de notificações está fechada...
     Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)...
     Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)... SKIPPED
     Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)...
     Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)... SKIPPED
-  13.P5c · confere que a cortina de notificações está fechada... COMPLETED
+  21.P5c · confere que a cortina de notificações está fechada... COMPLETED
   ${ETAPA}.P6 · abre o app limpo... COMPLETED
   ${ETAPA}.P6b · fecha a cortina, se o app abriu por baixo dela...
     Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)...
     Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)... SKIPPED
     Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)...
     Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)... SKIPPED
-  13.P6b · fecha a cortina, se o app abriu por baixo dela... COMPLETED
+  21.P6b · fecha a cortina, se o app abriu por baixo dela... COMPLETED
   ${ETAPA}.P7 · espera onboarding-start (negando a caixa do sistema)...
     Repeat while id: ${ALVO} is not visible (up to 40 times)...
       Run esperar_o_sistema.yaml...
@@ -39,7 +38,7 @@ Running on vupth_android11
       Assert that (Optional) id: ${ALVO} is visible... COMPLETED
     Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
     Assert that id: ${ALVO} is visible... COMPLETED
-  13.P7 · espera onboarding-start (negando a caixa do sistema)... COMPLETED
+  21.P7 · espera onboarding-start (negando a caixa do sistema)... COMPLETED
   ${ETAPA}.P8 · nega a caixa do sistema, se vier...
     Run esperar_o_sistema.yaml...
       Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
@@ -52,7 +51,7 @@ Running on vupth_android11
     Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
     Run flow when id: push-skip is visible...
     Run flow when id: push-skip is visible... SKIPPED
-  13.P8 · nega a caixa do sistema, se vier... COMPLETED
+  21.P8 · nega a caixa do sistema, se vier... COMPLETED
   ${ETAPA}.P9 · passa a abertura...
     Tap on id: onboarding-start... COMPLETED
     Run fechar_aviso.yaml...
@@ -68,7 +67,7 @@ Running on vupth_android11
       Run flow when id: push-skip is visible...
       Run flow when id: push-skip is visible... SKIPPED
     Run fechar_aviso.yaml... COMPLETED
-  13.P9 · passa a abertura... COMPLETED
+  21.P9 · passa a abertura... COMPLETED
   ${ETAPA}.PA · entra com o cliente...
     Run entrar.yaml...
       Tap on "Perfil"... COMPLETED
@@ -116,7 +115,7 @@ Running on vupth_android11
         Run flow when id: push-skip is visible... SKIPPED
       Run fechar_aviso.yaml... COMPLETED
     Run entrar.yaml... COMPLETED
-  13.PA · entra com o cliente... COMPLETED
+  21.PA · entra com o cliente... COMPLETED
   ${ETAPA}.PB · atualiza o app e confere a versão...
     Run atualizar.yaml...
       Repeat while id: grupo-.* is not visible (up to 4 times)...
@@ -164,49 +163,107 @@ Running on vupth_android11
       Copy text from element with ".* · [0-9a-f]{8}"... COMPLETED
       Run /home/andre/Documentos/programacao/vupth/.maestro/scripts/confere_versao.js... COMPLETED
     Run atualizar.yaml... COMPLETED
-  13.PB · atualiza o app e confere a versão... COMPLETED
+  21.PB · atualiza o app e confere a versão... COMPLETED
   ${ETAPA}.PC · confere a versão no Perfil do visitante...
-  13.PC · confere a versão no Perfil do visitante... SKIPPED
-13.P0 · prepara a etapa... COMPLETED
-13.A1 · abre a loja de teste...
-  Tap on "Início"... COMPLETED
-  Tap on id: busca-home... COMPLETED
-  Erase 30 characters... COMPLETED
-  Input text C${TAG}... COMPLETED
-  Hide Keyboard... COMPLETED
-  Assert that "${LOJA}" is visible... COMPLETED
-  Tap on "${LOJA}"... COMPLETED
-  Assert that id: professional-${PROF_ID} is visible... COMPLETED
-13.A1 · abre a loja de teste... COMPLETED
-13.A2 · escolhe o serviço...
-  Tap on id: professional-${PROF_ID}... COMPLETED
-  Assert that id: service-${SERVICO_ID} is visible... COMPLETED
-  Tap on id: service-${SERVICO_ID}... COMPLETED
-13.A2 · escolhe o serviço... COMPLETED
-13.A3 · toca em primary-queue... COMPLETED
-13.A4 · espera Entendi... COMPLETED
-13.A5 · toca em Entendi... COMPLETED
-13.A6 · fecha a política da multa e o push da vez, se cobrem a tela 10...
-  Tap on id: dialogo-botao-0... COMPLETED
+  21.PC · confere a versão no Perfil do visitante... SKIPPED
+21.P0 · prepara a etapa... COMPLETED
+21.PD · entra na fila pela API... COMPLETED
+21.PE · fecha o app... COMPLETED
+21.PF · abre o app de novo (traz a fila ativa)... COMPLETED
+21.PG · fecha as caixas...
+  Run esperar_o_sistema.yaml...
+    Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+    Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+  Run esperar_o_sistema.yaml... COMPLETED
   Wait for animation to end within 3000 ms... COMPLETED
-13.A6 · fecha a política da multa e o push da vez, se cobrem a tela 10... COMPLETED
-13.A7 · espera a tela 10... FAILED
-Run ../apoio/fechar_cortina.yaml...
-  Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)...
-  Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)... SKIPPED
-  Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)...
-  Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)... SKIPPED
-Run ../apoio/fechar_cortina.yaml... COMPLETED
+  Run flow when id: dialogo-botao-0 is visible...
+  Run flow when id: dialogo-botao-0 is visible... SKIPPED
+  Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+  Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+  Run flow when id: push-skip is visible...
+  Run flow when id: push-skip is visible... SKIPPED
+21.PG · fecha as caixas... COMPLETED
+21.E1 · roda 21_conjunta_atraso...
+  21.01 · toca em Início... COMPLETED
+  21.02 · espera card-da-fila... COMPLETED
+  21.03 · abre a fila... COMPLETED
+  21.04 · espera queue-position (fecha o aviso da estimativa)...
+    Repeat while id: queue-position is not visible (up to 20 times)...
+      Run flow when "Sobre o tempo estimado" is visible...
+        Tap on "Entendi"... COMPLETED
+      Run flow when "Sobre o tempo estimado" is visible... COMPLETED
+      Run flow when "Sua vez está chegando" is visible...
+        Tap on id: dialogo-botao-0... COMPLETED
+      Run flow when "Sua vez está chegando" is visible... COMPLETED
+      Run fechar_aviso.yaml...
+        Run esperar_o_sistema.yaml...
+          Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+          Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+        Run esperar_o_sistema.yaml... COMPLETED
+        Wait for animation to end within 3000 ms... COMPLETED
+        Run flow when id: dialogo-botao-0 is visible...
+        Run flow when id: dialogo-botao-0 is visible... SKIPPED
+        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+        Run flow when id: push-skip is visible...
+        Run flow when id: push-skip is visible... SKIPPED
+      Run fechar_aviso.yaml... COMPLETED
+      Assert that (Optional) id: queue-position is visible... COMPLETED
+    Repeat while id: queue-position is not visible (up to 20 times)... COMPLETED
+    Assert that id: queue-position is visible... COMPLETED
+  21.04 · espera queue-position (fecha o aviso da estimativa)... COMPLETED
+  21.05 · fecha a política da multa, se vier...
+  21.05 · fecha a política da multa, se vier... SKIPPED
+  21.06 · fecha as caixas...
+    Run esperar_o_sistema.yaml...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+    Run esperar_o_sistema.yaml... COMPLETED
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+    Run flow when id: push-skip is visible...
+    Run flow when id: push-skip is visible... SKIPPED
+  21.06 · fecha as caixas... COMPLETED
+  21.07 · espera 5 min e meio...io.grpc.StatusRuntimeException: UNAVAILABLE
+	at io.grpc.stub.ClientCalls.toStatusRuntimeException(ClientCalls.java:275)
+	at io.grpc.stub.ClientCalls.getUnchecked(ClientCalls.java:256)
+	at io.grpc.stub.ClientCalls.blockingUnaryCall(ClientCalls.java:169)
+	at maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub.deviceInfo(MaestroDriverGrpc.java:740)
+	at maestro.drivers.AndroidDriver.deviceInfo$lambda$5(AndroidDriver.kt:201)
+	at maestro.drivers.AndroidDriver.runDeviceCall(AndroidDriver.kt:1273)
+	at maestro.drivers.AndroidDriver.deviceInfo(AndroidDriver.kt:200)
+	at maestro.ViewHierarchy$Companion.from-8JJjmZI(ViewHierarchy.kt:28)
+	at maestro.Maestro$findElementWithTimeout$found$1$1.invoke-prqvCes(Maestro.kt:441)
+	at maestro.Maestro$findElementWithTimeout$found$1$1.invoke(Maestro.kt:440)
+	at kotlinx.coroutines.InterruptibleKt.runInterruptibleInExpectedContext(Interruptible.kt:48)
+	at kotlinx.coroutines.InterruptibleKt.access$runInterruptibleInExpectedContext(Interruptible.kt:1)
+	at kotlinx.coroutines.InterruptibleKt$runInterruptible$2.invokeSuspend(Interruptible.kt:40)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
+Caused by: java.io.IOException: Command failed (host:transport:emulator-5554): device offline
+	at dadb.adbserver.AdbServer.send$dadb(AdbServer.kt:103)
+	at dadb.adbserver.AdbServerDadb.open(AdbServer.kt:148)
+	at maestro.drivers.AndroidDriver.channel$lambda$0(AndroidDriver.kt:81)
+	at maestro.android.AdbSocket.connect(AdbSocketFactory.kt:40)
+	at maestro.android.AdbSocket.connect(AdbSocketFactory.kt:44)
+	at maestro.android.AdbSocketFactory.createSocket(AdbSocketFactory.kt:19)
+	at maestro.android.AdbSocketFactory.createSocket(AdbSocketFactory.kt:25)
+	at io.grpc.okhttp.OkHttpClientTransport$3.run(OkHttpClientTransport.java:535)
+	at io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:133)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
 
-Assertion is false: id: push-accept is visible
-
-Assertion 'id: push-accept is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
-
-Possible causes:
-- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
-- Element may be temporarily unavailable due to loading state
-- This could be a real regression that needs to be addressed
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth/.maestro/logs/2026-10-11_060634/13_push_da_vez
+/home/andre/Documentos/programacao/vupth/.maestro/logs/2026-10-11_070255/21_conjunta_atraso
