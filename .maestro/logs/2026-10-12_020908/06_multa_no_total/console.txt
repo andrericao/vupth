@@ -1,0 +1,274 @@
+Running on vupth_android11
+ > Flow 06_multa_no_total
+06.P0 · prepara a etapa...
+  ${ETAPA}.P1 · calcula TAG... COMPLETED
+  ${ETAPA}.P2 · calcula o cliente... COMPLETED
+  ${ETAPA}.P3 · monta a loja pela API...
+    Run /home/andre/Documentos/programacao/vupth/.maestro/scripts/loja_aberta.js... COMPLETED
+  06.P3 · monta a loja pela API... COMPLETED
+  ${ETAPA}.P4 · fecha a fila pela API (um cliente entra antes)...
+  06.P4 · fecha a fila pela API (um cliente entra antes)... SKIPPED
+  ${ETAPA}.P4b · põe o profissional em Fora pela API...
+  06.P4b · põe o profissional em Fora pela API... SKIPPED
+  ${ETAPA}.P5 · cria o cliente pela API...
+    Run /home/andre/Documentos/programacao/vupth/.maestro/scripts/cliente.js... COMPLETED
+  06.P5 · cria o cliente pela API... COMPLETED
+  ${ETAPA}.P5c · confere que a cortina de notificações está fechada...
+    Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)...
+    Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)... SKIPPED
+    Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)...
+    Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)... SKIPPED
+  06.P5c · confere que a cortina de notificações está fechada... COMPLETED
+  ${ETAPA}.P6 · abre o app limpo... COMPLETED
+  ${ETAPA}.P6b · fecha a cortina, se o app abriu por baixo dela...
+    Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)...
+    Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)... SKIPPED
+    Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)...
+    Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)... SKIPPED
+  06.P6b · fecha a cortina, se o app abriu por baixo dela... COMPLETED
+  ${ETAPA}.P7 · espera onboarding-start (negando a caixa do sistema)...
+    Repeat while id: ${ALVO} is not visible (up to 40 times)...
+      Run esperar_o_sistema.yaml...
+        Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+      Run esperar_o_sistema.yaml... COMPLETED
+      Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible...
+        Tap on id: com.android.permissioncontroller:id/permission_deny_button... COMPLETED
+      Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... COMPLETED
+      Assert that (Optional) id: ${ALVO} is visible... COMPLETED
+    Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
+    Assert that id: ${ALVO} is visible... COMPLETED
+  06.P7 · espera onboarding-start (negando a caixa do sistema)... COMPLETED
+  ${ETAPA}.P8 · nega a caixa do sistema, se vier...
+    Run esperar_o_sistema.yaml...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+    Run esperar_o_sistema.yaml... COMPLETED
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+    Run flow when id: push-skip is visible...
+    Run flow when id: push-skip is visible... SKIPPED
+  06.P8 · nega a caixa do sistema, se vier... COMPLETED
+  ${ETAPA}.P9 · passa a abertura...
+    Tap on id: onboarding-start... COMPLETED
+    Run fechar_aviso.yaml...
+      Run esperar_o_sistema.yaml...
+        Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+      Run esperar_o_sistema.yaml... COMPLETED
+      Wait for animation to end within 3000 ms... COMPLETED
+      Run flow when id: dialogo-botao-0 is visible...
+      Run flow when id: dialogo-botao-0 is visible... SKIPPED
+      Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+      Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+      Run flow when id: push-skip is visible...
+      Run flow when id: push-skip is visible... SKIPPED
+    Run fechar_aviso.yaml... COMPLETED
+  06.P9 · passa a abertura... COMPLETED
+  ${ETAPA}.PA · entra com o cliente...
+    Run entrar.yaml...
+      Tap on "Perfil"... COMPLETED
+      Tap on "Já tenho conta"... COMPLETED
+      Tap on "E-mail"... COMPLETED
+      Set Maestro clipboard to ${EMAIL_CLIENTE}... COMPLETED
+      Paste text... COMPLETED
+      Tap on "Senha"... COMPLETED
+      Set Maestro clipboard to ${SENHA}... COMPLETED
+      Paste text... COMPLETED
+      Hide Keyboard... COMPLETED
+      Tap on id: primary-login... COMPLETED
+      Assert that (Optional) id: (dialogo-botao-0|busca-home) is visible... COMPLETED
+      Run fechar_aviso.yaml...
+        Run esperar_o_sistema.yaml...
+          Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+          Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+        Run esperar_o_sistema.yaml... COMPLETED
+        Wait for animation to end within 3000 ms... COMPLETED
+        Run flow when id: dialogo-botao-0 is visible...
+        Run flow when id: dialogo-botao-0 is visible... SKIPPED
+        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+        Run flow when id: push-skip is visible...
+        Run flow when id: push-skip is visible... SKIPPED
+      Run fechar_aviso.yaml... COMPLETED
+      Run flow when id: primary-login is visible...
+      Run flow when id: primary-login is visible... SKIPPED
+      Repeat while id: grupo-.* is not visible (up to 4 times)...
+        Tap on "Perfil"... COMPLETED
+        Assert that (Optional) id: grupo-.* is visible... COMPLETED
+      Repeat while id: grupo-.* is not visible (up to 4 times)... COMPLETED
+      Scrolling DOWN until "Sair da conta" is visible with speed 40, visibility percentage 100%, timeout 30000 ms, with centering disabled... COMPLETED
+      Run fechar_aviso.yaml...
+        Run esperar_o_sistema.yaml...
+          Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+          Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+        Run esperar_o_sistema.yaml... COMPLETED
+        Wait for animation to end within 3000 ms... COMPLETED
+        Run flow when id: dialogo-botao-0 is visible...
+        Run flow when id: dialogo-botao-0 is visible... SKIPPED
+        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+        Run flow when id: push-skip is visible...
+        Run flow when id: push-skip is visible... SKIPPED
+      Run fechar_aviso.yaml... COMPLETED
+    Run entrar.yaml... COMPLETED
+  06.PA · entra com o cliente... COMPLETED
+  ${ETAPA}.PB · atualiza o app e confere a versão...
+    Run atualizar.yaml...
+      Repeat while id: grupo-.* is not visible (up to 4 times)...
+      Repeat while id: grupo-.* is not visible (up to 4 times)... SKIPPED
+      Scrolling DOWN until "Versão do app" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... COMPLETED
+      Tap on "Versão do app"... COMPLETED
+      Tap on id: check-update... COMPLETED
+      Assert that "(Atualização baixada|Tudo certo|Não foi possível verificar)" is visible... COMPLETED
+      Run flow when "Atualização baixada" is visible...
+        Tap on id: dialogo-botao-0... COMPLETED
+        Run esperar_negando.yaml...
+          Repeat while id: ${ALVO} is not visible (up to 40 times)...
+            Run esperar_o_sistema.yaml...
+              Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+              Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+            Run esperar_o_sistema.yaml... COMPLETED
+            Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible...
+            Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... SKIPPED
+            Assert that (Optional) id: ${ALVO} is visible... COMPLETED
+          Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
+          Assert that id: ${ALVO} is visible... COMPLETED
+        Run esperar_negando.yaml... COMPLETED
+        Repeat while id: grupo-.* is not visible (up to 4 times)...
+          Tap on "Perfil"... COMPLETED
+          Assert that (Optional) id: grupo-.* is visible... COMPLETED
+        Repeat while id: grupo-.* is not visible (up to 4 times)... COMPLETED
+        Scrolling DOWN until "Versão do app" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... COMPLETED
+        Tap on "Versão do app"... COMPLETED
+      Run flow when "Atualização baixada" is visible... COMPLETED
+      Repeat while ".*${COMMIT}.*" is not visible (up to 6 times)...
+      Repeat while ".*${COMMIT}.*" is not visible (up to 6 times)... SKIPPED
+      Run fechar_aviso.yaml...
+        Run esperar_o_sistema.yaml...
+          Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+          Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+        Run esperar_o_sistema.yaml... COMPLETED
+        Wait for animation to end within 3000 ms... COMPLETED
+        Run flow when id: dialogo-botao-0 is visible...
+        Run flow when id: dialogo-botao-0 is visible... SKIPPED
+        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+        Run flow when id: push-skip is visible...
+        Run flow when id: push-skip is visible... SKIPPED
+      Run fechar_aviso.yaml... COMPLETED
+      Copy text from element with ".* · [0-9a-f]{8}"... COMPLETED
+      Run /home/andre/Documentos/programacao/vupth/.maestro/scripts/confere_versao.js... COMPLETED
+    Run atualizar.yaml... COMPLETED
+  06.PB · atualiza o app e confere a versão... COMPLETED
+  ${ETAPA}.PC · confere a versão no Perfil do visitante...
+  06.PC · confere a versão no Perfil do visitante... SKIPPED
+06.P0 · prepara a etapa... COMPLETED
+06.L1 · abre a loja de teste...
+  Tap on "Início"... COMPLETED
+  Tap on id: busca-home... COMPLETED
+  Erase 30 characters... COMPLETED
+  Input text C${TAG}... COMPLETED
+  Hide Keyboard... COMPLETED
+  Assert that "${LOJA}" is visible... COMPLETED
+  Tap on "${LOJA}"... COMPLETED
+  Assert that id: professional-${PROF_ID} is visible... COMPLETED
+06.L1 · abre a loja de teste... COMPLETED
+06.L2 · escolhe o serviço...
+  Tap on id: professional-${PROF_ID}... COMPLETED
+  Assert that id: service-${SERVICO_ID} is visible... COMPLETED
+  Tap on id: service-${SERVICO_ID}... COMPLETED
+06.L2 · escolhe o serviço... COMPLETED
+06.E1 · roda 05_entra_e_sai_com_multa...
+  05.01 · toca em primary-queue... COMPLETED
+  05.02 · espera Entendi ou o push da vez... COMPLETED
+  05.02b · fecha o push da vez, se veio antes do Entendi...
+  05.02b · fecha o push da vez, se veio antes do Entendi... SKIPPED
+  05.02c · espera Entendi... COMPLETED
+  05.03 · toca em Entendi... COMPLETED
+  05.04 · espera o aviso da multa ou o push da vez... COMPLETED
+  05.05 · fecha o push da vez, se veio antes...
+  05.05 · fecha o push da vez, se veio antes... SKIPPED
+  05.06 · espera o aviso da política da multa... COMPLETED
+  05.07 · toca em Continuar na fila... COMPLETED
+  05.08 · espera o push da vez, se ainda nao veio... WARNED
+  05.09 · fecha o push da vez...
+  05.09 · fecha o push da vez... SKIPPED
+  05.10 · espera queue-position... COMPLETED
+  05.11 · espera a tolerância acabar (a faixa sem custo some)...
+    Assert that (Optional) ".*sem custo até.*" is not visible... WARNED
+    Assert that (Optional) ".*sem custo até.*" is visible... COMPLETED
+  05.11 · espera a tolerância acabar (a faixa sem custo some)... COMPLETED
+  05.1A · fecha o push da vez, se cobriu a faixa...
+  05.1A · fecha o push da vez, se cobriu a faixa... SKIPPED
+  05.1B · a tela da fila está livre... COMPLETED
+  05.1C · a faixa sem custo saiu de vez... COMPLETED
+  05.12 · toque duplo em leave-queue... COMPLETED
+  05.13 · espera Sair da fila?... COMPLETED
+  05.14 · toca em Sim, sair... COMPLETED
+  05.15 · roda fechar_aviso...
+    Run esperar_o_sistema.yaml...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+    Run esperar_o_sistema.yaml... COMPLETED
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+    Run flow when id: push-skip is visible...
+    Run flow when id: push-skip is visible... SKIPPED
+  05.15 · roda fechar_aviso... COMPLETED
+06.E1 · roda 05_entra_e_sai_com_multa... COMPLETED
+06.E2 · roda 06_multa_no_total...
+  06.01 · roda abrir_a_loja...
+    Tap on "Início"... COMPLETED
+    Tap on id: busca-home...io.grpc.StatusRuntimeException: UNAVAILABLE
+	at io.grpc.stub.ClientCalls.toStatusRuntimeException(ClientCalls.java:275)
+	at io.grpc.stub.ClientCalls.getUnchecked(ClientCalls.java:256)
+	at io.grpc.stub.ClientCalls.blockingUnaryCall(ClientCalls.java:169)
+	at maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub.deviceInfo(MaestroDriverGrpc.java:740)
+	at maestro.drivers.AndroidDriver.deviceInfo$lambda$5(AndroidDriver.kt:201)
+	at maestro.drivers.AndroidDriver.runDeviceCall(AndroidDriver.kt:1273)
+	at maestro.drivers.AndroidDriver.deviceInfo(AndroidDriver.kt:200)
+	at maestro.ViewHierarchy$Companion.from-8JJjmZI(ViewHierarchy.kt:28)
+	at maestro.utils.ScreenshotUtils$Companion.viewHierarchy-c1iYVAs(ScreenshotUtils.kt:99)
+	at maestro.utils.ScreenshotUtils$Companion.waitForAppToSettle-OpTFbEc(ScreenshotUtils.kt:60)
+	at maestro.drivers.AndroidDriver$waitForAppToSettle$1.invoke-prqvCes(AndroidDriver.kt:741)
+	at maestro.drivers.AndroidDriver$waitForAppToSettle$1.invoke(AndroidDriver.kt:737)
+	at maestro.utils.Metrics.measured(Metrics.kt:48)
+	at maestro.drivers.AndroidDriver.waitForAppToSettle-5RpGHs4(AndroidDriver.kt:737)
+	at maestro.Maestro$waitForAppToSettle$2.invoke-F9mIFpk(Maestro.kt:477)
+	at maestro.Maestro$waitForAppToSettle$2.invoke(Maestro.kt:476)
+	at kotlinx.coroutines.InterruptibleKt.runInterruptibleInExpectedContext(Interruptible.kt:48)
+	at kotlinx.coroutines.InterruptibleKt.access$runInterruptibleInExpectedContext(Interruptible.kt:1)
+	at kotlinx.coroutines.InterruptibleKt$runInterruptible$2.invokeSuspend(Interruptible.kt:40)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
+Caused by: java.io.IOException: Command failed (host:transport:emulator-5554): device offline
+	at dadb.adbserver.AdbServer.send$dadb(AdbServer.kt:103)
+	at dadb.adbserver.AdbServerDadb.open(AdbServer.kt:148)
+	at maestro.drivers.AndroidDriver.channel$lambda$0(AndroidDriver.kt:81)
+	at maestro.android.AdbSocket.connect(AdbSocketFactory.kt:40)
+	at maestro.android.AdbSocket.connect(AdbSocketFactory.kt:44)
+	at maestro.android.AdbSocketFactory.createSocket(AdbSocketFactory.kt:19)
+	at maestro.android.AdbSocketFactory.createSocket(AdbSocketFactory.kt:25)
+	at io.grpc.okhttp.OkHttpClientTransport$3.run(OkHttpClientTransport.java:535)
+	at io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:133)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth/.maestro/logs/2026-10-12_020908/06_multa_no_total
