@@ -65,6 +65,7 @@ appId: ${APP_ID}
 - assertVisible:
     text: ".*35 dias.*"
     label: "15.0J · vê as cópias de segurança em até 35 dias"
-- tapOn:
-    id: "back-button"
+# O voltar do Android, e nao o back-button: depois de rolar ate a secao 7 o
+# cabecalho sai da tela (bateria 11/10 18:44, 15.0G).
+- back:
     label: "15.0G · volta ao Perfil"

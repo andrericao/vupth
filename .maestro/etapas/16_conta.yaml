@@ -13,6 +13,24 @@ appId: ${APP_ID}
 - tapOn:
     text: "Adicionar endereço"
     label: "16.03 · toca em Adicionar endereço"
+# No emulador o 1o toque as vezes nao pega e a tela fica na lista (bateria
+# 11/10 18:44, 16.04): toca de novo enquanto o "Prefiro digitar" nao vem.
+- repeat:
+    times: 2
+    while:
+      notVisible: "Prefiro digitar"
+    commands:
+      - extendedWaitUntil:
+          visible: "Prefiro digitar"
+          timeout: ${5000 * LENTO}
+          optional: true
+      - runFlow:
+          when:
+            visible: "Adicionar endereço"
+          commands:
+            - tapOn:
+                text: "Adicionar endereço"
+    label: "16.03b · toca de novo se a tela não abriu"
 - tapOn:
     text: "Prefiro digitar"
     label: "16.04 · recusa o GPS"
