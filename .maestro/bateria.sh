@@ -131,8 +131,12 @@ CONJUNTAS="18 19 21 22"
 
 # A 13 (push da vez) depende do push do sistema; no emulador o app nao oferece
 # a tela 10 nem pede token (Device.isDevice, bateria 11/10 06:06, 13.A7). Fica
-# como ⏭ no emulador e roda no celular.
-SO_NO_CELULAR="13"
+# como ⏭ no emulador e roda no celular. A 24 (a tela do push) tambem: a tela 10
+# so vem no aparelho (bateria 11/10 23:57, 24.04).
+# A 21 (atraso) derruba o emulador na 21.0B, logo que o Client deveria mostrar
+# o aviso do 1o atraso (6 vezes em 11/10; nunca passou dali). Suspeita do app:
+# vai ao celular do Andre, com o logcat (orquestrador, 11/10 15h30).
+SO_NO_CELULAR="13 21 24"
 PARTNER_OK=1
 [ -d "$(dirname "$REPO")/vupth-partner/.maestro/conjunta" ] || PARTNER_OK=0
 adb shell pm list packages 2>/dev/null | grep -q "com.vupth.partner.preview" || PARTNER_OK=0
@@ -183,13 +187,22 @@ rodar() {
   local nome="$1" pasta="$RODADA/$1"
   mkdir -p "$pasta"
   echo "=== $nome ==="
+  # O logcat (avisos e erros) da etapa: a 21 derruba o aparelho na 21.0B e o
+  # Maestro nao tem print desse instante (11/10, 5 vezes). Fica so na etapa que
+  # falha (a verde apaga a pasta), cortado nas ultimas 3000 linhas.
+  adb logcat -c 2>/dev/null
+  adb logcat -v time '*:W' > "$pasta/logcat.txt" 2>/dev/null &
+  local logcat=$!
   maestro "${MAESTRO_APARELHO[@]}" test \
     -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
     -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" \
     --debug-output "$pasta" --flatten-debug-output \
     --test-output-dir "$pasta" \
     "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"
-  return "${PIPESTATUS[0]}"
+  local volta="${PIPESTATUS[0]}"
+  kill "$logcat" 2>/dev/null
+  tail -n 3000 "$pasta/logcat.txt" > "$pasta/logcat.tmp" 2>/dev/null && mv "$pasta/logcat.tmp" "$pasta/logcat.txt"
+  return "$volta"
 }
 
 # O print da falha com o nome do passo (DEC-16), na pasta da rodada.
@@ -237,7 +250,11 @@ else
       continue
     fi
     if [ "$LENTO" = 2 ] && echo " $SO_NO_CELULAR " | grep -q " $n "; then
-      echo "⏭  $arquivo (só no celular: o app não oferece push no emulador — Device.isDevice)" >> "$RODADA/relatorio.txt"
+      case "$n" in
+        13|24) por="o app não oferece push no emulador — Device.isDevice" ;;
+        *)  por="o emulador cai nela; o André roda no celular" ;;
+      esac
+      echo "⏭  $arquivo (só no celular: $por)" >> "$RODADA/relatorio.txt"
       continue
     fi
     if aprovada "$n"; then
@@ -254,7 +271,7 @@ else
       echo "↻ $arquivo: o aparelho saiu do adb ou o driver caiu — de novo, uma vez"
       timeout 120 adb wait-for-device
       sleep 10
-      rm -rf "${RODADA:?}/$arquivo"
+      mv "$RODADA/$arquivo" "$RODADA/${arquivo}_1a_tentativa"   # guarda o logcat da queda
       # TAG novo: as contas da 1a tentativa ja existem (409 no 21.P0, 11/10 11:02).
       TAG_DA_RODADA=$TAG
       TAG=$(date +%s | tail -c 7)
