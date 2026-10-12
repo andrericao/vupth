@@ -76,8 +76,12 @@ appId: ${APP_ID}
 # instante num re-render, e um notVisible so passava cedo (bateria 09/10
 # 20:30, 06: passou em 33 s com "sem custo até 20:50" na tela, e a saida foi de
 # graca, sem a caixa "Sair da fila?").
+# Voltas de 30 s, com o "Wait" do ANR entre elas: a tolerancia e tempo de
+# relogio, e uma espera longa e continua derrubava o adb no emulador ("device
+# offline" na 06, baterias 11/10 23:57 e 12/10 02:09). 40 voltas cobrem os
+# 15 min da tolerancia com folga.
 - repeat:
-    times: 20
+    times: 40
     while:
       visible:
         text: ".*sem custo até.*"
@@ -85,8 +89,10 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           notVisible:
             text: ".*sem custo até.*"
-          timeout: ${60000 * LENTO}
+          timeout: 30000
           optional: true
+      - runFlow:
+          file: ../apoio/esperar_o_sistema.yaml
       # A pausa de 5 s antes de conferir de novo: espera a faixa voltar.
       - extendedWaitUntil:
           visible:
@@ -108,11 +114,23 @@ appId: ${APP_ID}
       id: "leave-queue"
     timeout: ${10000 * LENTO}
     label: "05.1B · a tela da fila está livre"
-- extendedWaitUntil:
-    notVisible:
-      text: ".*sem custo até.*"
-    timeout: ${900000 * LENTO}
-    label: "05.1C · a faixa sem custo saiu de vez"
+- repeat:
+    times: 30
+    while:
+      visible:
+        text: ".*sem custo até.*"
+    commands:
+      - extendedWaitUntil:
+          notVisible:
+            text: ".*sem custo até.*"
+          timeout: 30000
+          optional: true
+      - runFlow:
+          file: ../apoio/esperar_o_sistema.yaml
+    label: "05.1C · a faixa sem custo saiu de vez (voltas de 30 s)"
+- assertNotVisible:
+    text: ".*sem custo até.*"
+    label: "05.1D · confere que a faixa saiu"
 
 # Sair da fila: dois toques seguidos (D15) e a confirmacao com o valor. Dois
 # tapOn saem ~2 s um do outro, fora da janela de 1,5 s (JANELA_DO_TOQUE_DUPLO_MS):
