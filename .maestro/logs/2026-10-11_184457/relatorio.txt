@@ -1,0 +1,22 @@
+✅ 00 · versão
+✅ 01_visitante
+✅ 02_cadastro
+✅ 03_loja
+✅ 04_fim_de_fila_hibrido
+✅ 05_entra_e_sai_com_multa
+❌ 06_multa_no_total — parou em 05.13 · espera Sair da fila?
+✅ 07_agendar_pela_barra
+✅ 08_fila_fechada
+✅ 09_login
+✅ 10_pedido_de_corte
+✅ 11_reabrir_o_app
+✅ 12_aparencia
+⏭  13_push_da_vez (só no celular: o app não oferece push no emulador — Device.isDevice)
+✅ 14_informacoes_do_profissional
+❌ 15_dados_e_termos — parou em 15.0G · volta ao Perfil
+❌ 16_conta — parou em 16.04 · recusa o GPS
+✅ 17_lista_de_lojas
+✅ 18_conjunta_tempo_do_servico
+✅ 19_conjunta_so_agenda
+✅ 20_esqueci_senha
+⏭  21_conjunta_atraso (só no celular: o emulador cai nela; o André roda no celular)
