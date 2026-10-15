@@ -101,7 +101,7 @@ describe('QueueStatus — entrar na fila', () => {
   it('o servidor sem acordar: limpa a fila e diz para tentar de novo', async () => {
     mockWait.mockResolvedValue(false);
     const { findByText } = renderWithProviders(<QueueStatus />);
-    expect(await findByText(/demorando para responder/)).toBeTruthy();
+    expect(await findByText(/Não conseguimos conectar agora/)).toBeTruthy();
     expect(mockLeave).toHaveBeenCalled();
     expect(mockCreate).not.toHaveBeenCalled();
   });

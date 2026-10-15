@@ -249,18 +249,17 @@ export function QueueStatus() {
       try {
         // Cold start do Render: acorda a instancia antes de criar, evitando spinner
         // "infinito" enquanto o backend (hibernado) demora ~50s a responder.
-        setCreateMsg("Preparando servidor...");
+        setCreateMsg(targetTime ? "Agendando..." : "Entrando na fila...");
         const ready = await waitForBackend({ isCancelled: () => !mountedRef.current });
         if (!mountedRef.current) return;
         if (!ready) {
           await leaveQueue();
           if (mountedRef.current) {
-            setCreateError("O servidor está demorando para responder. Tente novamente em instantes.");
+            setCreateError("Não conseguimos conectar agora. Tente novamente em instantes.");
           }
           return;
         }
 
-        setCreateMsg(targetTime ? "Agendando..." : "Entrando na fila...");
         const { data } = await attendanceService.create(
           targetTime
             ? { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], targetTime }
@@ -645,9 +644,6 @@ export function QueueStatus() {
       <Center flex={1} bg="$brandBackground" px={16}>
         <ActivityIndicator size="large" color="#163300" />
         <Text mt="$2" color="$brandTextSecondary">{createMsg}</Text>
-        <Text mt="$1" size="xs" color="$brandTextSecondary" textAlign="center">
-          Na primeira vez pode levar até ~50s para o servidor acordar.
-        </Text>
       </Center>
     );
   }

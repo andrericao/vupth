@@ -90,8 +90,8 @@ export function ForgotPassword() {
       setSendPhase("sending");
       if (!ready) {
         Alert.alert(
-          "Servidor demorando",
-          "O servidor está demorando para responder. Tente novamente em alguns instantes.",
+          "Sem conexão agora",
+          "Não conseguimos conectar agora. Tente novamente em alguns instantes.",
         );
         return;
       }
@@ -111,7 +111,7 @@ export function ForgotPassword() {
       // para o passo do código em vez de deixá-lo na estaca zero.
       if (error.code === "ECONNABORTED") {
         Alert.alert(
-          "O servidor não respondeu a tempo",
+          "O envio demorou para confirmar",
           "Se o e-mail estiver cadastrado, o código ainda pode chegar. Confira sua caixa (e o spam) e, se não vier em alguns minutos, toque em 'Reenviar código'.",
         );
         setStep("reset");
@@ -209,7 +209,7 @@ export function ForgotPassword() {
             <Button
               title={
                 isWakingServer
-                  ? `Acordando o servidor... ${elapsed}s`
+                  ? "Conectando..."
                   : isSubmitting
                     ? "Enviando..."
                     : "Enviar código"
@@ -221,8 +221,7 @@ export function ForgotPassword() {
             {isWakingServer && (
               <VStack gap="$3">
                 <Text size="xs" color="$brandTextSecondary" textAlign="center">
-                  O servidor hiberna quando fica sem uso e pode levar até 1 minuto para
-                  responder. Não feche o app.
+                  Está levando um pouco mais que o normal. Não feche o app.
                 </Text>
                 <TouchableOpacity onPress={handleCancel} testID="forgot-cancel-wait">
                   <Text size="sm" color="$brandTextSecondary" fontFamily="$heading" textAlign="center">
@@ -271,7 +270,7 @@ export function ForgotPassword() {
             <TouchableOpacity onPress={handleSendCode} disabled={isSubmitting}>
               <Text size="sm" color="$forest" fontFamily="$heading" textAlign="center">
                 {isWakingServer
-                  ? `Acordando o servidor... ${elapsed}s`
+                  ? "Conectando..."
                   : isSubmitting
                     ? "Reenviando..."
                     : "Reenviar código"}

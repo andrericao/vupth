@@ -64,14 +64,14 @@ describe('ForgotPassword — enviar o código', () => {
   it('o servidor sem acordar avisa e não envia', async () => {
     mockWait.mockResolvedValue(false);
     await enviar();
-    expect(alertSpy).toHaveBeenCalledWith('Servidor demorando', expect.any(String));
+    expect(alertSpy).toHaveBeenCalledWith('Sem conexão agora', expect.any(String));
     expect(mockForgot).not.toHaveBeenCalled();
   });
 
   it('timeout do envio segue para o passo do código', async () => {
     mockForgot.mockRejectedValue({ code: 'ECONNABORTED' });
     const tela = await enviar();
-    expect(alertSpy).toHaveBeenCalledWith('O servidor não respondeu a tempo', expect.any(String));
+    expect(alertSpy).toHaveBeenCalledWith('O envio demorou para confirmar', expect.any(String));
     expect(await tela.findByPlaceholderText('Código de 6 dígitos')).toBeTruthy();
   });
 
