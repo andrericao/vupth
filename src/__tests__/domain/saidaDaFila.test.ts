@@ -17,22 +17,26 @@ describe('toque duplo em "Sair da fila"', () => {
 describe('o que a saída diz', () => {
   it('com multa: a faixa diz o valor e o porquê, e há confirmação Sim / Não', () => {
     const s = saidaDaFila({ multa: true });
-    expect(s.faixa).toMatch(/multa de R\$ 3,00/);
-    expect(s.faixa).toMatch(/duas vezes seguidas/);
+    expect(s.faixa).toBe('Se sair, você paga uma multa de R$ 3,00. Toque 2 vezes para sair.');
     expect(s.confirmacao?.sim).toBe('Sim, sair');
     expect(s.confirmacao?.nao).toBe('Não');
   });
 
-  it('sem multa: só a instrução, e nada de confirmação', () => {
-    const s = saidaDaFila({ multa: false });
-    expect(s.faixa).toMatch(/duas vezes seguidas/);
-    expect(s.faixa).not.toMatch(/R\$/);
+  it('sem multa: retém, não diz que é de graça, e nada de confirmação', () => {
+    const s = saidaDaFila({ multa: false, minutos: 74.2 });
+    expect(s.faixa).toBe('Tem certeza? Faltam só 75 min. Toque 2 vezes para sair.');
+    expect(s.faixa).not.toMatch(/R\$|grátis|sem custo/);
     expect(s.confirmacao).toBeNull();
+  });
+
+  it('sem multa e sem os minutos: só a pergunta e a instrução', () => {
+    expect(saidaDaFila({ multa: false }).faixa).toBe('Tem certeza? Toque 2 vezes para sair.');
+    expect(saidaDaFila({ multa: false, minutos: 0 }).faixa).toBe('Tem certeza? Toque 2 vezes para sair.');
   });
 
   it('sem previsão: não afirma multa nem ausência dela — e confirma, por via das dúvidas', () => {
     const s = saidaDaFila({ multa: false, semPrevisao: true });
-    expect(s.faixa).toMatch(/Se faltar menos de 1 hora/);
+    expect(s.faixa).toMatch(/Se faltar menos de 1 h,/);
     expect(s.confirmacao).not.toBeNull();
   });
 

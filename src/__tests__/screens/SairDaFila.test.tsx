@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
 
@@ -112,12 +112,20 @@ describe('QueueStatus — sair da fila (D15)', () => {
     alerta.mockRestore();
   });
 
-  it('com menos de 1h, a faixa diz o valor e o porquê — e só a multa, sem convite de troca', () => {
+  it('com menos de 1h, a faixa diz o valor em uma linha — e só a multa, sem convite de troca', () => {
     const { getByTestId, getByText, queryByText } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
-    expect(getByText(/sair agora gera multa de R\$ 3,00/)).toBeTruthy();
-    expect(getByText(/quem está atrás é chamado antes do previsto/)).toBeTruthy();
+    expect(getByText(/Se sair, você paga uma multa de R\$ 3,00/)).toBeTruthy();
     expect(queryByText(/Trocar de lugar/)).toBeNull();
+  });
+
+  it('o "Saiba mais" da faixa abre o artigo do suporte', () => {
+    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    fireEvent.press(getByTestId('saida-saiba-mais'));
+    expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/sair-da-fila.html');
+    abrir.mockRestore();
   });
 
   it('dois toques seguidos com multa abrem "Sim / Não" — e "Não" deixa na fila', () => {

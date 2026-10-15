@@ -17,6 +17,11 @@ import { CANCELLATION_PENALTY_VALUE } from './types';
 // menor — o servidor responde 409 com o valor certo e NAO tira da fila; o app
 // mostra o aviso com esse valor e repete no "Sim" (`avisoDaMultaDoServidor`).
 //
+// sair-da-fila-texto (Andre, 15/10): a faixa e de UMA linha, com o "Saiba
+// mais" ao lado (o artigo do suporte). Sem multa, NAO diz que e de graca: so
+// tenta reter ("Tem certeza? Faltam so X min"). Com multa: "Se sair, voce paga
+// uma multa de R$ X".
+//
 // Substitui o dialogo do D10 ("Ficar na fila / Trocar de lugar / Sair mesmo
 // assim"): a troca deixou de morar na saida (D16 a leva para um popup).
 
@@ -36,7 +41,7 @@ export type SaidaDaFila = {
   valorConfirmado: number | null;
 };
 
-const INSTRUCAO = 'toque em "Sair da fila" duas vezes seguidas';
+const INSTRUCAO = 'Toque 2 vezes para sair.';
 
 const reais = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`;
 
@@ -50,12 +55,14 @@ export function saidaDaFila(s: {
   semPrevisao?: boolean;
   /** Valor da multa — enquanto o servidor nao informa, o fixo de hoje. */
   valor?: number;
+  /** Minutos que faltam para a vez — a frase de retencao sem multa. */
+  minutos?: number | null;
 }): SaidaDaFila {
   const valor = reais(s.valor ?? CANCELLATION_PENALTY_VALUE);
 
   if (s.semPrevisao) {
     return {
-      faixa: `Ainda estamos calculando a sua vez. Se faltar menos de 1 hora, sair gera multa de ${valor} no seu próximo atendimento. Para sair mesmo assim, ${INSTRUCAO}.`,
+      faixa: `Se faltar menos de 1 h, sair gera multa de ${valor}. ${INSTRUCAO}`,
       confirmacao: {
         titulo: 'Sair da fila?',
         mensagem: `Se faltar menos de 1 hora para a sua vez, a saída gera multa de ${valor} no seu próximo atendimento.`,
@@ -68,7 +75,7 @@ export function saidaDaFila(s: {
 
   if (s.multa) {
     return {
-      faixa: `Falta menos de 1 hora: sair agora gera multa de ${valor} no seu próximo atendimento — quem está atrás é chamado antes do previsto. Para sair mesmo assim, ${INSTRUCAO}.`,
+      faixa: `Se sair, você paga uma multa de ${valor}. ${INSTRUCAO}`,
       confirmacao: {
         titulo: 'Sair da fila?',
         mensagem: `A multa de ${valor} será cobrada no seu próximo atendimento.`,
@@ -79,7 +86,8 @@ export function saidaDaFila(s: {
     };
   }
 
-  return { faixa: `Para sair da fila, ${INSTRUCAO}.`, confirmacao: null, valorConfirmado: null };
+  const faltam = s.minutos != null && s.minutos > 0 ? ` Faltam só ${Math.ceil(s.minutos)} min.` : '';
+  return { faixa: `Tem certeza?${faltam} ${INSTRUCAO}`, confirmacao: null, valorConfirmado: null };
 }
 
 /**
