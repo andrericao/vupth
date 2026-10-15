@@ -11,6 +11,7 @@ import {
   ACAO_OK,
   CANAL_ALERTAS,
   CATEGORIA_CIENCIA,
+  CATEGORIAS_COM_BOTAO,
   mapPlatform,
   notificationRoute,
   registrarComRetentativa,
@@ -97,6 +98,13 @@ export function usePushRegistration() {
       Notifications.setNotificationCategoryAsync(CATEGORIA_CIENCIA, [
         { identifier: ACAO_OK, buttonTitle: "OK", options: { opensAppToForeground: false } },
       ]).catch(() => {});
+      // Os botoes que abrem a tela: o toque neles cai no mesmo `tratar` do
+      // corpo (nao e o OK), que navega pelo data.type.
+      for (const c of CATEGORIAS_COM_BOTAO) {
+        Notifications.setNotificationCategoryAsync(c.categoria, [
+          { identifier: c.acao, buttonTitle: c.titulo, options: { opensAppToForeground: true } },
+        ]).catch(() => {});
+      }
     } catch {
       // binário sem o módulo nativo de push.
     }

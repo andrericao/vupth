@@ -4,6 +4,7 @@ import {
   ACAO_OK,
   CANAL_ALERTAS,
   CATEGORIA_CIENCIA,
+  CATEGORIAS_COM_BOTAO,
   mapPlatform,
   deviceDeletePath,
   notificationRoute,
@@ -218,6 +219,11 @@ describe('notificação de ciência (app fechado)', () => {
   it('o botão OK só fecha; o toque no corpo segue navegando', () => {
     expect(tocouNoOk({ actionIdentifier: ACAO_OK })).toBe(true);
     expect(tocouNoOk({ actionIdentifier: 'expo.modules.notifications.actions.DEFAULT' })).toBe(false);
+  });
+
+  it('o botão que abre a tela não é o OK: segue navegando', () => {
+    expect(tocouNoOk({ actionIdentifier: 'VER_FILA' })).toBe(false);
+    expect(CATEGORIAS_COM_BOTAO.map((c) => c.categoria)).toEqual(['VER_FILA', 'VER_ATENDIMENTO']);
   });
 
   it('ids combinados com o Backend e o Partner', () => {

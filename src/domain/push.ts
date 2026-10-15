@@ -188,6 +188,17 @@ export function avisoDoPush(conteudo: { title?: string | null; body?: string | n
 export const CATEGORIA_CIENCIA = 'CIENCIA';
 export const ACAO_OK = 'OK';
 
+/**
+ * Toda notificacao tem botao (notificacao-com-botao, Andre 15/10, DEC-43). Alem
+ * do "OK" da CIENCIA, as que levam a uma tela ganham um botao que ABRE o app e
+ * segue o mesmo caminho do toque no corpo (`notificationRoute`). O Backend
+ * escolhe a categoria de cada push pelo `categoryId`.
+ */
+export const CATEGORIAS_COM_BOTAO: { categoria: string; acao: string; titulo: string }[] = [
+  { categoria: 'VER_FILA', acao: 'VER_FILA', titulo: 'Ver minha vez' },
+  { categoria: 'VER_ATENDIMENTO', acao: 'VER_ATENDIMENTO', titulo: 'Ver atendimento' },
+];
+
 /** Canal Android HIGH novo, id "alertas" combinado com o Backend e o Partner (o "default" antigo nao sobe de importancia). */
 export const CANAL_ALERTAS = 'alertas';
 

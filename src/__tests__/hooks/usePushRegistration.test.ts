@@ -192,6 +192,16 @@ describe('usePushRegistration — canais e categoria', () => {
       expect.objectContaining({ identifier: 'OK', options: { opensAppToForeground: false } }),
     ]);
   });
+
+  it('as categorias que levam a uma tela têm um botão que abre o app', async () => {
+    renderHook(() => usePushRegistration());
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('VER_FILA', [
+      { identifier: 'VER_FILA', buttonTitle: 'Ver minha vez', options: { opensAppToForeground: true } },
+    ]);
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('VER_ATENDIMENTO', [
+      { identifier: 'VER_ATENDIMENTO', buttonTitle: 'Ver atendimento', options: { opensAppToForeground: true } },
+    ]);
+  });
 });
 
 describe('usePushRegistration — com o app aberto', () => {
