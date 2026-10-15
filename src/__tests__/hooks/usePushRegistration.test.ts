@@ -35,6 +35,8 @@ jest.mock('@services/pushService', () => ({
 }));
 const mockOferecer = jest.fn();
 jest.mock('@utils/vezAdiantada', () => ({ oferecerVezAdiantada: (...a: unknown[]) => mockOferecer(...a) }));
+const mockConfirmarTroca = jest.fn();
+jest.mock('@utils/trocaPeloPush', () => ({ confirmarTrocaPeloPush: (...a: unknown[]) => mockConfirmarTroca(...a) }));
 const mockNavigate = jest.fn();
 jest.mock('@routes/navigationRef', () => ({
   navigateFromNotification: (...a: unknown[]) => mockNavigate(...a),
@@ -263,6 +265,31 @@ describe('usePushRegistration — toque na notificação', () => {
     tocou?.(resposta('n2', 'OK'));
     expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n2');
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('a categoria TROCA tem CONFIRMAR (abre o app) e AGORA NÃO (só fecha)', () => {
+    renderHook(() => usePushRegistration());
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('TROCA', [
+      { identifier: 'CONFIRMAR', buttonTitle: 'CONFIRMAR', options: { opensAppToForeground: true } },
+      { identifier: 'AGORA_NAO', buttonTitle: 'AGORA NÃO', options: { opensAppToForeground: false } },
+    ]);
+  });
+
+  it('CONFIRMAR da troca abre a fila e aceita', () => {
+    renderHook(() => usePushRegistration());
+    const data = { type: 'SWAP_OFFERED', offerId: 'o1' };
+    tocou?.(resposta('n5', 'CONFIRMAR', data));
+    expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n5');
+    expect(mockNavigate).toHaveBeenCalledWith('fila');
+    expect(mockConfirmarTroca).toHaveBeenCalledWith(data);
+  });
+
+  it('AGORA NÃO só fecha a notificação', () => {
+    renderHook(() => usePushRegistration());
+    tocou?.(resposta('n6', 'AGORA_NAO', { type: 'SWAP_REQUESTED', swapRequestId: 'r1' }));
+    expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n6');
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockConfirmarTroca).not.toHaveBeenCalled();
   });
 
   it('o OK com falha ao fechar não quebra', async () => {

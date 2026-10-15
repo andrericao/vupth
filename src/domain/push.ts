@@ -27,6 +27,16 @@ export function notificationRoute(data: unknown): RotaDaNotificacao | null {
   const type = (data as { type?: unknown } | null | undefined)?.type;
   if (typeof type !== 'string') return null;
   if (type === 'QUEUE_NEXT_IN_LINE') return 'fila';
+  // A troca (troca-pela-notificacao): o toque leva a fila, onde a troca acontece.
+  if (
+    type === 'SWAP_REQUESTED' ||
+    type === 'SWAP_OFFERED' ||
+    type === 'EARLIER_TURN_OFFERED' ||
+    type === 'SWAP_ACCEPTED' ||
+    type === 'SWAP_OFFER_ACCEPTED'
+  ) {
+    return 'fila';
+  }
   const known =
     type === 'ATTENDANCE_STARTED' ||
     type === 'ATTENDANCE_FINISHED' ||

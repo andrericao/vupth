@@ -50,6 +50,9 @@ describe('notificationRoute', () => {
 
   it('tipo desconhecido/ausente/inválido → null', () => {
     expect(notificationRoute({ type: 'FOO' })).toBeNull();
+    for (const type of ['SWAP_REQUESTED', 'SWAP_OFFERED', 'EARLIER_TURN_OFFERED', 'SWAP_ACCEPTED', 'SWAP_OFFER_ACCEPTED']) {
+      expect(notificationRoute({ type })).toBe('fila');
+    }
     expect(notificationRoute({})).toBeNull();
     expect(notificationRoute(null)).toBeNull();
     expect(notificationRoute({ type: 123 })).toBeNull();

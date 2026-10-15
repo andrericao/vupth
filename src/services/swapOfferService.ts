@@ -72,9 +72,21 @@ export const swapOfferService = {
   // Aceita a oferta: troca 1-por-1 dos scheduledTime; notifica os dois lados por
   // WS (SWAP_OFFER_ACCEPTED) + push. Erros: 404, 422 (não OPEN / própria / não
   // elegível / caller fora da fila).
-  accept(offerId: string, accessToken: string) {
+  // 409 SWAP_NEEDS_CONFIRMATION: a espera cai a menos de 1 hora — o app mostra
+  // o aviso e manda de novo com `confirmarMenosDeUmaHora` (Backend 43efd61).
+  accept(offerId: string, accessToken: string, confirmarMenosDeUmaHora = false) {
     return api.patch<SwapOfferResponse>(`/swap-offers/${offerId}/accept`, null, {
       headers: { Authorization: `Bearer ${accessToken}` },
+      ...(confirmarMenosDeUmaHora ? { params: { confirmLessThanHour: true } } : {}),
+    });
+  },
+
+  // Pedido de troca direto (SWAP_REQUESTED, Backend 43efd61): aceitar pela
+  // notificacao. Mesmo 409 SWAP_NEEDS_CONFIRMATION da oferta.
+  acceptRequest(swapRequestId: string, accessToken: string, confirmarMenosDeUmaHora = false) {
+    return api.patch<void>(`/swap-requests/${swapRequestId}`, null, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      params: { accept: true, ...(confirmarMenosDeUmaHora ? { confirmLessThanHour: true } : {}) },
     });
   },
 
