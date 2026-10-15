@@ -24,6 +24,11 @@ appId: ${APP_ID}
 - scrollUntilVisible:
     element:
       text: "Versão do app"
+# botao-suporte (15/10): o menu Suporte fica logo acima do Sistema. So confere
+# que esta la — o toque abre o navegador, fora do app.
+- assertVisible:
+    text: "Suporte"
+    label: "o menu Suporte esta no Perfil"
 - tapOn:
     text: "Versão do app"
 - tapOn:
