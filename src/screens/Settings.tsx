@@ -10,7 +10,7 @@ import {
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone, Palette, LifeBuoy } from "lucide-react-native";
+import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone, Palette, LifeBuoy, Ticket } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -23,6 +23,7 @@ import { profileService } from "@services/profileService";
 import { addressService, AddressResponse } from "@services/addressService";
 import { fs } from "@stores/fonteStore";
 import { SUPORTE_URL } from "@utils/suporte";
+import { CUPOM_LIGADO } from "@domain/campanhas";
 
 function MenuItem({
   icon,
@@ -306,6 +307,20 @@ export function Settings() {
               icon={<Palette size={20} color="#163300" />}
               label="Tema e tamanho da fonte"
               onPress={() => navigation.navigate("aparencia")}
+              last
+            />
+          </Grupo>
+        </VStack>
+        )}
+
+        {/* Promocoes (cupom-no-app): o cupom. Desligado ate o Backend subir. */}
+        {isAuthenticated && CUPOM_LIGADO && (
+        <VStack mt="$6">
+          <Grupo label="Promoções">
+            <MenuItem
+              icon={<Ticket size={20} color="#163300" />}
+              label="Cupom"
+              onPress={() => navigation.navigate("promocoes")}
               last
             />
           </Grupo>
