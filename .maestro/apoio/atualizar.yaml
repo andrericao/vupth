@@ -66,11 +66,12 @@ appId: ${APP_ID}
       - tapOn:
           text: "Versão do app"
 # O OTA ainda nao chegou (Andre, 11/10: "reabra o app ate o OTA chegar"): o
-# EAS Update pode estar publicando logo depois do push. Ate 6 voltas de 30 s:
+# EAS Update pode estar publicando logo depois do push. Desde 16/10 o OTA e um
+# job do CI, depois dos testes (~3,5 min + ~3,5 min): ate 14 voltas de 30 s —
 # fecha a caixa, espera e verifica de novo. Sem COMMIT, o ".*.*" sempre aparece
 # e a volta nao roda.
 - repeat:
-    times: 6
+    times: 14
     while:
       notVisible:
         text: ".*${COMMIT}.*"
