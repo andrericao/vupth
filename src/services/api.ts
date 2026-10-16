@@ -97,18 +97,42 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 	return config;
 });
 
-let isRefreshing = false;
-let failedQueue: { resolve: (token: string) => void; reject: (err: unknown) => void }[] = [];
+// UM refresh por vez (um-refresh-por-vez, log [SLOW] de 15/10: dois POST
+// /auth/refresh juntos). O refresh troca o refresh_token: o segundo, com o token
+// que o primeiro acabou de queimar, derrubava a sessao. Quem precisa renovar
+// enquanto um esta no ar — o interceptor (401) ou o WebSocket (beforeConnect) —
+// espera o mesmo resultado.
+let refreshEmVoo: Promise<string> | null = null;
 
-function processQueue(error: unknown, token: string | null) {
-	failedQueue.forEach((p) => {
-		if (error) {
-			p.reject(error);
-		} else {
-			p.resolve(token!);
-		}
+async function trocarTokens(): Promise<string> {
+	const refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);
+	if (!refreshToken) throw new Error("No refresh token");
+
+	// Chamada inline (não importa authService) para evitar o require cycle
+	// api ↔ authService. `/auth/` é rota pública → o interceptor não tenta
+	// refresh-sobre-refresh (sem recursão).
+	const { data } = await api.post<RefreshResponse>("/auth/refresh", {
+		refresh_token: refreshToken,
 	});
-	failedQueue = [];
+
+	await SecureStore.setItemAsync(TOKEN_KEY, data.access_token);
+	await SecureStore.setItemAsync(REFRESH_KEY, data.refresh_token);
+
+	_setAuthState?.({
+		accessToken: data.access_token,
+		refreshToken: data.refresh_token,
+	});
+	return data.access_token;
+}
+
+/** Renova a sessao; com um refresh ja no ar, devolve o resultado dele. */
+export function renovarSessao(): Promise<string> {
+	if (!refreshEmVoo) {
+		refreshEmVoo = trocarTokens().finally(() => {
+			refreshEmVoo = null;
+		});
+	}
+	return refreshEmVoo;
 }
 
 api.interceptors.response.use(
@@ -130,47 +154,13 @@ api.interceptors.response.use(
 			return Promise.reject(error);
 		}
 
-		if (isRefreshing) {
-			return new Promise((resolve, reject) => {
-				failedQueue.push({
-					resolve: (token: string) => {
-						originalRequest.headers.Authorization = `Bearer ${token}`;
-						resolve(api(originalRequest));
-					},
-					reject,
-				});
-			});
-		}
-
 		originalRequest._retry = true;
-		isRefreshing = true;
 
 		try {
-			const refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);
-			if (!refreshToken) throw new Error("No refresh token");
-
-			// Chamada inline (não importa authService) para evitar o require cycle
-			// api ↔ authService. `/auth/` é rota pública → o interceptor não tenta
-			// refresh-sobre-refresh (sem recursão).
-			const { data } = await api.post<RefreshResponse>("/auth/refresh", {
-				refresh_token: refreshToken,
-			});
-
-			await SecureStore.setItemAsync(TOKEN_KEY, data.access_token);
-			await SecureStore.setItemAsync(REFRESH_KEY, data.refresh_token);
-
-			_setAuthState?.({
-				accessToken: data.access_token,
-				refreshToken: data.refresh_token,
-			});
-
-			originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-			processQueue(null, data.access_token);
-
+			const token = await renovarSessao();
+			originalRequest.headers.Authorization = `Bearer ${token}`;
 			return api(originalRequest);
 		} catch (refreshError) {
-			processQueue(refreshError, null);
-
 			await SecureStore.deleteItemAsync(TOKEN_KEY);
 			await SecureStore.deleteItemAsync(REFRESH_KEY);
 			await SecureStore.deleteItemAsync(USER_KEY);
@@ -183,8 +173,6 @@ api.interceptors.response.use(
 			});
 
 			return Promise.reject(refreshError);
-		} finally {
-			isRefreshing = false;
 		}
 	},
 );

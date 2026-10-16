@@ -1,5 +1,5 @@
-import { Share } from 'react-native';
-import { fireEvent } from '@testing-library/react-native';
+import { Alert, Share } from 'react-native';
+import { act, fireEvent } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ProfessionalInfo } from '@screens/ProfessionalInfo';
@@ -18,6 +18,9 @@ jest.mock('@services/establishmentService', () => ({
     getServiceItemsByProfessional: jest.fn(),
   },
 }));
+
+const mockCopiar = jest.fn();
+jest.mock('@utils/copiar', () => ({ copiarTexto: (...a: unknown[]) => mockCopiar(...a) }));
 
 const mockGetById = establishmentService.getById as jest.Mock;
 const mockGetProfs = establishmentService.getProfessionalsWithQueue as jest.Mock;
@@ -99,3 +102,46 @@ describe('ProfessionalInfo (informacoes-do-profissional)', () => {
     share.mockRestore();
   });
 });
+
+describe('ProfessionalInfo — o que sobra (cobertura-98)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetById.mockResolvedValue({ data: { id: 'e1', name: 'Barbearia do Zé' } });
+    mockGetProfs.mockResolvedValue({ data: { professionals: [profissional({ profile_image_url: 'https://foto/p1.jpg' })] } });
+  });
+
+  it('a foto amplia ao toque e fecha', async () => {
+    mockGetServices.mockResolvedValue({ data: [] });
+    const { findByTestId, getByTestId, findByText } = montar();
+    expect(await findByText('Nenhum serviço cadastrado', {}, { timeout: 15000 })).toBeTruthy();
+    fireEvent.press(await findByTestId('foto-do-profissional'));
+    expect(getByTestId('foto-ampliada-imagem')).toBeTruthy();
+    fireEvent.press(getByTestId('foto-ampliada'));
+  });
+
+  it('sem o compartilhar do sistema, copia; sem copiar, não avisa; sem a loja, diz "loja"', async () => {
+    mockGetById.mockRejectedValue(new Error('x'));
+    mockGetServices.mockReturnValue(new Promise(() => {}));
+    const share = jest.spyOn(Share, 'share').mockRejectedValue(new Error('sem share'));
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { findByText, getByTestId } = montar();
+    await findByText('Carlos Lima', {}, { timeout: 15000 });
+
+    mockCopiar.mockResolvedValueOnce(true);
+    await act(async () => {
+      fireEvent.press(getByTestId('compartilhar'));
+    });
+    expect(mockCopiar).toHaveBeenCalledWith(expect.stringMatching(/na loja — /));
+    expect(alerta).toHaveBeenCalledWith('Link copiado', expect.any(String));
+
+    alerta.mockClear();
+    mockCopiar.mockResolvedValueOnce(false);
+    await act(async () => {
+      fireEvent.press(getByTestId('compartilhar'));
+    });
+    expect(alerta).not.toHaveBeenCalled();
+    share.mockRestore();
+    alerta.mockRestore();
+  });
+});
+
