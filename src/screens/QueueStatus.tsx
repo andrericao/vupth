@@ -60,6 +60,7 @@ import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
+import { paymentService } from "@services/paymentService";
 
 type RouteParams = {
   professionalId: string;
@@ -475,6 +476,20 @@ export function QueueStatus() {
   // O ref segura o segundo aviso enquanto a marca no store ainda esta sendo gravada.
   // Espera o aviso da estimativa ("Entendi") sair da tela: os dois abriam juntos
   // na entrada e, no Android, a advertencia sumia com ele (bateria 03/10, 05.05).
+  // pagamento-no-concluido (CLI-34, DEC-78): o corte concluiu e o pagamento
+  // segue pendente — o modal do Pix (QR e "Copiar código Pix") abre uma vez.
+  const pagamentoAberto = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isFinished || !attendanceId || !accessToken || pagamentoAberto.current === attendanceId) return;
+    pagamentoAberto.current = attendanceId;
+    paymentService
+      .get(attendanceId, accessToken)
+      .then(({ data }) => {
+        if (data.status === "PENDING") usePendenciaStore.getState().pagar(attendanceId);
+      })
+      .catch(() => {});
+  }, [isFinished, attendanceId, accessToken]);
+
   const advertiu = useRef<string | null>(null);
   useEffect(() => {
     const id = activeQueue?.attendanceId;

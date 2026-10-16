@@ -25,6 +25,26 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "22.04 · fecha as caixas"
+- extendedWaitUntil:
+    visible:
+      id: "pix-do-atendimento"
+    timeout: ${30000 * LENTO}
+    optional: true
+    label: "22.04b · corte concluído e não pago: o Pix abre na tela da fila (pagamento-no-concluido)"
+- runFlow:
+    when:
+      visible:
+        id: "pix-do-atendimento"
+    commands:
+      - assertVisible:
+          id: "pix-qr"
+          label: "22.04c · com o QR em cima"
+      - assertVisible:
+          id: "pix-copiar"
+          label: "22.04d · e o Copiar código Pix"
+      - tapOn:
+          id: "pagamento-fechar"
+          label: "22.04e · fecha (paga depois, em Atendimentos)"
 - tapOn:
     id: "faixa-avaliar-fechar"
     optional: true

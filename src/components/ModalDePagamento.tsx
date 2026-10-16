@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal, Pressable, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react-native";
+import QRCode from "react-native-qrcode-svg";
 
 import {
   Pagamento,
@@ -152,6 +153,10 @@ export function ModalDePagamento() {
               ) : null}
               {pagamento.pix_copy_paste && podeAvisarQuePagou(pagamento.status) ? (
                 <>
+                  {/* pagamento-no-concluido (DEC-78): o QR em cima do copiar. */}
+                  <View style={{ alignItems: "center" }} testID="pix-qr">
+                    <QRCode value={pagamento.pix_copy_paste} size={180} color={FOREST} backgroundColor="#FFFFFF" />
+                  </View>
                   <Text selectable numberOfLines={3} testID="pix-codigo" style={{ color: FOREST, fontSize: fs(12), backgroundColor: "#F3F5F1", borderRadius: 10, padding: 10 }}>
                     {pagamento.pix_copy_paste}
                   </Text>

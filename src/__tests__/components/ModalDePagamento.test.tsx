@@ -73,6 +73,7 @@ describe('ModalDePagamento', () => {
     expect(tela.getByText('R$ 5,00')).toBeTruthy();
     expect(tela.getByText('Para: Carlos Lima')).toBeTruthy();
     expect(tela.getByTestId('pix-codigo').props.children).toBe('000201pix');
+    expect(tela.getByTestId('pix-qr')).toBeTruthy();
 
     await act(async () => {
       fireEvent.press(tela.getByTestId('pix-copiar'));
