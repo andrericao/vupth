@@ -5,6 +5,15 @@ import { ProfessionalWithQueue, ServiceItemResponse } from '@domain/professional
 import { HorariosDaLoja } from '@domain/establishment/horarios';
 import { LOJAS_POR_PAGINA, PaginaDeLojas } from '@domain/establishment/paginacao';
 
+// Um GET do horario por loja de cada vez (um-refresh-por-vez, log [SLOW] de
+// 15/10: dois GET /establishment/{id}/hours juntos na mesma tela). Quem pede
+// enquanto o primeiro esta no ar recebe a mesma resposta.
+const horasEmVoo = new Map<string, ReturnType<typeof buscarHoras>>();
+
+function buscarHoras(establishmentId: string) {
+  return api.get<HorariosDaLoja>(`/establishment/${establishmentId}/hours`);
+}
+
 export interface EstablishmentWithProfessionals {
   id: string;
   name: string;
@@ -25,7 +34,11 @@ export const establishmentService = {
    * desde 17/09. Rota PÚBLICA: o cliente lê sem token.
    */
   getHours(establishmentId: string) {
-    return api.get<HorariosDaLoja>(`/establishment/${establishmentId}/hours`);
+    const emVoo = horasEmVoo.get(establishmentId);
+    if (emVoo) return emVoo;
+    const pedido = buscarHoras(establishmentId).finally(() => horasEmVoo.delete(establishmentId));
+    horasEmVoo.set(establishmentId, pedido);
+    return pedido;
   },
 
   /**

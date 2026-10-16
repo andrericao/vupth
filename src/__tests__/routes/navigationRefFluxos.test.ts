@@ -5,6 +5,7 @@ import {
   navigateFromNotification,
   goToLoginAfterOnboarding,
   abrirMudarMinhaVez,
+  abrirAvaliacao,
   guardarEstadoDaNavegacao,
   estadoDaNavegacao,
 } from '@routes/navigationRef';
@@ -57,6 +58,26 @@ describe('navigateFromNotification', () => {
     } as never);
     navigateFromNotification('fila' as never);
     expect(navigate).toHaveBeenCalledWith('homeTab', expect.objectContaining({ screen: 'queueStatus', pop: true }));
+  });
+});
+
+describe('abrirAvaliacao (notificacao-avaliar)', () => {
+  it('espera a navegação montar e abre Atendimentos com a avaliação', () => {
+    const esperas: (() => void)[] = [];
+    abrirAvaliacao('a1', 0, (fn) => esperas.push(fn));
+    expect(navigate).not.toHaveBeenCalled();
+    pronto = true;
+    esperas[0]();
+    expect(navigate).toHaveBeenCalledWith('atendimentosTab', { screen: 'attendances', pop: true, params: { avaliar: 'a1' } });
+  });
+
+  it('desiste depois de ~15 s; pronta, vai na hora', () => {
+    const espera = jest.fn();
+    abrirAvaliacao('a1', 75, espera);
+    expect(espera).not.toHaveBeenCalled();
+    pronto = true;
+    abrirAvaliacao('a2');
+    expect(navigate).toHaveBeenCalledWith('atendimentosTab', expect.objectContaining({ params: { avaliar: 'a2' } }));
   });
 });
 

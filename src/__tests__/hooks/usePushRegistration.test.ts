@@ -35,11 +35,17 @@ jest.mock('@services/pushService', () => ({
 }));
 const mockOferecer = jest.fn();
 jest.mock('@utils/vezAdiantada', () => ({ oferecerVezAdiantada: (...a: unknown[]) => mockOferecer(...a) }));
+const mockConfirmarTroca = jest.fn();
+jest.mock('@utils/trocaPeloPush', () => ({ confirmarTrocaPeloPush: (...a: unknown[]) => mockConfirmarTroca(...a) }));
 const mockNavigate = jest.fn();
+const mockAbrirAvaliacao = jest.fn();
 jest.mock('@routes/navigationRef', () => ({
   navigateFromNotification: (...a: unknown[]) => mockNavigate(...a),
+  abrirAvaliacao: (...a: unknown[]) => mockAbrirAvaliacao(...a),
 }));
 
+// O handler do push em primeiro plano e registrado no import do modulo.
+const handlerDoModulo = n.setNotificationHandler.mock.calls[0]?.[0] as { handleNotification: () => Promise<object> };
 const getItem = SecureStore.getItemAsync as jest.Mock;
 const setItem = SecureStore.setItemAsync as jest.Mock;
 
@@ -192,6 +198,28 @@ describe('usePushRegistration — canais e categoria', () => {
       expect.objectContaining({ identifier: 'OK', options: { opensAppToForeground: false } }),
     ]);
   });
+
+  it('as categorias que levam a uma tela têm um botão que abre o app', async () => {
+    renderHook(() => usePushRegistration());
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('VER_FILA', [
+      { identifier: 'VER_FILA', buttonTitle: 'Ver minha vez', options: { opensAppToForeground: true } },
+    ]);
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('VER_ATENDIMENTO', [
+      { identifier: 'VER_ATENDIMENTO', buttonTitle: 'Ver atendimento', options: { opensAppToForeground: true } },
+    ]);
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('AVALIAR', [
+      { identifier: 'AVALIAR', buttonTitle: 'Avaliar', options: { opensAppToForeground: true } },
+    ]);
+  });
+
+  it('o push de concluído (corpo ou "Avaliar") abre a avaliação do atendimento', () => {
+    renderHook(() => usePushRegistration());
+    tocou?.(resposta('n8', 'AVALIAR', { type: 'ATTENDANCE_FINISHED', attendanceId: 'a1' }));
+    tocou?.(resposta('n9', undefined, { type: 'ATTENDANCE_FINISHED', attendanceId: 'a2' }));
+    expect(mockAbrirAvaliacao).toHaveBeenNthCalledWith(1, 'a1');
+    expect(mockAbrirAvaliacao).toHaveBeenNthCalledWith(2, 'a2');
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
 });
 
 describe('usePushRegistration — com o app aberto', () => {
@@ -255,6 +283,31 @@ describe('usePushRegistration — toque na notificação', () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
+  it('a categoria TROCA tem CONFIRMAR (abre o app) e AGORA NÃO (só fecha)', () => {
+    renderHook(() => usePushRegistration());
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('TROCA', [
+      { identifier: 'CONFIRMAR', buttonTitle: 'CONFIRMAR', options: { opensAppToForeground: true } },
+      { identifier: 'AGORA_NAO', buttonTitle: 'AGORA NÃO', options: { opensAppToForeground: false } },
+    ]);
+  });
+
+  it('CONFIRMAR da troca abre a fila e aceita', () => {
+    renderHook(() => usePushRegistration());
+    const data = { type: 'SWAP_OFFERED', offerId: 'o1' };
+    tocou?.(resposta('n5', 'CONFIRMAR', data));
+    expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n5');
+    expect(mockNavigate).toHaveBeenCalledWith('fila');
+    expect(mockConfirmarTroca).toHaveBeenCalledWith(data);
+  });
+
+  it('AGORA NÃO só fecha a notificação', () => {
+    renderHook(() => usePushRegistration());
+    tocou?.(resposta('n6', 'AGORA_NAO', { type: 'SWAP_REQUESTED', swapRequestId: 'r1' }));
+    expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n6');
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockConfirmarTroca).not.toHaveBeenCalled();
+  });
+
   it('o OK com falha ao fechar não quebra', async () => {
     n.dismissNotificationAsync.mockRejectedValue(new Error('x'));
     renderHook(() => usePushRegistration());
@@ -268,5 +321,68 @@ describe('usePushRegistration — toque na notificação', () => {
     renderHook(() => usePushRegistration());
     await act(async () => {});
     expect(mockNavigate).not.toHaveBeenCalled();
+  });
+});
+
+describe('usePushRegistration — o que sobra (cobertura-98)', () => {
+  it('com o app aberto, o banner não sai (o aviso com OK já diz)', async () => {
+    await expect(handlerDoModulo.handleNotification()).resolves.toEqual({
+      shouldShowBanner: false,
+      shouldShowList: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    });
+  });
+
+  it('canais, categorias e o fechar da troca recusando não derrubam nada', async () => {
+    const antes = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true });
+    n.setNotificationChannelAsync.mockRejectedValue(new Error('x'));
+    n.setNotificationCategoryAsync.mockRejectedValue(new Error('x'));
+    n.dismissNotificationAsync.mockRejectedValue(new Error('x'));
+    try {
+      renderHook(() => usePushRegistration());
+      tocou?.(resposta('n7', 'CONFIRMAR', { type: 'SWAP_OFFERED', offerId: 'o1' }));
+      await act(async () => {});
+      expect(mockNavigate).toHaveBeenCalledWith('fila');
+    } finally {
+      Object.defineProperty(Platform, 'OS', { value: antes, configurable: true });
+    }
+  });
+
+  it('sem o projectId do app.json, usa o do EAS', async () => {
+    const C = jest.requireMock('expo-constants') as Record<string, unknown>;
+    const config = C.expoConfig;
+    C.expoConfig = undefined;
+    C.easConfig = { projectId: 'eas' };
+    try {
+      renderHook(() => usePushRegistration());
+      await waitFor(() => expect(n.getExpoPushTokenAsync).toHaveBeenCalledWith({ projectId: 'eas' }));
+    } finally {
+      C.expoConfig = config;
+      delete C.easConfig;
+    }
+  });
+
+  it('erro sem mensagem: a tentativa e a falha ficam no painel pelo texto do erro', async () => {
+    jest.useFakeTimers();
+    try {
+      mockRegisterDevice.mockRejectedValueOnce('caiu').mockRejectedValueOnce({ response: { status: 400 } });
+      renderHook(() => usePushRegistration());
+      await waitFor(() => expect(usePushDiagnosticsStore.getState().envio).toBe('tentando'));
+      await act(async () => {
+        jest.advanceTimersByTime(3_000);
+      });
+      await waitFor(() => expect(usePushDiagnosticsStore.getState().envio).toBe('falhou'));
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('push sem data vira aviso normal', () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    renderHook(() => usePushRegistration());
+    recebido?.({ request: { content: { title: 'Oi', body: 'b' } } });
+    expect(alerta).toHaveBeenCalledWith('Oi', 'b', [{ text: 'OK' }]);
   });
 });

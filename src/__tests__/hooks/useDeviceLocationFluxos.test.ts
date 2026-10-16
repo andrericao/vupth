@@ -117,3 +117,68 @@ describe('useDeviceLocation — a abertura que só atualiza a coordenada', () =>
     expect(useLocationStore.getState().coords).toEqual({ latitude: 1, longitude: 2 });
   });
 });
+
+describe('useDeviceLocation — o que sobra (cobertura-98)', () => {
+  it('a permissão retirada depois: a abertura não lê o GPS', async () => {
+    mockCheck.mockResolvedValue({ status: 'denied' });
+    renderHook(() => useDeviceLocation());
+    await act(async () => {
+      useLocationStore.setState({ hydrated: true, gpsAsked: true });
+    });
+    await act(async () => {});
+    expect(mockCheck).toHaveBeenCalled();
+    expect(mockPosition).not.toHaveBeenCalled();
+  });
+
+  it('quem já escolheu o lugar na mão: a abertura não pergunta, nem depois', async () => {
+    renderHook(() => useDeviceLocation());
+    await act(async () => {
+      useLocationStore.setState({ hydrated: true, gpsAsked: false, resolved: true });
+    });
+    await act(async () => {
+      useLocationStore.setState({ hydrated: false });
+    });
+    await act(async () => {
+      useLocationStore.setState({ hydrated: true, resolved: false });
+    });
+    expect(mockRequest).not.toHaveBeenCalled();
+    expect(useLocationStore.getState().gpsPending).toBe(false);
+  });
+
+  it('o satélite demorando: a lista de lojas para de esperar no teto', async () => {
+    jest.useFakeTimers();
+    try {
+      mockPosition.mockReturnValue(new Promise(() => {}));
+      renderHook(() => useDeviceLocation());
+      await act(async () => {
+        useLocationStore.setState({ hydrated: true, gpsAsked: false, resolved: false });
+      });
+      expect(useLocationStore.getState().gpsPending).toBe(true);
+      await act(async () => {
+        jest.advanceTimersByTime(60_000);
+      });
+      expect(useLocationStore.getState().gpsPending).toBe(false);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // Por último: troca o expo-location por um que não carrega (binário sem o módulo).
+  it('binário sem o expo-location: nada pede o GPS', async () => {
+    jest.resetModules();
+    jest.doMock('expo-location', () => {
+      throw new Error('sem módulo');
+    });
+    const { result } = renderHook(() => useDeviceLocation());
+    let ok = true;
+    let endereco: unknown = 'x';
+    await act(async () => {
+      ok = await result.current.requestDeviceLocation();
+      endereco = await result.current.captureDeviceAddress();
+      useLocationStore.setState({ hydrated: true, gpsAsked: true });
+    });
+    expect(ok).toBe(false);
+    expect(endereco).toBeNull();
+    expect(mockCheck).not.toHaveBeenCalled();
+  });
+});

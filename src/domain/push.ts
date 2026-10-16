@@ -27,6 +27,16 @@ export function notificationRoute(data: unknown): RotaDaNotificacao | null {
   const type = (data as { type?: unknown } | null | undefined)?.type;
   if (typeof type !== 'string') return null;
   if (type === 'QUEUE_NEXT_IN_LINE') return 'fila';
+  // A troca (troca-pela-notificacao): o toque leva a fila, onde a troca acontece.
+  if (
+    type === 'SWAP_REQUESTED' ||
+    type === 'SWAP_OFFERED' ||
+    type === 'EARLIER_TURN_OFFERED' ||
+    type === 'SWAP_ACCEPTED' ||
+    type === 'SWAP_OFFER_ACCEPTED'
+  ) {
+    return 'fila';
+  }
   const known =
     type === 'ATTENDANCE_STARTED' ||
     type === 'ATTENDANCE_FINISHED' ||
@@ -187,6 +197,30 @@ export function avisoDoPush(conteudo: { title?: string | null; body?: string | n
  */
 export const CATEGORIA_CIENCIA = 'CIENCIA';
 export const ACAO_OK = 'OK';
+
+/**
+ * Toda notificacao tem botao (notificacao-com-botao, Andre 15/10, DEC-43). Alem
+ * do "OK" da CIENCIA, as que levam a uma tela ganham um botao que ABRE o app e
+ * segue o mesmo caminho do toque no corpo (`notificationRoute`). O Backend
+ * escolhe a categoria de cada push pelo `categoryId`.
+ */
+export const CATEGORIAS_COM_BOTAO: { categoria: string; acao: string; titulo: string }[] = [
+  { categoria: 'VER_FILA', acao: 'VER_FILA', titulo: 'Ver minha vez' },
+  { categoria: 'VER_ATENDIMENTO', acao: 'VER_ATENDIMENTO', titulo: 'Ver atendimento' },
+  // notificacao-avaliar (CLI-33): o push de concluido (ATTENDANCE_FINISHED).
+  { categoria: 'AVALIAR', acao: 'AVALIAR', titulo: 'Avaliar' },
+];
+
+/**
+ * O atendimento a avaliar de um push de concluido (notificacao-avaliar, CLI-33):
+ * o toque (no corpo ou no "Avaliar") abre a avaliacao dele.
+ */
+export function atendimentoParaAvaliar(data: unknown): string | null {
+  const d = (data ?? {}) as { type?: unknown; attendanceId?: unknown };
+  return d.type === 'ATTENDANCE_FINISHED' && typeof d.attendanceId === 'string' && d.attendanceId
+    ? d.attendanceId
+    : null;
+}
 
 /** Canal Android HIGH novo, id "alertas" combinado com o Backend e o Partner (o "default" antigo nao sobe de importancia). */
 export const CANAL_ALERTAS = 'alertas';

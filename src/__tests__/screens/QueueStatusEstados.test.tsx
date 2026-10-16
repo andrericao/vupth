@@ -24,6 +24,8 @@ let mockPodeOferecer = false;
 jest.mock('@hooks/ofertaDePush', () => ({ podeOferecerPush: () => Promise.resolve(mockPodeOferecer) }));
 jest.mock('@hooks/useMostraPosicao', () => ({ useMostraPosicao: () => true }));
 jest.mock('@hooks/useQueueCountdown', () => ({ useQueueCountdown: () => mockEstado }));
+const mockPagamento = jest.fn();
+jest.mock('@services/paymentService', () => ({ paymentService: { get: (...a: unknown[]) => mockPagamento(...a) } }));
 jest.mock('@hooks/useSwapOffers', () => ({ useSwapOffers: () => ({ data: [] }) }));
 jest.mock('@stores/authStore', () => ({
   useAuthStore: (sel: (s: unknown) => unknown) => sel({ accessToken: 'tk', user: { id: 'u1' } }),
@@ -79,6 +81,7 @@ function estado(over: Record<string, unknown>) {
 beforeEach(() => {
   jest.clearAllMocks();
   mockPodeOferecer = false;
+  mockPagamento.mockResolvedValue({ data: { status: 'PAID', amount: 30 } });
 });
 
 describe('QueueStatus — concluído', () => {
@@ -157,6 +160,36 @@ describe('QueueStatus — a tela 10 na primeira fila', () => {
     useFirstRunStore.setState({ restored: true, pushAsked: false, pushOferta: false });
     renderWithProviders(<QueueStatus />);
     await waitFor(() => expect(useFirstRunStore.getState().pushOferta).toBe(true));
+  });
+});
+
+describe('QueueStatus — pagamento-no-concluido (CLI-34)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { usePendenciaStore } = require('@stores/pendenciaStore');
+  afterEach(() => usePendenciaStore.getState().fechar());
+
+  it('concluído com o pagamento pendente: abre o Pix uma vez', async () => {
+    mockPagamento.mockResolvedValue({ data: { status: 'PENDING', amount: 30 } });
+    estado({ isFinished: true });
+    const { rerender } = renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(usePendenciaStore.getState().pagando).toBe('a1'));
+    expect(mockPagamento).toHaveBeenCalledWith('a1', 'tk');
+    usePendenciaStore.getState().fechar();
+    rerender(<QueueStatus />);
+    await waitFor(() => expect(usePendenciaStore.getState().pagando).toBeNull());
+  });
+
+  it('já pago, ou sem conseguir ler: não abre', async () => {
+    estado({ isFinished: true });
+    renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(mockPagamento).toHaveBeenCalled());
+    expect(usePendenciaStore.getState().pagando).toBeNull();
+
+    mockPagamento.mockRejectedValue(new Error('x'));
+    estado({ isFinished: true, activeQueue: { ...FILA, attendanceId: 'a2' } });
+    renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(mockPagamento).toHaveBeenCalledWith('a2', 'tk'));
+    expect(usePendenciaStore.getState().pagando).toBeNull();
   });
 });
 

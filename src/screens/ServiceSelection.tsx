@@ -33,6 +33,9 @@ import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
+import { pendenciasDoErro } from "@domain/pagamento/pendencia";
+import { usePendenciaStore } from "@stores/pendenciaStore";
+import { usePendenciasAoEscolher } from "@hooks/usePendenciasAoEscolher";
 import { acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
@@ -140,6 +143,17 @@ export function ServiceSelection() {
   const totalPrice = selectedServices.reduce((sum, s) => sum + s.price, 0);
   // Multas pendentes entram na conta, separadas do servico (Backend 389a152).
   const { data: pendentes } = useMultasPendentes();
+  // Pagamento pendente (CLI-35): avisa ja no toque, com o "Pagar".
+  const pagamentosPendentes = usePendenciasAoEscolher();
+  function semPendencia(): boolean {
+    if (pagamentosPendentes.length === 0) return true;
+    setShowMoreOptions(false);
+    usePendenciaStore.getState().avisar(pagamentosPendentes);
+    return false;
+  }
+  function abrirAgendar() {
+    if (semPendencia()) setShowSchedule(true);
+  }
   const multas = pendentes?.penalties ?? [];
   const conta = contaComMultas(totalPrice, multas);
   const [showMultas, setShowMultas] = useState(false);
@@ -172,7 +186,7 @@ export function ServiceSelection() {
   }
 
   function handleConfirm() {
-    goToQueue();
+    if (semPendencia()) goToQueue();
   }
 
   // Portão de auth das ações que NÃO entram na fila (corte, troca): o visitante
@@ -196,6 +210,7 @@ export function ServiceSelection() {
   // publicação porque a fila precisa da duração para recalcular os ETAs.
   async function handleRequestSwap() {
     if (selectedIds.length === 0 || isPublishingSwap) return;
+    if (!semPendencia()) return;
     if (!isAuthenticated || !accessToken) {
       setShowMoreOptions(false);
       goToLoginAndComeBack();
@@ -241,6 +256,7 @@ export function ServiceSelection() {
   // O menu so abre a escolha de quando; o pedido sai em handleRequestCut.
   function abrirPedidoDeCorte() {
     if (selectedIds.length === 0 || isRequestingCut) return;
+    if (!semPendencia()) return;
     setShowMoreOptions(false);
     if (!isAuthenticated || !accessToken) {
       goToLoginAndComeBack();
@@ -278,6 +294,12 @@ export function ServiceSelection() {
       );
       navigation.navigate("home", undefined, { pop: true });
     } catch (error: any) {
+      // Pagamento pendente (CLI-30): o aviso com o "Pagar", no lugar do erro.
+      const pendencias = pendenciasDoErro(error);
+      if (pendencias) {
+        usePendenciaStore.getState().avisar(pendencias);
+        return;
+      }
       const code = error.response?.data?.code;
       const msg = error.response?.data?.fieldErrors?.desiredTime
         ? "Esse horário já passou. Escolha outro."
@@ -305,7 +327,7 @@ export function ServiceSelection() {
       description: "Escolha outro dia ou horário com este profissional.",
       onPress: () => {
         setShowMoreOptions(false);
-        setShowSchedule(true);
+        abrirAgendar();
       },
     },
     cut: {
@@ -527,7 +549,7 @@ export function ServiceSelection() {
                 <Button
                   title={`Agendar · R$ ${conta.total.toFixed(2)}`}
                   testID="primary-schedule"
-                  onPress={() => setShowSchedule(true)}
+                  onPress={abrirAgendar}
                 />
               )}
               {/* Fim de fila hibrido (C20): com a fila aberta, a outra porta —
@@ -537,7 +559,7 @@ export function ServiceSelection() {
                   title="Agendar um horário"
                   variant="outline"
                   testID="second-door-schedule"
-                  onPress={() => setShowSchedule(true)}
+                  onPress={abrirAgendar}
                 />
               )}
               {soAgenda && (

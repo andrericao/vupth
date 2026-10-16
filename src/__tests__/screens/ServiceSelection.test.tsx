@@ -49,6 +49,10 @@ let mockMultas: unknown[] = [];
 jest.mock('@services/penaltyService', () => ({
   penaltyService: { listPending: jest.fn(() => Promise.resolve({ data: { total: 0, penalties: mockMultas } })) },
 }));
+let mockPagamentos: unknown[] = [];
+jest.mock('@services/paymentService', () => ({
+  paymentService: { pendentes: jest.fn(() => Promise.resolve({ data: { count: 0, total: 0, items: mockPagamentos } })) },
+}));
 jest.mock('@services/cutRequestService', () => ({
   cutRequestService: { create: jest.fn() },
 }));

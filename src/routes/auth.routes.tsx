@@ -24,6 +24,7 @@ import { Privacy, Terms } from "@screens/Terms";
 import { ExcluirConta } from "@screens/ExcluirConta";
 import { Sistema } from "@screens/Sistema";
 import { Aparencia } from "@screens/Aparencia";
+import { Promocoes } from "@screens/Promocoes";
 import { ServiceSelection } from "@screens/ServiceSelection";
 import { ProfessionalInfo } from "@screens/ProfessionalInfo";
 import { TabPill, TabLabel, TAB_ACTIVE, TAB_INACTIVE, tabBarShadow } from "@components/TabPill";
@@ -112,7 +113,8 @@ export type AppRoutes = {
     targetTime?: string;
     establishmentOpen?: boolean;
   };
-  attendances: undefined;
+  // notificacao-avaliar (CLI-33): o toque no push de concluido abre a avaliacao.
+  attendances: { avaliar?: string } | undefined;
   services: undefined;
   settings: undefined;
   editProfile: undefined;
@@ -124,6 +126,7 @@ export type AppRoutes = {
   excluirConta: undefined;
   sistema: undefined;
   aparencia: undefined;
+  promocoes: undefined;
 };
 
 export type AppNavigatorRoutesProps = NativeStackNavigationProp<AppRoutes>;
@@ -170,6 +173,7 @@ function SettingsStack() {
       <SettingsStackNav.Screen name="excluirConta" component={ExcluirConta} />
       <SettingsStackNav.Screen name="sistema" component={Sistema} />
       <SettingsStackNav.Screen name="aparencia" component={Aparencia} />
+      <SettingsStackNav.Screen name="promocoes" component={Promocoes} />
     </SettingsStackNav.Navigator>
   );
 }

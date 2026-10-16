@@ -1,44 +1,32 @@
-import { AccessibilityInfo } from 'react-native';
 import { act } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { PreparingServer } from '@components/PreparingServer';
 
-// cobertura-98 (08/10): a tela de "preparando servidor" avanca os passos — com
-// a animacao, e sem ela para quem pediu menos movimento.
-
-jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
-
-jest.setTimeout(90000);
+// abertura-profissional (15/10): a abertura e a da marca — o "V" e os pontos
+// andando, sem citar servidor.
 
 afterEach(() => {
   jest.useRealTimers();
-  jest.restoreAllMocks();
 });
 
 describe('PreparingServer', () => {
-  it('com animação, os passos andam', async () => {
-    jest.useFakeTimers();
-    jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(false);
-    const { getByText, unmount } = renderWithProviders(<PreparingServer />);
-    expect(getByText('Abrindo o app')).toBeTruthy();
-    await act(async () => {
-      jest.advanceTimersByTime(2000);
-    });
+  it('mostra o V e o indicador, sem citar o servidor', () => {
+    const { getByTestId, queryByText, unmount } = renderWithProviders(<PreparingServer />);
+    expect(getByTestId('brand-mark')).toBeTruthy();
+    expect(getByTestId('abertura-indicador')).toBeTruthy();
+    expect(queryByText(/servidor/i)).toBeNull();
     unmount();
   });
 
-  it('com menos movimento, troca o passo direto', async () => {
+  it('os pontos andam e param ao sair', () => {
     jest.useFakeTimers();
-    jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true);
-    const { findByText, unmount } = renderWithProviders(<PreparingServer />);
-    await act(async () => {
-      await Promise.resolve();
+    const { getByTestId, unmount } = renderWithProviders(<PreparingServer />);
+    act(() => {
+      jest.advanceTimersByTime(1300);
     });
-    await act(async () => {
-      jest.advanceTimersByTime(850);
-    });
-    expect(await findByText('Chegando na loja')).toBeTruthy();
+    expect(getByTestId('abertura-indicador')).toBeTruthy();
     unmount();
+    expect(jest.getTimerCount()).toBe(0);
   });
 });

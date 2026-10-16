@@ -132,6 +132,20 @@ appId: ${APP_ID}
     text: ".*sem custo até.*"
     label: "05.1D · confere que a faixa saiu"
 
+# sair-da-fila-texto (15/10): um toque so mostra a faixa de uma linha, com o
+# valor e o "Saiba mais" (o toque no link abre o navegador, fora do app — so
+# confere que esta la). Os asserts levam mais que a janela de 1,5 s: o toque
+# duplo abaixo comeca do zero.
+- tapOn:
+    id: "leave-queue"
+    label: "05.1E · um toque em leave-queue"
+- assertVisible:
+    text: "Se sair, você paga uma multa de R\\$.*"
+    label: "05.1F · a faixa diz a multa em uma linha"
+- assertVisible:
+    id: "saida-saiba-mais"
+    label: "05.1G · o Saiba mais está na faixa"
+
 # Sair da fila: dois toques seguidos (D15) e a confirmacao com o valor. Dois
 # tapOn saem ~2 s um do outro, fora da janela de 1,5 s (JANELA_DO_TOQUE_DUPLO_MS):
 # cada um so mostrava a faixa e a confirmacao nunca abria. O doubleTapOn toca

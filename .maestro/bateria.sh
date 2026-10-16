@@ -122,12 +122,12 @@ echo ""
 # commit errado no aparelho, nenhuma etapa diz nada.
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
-ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24"}
+ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24"}
 
 # bateria-conjunta: as etapas que abrem o Partner no mesmo celular. Precisam do
 # APK do Partner instalado e do vupth-partner clonado ao lado do vupth (os
 # subfluxos sao lidos de la). Sem um dos dois, elas ficam como ⏭.
-CONJUNTAS="18 19 21 22"
+CONJUNTAS="18 19 21b 22"
 
 # A 13 (push da vez) depende do push do sistema; no emulador o app nao oferece
 # a tela 10 nem pede token (Device.isDevice, bateria 11/10 06:06, 13.A7). Fica
@@ -136,7 +136,10 @@ CONJUNTAS="18 19 21 22"
 # A 21 (atraso) derruba o emulador na 21.0B, logo que o Client deveria mostrar
 # o aviso do 1o atraso (6 vezes em 11/10; nunca passou dali). Suspeita do app:
 # vai ao celular do Andre, com o logcat (orquestrador, 11/10 15h30).
-SO_NO_CELULAR="13 21 24"
+# etapas-curtas (15/10): a 21 virou 21a (abrir a fila pelo card, curta, roda no
+# emulador) e 21b (a espera com o Client fechado, o Partner e o aviso) — so a
+# 21b fica no celular.
+SO_NO_CELULAR="13 21b 24"
 PARTNER_OK=1
 [ -d "$(dirname "$REPO")/vupth-partner/.maestro/conjunta" ] || PARTNER_OK=0
 adb shell pm list packages 2>/dev/null | grep -q "com.vupth.partner.preview" || PARTNER_OK=0
@@ -262,6 +265,9 @@ else
       continue
     fi
     longe_da_meia_noite
+    # etapas-curtas (15/10): a duracao vai ao relatorio; a etapa que passa de
+    # ~5 min e a candidata a virar partes (a verde apaga a pasta e o maestro.log).
+    INICIO=$(date +%s)
     rodar "$arquivo"
     VOLTA=$?
     # O emulador some do adb por instantes ("device offline", 21 nas baterias de
@@ -280,14 +286,15 @@ else
       TAG=$TAG_DA_RODADA
     fi
     juntar_para_o_andre "$RODADA/$arquivo"
+    DURA=$(( $(date +%s) - INICIO )); DURA="$((DURA / 60))min$(printf '%02d' $((DURA % 60)))s"
     if [ "$VOLTA" -eq 0 ]; then
-      echo "✅ $arquivo" >> "$RODADA/relatorio.txt"
+      echo "✅ $arquivo ($DURA)" >> "$RODADA/relatorio.txt"
       aprovar "$n"
       rm -rf "${RODADA:?}/$arquivo"   # verde: a pasta da etapa nao guarda nada
     else
       STATUS=1
       PASSO=$(falhou_em "$RODADA/$arquivo")
-      echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo}" >> "$RODADA/relatorio.txt"
+      echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo} ($DURA)" >> "$RODADA/relatorio.txt"
       echo "${PASSO:-}" > "$RODADA/$arquivo/falhou_em"
       print_da_falha "$RODADA/$arquivo" "$PASSO"
     fi

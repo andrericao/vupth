@@ -78,4 +78,30 @@ describe("waitForBackend", () => {
     expect(ok).toBe(false);
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  it("corpo que não é JSON conta como não-pronto", async () => {
+    mockFetch(async () => ({ ok: true, json: async () => { throw new Error("html"); } }));
+
+    const ok = await waitForBackend(fast);
+    expect(ok).toBe(false);
+  });
+
+  it("cancelado durante a tentativa: para sem esperar a próxima", async () => {
+    mockFetch(async () => ({ ok: false, json: async () => ({}) }));
+    let chamadas = 0;
+
+    const ok = await waitForBackend({ ...fast, isCancelled: () => chamadas++ > 0 });
+    expect(ok).toBe(false);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("a tentativa que passa do teto é abortada", async () => {
+    // @ts-expect-error o fetch pendurado só termina pelo abort do sinal
+    global.fetch = jest.fn((_url: string, init: { signal: AbortSignal }) =>
+      new Promise((_res, rej) => init.signal.addEventListener("abort", () => rej(new Error("abort")))),
+    );
+
+    const ok = await waitForBackend({ ...fast, maxTotalMs: 30, perAttemptMs: 5 });
+    expect(ok).toBe(false);
+  });
 });

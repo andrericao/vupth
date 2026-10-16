@@ -48,13 +48,17 @@ env:
 
 # Sem permissao de localizacao nem de notificacao: a caixa do sistema nao
 # aparece no meio do roteiro, e a lista vem sem raio (ninguem some dela).
-# O app abre na tela "preparando servidor" ate o staging responder.
+# O app abre na tela da marca (o V e os pontos) ate o staging responder.
 - launchApp:
     clearState: true
     permissions:
       location: deny
       notifications: deny
     label: "00.05 · abre o app"
+# abertura-profissional (15/10): a abertura nao cita servidor nem demora.
+- assertNotVisible:
+    text: ".*[Ss]ervidor.*"
+    label: "00.05a · a abertura nao cita o servidor"
 # A caixa da localizacao vem durante esta espera e cobria a tela: a espera
 # nega a caixa enquanto espera (bateria-ainda-pede-mao, 03/10).
 - runFlow:

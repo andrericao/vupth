@@ -1,9 +1,11 @@
 import {
+  atendimentoParaAvaliar,
   avisoDoPush,
   tocouNoOk,
   ACAO_OK,
   CANAL_ALERTAS,
   CATEGORIA_CIENCIA,
+  CATEGORIAS_COM_BOTAO,
   mapPlatform,
   deviceDeletePath,
   notificationRoute,
@@ -49,6 +51,9 @@ describe('notificationRoute', () => {
 
   it('tipo desconhecido/ausente/inválido → null', () => {
     expect(notificationRoute({ type: 'FOO' })).toBeNull();
+    for (const type of ['SWAP_REQUESTED', 'SWAP_OFFERED', 'EARLIER_TURN_OFFERED', 'SWAP_ACCEPTED', 'SWAP_OFFER_ACCEPTED']) {
+      expect(notificationRoute({ type })).toBe('fila');
+    }
     expect(notificationRoute({})).toBeNull();
     expect(notificationRoute(null)).toBeNull();
     expect(notificationRoute({ type: 123 })).toBeNull();
@@ -220,8 +225,27 @@ describe('notificação de ciência (app fechado)', () => {
     expect(tocouNoOk({ actionIdentifier: 'expo.modules.notifications.actions.DEFAULT' })).toBe(false);
   });
 
+  it('o botão que abre a tela não é o OK: segue navegando', () => {
+    expect(tocouNoOk({ actionIdentifier: 'VER_FILA' })).toBe(false);
+    expect(CATEGORIAS_COM_BOTAO.map((c) => c.categoria)).toEqual(['VER_FILA', 'VER_ATENDIMENTO', 'AVALIAR']);
+  });
+
   it('ids combinados com o Backend e o Partner', () => {
     expect(CATEGORIA_CIENCIA).toBe('CIENCIA');
     expect(CANAL_ALERTAS).toBe('alertas');
   });
 });
+
+describe('atendimentoParaAvaliar (notificacao-avaliar)', () => {
+  it('o push de concluído com o atendimento: a avaliação dele', () => {
+    expect(atendimentoParaAvaliar({ type: 'ATTENDANCE_FINISHED', attendanceId: 'a1' })).toBe('a1');
+  });
+
+  it('outro tipo, sem id ou sem dados: nada', () => {
+    expect(atendimentoParaAvaliar({ type: 'ATTENDANCE_STARTED', attendanceId: 'a1' })).toBeNull();
+    expect(atendimentoParaAvaliar({ type: 'ATTENDANCE_FINISHED' })).toBeNull();
+    expect(atendimentoParaAvaliar({ type: 'ATTENDANCE_FINISHED', attendanceId: '' })).toBeNull();
+    expect(atendimentoParaAvaliar(undefined)).toBeNull();
+  });
+});
+

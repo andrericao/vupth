@@ -17,12 +17,14 @@ const mockJoin = jest.fn();
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({ navigate: jest.fn() }),
+  useNavigation: () => ({ navigate: jest.fn(), setParams: jest.fn() }),
+  useRoute: () => ({ params: undefined }),
   useFocusEffect: jest.fn(),
   useScrollToTop: jest.fn(),
 }));
 jest.mock('@hooks/useAttendances', () => ({ useClientAttendances: jest.fn() }));
 jest.mock('@hooks/useIntentions', () => ({ useClientIntentions: () => ({ data: null, refetch: jest.fn() }) }));
+jest.mock('@hooks/usePagamentosPendentes', () => ({ usePagamentosPendentes: () => ({ data: undefined, refetch: jest.fn() }) }));
 jest.mock('@hooks/useMostraPosicao', () => ({ useMostraPosicao: () => true }));
 jest.mock('@hooks/useQueueCountdown', () => ({ useQueueCountdown: jest.fn() }));
 jest.mock('@hooks/useOutOfQueueSwap', () => ({

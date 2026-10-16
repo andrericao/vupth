@@ -1,7 +1,7 @@
 import type { AxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { mock } from './setup';
-import { api, registerAuthStore } from '../../services/api';
+import { api, registerAuthStore, renovarSessao } from '../../services/api';
 
 jest.mock('expo-secure-store');
 const ss = SecureStore as jest.Mocked<typeof SecureStore>;
@@ -232,6 +232,34 @@ describe('api — interceptors', () => {
       expect(results[0].status).toBe('rejected');
       expect(results[1].status).toBe('rejected');
       expect(ss.deleteItemAsync).toHaveBeenCalledWith(USER_KEY);
+    });
+
+    // um-refresh-por-vez (log [SLOW] de 15/10): o WebSocket (beforeConnect) e o
+    // 401 do HTTP renovando juntos faziam DOIS POST /auth/refresh.
+    it('o WebSocket e o 401 renovando juntos: um único refresh', async () => {
+      withTokens('old-tok', 'refresh-1');
+      let getCalls = 0;
+      mock.onGet(PROTECTED).reply(() => {
+        getCalls++;
+        return getCalls === 1 ? [401, {}] : [200, { ok: true }];
+      });
+      let refreshCalls = 0;
+      mock.onPost('/auth/refresh').reply(
+        () =>
+          new Promise((resolve) => {
+            refreshCalls++;
+            setTimeout(
+              () => resolve([200, { access_token: 'new-tok', refresh_token: 'refresh-2', expires_in: 3600 }]),
+              20,
+            );
+          }),
+      );
+
+      const [res, token] = await Promise.all([api.get(PROTECTED), renovarSessao()]);
+
+      expect(res.status).toBe(200);
+      expect(token).toBe('new-tok');
+      expect(refreshCalls).toBe(1);
     });
   });
 });

@@ -17,13 +17,17 @@ const mockRefetchOffers = jest.fn();
 const mockRemovePending = jest.fn();
 const mockCancelIntention = jest.fn();
 const mockCancelSwap = jest.fn();
-let mockIntentions: unknown[] = [];
+const mockJoin = jest.fn();
+let mockIntentions: unknown[] | undefined = [];
 let mockPending: unknown[] = [];
+let mockRouteParams: Record<string, unknown> | undefined;
+const mockSetParams = jest.fn();
 
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({ navigate: mockNavigate, getParent: () => ({ navigate: mockParentNavigate }) }),
+  useNavigation: () => ({ navigate: mockNavigate, setParams: mockSetParams, getParent: () => ({ navigate: mockParentNavigate }) }),
+  useRoute: () => ({ params: mockRouteParams }),
   useFocusEffect: (cb: () => void) => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useEffect } = require('react');
@@ -34,6 +38,11 @@ jest.mock('@react-navigation/native', () => ({
   useScrollToTop: jest.fn(),
 }));
 jest.mock('@hooks/useAttendances', () => ({ useClientAttendances: jest.fn() }));
+let mockPendentes: unknown[] | undefined;
+const mockRefetchPendentes = jest.fn();
+jest.mock('@hooks/usePagamentosPendentes', () => ({
+  usePagamentosPendentes: () => ({ data: mockPendentes, refetch: mockRefetchPendentes }),
+}));
 jest.mock('@hooks/useIntentions', () => ({
   useClientIntentions: () => ({ data: { intentions: mockIntentions }, refetch: mockRefetchIntentions }),
 }));
@@ -64,7 +73,7 @@ jest.mock('@stores/pendingSwapStore', () => ({
 }));
 jest.mock('@stores/queueStore', () => {
   const useQueueStore = (sel: (s: unknown) => unknown) => sel({ leaveQueue: jest.fn() });
-  useQueueStore.getState = () => ({ joinQueue: jest.fn() });
+  useQueueStore.getState = () => ({ joinQueue: mockJoin });
   return { useQueueStore };
 });
 jest.mock('@components/AttendanceDetailModal', () => {
@@ -144,6 +153,8 @@ beforeEach(() => {
   alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   mockIntentions = [];
   mockPending = [];
+  mockRouteParams = undefined;
+  mockPendentes = undefined;
   mockCancelIntention.mockResolvedValue({});
   mockCancelSwap.mockResolvedValue({});
   mockRemovePending.mockResolvedValue(undefined);
@@ -319,3 +330,121 @@ describe('Atendimentos — realizados', () => {
     expect(queryByText('detalhe-fechar')).toBeNull();
   });
 });
+
+describe('Atendimentos — o que sobra (cobertura-98)', () => {
+  it('sem histórico nem agenda carregados, a tela abre vazia', () => {
+    contagem({ activeQueue: null, isInQueue: false });
+    mockHistory.mockReturnValue({ data: undefined, isLoading: false, refetch: mockRefetch, isRefetching: false });
+    mockIntentions = undefined;
+    expect(() => renderWithProviders(<Attendances />)).not.toThrow();
+  });
+
+  it('atendimento ativo no histórico sem fila no aparelho: a fila volta', () => {
+    contagem({ activeQueue: null, isInQueue: false });
+    historico([{ ...REALIZADO, id: 'v1', status: 'SCHEDULED', scheduledTime: new Date().toISOString() }]);
+    renderWithProviders(<Attendances />);
+    expect(mockJoin).toHaveBeenCalledWith(expect.objectContaining({ attendanceId: 'v1' }));
+  });
+
+  it('o convite sem o nome do profissional abre a avaliação mesmo assim', () => {
+    contagem({ activeQueue: null, isInQueue: false });
+    historico([{ ...REALIZADO, professionalName: undefined }]);
+    const { getByTestId, getByText } = renderWithProviders(<Attendances />);
+    fireEvent.press(getByTestId('avaliar-agora'));
+    expect(getByText('avaliar-')).toBeTruthy();
+  });
+
+  it('cancelado, sem loja e sem valor: "—" e só "ver detalhes"', () => {
+    contagem({ activeQueue: null, isInQueue: false });
+    historico([
+      { ...REALIZADO, id: 'c1', status: 'CANCELLED', establishmentName: undefined, totalValue: null, services: [{ customName: 'Barba' }] },
+    ]);
+    const { getByText, queryByTestId } = renderWithProviders(<Attendances />);
+    expect(getByText('Barba')).toBeTruthy();
+    expect(getByText('—')).toBeTruthy();
+    expect(getByText('Toque para ver detalhes')).toBeTruthy();
+    expect(queryByTestId('historico-loja-c1')).toBeNull();
+  });
+
+  it('"Cancelando..." enquanto o pedido de troca e o agendamento cancelam', async () => {
+    mockPending = [{ offerId: 'o1', professionalName: 'Ana', establishmentName: 'Studio' }];
+    mockIntentions = [
+      { id: 'i1', desiredTime: '2030-01-10T15:00:00Z', professionalName: 'Bia', establishmentName: 'Salão', status: 'INTENTION', services: [] },
+    ];
+    mockCancelSwap.mockReturnValue(new Promise(() => {}));
+    mockCancelIntention.mockReturnValue(new Promise(() => {}));
+    const { getAllByText } = renderWithProviders(<Attendances />);
+    fireEvent.press(getAllByText('Cancelar')[0]);
+    act(() => {
+      void tocarNoAlerta('Cancelar pedido');
+    });
+    fireEvent.press(getAllByText('Cancelar')[0]);
+    act(() => {
+      void tocarNoAlerta('Cancelar agendamento');
+    });
+    await waitFor(() => expect(getAllByText('Cancelando...')).toHaveLength(2));
+  });
+});
+
+describe('Atendimentos — notificacao-avaliar (CLI-33)', () => {
+  beforeEach(() => contagem({ activeQueue: null, isInQueue: false }));
+
+  it('sem avaliar: o card tem o ponto; cancelado, não', () => {
+    historico([REALIZADO, { ...REALIZADO, id: 'c1', status: 'CANCELLED' }]);
+    const { getByTestId, queryByTestId } = renderWithProviders(<Attendances />);
+    expect(getByTestId('sem-avaliar-r1')).toBeTruthy();
+    expect(queryByTestId('sem-avaliar-c1')).toBeNull();
+  });
+
+  it('pelo push de concluído: abre a avaliação do atendimento e limpa o parâmetro', () => {
+    historico([REALIZADO]);
+    mockRouteParams = { avaliar: 'r1' };
+    const { getByText } = renderWithProviders(<Attendances />);
+    expect(getByText('avaliar-Carlos')).toBeTruthy();
+    expect(mockSetParams).toHaveBeenCalledWith({ avaliar: undefined });
+  });
+
+  it('pelo push de um atendimento que não dá para avaliar: só limpa', () => {
+    historico([{ ...REALIZADO, status: 'CANCELLED' }]);
+    mockRouteParams = { avaliar: 'r1' };
+    const { queryByText } = renderWithProviders(<Attendances />);
+    expect(queryByText('avaliar-Carlos')).toBeNull();
+    expect(mockSetParams).toHaveBeenCalledWith({ avaliar: undefined });
+  });
+
+  it('pelo push, com o histórico ainda vazio: espera', () => {
+    historico([]);
+    mockRouteParams = { avaliar: 'r1' };
+    renderWithProviders(<Attendances />);
+    expect(mockSetParams).not.toHaveBeenCalled();
+  });
+});
+
+describe('Atendimentos — pendencia-de-pagamento (CLI-30)', () => {
+  beforeEach(() => contagem({ activeQueue: null, isInQueue: false }));
+
+  it('o que falta pagar aparece no topo, com o ponto, e o toque abre o Pix', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { usePendenciaStore } = require('@stores/pendenciaStore');
+    mockPendentes = [
+      { attendance_id: 'a1', status: 'PENDING', amount: 45, professional_name: 'Carlos', establishment_name: 'Barbearia' },
+      { attendance_id: 'a2', status: 'AWAITING_CONFIRMATION', amount: '10' },
+    ];
+    const { getByTestId, getByText } = renderWithProviders(<Attendances />);
+    expect(getByTestId('pendente-a1')).toBeTruthy();
+    expect(getByText('Pagamento pendente · R$ 45,00')).toBeTruthy();
+    expect(getByText('Carlos · Barbearia')).toBeTruthy();
+    expect(getByText('Aguardando o profissional confirmar · R$ 10,00')).toBeTruthy();
+    expect(getByText('Toque para pagar')).toBeTruthy();
+    fireEvent.press(getByTestId('pagar-a1'));
+    expect(usePendenciaStore.getState().pagando).toBe('a1');
+    expect(mockRefetchPendentes).toHaveBeenCalled();
+  });
+
+  it('sem pendência, sem a seção', () => {
+    mockPendentes = [];
+    const { queryByTestId } = renderWithProviders(<Attendances />);
+    expect(queryByTestId('pagamentos-pendentes')).toBeNull();
+  });
+});
+

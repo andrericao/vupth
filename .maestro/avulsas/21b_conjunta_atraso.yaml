@@ -1,4 +1,5 @@
-# Etapa avulsa 21 (bateria-conjunta): Client e Partner no mesmo celular. Precisa
+# Etapa avulsa 21b (etapas-curtas, 15/10: a espera e o atraso; a 21a abre a
+# fila pelo card) (bateria-conjunta): Client e Partner no mesmo celular. Precisa
 # do APK do Partner instalado e do vupth-partner clonado ao lado do vupth.
 appId: ${APP_ID}
 env:
@@ -10,6 +11,8 @@ env:
     file: ../apoio/preparo.yaml
     env:
       ETAPA: "21"
+      # Contas proprias da 21b: a 21a roda na mesma rodada com o mesmo ETAPA.
+      TAG: "${(typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)) + '2'}"
       LOJA: "1"
       CONTA: "1"
       ABERTURA: "1"
@@ -24,22 +27,12 @@ env:
       LOJA_ID: ${output.LOJA_ID}
       SERVICO_ID: ${output.SERVICO_ID}
     label: "21.PD · entra na fila pela API"
-# Com o app aberto, a entrada pela API nao chega ao Inicio (o puxar para
-# atualizar so recarrega as lojas): sem o card-da-fila (bateria 09/10 20:30,
-# 21.02). Reabrir o app traz a fila ativa do servidor — sem clearState, o OTA
-# e o login ficam.
+# A espera de 5 min e meio e com o app FECHADO: a 21b reabre o Client so
+# depois que o Partner marca o atraso.
 - stopApp:
-    label: "21.PE · fecha o app"
-- launchApp:
-    permissions:
-      location: deny
-      notifications: deny
-    label: "21.PF · abre o app de novo (traz a fila ativa)"
+    label: "21.PE · fecha o app (a espera e com ele fechado)"
 - runFlow:
-    file: ../apoio/fechar_aviso.yaml
-    label: "21.PG · fecha as caixas"
-- runFlow:
-    file: ../etapas/21_conjunta_atraso.yaml
+    file: ../etapas/21b_conjunta_atraso.yaml
     env:
       TAG: ${output.TAG}
       LOJA: ${output.LOJA}
@@ -48,4 +41,4 @@ env:
       SERVICO_ID: ${output.SERVICO_ID}
       EMAIL_PROF: ${output.EMAIL_PROF}
       NOME_CLIENTE: ${output.NOME_CLIENTE}
-    label: "21.E1 · roda 21_conjunta_atraso"
+    label: "21.E1 · roda 21b_conjunta_atraso"

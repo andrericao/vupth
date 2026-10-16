@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
+import { Alert, Linking, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
@@ -45,6 +45,7 @@ import {
   filaEncerrada,
 } from "@domain/queue/types";
 import { jaSaiuDaFila, mensagemDeFalhaAoSair, multaSemCiencia } from "@domain/queue/leave";
+import { SUPORTE_SAIR_DA_FILA_URL } from "@utils/suporte";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -57,6 +58,9 @@ import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useMostraPosicao } from "@hooks/useMostraPosicao";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
+import { pendenciasDoErro } from "@domain/pagamento/pendencia";
+import { usePendenciaStore } from "@stores/pendenciaStore";
+import { paymentService } from "@services/paymentService";
 
 type RouteParams = {
   professionalId: string;
@@ -249,18 +253,17 @@ export function QueueStatus() {
       try {
         // Cold start do Render: acorda a instancia antes de criar, evitando spinner
         // "infinito" enquanto o backend (hibernado) demora ~50s a responder.
-        setCreateMsg("Preparando servidor...");
+        setCreateMsg(targetTime ? "Agendando..." : "Entrando na fila...");
         const ready = await waitForBackend({ isCancelled: () => !mountedRef.current });
         if (!mountedRef.current) return;
         if (!ready) {
           await leaveQueue();
           if (mountedRef.current) {
-            setCreateError("O servidor está demorando para responder. Tente novamente em instantes.");
+            setCreateError("Não conseguimos conectar agora. Tente novamente em instantes.");
           }
           return;
         }
 
-        setCreateMsg(targetTime ? "Agendando..." : "Entrando na fila...");
         const { data } = await attendanceService.create(
           targetTime
             ? { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], targetTime }
@@ -279,6 +282,15 @@ export function QueueStatus() {
           const status = error.response?.status;
           const code = error.response?.data?.code;
           const recusa = recusaAoEntrar(error);
+
+          // Pagamento pendente (409 PAYMENT_PENDING, CLI-30): o aviso com o
+          // "Pagar" e um MODAL; a pessoa volta para onde estava.
+          const pendencias = pendenciasDoErro(error);
+          if (pendencias) {
+            usePendenciaStore.getState().avisar(pendencias);
+            navigation.goBack();
+            return;
+          }
 
           // Loja fechada p/ novos (gate C1): oferece "solicitar corte" (BUG5 C2).
           // Este fica em TELA: tem uma ação propria para oferecer.
@@ -400,11 +412,13 @@ export function QueueStatus() {
   // tolerancia), ele manda — inclusive para dizer que nao ha multa. Sem ele, a
   // regra que o servidor aplica hoje: R$ 3 com menos de 1h.
   function regraDaSaida(naTolerancia = false) {
+    // Os minutos que faltam: a frase de retencao sem multa (sair-da-fila-texto).
+    const minutos = semPrevisao ? null : remaining;
     const doServidor = activeQueue?.exitPenaltyValue;
     if (typeof doServidor === "number") {
-      return { multa: doServidor > 0, valor: doServidor, semPrevisao: false };
+      return { multa: doServidor > 0, valor: doServidor, semPrevisao: false, minutos };
     }
-    return { multa: penalty && !naTolerancia, semPrevisao: semPrevisao && !naTolerancia };
+    return { multa: penalty && !naTolerancia, semPrevisao: semPrevisao && !naTolerancia, minutos };
   }
   const saidaAtual = saidaDaFila(regraDaSaida());
   useEffect(() => {
@@ -462,6 +476,20 @@ export function QueueStatus() {
   // O ref segura o segundo aviso enquanto a marca no store ainda esta sendo gravada.
   // Espera o aviso da estimativa ("Entendi") sair da tela: os dois abriam juntos
   // na entrada e, no Android, a advertencia sumia com ele (bateria 03/10, 05.05).
+  // pagamento-no-concluido (CLI-34, DEC-78): o corte concluiu e o pagamento
+  // segue pendente — o modal do Pix (QR e "Copiar código Pix") abre uma vez.
+  const pagamentoAberto = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isFinished || !attendanceId || !accessToken || pagamentoAberto.current === attendanceId) return;
+    pagamentoAberto.current = attendanceId;
+    paymentService
+      .get(attendanceId, accessToken)
+      .then(({ data }) => {
+        if (data.status === "PENDING") usePendenciaStore.getState().pagar(attendanceId);
+      })
+      .catch(() => {});
+  }, [isFinished, attendanceId, accessToken]);
+
   const advertiu = useRef<string | null>(null);
   useEffect(() => {
     const id = activeQueue?.attendanceId;
@@ -645,9 +673,6 @@ export function QueueStatus() {
       <Center flex={1} bg="$brandBackground" px={16}>
         <ActivityIndicator size="large" color="#163300" />
         <Text mt="$2" color="$brandTextSecondary">{createMsg}</Text>
-        <Text mt="$1" size="xs" color="$brandTextSecondary" textAlign="center">
-          Na primeira vez pode levar até ~50s para o servidor acordar.
-        </Text>
       </Center>
     );
   }
@@ -1006,6 +1031,15 @@ export function QueueStatus() {
                 <Text size="xs" color="$forest" flex={1}>
                   {saidaAtual.faixa}
                 </Text>
+                {/* sair-da-fila-texto (Andre, 15/10): o artigo do suporte. */}
+                <TouchableOpacity
+                  onPress={() => Linking.openURL(SUPORTE_SAIR_DA_FILA_URL)}
+                  testID="saida-saiba-mais"
+                >
+                  <Text size="xs" fontWeight="$semibold" color="$forest" underline>
+                    Saiba mais
+                  </Text>
+                </TouchableOpacity>
               </HStack>
             </Box>
           </Box>
@@ -1237,21 +1271,8 @@ export function QueueStatus() {
             />
           </>
         )}
-        {isFinished && attendanceId && !ratedIds.includes(attendanceId) && (
-          <Button title="Avaliar atendimento" onPress={() => setShowRating(true)} />
-        )}
-        {isFinished ? (
-          <Button
-            title="Concluir"
-            variant="outline"
-            onPress={() => {
-              leaveQueue();
-              navigation.navigate("home", undefined, { pop: true });
-            }}
-          />
-        ) : (
-          <Button title="Voltar ao início" onPress={() => navigation.navigate("home", undefined, { pop: true })} />
-        )}
+        {/* Concluido nao chega aqui: a tela de concluido (com o Avaliar) volta antes. */}
+        <Button title="Voltar ao início" onPress={() => navigation.navigate("home", undefined, { pop: true })} />
         {/* Sair da fila: vermelho e SEMPRE a última opção (pedido do Andre). */}
         {canCancel && (
           <Button
@@ -1297,12 +1318,6 @@ export function QueueStatus() {
         onChanged={refresh}
       />
       <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
-      <RatingModal
-        visible={showRating}
-        attendanceId={attendanceId}
-        professionalName={activeQueue?.professionalName ?? paramProfName}
-        onClose={() => setShowRating(false)}
-      />
     </VStack>
   );
 }

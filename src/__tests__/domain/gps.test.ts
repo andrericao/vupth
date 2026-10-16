@@ -135,3 +135,10 @@ describe('UF por extenso vinda do Android (17/09)', () => {
     expect(toAddressDraft({ city: 'Lisboa', region: 'Lisboa' }).state).toBe('Lisboa');
   });
 });
+
+describe('toAddressDraft — o que sobra (cobertura-98)', () => {
+  it('sem city usa a subregion; sem as duas, a cidade fica de fora', () => {
+    expect(toAddressDraft({ subregion: 'Palhoça', region: 'SC' }).city).toBe('Palhoça');
+    expect(toAddressDraft({ district: 'Centro' })).toEqual({ neighborhood: 'Centro' });
+  });
+});

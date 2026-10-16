@@ -21,9 +21,9 @@ a avulsa roda antes a etapa de que depende (a 06 roda a 05; a 11, a 10). Uma
 etapa só: `ETAPAS="05 06" bash .maestro/bateria.sh`. O `bateria_completa.yaml`
 segue como roteiro único, para rodar à mão com `maestro test`.
 
-**Conjunta (bateria-conjunta, 05/10).** As etapas 18, 19, 21 e 22 abrem o
+**Conjunta (bateria-conjunta, 05/10).** As etapas 18, 19, 21b e 22 abrem o
 Partner no mesmo celular e conferem no Client: o tempo do serviço novo (18), o
-só agenda (19), o atraso marcado (21) e o atendimento finalizado e avaliado (22). Os subfluxos são os do Partner, lidos do clone ao lado
+só agenda (19), o atraso marcado (21b; a 21a só abre a fila pelo card) e o atendimento finalizado e avaliado (22). Os subfluxos são os do Partner, lidos do clone ao lado
 (`../vupth-partner/.maestro/conjunta`). Sem esse clone ou sem o APK do Partner,
 elas aparecem como ⏭.
 

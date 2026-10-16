@@ -4,6 +4,7 @@ import * as Updates from 'expo-updates';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { Sistema } from '@screens/Sistema';
+import { useComingSoonStore } from '@stores/comingSoonStore';
 
 // cobertura-98 (08/10): "Verificar atualização" — baixa e reinicia, já está na
 // mais nova, ou não dá para verificar; e o OTA na linha da versão.
@@ -73,3 +74,34 @@ describe('Sistema — Verificar atualização', () => {
     expect(getByText(/OTA abcdef12/)).toBeTruthy();
   });
 });
+
+describe('Sistema — o que sobra (cobertura-98)', () => {
+  afterEach(() => {
+    up.createdAt = new Date('2026-10-08T12:00:00Z') as never;
+    useComingSoonStore.setState({ counts: {} });
+  });
+
+  it('"Verificando..." enquanto o servidor do OTA responde', async () => {
+    let soltar: (v: object) => void = () => {};
+    up.checkForUpdateAsync.mockImplementation(() => new Promise((r) => (soltar = r)));
+    const tela = await verificar();
+    expect(tela.getByText('Verificando...')).toBeTruthy();
+    await act(async () => soltar({ isAvailable: false }));
+    expect(tela.getByText('Verificar atualização')).toBeTruthy();
+  });
+
+  it('OTA sem data: só o id', () => {
+    up.createdAt = null as never;
+    const { getByText } = renderWithProviders(<Sistema />);
+    expect(getByText(/OTA abcdef12$/)).toBeTruthy();
+  });
+
+  it('as funcionalidades aguardadas, a mais tocada primeiro (7 toques na versão)', () => {
+    useComingSoonStore.setState({ counts: { pouco: 1, nada: 0, muito: 5 } });
+    const tela = renderWithProviders(<Sistema />);
+    for (let i = 0; i < 7; i++) fireEvent.press(tela.getByTestId('version-line'));
+    const textos = tela.getAllByText(/^(pouco|muito|nada)$/).map((t) => t.props.children);
+    expect(textos).toEqual(['muito', 'pouco']);
+  });
+});
+

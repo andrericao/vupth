@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Alert, TouchableOpacity } from "react-native";
+import { Alert, Linking, TouchableOpacity } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -10,7 +10,7 @@ import {
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone, Palette } from "lucide-react-native";
+import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone, Palette, LifeBuoy, Ticket } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -22,6 +22,8 @@ import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
 import { addressService, AddressResponse } from "@services/addressService";
 import { fs } from "@stores/fonteStore";
+import { SUPORTE_URL } from "@utils/suporte";
+import { CUPOM_LIGADO } from "@domain/campanhas";
 
 function MenuItem({
   icon,
@@ -305,6 +307,36 @@ export function Settings() {
               icon={<Palette size={20} color="#163300" />}
               label="Tema e tamanho da fonte"
               onPress={() => navigation.navigate("aparencia")}
+              last
+            />
+          </Grupo>
+        </VStack>
+        )}
+
+        {/* Promocoes (cupom-no-app): o cupom. Desligado ate o Backend subir. */}
+        {isAuthenticated && CUPOM_LIGADO && (
+        <VStack mt="$6">
+          <Grupo label="Promoções">
+            <MenuItem
+              icon={<Ticket size={20} color="#163300" />}
+              label="Cupom"
+              onPress={() => navigation.navigate("promocoes")}
+              last
+            />
+          </Grupo>
+        </VStack>
+        )}
+
+        {/* Suporte (botao-suporte): abre o site de suporte no navegador, fora
+            do app. So de quem tem conta, como Aparencia e Sistema (o visitante
+            ve so o convite, os Termos e a versao — Andre, 02/10). */}
+        {isAuthenticated && (
+        <VStack mt="$6">
+          <Grupo label="Ajuda">
+            <MenuItem
+              icon={<LifeBuoy size={20} color="#163300" />}
+              label="Suporte"
+              onPress={() => Linking.openURL(SUPORTE_URL)}
               last
             />
           </Grupo>

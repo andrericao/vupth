@@ -1,35 +1,14 @@
-# Bateria conjunta: o profissional marca no Partner que o cliente nao chegou;
-# o Client mostra "Atrasado" e o aviso "Este e o seu 1º atraso" com Entendi
-# (aviso-de-atraso, contagem-de-atrasos). O Partner so marca 5 min depois do
-# horario: a etapa espera. Comeca logado, ja na fila (entrou pela API).
+# Etapa 21b (etapas-curtas, 15/10: a 21 virou 21a + 21b; a abertura da fila
+# pelo card ficou na 21a). Bateria conjunta: o profissional marca no Partner que
+# o cliente nao chegou; o Client, aberto de novo, mostra o aviso "Este e o seu
+# 1º atraso" com Entendi e a fila "Atrasado" (aviso-de-atraso, contagem-de-
+# atrasos). O aviso vive no App (useAvisoDeAtraso), nao na tela da fila: vale
+# em qualquer tela. O Partner so marca 5 min depois do horario: a etapa espera
+# com o Client FECHADO (menos memoria no aparelho, que caia na 21.0B).
+# Comeca logado, ja na fila (entrou pela API), com o app fechado.
 # env: EMAIL_PROF, NOME_CLIENTE
 appId: ${APP_ID}
 ---
-- tapOn:
-    text: "Início"
-    label: "21.01 · toca em Início"
-- extendedWaitUntil:
-    visible:
-      id: "card-da-fila"
-    timeout: ${60000 * LENTO}
-    label: "21.02 · espera card-da-fila"
-- tapOn:
-    id: "card-da-fila"
-    label: "21.03 · abre a fila"
-- runFlow:
-    file: ../apoio/esperar_a_fila.yaml
-    label: "21.04 · espera queue-position (fecha o aviso da estimativa)"
-# A politica da multa (menos de 1h30) aparece uma vez: fecha.
-- runFlow:
-    when:
-      visible: "Sua vez está chegando"
-    commands:
-      - tapOn:
-          id: "dialogo-botao-0"
-    label: "21.05 · fecha a política da multa, se vier"
-- runFlow:
-    file: ../apoio/fechar_aviso.yaml
-    label: "21.06 · fecha as caixas"
 # O Partner so deixa marcar atraso 5 min depois do horario. E tempo de relogio,
 # nao de aparelho: sem LENTO (no emulador virava 11 min e o adb caia, "device
 # offline", baterias 11/10 06:06 e 07:02). 11 voltas de 30 s, com o "Wait" do
@@ -59,13 +38,15 @@ appId: ${APP_ID}
 - stopApp:
     appId: com.vupth.partner.preview
     label: "21.09b · fecha o Partner"
-# stopApp: false (como na 18 e na 19): sem ele o launchApp reabre o Client do
-# zero, e no emulador a leitura da tela travou 100 s logo depois, ate o driver
-# cair (21.0B, 4 vezes em 11/10; maestro.log das 13:56).
+# O Client estava fechado durante a espera: abre de novo, sem limpar (o login
+# e o OTA ficam), e a abertura traz a fila ja com o atraso do servidor.
 - launchApp:
     appId: ${APP_ID}
     stopApp: false
-    label: "21.0A · volta ao Client (sem limpar)"
+    permissions:
+      location: deny
+      notifications: deny
+    label: "21.0A · abre o Client de novo (sem limpar)"
 - extendedWaitUntil:
     visible: ".*Este é o seu 1º atraso.*"
     timeout: ${60000 * LENTO}
@@ -73,7 +54,10 @@ appId: ${APP_ID}
 - tapOn:
     text: "Entendi"
     label: "21.0C · toca em Entendi"
+- tapOn:
+    id: "card-da-fila"
+    label: "21.0D · abre a fila"
 - extendedWaitUntil:
     visible: "Atrasado"
     timeout: ${30000 * LENTO}
-    label: "21.0D · a fila mostra Atrasado"
+    label: "21.0E · a fila mostra Atrasado"

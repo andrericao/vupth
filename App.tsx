@@ -48,6 +48,10 @@ import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { usePedidoDeCorte } from "@hooks/usePedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
+import { useIndicacao } from "@hooks/useIndicacao";
+import { FaixaAvaliar } from "@components/FaixaAvaliar";
+import { ModalDePagamento } from "@components/ModalDePagamento";
+import { useLembreteDePendencia } from "@hooks/useLembreteDePendencia";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 import { aplicarOtaNaAbertura } from "@services/otaNaAbertura";
@@ -187,6 +191,10 @@ export default function App() {
   // ficar aqui.
   useDeviceLocation();
 
+  // Link de indicacao (/i/<codigo>, CLI-34): guarda o codigo e, logado, liga o
+  // cliente a quem o indicou (POST /referrals/claim). Sem react-query.
+  useIndicacao();
+
   return (
     <PersistQueryClientProvider
       client={queryClient}
@@ -214,6 +222,10 @@ export default function App() {
             de a fonte carregar precisa aparecer do mesmo jeito. */}
         <DialogoVupth />
         <ConviteDeTroca />
+        {/* pendencia-de-pagamento (CLI-30): o aviso do 409 e o Pix. */}
+        <ModalDePagamento />
+        {/* notificacao-avaliar (CLI-33): uma vez, no topo, depois do corte. */}
+        {fontGateOpen && backendReady ? <FaixaAvaliar /> : null}
       </GluestackUIProvider>
     </PersistQueryClientProvider>
   );
@@ -232,5 +244,7 @@ function QueryScopedHooks() {
   // Convite de troca como popup em qualquer tela (D16) — antes a oferta so era
   // buscada com a tela da fila aberta, e o outro cliente nao a achava.
   useConviteDeTroca();
+  // Pagamento pendente (CLI-35): o modal uma vez a cada abertura do app.
+  useLembreteDePendencia();
   return null;
 }

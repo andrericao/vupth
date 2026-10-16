@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Alert, TouchableOpacity, RefreshControl } from "react-native";
-import { useNavigation, useFocusEffect, useScrollToTop } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, useRoute, useScrollToTop } from "@react-navigation/native";
 import {
   VStack,
   Text,
@@ -24,6 +24,9 @@ import { useRatedStore } from "@stores/ratedStore";
 import { SkeletonList } from "@components/Skeleton";
 import { LiveDot } from "@components/LiveDot";
 import { RatingModal } from "@components/RatingModal";
+import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
+import { reais, textoDoStatus } from "@domain/pagamento/pendencia";
+import { usePendenciaStore } from "@stores/pendenciaStore";
 import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
 import { ClientAttendance } from "@services/attendanceService";
 import { intentionsService } from "@services/intentionsService";
@@ -106,6 +109,23 @@ export function Attendances() {
   // pode ser jogado nele de novo (Andre, 19/09). Aqui ele fica à mão, e leva ao
   // atendimento que aconteceu — quem não quiser, só ignora.
   const semAvaliar = atendimentoSemAvaliar(history, ratedIds);
+  // pendencia-de-pagamento (CLI-30): o que falta pagar, no topo, com o ponto.
+  const { data: pendentes = [], refetch: refetchPendentes } = usePagamentosPendentes();
+  const pagar = usePendenciaStore((s) => s.pagar);
+
+  // Push de concluido (notificacao-avaliar, CLI-33): chega com o atendimento a
+  // avaliar; com o historico na mao, abre a avaliacao dele uma vez.
+  const route = useRoute();
+  const avaliarPeloPush = (route.params as { avaliar?: string } | undefined)?.avaliar;
+  useEffect(() => {
+    if (!avaliarPeloPush || history.length === 0) return;
+    const alvo = history.find((a) => a.id === avaliarPeloPush);
+    // Abrir uma vez ao chegar o parametro do push — o efeito e o gatilho.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (alvo && podeAvaliar(alvo, ratedIds)) setRatingFor({ id: alvo.id, name: alvo.professionalName });
+    navigation.setParams({ avaliar: undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [avaliarPeloPush, history]);
 
   const intentionGroups = groupIntentionsByDay(agenda?.intentions ?? []);
 
@@ -114,7 +134,8 @@ export function Attendances() {
     useCallback(() => {
       refetch();
       refetchIntentions();
-    }, [refetch, refetchIntentions]),
+      refetchPendentes();
+    }, [refetch, refetchIntentions, refetchPendentes]),
   );
 
   // Cancela uma intenção (meus agendamentos) com confirmação.
@@ -222,6 +243,27 @@ export function Attendances() {
           <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#163300" colors={["#163300"]} />
         }
       >
+        {pendentes.length > 0 && (
+          <VStack px={16} mt="$5" gap="$2" testID="pagamentos-pendentes">
+            {pendentes.map((p) => (
+              <TouchableOpacity key={p.attendance_id} onPress={() => pagar(p.attendance_id)} testID={`pagar-${p.attendance_id}`}>
+                <HStack bg="$brandSurface" borderRadius="$card" p="$4" gap="$3" alignItems="center">
+                  <Box w={8} h={8} borderRadius={4} bg="$brandDanger" testID={`pendente-${p.attendance_id}`} />
+                  <VStack flex={1}>
+                    <Text fontFamily="$heading" size="sm">
+                      {textoDoStatus(p.status)} · {reais(p.amount)}
+                    </Text>
+                    <Text size="xs" color="$brandTextSecondary">
+                      {[p.professional_name, p.establishment_name].filter(Boolean).join(" · ") || "Toque para pagar"}
+                    </Text>
+                  </VStack>
+                  <ChevronRight size={16} color="#163300" />
+                </HStack>
+              </TouchableOpacity>
+            ))}
+          </VStack>
+        )}
+
         {semAvaliar && (
           <Box px={16} mt="$5">
             <TouchableOpacity onPress={() => setDetailFor(semAvaliar)} testID="convite-avaliar">
@@ -458,9 +500,15 @@ export function Attendances() {
                     <Box bg="$brandSurface" p="$4" borderRadius="$card">
                       <HStack justifyContent="space-between" alignItems="flex-start">
                         <VStack flex={1} pr="$2">
-                          <Text fontFamily="$heading" size="sm">
-                            {a.professionalName}
-                          </Text>
+                          <HStack alignItems="center" gap="$1.5">
+                            <Text fontFamily="$heading" size="sm">
+                              {a.professionalName}
+                            </Text>
+                            {/* Sem avaliar (notificacao-avaliar, CLI-33): o ponto. */}
+                            {canRate ? (
+                              <Box w={8} h={8} borderRadius={4} bg="$brandDanger" testID={`sem-avaliar-${a.id}`} />
+                            ) : null}
+                          </HStack>
                           {a.establishmentName ? (
                             <Text size="xs" color="$brandTextSecondary" testID={`historico-loja-${a.id}`}>
                               {a.establishmentName}

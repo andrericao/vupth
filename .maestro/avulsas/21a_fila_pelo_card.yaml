@@ -1,0 +1,45 @@
+# Etapa avulsa 21a (etapas-curtas, 15/10: a 21 virou 21a + 21b): entra na fila
+# pela API e abre a fila pelo card. So o Client, sem a espera de relogio.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "21"
+      # Contas proprias da 21a: a 21b roda na mesma rodada com o mesmo ETAPA.
+      TAG: "${(typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)) + '1'}"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "21.P0 · prepara a etapa"
+- runScript:
+    file: ../scripts/fila_pela_api.js
+    env:
+      ACAO: "entrar"
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+      PROF_ID: ${output.PROF_ID}
+      LOJA_ID: ${output.LOJA_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+    label: "21.PD · entra na fila pela API"
+# Com o app aberto, a entrada pela API nao chega ao Inicio (o puxar para
+# atualizar so recarrega as lojas): sem o card-da-fila (bateria 09/10 20:30,
+# 21.02). Reabrir o app traz a fila ativa do servidor — sem clearState, o OTA
+# e o login ficam.
+- stopApp:
+    label: "21.PE · fecha o app"
+- launchApp:
+    permissions:
+      location: deny
+      notifications: deny
+    label: "21.PF · abre o app de novo (traz a fila ativa)"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "21.PG · fecha as caixas"
+- runFlow:
+    file: ../etapas/21a_fila_pelo_card.yaml
+    label: "21.E1 · roda 21a_fila_pelo_card"

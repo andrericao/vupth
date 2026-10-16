@@ -1,0 +1,59 @@
+// Troca de lugar pela notificacao (troca-pela-notificacao, DEC-51; contrato do
+// Backend 43efd61). Os pushes SWAP_REQUESTED, SWAP_OFFERED e
+// EARLIER_TURN_OFFERED chegam com a categoria TROCA: CONFIRMAR aceita dali
+// mesmo, AGORA NAO so fecha. Se a espera cair a menos de 1 hora, o Backend
+// responde 409 SWAP_NEEDS_CONFIRMATION: o app mostra o aviso e o CONFIRMAR
+// manda de novo com confirmLessThanHour=true. Sem nome do outro cliente (Andre,
+// 15/10): so o tempo de espera.
+
+export const CATEGORIA_TROCA = 'TROCA';
+export const ACAO_CONFIRMAR = 'CONFIRMAR';
+export const ACAO_AGORA_NAO = 'AGORA_NAO';
+
+export type AceiteDaTroca =
+  | { tipo: 'pedido'; id: string }
+  | { tipo: 'oferta'; id: string }
+  | { tipo: 'adiantada'; attendanceId: string };
+
+type Dados = {
+  type?: unknown;
+  swapRequestId?: unknown;
+  offerId?: unknown;
+  attendanceId?: unknown;
+};
+
+const texto = (v: unknown): string | null => (typeof v === 'string' && v ? v : null);
+
+/** O que o CONFIRMAR aceita, pelo `data` do push. `null` = nada a aceitar. */
+export function aceiteDaTroca(data: unknown): AceiteDaTroca | null {
+  const d = (data ?? {}) as Dados;
+  if (d.type === 'SWAP_REQUESTED') {
+    const id = texto(d.swapRequestId);
+    return id ? { tipo: 'pedido', id } : null;
+  }
+  if (d.type === 'SWAP_OFFERED') {
+    const id = texto(d.offerId);
+    return id ? { tipo: 'oferta', id } : null;
+  }
+  if (d.type === 'EARLIER_TURN_OFFERED') {
+    const attendanceId = texto(d.attendanceId);
+    return attendanceId ? { tipo: 'adiantada', attendanceId } : null;
+  }
+  return null;
+}
+
+/** O Backend pede a confirmacao de "menos de 1 hora" (409 SWAP_NEEDS_CONFIRMATION). */
+export function precisaConfirmarMenosDeUmaHora(erro: unknown): boolean {
+  const r = (erro as { response?: { status?: number; data?: { code?: string } } } | null)?.response;
+  return r?.status === 409 && r.data?.code === 'SWAP_NEEDS_CONFIRMATION';
+}
+
+/** O aviso de menos de 1 hora, com a espera nova quando o push a trouxe. */
+export function avisoDeMenosDeUmaHora(data: unknown): { titulo: string; mensagem: string } {
+  const nova = (data as { newWaitMinutes?: unknown } | null)?.newWaitMinutes;
+  const espera = typeof nova === 'number' && nova >= 0 ? `Sua espera fica em ${Math.round(nova)} min. ` : '';
+  return {
+    titulo: 'Menos de 1 hora',
+    mensagem: `${espera}Sair da fila depois da troca gera multa.`,
+  };
+}

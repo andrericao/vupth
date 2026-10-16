@@ -97,4 +97,34 @@ describe('usePedidoDeCorte', () => {
     renderHook(() => usePedidoDeCorte(), { wrapper });
     expect(mockHistory).not.toHaveBeenCalled();
   });
+
+  it('aceito com fila já no aparelho e sem o nome: só avisa, com "O profissional"', async () => {
+    const fila = { attendanceId: 'att-velho' } as never;
+    useQueueStore.setState({ activeQueue: fila });
+    usePedidoDeCorteStore.setState({ pedidos: [pedido({ professionalName: '' })] });
+    mockHistory.mockResolvedValue({
+      data: [{ id: 'att-novo', professionalId: 'p1', establishmentId: 'e1', status: 'SCHEDULED', scheduledTime: new Date().toISOString(), services: [] }],
+    });
+
+    renderHook(() => usePedidoDeCorte(), { wrapper });
+
+    await waitFor(() => expect(Alert.alert).toHaveBeenCalledWith('Pedido aceito', expect.stringMatching(/^O profissional aceitou/)));
+    expect(useQueueStore.getState().activeQueue).toBe(fila);
+  });
+
+  it('um ainda no prazo e outro vencido sem nome: pula o primeiro e avisa o segundo', async () => {
+    usePedidoDeCorteStore.setState({
+      pedidos: [
+        pedido(),
+        pedido({ id: 'cr2', professionalId: 'p2', professionalName: '', criadoEm: Date.now() - 10 * 60_000, expiraEm: Date.now() - 5 * 60_000 }),
+      ],
+    });
+    mockHistory.mockResolvedValue({ data: [] });
+
+    renderHook(() => usePedidoDeCorte(), { wrapper });
+
+    await waitFor(() => expect(Alert.alert).toHaveBeenCalledWith('Pedido não aceito', expect.stringMatching(/^O profissional não aceitou/)));
+    expect(usePedidoDeCorteStore.getState().pedidos.map((p) => p.id)).toEqual(['cr1']);
+  });
 });
+

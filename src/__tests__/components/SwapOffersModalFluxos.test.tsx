@@ -24,7 +24,7 @@ let alertSpy: jest.SpyInstance;
 const onClose = jest.fn();
 const onChanged = jest.fn();
 
-function montar(establishmentId: string | undefined = 'e1') {
+function montar(establishmentId: string | null = 'e1') {
   return renderWithProviders(
     <SwapOffersModal visible professionalId="p1" establishmentId={establishmentId} onClose={onClose} onChanged={onChanged} />,
   );
@@ -67,7 +67,7 @@ describe('SwapOffersModal — aceitar', () => {
 
 describe('SwapOffersModal — meus pedidos', () => {
   it('cancela, avisa a tela e recarrega', async () => {
-    const { findByText } = montar(undefined);
+    const { findByText } = montar(null);
     const botao = await findByText('Cancelar');
     await act(async () => {
       fireEvent.press(botao);
@@ -105,5 +105,41 @@ describe('SwapOffersModal — vazio', () => {
     const { findByText } = montar();
     fireEvent.press(await findByText('Fechar'));
     expect(onClose).toHaveBeenCalled();
+  });
+});
+
+describe('SwapOffersModal — o que sobra (cobertura-98)', () => {
+  it('ocupado: o botão diz "Aceitando..." e um segundo toque não repete', async () => {
+    let soltar: () => void = () => {};
+    svc.accept.mockImplementation(() => new Promise<void>((r) => (soltar = r)));
+    const { findByText, getByText } = montar();
+    const botao = await findByText('Aceitar troca');
+    await act(async () => {
+      fireEvent.press(botao);
+    });
+    expect(getByText('Aceitando...')).toBeTruthy();
+    await act(async () => {
+      fireEvent.press(getByText('Aceitando...'));
+      fireEvent.press(getByText('Cancelar'));
+    });
+    expect(svc.accept).toHaveBeenCalledTimes(1);
+    expect(svc.cancel).not.toHaveBeenCalled();
+    await act(async () => soltar());
+  });
+
+  it('sem a loja, não lê a fila; sem sessão ou fechado, não busca nada', async () => {
+    const { queueService } = jest.requireMock('@services/queueService');
+    const { findByText, unmount } = montar(null);
+    await findByText('Aceitar troca');
+    expect(queueService.getQueue).not.toHaveBeenCalled();
+    unmount();
+
+    jest.clearAllMocks();
+    useAuthStore.setState({ accessToken: null });
+    montar();
+    renderWithProviders(
+      <SwapOffersModal visible={false} professionalId="p1" establishmentId="e1" onClose={onClose} onChanged={onChanged} />,
+    );
+    await waitFor(() => expect(svc.listAcceptable).not.toHaveBeenCalled());
   });
 });

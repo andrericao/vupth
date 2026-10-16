@@ -76,7 +76,7 @@ describe('ForgotPassword — passo 1 (enviar código)', () => {
     // Portão pendurado = exatamente o cold start do Render.
     mockWaitForBackend.mockImplementation(() => new Promise(() => {}));
 
-    const { findByText } = await renderAndSend();
+    const { findByText, queryByText } = await renderAndSend();
 
     // O aviso só aparece depois de alguns segundos: servidor quente responde
     // na hora e não deve piscar "acordando".
@@ -84,7 +84,8 @@ describe('ForgotPassword — passo 1 (enviar código)', () => {
       jest.advanceTimersByTime(4000);
     });
 
-    expect(await findByText(/Acordando o servidor/)).toBeTruthy();
+    expect(await findByText('Conectando...')).toBeTruthy();
+    expect(queryByText(/servidor/i)).toBeNull();
   });
 
   it('cancelar a espera não dispara o POST de esqueci-senha', async () => {

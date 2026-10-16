@@ -1,0 +1,30 @@
+# Etapa 21a (etapas-curtas, 15/10: a 21 virou 21a + 21b): o cliente que entrou
+# na fila pela API abre a fila pelo card do Início e fecha as caixas. Sem a
+# espera de relógio e sem o Partner — roda também no emulador.
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Início"
+    label: "21.01 · toca em Início"
+- extendedWaitUntil:
+    visible:
+      id: "card-da-fila"
+    timeout: ${60000 * LENTO}
+    label: "21.02 · espera card-da-fila"
+- tapOn:
+    id: "card-da-fila"
+    label: "21.03 · abre a fila"
+- runFlow:
+    file: ../apoio/esperar_a_fila.yaml
+    label: "21.04 · espera queue-position (fecha o aviso da estimativa)"
+# A politica da multa (menos de 1h30) aparece uma vez: fecha.
+- runFlow:
+    when:
+      visible: "Sua vez está chegando"
+    commands:
+      - tapOn:
+          id: "dialogo-botao-0"
+    label: "21.05 · fecha a política da multa, se vier"
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "21.06 · fecha as caixas"

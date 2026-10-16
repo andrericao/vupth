@@ -1,4 +1,4 @@
-import { Alert, StyleSheet } from 'react-native';
+import { Alert, Modal, StyleSheet } from 'react-native';
 import { act, fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
@@ -65,4 +65,35 @@ describe('Aparência', () => {
     expect(queryByTestId('janela-da-fonte')).toBeNull();
     expect(useFonteStore.getState().passo).toBe(2);
   });
+
+  it('Salvar sem mudar o passo só fecha; tocar fora ou no voltar do Android também fecha', async () => {
+    useFonteStore.setState({ passo: 1 });
+    const escolher = jest.spyOn(useFonteStore.getState(), 'escolher');
+    const { getByTestId, queryByTestId, UNSAFE_getByType } = renderWithProviders(<Aparencia />);
+    // O fundo escuro da janela: o primeiro ancestral com a cor dele e o toque.
+    const fundo = () => {
+      let no = getByTestId('janela-da-fonte').parent;
+      while (no && !(no.props.onPress && StyleSheet.flatten(no.props.style)?.backgroundColor === '#16330073')) no = no.parent;
+      return no!;
+    };
+
+    fireEvent.press(getByTestId('aparencia-fonte'));
+    fireEvent.press(getByTestId('janela-da-fonte'));
+    expect(queryByTestId('janela-da-fonte')).not.toBeNull();
+    await act(async () => {
+      fireEvent.press(getByTestId('salvar-fonte'));
+    });
+    expect(queryByTestId('janela-da-fonte')).toBeNull();
+    expect(escolher).not.toHaveBeenCalled();
+
+    fireEvent.press(getByTestId('aparencia-fonte'));
+    act(() => fundo().props.onPress());
+    expect(queryByTestId('janela-da-fonte')).toBeNull();
+
+    fireEvent.press(getByTestId('aparencia-fonte'));
+    act(() => UNSAFE_getByType(Modal).props.onRequestClose());
+    expect(queryByTestId('janela-da-fonte')).toBeNull();
+    escolher.mockRestore();
+  });
 });
+

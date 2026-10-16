@@ -7,10 +7,12 @@ import * as SecureStore from "expo-secure-store";
 
 import {
   acquireExpoPushToken,
+  atendimentoParaAvaliar,
   avisoDoPush,
   ACAO_OK,
   CANAL_ALERTAS,
   CATEGORIA_CIENCIA,
+  CATEGORIAS_COM_BOTAO,
   mapPlatform,
   notificationRoute,
   registrarComRetentativa,
@@ -18,7 +20,9 @@ import {
 } from "@domain/push";
 import { pushService } from "@services/pushService";
 import { oferecerVezAdiantada } from "@utils/vezAdiantada";
-import { navigateFromNotification } from "@routes/navigationRef";
+import { confirmarTrocaPeloPush } from "@utils/trocaPeloPush";
+import { ACAO_AGORA_NAO, ACAO_CONFIRMAR, CATEGORIA_TROCA } from "@domain/trocaPeloPush";
+import { abrirAvaliacao, navigateFromNotification } from "@routes/navigationRef";
 import { useAuthStore } from "@stores/authStore";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { PUSH_PERGUNTADO_KEY } from "@hooks/ofertaDePush";
@@ -97,6 +101,19 @@ export function usePushRegistration() {
       Notifications.setNotificationCategoryAsync(CATEGORIA_CIENCIA, [
         { identifier: ACAO_OK, buttonTitle: "OK", options: { opensAppToForeground: false } },
       ]).catch(() => {});
+      // Os botoes que abrem a tela: o toque neles cai no mesmo `tratar` do
+      // corpo (nao e o OK), que navega pelo data.type.
+      // A troca (troca-pela-notificacao): CONFIRMAR abre o app e aceita;
+      // AGORA NAO so fecha.
+      Notifications.setNotificationCategoryAsync(CATEGORIA_TROCA, [
+        { identifier: ACAO_CONFIRMAR, buttonTitle: "CONFIRMAR", options: { opensAppToForeground: true } },
+        { identifier: ACAO_AGORA_NAO, buttonTitle: "AGORA NÃO", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+      for (const c of CATEGORIAS_COM_BOTAO) {
+        Notifications.setNotificationCategoryAsync(c.categoria, [
+          { identifier: c.acao, buttonTitle: c.titulo, options: { opensAppToForeground: true } },
+        ]).catch(() => {});
+      }
     } catch {
       // binário sem o módulo nativo de push.
     }
@@ -206,12 +223,25 @@ export function usePushRegistration() {
       const id = response.notification.request.identifier;
       if (tratadas.has(id)) return;
       tratadas.add(id);
-      // "OK" só fecha a notificação — não navega.
-      if (tocouNoOk(response)) {
+      // "OK" e "AGORA NÃO" só fecham a notificação — não navegam.
+      if (tocouNoOk(response) || response.actionIdentifier === ACAO_AGORA_NAO) {
         Notifications.dismissNotificationAsync(id).catch(() => {});
         return;
       }
       const data = response.notification.request.content.data;
+      // CONFIRMAR da troca: abre a fila e aceita dali.
+      if (response.actionIdentifier === ACAO_CONFIRMAR) {
+        Notifications.dismissNotificationAsync(id).catch(() => {});
+        navigateFromNotification("fila");
+        void confirmarTrocaPeloPush(data);
+        return;
+      }
+      // Concluido (notificacao-avaliar): o toque abre a avaliacao dele.
+      const avaliar = atendimentoParaAvaliar(data);
+      if (avaliar) {
+        abrirAvaliacao(avaliar);
+        return;
+      }
       navigateFromNotification(notificationRoute(data));
     };
     try {

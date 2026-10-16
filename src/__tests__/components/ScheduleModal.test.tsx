@@ -93,6 +93,26 @@ describe('ScheduleModal — barra de encaixe', () => {
     alerta.mockRestore();
   });
 
+  it('pagamento pendente (409 PAYMENT_PENDING, CLI-30): fecha e mostra o aviso com o "Pagar"', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { usePendenciaStore } = require('@stores/pendenciaStore');
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const itens = [{ attendance_id: 'a0', status: 'PENDING', amount: 45 }];
+    (intentionsService.create as jest.Mock).mockRejectedValue({ response: { status: 409, data: { code: 'PAYMENT_PENDING', items: itens } } });
+    const { getAllByRole, findByTestId, getByTestId, props } = abrir();
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    fireEvent.press(await findByTestId('horario-09:00'));
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    expect(usePendenciaStore.getState().aviso).toEqual(itens);
+    expect(props.onClose).toHaveBeenCalled();
+    expect(alerta).not.toHaveBeenCalled();
+    usePendenciaStore.getState().fechar();
+    alerta.mockRestore();
+  });
+
   it('visitante: confirmar leva ao login, sem agendar', async () => {
     useAuthStore.setState({ accessToken: null });
     const { getAllByRole, findByTestId, getByTestId, props } = abrir();
@@ -163,3 +183,56 @@ describe('ScheduleModal — modo corte', () => {
     expect(intentionsService.create).not.toHaveBeenCalled();
   });
 });
+
+describe('ScheduleModal — o que sobra (cobertura-98)', () => {
+  const horas = (dia: Record<string, unknown>) =>
+    (establishmentService.getHours as jest.Mock).mockResolvedValue({
+      data: { configured: true, weekly: [], exceptions: [], upcoming: [{ date: dataISO(amanha()), day: 'MONDAY', ...dia }] },
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useAuthStore.setState({ accessToken: 'tk' });
+    (intentionsService.getPublicAgenda as jest.Mock).mockResolvedValue({ data: { frame: null, blocks: [] } });
+  });
+
+  it('a loja fechada no dia: diz que não abre', async () => {
+    horas({ closed: true, opens: null, closes: null });
+    const { getAllByRole, findByText } = abrir();
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    expect(await findByText('A loja não abre neste dia.')).toBeTruthy();
+  });
+
+  it('o serviço não cabe no dia: diz que não há horário livre', async () => {
+    horas({ closed: false, opens: '09:00', closes: '09:30' });
+    const { getAllByRole, findByText } = abrir();
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    expect(await findByText('Não há horário livre para este serviço neste dia.')).toBeTruthy();
+  });
+
+  it('enquanto a agenda e o horário não chegam: "Buscando horários..."; as leituras falhando não quebram', async () => {
+    let soltar: (v: unknown) => void = () => {};
+    (establishmentService.getHours as jest.Mock).mockReturnValue(new Promise((r) => (soltar = r)));
+    (intentionsService.getPublicAgenda as jest.Mock).mockRejectedValue(new Error('x'));
+    const { getAllByRole, getByText } = abrir();
+    fireEvent.press(getAllByRole('button')[1]);
+    expect(getByText('Buscando horários...')).toBeTruthy();
+    await act(async () => soltar(Promise.reject(new Error('y'))));
+  });
+
+  it('"Agendando..." enquanto o servidor responde', async () => {
+    horas({ closed: false, opens: '09:00', closes: '11:00' });
+    (intentionsService.create as jest.Mock).mockReturnValue(new Promise(() => {}));
+    const { getAllByRole, findByTestId, getByTestId, getByText } = abrir();
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    fireEvent.press(await findByTestId('horario-09:00'));
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    expect(getByText('Agendando...')).toBeTruthy();
+  });
+});
+

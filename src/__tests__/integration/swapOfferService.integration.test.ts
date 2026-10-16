@@ -101,6 +101,26 @@ describe('SwapOfferService', () => {
     });
   });
 
+  it('accept com a confirmação de menos de 1 hora manda confirmLessThanHour', async () => {
+    mock.onPatch('/swap-offers/off-1/accept').reply((config) => {
+      expect(config.params).toEqual({ confirmLessThanHour: true });
+      return [200, offer];
+    });
+    await swapOfferService.accept('off-1', 'tok', true);
+  });
+
+  it('acceptRequest envia PATCH /swap-requests/{id}?accept=true, e a confirmação quando pedida', async () => {
+    const params: unknown[] = [];
+    mock.onPatch('/swap-requests/r-1').reply((config) => {
+      expect(config.headers?.Authorization).toBe('Bearer tok');
+      params.push(config.params);
+      return [204];
+    });
+    await swapOfferService.acceptRequest('r-1', 'tok');
+    await swapOfferService.acceptRequest('r-1', 'tok', true);
+    expect(params).toEqual([{ accept: true }, { accept: true, confirmLessThanHour: true }]);
+  });
+
   it('cancel envia DELETE /swap-offers/{id}', async () => {
     mock.onDelete('/swap-offers/off-1').reply(204);
     const res = await swapOfferService.cancel('off-1', 'tok');

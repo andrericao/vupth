@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
@@ -104,6 +104,15 @@ describe('Perfil — a conta', () => {
       fireEvent.press(getByText(linha));
       expect(mockNavigate).toHaveBeenLastCalledWith(tela);
     }
+    await act(async () => {});
+  });
+
+  it('Suporte abre o site de suporte no navegador', async () => {
+    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    const { getByText } = renderWithProviders(<Settings />);
+    fireEvent.press(getByText('Suporte'));
+    expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/');
+    abrir.mockRestore();
     await act(async () => {});
   });
 

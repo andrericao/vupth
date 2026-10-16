@@ -14,7 +14,13 @@ on:
       - '**.md'
       - 'src/docs/**'
 
-# Pushes seguidos na mesma ref cancelam runs anteriores ainda em andamento.
+# Um run por push (Andre, 16/10: "todos os projetos que sobem rodam duas
+# vezes"): o OTA era um workflow a parte (eas-update.yml), com o seu proprio
+# npm ci, e publicava mesmo com o CI vermelho. Agora e o job `ota` daqui, que
+# so roda depois do `verify` verde.
+#
+# Pushes seguidos na mesma ref cancelam runs anteriores ainda em andamento
+# (so o ultimo commit e publicado no OTA).
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -44,3 +50,54 @@ jobs:
 
       - name: Tests
         run: npm test -- --ci
+
+  # EAS Update (OTA): publica a camada JavaScript pela internet, sem rebuild de loja.
+  # push em dev  -> branch/canal "preview"     (testers, APK preview)  | API: staging (Render)
+  # push em main -> branch/canal "production"   (usuarios finais)       | API: prod (Railway)
+  #
+  # IMPORTANTE: o `env` dos perfis do eas.json so vale para `eas build`.
+  # Para `eas update` a env precisa ser setada explicitamente aqui, senao o
+  # bundle do OTA pode sair apontando para a API errada (ver src/services/api.ts).
+  #
+  # Nao atualiza camada nativa: lib nativa nova / permissao / icone / bump de SDK
+  # exigem um novo build (o runtimeVersion muda e o update deixa de casar).
+  ota:
+    needs: verify
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - uses: expo/expo-github-action@v9
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # A mensagem do commit vai por ENV (nunca interpolada direto no shell):
+      # aspas/quebras de linha no corpo do commit quebravam o comando
+      # (`Unexpected arguments: ...`). Usamos so a 1a linha (subject), citada.
+      - name: Publish OTA (dev -> preview)
+        if: github.ref == 'refs/heads/dev'
+        env:
+          EXPO_PUBLIC_API_ENV: staging
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          SUBJECT="$(printf '%s\n' "$COMMIT_MSG" | head -n1)"
+          eas update --branch preview --message "$SUBJECT" --non-interactive
+
+      - name: Publish OTA (main -> production)
+        if: github.ref == 'refs/heads/main'
+        env:
+          EXPO_PUBLIC_API_ENV: prod
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          SUBJECT="$(printf '%s\n' "$COMMIT_MSG" | head -n1)"
+          eas update --branch production --message "$SUBJECT" --non-interactive

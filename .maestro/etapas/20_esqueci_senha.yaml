@@ -25,6 +25,10 @@ appId: ${APP_ID}
 - tapOn:
     id: "forgot-send"
     label: "20.07 · pede o código"
+# sem-servidor-nos-textos (15/10, DEC-40): a espera nao cita servidor.
+- assertNotVisible:
+    text: ".*[Ss]ervidor.*"
+    label: "20.07a · a espera nao cita o servidor"
 - extendedWaitUntil:
     visible: "E-mail sem conta"
     timeout: ${30000 * LENTO}

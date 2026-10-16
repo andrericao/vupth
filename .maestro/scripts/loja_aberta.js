@@ -49,7 +49,12 @@ var servico = pedir("POST", "/establishment/" + est.id + "/service-items", {
   establishmentId: est.id,
   serviceItemType: "CORTE_MAQUINA",
   customName: "Corte " + TAG,
-  price: 40.0,
+  // preco-sobre-o-total (DEC-54): R$ 40 para o profissional, sem absorcao —
+  // o cliente paga 42,90 (o menor X,90 em que preco - 4% - 2% >= 40). O preco
+  // antigo leva 422 do Backend novo. Os mesmos campos do preparo.js do Partner.
+  price: 42.9,
+  pro_receives: 40,
+  base_price: 40,
   estimatedMinutes: 30
 }, sessao.access_token);
 

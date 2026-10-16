@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { authService } from '../services/authService';
 import { pushService } from '../services/pushService';
-import { registerAuthStore } from '../services/api';
+import { registerAuthStore, renovarSessao } from '../services/api';
 import { useQueueStore } from './queueStore';
 
 interface AuthUser {
@@ -97,19 +97,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   },
 
+  // O mesmo refresh do interceptor (um por vez): grava os tokens e o estado.
   refreshTokens: async () => {
-    const { refreshToken } = get();
-    if (!refreshToken) return;
-
-    const { data } = await authService.refresh(refreshToken);
-
-    await SecureStore.setItemAsync(TOKEN_KEY, data.access_token);
-    await SecureStore.setItemAsync(REFRESH_KEY, data.refresh_token);
-
-    set({
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token,
-    });
+    if (!get().refreshToken) return;
+    await renovarSessao();
   },
 
   updateUser: async (partial) => {
