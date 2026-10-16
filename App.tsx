@@ -48,6 +48,7 @@ import { useOutOfQueueSwap } from "@hooks/useOutOfQueueSwap";
 import { usePedidoDeCorte } from "@hooks/usePedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
+import { useIndicacao } from "@hooks/useIndicacao";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 import { aplicarOtaNaAbertura } from "@services/otaNaAbertura";
@@ -186,6 +187,10 @@ export default function App() {
   // try/catch — inerte num binario sem expo-location. NAO usa react-query, pode
   // ficar aqui.
   useDeviceLocation();
+
+  // Link de indicacao (/i/<codigo>, CLI-34): guarda o codigo e, logado, liga o
+  // cliente a quem o indicou (POST /referrals/claim). Sem react-query.
+  useIndicacao();
 
   return (
     <PersistQueryClientProvider

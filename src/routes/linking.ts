@@ -50,6 +50,12 @@ const TELAS = {
  */
 const SO_PELA_NAVEGACAO = ["servicos", "fila", "completar-cadastro"];
 
+/**
+ * O link de indicacao (`/i/<codigo>`, CLI-34) nao e tela: o codigo fica guardado
+ * (useIndicacao) e o app abre no Inicio.
+ */
+const SO_GUARDA = ["i"];
+
 /** O caminho SEM a query: parametro nao vai para a barra de endereco. */
 export function caminhoDaTela(...args: Parameters<typeof caminhoPadrao>): string {
   return caminhoPadrao(...args).split("?")[0];
@@ -58,7 +64,7 @@ export function caminhoDaTela(...args: Parameters<typeof caminhoPadrao>): string
 export function telaDoCaminho(...args: Parameters<typeof estadoPadrao>) {
   const [caminho] = args;
   const semBarra = caminho.replace(/^\/+/, "").split("?")[0];
-  if (SO_PELA_NAVEGACAO.some((c) => semBarra === c || semBarra.startsWith(`${c}/`))) {
+  if ([...SO_PELA_NAVEGACAO, ...SO_GUARDA].some((c) => semBarra === c || semBarra.startsWith(`${c}/`))) {
     return undefined; // o app segue do estado inicial (Inicio)
   }
   return estadoPadrao(...args);

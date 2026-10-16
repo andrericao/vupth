@@ -43,6 +43,8 @@ describe('linking da web', () => {
     expect(telaDoCaminho('/fila', opcoes)).toBeUndefined();
     expect(telaDoCaminho('/servicos', opcoes)).toBeUndefined();
     expect(telaDoCaminho('/completar-cadastro', opcoes)).toBeUndefined();
+    // O link de indicacao (CLI-34) so guarda o codigo: abre no Inicio.
+    expect(telaDoCaminho('/i/K7M2QX', opcoes)).toBeUndefined();
   });
 
   it('as telas do perfil reabrem', () => {
