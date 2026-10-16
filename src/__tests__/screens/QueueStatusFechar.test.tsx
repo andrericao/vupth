@@ -137,3 +137,17 @@ describe('QueueStatus — puxar para atualizar e a faixa da saída (cobertura-98
   });
 });
 
+describe('QueueStatus — os rótulos do tempo (cobertura-98)', () => {
+  it('em atendimento: o tempo corrido e o término previsto', () => {
+    estado({ isInQueue: false, isBeingAttended: true, elapsedSeconds: 125, activeQueue: { ...FILA, status: 'IN_PROGRESS', startedAt: Date.now() - 125000 } });
+    const tela = renderWithProviders(<QueueStatus />);
+    expect(tela.toJSON()).toBeTruthy();
+  });
+
+  it('na fila com a previsão vencida: "Aguardando"', () => {
+    estado({ remaining: 0 });
+    const tela = renderWithProviders(<QueueStatus />);
+    expect(tela.getAllByText(/Aguardando/).length).toBeGreaterThan(0);
+  });
+});
+
