@@ -1,5 +1,5 @@
-import { BackHandler } from 'react-native';
-import { act, render } from '@testing-library/react-native';
+import { BackHandler, Modal } from 'react-native';
+import { act, fireEvent, render } from '@testing-library/react-native';
 
 import { DialogoVupth } from '@components/DialogoVupth';
 import { abrirDialogo, useDialogoStore } from '@stores/dialogo.store';
@@ -67,5 +67,75 @@ describe('os ids dos botões (bateria Maestro)', () => {
     expect(getByTestId('dialogo-botao-0')).toBeTruthy();
     expect(getByTestId('dialogo-botao-1')).toBeTruthy();
     expect(getByTestId('dialogo-botao-destrutivo')).toBeTruthy();
+  });
+});
+
+describe('o que sobra do diálogo (cobertura-98)', () => {
+  beforeEach(() => {
+    handler = null;
+    useDialogoStore.setState({ atual: null, fila: [] });
+    jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_e, h) => {
+      handler = h as () => boolean;
+      return { remove: jest.fn() } as never;
+    });
+  });
+
+  it('com um botão "cancel", o voltar responde ele, não o primeiro', async () => {
+    render(<DialogoVupth />);
+    let respondido: number | null = null;
+    act(() => {
+      abrirDialogo({
+        titulo: 'Sair?',
+        botoes: [{ texto: 'Sair', estilo: 'destructive' }, { texto: 'Ficar', estilo: 'cancel' }],
+      }).then((i) => (respondido = i));
+    });
+    await act(async () => {
+      handler!();
+    });
+    expect(respondido).toBe(1);
+  });
+
+  it('o onRequestClose do Modal faz o mesmo que o voltar; sem cancelar, não fecha', async () => {
+    const { UNSAFE_getByType } = render(<DialogoVupth />);
+    act(() => {
+      abrirDialogo({ titulo: 'Fixo', botoes: [{ texto: 'Entendi' }], cancelavel: false });
+    });
+    act(() => UNSAFE_getByType(Modal).props.onRequestClose());
+    expect(useDialogoStore.getState().atual?.titulo).toBe('Fixo');
+
+    let respondido: number | null = null;
+    act(() => {
+      useDialogoStore.setState({ atual: null, fila: [] });
+      abrirDialogo({ titulo: 'Livre', botoes: [{ texto: 'A' }, { texto: 'Voltar', estilo: 'cancel' }] }).then(
+        (i) => (respondido = i),
+      );
+    });
+    await act(async () => {
+      UNSAFE_getByType(Modal).props.onRequestClose();
+    });
+    expect(respondido).toBe(1);
+
+    act(() => {
+      abrirDialogo({ titulo: 'Só OK' }).then((i) => (respondido = i));
+    });
+    await act(async () => {
+      UNSAFE_getByType(Modal).props.onRequestClose();
+    });
+    expect(respondido).toBe(0);
+  });
+
+  it('a mensagem aparece, e tocar no botão responde o índice dele', async () => {
+    const { getByText, getByTestId } = render(<DialogoVupth />);
+    let respondido: number | null = null;
+    act(() => {
+      abrirDialogo({ titulo: 'Erro', mensagem: 'Senha incorreta', botoes: [{ texto: 'OK' }] }).then(
+        (i) => (respondido = i),
+      );
+    });
+    expect(getByText('Senha incorreta')).toBeTruthy();
+    await act(async () => {
+      fireEvent.press(getByTestId('dialogo-botao-0'));
+    });
+    expect(respondido).toBe(0);
   });
 });

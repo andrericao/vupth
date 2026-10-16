@@ -94,3 +94,48 @@ describe('o texto do convite', () => {
     expect(textoDoConvite('EARLIER').mensagem).toMatch(/você fica com a vez dela/);
   });
 });
+
+describe('o convite de troca — aceitando (cobertura-98)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    useAuthStore.setState({ accessToken: 'tk' });
+    useConviteDeTrocaStore.setState({ atual: null, jaMostradas: [] });
+  });
+  afterEach(() => jest.useRealTimers());
+
+  it('aceitando: o tempo não fecha, o segundo toque não repete, e a recusa do servidor avisa', async () => {
+    let recusar: (e: unknown) => void = () => {};
+    mockAccept.mockImplementationOnce(() => new Promise((_res, rej) => (recusar = rej)));
+    act(() => useConviteDeTrocaStore.getState().mostrar(oferta()));
+    const { getByTestId, getByText, queryByTestId } = render(<ConviteDeTroca />);
+
+    fireEvent.press(getByTestId('convite-de-troca'));
+    expect(getByTestId('convite-de-troca')).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.press(getByTestId('convite-aceitar'));
+    });
+    expect(getByText('Aceitando...')).toBeTruthy();
+    fireEvent.press(getByTestId('convite-aceitar'));
+    expect(mockAccept).toHaveBeenCalledTimes(1);
+    act(() => jest.advanceTimersByTime(DURACAO_DO_CONVITE_MS));
+    expect(getByTestId('convite-de-troca')).toBeTruthy();
+
+    await act(async () => {
+      recusar({ response: { data: { code: 'OFFER_NOT_OPEN' } } });
+    });
+    expect(queryByTestId('convite-de-troca')).toBeNull();
+    expect(Alert.alert).toHaveBeenCalledWith('Não foi possível aceitar', expect.any(String));
+  });
+
+  it('sem sessão, Aceitar não chama o servidor', () => {
+    useAuthStore.setState({ accessToken: null });
+    act(() => useConviteDeTrocaStore.getState().mostrar(oferta()));
+    const { getByTestId } = render(<ConviteDeTroca />);
+    fireEvent.press(getByTestId('convite-aceitar'));
+    expect(mockAccept).not.toHaveBeenCalled();
+  });
+});
+

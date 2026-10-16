@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Modal } from 'react-native';
 import { fireEvent, waitFor } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { RatingModal } from '@components/RatingModal';
@@ -62,4 +62,37 @@ describe('RatingModal', () => {
     await waitFor(() => expect(useRatedStore.getState().ids).toContain('att-1'));
     expect(onClose).toHaveBeenCalledWith(true);
   });
+
+  it('outro erro: mostra a mensagem do servidor (ou a nossa) e não fecha', async () => {
+    mockSubmit.mockRejectedValueOnce({ response: { status: 500, data: { message: 'Fora do ar' } } });
+    const { getByText, getByTestId } = renderModal();
+    fireEvent.press(getByTestId('star-3'));
+    fireEvent.press(getByText('Enviar avaliação'));
+    await waitFor(() => expect(Alert.alert).toHaveBeenCalledWith('Avaliação', 'Fora do ar'));
+
+    mockSubmit.mockRejectedValueOnce(new Error('rede'));
+    fireEvent.press(getByText('Enviar avaliação'));
+    await waitFor(() =>
+      expect(Alert.alert).toHaveBeenCalledWith('Avaliação', 'Não foi possível enviar a avaliação. Tente mais tarde.'),
+    );
+    expect(onClose).not.toHaveBeenCalled();
+    expect(useRatedStore.getState().ids).not.toContain('att-1');
+  });
+
+  it('sem sessão, não envia', () => {
+    useAuthStore.setState({ accessToken: null });
+    const { getByText, getByTestId } = renderModal();
+    fireEvent.press(getByTestId('star-2'));
+    fireEvent.press(getByText('Enviar avaliação'));
+    expect(mockSubmit).not.toHaveBeenCalled();
+  });
+
+  it('"Agora não" e o voltar do Android fecham com false', () => {
+    const { getByText, UNSAFE_getByType } = renderModal();
+    fireEvent.press(getByText('Agora não'));
+    UNSAFE_getByType(Modal).props.onRequestClose();
+    expect(onClose).toHaveBeenCalledTimes(2);
+    expect(onClose).toHaveBeenCalledWith(false);
+  });
 });
+
