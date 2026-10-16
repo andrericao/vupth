@@ -51,6 +51,7 @@ import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { useIndicacao } from "@hooks/useIndicacao";
 import { FaixaAvaliar } from "@components/FaixaAvaliar";
 import { ModalDePagamento } from "@components/ModalDePagamento";
+import { useLembreteDePendencia } from "@hooks/useLembreteDePendencia";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 import { aplicarOtaNaAbertura } from "@services/otaNaAbertura";
@@ -243,5 +244,7 @@ function QueryScopedHooks() {
   // Convite de troca como popup em qualquer tela (D16) — antes a oferta so era
   // buscada com a tela da fila aberta, e o outro cliente nao a achava.
   useConviteDeTroca();
+  // Pagamento pendente (CLI-35): o modal uma vez a cada abertura do app.
+  useLembreteDePendencia();
   return null;
 }

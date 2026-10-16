@@ -44,6 +44,10 @@ let mockMultas: unknown[] = [];
 jest.mock('@services/penaltyService', () => ({
   penaltyService: { listPending: jest.fn(() => Promise.resolve({ data: { total: 0, penalties: mockMultas } })) },
 }));
+let mockPagamentos: unknown[] = [];
+jest.mock('@services/paymentService', () => ({
+  paymentService: { pendentes: jest.fn(() => Promise.resolve({ data: { count: 0, total: 0, items: mockPagamentos } })) },
+}));
 jest.mock('@services/cutRequestService', () => ({ cutRequestService: { create: jest.fn() } }));
 
 jest.setTimeout(90000);
@@ -62,6 +66,7 @@ let alerta: jest.SpyInstance;
 beforeEach(() => {
   jest.clearAllMocks();
   mockMultas = [];
+  mockPagamentos = [];
   rota({ ...ABERTA });
   useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
   mockGetServices.mockResolvedValue({ data: CORTE });
@@ -182,6 +187,48 @@ describe('ServiceSelection — pagamento pendente (CLI-30)', () => {
     await waitFor(() => expect(usePendenciaStore.getState().aviso).toEqual([]));
     expect(alerta).not.toHaveBeenCalled();
     usePendenciaStore.getState().fechar();
+  });
+});
+
+describe('ServiceSelection — lembrete-de-pendencia (CLI-35)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { usePendenciaStore } = require('@stores/pendenciaStore');
+  const DEVE = [{ attendance_id: 'a0', status: 'PENDING', amount: 45 }];
+  afterEach(() => usePendenciaStore.getState().fechar());
+
+  it('com pendência, "Entrar na fila" avisa em vez de entrar', async () => {
+    mockPagamentos = DEVE;
+    const tela = await escolher();
+    await act(async () => {});
+    fireEvent.press(tela.getByTestId('primary-queue'));
+    expect(usePendenciaStore.getState().aviso).toEqual(DEVE);
+    expect(mockNavigate).not.toHaveBeenCalledWith('queueStatus', expect.anything());
+  });
+
+  it('com pendência, agendar, a segunda porta, o corte e a troca também avisam', async () => {
+    mockPagamentos = DEVE;
+    const tela = await escolher();
+    await act(async () => {});
+    fireEvent.press(tela.getByTestId('second-door-schedule'));
+    expect(usePendenciaStore.getState().aviso).toEqual(DEVE);
+    usePendenciaStore.getState().fechar();
+    fireEvent.press(tela.getByTestId('more-options'));
+    fireEvent.press(tela.getByTestId('more-option-swap'));
+    expect(usePendenciaStore.getState().aviso).toEqual(DEVE);
+  });
+
+  it('loja fechada com pendência: o Agendar principal e o pedido de corte avisam', async () => {
+    mockPagamentos = DEVE;
+    rota({ ...ABERTA, establishmentOpen: false });
+    const tela = await escolher();
+    await act(async () => {});
+    fireEvent.press(tela.getByTestId('primary-schedule'));
+    expect(usePendenciaStore.getState().aviso).toEqual(DEVE);
+    usePendenciaStore.getState().fechar();
+    fireEvent.press(tela.getByTestId('more-options'));
+    fireEvent.press(tela.getByTestId('more-option-cut'));
+    expect(usePendenciaStore.getState().aviso).toEqual(DEVE);
+    expect(mockCreateCut).not.toHaveBeenCalled();
   });
 });
 

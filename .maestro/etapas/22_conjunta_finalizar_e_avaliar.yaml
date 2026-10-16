@@ -100,3 +100,20 @@ appId: ${APP_ID}
 - assertNotVisible:
     text: "Avaliar atendimento"
     label: "22.0G · avaliado não oferece Avaliar"
+# lembrete-de-pendencia (CLI-35): o "Já paguei" ainda espera o profissional, então
+# a pendência segue; ao abrir o app de novo, o modal aparece uma vez.
+- launchApp:
+    appId: ${APP_ID}
+    stopApp: true
+    label: "22.0H · abre o Client de novo"
+- extendedWaitUntil:
+    visible:
+      id: "aviso-de-pendencia"
+    timeout: ${90000 * LENTO}
+    label: "22.0I · o aviso do pagamento pendente aparece"
+- tapOn:
+    id: "pendencia-agora-nao"
+    label: "22.0J · Agora não fecha"
+- assertNotVisible:
+    id: "aviso-de-pendencia"
+    label: "22.0K · e não volta nesta abertura"
