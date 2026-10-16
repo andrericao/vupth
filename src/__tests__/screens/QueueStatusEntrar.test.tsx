@@ -265,3 +265,13 @@ describe('QueueStatus — pagamento pendente (CLI-30)', () => {
   });
 });
 
+describe('QueueStatus — tela de erro (cobertura-98)', () => {
+  it('o voltar do cabeçalho volta', async () => {
+    mockCreate.mockRejectedValue({ response: { status: 500, data: { message: 'Falhou' } } });
+    const { findByText, getByTestId } = renderWithProviders(<QueueStatus />);
+    await findByText('Falhou');
+    fireEvent.press(getByTestId('back-button'));
+    expect(mockGoBack).toHaveBeenCalled();
+  });
+});
+

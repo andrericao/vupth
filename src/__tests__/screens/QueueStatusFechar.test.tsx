@@ -1,4 +1,5 @@
-import { fireEvent } from '@testing-library/react-native';
+import { RefreshControl } from 'react-native';
+import { act, fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
@@ -105,3 +106,34 @@ describe('QueueStatus — voltar e fechar (cobertura-98)', () => {
     expect(mockNavigate).toHaveBeenCalledWith('home', undefined, { pop: true });
   });
 });
+
+describe('QueueStatus — puxar para atualizar e a faixa da saída (cobertura-98)', () => {
+  it('puxar para atualizar chama o refresh, na espera e na tela clara', async () => {
+    for (const over of [{}, { isPaused: true }]) {
+      estado(over);
+      const tela = renderWithProviders(<QueueStatus />);
+      await act(async () => {
+        await tela.UNSAFE_getAllByType(RefreshControl)[0].props.onRefresh();
+      });
+      expect(mockEstado.refresh).toHaveBeenCalled();
+      tela.unmount();
+    }
+  });
+
+  it('o primeiro toque em "Sair da fila" mostra a faixa, que some em 8 s', () => {
+    jest.useFakeTimers();
+    try {
+      estado({});
+      const tela = renderWithProviders(<QueueStatus />);
+      fireEvent.press(tela.getByTestId('leave-queue'));
+      expect(tela.getByTestId('faixa-de-saida')).toBeTruthy();
+      act(() => {
+        jest.advanceTimersByTime(8000);
+      });
+      expect(tela.queryByTestId('faixa-de-saida')).toBeNull();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+});
+
