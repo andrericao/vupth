@@ -93,6 +93,26 @@ describe('ScheduleModal — barra de encaixe', () => {
     alerta.mockRestore();
   });
 
+  it('pagamento pendente (409 PAYMENT_PENDING, CLI-30): fecha e mostra o aviso com o "Pagar"', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { usePendenciaStore } = require('@stores/pendenciaStore');
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const itens = [{ attendance_id: 'a0', status: 'PENDING', amount: 45 }];
+    (intentionsService.create as jest.Mock).mockRejectedValue({ response: { status: 409, data: { code: 'PAYMENT_PENDING', items: itens } } });
+    const { getAllByRole, findByTestId, getByTestId, props } = abrir();
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    fireEvent.press(await findByTestId('horario-09:00'));
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    expect(usePendenciaStore.getState().aviso).toEqual(itens);
+    expect(props.onClose).toHaveBeenCalled();
+    expect(alerta).not.toHaveBeenCalled();
+    usePendenciaStore.getState().fechar();
+    alerta.mockRestore();
+  });
+
   it('visitante: confirmar leva ao login, sem agendar', async () => {
     useAuthStore.setState({ accessToken: null });
     const { getAllByRole, findByTestId, getByTestId, props } = abrir();

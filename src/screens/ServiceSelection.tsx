@@ -33,6 +33,8 @@ import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
+import { pendenciasDoErro } from "@domain/pagamento/pendencia";
+import { usePendenciaStore } from "@stores/pendenciaStore";
 import { acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
@@ -278,6 +280,12 @@ export function ServiceSelection() {
       );
       navigation.navigate("home", undefined, { pop: true });
     } catch (error: any) {
+      // Pagamento pendente (CLI-30): o aviso com o "Pagar", no lugar do erro.
+      const pendencias = pendenciasDoErro(error);
+      if (pendencias) {
+        usePendenciaStore.getState().avisar(pendencias);
+        return;
+      }
       const code = error.response?.data?.code;
       const msg = error.response?.data?.fieldErrors?.desiredTime
         ? "Esse horário já passou. Escolha outro."

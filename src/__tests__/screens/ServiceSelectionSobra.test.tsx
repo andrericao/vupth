@@ -166,3 +166,22 @@ describe('ServiceSelection — loja fechada', () => {
     else expect(msg).toMatch(texto);
   });
 });
+
+describe('ServiceSelection — pagamento pendente (CLI-30)', () => {
+  it('o pedido de corte recusado por pendência abre o aviso com o "Pagar", sem o erro', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { usePendenciaStore } = require('@stores/pendenciaStore');
+    rota({ ...ABERTA, establishmentOpen: false });
+    mockCreateCut.mockRejectedValue({ response: { status: 409, data: { code: 'PAYMENT_PENDING', items: [] } } });
+    const tela = await escolher();
+    fireEvent.press(tela.getByTestId('more-options'));
+    fireEvent.press(tela.getByTestId('more-option-cut'));
+    await act(async () => {
+      fireEvent.press(await tela.findByTestId('corte-assim-que-abrir'));
+    });
+    await waitFor(() => expect(usePendenciaStore.getState().aviso).toEqual([]));
+    expect(alerta).not.toHaveBeenCalled();
+    usePendenciaStore.getState().fechar();
+  });
+});
+

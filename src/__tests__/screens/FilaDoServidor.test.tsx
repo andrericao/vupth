@@ -24,6 +24,7 @@ jest.mock('@react-navigation/native', () => ({
 }));
 jest.mock('@hooks/useAttendances', () => ({ useClientAttendances: jest.fn() }));
 jest.mock('@hooks/useIntentions', () => ({ useClientIntentions: () => ({ data: null, refetch: jest.fn() }) }));
+jest.mock('@hooks/usePagamentosPendentes', () => ({ usePagamentosPendentes: () => ({ data: undefined, refetch: jest.fn() }) }));
 jest.mock('@hooks/useMostraPosicao', () => ({ useMostraPosicao: () => true }));
 jest.mock('@hooks/useQueueCountdown', () => ({ useQueueCountdown: jest.fn() }));
 jest.mock('@hooks/useOutOfQueueSwap', () => ({

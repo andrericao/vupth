@@ -38,6 +38,11 @@ jest.mock('@react-navigation/native', () => ({
   useScrollToTop: jest.fn(),
 }));
 jest.mock('@hooks/useAttendances', () => ({ useClientAttendances: jest.fn() }));
+let mockPendentes: unknown[] | undefined;
+const mockRefetchPendentes = jest.fn();
+jest.mock('@hooks/usePagamentosPendentes', () => ({
+  usePagamentosPendentes: () => ({ data: mockPendentes, refetch: mockRefetchPendentes }),
+}));
 jest.mock('@hooks/useIntentions', () => ({
   useClientIntentions: () => ({ data: { intentions: mockIntentions }, refetch: mockRefetchIntentions }),
 }));
@@ -149,6 +154,7 @@ beforeEach(() => {
   mockIntentions = [];
   mockPending = [];
   mockRouteParams = undefined;
+  mockPendentes = undefined;
   mockCancelIntention.mockResolvedValue({});
   mockCancelSwap.mockResolvedValue({});
   mockRemovePending.mockResolvedValue(undefined);
@@ -411,6 +417,34 @@ describe('Atendimentos — notificacao-avaliar (CLI-33)', () => {
     mockRouteParams = { avaliar: 'r1' };
     renderWithProviders(<Attendances />);
     expect(mockSetParams).not.toHaveBeenCalled();
+  });
+});
+
+describe('Atendimentos — pendencia-de-pagamento (CLI-30)', () => {
+  beforeEach(() => contagem({ activeQueue: null, isInQueue: false }));
+
+  it('o que falta pagar aparece no topo, com o ponto, e o toque abre o Pix', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { usePendenciaStore } = require('@stores/pendenciaStore');
+    mockPendentes = [
+      { attendance_id: 'a1', status: 'PENDING', amount: 45, professional_name: 'Carlos', establishment_name: 'Barbearia' },
+      { attendance_id: 'a2', status: 'AWAITING_CONFIRMATION', amount: '10' },
+    ];
+    const { getByTestId, getByText } = renderWithProviders(<Attendances />);
+    expect(getByTestId('pendente-a1')).toBeTruthy();
+    expect(getByText('Pagamento pendente · R$ 45,00')).toBeTruthy();
+    expect(getByText('Carlos · Barbearia')).toBeTruthy();
+    expect(getByText('Aguardando o profissional confirmar · R$ 10,00')).toBeTruthy();
+    expect(getByText('Toque para pagar')).toBeTruthy();
+    fireEvent.press(getByTestId('pagar-a1'));
+    expect(usePendenciaStore.getState().pagando).toBe('a1');
+    expect(mockRefetchPendentes).toHaveBeenCalled();
+  });
+
+  it('sem pendência, sem a seção', () => {
+    mockPendentes = [];
+    const { queryByTestId } = renderWithProviders(<Attendances />);
+    expect(queryByTestId('pagamentos-pendentes')).toBeNull();
   });
 });
 

@@ -40,6 +40,9 @@ appId: ${APP_ID}
 - assertVisible:
     id: "sem-avaliar-.*"
     label: "22.07a · o card sem avaliar tem o ponto"
+- assertNotVisible:
+    id: "pagamentos-pendentes"
+    label: "22.07b · pago no Finalizar (Sim, recebi): nada a pagar no topo"
 - tapOn:
     id: "convite-avaliar"
     label: "22.08 · abre o detalhe"

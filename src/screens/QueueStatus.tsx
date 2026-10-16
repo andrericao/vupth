@@ -58,6 +58,8 @@ import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useMostraPosicao } from "@hooks/useMostraPosicao";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
+import { pendenciasDoErro } from "@domain/pagamento/pendencia";
+import { usePendenciaStore } from "@stores/pendenciaStore";
 
 type RouteParams = {
   professionalId: string;
@@ -279,6 +281,15 @@ export function QueueStatus() {
           const status = error.response?.status;
           const code = error.response?.data?.code;
           const recusa = recusaAoEntrar(error);
+
+          // Pagamento pendente (409 PAYMENT_PENDING, CLI-30): o aviso com o
+          // "Pagar" e um MODAL; a pessoa volta para onde estava.
+          const pendencias = pendenciasDoErro(error);
+          if (pendencias) {
+            usePendenciaStore.getState().avisar(pendencias);
+            navigation.goBack();
+            return;
+          }
 
           // Loja fechada p/ novos (gate C1): oferece "solicitar corte" (BUG5 C2).
           // Este fica em TELA: tem uma ação propria para oferecer.

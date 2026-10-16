@@ -251,3 +251,17 @@ describe('QueueStatus — o que sobra ao entrar (cobertura-98)', () => {
   });
 });
 
+describe('QueueStatus — pagamento pendente (CLI-30)', () => {
+  it('409 PAYMENT_PENDING: limpa a fila, mostra o aviso com o "Pagar" e volta', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { usePendenciaStore } = require('@stores/pendenciaStore');
+    const itens = [{ attendance_id: 'a0', status: 'PENDING', amount: 45 }];
+    mockCreate.mockRejectedValue({ response: { status: 409, data: { code: 'PAYMENT_PENDING', items: itens } } });
+    renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(usePendenciaStore.getState().aviso).toEqual(itens));
+    expect(mockLeave).toHaveBeenCalled();
+    expect(mockGoBack).toHaveBeenCalled();
+    usePendenciaStore.getState().fechar();
+  });
+});
+

@@ -11,6 +11,8 @@ import { HorariosDaLoja } from "@domain/establishment/horarios";
 import { intentionsService } from "@services/intentionsService";
 import { establishmentService } from "@services/establishmentService";
 import { useAuthStore } from "@stores/authStore";
+import { pendenciasDoErro } from "@domain/pagamento/pendencia";
+import { usePendenciaStore } from "@stores/pendenciaStore";
 
 type Props = {
   visible: boolean;
@@ -99,6 +101,13 @@ export function ScheduleModal({
       Alert.alert("Agendado", `Seu horário ficou para ${quando}. Ele aparece em Atendimentos.`);
       onAgendado?.();
     } catch (error: any) {
+      // Pagamento pendente (CLI-30): fecha a agenda e mostra o aviso com o "Pagar".
+      const pendencias = pendenciasDoErro(error);
+      if (pendencias) {
+        close();
+        usePendenciaStore.getState().avisar(pendencias);
+        return;
+      }
       Alert.alert("Não foi possível agendar", mensagemDoAgendamento(error?.response?.status, error?.response?.data?.code));
     } finally {
       setEnviando(false);
