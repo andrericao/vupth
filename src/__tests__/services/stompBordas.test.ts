@@ -101,4 +101,36 @@ describe('a conexão STOMP única — bordas', () => {
     conectou(c);
     expect(() => sair()).not.toThrow();
   });
+
+  it('o mesmo canal duas vezes: não repete o painel, e sair de uma mantém o canal vivo', () => {
+    const sair1 = assinar('/topic/a', 'public', jest.fn());
+    const sair2 = assinar('/topic/b', 'public', jest.fn()); // conectando, canal já conhecido
+    const c = mockClientes[0];
+    c.config.onConnect(undefined); // ainda sem connected: não assina, e o frame vazio vira {}
+    expect(c.subscribe).not.toHaveBeenCalled();
+    conectou(c);
+    const sair3 = assinar('/topic/c', 'public', jest.fn()); // conectado, canal já conhecido
+    expect(c.subscribe).toHaveBeenCalledTimes(3);
+    sair1();
+    expect(mockClientes).toHaveLength(1);
+    sair2();
+    sair3();
+    expect(c.deactivate).toHaveBeenCalled();
+  });
+
+  it('erro STOMP sem frame vai ao painel como "erro"', () => {
+    const sair = assinar('/topic/a', 'public', jest.fn());
+    expect(() => mockClientes[0].config.onStompError(undefined)).not.toThrow();
+    sair();
+  });
+
+  it('saiu enquanto reconectava: a conexão velha não volta', async () => {
+    const sair = assinar('/topic/a', 'public', jest.fn());
+    const c = mockClientes[0];
+    aoMudar?.('active');
+    sair();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(c.activate).toHaveBeenCalledTimes(1);
+  });
 });
