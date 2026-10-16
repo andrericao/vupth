@@ -17,7 +17,8 @@ const mockRefetchOffers = jest.fn();
 const mockRemovePending = jest.fn();
 const mockCancelIntention = jest.fn();
 const mockCancelSwap = jest.fn();
-let mockIntentions: unknown[] = [];
+const mockJoin = jest.fn();
+let mockIntentions: unknown[] | undefined = [];
 let mockPending: unknown[] = [];
 
 jest.mock('expo-secure-store');
@@ -64,7 +65,7 @@ jest.mock('@stores/pendingSwapStore', () => ({
 }));
 jest.mock('@stores/queueStore', () => {
   const useQueueStore = (sel: (s: unknown) => unknown) => sel({ leaveQueue: jest.fn() });
-  useQueueStore.getState = () => ({ joinQueue: jest.fn() });
+  useQueueStore.getState = () => ({ joinQueue: mockJoin });
   return { useQueueStore };
 });
 jest.mock('@components/AttendanceDetailModal', () => {
@@ -319,3 +320,59 @@ describe('Atendimentos — realizados', () => {
     expect(queryByText('detalhe-fechar')).toBeNull();
   });
 });
+
+describe('Atendimentos — o que sobra (cobertura-98)', () => {
+  it('sem histórico nem agenda carregados, a tela abre vazia', () => {
+    contagem({ activeQueue: null, isInQueue: false });
+    mockHistory.mockReturnValue({ data: undefined, isLoading: false, refetch: mockRefetch, isRefetching: false });
+    mockIntentions = undefined;
+    expect(() => renderWithProviders(<Attendances />)).not.toThrow();
+  });
+
+  it('atendimento ativo no histórico sem fila no aparelho: a fila volta', () => {
+    contagem({ activeQueue: null, isInQueue: false });
+    historico([{ ...REALIZADO, id: 'v1', status: 'SCHEDULED', scheduledTime: new Date().toISOString() }]);
+    renderWithProviders(<Attendances />);
+    expect(mockJoin).toHaveBeenCalledWith(expect.objectContaining({ attendanceId: 'v1' }));
+  });
+
+  it('o convite sem o nome do profissional abre a avaliação mesmo assim', () => {
+    contagem({ activeQueue: null, isInQueue: false });
+    historico([{ ...REALIZADO, professionalName: undefined }]);
+    const { getByTestId, getByText } = renderWithProviders(<Attendances />);
+    fireEvent.press(getByTestId('avaliar-agora'));
+    expect(getByText('avaliar-')).toBeTruthy();
+  });
+
+  it('cancelado, sem loja e sem valor: "—" e só "ver detalhes"', () => {
+    contagem({ activeQueue: null, isInQueue: false });
+    historico([
+      { ...REALIZADO, id: 'c1', status: 'CANCELLED', establishmentName: undefined, totalValue: null, services: [{ customName: 'Barba' }] },
+    ]);
+    const { getByText, queryByTestId } = renderWithProviders(<Attendances />);
+    expect(getByText('Barba')).toBeTruthy();
+    expect(getByText('—')).toBeTruthy();
+    expect(getByText('Toque para ver detalhes')).toBeTruthy();
+    expect(queryByTestId('historico-loja-c1')).toBeNull();
+  });
+
+  it('"Cancelando..." enquanto o pedido de troca e o agendamento cancelam', async () => {
+    mockPending = [{ offerId: 'o1', professionalName: 'Ana', establishmentName: 'Studio' }];
+    mockIntentions = [
+      { id: 'i1', desiredTime: '2030-01-10T15:00:00Z', professionalName: 'Bia', establishmentName: 'Salão', status: 'INTENTION', services: [] },
+    ];
+    mockCancelSwap.mockReturnValue(new Promise(() => {}));
+    mockCancelIntention.mockReturnValue(new Promise(() => {}));
+    const { getAllByText } = renderWithProviders(<Attendances />);
+    fireEvent.press(getAllByText('Cancelar')[0]);
+    act(() => {
+      void tocarNoAlerta('Cancelar pedido');
+    });
+    fireEvent.press(getAllByText('Cancelar')[0]);
+    act(() => {
+      void tocarNoAlerta('Cancelar agendamento');
+    });
+    await waitFor(() => expect(getAllByText('Cancelando...')).toHaveLength(2));
+  });
+});
+
