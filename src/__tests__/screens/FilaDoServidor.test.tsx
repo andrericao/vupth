@@ -17,7 +17,8 @@ const mockJoin = jest.fn();
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({ navigate: jest.fn() }),
+  useNavigation: () => ({ navigate: jest.fn(), setParams: jest.fn() }),
+  useRoute: () => ({ params: undefined }),
   useFocusEffect: jest.fn(),
   useScrollToTop: jest.fn(),
 }));
