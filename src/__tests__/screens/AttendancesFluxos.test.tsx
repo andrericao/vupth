@@ -20,11 +20,14 @@ const mockCancelSwap = jest.fn();
 const mockJoin = jest.fn();
 let mockIntentions: unknown[] | undefined = [];
 let mockPending: unknown[] = [];
+let mockRouteParams: Record<string, unknown> | undefined;
+const mockSetParams = jest.fn();
 
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
-  useNavigation: () => ({ navigate: mockNavigate, getParent: () => ({ navigate: mockParentNavigate }) }),
+  useNavigation: () => ({ navigate: mockNavigate, setParams: mockSetParams, getParent: () => ({ navigate: mockParentNavigate }) }),
+  useRoute: () => ({ params: mockRouteParams }),
   useFocusEffect: (cb: () => void) => {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { useEffect } = require('react');
@@ -145,6 +148,7 @@ beforeEach(() => {
   alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   mockIntentions = [];
   mockPending = [];
+  mockRouteParams = undefined;
   mockCancelIntention.mockResolvedValue({});
   mockCancelSwap.mockResolvedValue({});
   mockRemovePending.mockResolvedValue(undefined);
@@ -373,6 +377,40 @@ describe('Atendimentos — o que sobra (cobertura-98)', () => {
       void tocarNoAlerta('Cancelar agendamento');
     });
     await waitFor(() => expect(getAllByText('Cancelando...')).toHaveLength(2));
+  });
+});
+
+describe('Atendimentos — notificacao-avaliar (CLI-33)', () => {
+  beforeEach(() => contagem({ activeQueue: null, isInQueue: false }));
+
+  it('sem avaliar: o card tem o ponto; cancelado, não', () => {
+    historico([REALIZADO, { ...REALIZADO, id: 'c1', status: 'CANCELLED' }]);
+    const { getByTestId, queryByTestId } = renderWithProviders(<Attendances />);
+    expect(getByTestId('sem-avaliar-r1')).toBeTruthy();
+    expect(queryByTestId('sem-avaliar-c1')).toBeNull();
+  });
+
+  it('pelo push de concluído: abre a avaliação do atendimento e limpa o parâmetro', () => {
+    historico([REALIZADO]);
+    mockRouteParams = { avaliar: 'r1' };
+    const { getByText } = renderWithProviders(<Attendances />);
+    expect(getByText('avaliar-Carlos')).toBeTruthy();
+    expect(mockSetParams).toHaveBeenCalledWith({ avaliar: undefined });
+  });
+
+  it('pelo push de um atendimento que não dá para avaliar: só limpa', () => {
+    historico([{ ...REALIZADO, status: 'CANCELLED' }]);
+    mockRouteParams = { avaliar: 'r1' };
+    const { queryByText } = renderWithProviders(<Attendances />);
+    expect(queryByText('avaliar-Carlos')).toBeNull();
+    expect(mockSetParams).toHaveBeenCalledWith({ avaliar: undefined });
+  });
+
+  it('pelo push, com o histórico ainda vazio: espera', () => {
+    historico([]);
+    mockRouteParams = { avaliar: 'r1' };
+    renderWithProviders(<Attendances />);
+    expect(mockSetParams).not.toHaveBeenCalled();
   });
 });
 

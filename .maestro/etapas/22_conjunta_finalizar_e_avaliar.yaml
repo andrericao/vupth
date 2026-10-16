@@ -1,7 +1,8 @@
 # Bateria conjunta: o profissional atende e finaliza no Partner; no Client, o
 # historico mostra a loja embaixo do profissional e o detalhe tem "Local"
 # (usar-campos-do-historico); o convite de avaliar aparece, a avaliacao vai, e
-# o atendimento avaliado nao oferece mais "Avaliar" (avaliar-so-sem-nota).
+# o atendimento avaliado nao oferece mais "Avaliar" (avaliar-so-sem-nota); o
+# card sem avaliar tem o ponto, que some depois de avaliar (notificacao-avaliar).
 # Comeca logado, ja na fila (entrou pela API).
 # env: EMAIL_PROF, NOME_CLIENTE, LOJA, PROF
 appId: ${APP_ID}
@@ -32,6 +33,9 @@ appId: ${APP_ID}
 - assertVisible:
     text: ${LOJA}
     label: "22.07 · o realizado mostra ${LOJA}"
+- assertVisible:
+    id: "sem-avaliar-.*"
+    label: "22.07a · o card sem avaliar tem o ponto"
 - tapOn:
     id: "convite-avaliar"
     label: "22.08 · abre o detalhe"
@@ -55,6 +59,9 @@ appId: ${APP_ID}
       id: "convite-avaliar"
     timeout: ${30000 * LENTO}
     label: "22.0E · o convite some"
+- assertNotVisible:
+    id: "sem-avaliar-.*"
+    label: "22.0Ea · o ponto some"
 - tapOn:
     text: ${PROF}
     index: 0

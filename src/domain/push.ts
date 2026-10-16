@@ -207,7 +207,20 @@ export const ACAO_OK = 'OK';
 export const CATEGORIAS_COM_BOTAO: { categoria: string; acao: string; titulo: string }[] = [
   { categoria: 'VER_FILA', acao: 'VER_FILA', titulo: 'Ver minha vez' },
   { categoria: 'VER_ATENDIMENTO', acao: 'VER_ATENDIMENTO', titulo: 'Ver atendimento' },
+  // notificacao-avaliar (CLI-33): o push de concluido (ATTENDANCE_FINISHED).
+  { categoria: 'AVALIAR', acao: 'AVALIAR', titulo: 'Avaliar' },
 ];
+
+/**
+ * O atendimento a avaliar de um push de concluido (notificacao-avaliar, CLI-33):
+ * o toque (no corpo ou no "Avaliar") abre a avaliacao dele.
+ */
+export function atendimentoParaAvaliar(data: unknown): string | null {
+  const d = (data ?? {}) as { type?: unknown; attendanceId?: unknown };
+  return d.type === 'ATTENDANCE_FINISHED' && typeof d.attendanceId === 'string' && d.attendanceId
+    ? d.attendanceId
+    : null;
+}
 
 /** Canal Android HIGH novo, id "alertas" combinado com o Backend e o Partner (o "default" antigo nao sobe de importancia). */
 export const CANAL_ALERTAS = 'alertas';

@@ -52,6 +52,23 @@ export function navigateFromNotification(
 }
 
 /**
+ * Abre Atendimentos ja com a avaliacao do atendimento (push de concluido,
+ * notificacao-avaliar CLI-33). Espera o mount como o toque comum.
+ */
+export function abrirAvaliacao(
+  attendanceId: string,
+  tentativa = 0,
+  espera: (fn: () => void, ms: number) => void = (fn, ms) => { setTimeout(fn, ms); },
+): void {
+  if (!navigationRef.isReady()) {
+    if (tentativa < 75) espera(() => abrirAvaliacao(attendanceId, tentativa + 1, espera), 200);
+    return;
+  }
+  const navigate = navigationRef.navigate as unknown as (name: string, params?: object) => void;
+  navigate("atendimentosTab", { screen: "attendances", pop: true, params: { avaliar: attendanceId } });
+}
+
+/**
  * Leva pro login depois do onboarding.
  *
  * O onboarding tem o navegador PROPRIO (ver routes/index.tsx): quando ele

@@ -113,7 +113,8 @@ export type AppRoutes = {
     targetTime?: string;
     establishmentOpen?: boolean;
   };
-  attendances: undefined;
+  // notificacao-avaliar (CLI-33): o toque no push de concluido abre a avaliacao.
+  attendances: { avaliar?: string } | undefined;
   services: undefined;
   settings: undefined;
   editProfile: undefined;

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Alert, TouchableOpacity, RefreshControl } from "react-native";
-import { useNavigation, useFocusEffect, useScrollToTop } from "@react-navigation/native";
+import { useNavigation, useFocusEffect, useRoute, useScrollToTop } from "@react-navigation/native";
 import {
   VStack,
   Text,
@@ -106,6 +106,20 @@ export function Attendances() {
   // pode ser jogado nele de novo (Andre, 19/09). Aqui ele fica à mão, e leva ao
   // atendimento que aconteceu — quem não quiser, só ignora.
   const semAvaliar = atendimentoSemAvaliar(history, ratedIds);
+
+  // Push de concluido (notificacao-avaliar, CLI-33): chega com o atendimento a
+  // avaliar; com o historico na mao, abre a avaliacao dele uma vez.
+  const route = useRoute();
+  const avaliarPeloPush = (route.params as { avaliar?: string } | undefined)?.avaliar;
+  useEffect(() => {
+    if (!avaliarPeloPush || history.length === 0) return;
+    const alvo = history.find((a) => a.id === avaliarPeloPush);
+    // Abrir uma vez ao chegar o parametro do push — o efeito e o gatilho.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (alvo && podeAvaliar(alvo, ratedIds)) setRatingFor({ id: alvo.id, name: alvo.professionalName });
+    navigation.setParams({ avaliar: undefined });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [avaliarPeloPush, history]);
 
   const intentionGroups = groupIntentionsByDay(agenda?.intentions ?? []);
 
@@ -458,9 +472,15 @@ export function Attendances() {
                     <Box bg="$brandSurface" p="$4" borderRadius="$card">
                       <HStack justifyContent="space-between" alignItems="flex-start">
                         <VStack flex={1} pr="$2">
-                          <Text fontFamily="$heading" size="sm">
-                            {a.professionalName}
-                          </Text>
+                          <HStack alignItems="center" gap="$1.5">
+                            <Text fontFamily="$heading" size="sm">
+                              {a.professionalName}
+                            </Text>
+                            {/* Sem avaliar (notificacao-avaliar, CLI-33): o ponto. */}
+                            {canRate ? (
+                              <Box w={8} h={8} borderRadius={4} bg="$brandDanger" testID={`sem-avaliar-${a.id}`} />
+                            ) : null}
+                          </HStack>
                           {a.establishmentName ? (
                             <Text size="xs" color="$brandTextSecondary" testID={`historico-loja-${a.id}`}>
                               {a.establishmentName}

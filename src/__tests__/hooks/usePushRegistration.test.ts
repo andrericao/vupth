@@ -38,8 +38,10 @@ jest.mock('@utils/vezAdiantada', () => ({ oferecerVezAdiantada: (...a: unknown[]
 const mockConfirmarTroca = jest.fn();
 jest.mock('@utils/trocaPeloPush', () => ({ confirmarTrocaPeloPush: (...a: unknown[]) => mockConfirmarTroca(...a) }));
 const mockNavigate = jest.fn();
+const mockAbrirAvaliacao = jest.fn();
 jest.mock('@routes/navigationRef', () => ({
   navigateFromNotification: (...a: unknown[]) => mockNavigate(...a),
+  abrirAvaliacao: (...a: unknown[]) => mockAbrirAvaliacao(...a),
 }));
 
 // O handler do push em primeiro plano e registrado no import do modulo.
@@ -205,6 +207,18 @@ describe('usePushRegistration — canais e categoria', () => {
     expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('VER_ATENDIMENTO', [
       { identifier: 'VER_ATENDIMENTO', buttonTitle: 'Ver atendimento', options: { opensAppToForeground: true } },
     ]);
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('AVALIAR', [
+      { identifier: 'AVALIAR', buttonTitle: 'Avaliar', options: { opensAppToForeground: true } },
+    ]);
+  });
+
+  it('o push de concluído (corpo ou "Avaliar") abre a avaliação do atendimento', () => {
+    renderHook(() => usePushRegistration());
+    tocou?.(resposta('n8', 'AVALIAR', { type: 'ATTENDANCE_FINISHED', attendanceId: 'a1' }));
+    tocou?.(resposta('n9', undefined, { type: 'ATTENDANCE_FINISHED', attendanceId: 'a2' }));
+    expect(mockAbrirAvaliacao).toHaveBeenNthCalledWith(1, 'a1');
+    expect(mockAbrirAvaliacao).toHaveBeenNthCalledWith(2, 'a2');
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });
 

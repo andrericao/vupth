@@ -7,6 +7,7 @@ import * as SecureStore from "expo-secure-store";
 
 import {
   acquireExpoPushToken,
+  atendimentoParaAvaliar,
   avisoDoPush,
   ACAO_OK,
   CANAL_ALERTAS,
@@ -21,7 +22,7 @@ import { pushService } from "@services/pushService";
 import { oferecerVezAdiantada } from "@utils/vezAdiantada";
 import { confirmarTrocaPeloPush } from "@utils/trocaPeloPush";
 import { ACAO_AGORA_NAO, ACAO_CONFIRMAR, CATEGORIA_TROCA } from "@domain/trocaPeloPush";
-import { navigateFromNotification } from "@routes/navigationRef";
+import { abrirAvaliacao, navigateFromNotification } from "@routes/navigationRef";
 import { useAuthStore } from "@stores/authStore";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { PUSH_PERGUNTADO_KEY } from "@hooks/ofertaDePush";
@@ -233,6 +234,12 @@ export function usePushRegistration() {
         Notifications.dismissNotificationAsync(id).catch(() => {});
         navigateFromNotification("fila");
         void confirmarTrocaPeloPush(data);
+        return;
+      }
+      // Concluido (notificacao-avaliar): o toque abre a avaliacao dele.
+      const avaliar = atendimentoParaAvaliar(data);
+      if (avaliar) {
+        abrirAvaliacao(avaliar);
         return;
       }
       navigateFromNotification(notificationRoute(data));
