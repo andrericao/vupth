@@ -2,7 +2,9 @@
 # historico mostra a loja embaixo do profissional e o detalhe tem "Local"
 # (usar-campos-do-historico); o convite de avaliar aparece, a avaliacao vai, e
 # o atendimento avaliado nao oferece mais "Avaliar" (avaliar-so-sem-nota); o
-# card sem avaliar tem o ponto, que some depois de avaliar (notificacao-avaliar).
+# card sem avaliar tem o ponto, que some depois de avaliar (notificacao-avaliar);
+# o profissional finaliza com "Ainda não" no pagamento e o Client ve o que falta
+# pagar no topo, abre o Pix e toca em "Já paguei" (pendencia-de-pagamento).
 # Comeca logado, ja na fila (entrou pela API).
 # env: EMAIL_PROF, NOME_CLIENTE, LOJA, PROF
 appId: ${APP_ID}
@@ -15,7 +17,8 @@ appId: ${APP_ID}
     env:
       APP_ID: com.vupth.partner.preview
       CLIENTE: ${NOME_CLIENTE}
-    label: "22.02 · no Partner, atende e finaliza ${NOME_CLIENTE}"
+      PAGAMENTO: "Ainda não"
+    label: "22.02 · no Partner, atende e finaliza ${NOME_CLIENTE} sem receber"
 - launchApp:
     appId: ${APP_ID}
     label: "22.03 · volta ao Client (sem limpar)"
@@ -40,9 +43,30 @@ appId: ${APP_ID}
 - assertVisible:
     id: "sem-avaliar-.*"
     label: "22.07a · o card sem avaliar tem o ponto"
-- assertNotVisible:
+- assertVisible:
     id: "pagamentos-pendentes"
-    label: "22.07b · pago no Finalizar (Sim, recebi): nada a pagar no topo"
+    label: "22.07b · o que falta pagar aparece no topo"
+- tapOn:
+    id: "pagar-.*"
+    label: "22.07c · abre o Pix"
+- extendedWaitUntil:
+    visible:
+      id: "pix-ja-paguei"
+    timeout: ${20000 * LENTO}
+    label: "22.07d · o Pix mostra o valor e o Já paguei"
+- assertVisible:
+    text: "Total"
+    label: "22.07e · com o total"
+- tapOn:
+    id: "pix-ja-paguei"
+    label: "22.07f · toca em Já paguei"
+- extendedWaitUntil:
+    visible: "Aguardando o profissional confirmar"
+    timeout: ${20000 * LENTO}
+    label: "22.07g · fica aguardando o profissional"
+- tapOn:
+    id: "pix-ok"
+    label: "22.07h · fecha o Pix"
 - tapOn:
     id: "convite-avaliar"
     label: "22.08 · abre o detalhe"
