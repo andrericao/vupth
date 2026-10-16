@@ -1245,21 +1245,8 @@ export function QueueStatus() {
             />
           </>
         )}
-        {isFinished && attendanceId && !ratedIds.includes(attendanceId) && (
-          <Button title="Avaliar atendimento" onPress={() => setShowRating(true)} />
-        )}
-        {isFinished ? (
-          <Button
-            title="Concluir"
-            variant="outline"
-            onPress={() => {
-              leaveQueue();
-              navigation.navigate("home", undefined, { pop: true });
-            }}
-          />
-        ) : (
-          <Button title="Voltar ao início" onPress={() => navigation.navigate("home", undefined, { pop: true })} />
-        )}
+        {/* Concluido nao chega aqui: a tela de concluido (com o Avaliar) volta antes. */}
+        <Button title="Voltar ao início" onPress={() => navigation.navigate("home", undefined, { pop: true })} />
         {/* Sair da fila: vermelho e SEMPRE a última opção (pedido do Andre). */}
         {canCancel && (
           <Button
@@ -1305,12 +1292,6 @@ export function QueueStatus() {
         onChanged={refresh}
       />
       <QueueDisclaimerModal visible={showDisclaimer} onClose={handleCloseDisclaimer} />
-      <RatingModal
-        visible={showRating}
-        attendanceId={attendanceId}
-        professionalName={activeQueue?.professionalName ?? paramProfName}
-        onClose={() => setShowRating(false)}
-      />
     </VStack>
   );
 }
