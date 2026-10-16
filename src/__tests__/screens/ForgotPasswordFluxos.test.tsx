@@ -11,13 +11,14 @@ const mockNavigate = jest.fn();
 const mockWait = jest.fn();
 const mockForgot = jest.fn();
 const mockReset = jest.fn();
+let mockParams: object | undefined = {};
 
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({ navigate: mockNavigate, goBack: jest.fn() }),
-  useRoute: () => ({ params: {} }),
+  useRoute: () => ({ params: mockParams }),
 }));
 jest.mock('@services/healthService', () => ({ waitForBackend: (...a: unknown[]) => mockWait(...a) }));
 jest.mock('@services/authService', () => ({
@@ -33,6 +34,7 @@ let alertSpy: jest.SpyInstance;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockParams = {};
   alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   mockWait.mockResolvedValue(true);
   mockForgot.mockResolvedValue({});
@@ -132,3 +134,42 @@ describe('ForgotPassword — redefinir', () => {
     expect(alertSpy).toHaveBeenLastCalledWith('Erro', expect.stringMatching(texto));
   });
 });
+
+describe('ForgotPassword — o que sobra (cobertura-98)', () => {
+  it('sem parâmetros na rota, o e-mail começa vazio', () => {
+    mockParams = undefined;
+    const tela = renderWithProviders(<ForgotPassword />);
+    expect(tela.getByPlaceholderText('E-mail').props.value).toBe('');
+  });
+
+  it('no passo do código: "Redefinindo..." e "Reenviando..." enquanto espera', async () => {
+    const tela = await noPassoDoCodigo();
+    preencherReset(tela);
+    let soltar: () => void = () => {};
+    mockReset.mockImplementation(() => new Promise<void>((r) => (soltar = r)));
+    await act(async () => {
+      fireEvent.press(tela.getByText('Redefinir senha'));
+    });
+    expect(tela.getByText('Redefinindo...')).toBeTruthy();
+    expect(tela.getByText('Reenviando...')).toBeTruthy();
+    await act(async () => soltar());
+  });
+
+  it('reenviar com o servidor dormindo: "Conectando..." depois de 3 s', async () => {
+    const tela = await noPassoDoCodigo();
+    jest.useFakeTimers();
+    try {
+      mockWait.mockReturnValue(new Promise(() => {}));
+      await act(async () => {
+        fireEvent.press(tela.getByText('Reenviar código'));
+      });
+      await act(async () => {
+        jest.advanceTimersByTime(3_500);
+      });
+      expect(tela.getByText('Conectando...')).toBeTruthy();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+});
+
