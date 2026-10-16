@@ -49,6 +49,7 @@ import { usePedidoDeCorte } from "@hooks/usePedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { useIndicacao } from "@hooks/useIndicacao";
+import { FaixaAvaliar } from "@components/FaixaAvaliar";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 import { aplicarOtaNaAbertura } from "@services/otaNaAbertura";
@@ -219,6 +220,8 @@ export default function App() {
             de a fonte carregar precisa aparecer do mesmo jeito. */}
         <DialogoVupth />
         <ConviteDeTroca />
+        {/* notificacao-avaliar (CLI-33): uma vez, no topo, depois do corte. */}
+        {fontGateOpen && backendReady ? <FaixaAvaliar /> : null}
       </GluestackUIProvider>
     </PersistQueryClientProvider>
   );

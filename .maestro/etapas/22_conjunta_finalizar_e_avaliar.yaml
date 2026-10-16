@@ -23,6 +23,10 @@ appId: ${APP_ID}
     file: ../apoio/fechar_aviso.yaml
     label: "22.04 · fecha as caixas"
 - tapOn:
+    id: "faixa-avaliar-fechar"
+    optional: true
+    label: "22.04a · fecha a faixa de avaliar, se apareceu (a pendência segue em Atendimentos)"
+- tapOn:
     text: "Atendimentos"
     label: "22.05 · toca em Atendimentos"
 - extendedWaitUntil:
