@@ -196,6 +196,7 @@ export function SignUp() {
           <VStack gap="$1">
             <Input2
               isPassword
+              mostrarLimites={false}
               placeholder="Confirmar senha"
               value={confirmPassword}
               onChangeText={(text: string) => { setConfirmPassword(text); setErrors({}); }}
