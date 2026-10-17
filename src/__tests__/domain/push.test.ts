@@ -40,6 +40,7 @@ describe('notificationRoute', () => {
       'CUT_ACCEPTED',
       'CUT_REFUSED',
       'CUT_EXPIRED',
+      'NO_SHOW_REMOVED',
     ]) {
       expect(notificationRoute({ type })).toBe('attendances');
     }
@@ -227,7 +228,7 @@ describe('notificação de ciência (app fechado)', () => {
 
   it('o botão que abre a tela não é o OK: segue navegando', () => {
     expect(tocouNoOk({ actionIdentifier: 'VER_FILA' })).toBe(false);
-    expect(CATEGORIAS_COM_BOTAO.map((c) => c.categoria)).toEqual(['VER_FILA', 'VER_ATENDIMENTO', 'AVALIAR']);
+    expect(CATEGORIAS_COM_BOTAO.map((c) => c.categoria)).toEqual(['VER_FILA', 'VER_ATENDIMENTO', 'AVALIAR', 'PAGAR_MULTA']);
   });
 
   it('ids combinados com o Backend e o Partner', () => {
