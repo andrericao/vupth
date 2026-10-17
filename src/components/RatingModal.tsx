@@ -7,6 +7,7 @@ import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
 import { ratingService } from "@services/ratingService";
 import { useAuthStore } from "@stores/authStore";
+import { useFeedbackStore } from "@stores/feedbackStore";
 import { useRatedStore } from "@stores/ratedStore";
 import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 
@@ -53,6 +54,8 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
       Alert.alert("Obrigado", "Sua avaliação foi registrada.");
       reset();
       onClose(true);
+      // pedido-de-feedback (CLI-34): depois de avaliar, se o intervalo permitir.
+      useFeedbackStore.getState().pedir();
     } catch (e: any) {
       const status = e.response?.status;
       const msg =

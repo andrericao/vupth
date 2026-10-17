@@ -110,6 +110,22 @@ appId: ${APP_ID}
       id: "convite-avaliar"
     timeout: ${30000 * LENTO}
     label: "22.0E · o convite some"
+# pedido-de-feedback (CLI-34): depois de avaliar, a caixa pede feedback (uma vez
+# a cada 30 dias; a conta da etapa e nova, entao aparece).
+- extendedWaitUntil:
+    visible:
+      id: "pedido-de-feedback"
+    timeout: ${30000 * LENTO}
+    label: "22.0Eb · a caixa 'Ajude a melhorar o app' aparece"
+- assertVisible:
+    id: "feedback-enviar"
+    label: "22.0Ec · tem 'Enviar feedback'"
+- tapOn:
+    id: "feedback-agora-nao"
+    label: "22.0Ed · 'Agora não' fecha"
+- assertNotVisible:
+    id: "pedido-de-feedback"
+    label: "22.0Ee · e a caixa some"
 - assertNotVisible:
     id: "sem-avaliar-.*"
     label: "22.0Ea · o ponto some"

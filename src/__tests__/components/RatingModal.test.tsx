@@ -4,6 +4,7 @@ import { renderWithProviders } from '../utils/renderWithProviders';
 import { RatingModal } from '@components/RatingModal';
 import { ratingService } from '@services/ratingService';
 import { useAuthStore } from '@stores/authStore';
+import { useFeedbackStore } from '@stores/feedbackStore';
 import { useRatedStore } from '@stores/ratedStore';
 
 jest.mock('expo-secure-store');
@@ -19,6 +20,7 @@ describe('RatingModal', () => {
     jest.clearAllMocks();
     useAuthStore.setState({ accessToken: 'tok-1' });
     useRatedStore.setState({ ids: [] });
+    useFeedbackStore.setState({ aberto: false, ultimoPedido: null, ultimoEnvio: null });
     jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
   });
 
@@ -50,6 +52,8 @@ describe('RatingModal', () => {
     await waitFor(() => expect(mockSubmit).toHaveBeenCalledWith('att-1', { score: 4 }, 'tok-1'));
     expect(useRatedStore.getState().ids).toContain('att-1');
     expect(onClose).toHaveBeenCalledWith(true);
+    // pedido-de-feedback (CLI-34): depois de avaliar, a caixa abre.
+    expect(useFeedbackStore.getState().aberto).toBe(true);
   });
 
   it('409 (já avaliado): marca no ratedStore e fecha com true', async () => {
