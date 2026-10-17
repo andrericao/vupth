@@ -46,7 +46,9 @@ describe('ModalDeFeedback', () => {
     fireEvent.press(getByTestId('feedback-agora-nao'));
     expect(queryByTestId('pedido-de-feedback')).toBeNull();
     expect(useFeedbackStore.getState().pedir(T + INTERVALO_DO_PEDIDO_MS - 1)).toBe(false);
-    expect(useFeedbackStore.getState().pedir(T + INTERVALO_DO_PEDIDO_MS)).toBe(true);
+    act(() => {
+      expect(useFeedbackStore.getState().pedir(T + INTERVALO_DO_PEDIDO_MS)).toBe(true);
+    });
   });
 
   it('"Enviar feedback" abre o Suporte, fecha e guarda o envio', () => {
