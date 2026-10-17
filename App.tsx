@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
 
 import { useFonts } from "expo-font";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // Os TTFs vivem em `assets/fonts/`, NAO em `@expo-google-fonts/*`. O motivo e
 // o build web: o `expo export --platform web` grava cada asset espelhando o
@@ -209,6 +210,10 @@ export default function App() {
       }}
     >
       <GluestackUIProvider config={configDoTema} key={passoDaFonte}>
+        {/* preview-nao-abre (17/10): o FaixaAvaliar usa useSafeAreaInsets e fica
+            fora do Routes (que ja traz o seu provider) — sem este, o render da
+            abertura estoura "No safe area value available" e o app fecha. */}
+        <SafeAreaProvider>
         <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
 
         <QueryScopedHooks />
@@ -225,7 +230,12 @@ export default function App() {
         {/* pendencia-de-pagamento (CLI-30): o aviso do 409 e o Pix. */}
         <ModalDePagamento />
         {/* notificacao-avaliar (CLI-33): uma vez, no topo, depois do corte. */}
-        {fontGateOpen && backendReady ? <FaixaAvaliar /> : null}
+        {fontGateOpen && backendReady ? (
+          <ErrorBoundary>
+            <FaixaAvaliar />
+          </ErrorBoundary>
+        ) : null}
+        </SafeAreaProvider>
       </GluestackUIProvider>
     </PersistQueryClientProvider>
   );

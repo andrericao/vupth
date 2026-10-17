@@ -8,9 +8,15 @@ export type PasswordRule = {
   passed: boolean;
 };
 
+/** DEC-79 (16/10): o mesmo intervalo em todos os apps e no Backend. */
+export const SENHA_MIN = 6;
+export const SENHA_MAX = 64;
+/** O que o campo de senha mostra, sempre. */
+export const DICA_DA_SENHA = `De ${SENHA_MIN} a ${SENHA_MAX} caracteres`;
+
 export function getPasswordRules(password: string): PasswordRule[] {
   return [
-    { label: 'Mínimo de 6 caracteres', passed: password.length >= 6 },
+    { label: DICA_DA_SENHA, passed: password.length >= SENHA_MIN && password.length <= SENHA_MAX },
     { label: 'Letra maiúscula', passed: /[A-Z]/.test(password) },
     { label: 'Letra minúscula', passed: /[a-z]/.test(password) },
     { label: 'Caractere especial (!@#$...)', passed: /[^A-Za-z0-9]/.test(password) },

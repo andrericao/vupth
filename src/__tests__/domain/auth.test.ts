@@ -128,7 +128,12 @@ describe('Auth Domain', () => {
 
     it('deve passar mínimo de caracteres com 6+', () => {
       const rules = getPasswordRules('abcdef');
-      expect(rules.find((r) => r.label === 'Mínimo de 6 caracteres')?.passed).toBe(true);
+      expect(rules.find((r) => r.label === 'De 6 a 64 caracteres')?.passed).toBe(true);
+    });
+
+    it('DEC-79: mais de 64 caracteres não passa', () => {
+      expect(getPasswordRules('a'.repeat(64)).find((r) => r.label === 'De 6 a 64 caracteres')?.passed).toBe(true);
+      expect(getPasswordRules('a'.repeat(65)).find((r) => r.label === 'De 6 a 64 caracteres')?.passed).toBe(false);
     });
 
     it('deve detectar maiúscula', () => {

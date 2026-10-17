@@ -258,6 +258,7 @@ export function ForgotPassword() {
             </VStack>
             <Input2
               isPassword
+              mostrarLimites={false}
               placeholder="Confirmar nova senha"
               value={confirmPassword}
               onChangeText={setConfirmPassword}

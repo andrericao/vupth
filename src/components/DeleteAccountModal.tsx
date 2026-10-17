@@ -61,6 +61,7 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
 
           <Input2
             isPassword
+            mostrarLimites={false}
             placeholder="Senha atual"
             value={password}
             onChangeText={setPassword}
