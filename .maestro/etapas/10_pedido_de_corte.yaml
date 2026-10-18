@@ -18,6 +18,14 @@ appId: ${APP_ID}
     label: "10.04 · toca em more-option-cut"
 # Desde o 77b918d o pedido abre a barra de quando: "Assim que abrir" e o
 # pedido de sempre (o profissional tem 5 minutos).
+# cancelar-fora-da-caixa (CLI): a caixa rola dentro de si e o Cancelar fica nela.
+- scrollUntilVisible:
+    element:
+      text: "Cancelar"
+    label: "10.0A · rola a caixa até o Cancelar"
+- assertVisible:
+    text: "Solicitar"
+    label: "10.0Aa · o botão diz Solicitar"
 - tapOn:
     id: "corte-assim-que-abrir"
     label: "10.0B · toca em Assim que abrir"

@@ -165,6 +165,13 @@ describe('ScheduleModal — modo corte', () => {
     expect(intentionsService.create).not.toHaveBeenCalled();
   });
 
+  it('a caixa rola dentro de si e o Cancelar fica dentro dela (cancelar-fora-da-caixa)', async () => {
+    const { getByTestId, getByText } = abrir({ corte: { onEscolher: jest.fn() } });
+    await act(async () => {});
+    expect(getByTestId('agenda-rolagem')).toBeTruthy();
+    expect(getByText('Cancelar')).toBeTruthy();
+  });
+
   it('com dia e horário escolhidos, devolve o horário — sem criar intenção', async () => {
     const onEscolher = jest.fn();
     const { getAllByRole, findByTestId, getByTestId, getByText, props } = abrir({ corte: { onEscolher } });
@@ -172,7 +179,8 @@ describe('ScheduleModal — modo corte', () => {
     // O 1º botão é o "Assim que abrir"; depois vêm hoje e amanhã.
     fireEvent.press(getAllByRole('button')[2]);
     fireEvent.press(await findByTestId('horario-09:30'));
-    expect(getByText('Pedir neste horário')).toBeTruthy();
+    // cancelar-fora-da-caixa (CLI-7): o botão diz só "Solicitar" — o horário já está escolhido acima.
+    expect(getByText('Solicitar')).toBeTruthy();
     await act(async () => {
       fireEvent.press(getByTestId('confirmar-agendamento'));
     });
