@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { AccessibilityInfo, Animated, Pressable, Text } from "react-native";
 import { ArrowUp } from "lucide-react-native";
 import { fs } from "@stores/fonteStore";
+import { useTema } from "@hooks/useTema";
 
-const FOREST = "#163300";
-const GREEN_TINT = "#E2F6D5";
 
 /**
  * "↑ Voltar ao topo": aparece suave no rodape, centralizada logo acima das abas,
@@ -16,6 +15,7 @@ const GREEN_TINT = "#E2F6D5";
  * aparece para o leitor de tela.
  */
 export function PilulaVoltarAoTopo({ visivel, onPress }: { visivel: boolean; onPress: () => void }) {
+  const { cores } = useTema();
   const [progresso] = useState(() => new Animated.Value(0));
   const [reduzMovimento, setReduzMovimento] = useState(false);
 
@@ -62,16 +62,16 @@ export function PilulaVoltarAoTopo({ visivel, onPress }: { visivel: boolean; onP
           height: 32,
           paddingHorizontal: 14,
           borderRadius: 999,
-          backgroundColor: GREEN_TINT,
-          shadowColor: FOREST,
+          backgroundColor: cores.greenTint,
+          shadowColor: cores.forest,
           shadowOpacity: 0.18,
           shadowRadius: 8,
           shadowOffset: { width: 0, height: 3 },
           elevation: 3,
         }}
       >
-        <ArrowUp size={14} color={FOREST} />
-        <Text style={{ fontFamily: "Archivo_700Bold", fontSize: fs(13), color: FOREST }}>Voltar ao topo</Text>
+        <ArrowUp size={14} color={cores.onGreenTint} />
+        <Text style={{ fontFamily: "Archivo_700Bold", fontSize: fs(13), color: cores.onGreenTint }}>Voltar ao topo</Text>
       </Pressable>
     </Animated.View>
   );
