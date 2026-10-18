@@ -61,6 +61,10 @@ appId: ${APP_ID}
     visible: "1. Quem somos"
     timeout: ${15000 * LENTO}
     label: "15.0H · vê Quem somos na Privacidade"
+# empresa-nas-paginas-legais (CLI): quem responde e a empresa Os Paulo's, com o contato.
+- assertVisible:
+    text: ".*Os Paulo's.*"
+    label: "15.0Ha · vê a empresa Os Paulo's"
 - scrollUntilVisible:
     element:
       text: "7. Por quanto tempo guardamos"

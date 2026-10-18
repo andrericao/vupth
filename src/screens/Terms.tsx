@@ -56,14 +56,17 @@ const TERMOS: Secao[] = [
 // Respostas do Andre (08/10): pessoa fisica responde; ninguem recebe pedido por
 // e-mail — o titular resolve no app ou no /excluir-conta; retencao pelas boas
 // praticas (backup 35 dias; registros de acesso "pelo tempo exigido em lei" ate
-// o registro-de-acesso existir). RASCUNHO: falta o
-// nome completo, entre colchetes, e a revisao do Andre.
-export const CONTROLADOR = "[nome completo do responsável], pessoa física";
+// o registro-de-acesso existir). RASCUNHO: falta a revisao do Andre.
+//
+// empresa-nas-paginas-legais (CLI-13, Andre 09/10): o responsavel e a empresa Os
+// Paulo's, nao o nome do Andre. Ainda nao ha CNPJ: sai sem numero.
+export const CONTROLADOR = "a empresa Os Paulo's";
+export const CONTATO_LEGAL = "andrericao49@gmail.com";
 
 const PRIVACIDADE: Secao[] = [
   {
     titulo: "1. Quem somos",
-    corpo: `A Vupth é mantida por ${CONTROLADOR}, responsável pelos seus dados. Esta política vale para o app do cliente e para o app do profissional (VUPTH Parceiros).`,
+    corpo: `A Vupth é mantida por ${CONTROLADOR}, responsável pelos seus dados. Esta política vale para o app do cliente e para o app do profissional (VUPTH Parceiros). Contato: ${CONTATO_LEGAL}.`,
   },
   {
     titulo: "2. O que coletamos",
