@@ -231,6 +231,11 @@ export function EstablishmentDetail() {
   // "Trabalhando" e "Fora" sao secoes de TELA (contrato de 19/09): o backend
   // manda todo mundo e quem separa e o app.
   const { trabalhando, fora } = agruparPorExpediente(professionals);
+  // Quem recebe cliente novo AGORA: no expediente e com a fila aberta. Trabalhar
+  // com a fila fechada (`accepting_new: false`) deixa a linha em "Fila fechada";
+  // o atalho "Entrar com menor espera" levava justamente a ele e a tela de
+  // servicos virava a de quem esta Fora (fila-aberta-aparece-fechada, 18/10).
+  const recebem = trabalhando.filter((p) => !filaFechada(p));
 
   // Link compartilhado com `?profissional=` (24/09): assim que a loja e a
   // lista chegam, abre os servicos dele — uma vez so, para o voltar trazer a
@@ -247,11 +252,12 @@ export function EstablishmentDetail() {
   }, [profissionalDoLink, establishment, professionals]);
 
   function handleSelectShortestQueue() {
-    if (trabalhando.length === 0) return;
+    if (recebem.length === 0) return;
 
-    // ⚠️ So entre quem esta no expediente. Antes o botao podia mandar o cliente
-    // para a "menor espera" de quem foi embora — que e sempre zero.
-    const shortest = trabalhando.reduce((prev, curr) =>
+    // ⚠️ So entre quem esta no expediente E recebe. Antes o botao podia mandar o
+    // cliente para a "menor espera" de quem foi embora — que e sempre zero — ou
+    // de quem fechou a fila.
+    const shortest = recebem.reduce((prev, curr) =>
       (curr.estimated_wait_minutes ?? 0) < (prev.estimated_wait_minutes ?? 0) ? curr : prev
     );
 
@@ -571,7 +577,7 @@ export function EstablishmentDetail() {
       </VStack>
 
       <VStack px={16} pb={32}>
-        {isOpen && trabalhando.length > 0 && (
+        {isOpen && recebem.length > 0 && (
           <Button title="Entrar com menor espera" onPress={handleSelectShortestQueue} />
         )}
 
