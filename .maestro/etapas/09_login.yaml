@@ -35,6 +35,17 @@ appId: ${APP_ID}
 - tapOn:
     text: "Já tenho conta"
     label: "09.08 · toca em Já tenho conta"
+# termos-no-rodape (CLI): os dois links legais no rodape da tela de entrada.
+- scrollUntilVisible:
+    element:
+      id: "link-privacidade"
+    label: "09.08a · rola até o rodapé da tela de entrada"
+- assertVisible:
+    id: "link-termos"
+    label: "09.08b · vê Termos de uso"
+- assertVisible:
+    id: "link-privacidade"
+    label: "09.08c · vê Política de privacidade"
 - tapOn:
     text: "E-mail"
     label: "09.09 · toca em E-mail"

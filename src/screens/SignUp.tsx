@@ -13,6 +13,7 @@ import { validateSignUp, getPasswordRules } from "@domain/auth/validateAuth";
 import { erroDeAcesso } from "@domain/auth/errosDeAcesso";
 import { useAuthStore } from "@stores/authStore";
 import { useTabBarInset } from "@hooks/useTabBarInset";
+import { LinksLegais } from "@components/LinksLegais";
 import { fs } from "@stores/fonteStore";
 
 type RouteParams = {
@@ -236,6 +237,7 @@ export function SignUp() {
           >
             Ao continuar você concorda com os Termos de Uso e a Política de Privacidade.
           </Text>
+          <LinksLegais />
           <HStack justifyContent="center" gap="$1.5" alignItems="center">
             <Text size="sm" color="$brandTextSecondary">
               Já tem conta?

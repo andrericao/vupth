@@ -7,6 +7,7 @@ import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Input2 } from "@components/Input2";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { Button } from "@components/Button";
+import { LinksLegais } from "@components/LinksLegais";
 import { VersaoDoApp } from "@components/VersaoDoApp";
 import { validateLogin } from "@domain/auth/validateAuth";
 import { postAuthRoute } from "@domain/auth/postAuthRoute";
@@ -185,6 +186,7 @@ export function Login() {
               </Text>
             </TouchableOpacity>
           </HStack>
+          <LinksLegais />
           <VersaoDoApp testID="versao-login" />
         </VStack>
       </VStack>
