@@ -72,10 +72,10 @@ describe("aparenciaDoTipo", () => {
   });
 
   it("cada tipo tem o seu selo e as suas cores", () => {
-    expect(aparenciaDoTipo("informacao")).toEqual({ faixa: true, fundo: "#E2F6D5", texto: "#163300", selo: "Aviso" });
-    expect(aparenciaDoTipo("atencao")).toEqual({ faixa: true, fundo: "#FFC091", texto: "#163300", selo: "Atenção" });
-    expect(aparenciaDoTipo("dinheiro")).toEqual({ faixa: true, fundo: "#F7E4E2", texto: "#B3261E", selo: "Pagamento" });
-    expect(aparenciaDoTipo("erro")).toEqual({ faixa: false, fundo: "#F7E4E2", texto: "#B3261E", selo: "Erro" });
+    expect(aparenciaDoTipo("informacao")).toEqual({ faixa: true, corDaFaixa: "#9FE870", fundo: "#E2F6D5", texto: "#163300", selo: "Aviso" });
+    expect(aparenciaDoTipo("atencao")).toEqual({ faixa: true, corDaFaixa: "#FFC091", fundo: "#FFC091", texto: "#163300", selo: "Atenção" });
+    expect(aparenciaDoTipo("dinheiro")).toEqual({ faixa: true, corDaFaixa: "#B3261E", fundo: "#F7E4E2", texto: "#B3261E", selo: "Pagamento" });
+    expect(aparenciaDoTipo("erro")).toEqual({ faixa: false, corDaFaixa: null, fundo: "#F7E4E2", texto: "#B3261E", selo: "Erro" });
   });
 
   it("o selo troca de rotulo sem trocar de tipo; vazio nao apaga o rotulo", () => {
@@ -127,5 +127,30 @@ describe("papel e ordem dos botoes", () => {
     expect(ordemDosBotoes([cancelar, confirmar, destruir])).toEqual([1, 2, 0]);
     expect(ordemDosBotoes([confirmar])).toEqual([0]);
     expect(ordemDosBotoes([confirmar, cancelar])).toEqual([0, 1]);
+  });
+});
+
+// A faixa em dangerTint (#F7E4E2) sobre o branco do cartao mal se via: a tabela da
+// Design dizia "faixa e selo: dangerTint" e os mockups desenhavam a faixa forte.
+describe("a faixa e forte e o selo e o tom claro", () => {
+  it.each([
+    ["informacao", "#9FE870"],
+    ["dinheiro", "#B3261E"],
+  ] as const)("%s: faixa %s, diferente do tom claro do selo", (tipo, cor) => {
+    const a = aparenciaDoTipo(tipo);
+    expect(a.corDaFaixa).toBe(cor);
+    expect(a.corDaFaixa).not.toBe(a.fundo);
+  });
+
+  it("a atencao usa o mesmo pessego na faixa e no selo: ele ja e forte", () => {
+    expect(aparenciaDoTipo("atencao")).toMatchObject({ corDaFaixa: "#FFC091", fundo: "#FFC091" });
+  });
+
+  it("o erro nao tem faixa e nao tem cor de faixa", () => {
+    expect(aparenciaDoTipo("erro")).toMatchObject({ faixa: false, corDaFaixa: null });
+  });
+
+  it("a faixa de dinheiro se separa do branco do cartao (3:1, componente grafico)", () => {
+    expect(razao(aparenciaDoTipo("dinheiro").corDaFaixa as string, "#FFFFFF")).toBeGreaterThanOrEqual(3);
   });
 });

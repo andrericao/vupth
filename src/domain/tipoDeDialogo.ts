@@ -36,20 +36,22 @@ export const TOKENS_CLARO = {
 
 type Token = keyof typeof TOKENS_CLARO;
 
-const TIPOS: Record<TipoDeDialogo, { fundo: Token; texto: Token; faixa: boolean; selo: string }> = {
+const TIPOS: Record<TipoDeDialogo, { fundo: Token; texto: Token; corDaFaixa: Token | null; faixa: boolean; selo: string }> = {
   // Fato sem consequência: pedido enviado, você trocou de lugar.
-  informacao: { fundo: "greenTint", texto: "onGreenTint", faixa: true, selo: "Aviso" },
+  informacao: { fundo: "greenTint", texto: "onGreenTint", corDaFaixa: "green", faixa: true, selo: "Aviso" },
   // Prazo ou estado que pede ação: hora do almoço, fechamento, loja sem ponto.
-  atencao: { fundo: "accentPeach", texto: "onAccentPeach", faixa: true, selo: "Atenção" },
+  atencao: { fundo: "accentPeach", texto: "onAccentPeach", corDaFaixa: "accentPeach", faixa: true, selo: "Atenção" },
   // Tudo que tem R$. Mesma cor do erro; o que os separa é a faixa.
-  dinheiro: { fundo: "dangerTint", texto: "danger", faixa: true, selo: "Pagamento" },
+  dinheiro: { fundo: "dangerTint", texto: "danger", corDaFaixa: "danger", faixa: true, selo: "Pagamento" },
   // Resposta a um toque que a pessoa acabou de dar: só o selo, sem faixa. Com
   // três vermelhos ninguém distinguiria nada; com faixa × sem faixa, sim.
-  erro: { fundo: "dangerTint", texto: "danger", faixa: false, selo: "Erro" },
+  erro: { fundo: "dangerTint", texto: "danger", corDaFaixa: null, faixa: false, selo: "Erro" },
 };
 
 export type AparenciaDoTipo = {
   faixa: boolean;
+  /** Cor da faixa de 6 px: FORTE (verde, pêssego, danger). O fundo do selo é o tom claro. */
+  corDaFaixa: string | null;
   fundo: string;
   texto: string;
   selo: string;
@@ -60,6 +62,10 @@ export function aparenciaDoTipo(tipo: TipoDeDialogo, selo?: string): AparenciaDo
   const t = TIPOS[tipo];
   return {
     faixa: t.faixa,
+    // A faixa em dangerTint (#F7E4E2) sobre o branco do cartao mal se ve: a tabela
+    // dizia "faixa e selo: dangerTint" e os mockups desenhavam a faixa forte. Vale o
+    // mockup: o tipo e dito por uma faixa que se ENXERGA, e o selo fica no tom claro.
+    corDaFaixa: t.corDaFaixa ? TOKENS_CLARO[t.corDaFaixa] : null,
     fundo: TOKENS_CLARO[t.fundo],
     texto: TOKENS_CLARO[t.texto],
     selo: selo?.trim() || t.selo,

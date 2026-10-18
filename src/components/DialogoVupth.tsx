@@ -272,7 +272,7 @@ function CartaoComTipo({
         <View style={{ height: 6, marginTop: -4, marginBottom: 12 }}>
           <Animated.View
             testID="dialogo-faixa"
-            style={[{ height: 6, borderRadius: 999, backgroundColor: aparencia.fundo }, estiloDaFaixa]}
+            style={[{ height: 6, borderRadius: 999, backgroundColor: aparencia.corDaFaixa ?? aparencia.fundo }, estiloDaFaixa]}
           />
         </View>
       )}
