@@ -463,7 +463,7 @@ export function QueueStatus() {
       // cancelou antes): o objetivo do usuario esta cumprido. Segue pra
       // limpeza, senao ele fica preso numa tela de fila que nao existe.
       if (!jaSaiuDaFila(error)) {
-        Alert.alert("Nao foi possivel sair da fila", mensagemDeFalhaAoSair(error));
+        Alert.alert("Não foi possível sair da fila", mensagemDeFalhaAoSair(error));
         return;
       }
     }
