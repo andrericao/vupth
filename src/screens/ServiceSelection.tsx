@@ -37,6 +37,7 @@ import { pendenciasDoErro } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { usePendenciasAoEscolher } from "@hooks/usePendenciasAoEscolher";
 import { acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
+import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
 // POUCOS lugares com sombra legitima: no Pencil o "Resumo" sobre `forest` e um
@@ -128,7 +129,7 @@ export function ServiceSelection() {
         setIsLoading(false);
       })
       .catch((err) => {
-        setError(err.response?.data?.message || "Erro ao carregar serviços");
+        setError(mensagemDoErro(err, "Erro ao carregar serviços"));
         setIsLoading(false);
       });
   }, [professionalId]);
@@ -309,7 +310,7 @@ export function ServiceSelection() {
           ? // Desde o Backend d8039b5 (DEC-27) o servidor aceita o pedido com o
             // profissional em Fora; o codigo so volta de backend anterior.
             `${professionalName || "Este profissional"} não está recebendo pedidos agora. Escolha outro horário, ou agende.`
-          : error.response?.data?.message || "Erro ao enviar o pedido de corte";
+          : mensagemDoErro(error, "Erro ao enviar o pedido de corte");
       Alert.alert("Erro", msg);
     } finally {
       setIsRequestingCut(false);

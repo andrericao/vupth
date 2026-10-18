@@ -9,6 +9,7 @@ import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
+import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 export function EditEmail() {
   const navigation = useNavigation();
@@ -39,7 +40,7 @@ export function EditEmail() {
       Alert.alert("Sucesso", "E-mail atualizado!");
       navigation.goBack();
     } catch (error: any) {
-      const msg = error.response?.data?.message || error.message || "Erro ao atualizar e-mail";
+      const msg = mensagemDoErro(error, "Erro ao atualizar e-mail");
       Alert.alert("Erro", msg);
     } finally {
       setIsSaving(false);

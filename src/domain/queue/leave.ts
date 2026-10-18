@@ -1,3 +1,4 @@
+import { mensagemDoErro } from '@domain/erros/mensagemDoErro';
 // Sair da fila: o que fazer quando o cancelamento falha.
 //
 // Ate 2026-09-07 o erro era engolido por um `catch {}` vazio e o cliente saia
@@ -50,8 +51,5 @@ export function jaSaiuDaFila(error: unknown): boolean {
  */
 export function mensagemDeFalhaAoSair(error: unknown): string {
   const err = error as ErroDeApi | null | undefined;
-  return (
-    err?.response?.data?.message ??
-    "Voce continua na fila. Verifique a conexao e tente de novo."
-  );
+  return mensagemDoErro({ response: err?.response }, "Voce continua na fila. Verifique a conexao e tente de novo.");
 }

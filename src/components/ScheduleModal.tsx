@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Modal, ScrollView, TouchableOpacity } from "react-native";
+import { Alert, Modal, ScrollView, TouchableOpacity, useWindowDimensions } from "react-native";
 import { VStack, HStack, Box, Text, Heading, Spinner } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
@@ -74,6 +74,8 @@ export function ScheduleModal({
     onClose();
   }
 
+  const { height: altura } = useWindowDimensions();
+
   const doDia = selectedDate && agora
     ? horariosDoDia({ dia: selectedDate, agoraMs: agora, horarios: horariosDaLoja, agenda, minutosDoServico })
     : null;
@@ -117,7 +119,11 @@ export function ScheduleModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
+        {/* cancelar-fora-da-caixa (CLI-7, Andre 11/10): a caixa nunca passa de 90% da
+            tela e o conteudo rola dentro dela — com a fonte ampliada o "Cancelar"
+            ficava cortado fora da caixa branca. */}
+        <VStack bg="$white" borderRadius="$card" style={[floatingShadow, { maxHeight: altura * 0.9 }]}>
+          <ScrollView contentContainerStyle={{ padding: 24 }} showsVerticalScrollIndicator={false} testID="agenda-rolagem">
           <Heading fontFamily="$heading" fontSize="$lg">
             {corte ? "Solicitar corte" : "Agendar"}
           </Heading>
@@ -183,7 +189,7 @@ export function ScheduleModal({
           )}
 
           <Button
-            title={enviando ? "Agendando..." : corte ? "Pedir neste horário" : "Confirmar"}
+            title={enviando ? "Agendando..." : corte ? "Solicitar" : "Confirmar"}
             mt="$5"
             isDisabled={horario == null || enviando}
             opacity={horario == null ? 0.5 : 1}
@@ -191,6 +197,7 @@ export function ScheduleModal({
             testID="confirmar-agendamento"
           />
           <Button title="Cancelar" variant="outline" mt="$3" onPress={close} />
+          </ScrollView>
         </VStack>
       </Box>
     </Modal>

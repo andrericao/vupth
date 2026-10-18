@@ -23,7 +23,7 @@ describe('recusaAoEntrar', () => {
 
   it('erro desconhecido cai na mensagem do servidor, que é melhor que nada', () => {
     expect(recusaAoEntrar(erro('SEI_LA', 'Explicação do servidor')).mensagem).toBe('Explicação do servidor');
-    expect(recusaAoEntrar({ message: 'Network Error' }).mensagem).toBe('Network Error');
+    expect(recusaAoEntrar({ message: 'Network Error' }).mensagem).toBe('Sem conexão com o servidor. Confira a sua internet.');
     expect(recusaAoEntrar(undefined).mensagem).toBe('Erro ao entrar na fila');
   });
 });

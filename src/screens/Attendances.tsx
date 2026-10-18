@@ -40,6 +40,7 @@ import { formatWaitTime, formatClockTime, STATUS_DESCONHECIDO, filaEncerrada } f
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { usePilulaDeTopo } from "@hooks/usePilulaDeTopo";
 import { fs } from "@stores/fonteStore";
+import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 // [marca-vupth] Cada status e um PAR (fundo, texto). Antes era so uma cor de
 // FUNDO com texto branco fixo por cima, e "Atrasado" (#F59E0B + branco) dava
@@ -158,7 +159,7 @@ export function Attendances() {
               const msg =
                 error.response?.status === 400
                   ? "Este agendamento já virou fila (ou já foi cancelado)."
-                  : error.response?.data?.message || "Erro ao cancelar o agendamento";
+                  : mensagemDoErro(error, "Erro ao cancelar o agendamento");
               Alert.alert("Erro", msg);
               refetchIntentions();
             } finally {

@@ -28,12 +28,15 @@ describe('páginas legais', () => {
   });
 
   it('/privacidade abre já na Privacidade, com quem responde e o contato', () => {
-    const { getByText } = renderWithProviders(<Privacy />);
+    const { getByText, queryByText } = renderWithProviders(<Privacy />);
     expect(getByText('1. Quem somos')).toBeTruthy();
     expect(getByText('7. Por quanto tempo guardamos')).toBeTruthy();
     expect(getByText(/excluir-conta/)).toBeTruthy();
     expect(getByText(/35 dias/)).toBeTruthy();
-    expect(getByText(/pessoa física/)).toBeTruthy();
+    // empresa-nas-paginas-legais (CLI-13): o responsável é a empresa, com o e-mail de contato.
+    expect(getByText(/Os Paulo's/)).toBeTruthy();
+    expect(getByText(/andrericao49@gmail.com/)).toBeTruthy();
+    expect(queryByText(/pessoa física/)).toBeNull();
   });
 
   it('a aba troca para os Termos', () => {

@@ -74,16 +74,17 @@ beforeEach(() => {
 });
 
 describe('Perfil — a conta', () => {
-  it('mostra o endereço principal e as iniciais', async () => {
+  it('mostra as iniciais e a linha "Dados cadastrais" com nome e e-mail', async () => {
     const { findByText, getByText } = renderWithProviders(<Settings />);
-    expect(await findByText('Rua A, 10 — Centro')).toBeTruthy();
+    expect(await findByText('Dados cadastrais')).toBeTruthy();
+    expect(getByText('Alexia Souza · a@b.com')).toBeTruthy();
     expect(getByText('AS')).toBeTruthy();
   });
 
-  it('sem endereço principal: "Não informado"', async () => {
-    mockGetMain.mockRejectedValue(new Error('404'));
-    const { findAllByText } = renderWithProviders(<Settings />);
-    expect((await findAllByText('Não informado')).length).toBeGreaterThan(0);
+  it('os dados não ficam expandidos no Perfil (dados-cadastrais-no-submenu)', async () => {
+    const { findByText, queryByText } = renderWithProviders(<Settings />);
+    await findByText('Dados cadastrais');
+    for (const linha of ['Dados pessoais', 'Senha', 'Endereços']) expect(queryByText(linha)).toBeNull();
   });
 
   it('sem nome, a inicial vem do e-mail', async () => {
@@ -95,10 +96,7 @@ describe('Perfil — a conta', () => {
   it('as linhas abrem as telas da conta', async () => {
     const { getByText } = renderWithProviders(<Settings />);
     for (const [linha, tela] of [
-      ['Dados pessoais', 'editProfile'],
-      ['E-mail', 'editEmail'],
-      ['Senha', 'editPassword'],
-      ['Endereços', 'editAddress'],
+      ['Dados cadastrais', 'dadosCadastrais'],
       ['Tema e tamanho da fonte', 'aparencia'],
     ]) {
       fireEvent.press(getByText(linha));
@@ -113,6 +111,13 @@ describe('Perfil — a conta', () => {
     fireEvent.press(getByText('Suporte'));
     expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/');
     abrir.mockRestore();
+    await act(async () => {});
+  });
+
+  it('o Sair é o do Partner: texto "Sair da conta", solto, com o rótulo "Sair" (botao-sair-igual)', async () => {
+    const { getByTestId, getByText } = renderWithProviders(<Settings />);
+    expect(getByTestId('logout').props.accessibilityLabel).toBe('Sair');
+    expect(getByText('Sair da conta')).toBeTruthy();
     await act(async () => {});
   });
 
@@ -171,7 +176,7 @@ describe('Perfil — deletar conta', () => {
 
     mockDelete.mockRejectedValueOnce(new Error('Network Error'));
     fireEvent.press(getByText('confirmar-delete'));
-    expect(await findByText('erro:Network Error')).toBeTruthy();
+    expect(await findByText('erro:Sem conexão com o servidor. Confira a sua internet.')).toBeTruthy();
 
     mockDelete.mockRejectedValueOnce({});
     fireEvent.press(getByText('confirmar-delete'));

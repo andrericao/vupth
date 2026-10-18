@@ -22,3 +22,13 @@ describe('App.tsx: o que usa safe area fica dentro do SafeAreaProvider', () => {
     expect(app).toMatch(/<ErrorBoundary>\s*<FaixaAvaliar \/>\s*<\/ErrorBoundary>/);
   });
 });
+
+// abertura-sem-retangulo-e-sem-tela-verde (17/10): entre o splash nativo e a
+// abertura nao pode haver uma tela vazia — o V pulsando vale tambem na espera
+// da fonte (o V nao usa texto).
+describe('App.tsx: a abertura e continua', () => {
+  it('a espera da fonte mostra o mesmo V pulsando, sem Loading/spinner', () => {
+    expect(app).toMatch(/!fontGateOpen \|\| !backendReady \? <PreparingServer \/>/);
+    expect(app).not.toMatch(/<Loading/);
+  });
+});

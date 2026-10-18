@@ -248,7 +248,7 @@ describe('EditAddress — salvar', () => {
 
     svc.update.mockRejectedValueOnce(new Error('Network Error'));
     fireEvent.press(tela.getByText('Salvar'));
-    await waitFor(() => expect(alertSpy).toHaveBeenLastCalledWith('Erro', 'Network Error'));
+    await waitFor(() => expect(alertSpy).toHaveBeenLastCalledWith('Erro', 'Sem conexão com o servidor. Confira a sua internet.'));
 
     svc.update.mockRejectedValueOnce({});
     fireEvent.press(tela.getByText('Salvar'));

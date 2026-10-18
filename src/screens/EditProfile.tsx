@@ -9,6 +9,7 @@ import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
+import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 const GENDER_OPTIONS = ["MALE", "FEMALE", "NON_BINARY", "OTHERS"] as const;
 const GENDER_LABELS: Record<string, string> = {
@@ -64,7 +65,7 @@ export function EditProfile() {
       Alert.alert("Sucesso", "Dados atualizados!");
       navigation.goBack();
     } catch (error: any) {
-      const msg = error.response?.data?.message || error.message || "Erro ao atualizar";
+      const msg = mensagemDoErro(error, "Erro ao atualizar");
       Alert.alert("Erro", msg);
     } finally {
       setIsSaving(false);

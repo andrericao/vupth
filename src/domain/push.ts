@@ -42,6 +42,8 @@ export function notificationRoute(data: unknown): RotaDaNotificacao | null {
     type === 'ATTENDANCE_FINISHED' ||
     type === 'ATTENDANCE_PROMOTED' ||
     type === 'ATTENDANCE_CANCELLED' ||
+    // aviso-de-falta (DEC-83): removido da fila por nao comparecer, com multa.
+    type === 'NO_SHOW_REMOVED' ||
     type.startsWith('CUT_');
   return known ? 'attendances' : null;
 }
@@ -209,6 +211,9 @@ export const CATEGORIAS_COM_BOTAO: { categoria: string; acao: string; titulo: st
   { categoria: 'VER_ATENDIMENTO', acao: 'VER_ATENDIMENTO', titulo: 'Ver atendimento' },
   // notificacao-avaliar (CLI-33): o push de concluido (ATTENDANCE_FINISHED).
   { categoria: 'AVALIAR', acao: 'AVALIAR', titulo: 'Avaliar' },
+  // aviso-de-falta (DEC-83): o push NO_SHOW_REMOVED. Hoje o botao abre a aba
+  // Atendimentos; o Pix da multa vem com o pagar-multa-avulso (contrato do Backend).
+  { categoria: 'PAGAR_MULTA', acao: 'PAGAR_MULTA', titulo: 'Pagar multa' },
 ];
 
 /**

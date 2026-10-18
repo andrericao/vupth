@@ -8,6 +8,10 @@ appId: ${APP_ID}
 - assertVisible:
     text: ${PROF}
     label: "03.02 · vê ${PROF}"
+# icone-compartilhar (CLI): o botao do topo e o de compartilhar, nao o de copiar.
+- assertVisible:
+    id: "compartilhar-loja"
+    label: "03.02a · vê o botão de compartilhar a loja"
 - assertNotVisible:
     id: "fila-fechada-${PROF_ID}"
     label: "03.03 · não vê fila-fechada-${PROF_ID}"
@@ -34,6 +38,10 @@ appId: ${APP_ID}
 - assertVisible:
     id: "nota-.*"
     label: "03.0A · o card da loja mostra a nota"
+# nota-novo (CLI): a loja de teste ainda nao tem avaliacao — o card diz "Novo".
+- assertVisible:
+    text: "Novo"
+    label: "03.0Aa · a loja sem avaliação mostra Novo"
 - tapOn:
     id: "pra-ontem-sair"
     label: "03.08 · desliga o Pra ontem"

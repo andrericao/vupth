@@ -11,6 +11,7 @@ import { getPasswordRules } from "@domain/auth/validateAuth";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
+import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 export function EditPassword() {
   const navigation = useNavigation();
@@ -52,7 +53,7 @@ export function EditPassword() {
       const msg =
         code === "CURRENT_PASSWORD_INVALID"
           ? "Senha atual incorreta."
-          : error.response?.data?.message || error.message || "Erro ao atualizar senha";
+          : mensagemDoErro(error, "Erro ao atualizar senha");
       Alert.alert("Erro", msg);
     } finally {
       setIsSaving(false);

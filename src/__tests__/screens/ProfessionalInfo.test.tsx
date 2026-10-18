@@ -1,5 +1,5 @@
 import { Alert, Share } from 'react-native';
-import { act, fireEvent } from '@testing-library/react-native';
+import { act, fireEvent, within } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ProfessionalInfo } from '@screens/ProfessionalInfo';
@@ -71,7 +71,7 @@ describe('ProfessionalInfo (informacoes-do-profissional)', () => {
 
     expect(await findByText('Carlos Lima', {}, { timeout: 15000 })).toBeTruthy();
     expect(await findByText('Barbearia do Zé')).toBeTruthy();
-    expect(getByTestId('nota-do-profissional').props.children).toBe('4.8');
+    expect(within(getByTestId('nota-do-profissional')).getByText('4.8')).toBeTruthy();
     expect(await findByText('Corte')).toBeTruthy();
     expect(await findByText('R$ 30.00')).toBeTruthy();
     expect(await findByText('40 min')).toBeTruthy();

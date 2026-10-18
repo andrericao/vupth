@@ -10,7 +10,7 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Copy } from "lucide-react-native";
+import { Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Share2 } from "lucide-react-native";
 import { copiarTexto } from "@utils/copiar";
 import { FotoAmpliada } from "@components/FotoAmpliada";
 import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
@@ -27,6 +27,7 @@ import { LiveDot } from "@components/LiveDot";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { agruparPorExpediente, emIntervalo, estaNoExpediente, filaFechada } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
+import { NotaDaLoja } from "@components/NotaDaLoja";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { ehSoAgenda } from "@domain/professional/modo";
 import { isEffectivelyOpen } from "@domain/establishment/types";
@@ -77,7 +78,6 @@ function ProfessionalRow({
   const r = resolveRating(
     professional.rating_average,
     professional.rating_count,
-    professional.id,
   );
 
   return (
@@ -157,12 +157,7 @@ function ProfessionalRow({
               <Text size="2xs" color="$brandTextSecondary" numberOfLines={1} flex={1}>
                 {formatSpecialty(professional.specialty)}
               </Text>
-              <HStack alignItems="center" gap="$1">
-                <Star size={11} color="#163300" fill="#163300" />
-                <Text size="2xs" color="$brandTextSecondary" fontFamily="$heading">
-                  {r.value.toFixed(1)}
-                </Text>
-              </HStack>
+              <NotaDaLoja rating={r} starSize={11} size="2xs" color="$brandTextSecondary" fontFamily="$heading" />
             </HStack>
           </VStack>
           <TouchableOpacity
@@ -305,18 +300,19 @@ export function EstablishmentDetail() {
   const rating = resolveRating(
     establishment.rating_best ?? establishment.rating_average,
     establishment.rating_count,
-    establishment.id,
   );
 
-  // Copiar o link da loja (Andre, 26/09): a base da indicacao. Sem o modulo
-  // nativo (APK anterior ao build), cai no compartilhar do sistema.
-  async function handleCopiarLink() {
+  // icone-compartilhar (CLI-9, Andre 11/10): o botao abre a folha de compartilhar
+  // do sistema, onde a pessoa escolhe copiar ou a plataforma. Onde ela nao
+  // existe (navegador sem Web Share), copia o link e avisa. A base da indicacao
+  // (Andre, 26/09).
+  async function handleCompartilhar() {
     const link = linkParaCompartilhar(raizDoSite(API_ENV), establishmentId);
-    if (await copiarTexto(link)) {
-      Alert.alert("Link copiado", "Cole onde quiser para indicar esta loja.");
-      return;
+    try {
+      await Share.share({ message: textoDeDivulgacao({ loja: establishment!.name, link }) });
+    } catch {
+      if (await copiarTexto(link)) Alert.alert("Link copiado", "Cole onde quiser para indicar esta loja.");
     }
-    Share.share({ message: textoDeDivulgacao({ loja: establishment!.name, link }) }).catch(() => {});
   }
   // Um so botao de favorito pros dois ramos (com foto e sem): antes cada ramo
   // desenhava o proprio, e eles ja tinham saido com tamanhos diferentes.
@@ -337,12 +333,12 @@ export function EstablishmentDetail() {
   const acoes = (
     <HStack gap="$2">
       <HeaderIconButton
-        onPress={handleCopiarLink}
+        onPress={handleCompartilhar}
         ground={showPhoto ? "foto" : "claro"}
-        testID="copiar-link"
-        accessibilityLabel="Copiar o link da loja"
+        testID="compartilhar-loja"
+        accessibilityLabel="Compartilhar a loja"
       >
-        <Copy size={20} color="#163300" />
+        <Share2 size={20} color="#163300" />
       </HeaderIconButton>
       {favorito}
     </HStack>
@@ -400,10 +396,7 @@ export function EstablishmentDetail() {
           </Text>
         )}
         <HStack alignItems="center" gap="$2">
-          <Star size={14} color="#163300" fill="#163300" />
-          <Text size="sm" fontFamily="$heading" color="$brandTextPrimary">
-            {rating.value.toFixed(1)}
-          </Text>
+          <NotaDaLoja rating={rating} starSize={14} gap="$2" size="sm" fontFamily="$heading" color="$brandTextPrimary" testID="nota-da-loja" />
           <Text size="sm" color="$brandTextSecondary">
             {rating.real && rating.count != null ? `(${rating.count} avaliações)` : ""}
             {establishment.distance_km != null

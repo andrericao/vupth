@@ -54,7 +54,7 @@ describe("fontes da marca sobrevivem ao deploy web", () => {
     expect(APP).toMatch(/const \[fontsLoaded, fontError\] = useFonts\(/);
     expect(APP).toMatch(/fontsLoaded \|\| Boolean\(fontError\)/);
     // E o portao de render tem de usar a variavel combinada, nao o cru.
-    expect(APP).toContain("{!fontGateOpen ?");
+    expect(APP).toContain("{!fontGateOpen ||");
     expect(APP).not.toContain("{!fontsLoaded ?");
   });
 });

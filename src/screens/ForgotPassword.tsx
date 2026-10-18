@@ -14,6 +14,7 @@ import { authService } from "@services/authService";
 import { waitForBackend } from "@services/healthService";
 import { useTabBarInset } from "@hooks/useTabBarInset";
 import { fs } from "@stores/fonteStore";
+import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 const EMAIL_RE = /\S+@\S+\.\S+/;
 
@@ -151,7 +152,7 @@ export function ForgotPassword() {
           ? "Código inválido ou já utilizado. Confira ou peça um novo."
           : codeErr === "RESET_CODE_EXPIRED"
             ? "Código expirado. Toque em 'Reenviar código'."
-            : error.response?.data?.message || error.message || "Erro ao redefinir a senha";
+            : mensagemDoErro(error, "Erro ao redefinir a senha");
       Alert.alert("Erro", msg);
     } finally {
       setIsSubmitting(false);
