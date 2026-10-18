@@ -1,5 +1,5 @@
-import { Alert } from 'react-native';
-import { act, fireEvent } from '@testing-library/react-native';
+import { Alert, StyleSheet } from 'react-native';
+import { act, fireEvent, within } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ScheduleModal } from '@components/ScheduleModal';
@@ -170,6 +170,36 @@ describe('ScheduleModal — modo corte', () => {
     await act(async () => {});
     expect(getByTestId('agenda-rolagem')).toBeTruthy();
     expect(getByText('Cancelar')).toBeTruthy();
+  });
+
+  // cancelar-cortado-no-solicitar (Andre, 18/10): com a rolagem em volta de TUDO, o
+  // "Cancelar" ficava abaixo da dobra, cortado na borda da caixa, sem nada que
+  // avisasse que dava para rolar. Os botões saem da rolagem e ficam no rodapé da
+  // caixa: o que cresce com a fonte do aparelho é o miolo, que rola; os botões
+  // aparecem sempre.
+  it('"Solicitar" e "Cancelar" ficam no rodapé fixo, fora da rolagem', async () => {
+    const { getByTestId } = abrir({ corte: { onEscolher: jest.fn() } });
+    await act(async () => {});
+    const rolagem = within(getByTestId('agenda-rolagem'));
+    expect(rolagem.queryByText('Cancelar')).toBeNull();
+    expect(rolagem.queryByTestId('confirmar-agendamento')).toBeNull();
+    const rodape = within(getByTestId('agenda-rodape'));
+    expect(rodape.getByText('Cancelar')).toBeTruthy();
+    expect(rodape.getByTestId('confirmar-agendamento')).toBeTruthy();
+    // O miolo (título, "Assim que abrir", dias) é o que rola.
+    expect(rolagem.getByText('Solicitar corte')).toBeTruthy();
+    expect(rolagem.getByTestId('corte-assim-que-abrir')).toBeTruthy();
+  });
+
+  it('a caixa tem altura MÁXIMA relativa ao espaço da janela, nunca altura cravada (fonte ampliada)', async () => {
+    const { getByTestId } = abrir({ corte: { onEscolher: jest.fn() } });
+    await act(async () => {});
+    const caixa = StyleSheet.flatten(getByTestId('agenda-caixa').props.style);
+    expect(caixa.maxHeight).toBe('100%');
+    expect(caixa.height).toBeUndefined();
+    // O miolo encolhe antes de empurrar o rodapé para fora da caixa.
+    const rolagem = StyleSheet.flatten(getByTestId('agenda-rolagem').props.style);
+    expect(rolagem.flexShrink).toBe(1);
   });
 
   it('com dia e horário escolhidos, devolve o horário — sem criar intenção', async () => {
