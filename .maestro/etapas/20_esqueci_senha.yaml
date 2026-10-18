@@ -57,6 +57,10 @@ appId: ${APP_ID}
     visible: "E-mail sem conta"
     timeout: ${30000 * LENTO}
     label: "20.0G · avisa E-mail sem conta"
+# erros-em-portugues (CLI): o servidor responde "E-mail not registered"; a tela nunca o mostra.
+- assertNotVisible:
+    text: ".*not registered.*"
+    label: "20.0Ga · o inglês do servidor não aparece"
 - tapOn:
     text: "Criar conta"
     label: "20.0H · toca em Criar conta"
