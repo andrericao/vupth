@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Animated, Modal, Pressable, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react-native";
+import { Check, X } from "lucide-react-native";
 import QRCode from "react-native-qrcode-svg";
 
 import {
@@ -17,13 +17,14 @@ import { useAuthStore } from "@stores/authStore";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { fs } from "@stores/fonteStore";
 import { copiarTexto } from "@utils/copiar";
+import { movimentoReduzido } from "@utils/motion";
 
 const FOREST = "#163300";
 const GREEN = "#9FE870";
 const TEXT_SECONDARY = "#454745";
 
-function Botao({ titulo, onPress, claro, testID, desligado }: {
-  titulo: string; onPress: () => void; claro?: boolean; testID: string; desligado?: boolean;
+function Botao({ titulo, onPress, claro, testID, desligado, feito }: {
+  titulo: string; onPress: () => void; claro?: boolean; testID: string; desligado?: boolean; feito?: boolean;
 }) {
   return (
     <Pressable
@@ -31,7 +32,8 @@ function Botao({ titulo, onPress, claro, testID, desligado }: {
       disabled={desligado}
       testID={testID}
       accessibilityRole="button"
-      style={{
+      // Escala estatica no pressionado (sem Reanimated no app): o toque encolhe o botao.
+      style={({ pressed }) => ({
         backgroundColor: claro ? "#FFFFFF" : GREEN,
         borderWidth: claro ? 1 : 0,
         borderColor: FOREST,
@@ -39,10 +41,42 @@ function Botao({ titulo, onPress, claro, testID, desligado }: {
         paddingVertical: 12,
         alignItems: "center",
         opacity: desligado ? 0.5 : 1,
-      }}
+        transform: [{ scale: pressed ? 0.97 : 1 }],
+      })}
     >
-      <Text style={{ color: FOREST, fontFamily: "Inter_600SemiBold", fontSize: fs(15) }}>{titulo}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        {feito ? <ChecagemQueSurge /> : null}
+        <Text style={{ color: FOREST, fontFamily: "Inter_600SemiBold", fontSize: fs(15) }}>{titulo}</Text>
+      </View>
     </Pressable>
+  );
+}
+
+// "Copiado" so trocava o texto, e quem copia um codigo Pix precisa ter certeza de que
+// copiou. O check surge com um salto (0 a 1, passando de 1 por um instante).
+function ChecagemQueSurge() {
+  const [escala] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    let vivo = true;
+    let anim: Animated.CompositeAnimation | null = null;
+    movimentoReduzido().then((reduzido) => {
+      if (!vivo) return;
+      if (reduzido) {
+        escala.setValue(1);
+        return;
+      }
+      anim = Animated.spring(escala, { toValue: 1, friction: 5, tension: 200, useNativeDriver: true });
+      anim.start();
+    });
+    return () => {
+      vivo = false;
+      anim?.stop();
+    };
+  }, [escala]);
+  return (
+    <Animated.View testID="pix-copiado-check" style={{ transform: [{ scale: escala }] }}>
+      <Check size={16} color={FOREST} />
+    </Animated.View>
   );
 }
 
@@ -160,7 +194,7 @@ export function ModalDePagamento() {
                   <Text selectable numberOfLines={3} testID="pix-codigo" style={{ color: FOREST, fontSize: fs(12), backgroundColor: "#F3F5F1", borderRadius: 10, padding: 10 }}>
                     {pagamento.pix_copy_paste}
                   </Text>
-                  <Botao titulo={copiado ? "Copiado" : "Copiar código Pix"} claro testID="pix-copiar" onPress={copiar} />
+                  <Botao titulo={copiado ? "Copiado" : "Copiar código Pix"} claro feito={copiado} testID="pix-copiar" onPress={copiar} />
                 </>
               ) : null}
               {podeAvisarQuePagou(pagamento.status) ? (
