@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+import { tipoValido, type TipoDeDialogo } from "@domain/tipoDeDialogo";
+
 // Ponte entre quem PEDE um diálogo e quem o DESENHA.
 //
 // 🔴 "o modal de aviso na versão web tá melhor que o modal do apk, quero que
@@ -31,13 +33,22 @@ export type PedidoDialogo = {
    * registro de que a pessoa soube). Ausente = o voltar responde como cancelar.
    */
   cancelavel?: boolean;
+  /**
+   * Identidade do aviso (faixa + selo; design-modais, 17/10). Sem `tipo` o
+   * diálogo é o de sempre — as ~95 chamadas de `Alert.alert` não mudam.
+   */
+  tipo?: TipoDeDialogo;
+  /** Troca o rótulo do selo sem trocar o tipo ("Multa" em vez de "Pagamento"). */
+  selo?: string;
 };
 
-type DialogoNaTela = {
+export type DialogoNaTela = {
   titulo: string;
   mensagem?: string;
   botoes: Required<BotaoDialogo>[];
   cancelavel: boolean;
+  tipo?: TipoDeDialogo;
+  selo?: string;
   resolver: (indice: number) => void;
 };
 
@@ -87,6 +98,10 @@ export function abrirDialogo(pedido: PedidoDialogo): Promise<number> {
       mensagem: pedido.mensagem,
       botoes: normalizar(pedido.botoes),
       cancelavel: pedido.cancelavel !== false,
+      // Um tipo que nao existe (JS solto, valor de API) vira diálogo sem tipo:
+      // melhor a caixa de sempre do que uma tela sem selo e sem explicação.
+      tipo: tipoValido(pedido.tipo) ? pedido.tipo : undefined,
+      selo: pedido.selo,
       resolver: resolve,
     });
   });
