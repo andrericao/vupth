@@ -43,11 +43,11 @@ appId: ${APP_ID}
     label: "15.0B · volta ao Perfil"
 - scrollUntilVisible:
     element:
-      id: "terms"
-    label: "15.0C · rola até terms"
+      id: "link-termos"
+    label: "15.0C · rola até Termos de uso"
 - tapOn:
-    id: "terms"
-    label: "15.0D · toca em terms"
+    id: "link-termos"
+    label: "15.0D · toca em Termos de uso"
 - extendedWaitUntil:
     visible:
       id: "tab-uso"

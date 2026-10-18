@@ -1,11 +1,12 @@
-import { Platform, StatusBar, StyleSheet } from 'react-native';
+import { Linking, Platform, StatusBar, StyleSheet } from 'react-native';
 import { fireEvent, waitFor, within } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { Onboarding, bordasDaEntrada, PISO_BARRA_DE_NAVEGACAO } from '@screens/Onboarding';
+import { linkLegal } from '@components/LinksLegais';
 
 // O Onboarding fica fora do navegador: ninguem reserva a barra de navegacao do
-// celular. Sem a inset de baixo, o "Já tem conta? Entrar" nascia atras dela e
-// nao dava para tocar (Andre, 05/10, no aparelho).
+// celular. Sem a inset de baixo, o "Entrar" nascia atras dela e nao dava para
+// tocar (Andre, 05/10, no aparelho).
 
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('expo-updates', () => ({ runtimeVersion: '1.0.3', createdAt: new Date(2026, 9, 3, 12, 0) }));
@@ -34,6 +35,55 @@ describe('Onboarding — o rodapé acima da barra do sistema', () => {
     expect(within(rolagem).queryByTestId('onboarding-rodape')).toBeNull();
     expect(within(rolagem).queryByTestId('onboarding-login')).toBeNull();
     expect(getByTestId('onboarding-rodape')).toBeTruthy();
+  });
+
+  // tela-de-entrada do Client (design-entrada, 17/10): "Ver filas" e "Entrar"
+  // sao o mesmo par de pilulas do Partner; o link de 14 px virou botao.
+  describe('o par de botões e os termos no rodapé', () => {
+    it('o primário diz "Ver filas" e o secundário é o botão "Entrar", não um link', () => {
+      const { getByTestId, getByText, queryByText } = renderWithProviders(<Onboarding />);
+      expect(within(getByTestId('onboarding-start')).getByText('Ver filas')).toBeTruthy();
+      expect(within(getByTestId('onboarding-login')).getByText('Entrar')).toBeTruthy();
+      expect(getByTestId('onboarding-login').props.accessibilityRole).not.toBe('link');
+      expect(queryByText('Ver filas perto de mim')).toBeNull();
+      expect(queryByText('Já tem conta?')).toBeNull();
+      expect(getByText('Ver filas')).toBeTruthy();
+    });
+
+    it('os dois botões têm a mesma altura mínima (54) e o mesmo raio de pílula', () => {
+      const { getByTestId } = renderWithProviders(<Onboarding />);
+      const [a, b] = ['onboarding-start', 'onboarding-login'].map((id) =>
+        StyleSheet.flatten(getByTestId(id).props.style)
+      );
+      expect(a.minHeight).toBe(54);
+      expect(b.minHeight).toBe(54);
+      expect(a.borderRadius).toBe(b.borderRadius);
+      expect(a.width).toBe(b.width);
+    });
+
+    it('o "Entrar" não é a pílula verde: fundo surface, sem contorno', () => {
+      const { getByTestId } = renderWithProviders(<Onboarding />);
+      const primario = StyleSheet.flatten(getByTestId('onboarding-start').props.style);
+      const secundario = StyleSheet.flatten(getByTestId('onboarding-login').props.style);
+      expect(secundario.backgroundColor).toBe('#F3F5F1');
+      expect(secundario.backgroundColor).not.toBe(primario.backgroundColor);
+      expect(secundario.borderWidth ?? 0).toBe(0);
+    });
+
+    it('Termos de uso e Política de privacidade ficam no rodapé fixo, fora da rolagem', async () => {
+      const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+      const { getByTestId } = renderWithProviders(<Onboarding />);
+      const rodape = within(getByTestId('onboarding-rodape'));
+      expect(rodape.getByTestId('link-termos')).toBeTruthy();
+      expect(rodape.getByTestId('link-privacidade')).toBeTruthy();
+      expect(within(getByTestId('onboarding-rolagem')).queryByTestId('links-legais')).toBeNull();
+
+      fireEvent.press(getByTestId('link-termos'));
+      await waitFor(() => expect(abrir).toHaveBeenLastCalledWith(linkLegal('termos')));
+      fireEvent.press(getByTestId('link-privacidade'));
+      await waitFor(() => expect(abrir).toHaveBeenLastCalledWith(linkLegal('privacidade')));
+      abrir.mockRestore();
+    });
   });
 
   describe('bordasDaEntrada — insets zeradas na primeira abertura (bateria 09/10 23:42)', () => {
@@ -66,7 +116,7 @@ describe('Onboarding — o rodapé acima da barra do sistema', () => {
       mockLojas = [];
     });
 
-    it('"Ver filas perto de mim" marca a abertura como vista e não vai ao login', async () => {
+    it('"Ver filas" marca a abertura como vista e não vai ao login', async () => {
       const { getByTestId } = renderWithProviders(<Onboarding />);
       fireEvent.press(getByTestId('onboarding-start'));
       await waitFor(() => expect(mockMarcarVisto).toHaveBeenCalled());
