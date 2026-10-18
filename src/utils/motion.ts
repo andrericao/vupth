@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AccessibilityInfo, Easing } from "react-native";
+import { AccessibilityInfo, Animated, Easing } from "react-native";
 
 // Curvas e tempos do movimento do app. A tabela completa, com o porquê de cada
 // número, vive no vupth-docs (aba Design, Motion); aqui ficam só os que o código
@@ -52,4 +52,42 @@ export function useMovimentoReduzido(): boolean {
     };
   }, []);
   return reduzido;
+}
+
+/**
+ * Entrada suave de um elemento que acaba de aparecer: opacidade e deslize de `dy`
+ * pontos, uma vez, ao montar. Devolve o estilo animado para quem precisa animar o
+ * PRÓPRIO elemento (faixas de posição absoluta, que não podem ganhar um invólucro
+ * sem perder o `top`/`left` que as ancora). Com movimento reduzido já nasce pronto.
+ * `chave` reinicia a entrada quando muda: a faixa que só aparece depois de um dado
+ * chegar (o atendimento a avaliar) entra a cada novo valor, e não gasta a animação
+ * enquanto ainda não existe.
+ * Só `transform` e `opacity`: rodam no driver nativo.
+ */
+export function useEntrada({
+  dy = 12,
+  atraso = 0,
+  duracao = MS.entrada,
+  chave,
+}: { dy?: number; atraso?: number; duracao?: number; chave?: unknown } = {}) {
+  const [v] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    let vivo = true;
+    let anim: Animated.CompositeAnimation | null = null;
+    v.setValue(0);
+    movimentoReduzido().then((reduzido) => {
+      if (!vivo) return;
+      if (reduzido) {
+        v.setValue(1);
+        return;
+      }
+      anim = Animated.timing(v, { toValue: 1, duration: duracao, delay: atraso, easing: EASE.entrada, useNativeDriver: true });
+      anim.start();
+    });
+    return () => {
+      vivo = false;
+      anim?.stop();
+    };
+  }, [v, atraso, duracao, chave]);
+  return { opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [dy, 0] }) }] };
 }
