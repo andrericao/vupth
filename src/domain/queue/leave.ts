@@ -51,5 +51,5 @@ export function jaSaiuDaFila(error: unknown): boolean {
  */
 export function mensagemDeFalhaAoSair(error: unknown): string {
   const err = error as ErroDeApi | null | undefined;
-  return mensagemDoErro({ response: err?.response }, "Voce continua na fila. Verifique a conexao e tente de novo.");
+  return mensagemDoErro({ response: err?.response }, "Você continua na fila. Verifique a conexão e tente de novo.");
 }
