@@ -10,7 +10,7 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Copy } from "lucide-react-native";
+import { Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Share2 } from "lucide-react-native";
 import { copiarTexto } from "@utils/copiar";
 import { FotoAmpliada } from "@components/FotoAmpliada";
 import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
@@ -302,15 +302,17 @@ export function EstablishmentDetail() {
     establishment.rating_count,
   );
 
-  // Copiar o link da loja (Andre, 26/09): a base da indicacao. Sem o modulo
-  // nativo (APK anterior ao build), cai no compartilhar do sistema.
-  async function handleCopiarLink() {
+  // icone-compartilhar (CLI-9, Andre 11/10): o botao abre a folha de compartilhar
+  // do sistema, onde a pessoa escolhe copiar ou a plataforma. Onde ela nao
+  // existe (navegador sem Web Share), copia o link e avisa. A base da indicacao
+  // (Andre, 26/09).
+  async function handleCompartilhar() {
     const link = linkParaCompartilhar(raizDoSite(API_ENV), establishmentId);
-    if (await copiarTexto(link)) {
-      Alert.alert("Link copiado", "Cole onde quiser para indicar esta loja.");
-      return;
+    try {
+      await Share.share({ message: textoDeDivulgacao({ loja: establishment!.name, link }) });
+    } catch {
+      if (await copiarTexto(link)) Alert.alert("Link copiado", "Cole onde quiser para indicar esta loja.");
     }
-    Share.share({ message: textoDeDivulgacao({ loja: establishment!.name, link }) }).catch(() => {});
   }
   // Um so botao de favorito pros dois ramos (com foto e sem): antes cada ramo
   // desenhava o proprio, e eles ja tinham saido com tamanhos diferentes.
@@ -331,12 +333,12 @@ export function EstablishmentDetail() {
   const acoes = (
     <HStack gap="$2">
       <HeaderIconButton
-        onPress={handleCopiarLink}
+        onPress={handleCompartilhar}
         ground={showPhoto ? "foto" : "claro"}
-        testID="copiar-link"
-        accessibilityLabel="Copiar o link da loja"
+        testID="compartilhar-loja"
+        accessibilityLabel="Compartilhar a loja"
       >
-        <Copy size={20} color="#163300" />
+        <Share2 size={20} color="#163300" />
       </HeaderIconButton>
       {favorito}
     </HStack>

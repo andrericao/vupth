@@ -8,6 +8,10 @@ appId: ${APP_ID}
 - assertVisible:
     text: ${PROF}
     label: "03.02 · vê ${PROF}"
+# icone-compartilhar (CLI): o botao do topo e o de compartilhar, nao o de copiar.
+- assertVisible:
+    id: "compartilhar-loja"
+    label: "03.02a · vê o botão de compartilhar a loja"
 - assertNotVisible:
     id: "fila-fechada-${PROF_ID}"
     label: "03.03 · não vê fila-fechada-${PROF_ID}"
