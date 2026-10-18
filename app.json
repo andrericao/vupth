@@ -25,13 +25,19 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/marca/favicon-48.png",
       "lang": "pt-BR"
     },
     "plugins": [
       "expo-font",
       "expo-secure-store",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/marca/v-notificacao-96.png",
+          "color": "#163300"
+        }
+      ],
       [
         "expo-location",
         {

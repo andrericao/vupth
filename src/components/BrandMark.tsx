@@ -14,8 +14,9 @@ import { Image, ImageStyle, StyleProp } from "react-native";
  * build (não sai por OTA):
  *   - `assets/adaptive-icon.png` — ícone adaptativo do Android
  *   - `assets/splash.png`        — tela de abertura
- *   - `assets/favicon.png`       — web
- * Ao trocar a marca, regerar esses três a partir da mesma arte e fazer um
+ *   - `assets/marca/`            — o V estilizado: ícone e cor da notificação do
+ *                                  Android (plugin do expo-notifications) e o favicon da web
+ * Ao trocar a marca, regerar esses a partir da mesma arte e fazer um
  * `eas build` novo.
  *
  * Decisão do Andre (2026-08-06): dentro do app entra APENAS o "V" — o nome
