@@ -8,6 +8,9 @@ appId: ${APP_ID}
     text: "Perfil"
     label: "16.01 · toca em Perfil"
 - tapOn:
+    text: "Dados cadastrais"
+    label: "16.01a · toca em Dados cadastrais (o submenu do Perfil)"
+- tapOn:
     text: "Endereços"
     label: "16.02 · toca em Endereços"
 - tapOn:
@@ -135,6 +138,9 @@ appId: ${APP_ID}
 - tapOn:
     text: "Perfil"
     label: "16.0Z · volta ao Perfil"
+- tapOn:
+    text: "Dados cadastrais"
+    label: "16.0Za · toca em Dados cadastrais"
 - tapOn:
     text: "E-mail"
     label: "16.10 · toca em E-mail"

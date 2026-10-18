@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Alert, Linking, TouchableOpacity } from "react-native";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   VStack,
@@ -10,71 +10,21 @@ import {
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import { User, Mail, Lock, MapPin, ChevronRight, LogOut, Smartphone, Palette, LifeBuoy, Ticket } from "lucide-react-native";
+import { User, LogOut, Smartphone, Palette, LifeBuoy, Ticket } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { nomeDeExibicao } from "@domain/auth/displayName";
 import { Button } from "@components/Button";
+import { MenuItem, Grupo } from "@components/MenuDoPerfil";
 import { VersaoDoApp } from "@components/VersaoDoApp";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
-import { addressService, AddressResponse } from "@services/addressService";
 import { fs } from "@stores/fonteStore";
 import { SUPORTE_URL } from "@utils/suporte";
 import { CUPOM_LIGADO } from "@domain/campanhas";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
-
-function MenuItem({
-  icon,
-  label,
-  value,
-  onPress,
-  last,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value?: string;
-  onPress: () => void;
-  /** Ultima linha do card nao leva divisor. */
-  last?: boolean;
-}) {
-  return (
-    <TouchableOpacity onPress={onPress}>
-      <HStack px={16} py={15} gap="$3" alignItems="center">
-        {icon}
-        <VStack flex={1} gap="$0.5">
-          <Text size="xs" color="$brandTextSecondary">
-            {label}
-          </Text>
-          {value && (
-            <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary" numberOfLines={1}>
-              {value}
-            </Text>
-          )}
-        </VStack>
-        <ChevronRight size={18} color="#454745" />
-      </HStack>
-      {!last && <Box height={1} bg="$brandBorder" />}
-    </TouchableOpacity>
-  );
-}
-
-// Rotulo em caixa alta sobre um card: o mesmo agrupamento do menu do partner
-// (Andre 2026-09-16: "o menu igual o do partner, com submenus").
-function Grupo({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <VStack gap="$2" testID={`grupo-${label}`}>
-      <Text fontSize={fs(11)} fontWeight="$bold" letterSpacing={0.6} color="$brandTextSecondary">
-        {label.toUpperCase()}
-      </Text>
-      <Box borderRadius="$card" overflow="hidden" bg="$brandSurface">
-        {children}
-      </Box>
-    </VStack>
-  );
-}
 
 export function Settings() {
   const insets = useSafeAreaInsets();
@@ -84,33 +34,9 @@ export function Settings() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
 
-  const [mainAddress, setMainAddress] = useState<AddressResponse | null>(null);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (!accessToken) return;
-      addressService.getMain(accessToken)
-        .then(({ data }) => setMainAddress(data))
-        .catch(() => setMainAddress(null));
-    }, [accessToken]),
-  );
-
-  // Duas leituras diferentes do mesmo dado, por isso duas variaveis:
-  //  · como VALOR da linha "Dados pessoais", vazio e "Não informado" — o campo
-  //    existe e esta em branco, e dizer isso e o certo.
-  //  · como NOME no topo, "Não informado" vira um nome falso: a pessoa le o
-  //    proprio cartao de identidade e nao se reconhece. Sem nome cadastrado o
-  //    topo cai no apelido do e-mail, que e sempre alguma coisa dela.
-  // (O nome nunca chega a ser pedido: nao existe tela de completar perfil
-  //  depois do cadastro. Enquanto ela nao existir, este e o menor mal.)
-  const nomeCadastrado = [user?.first_name, user?.last_name].filter(Boolean).join(" ");
-  const displayName = nomeCadastrado || "Não informado";
   // Mesma regra da Home, numa funcao so — eram duas copias que ja divergiam
   // (aqui caia no e-mail, la caia no texto de visitante).
   const nomeDoTopo = nomeDeExibicao(user);
-  const displayAddress = mainAddress
-    ? `${mainAddress.street}, ${mainAddress.number} — ${mainAddress.neighborhood}`
-    : "Não informado";
   // Iniciais do nome; sem nome cadastrado, a primeira letra do e-mail — nunca
   // um circulo vazio.
   const initials =
@@ -221,29 +147,13 @@ export function Settings() {
         {isAuthenticated ? (
           <>
             <Grupo label="Conta">
+              {/* dados-cadastrais-no-submenu (17/10): nome e e-mail como resumo; Dados
+                  pessoais, E-mail, Senha e Endereços moram na tela que isto abre. */}
               <MenuItem
                 icon={<User size={20} color="#163300" />}
-                label="Dados pessoais"
-                value={displayName}
-                onPress={() => navigation.navigate("editProfile")}
-              />
-              <MenuItem
-                icon={<Mail size={20} color="#163300" />}
-                label="E-mail"
-                value={user?.email ?? "—"}
-                onPress={() => navigation.navigate("editEmail")}
-              />
-              <MenuItem
-                icon={<Lock size={20} color="#163300" />}
-                label="Senha"
-                value="••••••"
-                onPress={() => navigation.navigate("editPassword")}
-              />
-              <MenuItem
-                icon={<MapPin size={20} color="#163300" />}
-                label="Endereços"
-                value={displayAddress}
-                onPress={() => navigation.navigate("editAddress")}
+                label="Dados cadastrais"
+                value={[nomeDoTopo, user?.email].filter(Boolean).join(" · ")}
+                onPress={() => navigation.navigate("dadosCadastrais")}
                 last
               />
             </Grupo>

@@ -32,7 +32,6 @@ import { useFonteStore } from "@stores/fonteStore";
 
 import { Routes } from "@routes/index";
 
-import { Loading } from "@components/Loading";
 import { PreparingServer } from "@components/PreparingServer";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
@@ -226,7 +225,9 @@ export default function App() {
             DENTRO dos providers de proposito: a tela de erro usa `Button` e os
             tokens da marca, que precisam do Gluestack acima. */}
         <ErrorBoundary>
-          {!fontGateOpen ? <Loading /> : !backendReady ? <PreparingServer /> : <Routes />}
+          {/* abertura-sem-retangulo-e-sem-tela-verde (17/10): o V pulsando ja na espera da fonte —
+              sem o spinner/tela vazia entre o splash nativo e a abertura. A tela do V nao usa fonte. */}
+          {!fontGateOpen || !backendReady ? <PreparingServer /> : <Routes />}
         </ErrorBoundary>
         {/* Um so na arvore, FORA do portao de fonte: um aviso disparado antes
             de a fonte carregar precisa aparecer do mesmo jeito. */}

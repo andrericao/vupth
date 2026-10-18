@@ -7,6 +7,9 @@ appId: ${APP_ID}
     text: "Perfil"
     label: "15.01 · toca em Perfil"
 - tapOn:
+    text: "Dados cadastrais"
+    label: "15.01a · toca em Dados cadastrais (o submenu do Perfil)"
+- tapOn:
     text: "Dados pessoais"
     label: "15.02 · toca em Dados pessoais"
 - extendedWaitUntil:

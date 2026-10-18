@@ -29,6 +29,7 @@ const TELAS = {
   settingsTab: {
     screens: {
       settings: "perfil",
+      dadosCadastrais: "perfil/dados-cadastrais",
       editProfile: "perfil/dados",
       editEmail: "perfil/email",
       editPassword: "perfil/senha",

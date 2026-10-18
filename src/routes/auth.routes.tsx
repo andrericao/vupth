@@ -24,6 +24,7 @@ import { Privacy, Terms } from "@screens/Terms";
 import { ExcluirConta } from "@screens/ExcluirConta";
 import { Sistema } from "@screens/Sistema";
 import { Aparencia } from "@screens/Aparencia";
+import { DadosCadastrais } from "@screens/DadosCadastrais";
 import { Promocoes } from "@screens/Promocoes";
 import { ServiceSelection } from "@screens/ServiceSelection";
 import { ProfessionalInfo } from "@screens/ProfessionalInfo";
@@ -117,6 +118,7 @@ export type AppRoutes = {
   attendances: { avaliar?: string } | undefined;
   services: undefined;
   settings: undefined;
+  dadosCadastrais: undefined;
   editProfile: undefined;
   editEmail: undefined;
   editPassword: undefined;
@@ -164,6 +166,7 @@ function SettingsStack() {
   return (
     <SettingsStackNav.Navigator screenOptions={{ headerShown: false }}>
       <SettingsStackNav.Screen name="settings" component={Settings} />
+      <SettingsStackNav.Screen name="dadosCadastrais" component={DadosCadastrais} />
       <SettingsStackNav.Screen name="editProfile" component={EditProfile} />
       <SettingsStackNav.Screen name="editEmail" component={EditEmail} />
       <SettingsStackNav.Screen name="editPassword" component={EditPassword} />
