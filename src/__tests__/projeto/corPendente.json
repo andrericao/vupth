@@ -1,0 +1,227 @@
+{
+  "src/components/AttendanceDetailModal.tsx": {
+    "hex": 15,
+    "branco": 1
+  },
+  "src/components/AtualizarNoNavegador.tsx": {
+    "hex": 1,
+    "forest": 1
+  },
+  "src/components/Button.tsx": {
+    "forest": 1
+  },
+  "src/components/CardDaLoja.tsx": {
+    "hex": 2,
+    "forest": 2
+  },
+  "src/components/ChangeTurnModal.tsx": {
+    "hex": 1,
+    "forest": 5
+  },
+  "src/components/ConviteDeTroca.tsx": {
+    "hex": 6
+  },
+  "src/components/DaySelector.tsx": {
+    "forest": 2
+  },
+  "src/components/DeleteAccountModal.tsx": {
+    "hex": 1,
+    "branco": 1
+  },
+  "src/components/DialogoVupth.tsx": {
+    "hex": 6
+  },
+  "src/components/ErrorBoundary.tsx": {
+    "hex": 1,
+    "forest": 1
+  },
+  "src/components/FaixaAvaliar.tsx": {
+    "hex": 3
+  },
+  "src/components/FaixaBaixarApp.tsx": {
+    "forest": 2,
+    "branco": 2
+  },
+  "src/components/FaixaDaTolerancia.tsx": {
+    "hex": 1,
+    "forest": 1
+  },
+  "src/components/FilterSheet.tsx": {
+    "hex": 1,
+    "forest": 2
+  },
+  "src/components/FotoAmpliada.tsx": {
+    "hex": 2
+  },
+  "src/components/Input2.tsx": {
+    "hex": 4,
+    "forest": 1,
+    "branco": 1
+  },
+  "src/components/LiveDot.tsx": {
+    "hex": 1
+  },
+  "src/components/LocationSelector.tsx": {
+    "hex": 3,
+    "forest": 1,
+    "branco": 1
+  },
+  "src/components/MenuDoPerfil.tsx": {
+    "hex": 1
+  },
+  "src/components/ModalDeFeedback.tsx": {
+    "hex": 6
+  },
+  "src/components/ModalDePagamento.tsx": {
+    "hex": 8
+  },
+  "src/components/MoreOptionsModal.tsx": {
+    "hex": 3,
+    "forest": 2
+  },
+  "src/components/NotaDaLoja.tsx": {
+    "hex": 2
+  },
+  "src/components/OfflineBanner.tsx": {
+    "hex": 2
+  },
+  "src/components/PasswordRules.tsx": {
+    "hex": 2,
+    "forest": 1
+  },
+  "src/components/PilulaVoltarAoTopo.tsx": {
+    "hex": 2
+  },
+  "src/components/PlaceAvatar.tsx": {
+    "forest": 1
+  },
+  "src/components/PreparingServer.tsx": {
+    "hex": 1
+  },
+  "src/components/PushDiagnostics.tsx": {
+    "forest": 3,
+    "branco": 1
+  },
+  "src/components/QueueDisclaimerModal.tsx": {
+    "hex": 3,
+    "forest": 2
+  },
+  "src/components/RatingModal.tsx": {
+    "hex": 5,
+    "branco": 1
+  },
+  "src/components/RescheduleModal.tsx": {
+    "hex": 4,
+    "forest": 2
+  },
+  "src/components/ScheduleModal.tsx": {
+    "hex": 1,
+    "forest": 3,
+    "branco": 1
+  },
+  "src/components/ScreenHeader.tsx": {
+    "hex": 3,
+    "forest": 1
+  },
+  "src/components/Skeleton.tsx": {
+    "hex": 1
+  },
+  "src/components/SwapOffersModal.tsx": {
+    "hex": 1,
+    "forest": 2,
+    "branco": 1
+  },
+  "src/components/TabPill.tsx": {
+    "hex": 4
+  },
+  "src/components/WsDiagnostics.tsx": {
+    "forest": 2
+  },
+  "src/components/brand/Button.tsx": {
+    "forest": 2
+  },
+  "src/hooks/useQueueCountdown.ts": {
+    "hex": 2
+  },
+  "src/routes/auth.routes.tsx": {
+    "hex": 1
+  },
+  "src/screens/Attendances.tsx": {
+    "hex": 22,
+    "forest": 4
+  },
+  "src/screens/CompleteProfile.tsx": {
+    "hex": 1,
+    "forest": 2
+  },
+  "src/screens/DadosCadastrais.tsx": {
+    "hex": 4
+  },
+  "src/screens/EditAddress.tsx": {
+    "hex": 6,
+    "forest": 1
+  },
+  "src/screens/EstablishmentDetail.tsx": {
+    "hex": 10,
+    "forest": 6
+  },
+  "src/screens/EstablishmentList.tsx": {
+    "hex": 7,
+    "forest": 3,
+    "branco": 1
+  },
+  "src/screens/ExcluirConta.tsx": {
+    "forest": 1
+  },
+  "src/screens/ForgotPassword.tsx": {
+    "forest": 2
+  },
+  "src/screens/Home.tsx": {
+    "hex": 11,
+    "forest": 11
+  },
+  "src/screens/Login.tsx": {
+    "hex": 1,
+    "forest": 2
+  },
+  "src/screens/Onboarding.tsx": {
+    "hex": 1,
+    "forest": 2
+  },
+  "src/screens/ProfessionalInfo.tsx": {
+    "hex": 2,
+    "forest": 5
+  },
+  "src/screens/PushPermission.tsx": {
+    "hex": 2,
+    "forest": 1
+  },
+  "src/screens/QueueStatus.tsx": {
+    "hex": 18,
+    "forest": 12
+  },
+  "src/screens/ServiceSelection.tsx": {
+    "hex": 8,
+    "forest": 8,
+    "branco": 1
+  },
+  "src/screens/Settings.tsx": {
+    "hex": 5,
+    "forest": 2,
+    "branco": 1
+  },
+  "src/screens/SignUp.tsx": {
+    "hex": 4,
+    "forest": 4
+  },
+  "src/screens/Sistema.tsx": {
+    "hex": 1,
+    "forest": 2
+  },
+  "src/screens/Terms.tsx": {
+    "forest": 1
+  },
+  "src/utils/styles.ts": {
+    "hex": 1
+  }
+}
