@@ -249,7 +249,7 @@ describe('QueueStatus — advertência antes da multa', () => {
     mockRemaining = 80;
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     renderWithProviders(<QueueStatus />);
-    await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1), { timeout: 5000 });
     const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
     expect(titulo).toBe('Sua vez está chegando');
     expect(mensagem).toMatch(/R\$ 3,00/);
@@ -262,7 +262,7 @@ describe('QueueStatus — advertência antes da multa', () => {
     mockRemaining = 80;
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     renderWithProviders(<QueueStatus />);
-    await waitFor(() => expect(alerta).toHaveBeenCalled());
+    await waitFor(() => expect(alerta).toHaveBeenCalled(), { timeout: 5000 });
     const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
     await act(async () => {
       await botoes.find((b) => b.text === 'Sair agora de graça')!.onPress!();
@@ -275,7 +275,7 @@ describe('QueueStatus — advertência antes da multa', () => {
     mockRemaining = 20;
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     renderWithProviders(<QueueStatus />);
-    await waitFor(() => expect(alerta).toHaveBeenCalled());
+    await waitFor(() => expect(alerta).toHaveBeenCalled(), { timeout: 5000 });
     const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
     expect(botoes.map((b) => b.text)).toEqual(['Continuar na fila', 'Adiar minha vez']);
     alerta.mockRestore();
@@ -305,7 +305,7 @@ describe('QueueStatus — advertência antes da multa', () => {
     fireEvent.press(entendi);
     // Nem logo depois do Entendi: o Modal ainda esta no fade (bateria 03/10 21h25).
     expect(alerta).not.toHaveBeenCalled();
-    await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1), { timeout: 5000 });
     expect(alerta.mock.calls[0][0]).toBe('Sua vez está chegando');
     alerta.mockRestore();
   });

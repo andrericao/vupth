@@ -52,6 +52,8 @@ import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { useIndicacao } from "@hooks/useIndicacao";
 import { FaixaAvaliar } from "@components/FaixaAvaliar";
 import { ModalDePagamento } from "@components/ModalDePagamento";
+import { ModalDeFeedback } from "@components/ModalDeFeedback";
+import { useFeedbackStore } from "@stores/feedbackStore";
 import { useLembreteDePendencia } from "@hooks/useLembreteDePendencia";
 import { setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
@@ -117,6 +119,7 @@ export default function App() {
   const restoreComingSoon = useComingSoonStore((s) => s.restore);
   const restoreLocation = useLocationStore((s) => s.restoreLocation);
   const restoreFirstRun = useFirstRunStore((s) => s.restoreFirstRun);
+  const restoreFeedback = useFeedbackStore((s) => s.restoreFeedback);
   const restorePendingSwap = usePendingSwapStore((s) => s.restorePending);
   const restorePedidosDeCorte = usePedidoDeCorteStore((s) => s.restaurar);
   const restoreFavorites = useFavoritesStore((s) => s.restoreFavorites);
@@ -138,6 +141,7 @@ export default function App() {
     restorePendingSwap();
     restorePedidosDeCorte();
     restoreFirstRun();
+    restoreFeedback();
     restoreFavorites();
     restaurarFonte();
     // Primeira abertura no bundle do APK: aplica o OTA novo na hora (card-oscila).
@@ -164,6 +168,7 @@ export default function App() {
     restorePendingSwap,
     restorePedidosDeCorte,
     restoreFirstRun,
+    restoreFeedback,
   ]);
 
   // Notificacao pessoal "é a sua vez" (WebSocket) app-wide: vale em qualquer
@@ -229,6 +234,8 @@ export default function App() {
         <ConviteDeTroca />
         {/* pendencia-de-pagamento (CLI-30): o aviso do 409 e o Pix. */}
         <ModalDePagamento />
+        {/* pedido-de-feedback (CLI-34): depois de avaliar, uma vez a cada 30 dias. */}
+        <ModalDeFeedback />
         {/* notificacao-avaliar (CLI-33): uma vez, no topo, depois do corte. */}
         {fontGateOpen && backendReady ? (
           <ErrorBoundary>
