@@ -16,6 +16,7 @@ import { Button } from "@components/Button";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ScheduleModal } from "@components/ScheduleModal";
+import { SaibaMaisDoPreco } from "@components/SaibaMaisDoPreco";
 import { MoreOptionsModal, MoreOption } from "@components/MoreOptionsModal";
 import { formatWaitTime, estimatedStartTime } from "@domain/queue/types";
 import { ServiceItemResponse } from "@domain/professional/types";
@@ -528,6 +529,15 @@ export function ServiceSelection() {
                     <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">+ {reais(conta.totalMultas)}</Text>
                   </HStack>
                 )}
+                {/* politica-de-preco-saiba-mais (DEC-91, Andre 18/10): o preco que
+                    aparece nos botoes ja inclui a taxa de pagamento, que varia por
+                    faixa. O "Saiba mais" abre o artigo do Suporte (DEC-96). */}
+                <HStack justifyContent="space-between" alignItems="center" gap="$3" testID="preco-explicacao">
+                  <Text size="xs" color="#FFFFFFB3" flex={1}>
+                    O preço inclui a taxa de pagamento.
+                  </Text>
+                  <SaibaMaisDoPreco color="$brandGreen" />
+                </HStack>
               </VStack>
             )}
           </ScrollView>

@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ServiceSelection } from '@screens/ServiceSelection';
@@ -111,6 +111,20 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
     fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
     expect(queryByTestId('regra-da-multa')).toBeNull();
     expect(queryByText(/multa|sem custo/i)).toBeNull();
+  });
+
+  // politica-de-preco-saiba-mais (DEC-91, Andre 18/10): onde o preço aparece, o
+  // "Saiba mais" leva ao artigo do Suporte. Sem serviço marcado não há preço a explicar.
+  it('com serviço escolhido, o resumo traz o Saiba mais do preço, que abre o artigo do Suporte', async () => {
+    useAuthStore.setState({ isAuthenticated: true });
+    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    const { queryByTestId, getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    await findByTestId('service-s1', {}, { timeout: 15000 });
+    expect(queryByTestId('preco-saiba-mais')).toBeNull();
+    fireEvent.press(getByTestId('service-s1'));
+    fireEvent.press(getByTestId('preco-saiba-mais'));
+    expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/por-que-o-preco-muda.html');
+    abrir.mockRestore();
   });
 
   it('LOGADO: confirmar vai direto pra queueStatus', async () => {

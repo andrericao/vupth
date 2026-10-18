@@ -16,6 +16,12 @@ appId: ${APP_ID}
 - assertNotVisible:
     id: "regra-da-multa"
     label: "04.04 · não vê regra-da-multa"
+# politica-de-preco-saiba-mais (DEC-91): o resumo explica o preco e o "Saiba mais"
+# leva ao artigo do Suporte (o toque abre o navegador, fora do app: so se confere
+# que o link esta na tela).
+- assertVisible:
+    id: "preco-saiba-mais"
+    label: "04.04a · vê o Saiba mais do preço"
 # O agendar saiu do "Mais opcoes": la sobra so a troca.
 - tapOn:
     id: "more-options"
