@@ -34,6 +34,10 @@ appId: ${APP_ID}
 - assertVisible:
     id: "nota-.*"
     label: "03.0A · o card da loja mostra a nota"
+# nota-novo (CLI): a loja de teste ainda nao tem avaliacao — o card diz "Novo".
+- assertVisible:
+    text: "Novo"
+    label: "03.0Aa · a loja sem avaliação mostra Novo"
 - tapOn:
     id: "pra-ontem-sair"
     label: "03.08 · desliga o Pra ontem"

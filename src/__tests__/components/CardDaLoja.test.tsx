@@ -38,6 +38,14 @@ describe('o card da loja na Home', () => {
     expect(getByText("1,3 km")).toBeTruthy();
   });
 
+  it('loja sem avaliação mostra "Novo", sem estrela nem nota de exemplo (nota-novo)', async () => {
+    const { findByText, getByTestId } = renderWithProviders(
+      <CardDaLoja establishment={loja({ rating_average: null, rating_count: 0 })} distanceKm={null} onPress={jest.fn()} />,
+    );
+    expect(await findByText('Novo', {}, { timeout: 15000 })).toBeTruthy();
+    expect(within(getByTestId('nota-e1')).queryByText(/^\d\.\d$/)).toBeNull();
+  });
+
   it('sem nota no servidor, usa a média; sem GPS, a distância some e a loja fica', async () => {
     const { findByText, queryByText } = renderWithProviders(
       <CardDaLoja establishment={loja({ rating_average: 4.5 })} distanceKm={null} onPress={jest.fn()} />,

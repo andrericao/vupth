@@ -10,7 +10,7 @@ import {
   HStack,
   Center,
 } from "@gluestack-ui/themed";
-import { Star, Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Copy } from "lucide-react-native";
+import { Info, Heart, ChevronRight, Clock, ChevronDown, MapPin, Copy } from "lucide-react-native";
 import { copiarTexto } from "@utils/copiar";
 import { FotoAmpliada } from "@components/FotoAmpliada";
 import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
@@ -27,6 +27,7 @@ import { LiveDot } from "@components/LiveDot";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { agruparPorExpediente, emIntervalo, estaNoExpediente, filaFechada } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
+import { NotaDaLoja } from "@components/NotaDaLoja";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { ehSoAgenda } from "@domain/professional/modo";
 import { isEffectivelyOpen } from "@domain/establishment/types";
@@ -77,7 +78,6 @@ function ProfessionalRow({
   const r = resolveRating(
     professional.rating_average,
     professional.rating_count,
-    professional.id,
   );
 
   return (
@@ -157,12 +157,7 @@ function ProfessionalRow({
               <Text size="2xs" color="$brandTextSecondary" numberOfLines={1} flex={1}>
                 {formatSpecialty(professional.specialty)}
               </Text>
-              <HStack alignItems="center" gap="$1">
-                <Star size={11} color="#163300" fill="#163300" />
-                <Text size="2xs" color="$brandTextSecondary" fontFamily="$heading">
-                  {r.value.toFixed(1)}
-                </Text>
-              </HStack>
+              <NotaDaLoja rating={r} starSize={11} size="2xs" color="$brandTextSecondary" fontFamily="$heading" />
             </HStack>
           </VStack>
           <TouchableOpacity
@@ -305,7 +300,6 @@ export function EstablishmentDetail() {
   const rating = resolveRating(
     establishment.rating_best ?? establishment.rating_average,
     establishment.rating_count,
-    establishment.id,
   );
 
   // Copiar o link da loja (Andre, 26/09): a base da indicacao. Sem o modulo
@@ -400,10 +394,7 @@ export function EstablishmentDetail() {
           </Text>
         )}
         <HStack alignItems="center" gap="$2">
-          <Star size={14} color="#163300" fill="#163300" />
-          <Text size="sm" fontFamily="$heading" color="$brandTextPrimary">
-            {rating.value.toFixed(1)}
-          </Text>
+          <NotaDaLoja rating={rating} starSize={14} gap="$2" size="sm" fontFamily="$heading" color="$brandTextPrimary" testID="nota-da-loja" />
           <Text size="sm" color="$brandTextSecondary">
             {rating.real && rating.count != null ? `(${rating.count} avaliações)` : ""}
             {establishment.distance_km != null

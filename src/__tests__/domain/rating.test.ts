@@ -1,36 +1,24 @@
-import { pseudoRating, resolveRating } from '@domain/establishment/rating';
+import { resolveRating } from '@domain/establishment/rating';
 
-describe('pseudoRating', () => {
-  it('retorna valor entre 4.0 e 5.0', () => {
-    for (const id of ['a', 'estab-1', 'uuid-xyz', '42', '']) {
-      const r = pseudoRating(id);
-      expect(r).toBeGreaterThanOrEqual(4);
-      expect(r).toBeLessThanOrEqual(5);
-    }
-  });
-
-  it('é estável: mesmo id sempre dá a mesma nota', () => {
-    expect(pseudoRating('estab-1')).toBe(pseudoRating('estab-1'));
-  });
-
-  it('ids diferentes tendem a dar notas diferentes', () => {
-    const a = pseudoRating('barbearia-do-ze');
-    const b = pseudoRating('salao-da-maria');
-    expect(a).not.toBe(b);
-  });
-});
+// nota-novo (Andre 09/10): sem avaliacao a loja e "Novo" — nunca uma nota inventada.
 
 describe('resolveRating', () => {
   it('usa a nota REAL do backend quando presente (com contagem)', () => {
-    expect(resolveRating(4.73, 212, 'x')).toEqual({ value: 4.73, count: 212, real: true });
+    expect(resolveRating(4.73, 212)).toEqual({ value: 4.73, count: 212, real: true, novo: false });
   });
 
-  it('cai no placeholder quando a média é null/undefined', () => {
-    const a = resolveRating(null, undefined, 'estab-1');
-    const b = resolveRating(undefined, undefined, 'estab-1');
-    expect(a.real).toBe(false);
-    expect(a.count).toBeUndefined();
-    expect(a.value).toBe(pseudoRating('estab-1'));
-    expect(b).toEqual(a);
+  it('média real sem contagem ainda vale (a contagem é opcional)', () => {
+    expect(resolveRating(4.5, undefined)).toEqual({ value: 4.5, count: undefined, real: true, novo: false });
+  });
+
+  it('média nula ou indefinida: é Novo, sem nota de exemplo', () => {
+    const esperado = { value: 0, real: false, novo: true };
+    expect(resolveRating(null, undefined)).toEqual(esperado);
+    expect(resolveRating(undefined, undefined)).toEqual(esperado);
+  });
+
+  it('zero avaliações: é Novo, mesmo com a média 0 vinda do servidor', () => {
+    expect(resolveRating(0, 0)).toEqual({ value: 0, real: false, novo: true });
+    expect(resolveRating(4.2, 0).novo).toBe(true);
   });
 });

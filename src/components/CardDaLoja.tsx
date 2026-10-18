@@ -1,13 +1,14 @@
 import { memo } from "react";
 import { TouchableOpacity } from "react-native";
 import { VStack, Text, HStack, Center } from "@gluestack-ui/themed";
-import { Star, MapPin } from "lucide-react-native";
+import { MapPin } from "lucide-react-native";
 
 import { Establishment } from "@domain/establishment/types";
 import { formatDistanceKm } from "@domain/establishment/proximity";
 import { statusTag } from "@domain/establishment/statusTag";
 import { serviceTypeLabel } from "@domain/establishment/serviceType";
 import { resolveRating } from "@domain/establishment/rating";
+import { NotaDaLoja } from "@components/NotaDaLoja";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
 import { fs } from "@stores/fonteStore";
@@ -102,7 +103,6 @@ export const CardDaLoja = memo(function CardDaLoja({
   const nota = resolveRating(
     establishment.rating_best ?? establishment.rating_average,
     establishment.rating_count,
-    establishment.id,
   );
 
   return (
@@ -137,12 +137,15 @@ export const CardDaLoja = memo(function CardDaLoja({
             {establishment.name}
           </Text>
           <HStack gap={8} alignItems="center" flexWrap="wrap">
-            <HStack gap={3} alignItems="center" testID={`nota-${establishment.id}`}>
-              <Star size={12} color="#163300" fill="#163300" />
-              <Text fontFamily="$heading" fontSize={fs(13)} color="$brandTextPrimary">
-                {nota.value.toFixed(1)}
-              </Text>
-            </HStack>
+            <NotaDaLoja
+              rating={nota}
+              starSize={12}
+              gap={3}
+              testID={`nota-${establishment.id}`}
+              fontFamily="$heading"
+              fontSize={fs(13)}
+              color="$brandTextPrimary"
+            />
             {/* O ponto SEPARA, entao nao vem antes do primeiro item. Antes a
                 linha comecava com o `queueLabel` e a meta so completava; sem
                 ele, o separador virou um "·" orfao no comeco. */}

@@ -3,7 +3,7 @@ import { Alert, ScrollView, Share, TouchableOpacity } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
-import { Star, Phone, Share2 } from "lucide-react-native";
+import { Phone, Share2 } from "lucide-react-native";
 
 import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
 import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
@@ -16,6 +16,7 @@ import { FotoAmpliada } from "@components/FotoAmpliada";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { establishmentService } from "@services/establishmentService";
 import { resolveRating } from "@domain/establishment/rating";
+import { NotaDaLoja } from "@components/NotaDaLoja";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { contatoDoProfissional } from "@domain/professional/contato";
 import { duracaoDoServico } from "@domain/professional/duracaoDoServico";
@@ -51,7 +52,7 @@ export function ProfessionalInfo() {
 
   const nome = prof?.name ?? professionalName ?? "";
   const contato = contatoDoProfissional(prof?.contact_phone);
-  const nota = resolveRating(prof?.rating_average, prof?.rating_count, professionalId);
+  const nota = resolveRating(prof?.rating_average, prof?.rating_count);
   const foto = prof?.profile_image_url ?? null;
 
   // O compartilhar do sistema; onde ele nao existe (navegador sem Web Share),
@@ -117,10 +118,15 @@ export function ProfessionalInfo() {
               </Text>
             )}
             <HStack alignItems="center" gap="$2">
-              <Star size={14} color="#163300" fill="#163300" />
-              <Text size="sm" fontFamily="$heading" color="$brandTextPrimary" testID="nota-do-profissional">
-                {nota.value.toFixed(1)}
-              </Text>
+              <NotaDaLoja
+                rating={nota}
+                starSize={14}
+                gap="$2"
+                size="sm"
+                fontFamily="$heading"
+                color="$brandTextPrimary"
+                testID="nota-do-profissional"
+              />
               {nota.real && nota.count != null && (
                 <Text size="sm" color="$brandTextSecondary">
                   ({nota.count} avaliações)

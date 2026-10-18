@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
-import { Search, ChevronRight, Zap, ArrowUpDown, Star } from "lucide-react-native";
+import { Search, ChevronRight, Zap, ArrowUpDown } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
@@ -10,6 +10,7 @@ import { filterEstablishments } from "@domain/establishment/filter";
 import { serviceTypeTitle, serviceTypeLabel } from "@domain/establishment/serviceType";
 import { formatDistanceKm } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
+import { NotaDaLoja } from "@components/NotaDaLoja";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { statusTag } from "@domain/establishment/statusTag";
@@ -36,7 +37,6 @@ function OpenRow({
   const r = resolveRating(
     establishment.rating_best ?? establishment.rating_average,
     establishment.rating_count,
-    establishment.id,
   );
   return (
     <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>
@@ -61,12 +61,7 @@ function OpenRow({
                   <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
                 </>
               )}
-              <HStack alignItems="center" gap="$1">
-                <Star size={11} color="#163300" fill="#163300" />
-                <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
-                  {r.value.toFixed(1)}
-                </Text>
-              </HStack>
+              <NotaDaLoja rating={r} starSize={11} size="xs" color="$brandTextSecondary" fontFamily="$heading" />
             </HStack>
           </VStack>
           {/* Mesma tag da Home — uma regra so pras duas telas. Aqui so chega

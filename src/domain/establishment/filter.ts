@@ -1,9 +1,9 @@
 import { Establishment, ServiceType, isEffectivelyOpen } from './types';
 import { resolveRating } from './rating';
 
-/** Nota usada para exibição/ordenação: maior estrela (rating_best) → média → placeholder. */
+/** Nota usada para exibição/ordenação: maior estrela (rating_best) → média; sem avaliação, 0 (a loja nova vai para o fim do desempate). */
 function ratingValue(e: Establishment): number {
-  return resolveRating(e.rating_best ?? e.rating_average, e.rating_count, e.id).value;
+  return resolveRating(e.rating_best ?? e.rating_average, e.rating_count).value;
 }
 
 /**

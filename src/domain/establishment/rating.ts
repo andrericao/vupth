@@ -1,33 +1,22 @@
-/**
- * Avaliação FICTÍCIA e estável (mesma loja → mesma nota) derivada do id.
- * Placeholder até existir avaliação real no backend. Retorna 4.0–5.0.
- */
-export function pseudoRating(seed: string): number {
-  let h = 0;
-  for (let i = 0; i < seed.length; i++) {
-    h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  }
-  return 4 + (h % 11) / 10;
-}
-
 export interface RatingDisplay {
+  /** A media real; 0 quando ainda nao ha avaliacao (so serve para ordenar/filtrar). */
   value: number;
   count?: number;
-  /** true = nota real do backend; false = placeholder fictício (pseudoRating). */
+  /** true = nota real do backend. */
   real: boolean;
+  /** Sem avaliacao ainda: a tela mostra "Novo", nunca uma nota inventada. */
+  novo: boolean;
 }
 
 /**
- * Resolve a nota a exibir: usa a média REAL do backend quando presente; senão
- * cai no placeholder fictício estável por id (até o Item 6 do backend existir).
+ * A nota a exibir (nota-novo, Andre 09/10): a media REAL do backend quando ha
+ * avaliacao; sem ela (media nula ou zero avaliacoes), a loja e "Novo". Antes
+ * entrava aqui uma nota de exemplo derivada do id — uma loja sem nenhuma
+ * avaliacao aparecia com 4,7 estrelas.
  */
-export function resolveRating(
-  average: number | null | undefined,
-  count: number | undefined,
-  seed: string,
-): RatingDisplay {
-  if (average != null) {
-    return { value: average, count, real: true };
+export function resolveRating(average: number | null | undefined, count: number | undefined): RatingDisplay {
+  if (average == null || count === 0) {
+    return { value: 0, real: false, novo: true };
   }
-  return { value: pseudoRating(seed), real: false };
+  return { value: average, count, real: true, novo: false };
 }
