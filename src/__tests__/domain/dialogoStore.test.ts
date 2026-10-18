@@ -66,4 +66,21 @@ describe("dialogo.store", () => {
     expect(useDialogoStore.getState().atual).toBeNull();
     expect(useDialogoStore.getState().fila).toHaveLength(0);
   });
+
+  // modais-de-alerta (design-modais, 17/10)
+  it("o tipo e o selo vao junto do pedido", () => {
+    abrirDialogo({ titulo: "Sair da fila", tipo: "dinheiro", selo: "Multa" });
+    expect(useDialogoStore.getState().atual).toMatchObject({ tipo: "dinheiro", selo: "Multa" });
+  });
+
+  it("sem tipo, o pedido segue sem tipo — as chamadas antigas nao mudam", () => {
+    abrirDialogo({ titulo: "Erro", mensagem: "Senha incorreta" });
+    expect(useDialogoStore.getState().atual?.tipo).toBeUndefined();
+  });
+
+  it("um tipo que nao existe e descartado, nao desenhado pela metade", () => {
+    abrirDialogo({ titulo: "Oi", tipo: "outro" as never });
+    expect(useDialogoStore.getState().atual?.tipo).toBeUndefined();
+  });
 });
+
