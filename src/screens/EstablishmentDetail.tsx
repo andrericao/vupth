@@ -24,6 +24,7 @@ import { Button } from "@components/Button";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
+import { BadgeAgendar } from "@components/BadgeAgendar";
 import { ProfessionalWithQueue } from "@domain/professional/types";
 import { agruparPorExpediente, emIntervalo, estaNoExpediente, filaFechada } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
@@ -421,6 +422,9 @@ export function EstablishmentDetail() {
                 estar aberta com a fila drenando). */}
             {isOpen ? "Aberto agora" : "Fechada agora"}
           </Text>
+          {/* loja-fechada (Design, 17/10): o mesmo badge do card do Inicio, ao
+              lado do estado — fechada, mas com caminho. */}
+          {!isOpen && <BadgeAgendar testID="agendar-da-loja" />}
           {isOpen && trabalhando.length > 0 && (
             <>
               <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
