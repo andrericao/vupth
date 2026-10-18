@@ -30,9 +30,9 @@ appId: ${APP_ID}
     id: "corte-assim-que-abrir"
     label: "10.0B · toca em Assim que abrir"
 - extendedWaitUntil:
-    visible: "Pedido enviado!.*"
+    visible: "Pedido enviado.*"
     timeout: ${30000 * LENTO}
-    label: "10.05 · espera Pedido enviado!"
+    label: "10.05 · espera Pedido enviado"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "10.06 · roda fechar_aviso"

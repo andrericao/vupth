@@ -40,14 +40,14 @@ describe('pendência de pagamento — domínio', () => {
   it('o aviso soma o que falta e diz com quem, quando é um só', () => {
     expect(avisoDaPendencia([{ attendance_id: 'a1', status: 'PENDING', amount: '45', professional_name: 'Carlos' }])).toEqual({
       titulo: 'Pagamento pendente',
-      mensagem: 'Falta pagar R$ 45,00 com Carlos. Pague para marcar de novo.',
+      mensagem: 'R$ 45,00 com Carlos.',
     });
     expect(
       avisoDaPendencia([
         { attendance_id: 'a1', status: 'PENDING', amount: 10 },
         { attendance_id: 'a2', status: 'AWAITING_CONFIRMATION', amount: 'x', professional_name: 'Ana' },
       ]).mensagem,
-    ).toBe('Falta pagar R$ 10,00. Pague para marcar de novo.');
+    ).toBe('R$ 10,00.');
     expect(avisoDaPendencia([]).mensagem).toBe('Há um pagamento pendente. Pague para marcar de novo.');
   });
 });
