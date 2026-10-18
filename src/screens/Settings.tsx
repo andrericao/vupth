@@ -157,20 +157,6 @@ export function Settings() {
                 last
               />
             </Grupo>
-
-            {/* botao-sair-igual (CLI-3, Andre 15/10): o Sair e o do Partner — texto
-                vermelho, solto, fora dos grupos, centralizado, sem icone nem caixa. */}
-            <TouchableOpacity
-              onPress={handleLogout}
-              testID="logout"
-              accessibilityRole="button"
-              accessibilityLabel="Sair"
-              style={{ paddingVertical: 4, marginTop: 16 }}
-            >
-              <Text size="sm" fontWeight="$semibold" color="$brandDanger" textAlign="center">
-                Sair da conta
-              </Text>
-            </TouchableOpacity>
           </>
         ) : (
           /* Pro VISITANTE o convite e o UNICO conteudo da tela. Encostado no
@@ -260,6 +246,24 @@ export function Settings() {
             />
           </Grupo>
         </VStack>
+        )}
+
+        {/* botao-sair-igual (CLI-3, Andre 15/10): o Sair e o do Partner — texto
+            vermelho, solto, fora dos grupos, centralizado, sem icone nem caixa.
+            sair-da-conta-embaixo (CLI-1, Andre 18/10): no FIM do Perfil, depois de
+            Sistema e acima de Termos e Privacidade. */}
+        {isAuthenticated && (
+          <TouchableOpacity
+            onPress={handleLogout}
+            testID="logout"
+            accessibilityRole="button"
+            accessibilityLabel="Sair"
+            style={{ paddingVertical: 4, marginTop: 24 }}
+          >
+            <Text size="sm" fontWeight="$semibold" color="$brandDanger" textAlign="center">
+              Sair da conta
+            </Text>
+          </TouchableOpacity>
         )}
 
         {/* `flex-end` empurra o rodape pro fim: antes ele vinha logo abaixo do
