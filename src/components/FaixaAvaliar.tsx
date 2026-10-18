@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Animated, Pressable, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
 import { Star, X } from "lucide-react-native";
@@ -11,6 +11,7 @@ import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
 import { fs } from "@stores/fonteStore";
+import { useEntrada } from "@utils/motion";
 
 const FOREST = "#163300";
 const TINT = "#E2F6D5";
@@ -39,6 +40,9 @@ export function FaixaAvaliar() {
   }, []);
 
   const pendente = atendimentoSemAvaliar(history, ratedIds);
+  // Antes do retorno antecipado, com a chave no atendimento: a faixa só passa a
+  // existir depois de o histórico chegar, e a entrada tem de rodar então.
+  const entrada = useEntrada({ dy: -12, chave: pendente?.id });
   if (!isAuthenticated || temFila || vista === undefined || !pendente || pendente.id === vista) return null;
 
   const marcarVista = () => {
@@ -47,9 +51,10 @@ export function FaixaAvaliar() {
   };
 
   return (
-    <View
+    <Animated.View
       testID="faixa-avaliar"
-      style={{
+      style={[
+        {
         position: "absolute",
         top: insets.top + 8,
         left: 16,
@@ -66,7 +71,9 @@ export function FaixaAvaliar() {
         shadowOpacity: 0.12,
         shadowRadius: 8,
         shadowOffset: { width: 0, height: 2 },
-      }}
+        },
+        entrada,
+      ]}
     >
       <Star size={18} color={FOREST} />
       <Pressable
@@ -86,6 +93,6 @@ export function FaixaAvaliar() {
       <Pressable onPress={marcarVista} testID="faixa-avaliar-fechar" accessibilityLabel="Fechar" hitSlop={12}>
         <X size={18} color={FOREST} />
       </Pressable>
-    </View>
+    </Animated.View>
   );
 }

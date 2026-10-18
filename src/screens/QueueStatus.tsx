@@ -56,6 +56,7 @@ import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useMostraPosicao } from "@hooks/useMostraPosicao";
+import { NumeroComSalto } from "@components/NumeroComSalto";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
@@ -920,16 +921,18 @@ export function QueueStatus() {
               posicao (backend nao respondeu ainda), o tempo assume o lugar. */}
           {peopleAhead != null ? (
             <>
-              <Text
-                fontFamily="$display"
-                fontSize={fs(110)}
-                lineHeight={fs(112)}
-                letterSpacing={-6}
-                color="$forest"
-                testID="queue-position"
-              >
-                {peopleAhead}
-              </Text>
+              <NumeroComSalto valor={peopleAhead}>
+                <Text
+                  fontFamily="$display"
+                  fontSize={fs(110)}
+                  lineHeight={fs(112)}
+                  letterSpacing={-6}
+                  color="$forest"
+                  testID="queue-position"
+                >
+                  {peopleAhead}
+                </Text>
+              </NumeroComSalto>
               <Text
                 fontFamily="$display"
                 fontSize={fs(26)}
