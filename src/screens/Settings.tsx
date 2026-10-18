@@ -10,7 +10,7 @@ import {
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import { User, LogOut, Smartphone, Palette, LifeBuoy, Ticket } from "lucide-react-native";
+import { User, Smartphone, Palette, LifeBuoy, Ticket } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -158,24 +158,18 @@ export function Settings() {
               />
             </Grupo>
 
-            {/* Sair NAO e vermelho: e uma saida legitima, nao um erro. O
-                vermelho fica reservado pro que e irreversivel (deletar), la
-                embaixo. */}
-            <TouchableOpacity onPress={handleLogout} testID="logout">
-              <HStack
-                bg="$brandSurface"
-                borderRadius="$card"
-                px={16}
-                py={15}
-                mt="$4"
-                gap="$2.5"
-                alignItems="center"
-              >
-                <LogOut size={19} color="#163300" />
-                <Text size="sm" fontWeight="$semibold" color="$forest">
-                  Sair da conta
-                </Text>
-              </HStack>
+            {/* botao-sair-igual (CLI-3, Andre 15/10): o Sair e o do Partner — texto
+                vermelho, solto, fora dos grupos, centralizado, sem icone nem caixa. */}
+            <TouchableOpacity
+              onPress={handleLogout}
+              testID="logout"
+              accessibilityRole="button"
+              accessibilityLabel="Sair"
+              style={{ paddingVertical: 4, marginTop: 16 }}
+            >
+              <Text size="sm" fontWeight="$semibold" color="$brandDanger" textAlign="center">
+                Sair da conta
+              </Text>
             </TouchableOpacity>
           </>
         ) : (

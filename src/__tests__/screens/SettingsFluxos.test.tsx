@@ -114,6 +114,13 @@ describe('Perfil — a conta', () => {
     await act(async () => {});
   });
 
+  it('o Sair é o do Partner: texto "Sair da conta", solto, com o rótulo "Sair" (botao-sair-igual)', async () => {
+    const { getByTestId, getByText } = renderWithProviders(<Settings />);
+    expect(getByTestId('logout').props.accessibilityLabel).toBe('Sair');
+    expect(getByText('Sair da conta')).toBeTruthy();
+    await act(async () => {});
+  });
+
   it('sair pergunta, sai e volta ao Início', async () => {
     const { getByTestId } = renderWithProviders(<Settings />);
     fireEvent.press(getByTestId('logout'));
