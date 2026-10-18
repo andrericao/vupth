@@ -1,6 +1,7 @@
 import { Alert, Platform } from "react-native";
 
 import { abrirDialogo, useDialogoStore } from "@stores/dialogo.store";
+import type { TipoDeDialogo } from "@domain/tipoDeDialogo";
 
 // O mesmo truque do shim da web, do lado de cá.
 //
@@ -17,6 +18,12 @@ import { abrirDialogo, useDialogoStore } from "@stores/dialogo.store";
 // Alert ORIGINAL. Um app que trocou o diálogo por um modal que ninguém desenha
 // fica MUDO — que é exatamente o defeito que estávamos consertando na web. Feio
 // e visível é melhor que bonito e invisível.
+//
+// O TIPO (faixa + selo, design-modais 17/10) viaja no 4o argumento, ao lado do
+// `cancelable`: `alertaTipado()` e o jeito de pedir. A rede de emergencia o tira
+// antes de repassar ao Alert do sistema — ele nao conhece o campo.
+type OpcoesDoAlert = { cancelable?: boolean; tipo?: TipoDeDialogo; selo?: string };
+
 type Alvo = {
   alert: typeof Alert.alert;
   __vupthDialogo?: boolean;
@@ -43,11 +50,15 @@ export function instalarDialogoNativo(deps: {
   const hostMontado = deps.hostMontado ?? (() => useDialogoStore.getState().hostMontado);
 
   alvo.__vupthAlertOriginal = original;
-  alvo.alert = ((titulo: string, mensagem?: string, botoes?: any[], opcoes?: { cancelable?: boolean }) => {
+  alvo.alert = ((titulo: string, mensagem?: string, botoes?: any[], opcoes?: OpcoesDoAlert) => {
     if (!hostMontado()) {
-      // Repassa exatamente o que veio: sem opcoes, a mesma chamada de antes.
+      // Repassa exatamente o que veio: sem opcoes, a mesma chamada de antes. So o
+      // tipo e o selo ficam de fora — o Alert do sistema nao os conhece.
       if (opcoes === undefined) original(titulo, mensagem, botoes);
-      else original(titulo, mensagem, botoes, opcoes);
+      else {
+        const { tipo, selo, ...doSistema } = opcoes;
+        original(titulo, mensagem, botoes, doSistema);
+      }
       return;
     }
     const lista = botoes && botoes.length > 0 ? botoes : [{ text: "OK" }];
@@ -58,6 +69,8 @@ export function instalarDialogoNativo(deps: {
       // Ate 25/09 o 4o argumento era ignorado: o aviso de atraso, que pede
       // `cancelable: false`, era dado como lido pelo voltar do Android.
       cancelavel: opcoes?.cancelable !== false,
+      tipo: opcoes?.tipo,
+      selo: opcoes?.selo,
     }).then((indice) => lista[indice]?.onPress?.());
   }) as typeof Alert.alert;
   alvo.__vupthDialogo = true;
