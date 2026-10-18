@@ -80,13 +80,23 @@ describe('o card da loja na Home', () => {
     expect(queryByText('Ligue o GPS')).toBeNull();
   });
 
-  it('loja fechada: a etiqueta Agendar; sem tipo, a linha fica só com a nota; o toque abre a loja', async () => {
+  it('loja aberta não mostra o selo AGENDAR (agendar-ambar)', async () => {
+    const { findByText, queryByText, queryByTestId } = renderWithProviders(
+      <CardDaLoja establishment={loja({ estimated_wait_minutes: 0 })} distanceKm={null} onPress={jest.fn()} />,
+    );
+    expect(await findByText('Sem fila', {}, { timeout: 15000 })).toBeTruthy();
+    expect(queryByText('AGENDAR')).toBeNull();
+    expect(queryByTestId('status-agendar')).toBeNull();
+  });
+
+  it('loja fechada: o selo âmbar AGENDAR; sem tipo, a linha fica só com a nota; o toque abre a loja', async () => {
     const onPress = jest.fn();
     const e = loja({ is_open: false, open_status: 'CLOSED' as Establishment['open_status'], serviceType: undefined });
     const { findByText, getByTestId } = renderWithProviders(
       <CardDaLoja establishment={e} distanceKm={null} destaque="Senta em ~10 min" onPress={onPress} />,
     );
-    expect(await findByText('Agendar', {}, { timeout: 15000 })).toBeTruthy();
+    expect(await findByText('AGENDAR', {}, { timeout: 15000 })).toBeTruthy();
+    expect(getByTestId('status-agendar')).toBeTruthy();
     expect(await findByText('Senta em ~10 min')).toBeTruthy();
     fireEvent.press(getByTestId('establishment-e1'));
     expect(onPress).toHaveBeenCalledWith(e);

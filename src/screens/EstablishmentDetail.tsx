@@ -28,6 +28,7 @@ import { ProfessionalWithQueue } from "@domain/professional/types";
 import { agruparPorExpediente, emIntervalo, estaNoExpediente, filaFechada } from "@domain/professional/expediente";
 import { resolveRating } from "@domain/establishment/rating";
 import { NotaDaLoja } from "@components/NotaDaLoja";
+import { BadgeAgendar } from "@components/BadgeAgendar";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { ehSoAgenda } from "@domain/professional/modo";
 import { isEffectivelyOpen } from "@domain/establishment/types";
@@ -106,9 +107,7 @@ function ProfessionalRow({
                 corrigido na Home. Fechada, a linha diz o que da pra fazer. */}
             <HStack alignItems="center" gap="$2" mt="$0.5">
               {!lojaAberta ? (
-                <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
-                  Agendar
-                </Text>
+                <BadgeAgendar pequeno testID={`agendar-${professional.id}`} />
               ) : fora ? (
                 /* Quem esta fora do expediente nao recebe: anunciar "Sem fila ·
                    Agora" aqui convidava para uma fila que ninguem vai atender —
@@ -421,6 +420,8 @@ export function EstablishmentDetail() {
                 estar aberta com a fila drenando). */}
             {isOpen ? "Aberto agora" : "Fechada agora"}
           </Text>
+          {/* agendar-ambar (18/10): o que da pra fazer com a loja fechada. */}
+          {!isOpen && <BadgeAgendar pequeno testID="badge-agendar-loja" />}
           {isOpen && trabalhando.length > 0 && (
             <>
               <Center width={3} height={3} borderRadius="$full" bg="$brandTextSecondary" />
