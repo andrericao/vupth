@@ -209,9 +209,13 @@ describe('Perfil — visitante', () => {
     expect(mockParentNavigate).toHaveBeenLastCalledWith('homeTab', { screen: 'login', params: {}, pop: true });
   });
 
-  it('os Termos', () => {
-    const { getByTestId } = renderWithProviders(<Settings />);
-    fireEvent.press(getByTestId('terms'));
-    expect(mockNavigate).toHaveBeenCalledWith('terms');
+  it('Termos de uso e Política de privacidade: dois links, cada um na sua tela do app', () => {
+    const { getByTestId, getByText } = renderWithProviders(<Settings />);
+    expect(getByText('Termos de uso')).toBeTruthy();
+    expect(getByText('Política de privacidade')).toBeTruthy();
+    fireEvent.press(getByTestId('link-termos'));
+    expect(mockNavigate).toHaveBeenLastCalledWith('terms');
+    fireEvent.press(getByTestId('link-privacidade'));
+    expect(mockNavigate).toHaveBeenLastCalledWith('privacy');
   });
 });
