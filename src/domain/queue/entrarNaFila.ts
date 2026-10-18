@@ -10,6 +10,7 @@
  * e ele continua onde estava. Tela cheia é para quando não há caminho de volta.
  */
 import { MENSAGEM_SO_AGENDA } from '@domain/professional/modo';
+import { mensagemDoErro } from '@domain/erros/mensagemDoErro';
 
 export type RecusaAoEntrar =
   | { tipo: 'ja-na-fila'; mensagem: string }
@@ -41,7 +42,7 @@ export function recusaAoEntrar(error: unknown): RecusaAoEntrar {
 
   return {
     tipo: 'outro',
-    mensagem: e?.response?.data?.message || e?.message || 'Erro ao entrar na fila',
+    mensagem: mensagemDoErro(e, 'Erro ao entrar na fila'),
   };
 }
 

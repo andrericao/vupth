@@ -63,12 +63,12 @@ describe('Login — erros do contrato de 03/10', () => {
     );
   });
 
-  it('401 BAD_CREDENTIALS: a mensagem do servidor, como antes', async () => {
+  it('401 BAD_CREDENTIALS: a mensagem em português do código (erros-em-portugues)', async () => {
     mockLogin.mockRejectedValue({ response: { status: 401, data: { code: 'BAD_CREDENTIALS', message: 'Senha incorreta' } } });
 
     await entrar();
 
-    await waitFor(() => expect(alert).toHaveBeenCalledWith('Erro', 'Senha incorreta'));
+    await waitFor(() => expect(alert).toHaveBeenCalledWith('Erro', 'E-mail ou senha incorretos.'));
   });
 
   it('429: "muitas tentativas" com o tempo do Retry-After', async () => {

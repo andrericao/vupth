@@ -171,7 +171,7 @@ describe('Perfil — deletar conta', () => {
 
     mockDelete.mockRejectedValueOnce(new Error('Network Error'));
     fireEvent.press(getByText('confirmar-delete'));
-    expect(await findByText('erro:Network Error')).toBeTruthy();
+    expect(await findByText('erro:Sem conexão com o servidor. Confira a sua internet.')).toBeTruthy();
 
     mockDelete.mockRejectedValueOnce({});
     fireEvent.press(getByText('confirmar-delete'));

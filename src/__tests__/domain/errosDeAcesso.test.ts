@@ -73,15 +73,15 @@ describe('erroDeAcesso', () => {
     expect(erroDeAcesso({ response: { data: { code: 'TOO_MANY_REQUESTS' } } }, 'x').tipo).toBe('muitas-tentativas');
   });
 
-  it('senha errada (BAD_CREDENTIALS): a mensagem do servidor', () => {
+  it('senha errada (BAD_CREDENTIALS): a mensagem em português do código (erros-em-portugues)', () => {
     expect(erroDeAcesso(resposta(401, { code: 'BAD_CREDENTIALS', message: 'Senha incorreta' }), 'x')).toEqual({
       tipo: 'outro',
-      mensagem: 'Senha incorreta',
+      mensagem: 'E-mail ou senha incorretos.',
     });
   });
 
   it('sem mensagem do servidor: a do erro, depois a padrão', () => {
-    expect(erroDeAcesso({ message: 'Network Error' }, 'Erro ao entrar')).toEqual({ tipo: 'outro', mensagem: 'Network Error' });
+    expect(erroDeAcesso({ message: 'Network Error' }, 'Erro ao entrar')).toEqual({ tipo: 'outro', mensagem: 'Sem conexão com o servidor. Confira a sua internet.' });
     expect(erroDeAcesso(undefined, 'Erro ao entrar')).toEqual({ tipo: 'outro', mensagem: 'Erro ao entrar' });
   });
 

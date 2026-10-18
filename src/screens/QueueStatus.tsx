@@ -61,6 +61,7 @@ import { fs } from "@stores/fonteStore";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { paymentService } from "@services/paymentService";
+import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 type RouteParams = {
   professionalId: string;
@@ -346,7 +347,7 @@ export function QueueStatus() {
           // sugerindo outro horário; senão, mensagem genérica de entrada na fila.
           const msg = targetTime
             ? rescheduleErrorMessage(status, code)
-            : error.response?.data?.message || error.message || "Erro ao entrar na fila";
+            : mensagemDoErro(error, "Erro ao entrar na fila");
           setCreateError(msg);
         }
       } finally {
@@ -645,7 +646,7 @@ export function QueueStatus() {
         "Não foi possível publicar",
         code === "QUEUE_SWAP_OFFER_NOT_ALLOWED"
           ? "A troca só vale enquanto você está aguardando na fila."
-          : error.response?.data?.message || "Tente novamente em instantes.",
+          : mensagemDoErro(error, "Tente novamente em instantes."),
       );
     } finally {
       if (mountedRef.current) setIsPublishingSwap(false);
@@ -728,7 +729,7 @@ export function QueueStatus() {
                   const msg =
                     code === "CUT_REQUEST_NOT_ALLOWED"
                       ? "A loja está aberta agora — tente entrar na fila normalmente."
-                      : error.response?.data?.message || "Erro ao enviar o pedido de corte";
+                      : mensagemDoErro(error, "Erro ao enviar o pedido de corte");
                   Alert.alert("Erro", msg);
                 } finally {
                   setIsRequestingCut(false);

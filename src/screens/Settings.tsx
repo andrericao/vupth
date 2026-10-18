@@ -24,6 +24,7 @@ import { addressService, AddressResponse } from "@services/addressService";
 import { fs } from "@stores/fonteStore";
 import { SUPORTE_URL } from "@utils/suporte";
 import { CUPOM_LIGADO } from "@domain/campanhas";
+import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 function MenuItem({
   icon,
@@ -155,7 +156,6 @@ export function Settings() {
       navigation.getParent()?.navigate("homeTab", { screen: "home", pop: true });
     } catch (error: any) {
       const code = error.response?.data?.code;
-      const msg = error.response?.data?.message;
 
       if (code === "CURRENT_PASSWORD_INVALID") {
         // 401 de NEGÓCIO: erro de campo, não sessão expirada. O interceptor
@@ -166,9 +166,9 @@ export function Settings() {
         // destravar (sair da fila, encerrar o atendimento, esperar a loja
         // esvaziar) — exibir como veio. Transformar em "não é possível apagar
         // esta conta" reprovaria na publicação das lojas de app.
-        setDeleteError(msg ?? "Você tem um atendimento em andamento. Conclua antes de apagar a conta.");
+        setDeleteError(mensagemDoErro(error, "Você tem um atendimento em andamento. Conclua antes de apagar a conta."));
       } else {
-        setDeleteError(msg || error.message || "Erro ao deletar conta");
+        setDeleteError(mensagemDoErro(error, "Erro ao deletar conta"));
       }
     } finally {
       setIsDeleting(false);

@@ -8,6 +8,8 @@
 // Antes o esqueci respondia 200 sempre e a tela seguia para o passo do codigo
 // com um e-mail sem conta — esperando um codigo que nunca chegaria (C23).
 
+import { mensagemDoErro } from '@domain/erros/mensagemDoErro';
+
 type ErroHttp = {
   response?: {
     status?: number;
@@ -53,7 +55,9 @@ function muitasTentativas(erro: ErroHttp): boolean {
 }
 
 function semConta(erro: ErroHttp): boolean {
-  return erro?.response?.data?.code === 'EMAIL_NOT_FOUND';
+  const d = erro?.response?.data;
+  // Pelo codigo; e, se o codigo faltar, pelo texto em ingles que o Backend manda.
+  return d?.code === 'EMAIL_NOT_FOUND' || /e-?mail not registered/i.test(d?.message ?? '');
 }
 
 /** O que a tela faz com o erro. `padrao` e a mensagem quando o servidor nao manda nenhuma. */
@@ -67,7 +71,7 @@ export function erroDeAcesso(erro: unknown, padrao: string, agora: number = Date
     };
   }
   if (semConta(e)) return { tipo: 'sem-conta' };
-  return { tipo: 'outro', mensagem: e.response?.data?.message || e.message || padrao };
+  return { tipo: 'outro', mensagem: mensagemDoErro(e, padrao) };
 }
 
 /** O aviso do e-mail sem conta — o mesmo no login e no esqueci. */

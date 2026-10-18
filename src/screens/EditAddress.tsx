@@ -13,6 +13,7 @@ import { lookupCep, buscarCepPorEndereco } from "@utils/cep";
 import { SkeletonList } from "@components/Skeleton";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
+import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 type Mode = "list" | "form";
 
@@ -132,7 +133,7 @@ export function EditAddress() {
       await loadAddresses();
       setMode("list");
     } catch (error: any) {
-      const msg = error.response?.data?.message || error.message || "Erro ao salvar";
+      const msg = mensagemDoErro(error, "Erro ao salvar");
       Alert.alert("Erro", msg);
     } finally {
       setIsSaving(false);
@@ -151,7 +152,7 @@ export function EditAddress() {
             await addressService.remove(id, accessToken);
             await loadAddresses();
           } catch (error: any) {
-            Alert.alert("Erro", error.response?.data?.message || "Erro ao remover");
+            Alert.alert("Erro", mensagemDoErro(error, "Erro ao remover"));
           }
         },
       },
@@ -164,7 +165,7 @@ export function EditAddress() {
       await addressService.setMain(id, accessToken);
       await loadAddresses();
     } catch (error: any) {
-      Alert.alert("Erro", error.response?.data?.message || "Erro ao definir principal");
+      Alert.alert("Erro", mensagemDoErro(error, "Erro ao definir principal"));
     }
   }
 

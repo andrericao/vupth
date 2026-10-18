@@ -122,7 +122,7 @@ describe('ForgotPassword — redefinir', () => {
     [{ response: { data: { code: 'RESET_CODE_INVALID' } } }, /Código inválido/],
     [{ response: { data: { code: 'RESET_CODE_EXPIRED' } } }, /Código expirado/],
     [{ response: { data: { message: 'Falhou' } } }, /Falhou/],
-    [new Error('Network Error'), /Network Error/],
+    [new Error('Network Error'), /Sem conexão com o servidor/],
     [{}, /Erro ao redefinir a senha/],
   ])('erro ao redefinir: %#', async (erro, texto) => {
     mockReset.mockRejectedValue(erro);

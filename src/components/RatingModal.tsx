@@ -10,6 +10,7 @@ import { useAuthStore } from "@stores/authStore";
 import { useFeedbackStore } from "@stores/feedbackStore";
 import { useRatedStore } from "@stores/ratedStore";
 import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
+import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 type Props = {
   visible: boolean;
@@ -61,7 +62,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
       const msg =
         status === 409
           ? "Você já avaliou este atendimento."
-          : e.response?.data?.message || "Não foi possível enviar a avaliação. Tente mais tarde.";
+          : mensagemDoErro(e, "Não foi possível enviar a avaliação. Tente mais tarde.");
       Alert.alert("Avaliação", msg);
       if (status === 409) {
         // 409 = backend confirma que já foi avaliado → marca pra esconder também.
