@@ -50,7 +50,7 @@ describe('LocationSelector', () => {
 
     expect(getByText('Sua localização')).toBeTruthy();
     expect(getByPlaceholderText('CEP (ex.: 88010-000)')).toBeTruthy();
-    expect(queryByText('Usar meu endereço cadastrado')).toBeNull();
+    expect(queryByText('Usar endereço')).toBeNull();
   });
 
   it('logado: modal mostra "usar meu endereço"; com localidade, mostra "Ver todos"', () => {
@@ -62,7 +62,17 @@ describe('LocationSelector', () => {
     const { getByText } = renderWithProviders(<LocationSelector />);
     fireEvent.press(getByText('Aldeota, Fortaleza'));
 
-    expect(getByText('Usar meu endereço cadastrado')).toBeTruthy();
+    expect(getByText('Usar endereço')).toBeTruthy();
     expect(getByText('Ver todos (remover filtro)')).toBeTruthy();
+  });
+
+  // GUIA_DE_TEXTO.md §4.7: botão de verbo, no máximo duas palavras.
+  it('os dois botões de localização têm duas palavras: Usar localização / Usar endereço', () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    const { getByText, queryByText } = renderWithProviders(<LocationSelector />);
+    fireEvent.press(getByText('Escolher meu bairro'));
+    expect(getByText('Usar localização')).toBeTruthy();
+    expect(getByText('Usar endereço')).toBeTruthy();
+    expect(queryByText(/Usar minha|Usar meu/)).toBeNull();
   });
 });

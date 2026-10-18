@@ -47,7 +47,7 @@ describe('LocationSelector — endereço cadastrado', () => {
   it('usa a cidade do endereço principal e fecha', async () => {
     const tela = abrir();
     await act(async () => {
-      fireEvent.press(tela.getByText('Usar meu endereço cadastrado'));
+      fireEvent.press(tela.getByText('Usar endereço'));
     });
     await waitFor(() => expect(useLocationStore.getState().location?.city).toBe('Campinas'));
     expect(tela.queryByText('Sua localização')).toBeNull();
@@ -57,7 +57,7 @@ describe('LocationSelector — endereço cadastrado', () => {
     mockGetMain.mockResolvedValue({ data: null });
     const tela = abrir();
     await act(async () => {
-      fireEvent.press(tela.getByText('Usar meu endereço cadastrado'));
+      fireEvent.press(tela.getByText('Usar endereço'));
     });
     expect(alertSpy).toHaveBeenCalledWith('Sem endereço', expect.any(String));
   });
@@ -66,7 +66,7 @@ describe('LocationSelector — endereço cadastrado', () => {
     mockGetMain.mockRejectedValue(new Error('x'));
     const tela = abrir();
     await act(async () => {
-      fireEvent.press(tela.getByText('Usar meu endereço cadastrado'));
+      fireEvent.press(tela.getByText('Usar endereço'));
     });
     expect(alertSpy).toHaveBeenCalledWith('Erro', 'Não foi possível ler seu endereço cadastrado.');
   });

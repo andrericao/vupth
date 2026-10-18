@@ -107,7 +107,7 @@ describe('usePushRegistration — registro', () => {
     expect(n.requestPermissionsAsync).not.toHaveBeenCalled();
   });
 
-  it('depois do "Quero ser avisada", abre a caixa e marca como perguntado', async () => {
+  it('depois do "Avisar", abre a caixa e marca como perguntado', async () => {
     n.getPermissionsAsync.mockResolvedValue({ status: 'undetermined', canAskAgain: true });
     renderHook(() => usePushRegistration());
     await waitFor(() => expect(n.requestPermissionsAsync).toHaveBeenCalled());

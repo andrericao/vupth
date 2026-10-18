@@ -46,7 +46,9 @@ export function Settings() {
       .join("") || user?.email?.[0]?.toUpperCase() || "?";
 
   function handleLogout() {
-    Alert.alert("Sair da conta", "Tem certeza que deseja sair da sua conta?", [
+    // Titulo que diz o fato e nenhum corpo (guia de texto, §4.7): a pergunta ja
+    // esta nos dois botoes, Sair e Cancelar.
+    Alert.alert("Sair da conta", undefined, [
       { text: "Cancelar", style: "cancel" },
       {
         text: "Sair",
