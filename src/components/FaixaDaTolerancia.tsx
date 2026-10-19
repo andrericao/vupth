@@ -3,6 +3,7 @@ import { Box, HStack, Text } from "@gluestack-ui/themed";
 import { Info } from "lucide-react-native";
 
 import { formatClockTime } from "@domain/queue/types";
+import { useTema } from "@hooks/useTema";
 
 /**
  * A faixa da tolerancia — D13/D15 (Andre, 24/09): enquanto ela vale, uma faixa
@@ -14,6 +15,7 @@ import { formatClockTime } from "@domain/queue/types";
  */
 export function FaixaDaTolerancia({ ate }: { ate: number | null | undefined }) {
   const [dentro, setDentro] = useState(() => !!ate && ate > Date.now());
+  const { cores } = useTema();
 
   useEffect(() => {
     if (!ate) return;
@@ -31,8 +33,8 @@ export function FaixaDaTolerancia({ ate }: { ate: number | null | undefined }) {
   return (
     <Box bg="$brandBackground" borderRadius="$card" px="$3.5" py="$2.5" mx={16} mb="$2" testID="faixa-da-tolerancia">
       <HStack alignItems="center" gap="$2">
-        <Info size={16} color="#163300" />
-        <Text size="xs" color="$forest" flex={1}>
+        <Info size={16} color={cores.textPrimary} />
+        <Text size="xs" color="$brandTextPrimary" flex={1}>
           Você pode sair da fila sem custo até {formatClockTime(new Date(ate))}.
         </Text>
       </HStack>

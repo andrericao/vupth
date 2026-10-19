@@ -9,7 +9,7 @@ import { SUPORTE_PRECO_URL } from "@utils/suporte";
 // Voltar traz de volta, DEC-63), nunca o Asaas direto.
 // `color` deixa o link cair bem sobre qualquer fundo (no resumo é brandGreen
 // sobre forest).
-export function SaibaMaisDoPreco({ color = "$forest" }: { color?: string }) {
+export function SaibaMaisDoPreco({ color = "$brandTextPrimary" }: { color?: string }) {
   async function abrir() {
     try {
       await Linking.openURL(SUPORTE_PRECO_URL);

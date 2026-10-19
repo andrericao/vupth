@@ -7,11 +7,8 @@ import { swapOfferService } from "@services/swapOfferService";
 import { acceptOfferErrorMessage } from "@domain/queue/swap";
 import { useAuthStore } from "@stores/authStore";
 import { useConviteDeTrocaStore } from "@stores/conviteDeTrocaStore";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
-
-const FOREST = "#163300";
-const GREEN = "#9FE870";
-const TEXT_SECONDARY = "#454745";
 
 /**
  * Os 5 segundos à vista (Andre, 26/09: "algo visual que demonstre os 5 segundos
@@ -19,6 +16,7 @@ const TEXT_SECONDARY = "#454745";
  * mesmo tempo em que o convite fecha sozinho.
  */
 export function BarraDoTempo({ duracaoMs, chave }: { duracaoMs: number; chave: string }) {
+  const { cores } = useTema();
   const [resto] = useState(() => new Animated.Value(1));
   useEffect(() => {
     resto.setValue(1);
@@ -36,9 +34,10 @@ export function BarraDoTempo({ duracaoMs, chave }: { duracaoMs: number; chave: s
     <View
       testID="convite-tempo"
       accessibilityLabel="Tempo para aceitar"
-      style={{ height: 6, borderRadius: 3, backgroundColor: "#16330014", overflow: "hidden" }}
+      // `trilho`: o vazio da barra (border no claro; no escuro o border e um verde vivo e o trilho berraria)
+      style={{ height: 6, borderRadius: 3, backgroundColor: cores.trilho, overflow: "hidden" }}
     >
-      <Animated.View style={{ height: 6, width: largura, backgroundColor: FOREST, borderRadius: 3 }} />
+      <Animated.View style={{ height: 6, width: largura, backgroundColor: cores.textPrimary, borderRadius: 3 }} />
     </View>
   );
 }
@@ -55,6 +54,7 @@ export function ConviteDeTroca() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const [aceitando, setAceitando] = useState(false);
   const aceitandoRef = useRef(false);
+  const { cores, veu } = useTema();
 
   // Some sozinho em 5 s — a nao ser que a pessoa ja tenha tocado em Aceitar.
   useEffect(() => {
@@ -93,7 +93,7 @@ export function ConviteDeTroca() {
         onPress={fechar}
         style={{
           flex: 1,
-          backgroundColor: "#16330073",
+          backgroundColor: veu,
           alignItems: "center",
           justifyContent: "center",
           paddingHorizontal: 24,
@@ -106,7 +106,7 @@ export function ConviteDeTroca() {
           accessibilityLabel={texto.titulo}
           testID="convite-de-troca"
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: cores.painel,
             borderRadius: 20,
             padding: 22,
             gap: 16,
@@ -121,7 +121,7 @@ export function ConviteDeTroca() {
                 fontFamily: "Archivo_800ExtraBold",
                 fontSize: fs(18),
                 letterSpacing: -0.4,
-                color: FOREST,
+                color: cores.textPrimary,
               }}
             >
               {texto.titulo}
@@ -133,10 +133,10 @@ export function ConviteDeTroca() {
               accessibilityLabel="Fechar"
               testID="convite-fechar"
             >
-              <X size={20} color={FOREST} />
+              <X size={20} color={cores.textPrimary} />
             </Pressable>
           </View>
-          <Text style={{ fontFamily: "Inter_400Regular", fontSize: fs(14), lineHeight: fs(20), color: TEXT_SECONDARY }}>
+          <Text style={{ fontFamily: "Inter_400Regular", fontSize: fs(14), lineHeight: fs(20), color: cores.textSecondary }}>
             {texto.mensagem}
           </Text>
           <BarraDoTempo duracaoMs={DURACAO_DO_CONVITE_MS} chave={atual.id} />
@@ -148,13 +148,13 @@ export function ConviteDeTroca() {
             style={{
               minHeight: 50,
               borderRadius: 999,
-              backgroundColor: GREEN,
+              backgroundColor: cores.green,
               alignItems: "center",
               justifyContent: "center",
               opacity: aceitando ? 0.6 : 1,
             }}
           >
-            <Text style={{ fontFamily: "Archivo_700Bold", fontSize: fs(16), color: FOREST }}>
+            <Text style={{ fontFamily: "Archivo_700Bold", fontSize: fs(16), color: cores.onGreen }}>
               {aceitando ? "Aceitando..." : "Aceitar"}
             </Text>
           </Pressable>

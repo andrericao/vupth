@@ -6,9 +6,12 @@
 // ação destrutiva troca para danger. O erro que isto evita: a borda da mesma
 // cor do fundo, que era a única "identidade" que o cartão tinha.
 //
-// O componente recebe a VARIANTE, nunca um hex (DESIGN.md §5). Os valores abaixo
-// são os do tema claro, com os NOMES do tokens.json do vupth-docs — o escuro
-// entra com o modo escuro e só acrescenta uma coluna aqui.
+// O componente recebe a VARIANTE, nunca um hex (DESIGN.md §5). Os valores saem
+// do tokens.json (via `coresDoTema`), pelos NOMES do vupth-docs, e o par de cada
+// tipo vale nos dois temas: o selo inverte sozinho (fundo escuro, texto na cor)
+// e a faixa fica, como em design-modais.html.
+
+import { coresDoTema, type NomeDeCor, type Tema } from "@domain/tema";
 
 export type TipoDeDialogo = "informacao" | "atencao" | "dinheiro" | "erro";
 
@@ -18,29 +21,37 @@ export function tipoValido(tipo: unknown): tipo is TipoDeDialogo {
   return typeof tipo === "string" && (TIPOS_DE_DIALOGO as string[]).includes(tipo);
 }
 
-/** Tema claro, pelos nomes do tokens.json. */
-export const TOKENS_CLARO = {
-  green: "#9FE870",
-  onGreen: "#163300",
-  greenTint: "#E2F6D5",
-  onGreenTint: "#163300",
-  accentPeach: "#FFC091",
-  onAccentPeach: "#163300",
-  dangerTint: "#F7E4E2",
-  danger: "#B3261E",
-  onDanger: "#FFFFFF",
-  surface: "#F3F5F1",
-  textPrimary: "#163300",
-  textSecondary: "#454745",
-} as const;
+const NOMES_DO_DIALOGO = [
+  "green",
+  "onGreen",
+  "greenTint",
+  "onGreenTint",
+  "accentPeach",
+  "onAccentPeach",
+  "dangerTint",
+  "danger",
+  "onDanger",
+  "surface",
+  "textPrimary",
+  "textSecondary",
+] as const;
 
-type Token = keyof typeof TOKENS_CLARO;
+/** Tema claro, pelos nomes do tokens.json (lidos de lá, não copiados). */
+export const TOKENS_CLARO = Object.fromEntries(
+  NOMES_DO_DIALOGO.map((nome) => [nome, coresDoTema("claro")[nome]]),
+) as Record<(typeof NOMES_DO_DIALOGO)[number], string>;
 
-const TIPOS: Record<TipoDeDialogo, { fundo: Token; texto: Token; corDaFaixa: Token | null; faixa: boolean; selo: string }> = {
+const TIPOS: Record<
+  TipoDeDialogo,
+  { fundo: NomeDeCor; texto: NomeDeCor; corDaFaixa: NomeDeCor | null; faixa: boolean; selo: string }
+> = {
   // Fato sem consequência: pedido enviado, você trocou de lugar.
   informacao: { fundo: "greenTint", texto: "onGreenTint", corDaFaixa: "green", faixa: true, selo: "Aviso" },
   // Prazo ou estado que pede ação: hora do almoço, fechamento, loja sem ponto.
-  atencao: { fundo: "accentPeach", texto: "onAccentPeach", corDaFaixa: "accentPeach", faixa: true, selo: "Atenção" },
+  // A faixa é o `pessego` (o #FFC091 como COR): o token `accentPeach` é fundo e
+  // no escuro vira um marrom (#4A2A10) que, como faixa de 6 px sobre o painel
+  // forest, não se enxerga.
+  atencao: { fundo: "accentPeach", texto: "onAccentPeach", corDaFaixa: "pessego", faixa: true, selo: "Atenção" },
   // Tudo que tem R$. Mesma cor do erro; o que os separa é a faixa.
   dinheiro: { fundo: "dangerTint", texto: "danger", corDaFaixa: "danger", faixa: true, selo: "Pagamento" },
   // Resposta a um toque que a pessoa acabou de dar: só o selo, sem faixa. Com
@@ -57,22 +68,41 @@ export type AparenciaDoTipo = {
   selo: string;
 };
 
-/** `selo` troca o rótulo ("Multa" no lugar de "Pagamento") sem trocar o tipo. */
-export function aparenciaDoTipo(tipo: TipoDeDialogo, selo?: string): AparenciaDoTipo {
+/**
+ * `selo` troca o rótulo ("Multa" no lugar de "Pagamento") sem trocar o tipo.
+ * Sem `tema` vale o claro.
+ */
+export function aparenciaDoTipo(tipo: TipoDeDialogo, selo?: string, tema: Tema = "claro"): AparenciaDoTipo {
   const t = TIPOS[tipo];
+  const cores = coresDoTema(tema);
   return {
     faixa: t.faixa,
     // A faixa em dangerTint (#F7E4E2) sobre o branco do cartao mal se ve: a tabela
     // dizia "faixa e selo: dangerTint" e os mockups desenhavam a faixa forte. Vale o
     // mockup: o tipo e dito por uma faixa que se ENXERGA, e o selo fica no tom claro.
-    corDaFaixa: t.corDaFaixa ? TOKENS_CLARO[t.corDaFaixa] : null,
-    fundo: TOKENS_CLARO[t.fundo],
-    texto: TOKENS_CLARO[t.texto],
+    corDaFaixa: t.corDaFaixa ? cores[t.corDaFaixa] : null,
+    fundo: cores[t.fundo],
+    texto: cores[t.texto],
     selo: selo?.trim() || t.selo,
   };
 }
 
 export type PapelDoBotao = "primario" | "secundario" | "perigo";
+
+const BOTOES: Record<PapelDoBotao, { fundo: NomeDeCor; texto: NomeDeCor }> = {
+  // O botão primário é o único par que não muda de tema.
+  primario: { fundo: "green", texto: "onGreen" },
+  // `sobrePainel`: surface no claro e surfaceAlt no escuro. A surface do escuro é
+  // a cor do próprio painel, e o botão secundário sumiria dentro dele.
+  secundario: { fundo: "sobrePainel", texto: "textPrimary" },
+  perigo: { fundo: "danger", texto: "onDanger" },
+};
+
+/** Fundo e rótulo de cada papel de botão do diálogo com tipo, no tema. */
+export function aparenciaDoBotao(papel: PapelDoBotao, tema: Tema = "claro"): { fundo: string; texto: string } {
+  const cores = coresDoTema(tema);
+  return { fundo: cores[BOTOES[papel].fundo], texto: cores[BOTOES[papel].texto] };
+}
 
 type EstiloDoBotao = { estilo?: "default" | "cancel" | "destructive" };
 

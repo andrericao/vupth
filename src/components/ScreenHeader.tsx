@@ -36,6 +36,7 @@ type Props = {
 function buttonBg(ground: Props["ground"]) {
   // tema-fixo: sobre a foto e sobre o hero verde os fundos sao os mesmos nos dois temas
   if (ground === "foto") return "#FFFFFFE6";
+  // tema-fixo: forest translucido sobre o hero verde, que e green nos dois temas
   if (ground === "marca") return "#16330014";
   return "$greenTint";
 }
@@ -131,6 +132,7 @@ export function ScreenHeader({ title, subtitle, action, onBack, root, ground }: 
           fontSize={fs(26)}
           lineHeight={fs(30)}
           letterSpacing={-1}
+          // tema-fixo: sobre a foto o titulo e forest nos dois temas (a foto e clara nos dois)
           color={ground === "marca" ? "$onGreen" : ground === "foto" ? "$forest" : "$brandTextPrimary"}
         >
           {title}

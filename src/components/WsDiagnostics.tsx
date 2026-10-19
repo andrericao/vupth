@@ -20,9 +20,11 @@ import {
 //   Recebidas/última -> separa "conectado" de "realmente recebendo".
 //   Conexões       -> quantas vezes reconectou (background, troca de rede).
 
+// O ponto de cada nivel, sobre o cartao surface: `pessego` (o #FFC091 como cor; o
+// `brandWarning` do escuro e um marrom que como ponto some) e o texto do tema no ok.
 const LEVEL_COLOR: Record<VerdictLevel, string> = {
-  ok: "$forest",
-  warn: "$brandWarning",
+  ok: "$brandTextPrimary",
+  warn: "$pessego",
   bad: "$brandDanger",
   idle: "$brandTextSecondary",
 };
@@ -32,6 +34,14 @@ const LEVEL_BG: Record<VerdictLevel, string> = {
   warn: "$brandWarning",
   bad: "$brandDangerTint",
   idle: "$brandSurface",
+};
+
+// O texto da mensagem e o par do fundo de cada nivel (nunca forest: no escuro e a surface).
+const LEVEL_TEXT: Record<VerdictLevel, string> = {
+  ok: "$onGreenTint",
+  warn: "$onAccentPeach",
+  bad: "$brandTextPrimary",
+  idle: "$brandTextSecondary",
 };
 
 function Channel({
@@ -56,7 +66,7 @@ function Channel({
         </Text>
       </HStack>
       <Box bg={LEVEL_BG[verdict.level]} borderRadius="$lg" px="$3" py="$2">
-        <Text size="xs" color={verdict.level === "idle" ? "$brandTextSecondary" : "$forest"}>
+        <Text size="xs" color={LEVEL_TEXT[verdict.level]}>
           {verdict.message}
         </Text>
       </Box>

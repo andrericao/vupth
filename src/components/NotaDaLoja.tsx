@@ -3,6 +3,7 @@ import { Star } from "lucide-react-native";
 import { ComponentProps } from "react";
 
 import { RatingDisplay } from "@domain/establishment/rating";
+import { useTema } from "@hooks/useTema";
 
 type TextoProps = ComponentProps<typeof Text>;
 
@@ -18,13 +19,14 @@ export function NotaDaLoja({
   testID,
   ...texto
 }: { rating: RatingDisplay; starSize: number; gap?: string | number; testID?: string } & TextoProps) {
+  const { cores } = useTema();
   return (
     <HStack alignItems="center" gap={gap as never} testID={testID}>
       {rating.novo ? (
         <Text {...texto}>Novo</Text>
       ) : (
         <>
-          <Star size={starSize} color="#163300" fill="#163300" />
+          <Star size={starSize} color={cores.textPrimary} fill={cores.textPrimary} />
           <Text {...texto}>{rating.value.toFixed(1)}</Text>
         </>
       )}

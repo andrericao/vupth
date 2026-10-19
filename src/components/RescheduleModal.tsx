@@ -11,7 +11,7 @@ import {
   formatClockTime,
   CANCELLATION_PENALTY_VALUE,
 } from "@domain/queue/types";
-import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 type Props = {
@@ -43,11 +43,15 @@ function CampoHora({
   onChangeText: (t: string) => void;
   placeholder: string;
 }) {
+  const { cores, escuro } = useTema();
   return (
-    <Center bg="$brandSurface" borderRadius="$card" px={14} py={10}>
+    // No claro, a surface. No escuro a surface e a cor do proprio painel (o campo
+    // sumiria) e o `sobrePainel` da 3,87:1 ao placeholder (minimo 4,5): o campo
+    // entra mais fundo que o painel, como o Input2 (background, 5,91:1).
+    <Center bg={escuro ? "$brandBackground" : "$brandSurface"} borderRadius="$card" px={14} py={10}>
       <TextInput
         placeholder={placeholder}
-        placeholderTextColor={COR_DO_PLACEHOLDER}
+        placeholderTextColor={cores.textPlaceholder}
         keyboardType="number-pad"
         value={value}
         onChangeText={onChangeText}
@@ -57,7 +61,7 @@ function CampoHora({
           fontSize: fs(26),
           width: 46,
           textAlign: "center",
-          color: "#163300",
+          color: cores.textPrimary,
           padding: 0,
         }}
       />
@@ -72,6 +76,7 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
   const [hour, setHour] = useState("");
   const [minute, setMinute] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const { cores, veu } = useTema();
 
   function reset() {
     setHour("");
@@ -97,22 +102,22 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$brandBackground" borderRadius="$hero" p="$6" gap="$4" style={floatingShadow}>
+      <Box flex={1} bg={veu} justifyContent="center" px={24}>
+        <VStack bg="$painel" borderRadius="$hero" p="$6" gap="$4" style={floatingShadow}>
           <VStack gap="$1.5">
             <Text
               fontFamily="$display"
               fontSize={fs(22)}
               lineHeight={fs(26)}
               letterSpacing={-0.6}
-              color="$forest"
+              color="$brandTextPrimary"
             >
               Agendar minha vez
             </Text>
 
             {tailEtaMs != null && (
               <HStack alignItems="center" gap="$1.5">
-                <Clock size={15} color="#454745" />
+                <Clock size={15} color={cores.textSecondary} />
                 <Text size="sm" color="$brandTextSecondary">
                   A fila hoje deve ir até {formatClockTime(new Date(tailEtaMs))}
                 </Text>
@@ -137,7 +142,7 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
               px="$3.5"
               py="$2.5"
             >
-              <TriangleAlert size={16} color="#B3261E" />
+              <TriangleAlert size={16} color={cores.danger} />
               <Text fontFamily="$heading" fontSize={fs(13)} lineHeight={fs(18)} color="$brandDanger" flex={1}>
                 Perto de ser atendido: reagendar agora gera multa de R${" "}
                 {CANCELLATION_PENALTY_VALUE},00.
@@ -147,7 +152,7 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
 
           <HStack alignItems="center" justifyContent="center" gap="$2">
             <CampoHora placeholder="HH" value={hour} onChangeText={(t) => setHour(onlyDigits(t))} />
-            <Text fontFamily="$display" fontSize={fs(22)} color="$forest">
+            <Text fontFamily="$display" fontSize={fs(22)} color="$brandTextPrimary">
               :
             </Text>
             <CampoHora placeholder="MM" value={minute} onChangeText={(t) => setMinute(onlyDigits(t))} />

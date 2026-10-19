@@ -41,20 +41,25 @@ export function DaySelector({ selectedDate, onSelect, from, count = SCHEDULE_HOR
             // os textos pros tokens da marca. Selecionado segue forest, com
             // `$brandGreen` por cima — o par da marca sobre fundo escuro
             // (era `$green100`/`$white`, da paleta antiga).
-            bg={selected ? "$forest" : "$brandSurface"}
+            // No tema: selecionado = o papel `selecionado` com o `onSelecionado`
+            // por cima (forest + green no claro; green + onGreen no escuro, onde o
+            // forest e a surface). Nao selecionado = `sobrePainel` (a surface no
+            // claro): o seletor mora dentro de um painel, e a surface do escuro e
+            // a cor do proprio painel.
+            bg={selected ? "$selecionado" : "$sobrePainel"}
             borderRadius="$xl"
             px="$4"
             py="$3"
             minWidth={64}
           >
             <VStack alignItems="center" gap="$1">
-              <Text size="xs" color={selected ? "$brandGreen" : "$brandTextSecondary"}>
+              <Text size="xs" color={selected ? "$onSelecionado" : "$brandTextSecondary"}>
                 {day.weekday}
               </Text>
               <Text
                 fontFamily="$heading"
                 size={day.isToday ? "sm" : "md"}
-                color={selected ? "$brandGreen" : "$forest"}
+                color={selected ? "$onSelecionado" : "$brandTextPrimary"}
               >
                 {day.label}
               </Text>

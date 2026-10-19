@@ -44,12 +44,18 @@ export function FaixaBaixarApp({ apkNoAr = APK_NO_AR }: { apkNoAr?: boolean }) {
     setFechada(true);
   }
 
+  // A faixa e uma peca de divulgacao da marca: forest com texto branco e o botao
+  // green, os mesmos nos dois temas. Nao e a surface do escuro nem o textPrimary
+  // dele: o texto branco sobre o forest nao troca com o tema.
   return (
+    // tema-fixo: faixa forest da divulgacao, a mesma nos dois temas
     <HStack bg="$forest" px={16} py={10} gap="$3" alignItems="center" testID="faixa-baixar-app">
+      {/* tema-fixo: branco sobre a faixa forest, nos dois temas */}
       <Text flex={1} color="$white" fontSize={fs(13)}>
         O VUPTH é melhor no app.
       </Text>
       <TouchableOpacity onPress={continuar} accessibilityRole="button" testID="continuar-na-web">
+        {/* tema-fixo: branco sobre a faixa forest, nos dois temas */}
         <Text color="$white" fontSize={fs(13)}>
           Continuar na web
         </Text>
@@ -60,7 +66,7 @@ export function FaixaBaixarApp({ apkNoAr = APK_NO_AR }: { apkNoAr?: boolean }) {
         testID="baixar-o-app"
       >
         <HStack bg="$brandGreen" borderRadius="$full" px={14} py={6}>
-          <Text color="$forest" fontFamily="$heading" fontSize={fs(13)}>
+          <Text color="$onGreen" fontFamily="$heading" fontSize={fs(13)}>
             Baixar o app
           </Text>
         </HStack>
