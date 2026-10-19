@@ -180,7 +180,7 @@ export function ForgotPassword() {
             fontSize={fs(34)}
             lineHeight={fs(36)}
             letterSpacing={-1.5}
-            color="$forest"
+            color="$brandTextPrimary"
           >
             {step === "email" ? "ESQUECEU A SENHA?" : "NOVA SENHA"}
           </Text>
@@ -270,7 +270,7 @@ export function ForgotPassword() {
               isDisabled={!canReset}
             />
             <TouchableOpacity onPress={handleSendCode} disabled={isSubmitting}>
-              <Text size="sm" color="$forest" fontFamily="$heading" textAlign="center">
+              <Text size="sm" color="$brandTextPrimary" fontFamily="$heading" textAlign="center">
                 {isWakingServer
                   ? "Conectando..."
                   : isSubmitting

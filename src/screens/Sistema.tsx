@@ -13,12 +13,14 @@ import { useComingSoonStore } from "@stores/comingSoonStore";
 import { COMING_SOON_LABELS, ComingSoonFeature } from "@domain/comingSoon";
 import { fs } from "@stores/fonteStore";
 import { commitDoApp } from "@domain/versao";
+import { useTema } from "@hooks/useTema";
 
 // A versao e o que a cerca (atualizar, diagnosticos) saiu da tela de Perfil
 // para esta, atras do item "Versão do app" — o mesmo desenho do partner
 // (Andre 2026-09-16: "o menu igual o do partner, a versao deve ser escondida").
 // Quem so quer mexer na conta nao ve numero de build nem painel tecnico.
 export function Sistema() {
+  const { cores } = useTema();
   const [toquesNaVersao, setToquesNaVersao] = useState(0);
   const [isChecking, setIsChecking] = useState(false);
 
@@ -84,8 +86,8 @@ export function Sistema() {
                 gap="$2"
                 alignItems="center"
               >
-                <RefreshCw size={15} color="#163300" />
-                <Text fontFamily="$heading" fontSize={fs(13)} color="$forest">
+                <RefreshCw size={15} color={cores.textPrimary} />
+                <Text fontFamily="$heading" fontSize={fs(13)} color="$brandTextPrimary">
                   {isChecking ? "Verificando..." : "Verificar atualização"}
                 </Text>
               </HStack>
@@ -142,7 +144,7 @@ export function Sistema() {
                     {COMING_SOON_LABELS[feature as ComingSoonFeature] ?? feature}
                   </Text>
                   <Box bg="$greenTint" borderRadius="$full" px="$3" py="$1">
-                    <Text size="xs" fontFamily="$heading" color="$forest">
+                    <Text size="xs" fontFamily="$heading" color="$onGreenTint">
                       {count}×
                     </Text>
                   </Box>

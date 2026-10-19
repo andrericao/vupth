@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import { Phone, Share2 } from "lucide-react-native";
 
-import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
+import { ScreenHeader, HeaderIconButton, corDoIconeDoCabecalho } from "@components/ScreenHeader";
 import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
 import { API_ENV } from "@services/api";
 import { copiarTexto } from "@utils/copiar";
@@ -21,6 +21,7 @@ import { formatSpecialty } from "@domain/establishment/serviceType";
 import { contatoDoProfissional } from "@domain/professional/contato";
 import { duracaoDoServico } from "@domain/professional/duracaoDoServico";
 import { fs } from "@stores/fonteStore";
+import { useTema } from "@hooks/useTema";
 
 type RouteParams = {
   professionalId: string;
@@ -35,6 +36,7 @@ type RouteParams = {
 // pelo "Ver profissional" do detalhe do atendimento. O Compartilhar manda o
 // texto do link-de-divulgacao (a loja ja abrindo este profissional).
 export function ProfessionalInfo() {
+  const { cores } = useTema();
   const route = useRoute();
   const { professionalId, establishmentId, professionalName } = route.params as RouteParams;
 
@@ -74,7 +76,7 @@ export function ProfessionalInfo() {
           title="Profissional"
           action={
             <HeaderIconButton onPress={compartilhar} testID="compartilhar" accessibilityLabel={`Compartilhar ${nome}`}>
-              <Share2 size={20} color="#163300" />
+              <Share2 size={20} color={corDoIconeDoCabecalho(undefined, cores)} />
             </HeaderIconButton>
           }
         />
@@ -106,7 +108,7 @@ export function ProfessionalInfo() {
               fontSize={fs(24)}
               lineHeight={fs(28)}
               letterSpacing={-1}
-              color="$forest"
+              color="$brandTextPrimary"
               textAlign="center"
               mt="$2"
             >
@@ -156,14 +158,14 @@ export function ProfessionalInfo() {
               gap="$3"
               testID="contato-do-profissional"
             >
-              <Phone size={18} color="#163300" />
-              <Text flex={1} color="$forest" fontWeight="$semibold" selectable>
+              <Phone size={18} color={cores.textPrimary} />
+              <Text flex={1} color="$brandTextPrimary" fontWeight="$semibold" selectable>
                 {contato.exibir}
               </Text>
             </HStack>
           )}
 
-          <Text fontFamily="$display" fontSize="$lg" color="$forest" mt="$6" mb="$3">
+          <Text fontFamily="$display" fontSize="$lg" color="$brandTextPrimary" mt="$6" mb="$3">
             Serviços
           </Text>
           {carregandoServicos ? (
@@ -183,14 +185,14 @@ export function ProfessionalInfo() {
                   testID={`servico-${s.id}`}
                 >
                   <VStack flex={1} gap="$0.5">
-                    <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                    <Text fontFamily="$heading" fontSize="$sm" color="$brandTextPrimary">
                       {s.customName}
                     </Text>
                     <Text size="xs" color="$brandTextSecondary">
                       {duracaoDoServico(s)} min
                     </Text>
                   </VStack>
-                  <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                  <Text fontFamily="$heading" fontSize="$sm" color="$brandTextPrimary">
                     R$ {s.price.toFixed(2)}
                   </Text>
                 </HStack>

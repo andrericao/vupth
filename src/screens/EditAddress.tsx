@@ -14,6 +14,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
 import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
+import { useTema } from "@hooks/useTema";
 
 type Mode = "list" | "form";
 
@@ -29,6 +30,7 @@ const EMPTY_FORM: AddressRequest = {
 };
 
 export function EditAddress() {
+  const { cores } = useTema();
   const accessToken = useAuthStore((s) => s.accessToken);
 
   const [mode, setMode] = useState<Mode>("list");
@@ -252,7 +254,7 @@ export function EditAddress() {
             onPress={handleUseGps}
           />
           <HStack alignItems="center" gap="$1" mb="$4">
-            <MapPin size={12} color="#454745" />
+            <MapPin size={12} color={cores.textSecondary} />
             <Text size="xs" color="$brandTextSecondary" flex={1}>
               Com o GPS a gente já preenche o endereço e calcula sua distância até os estabelecimentos.
             </Text>
@@ -334,22 +336,22 @@ export function EditAddress() {
                     <Text size="xs" color="$brandTextSecondary">CEP: {addr.zipCode}</Text>
                     {addr.isMain && (
                       <HStack alignItems="center" gap="$1" mt="$1">
-                        <Star size={14} color="#163300" fill="#163300" />
-                        <Text size="xs" color="$forest" fontFamily="$heading">Principal</Text>
+                        <Star size={14} color={cores.textPrimary} fill={cores.textPrimary} />
+                        <Text size="xs" color="$brandTextPrimary" fontFamily="$heading">Principal</Text>
                       </HStack>
                     )}
                   </VStack>
                   <HStack gap="$3">
                     {!addr.isMain && (
                       <TouchableOpacity onPress={() => handleSetMain(addr.userAddressId)} testID={`endereco-principal-${addr.userAddressId}`}>
-                        <Star size={20} color="#454745" />
+                        <Star size={20} color={cores.textSecondary} />
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity onPress={() => handleEdit(addr)} testID={`endereco-editar-${addr.userAddressId}`}>
-                      <Pencil size={20} color="#163300" />
+                      <Pencil size={20} color={cores.textPrimary} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => handleDelete(addr.userAddressId)} testID={`endereco-remover-${addr.userAddressId}`}>
-                      <Trash2 size={20} color="#B3261E" />
+                      <Trash2 size={20} color={cores.danger} />
                     </TouchableOpacity>
                   </HStack>
                 </HStack>
