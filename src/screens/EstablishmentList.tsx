@@ -7,7 +7,7 @@ import { Search, ChevronRight, Zap, ArrowUpDown } from "lucide-react-native";
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType, isEffectivelyOpen } from "@domain/establishment/types";
 import { filterEstablishments } from "@domain/establishment/filter";
-import { serviceTypeTitle, serviceTypeLabel } from "@domain/establishment/serviceType";
+import { serviceTypeTitle } from "@domain/establishment/serviceType";
 import { formatDistanceKm } from "@domain/establishment/proximity";
 import { resolveRating } from "@domain/establishment/rating";
 import { NotaDaLoja } from "@components/NotaDaLoja";
@@ -16,6 +16,7 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { statusTag } from "@domain/establishment/statusTag";
 import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
+import { LinhaDaLojaFechada } from "@components/LinhaDaLojaFechada";
 import { formatWaitTime } from "@domain/queue/types";
 import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 import { fs } from "@stores/fonteStore";
@@ -69,63 +70,6 @@ function OpenRow({
               ou com o tempo. */}
           <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
             <Text size="2xs" fontFamily="$heading" color="$forest">
-              {statusTag(establishment).label}
-            </Text>
-          </Box>
-        </HStack>
-      </Box>
-    </TouchableOpacity>
-  );
-}
-
-// Loja fechada NAO some da lista (Andre 2026-07-23: da pra agendar/solicitar
-// para a reabertura) — entra apagada no fim, com o caminho ainda aberto.
-//
-// ⚠️ C22: o desenho do Pencil mostra "Abre amanha as 9h" aqui, mas o contrato
-// de hoje so tem o booleano `is_open` — sem opening/closing time, e muito menos
-// por dia da semana. Inventar um horario seria pior do que omitir: mostramos so
-// "Fechada". Quando o backend entregar a grade (S27), e esta linha que ganha o
-// "abre <dia> as <hora>".
-function ClosedRow({
-  establishment,
-  onPress,
-}: {
-  establishment: Establishment;
-  onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity onPress={onPress} testID={`establishment-${establishment.id}`}>
-      {/* Fechada entra APAGADA (decisao da design, 2026-08-26) — o mesmo
-          tratamento da Home.
-
-          0,8 e nao 0,7: medido, `opacity` multiplica sobre TUDO, inclusive o
-          texto que ja tinha passado no contraste. A 0,7 o nome da loja cai pra
-          3,82:1 e reprova no AA; a 0,8 fica em 4,92:1. */}
-      <Box bg="$brandSurface" p="$3" mb="$3" borderRadius="$card" opacity={0.8}>
-        <HStack alignItems="center" gap="$3">
-          <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} bg="$brandBorder" color="$brandTextSecondary" />
-          <VStack flex={1}>
-            <Text fontFamily="$heading" fontSize="$sm" color="$brandTextSecondary">
-              {establishment.name}
-            </Text>
-            <Text size="xs" color="$brandTextSecondary" mt="$0.5">
-              {serviceTypeLabel(establishment.serviceType ?? "")}
-              {establishment.distance_km != null
-                ? ` · ${formatDistanceKm(establishment.distance_km)}`
-                : ""}
-            </Text>
-          </VStack>
-          {/* Mesma tag das outras duas telas. Aqui ela dizia "Fechada" e o
-              subtitulo dizia "Toque para agendar" — o estado e a acao
-              separados, com vocabulario que so existia nesta tela. */}
-          <Box
-            borderWidth={1}
-            borderColor="$brandBorder"
-            borderRadius="$full"
-            px="$3"
-            py="$1.5"
-          >
-            <Text size="2xs" fontFamily="$heading" color="$brandTextSecondary">
               {statusTag(establishment).label}
             </Text>
           </Box>
@@ -282,7 +226,7 @@ export function EstablishmentList() {
               isEffectivelyOpen(item) ? (
                 <OpenRow establishment={item} onPress={() => goToDetail(item.id)} />
               ) : (
-                <ClosedRow establishment={item} onPress={() => goToDetail(item.id)} />
+                <LinhaDaLojaFechada establishment={item} onPress={() => goToDetail(item.id)} />
               )
             }
             ListEmptyComponent={

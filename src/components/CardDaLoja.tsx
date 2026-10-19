@@ -110,31 +110,12 @@ export const CardDaLoja = memo(function CardDaLoja({
 
   return (
     <TouchableOpacity onPress={() => onPress(establishment)} testID={`establishment-${establishment.id}`}>
-      {/* Fechada entra APAGADA (decisao da design, 2026-08-26) — o mesmo
-          tratamento nas duas listas.
-
-          0,8 e nao 0,7: medido, `opacity` multiplica sobre TUDO, inclusive o
-          texto que ja tinha passado no contraste. A 0,7 o nome da loja cai pra
-          3,82:1 e reprova no AA; a 0,8 fica em 4,92:1. E o apagado mais forte
-          que ainda deixa ler. */}
-      <HStack
-        bg="$brandSurface"
-        borderRadius={18}
-        gap={14}
-        p={14}
-        mb={12}
-        alignItems="center"
-        opacity={tag.live ? 1 : 0.8}
-      >
-        {/* Avatar APAGADO quando fechada — o mesmo sinal da lista cheia. Era
-            verde nas duas situacoes, entao a linha fechada so se distinguia
-            pela tag no canto oposto. */}
-        <PlaceAvatar
-          name={establishment.name}
-          photoUrl={establishment.urlImage}
-          bg={tag.live ? "$greenTint" : "$brandBorder"}
-          color={tag.live ? "$forest" : "$brandTextSecondary"}
-        />
+      {/* Fechada NAO entra apagada (decisao da Design, 17/10, loja-fechada):
+          `opacity` multiplica sobre tudo — a 0,8 o nome da loja ja ficava em
+          4,92:1, e a linha cinza dizia "nao da pra nada" numa loja que aceita
+          agendar. O aviso e o selo AGENDAR, no canto. */}
+      <HStack bg="$brandSurface" borderRadius={18} gap={14} p={14} mb={12} alignItems="center">
+        <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} bg="$greenTint" color="$forest" />
         <VStack flex={1} gap={4}>
           <Text fontFamily="$display" fontSize={fs(15)} fontWeight="$bold" color="$brandTextPrimary">
             {establishment.name}
