@@ -135,11 +135,11 @@ export function ScheduleModal({
             testID="agenda-rolagem"
           >
           <Heading fontFamily="$heading" fontSize="$lg">
-            {corte ? "Solicitar corte" : "Agendar"}
+            {corte ? "Pedir corte" : "Agendar"}
           </Heading>
           <Text size="sm" color="$brandTextSecondary" mt="$1">
             {corte
-              ? "Para quando? O profissional tem 5 minutos para responder."
+              ? "O profissional responde em 5 min."
               : "Escolha o dia e o horário."}
           </Text>
 
@@ -199,8 +199,11 @@ export function ScheduleModal({
           )}
           </ScrollView>
           <VStack px={24} pt="$3" pb={24} gap="$3" testID="agenda-rodape">
+            {/* O rotulo nao vira "Agendando..." (guia de texto, regra 6): o botao
+                desabilitado com o spinner ja diz que esta enviando. */}
             <Button
-              title={enviando ? "Agendando..." : corte ? "Solicitar" : "Confirmar"}
+              title={corte ? "Pedir" : "Agendar"}
+              isLoading={enviando}
               isDisabled={horario == null || enviando}
               opacity={horario == null ? 0.5 : 1}
               onPress={confirmar}
