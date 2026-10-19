@@ -1,10 +1,10 @@
-import { TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { VStack, HStack, Text, Box, Center, ScrollView } from "@gluestack-ui/themed";
 import { Users } from "lucide-react-native";
 
 import { goToLoginAfterOnboarding } from "@routes/navigationRef";
 import { Button } from "@components/Button";
+import { LinksLegais } from "@components/LinksLegais";
 import { BrandMark } from "@components/BrandMark";
 import { VersaoDoApp } from "@components/VersaoDoApp";
 import { useFirstRunStore } from "@stores/firstRunStore";
@@ -98,19 +98,25 @@ export function Onboarding() {
           Fixo, fora da rolagem (entrar-atras-da-barra, Andre 09/10): dentro
           dela, o rodape descia ate a barra quando a inset chegava depois da
           primeira pintura. A inset ja vem pronta (initialMetrics no
-          SafeAreaProvider) e o rodape nao depende do tamanho do conteudo. */}
-      <VStack px={16} pt="$3" gap="$3.5" alignItems="center" style={{ paddingBottom: bottom + 32 }} testID="onboarding-rodape">
-        <Button title="Ver filas perto de mim" onPress={() => go("home")} testID="onboarding-start" />
-        <HStack gap="$1.5" alignItems="center">
-          <Text size="sm" color="$brandTextSecondary">
-            Já tem conta?
-          </Text>
-          <TouchableOpacity onPress={() => go("login")} testID="onboarding-login">
-            <Text fontFamily="$heading" fontSize="$sm" color="$forest">
-              Entrar
-            </Text>
-          </TouchableOpacity>
-        </HStack>
+          SafeAreaProvider) e o rodape nao depende do tamanho do conteudo.
+          Os Termos e a Privacidade abrem as paginas da web (termos-no-rodape):
+          a tela esta fora do navegador, nao ha tela de Termos para onde ir. */}
+      <VStack px={16} pt="$3" gap="$3" alignItems="center" style={{ paddingBottom: bottom + 32 }} testID="onboarding-rodape">
+        <Button title="Ver filas" onPress={() => go("home")} testID="onboarding-start" />
+        {/* O par de botoes e o mesmo do Partner (design-entrada, 17/10): duas
+            pilulas da MESMA altura, a primaria e a secundaria. "Entrar" era um
+            link de 14 px e o toque errava. O `Button` do Client nao tem a
+            variante secundaria; o contorno vira o fundo `surface` do desenho. */}
+        <Button
+          title="Entrar"
+          variant="outline"
+          bg="$brandSurface"
+          borderWidth="$0"
+          $active-bg="$brandBorder"
+          onPress={() => go("login")}
+          testID="onboarding-login"
+        />
+        <LinksLegais />
         <VersaoDoApp testID="versao-entrada" />
       </VStack>
     </VStack>

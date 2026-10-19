@@ -121,3 +121,41 @@ describe("alertNativo — o que sobra dos caminhos", () => {
     }
   });
 });
+
+// modais-de-alerta (design-modais, 17/10): o tipo viaja no 4o argumento, ao lado
+// do cancelable, e o Alert do sistema nunca o recebe.
+describe("alertNativo — o tipo do aviso", () => {
+  beforeEach(() => useDialogoStore.setState({ atual: null, fila: [] } as never));
+
+  it("o tipo e o selo chegam ao dialogo, junto do cancelable", () => {
+    const alvo = { alert: jest.fn() };
+    instalarDialogoNativo({ plataforma: "android", alvo: alvo as any, hostMontado: () => true });
+
+    alvo.alert("Sair da fila", "R$ 3,00 de multa.", [{ text: "Sair" }], {
+      cancelable: false,
+      tipo: "dinheiro",
+      selo: "Multa",
+    });
+
+    expect(useDialogoStore.getState().atual).toMatchObject({ tipo: "dinheiro", selo: "Multa", cancelavel: false });
+  });
+
+  it("sem tipo, o dialogo sai sem tipo — as ~95 chamadas de hoje seguem iguais", () => {
+    const alvo = { alert: jest.fn() };
+    instalarDialogoNativo({ plataforma: "android", alvo: alvo as any, hostMontado: () => true });
+    alvo.alert("Erro", "Senha incorreta");
+    expect(useDialogoStore.getState().atual?.tipo).toBeUndefined();
+  });
+
+  it("sem host montado, o Alert do sistema recebe as opcoes SEM o tipo nem o selo", () => {
+    const alvo = { alert: jest.fn() };
+    const original = alvo.alert;
+    instalarDialogoNativo({ plataforma: "android", alvo: alvo as any, hostMontado: () => false });
+
+    alvo.alert("Sair da fila", "x", undefined, { cancelable: false, tipo: "dinheiro", selo: "Multa" });
+
+    expect(original).toHaveBeenCalledWith("Sair da fila", "x", undefined, { cancelable: false });
+    expect(useDialogoStore.getState().atual).toBeNull();
+  });
+});
+

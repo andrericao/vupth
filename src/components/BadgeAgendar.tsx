@@ -1,36 +1,31 @@
-import { Box, Text } from "@gluestack-ui/themed";
+import { HStack, Text } from "@gluestack-ui/themed";
 
 import { fs } from "@stores/fonteStore";
 
 /**
- * O badge "AGENDAR" da loja fechada (decisao da Design, 17/10, design.html
- * #loja-fechada).
+ * O selo âmbar "AGENDAR" (agendar-ambar, Andre 18/10): a loja fechada nao
+ * oferece "Entrar na fila", so marcar depois — e o selo diz isso no lugar do
+ * convite. Aparece no card da lista e na tela da loja.
  *
- * Havia duas decisoes contraditorias: o amber do Andre (23/07) e a linha apagada
- * da Design (26/08), e o codigo seguia a segunda. A linha apagada diz "nao da
- * para nada" — e da: fechada agora, a loja aceita agendar e pedir corte. O badge
- * diz o contrario (fechada, mas com caminho), e a linha apagada ainda reprovava o
- * contraste: `opacity` derruba o nome da loja para menos de 4,5:1.
- *
- * Amber #FFB703 com texto forest, 7,98:1. Nao inverte no escuro (sobre o fundo
- * escuro o amber da 10,3:1): badge e selo, nao bloco. O accentPeach nao serve —
- * ja e o fundo de bloqueio, e loja fechada nao e bloqueio.
- *
- * E a UNICA caixa alta do app (o guia de texto proibe nos rotulos): por ser selo,
- * nao frase. O leitor de tela le "Agendar", nao as letras.
+ * COR: o token `brandWarning` (#FFC091, o âmbar de aviso do app — o mesmo do
+ * banner "Fechada agora") com o texto em `forest` (#163300): 8,76:1, AA com
+ * folga. O app ainda so tem o tema claro; no escuro (modo-escuro, DES) o par
+ * muda junto com o token, sem tocar aqui. O Partner copia: mesmo token, mesmo
+ * texto, mesma pílula.
  */
-export function BadgeAgendar({ testID }: { testID?: string }) {
+export function BadgeAgendar({ pequeno = false, testID = "badge-agendar" }: { pequeno?: boolean; testID?: string }) {
   return (
-    <Box bg="$amber500" borderRadius="$full" px={8} py={2} alignSelf="flex-start" testID={testID}>
-      <Text
-        fontFamily="$heading"
-        fontSize={fs(12)}
-        fontWeight="$bold"
-        color="$forest"
-        accessibilityLabel="Agendar"
-      >
+    <HStack
+      bg="$brandWarning"
+      borderRadius="$full"
+      px={pequeno ? 8 : 12}
+      py={pequeno ? 2 : 6}
+      alignItems="center"
+      testID={testID}
+    >
+      <Text fontFamily="$display" fontSize={fs(pequeno ? 10 : 12)} fontWeight="$bold" color="$forest">
         AGENDAR
       </Text>
-    </Box>
+    </HStack>
   );
 }

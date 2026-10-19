@@ -18,22 +18,44 @@ import { fs } from "@stores/fonteStore";
 // volta da nota: assim o card tem teste proprio sem carregar a Home inteira).
 
 /**
- * Pilula de status da loja ABERTA na lista: brand-green solido, ponto piscando —
- * "da pra entrar JA".
+ * Pilula de status da loja na lista.
  *
- * A fechada nao tem pilula: ela leva o badge AGENDAR ao lado do nome (ver o
- * card). Antes as duas pilulas existiam, a fechada contornada e quieta, e a
- * linha inteira ficava apagada; a Design decidiu em 17/10 que apagar a linha
- * esconde um caminho que existe (a loja fechada aceita agendar e pedir corte).
+ * ABERTA agora  -> brand-green solido, ponto piscando: "da pra entrar JA".
+ * FECHADA       -> contornada e quieta: "so agendar".
  *
- * A pilula verde so aparece na aberta, entao o acento maximo da marca continua
- * querendo dizer "pode ir agora" (a regra do C25 e 1-2 acentos por tela).
+ * As duas usavam o MESMO brand-green, e a unica diferenca era o ponto piscar —
+ * que nao aparece num relance nem num print. Numa lista de cinco lojas, TODAS
+ * carregavam o acento maximo da marca, abertas ou fechadas, e o verde parava
+ * de significar "pode ir agora" (a regra do C25 e 1-2 acentos por tela).
+ *
+ * A fechada nao pode ser `brandSurface`: o CARTAO da linha ja e surface, e a
+ * pilula sumiria nele (1,00:1). Contornada resolve — a borda agrupa e o TEXTO
+ * carrega o sentido, a 8,54:1 sobre o cartao.
+ *
+ * E sem ponto quando fechada: ponto e sinal de "ao vivo"; parado numa loja
+ * fechada e ruido.
  */
-function StatusPill({ label }: { label: string }) {
+function StatusPill({ label, live }: { label: string; live: boolean }) {
+  // agendar-ambar (18/10): fechada, o convite e o selo ambar AGENDAR.
+  if (!live) return <BadgeAgendar testID="status-agendar" />;
   return (
-    <HStack bg="$brandGreen" borderRadius="$full" gap={6} px={12} py={6} alignItems="center">
-      <LiveDot size={8} color="#163300" pulsing />
-      <Text fontFamily="$display" fontSize={fs(12)} fontWeight="$bold" color="$forest">
+    <HStack
+      bg={live ? "$brandGreen" : "transparent"}
+      borderWidth={live ? 0 : 1}
+      borderColor="$brandBorder"
+      borderRadius="$full"
+      gap={6}
+      px={12}
+      py={6}
+      alignItems="center"
+    >
+      {live && <LiveDot size={8} color="#163300" pulsing />}
+      <Text
+        fontFamily="$display"
+        fontSize={fs(12)}
+        fontWeight="$bold"
+        color={live ? "$forest" : "$brandTextSecondary"}
+      >
         {label}
       </Text>
     </HStack>
@@ -91,22 +113,13 @@ export const CardDaLoja = memo(function CardDaLoja({
       {/* Fechada NAO entra apagada (decisao da Design, 17/10, loja-fechada):
           `opacity` multiplica sobre tudo — a 0,8 o nome da loja ja ficava em
           4,92:1, e a linha cinza dizia "nao da pra nada" numa loja que aceita
-          agendar. O aviso e o badge AGENDAR, ao lado do nome. */}
+          agendar. O aviso e o selo AGENDAR, no canto. */}
       <HStack bg="$brandSurface" borderRadius={18} gap={14} p={14} mb={12} alignItems="center">
         <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} bg="$greenTint" color="$forest" />
         <VStack flex={1} gap={4}>
-          <HStack gap={8} alignItems="center">
-            <Text
-              fontFamily="$display"
-              fontSize={fs(15)}
-              fontWeight="$bold"
-              color="$brandTextPrimary"
-              flexShrink={1}
-            >
-              {establishment.name}
-            </Text>
-            {!tag.live && <BadgeAgendar testID={`agendar-${establishment.id}`} />}
-          </HStack>
+          <Text fontFamily="$display" fontSize={fs(15)} fontWeight="$bold" color="$brandTextPrimary">
+            {establishment.name}
+          </Text>
           <HStack gap={8} alignItems="center" flexWrap="wrap">
             <NotaDaLoja
               rating={nota}
@@ -141,9 +154,8 @@ export const CardDaLoja = memo(function CardDaLoja({
             )}
           </HStack>
         </VStack>
-        {/* Fechada nao e beco sem saida: ainda da pra agendar (Andre 2026-07-23) —
-            e o badge ao lado do nome diz isso, no lugar da pilula. */}
-        {tag.live && <StatusPill label={tag.label} />}
+        {/* Fechada nao e beco sem saida: ainda da pra agendar (Andre 2026-07-23). */}
+        <StatusPill {...tag} />
       </HStack>
     </TouchableOpacity>
   );

@@ -82,7 +82,8 @@ describe('Perfil — menu em grupos, como o do partner', () => {
     expect(queryByText('Tema e tamanho da fonte')).toBeNull();
     expect(getByText('Criar conta grátis')).toBeTruthy();
     expect(getByText('Já tenho conta')).toBeTruthy();
-    expect(getByTestId('terms')).toBeTruthy();
+    expect(getByTestId('link-termos')).toBeTruthy();
+    expect(getByTestId('link-privacidade')).toBeTruthy();
     expect(getByTestId('versao-visitante')).toBeTruthy();
     expect(queryByText('Sair da conta')).toBeNull();
     expect(queryByText('Deletar minha conta')).toBeNull();

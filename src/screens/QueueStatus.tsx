@@ -16,9 +16,9 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor } from "@domain/queue/saidaDaFila";
-import { advertenciaDaMulta, deveAdvertir } from "@domain/queue/advertenciaDaMulta";
+import { advertenciaDaMulta, deveAdvertir, limiteDaSaidaGratis } from "@domain/queue/advertenciaDaMulta";
 import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
-import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
+import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { recusaAoEntrar, atendimentoNaFilaDoProfissional, avisoDeFilaExistente } from "@domain/queue/entrarNaFila";
 import { filaDoAtendimento } from "@domain/queue/reconciliar";
@@ -46,6 +46,7 @@ import {
 } from "@domain/queue/types";
 import { jaSaiuDaFila, mensagemDeFalhaAoSair, multaSemCiencia } from "@domain/queue/leave";
 import { SUPORTE_SAIR_DA_FILA_URL } from "@utils/suporte";
+import { alertaComArtigo } from "@utils/alertaComArtigo";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -56,6 +57,7 @@ import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useMostraPosicao } from "@hooks/useMostraPosicao";
+import { NumeroComSalto } from "@components/NumeroComSalto";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
@@ -463,7 +465,7 @@ export function QueueStatus() {
       // cancelou antes): o objetivo do usuario esta cumprido. Segue pra
       // limpeza, senao ele fica preso numa tela de fila que nao existe.
       if (!jaSaiuDaFila(error)) {
-        Alert.alert("Nao foi possivel sair da fila", mensagemDeFalhaAoSair(error));
+        Alert.alert("Não deu para sair", mensagemDeFalhaAoSair(error));
         return;
       }
     }
@@ -501,12 +503,21 @@ export function QueueStatus() {
     updateQueue({ multaAdvertida: true });
     const naTolerancia = !!activeQueue.toleranceUntil && Date.now() < activeQueue.toleranceUntil;
     const regra = regraDaSaida(naTolerancia);
-    const aviso = advertenciaDaMulta({ sairCustaAgora: regra.multa || !!regra.semPrevisao, podeAdiar: canReshuffle });
-    Alert.alert(aviso.titulo, aviso.mensagem, [
+    const aviso = advertenciaDaMulta({
+      sairCustaAgora: regra.multa || !!regra.semPrevisao,
+      podeAdiar: canReshuffle,
+      // A hora em que sair passa a custar: o aviso diz o relogio, nao as faixas.
+      gratisAte: limiteDaSaidaGratis({
+        restante: remaining ?? 0,
+        agora: Date.now(),
+        toleranceUntil: activeQueue.toleranceUntil,
+      }),
+    });
+    alertaComArtigo(aviso.titulo, aviso.mensagem, [
       { text: aviso.ficar, style: "cancel" },
       ...(aviso.adiar ? [{ text: aviso.adiar, onPress: () => { handleOpenChangeTurn(); } }] : []),
       ...(aviso.sairDeGraca ? [{ text: aviso.sairDeGraca, onPress: () => { sair(null); } }] : []),
-    ]);
+    ], "sairDaFila");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeQueue?.attendanceId, activeQueue?.multaAdvertida, remaining, semPrevisao, canReshuffle, avisoDaEstimativaSaiu]);
 
@@ -532,7 +543,7 @@ export function QueueStatus() {
     Alert.alert(saida.confirmacao.titulo, saida.confirmacao.mensagem, [
       { text: saida.confirmacao.nao, style: "cancel" },
       // Evitar a multa sem sair (Andre, 26/09 — esboço): adiar a vez nao custa.
-      ...(canReshuffle ? [{ text: "Adiar minha vez", onPress: () => { handleOpenChangeTurn(); } }] : []),
+      ...(canReshuffle ? [{ text: "Adiar", onPress: () => { handleOpenChangeTurn(); } }] : []),
       { text: saida.confirmacao.sim, style: "destructive", onPress: () => sair(saida.valorConfirmado) },
     ]);
   }
@@ -695,9 +706,9 @@ export function QueueStatus() {
           </Text>
           {canRequestCut && (
             <Button
-              title={isRequestingCut ? "Enviando pedido..." : "Solicitar corte"}
+              title="Pedir corte"
               mt="$4"
-              isDisabled={isRequestingCut}
+              isLoading={isRequestingCut}
               onPress={async () => {
                 if (!accessToken || isRequestingCut) return;
                 setIsRequestingCut(true);
@@ -707,22 +718,19 @@ export function QueueStatus() {
                     accessToken,
                   );
                   // Guarda o pedido para o app avisar a resposta (usePedidoDeCorte).
-                  await usePedidoDeCorteStore.getState().adicionar(
-                    pedidoDaResposta(
-                      pedido,
-                      {
-                        professionalId,
-                        professionalName: paramProfName ?? "",
-                        establishmentId,
-                        establishmentName: paramEstName ?? "",
-                      },
-                      Date.now(),
-                    ),
+                  const guardado = pedidoDaResposta(
+                    pedido,
+                    {
+                      professionalId,
+                      professionalName: paramProfName ?? "",
+                      establishmentId,
+                      establishmentName: paramEstName ?? "",
+                    },
+                    Date.now(),
                   );
-                  Alert.alert(
-                    "Pedido enviado! ⏳",
-                    "O profissional tem 5 minutos para responder. A resposta aparece aqui no app — o pedido fica no Início enquanto isso.",
-                  );
+                  await usePedidoDeCorteStore.getState().adicionar(guardado);
+                  const enviado = avisoDoPedidoEnviado(guardado);
+                  Alert.alert(enviado.titulo, enviado.mensagem, [{ text: "Ok" }]);
                   navigation.goBack();
                 } catch (error: any) {
                   const code = error.response?.data?.code;
@@ -920,16 +928,18 @@ export function QueueStatus() {
               posicao (backend nao respondeu ainda), o tempo assume o lugar. */}
           {peopleAhead != null ? (
             <>
-              <Text
-                fontFamily="$display"
-                fontSize={fs(110)}
-                lineHeight={fs(112)}
-                letterSpacing={-6}
-                color="$forest"
-                testID="queue-position"
-              >
-                {peopleAhead}
-              </Text>
+              <NumeroComSalto valor={peopleAhead}>
+                <Text
+                  fontFamily="$display"
+                  fontSize={fs(110)}
+                  lineHeight={fs(112)}
+                  letterSpacing={-6}
+                  color="$forest"
+                  testID="queue-position"
+                >
+                  {peopleAhead}
+                </Text>
+              </NumeroComSalto>
               <Text
                 fontFamily="$display"
                 fontSize={fs(26)}

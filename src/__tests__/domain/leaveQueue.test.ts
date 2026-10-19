@@ -39,6 +39,6 @@ describe('a mensagem diz em que estado o cliente ficou', () => {
   it('sem mensagem, a frase padrao diz que ele CONTINUA na fila', () => {
     // "Erro ao cancelar" nao informa a unica coisa que importa: se saiu ou nao.
     const msg = mensagemDeFalhaAoSair(new Error('timeout'));
-    expect(msg).toMatch(/continua na fila/i);
+    expect(msg).toBe('Você continua na fila. Tente de novo.');
   });
 });

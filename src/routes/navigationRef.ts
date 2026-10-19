@@ -114,6 +114,21 @@ export function abrirMudarMinhaVez(fila: {
   navigate("homeTab", { screen: "queueStatus", pop: true, params: { ...fila, serviceItemIds: [], abrirMudarVez: true } });
 }
 
+/**
+ * Abre a loja — e, com `profissionalId`, ja nos servicos dele (o mesmo caminho do
+ * link compartilhado `?profissional=`), de onde se agenda. E o "Escolher outro" e
+ * o "Agendar" do pedido de corte que venceu sem aceite (usePedidoDeCorte). Best-effort.
+ */
+export function abrirLoja(establishmentId: string, profissionalId?: string): void {
+  if (!navigationRef.isReady()) return;
+  const navigate = navigationRef.navigate as unknown as (name: string, params?: object) => void;
+  navigate("homeTab", {
+    screen: "establishmentDetail",
+    pop: true,
+    params: { establishmentId, ...(profissionalId ? { profissional: profissionalId } : {}) },
+  });
+}
+
 // O estado da navegacao, guardado para a arvore remontar no mesmo lugar — ao
 // salvar o tamanho da fonte o app se redesenha e a pessoa continua na tela em
 // que estava (Andre, 26/09), em vez de voltar ao Inicio.

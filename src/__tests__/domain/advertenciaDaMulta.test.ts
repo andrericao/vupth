@@ -1,6 +1,7 @@
 import {
   advertenciaDaMulta,
   deveAdvertir,
+  limiteDaSaidaGratis,
   LIMIAR_DA_ADVERTENCIA_MINUTOS,
 } from '../../domain/queue/advertenciaDaMulta';
 
@@ -35,26 +36,71 @@ describe('deveAdvertir', () => {
   });
 });
 
+// GUIA_DE_TEXTO.md §4.2: de 244 caracteres para uma linha. A HORA substitui as
+// faixas de valor — a pessoa não calcula "entre 30 minutos e 1 hora", ela olha o
+// relógio. As faixas e os valores ficam no artigo do Suporte.
 describe('advertenciaDaMulta', () => {
-  it('diz as três faixas da política', () => {
-    const a = advertenciaDaMulta({ sairCustaAgora: false, podeAdiar: true });
-    expect(a.mensagem).toMatch(/de graça com 1 hora ou mais/);
-    expect(a.mensagem).toMatch(/Entre 30 minutos e 1 hora.*R\$ 3,00/);
-    expect(a.mensagem).toMatch(/30 minutos ou menos, R\$ 5,00/);
+  const as = (hhmm: string) => {
+    const [h, m] = hhmm.split(':').map(Number);
+    return new Date(2026, 9, 18, h, m).getTime();
+  };
+
+  it('diz que sair ainda é de graça e a hora em que passa a custar', () => {
+    const a = advertenciaDaMulta({ sairCustaAgora: false, podeAdiar: true, gratisAte: as('14:35') });
+    expect(a.titulo).toBe('Sua vez está chegando');
+    expect(a.mensagem).toBe('Sair agora ainda é de graça. Depois das 14:35, gera multa.');
   });
 
-  it('oferece adiar e sair de graça quando os dois valem', () => {
-    const a = advertenciaDaMulta({ sairCustaAgora: false, podeAdiar: true });
-    expect(a.adiar).toBe('Adiar minha vez');
-    expect(a.sairDeGraca).toBe('Sair agora de graça');
-    expect(a.ficar).toBe('Continuar na fila');
+  it('uma linha: até 70 caracteres, sem as faixas de valor', () => {
+    for (const s of [
+      { sairCustaAgora: false, podeAdiar: true, gratisAte: as('09:05') },
+      { sairCustaAgora: false, podeAdiar: false },
+      { sairCustaAgora: true, podeAdiar: true },
+    ]) {
+      const a = advertenciaDaMulta(s);
+      expect(a.mensagem.length).toBeLessThanOrEqual(70);
+      expect(a.mensagem).not.toMatch(/R\$|30 minutos/);
+    }
+  });
+
+  it('botões de uma palavra: Ficar / Adiar / Sair', () => {
+    const a = advertenciaDaMulta({ sairCustaAgora: false, podeAdiar: true, gratisAte: as('14:35') });
+    expect(a.adiar).toBe('Adiar');
+    expect(a.sairDeGraca).toBe('Sair');
+    expect(a.ficar).toBe('Ficar');
   });
 
   it('não promete saída de graça quando sair já custa', () => {
-    expect(advertenciaDaMulta({ sairCustaAgora: true, podeAdiar: true }).sairDeGraca).toBeNull();
+    const a = advertenciaDaMulta({ sairCustaAgora: true, podeAdiar: true });
+    expect(a.sairDeGraca).toBeNull();
+    expect(a.mensagem).toBe('Sair agora gera multa.');
+  });
+
+  it('sem a hora, não inventa uma', () => {
+    const a = advertenciaDaMulta({ sairCustaAgora: false, podeAdiar: true });
+    expect(a.mensagem).toBe('Sair agora ainda é de graça. Depois, gera multa.');
   });
 
   it('sem poder adiar, o botão some', () => {
     expect(advertenciaDaMulta({ sairCustaAgora: false, podeAdiar: false }).adiar).toBeNull();
+  });
+});
+
+describe('limiteDaSaidaGratis', () => {
+  const agora = new Date(2026, 9, 18, 14, 0).getTime();
+  const min = 60000;
+
+  it('é 1 hora antes da vez: com 75 min de espera, sair é de graça por mais 15 min', () => {
+    expect(limiteDaSaidaGratis({ restante: 75, agora })).toBe(agora + 15 * min);
+  });
+
+  it('a tolerância do servidor vale se acabar depois do limite de 1 hora', () => {
+    expect(limiteDaSaidaGratis({ restante: 75, agora, toleranceUntil: agora + 40 * min })).toBe(agora + 40 * min);
+    expect(limiteDaSaidaGratis({ restante: 75, agora, toleranceUntil: agora + 5 * min })).toBe(agora + 15 * min);
+  });
+
+  it('já abaixo de 1 hora e sem tolerância, o limite é agora', () => {
+    expect(limiteDaSaidaGratis({ restante: 40, agora })).toBe(agora);
+    expect(limiteDaSaidaGratis({ restante: 40, agora, toleranceUntil: null })).toBe(agora);
   });
 });

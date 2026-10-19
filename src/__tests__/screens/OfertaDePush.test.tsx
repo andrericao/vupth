@@ -1,4 +1,4 @@
-import { fireEvent, waitFor } from '@testing-library/react-native';
+import { fireEvent, waitFor, within } from '@testing-library/react-native';
 import { Platform, StyleSheet } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
@@ -115,7 +115,16 @@ describe('oferecerPush (firstRunStore)', () => {
 });
 
 describe('PushPermission', () => {
-  it('"Quero ser avisada" fecha a tela e deixa a caixa do sistema vir', async () => {
+  // GUIA_DE_TEXTO.md §4.7: "Avisar" / "Agora não" (o link "Prefiro acompanhar pelo
+  // app" tinha 5 palavras e fazia pensar).
+  it('os dois botões são Avisar e Agora não', () => {
+    useFirstRunStore.setState({ pushOferta: true });
+    const { getByTestId } = renderWithProviders(<PushPermission />);
+    expect(within(getByTestId('push-accept')).getByText('Avisar')).toBeTruthy();
+    expect(within(getByTestId('push-skip')).getByText('Agora não')).toBeTruthy();
+  });
+
+  it('"Avisar" fecha a tela e deixa a caixa do sistema vir', async () => {
     useFirstRunStore.setState({ pushOferta: true });
     const { getByTestId } = renderWithProviders(<PushPermission />);
     fireEvent.press(getByTestId('push-accept'));
@@ -124,7 +133,7 @@ describe('PushPermission', () => {
     expect(setItem).not.toHaveBeenCalledWith(PUSH_PERGUNTADO_KEY, '1');
   });
 
-  it('"Prefiro acompanhar pelo app" fecha a tela e dispensa a caixa do sistema', async () => {
+  it('"Agora não" fecha a tela e dispensa a caixa do sistema', async () => {
     useFirstRunStore.setState({ pushOferta: true });
     const { getByTestId } = renderWithProviders(<PushPermission />);
     fireEvent.press(getByTestId('push-skip'));
@@ -133,7 +142,7 @@ describe('PushPermission', () => {
     expect(setItem).toHaveBeenCalledWith(PUSH_PERGUNTADO_KEY, '1');
   });
 
-  it('o "Prefiro acompanhar pelo app" fica acima da barra do celular (print do Andre, 10/10 16h)', () => {
+  it('o "Agora não" fica acima da barra do celular (print do Andre, 10/10 16h)', () => {
     const { getByTestId } = renderWithProviders(<PushPermission />);
     const estilo = StyleSheet.flatten(getByTestId('push-rodape').props.style);
     expect(estilo.paddingBottom).toBe(34 + 32);

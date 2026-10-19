@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Animated } from "react-native";
 import { VStack, HStack } from "@gluestack-ui/themed";
+import { useTema } from "@hooks/useTema";
 
 
 // [verde-imersivo] Skeleton loading: placeholders com a forma do conteudo, no
 // lugar dos Spinner. Pulso de opacidade (Animated nativo, sem dep extra).
 
-// [marca-vupth] $brandBorder. E DECORACAO (nao carrega informacao), entao nao
-// tem minimo de contraste — precisa so aparecer sobre o $brandSurface do card.
-const BASE = "#D7DDD3";
+// E DECORACAO (nao carrega informacao), entao nao tem minimo de contraste —
+// precisa so aparecer sobre o $brandSurface do card. No claro e o `border`; no
+// escuro o `border` e um verde vivo e berraria, entao vem do papel `esqueleto`.
 
 function usePulse() {
   const [v] = useState(() => new Animated.Value(0.45));
@@ -36,9 +37,10 @@ function Block({
   h?: number;
   r?: number;
 }) {
+  const { cores } = useTema();
   return (
     <Animated.View
-      style={{ width: w as never, height: h, borderRadius: r, backgroundColor: BASE, opacity }}
+      style={{ width: w as never, height: h, borderRadius: r, backgroundColor: cores.esqueleto, opacity }}
     />
   );
 }

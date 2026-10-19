@@ -31,7 +31,7 @@ appId: ${APP_ID}
       - waitForAnimationToEnd:
           timeout: 2000
 # A tela 10 (ligar-push-permission): na primeira entrada numa fila, antes da
-# caixa do sistema. "Prefiro acompanhar pelo app" = o mesmo que negar.
+# caixa do sistema. "Agora não" = o mesmo que negar.
 - runFlow:
     when:
       visible:

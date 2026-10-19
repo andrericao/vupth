@@ -8,9 +8,9 @@ import { PlaceAvatar } from "@components/PlaceAvatar";
 import { BadgeAgendar } from "@components/BadgeAgendar";
 
 // Loja fechada NAO some da lista (Andre 2026-07-23: da pra agendar/solicitar
-// para a reabertura) — entra no fim, com o caminho aberto: o badge AGENDAR ao
-// lado do nome. A linha NAO fica apagada (decisao da Design, 17/10, loja-fechada):
-// `opacity` multiplica sobre tudo e o nome da loja cai abaixo de 4,5:1, e a linha
+// para a reabertura) — entra no fim, com o caminho aberto: o selo AGENDAR no
+// canto, o mesmo do card do Inicio. A linha NAO fica apagada (decisao da Design,
+// 17/10, loja-fechada): `opacity` multiplica sobre tudo e o nome da loja cai abaixo de 4,5:1, e a linha
 // cinza dizia "nao da pra nada" numa loja que aceita agendar.
 //
 // ⚠️ C22: o desenho do Pencil mostra "Abre amanha as 9h" aqui, mas o contrato
@@ -31,12 +31,9 @@ export function LinhaDaLojaFechada({
         <HStack alignItems="center" gap="$3">
           <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} />
           <VStack flex={1}>
-            <HStack alignItems="center" gap="$2">
-              <Text fontFamily="$heading" fontSize="$sm" color="$forest" flexShrink={1}>
-                {establishment.name}
-              </Text>
-              <BadgeAgendar testID={`agendar-${establishment.id}`} />
-            </HStack>
+            <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+              {establishment.name}
+            </Text>
             <Text size="xs" color="$brandTextSecondary" mt="$0.5">
               {serviceTypeLabel(establishment.serviceType ?? "")}
               {establishment.distance_km != null
@@ -44,6 +41,7 @@ export function LinhaDaLojaFechada({
                 : ""}
             </Text>
           </VStack>
+          <BadgeAgendar testID={`agendar-${establishment.id}`} />
         </HStack>
       </Box>
     </TouchableOpacity>

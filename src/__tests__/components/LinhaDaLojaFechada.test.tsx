@@ -6,7 +6,7 @@ import { LinhaDaLojaFechada } from '@components/LinhaDaLojaFechada';
 import { Establishment } from '@domain/establishment/types';
 
 // loja-fechada (Design, 17/10): na lista de uma categoria a loja fechada entra no
-// fim com o badge AGENDAR e a linha sem apagar.
+// fim com o selo AGENDAR (o ambar do tema, brandWarning) e a linha sem apagar.
 
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
@@ -23,6 +23,8 @@ const fechada = {
   distance_km: 1.2,
 } as unknown as Establishment;
 
+type No = { props?: Record<string, unknown>; children?: (No | string)[] | null };
+
 // Os estilos de todos os Views/Texts renderizados (o Gluestack os resolve depois
 // da primeira pintura, entao quem le precisa esperar o fundo da linha aparecer).
 function estilosRenderizados(no: No | string | null): Record<string, unknown>[] {
@@ -31,30 +33,15 @@ function estilosRenderizados(no: No | string | null): Record<string, unknown>[] 
   return proprio.concat(...(no.children ?? []).map((f) => estilosRenderizados(f)));
 }
 
-// Duas coisas dividem a mesma linha? Olha a arvore renderizada, sem depender de
-// como o Gluestack empacota o View.
-type No = { props?: Record<string, unknown>; children?: (No | string)[] | null };
-function mesmaLinha(raiz: No | null, testID: string, texto: string): boolean {
-  const procura = (no: No | string): boolean => {
-    if (typeof no === 'string') return false;
-    const filhos = no.children ?? [];
-    const comBadge = filhos.some((f) => typeof f !== 'string' && f.props?.testID === testID);
-    const comNome = filhos.some((f) => typeof f !== 'string' && (f.children ?? []).includes(texto));
-    return (comBadge && comNome) || filhos.some((f) => procura(f));
-  };
-  return raiz ? procura(raiz) : false;
-}
-
 describe('a linha da loja fechada na lista da categoria', () => {
-  it('mostra o badge AGENDAR ao lado do nome e o toque abre a loja', async () => {
+  it('mostra o selo AGENDAR e o toque abre a loja', async () => {
     const onPress = jest.fn();
-    const { getByTestId, getByText, toJSON } = renderWithProviders(<LinhaDaLojaFechada establishment={fechada} onPress={onPress} />);
+    const { getByTestId, getByText } = renderWithProviders(<LinhaDaLojaFechada establishment={fechada} onPress={onPress} />);
     // O Gluestack resolve o estilo depois da primeira pintura.
-    await waitFor(() => expect(StyleSheet.flatten(getByTestId('agendar-e2').props.style).backgroundColor).toBe('#FFB703'), {
+    await waitFor(() => expect(StyleSheet.flatten(getByTestId('agendar-e2').props.style).backgroundColor).toBe('#FFC091'), {
       timeout: 15000,
     });
     expect(getByText('AGENDAR')).toBeTruthy();
-    expect(mesmaLinha(toJSON() as No | null, 'agendar-e2', 'Studio Ana')).toBe(true);
     fireEvent.press(getByTestId('establishment-e2'));
     expect(onPress).toHaveBeenCalled();
   });

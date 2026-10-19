@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Animated, AccessibilityInfo, Easing } from "react-native";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   size?: number;
@@ -25,7 +26,8 @@ type Props = {
  * movimento que essa preferencia existe pra desligar, e o estado continua
  * legivel sem ele (a cor e o rotulo ja dizem tudo).
  */
-export function LiveDot({ size = 8, color = "#163300", pulsing = true }: Props) {
+export function LiveDot({ size = 8, color, pulsing = true }: Props) {
+  const { cores } = useTema();
   const [opacity] = useState(() => new Animated.Value(1));
   const [reduceMotion, setReduceMotion] = useState(false);
 
@@ -66,7 +68,7 @@ export function LiveDot({ size = 8, color = "#163300", pulsing = true }: Props) 
         width: size,
         height: size,
         borderRadius: size / 2,
-        backgroundColor: color,
+        backgroundColor: color ?? cores.textPrimary,
         opacity,
       }}
     />

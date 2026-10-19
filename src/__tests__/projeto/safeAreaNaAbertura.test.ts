@@ -28,7 +28,18 @@ describe('App.tsx: o que usa safe area fica dentro do SafeAreaProvider', () => {
 // da fonte (o V nao usa texto).
 describe('App.tsx: a abertura e continua', () => {
   it('a espera da fonte mostra o mesmo V pulsando, sem Loading/spinner', () => {
-    expect(app).toMatch(/!fontGateOpen \|\| !backendReady \? <PreparingServer \/>/);
+    // "pronto" so abre com fonte E backend: ate la a unica tela e o V.
+    expect(app).toMatch(/const pronto = fontGateOpen && backendReady/);
+    expect(app).toMatch(/<PreparingServer pronto=\{pronto\}/);
     expect(app).not.toMatch(/<Loading/);
+  });
+
+  // abertura-sem-piscar (18/10): trocar <PreparingServer /> por <Routes /> de
+  // uma vez cortava a saida do V no meio. A Home monta por baixo e a abertura
+  // so sai da arvore quando termina de sair.
+  it('a Home monta por baixo e a abertura so sai da arvore quando o V terminou de sair', () => {
+    expect(app).toMatch(/\{pronto \? \(\s*<EntradaDaHome>\s*<Routes \/>\s*<\/EntradaDaHome>/);
+    expect(app).toMatch(/aberturaFechada \? null : <PreparingServer/);
+    expect(app).toMatch(/onSaiu=\{\(\) => setAberturaFechada\(true\)\}/);
   });
 });

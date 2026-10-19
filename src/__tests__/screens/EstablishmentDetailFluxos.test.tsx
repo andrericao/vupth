@@ -178,24 +178,12 @@ describe('EstablishmentDetail — os profissionais', () => {
 });
 
 describe('EstablishmentDetail — fechada', () => {
-  // loja-fechada (Design, 17/10): o badge amber AGENDAR ao lado do estado.
-  it('fechada mostra o badge AGENDAR; aberta não', () => {
-    mockLoja = { ...LOJA, open_status: 'CLOSED', is_open: false };
-    const fechada = renderWithProviders(<EstablishmentDetail />);
-    expect(fechada.getByTestId('agendar-da-loja')).toBeTruthy();
-    expect(fechada.getByText('AGENDAR')).toBeTruthy();
-    fechada.unmount();
-
-    mockLoja = { ...LOJA, open_status: 'OPEN', is_open: true };
-    const aberta = renderWithProviders(<EstablishmentDetail />);
-    expect(aberta.queryByTestId('agendar-da-loja')).toBeNull();
-  });
-
-  it('a linha diz Agendar, e o aviso explica', () => {
+  it('o selo âmbar AGENDAR na loja e no profissional, e o aviso explica (agendar-ambar)', () => {
     mockLoja = { ...LOJA, open_status: 'CLOSED', is_open: false };
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const { getAllByText } = renderWithProviders(<EstablishmentDetail />);
-    expect(getAllByText('Agendar').length).toBeGreaterThan(0);
+    const { getAllByText, getByTestId } = renderWithProviders(<EstablishmentDetail />);
+    expect(getAllByText('AGENDAR').length).toBeGreaterThan(1);
+    expect(getByTestId('badge-agendar-loja')).toBeTruthy();
     const fechadas = getAllByText(/Fechada agora/);
     fireEvent.press(fechadas[fechadas.length - 1]);
     expect(alerta).toHaveBeenCalledWith('Fechada agora', expect.any(String));
