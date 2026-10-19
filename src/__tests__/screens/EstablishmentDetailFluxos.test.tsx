@@ -157,6 +157,28 @@ describe('EstablishmentDetail — os profissionais', () => {
     expect(mockNavigate).not.toHaveBeenCalledWith('serviceSelection', expect.objectContaining({ professionalId: 'c' }));
   });
 
+  // fila-aberta-aparece-fechada (Andre, 18/10): a linha do profissional dizia
+  // "Fila fechada" e, logo abaixo, o botão da loja convidava a "Entrar com menor
+  // espera" — que levava para o mesmo profissional de fila fechada.
+  it('quem trabalha com a fila fechada não é a "menor espera": o botão leva a quem recebe', () => {
+    mockProfs = [
+      prof('fechada', { accepting_new: false, queue_count: 0, estimated_wait_minutes: 0 }),
+      prof('aberta', { accepting_new: true, queue_count: 3, estimated_wait_minutes: 40 }),
+    ];
+    const { getByText } = renderWithProviders(<EstablishmentDetail />);
+    fireEvent.press(getByText('Entrar com menor espera'));
+    expect(mockNavigate).toHaveBeenCalledWith(
+      'serviceSelection',
+      expect.objectContaining({ professionalId: 'aberta', profissionalFora: false }),
+    );
+  });
+
+  it('todos trabalhando com a fila fechada: não há botão de entrar, só escolher e agendar', () => {
+    mockProfs = [prof('a', { accepting_new: false }), prof('b', { accepting_new: false })];
+    const { queryByText } = renderWithProviders(<EstablishmentDetail />);
+    expect(queryByText('Entrar com menor espera')).toBeNull();
+  });
+
   it('o profissional com foto amplia a foto; a ⓘ abre as informações', () => {
     mockProfs = [prof('a', { profile_image_url: 'https://x/p.jpg' })];
     const { getByTestId, getByText } = renderWithProviders(<EstablishmentDetail />);
