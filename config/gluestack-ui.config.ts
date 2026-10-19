@@ -4,6 +4,17 @@ import { createConfig, createComponents } from '@gluestack-style/react';
 import * as componentsTheme from './theme';
 import { coresNoGluestack } from '../src/domain/tema';
 
+// O Text e o Heading do Gluestack tem cor PADRAO fixa ($textLight700 = #525252,
+// $textLight900 = #262626): no escuro, todo texto sem `color` saia cinza escuro
+// sobre o painel forest (ex.: #525252 sobre #163300, quase invisivel). Dentro do
+// tema escuro esses dois tokens passam a ser o texto secundario e o principal;
+// no claro seguem os de sempre. Qualquer texto novo sem cor ja nasce legivel.
+const coresDoEscuro = {
+  ...coresNoGluestack('escuro'),
+  textLight700: coresNoGluestack('escuro').brandTextSecondary,
+  textLight900: coresNoGluestack('escuro').brandTextPrimary,
+};
+
 const configBase = {
   aliases: {
     bg: 'backgroundColor',
@@ -746,7 +757,7 @@ const configBase = {
   // Sem `colorMode="dark"` de proposito: ele ligaria os `_dark` genericos que os
   // temas dos componentes ainda trazem do Gluestack, com a paleta cinza dele.
   themes: {
-    escuro: { colors: coresNoGluestack('escuro') },
+    escuro: { colors: coresDoEscuro },
   },
   plugins: [new AnimationResolver(MotionAnimationDriver)],
 } as const;

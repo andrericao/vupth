@@ -189,7 +189,7 @@ describe('o tema do Gluestack', () => {
 
   it('o config traz o escuro como TEMA do Gluestack, com todas as cores da marca e os papeis', () => {
     const escuro = (config as unknown as { themes: { escuro: { colors: Record<string, string> } } }).themes.escuro.colors;
-    expect(escuro).toEqual(coresNoGluestack('escuro'));
+    expect(escuro).toMatchObject(coresNoGluestack('escuro'));
     expect(escuro.brandSurface).toBe('#163300');
     expect(escuro.brandBackground).toBe('#0B1A04');
     // sem colorMode="dark": os `_dark` genericos do Gluestack nao ligam
