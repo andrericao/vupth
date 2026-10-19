@@ -68,6 +68,20 @@ export function coresDaBarraDeAbas(cores: Cores) {
   };
 }
 
+/**
+ * A linha que separa a barra do conteudo. No CLARO nao ha linha: a sombra da
+ * barra (abaixo) ja a descola da tela. No ESCURO a sombra some contra o fundo e a
+ * barra, da mesma cor da tela, ficava sem limite; entra uma linha de 1px em
+ * `surfaceAlt` (1,5:1 com a tela: marca o limite sem pesar, como a sombra faz no
+ * claro). `border` serviria (4,4:1), mas no escuro e um verde vivo que gritaria
+ * mais que a sombra do claro. Escolha da Design, 19/10.
+ */
+export function divisorDaBarraDeAbas(escuro: boolean, cores: Cores) {
+  return escuro
+    ? { borderTopWidth: 1, borderTopColor: cores.surfaceAlt }
+    : { borderTopWidth: 0, borderTopColor: "transparent" };
+}
+
 // [verde-imersivo] Sombra superior sutil da tab bar (mesclar no tabBarStyle).
 export const tabBarShadow = {
   // tema-fixo: sombra forest a 6%; no escuro ela some contra o fundo, e nao carrega texto

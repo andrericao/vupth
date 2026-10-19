@@ -28,7 +28,7 @@ import { DadosCadastrais } from "@screens/DadosCadastrais";
 import { Promocoes } from "@screens/Promocoes";
 import { ServiceSelection } from "@screens/ServiceSelection";
 import { ProfessionalInfo } from "@screens/ProfessionalInfo";
-import { TabPill, TabLabel, coresDaBarraDeAbas, tabBarShadow } from "@components/TabPill";
+import { TabPill, TabLabel, coresDaBarraDeAbas, divisorDaBarraDeAbas, tabBarShadow } from "@components/TabPill";
 import { ServiceType } from "@domain/establishment/types";
 import { useTema } from "@hooks/useTema";
 
@@ -192,7 +192,7 @@ const Tab = createBottomTabNavigator<TabRoutes>();
 
 export function AuthRoutes() {
   const insets = useSafeAreaInsets();
-  const { cores } = useTema();
+  const { cores, escuro } = useTema();
   const barra = coresDaBarraDeAbas(cores);
 
   return (
@@ -208,7 +208,7 @@ export function AuthRoutes() {
         tabBarLabelPosition: "below-icon",
         tabBarStyle: {
           backgroundColor: barra.fundo,
-          borderTopWidth: 0,
+          ...divisorDaBarraDeAbas(escuro, cores),
           // A altura tem de caber PILULA + ROTULO, medidos: 34 + 13 + 2 de
           // respiro = 49. Com 6 de padding em cima e embaixo, 61 — arredondado
           // pra 64 de folga. Era 62 com padding 8+8, sobrando 46 pra 47 de
