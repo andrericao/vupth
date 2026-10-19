@@ -20,7 +20,7 @@ import { Grupo, MenuItem } from '@components/MenuDoPerfil';
 import { PreparingServer } from '@components/PreparingServer';
 import { SaibaMais } from '@components/SaibaMais';
 import { SaibaMaisDoPreco } from '@components/SaibaMaisDoPreco';
-import { TabLabel, TabPill, coresDaBarraDeAbas } from '@components/TabPill';
+import { TabLabel, TabPill, coresDaBarraDeAbas, divisorDaBarraDeAbas } from '@components/TabPill';
 import { URGENCY_COLORS } from '@hooks/useQueueCountdown';
 import { useAuthStore } from '@stores/authStore';
 import { useQueueStore } from '@stores/queueStore';
@@ -406,5 +406,22 @@ describe('cores de urgencia da contagem (tema-fixo)', () => {
       expect(contraste(cor, escuro.background)).toBeGreaterThanOrEqual(3);
     }
     expect(URGENCY_COLORS).toEqual({ normal: '#F59E0B', urgent: '#EF4444' });
+  });
+});
+
+// Escolha da Design (19/10): no escuro a barra, da cor da tela e sem sombra visivel, ficava
+// sem limite; ganha uma linha discreta (surfaceAlt, 1,5:1). No claro a sombra ja separa.
+describe('divisor da barra de abas', () => {
+  it('no claro nao ha linha', () => {
+    expect(divisorDaBarraDeAbas(false, coresDoTema('claro'))).toEqual({ borderTopWidth: 0, borderTopColor: 'transparent' });
+  });
+
+  it('no escuro e uma linha de 1px em surfaceAlt, discreta: entre 1,3:1 e 2:1 com a tela', () => {
+    const c = coresDoTema('escuro');
+    const linha = divisorDaBarraDeAbas(true, c);
+    expect(linha).toEqual({ borderTopWidth: 1, borderTopColor: '#1F3F0B' });
+    const razao = contraste(linha.borderTopColor, c.background);
+    expect(razao).toBeGreaterThanOrEqual(1.3);
+    expect(razao).toBeLessThan(2);
   });
 });
