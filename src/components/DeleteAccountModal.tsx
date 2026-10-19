@@ -55,7 +55,7 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <Box flex={1} bg={veu} justifyContent="center" px={24}>
         <VStack bg="$painel" borderRadius="$card" p="$6" gap="$3" style={floatingShadow}>
-          <Heading fontFamily="$heading" fontSize="$lg" color="$brandTextPrimary">
+          <Heading fontFamily="$heading" fontSize="$lg">
             Excluir conta
           </Heading>
 

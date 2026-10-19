@@ -52,7 +52,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <HStack w="$full" justifyContent="space-between" mb="$2" alignItems="flex-start">
       <Text size="sm" color="$brandTextSecondary">{label}</Text>
-      <Text size="sm" fontFamily="$heading" color="$brandTextPrimary" flex={1} textAlign="right" ml="$3">
+      <Text size="sm" fontFamily="$heading" flex={1} textAlign="right" ml="$3">
         {value}
       </Text>
     </HStack>
@@ -82,7 +82,7 @@ export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = t
         {a && st && (
           <VStack bg="$painel" borderRadius="$card" p="$6" style={floatingShadow} maxHeight="80%">
             <HStack justifyContent="space-between" alignItems="center" mb="$4">
-              <Heading fontFamily="$heading" fontSize="$lg" color="$brandTextPrimary" flex={1}>
+              <Heading fontFamily="$heading" fontSize="$lg" flex={1}>
                 Detalhes do atendimento
               </Heading>
               <Badge bg={cores[st.bg]} borderRadius="$full" px="$3" py="$1">

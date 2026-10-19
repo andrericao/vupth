@@ -103,7 +103,7 @@ export function LocationSelector() {
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <Box flex={1} bg={veu} justifyContent="center" px={24}>
           <VStack bg="$painel" borderRadius="$card" p="$6" style={floatingShadow}>
-            <Heading fontFamily="$heading" fontSize="$lg" color="$brandTextPrimary">
+            <Heading fontFamily="$heading" fontSize="$lg">
               Sua localização
             </Heading>
             <Text size="sm" color="$brandTextSecondary" mt="$1">

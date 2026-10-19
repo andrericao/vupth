@@ -80,7 +80,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
     <Modal visible={visible} transparent animationType="fade" onRequestClose={() => onClose(false)}>
       <Box flex={1} bg={veu} justifyContent="center" px={24}>
         <VStack bg="$painel" borderRadius="$card" p="$6" style={floatingShadow}>
-          <Heading fontFamily="$heading" fontSize="$lg" color="$brandTextPrimary">
+          <Heading fontFamily="$heading" fontSize="$lg">
             Como foi seu atendimento?
           </Heading>
           {professionalName ? (

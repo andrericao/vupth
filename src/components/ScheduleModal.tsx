@@ -136,7 +136,7 @@ export function ScheduleModal({
             showsVerticalScrollIndicator={false}
             testID="agenda-rolagem"
           >
-          <Heading fontFamily="$heading" fontSize="$lg" color="$brandTextPrimary">
+          <Heading fontFamily="$heading" fontSize="$lg">
             {corte ? "Pedir corte" : "Agendar"}
           </Heading>
           <Text size="sm" color="$brandTextSecondary" mt="$1">

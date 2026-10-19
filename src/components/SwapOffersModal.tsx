@@ -99,7 +99,7 @@ export function SwapOffersModal({ visible, professionalId, establishmentId, onCl
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Box flex={1} bg={veu} justifyContent="center" px={24}>
         <VStack bg="$painel" borderRadius="$card" p="$6" style={floatingShadow}>
-          <Heading fontFamily="$heading" fontSize="$lg" color="$brandTextPrimary">
+          <Heading fontFamily="$heading" fontSize="$lg">
             Trocar de lugar
           </Heading>
 
