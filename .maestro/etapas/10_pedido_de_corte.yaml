@@ -27,8 +27,8 @@ appId: ${APP_ID}
     text: "Cancelar"
     label: "10.0Aa · o Cancelar aparece inteiro"
 - assertVisible:
-    text: "Solicitar"
-    label: "10.0Ab · o botão diz Solicitar"
+    text: "Pedir"
+    label: "10.0Ab · o botão diz Pedir"
 - tapOn:
     id: "corte-assim-que-abrir"
     label: "10.0B · toca em Assim que abrir"
