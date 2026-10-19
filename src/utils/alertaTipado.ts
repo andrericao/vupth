@@ -1,6 +1,8 @@
 import { Alert, type AlertButton } from "react-native";
 
 import type { TipoDeDialogo } from "@domain/tipoDeDialogo";
+import { comSaibaMais } from "@utils/alertaComArtigo";
+import type { Artigo } from "@utils/artigosDoSuporte";
 
 /**
  * `Alert.alert` com a identidade do aviso: faixa no topo e selo com icone
@@ -21,6 +23,10 @@ import type { TipoDeDialogo } from "@domain/tipoDeDialogo";
  * nao os tem e o aviso sai como sempre saiu; sem a caixa montada, cai no Alert do
  * sistema, sem tipo (feio e visivel e melhor que bonito e invisivel).
  *
+ * `artigo` poe o "Saiba mais" como ULTIMO botao (ver `alertaComArtigo`): abre o
+ * artigo do Suporte e MOSTRA O AVISO DE NOVO. Sem ele a multa fica sem a regra
+ * completa, que e o que quem leu "R$ 3,00" quer saber em seguida.
+ *
  * Mesma assinatura das chamadas de hoje, entao adotar e trocar `Alert.alert(` por
  * `alertaTipado(` e juntar o tipo:
  *
@@ -31,9 +37,11 @@ export function alertaTipado(
   titulo: string,
   mensagem: string | undefined,
   botoes: AlertButton[] | undefined,
-  opcoes: { tipo: TipoDeDialogo; selo?: string; cancelable?: boolean }
+  opcoes: { tipo: TipoDeDialogo; selo?: string; cancelable?: boolean; artigo?: Artigo }
 ): void {
+  const { artigo, ...paraOAlert } = opcoes;
+  const lista = artigo ? comSaibaMais(botoes ?? [], artigo, () => alertaTipado(titulo, mensagem, botoes, opcoes)) : botoes;
   // O 4o argumento do Alert.alert tipa so `cancelable`/`onDismiss`: o resto
   // segue por conta do alertNativo, que o le e o tira antes do Alert do sistema.
-  Alert.alert(titulo, mensagem, botoes, opcoes as never);
+  Alert.alert(titulo, mensagem, lista, paraOAlert as never);
 }

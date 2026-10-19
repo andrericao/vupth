@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
@@ -229,9 +229,28 @@ describe('QueueStatus — ir para o fim', () => {
       [
         { text: 'Cancelar', style: 'cancel' },
         { text: 'Ir para o fim', style: 'destructive', onPress: expect.any(Function) },
+        // "Saiba mais" por ultimo: o indice dos botoes que ja existiam nao muda.
+        { text: 'Saiba mais', style: 'default', onPress: expect.any(Function) },
       ],
       { tipo: 'dinheiro', selo: 'Multa' }
     );
+  });
+
+  it('o "Saiba mais" da multa do fim da fila abre o artigo de mudar a vez e mostra o aviso de novo', async () => {
+    mockRemaining = 20;
+    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    const { findByText } = renderWithProviders(<QueueStatus />);
+    fireEvent.press(await findByText('mudar-fim'));
+    const chamadas = alertSpy.mock.calls.length;
+    const botoes = alertSpy.mock.calls[chamadas - 1][2] as { text: string; onPress?: () => void }[];
+    botoes.find((b) => b.text === 'Saiba mais')!.onPress!();
+    expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/mudar-minha-vez.html');
+    expect(alertSpy).toHaveBeenCalledTimes(chamadas + 1);
+    expect(alertSpy).toHaveBeenLastCalledWith('Ir para o fim da fila', expect.stringContaining('multa'), expect.anything(), {
+      tipo: 'dinheiro',
+      selo: 'Multa',
+    });
+    abrir.mockRestore();
   });
 
   it('a espera nova sem resposta não impede o "Pronto"', async () => {
