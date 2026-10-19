@@ -134,10 +134,27 @@ describe('QueueStatus — sair da fila (D15)', () => {
     tocar(getByTestId);
     tocar(getByTestId);
     const [, , botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
-    expect(botoes.map((b) => b.text)).toEqual(['Cancelar', 'Adiar', 'Sair']);
+    // "Saiba mais" por ultimo: o indice dos tres botoes que ja existiam nao muda.
+    expect(botoes.map((b) => b.text)).toEqual(['Cancelar', 'Adiar', 'Sair', 'Saiba mais']);
     expect(alerta.mock.calls[0][0]).toBe('Sair da fila');
     expect(alerta.mock.calls[0][1]).toBe('R$ 3,00 de multa no próximo atendimento.');
     expect(attendanceService.cancel).not.toHaveBeenCalled();
+    alerta.mockRestore();
+  });
+
+  it('o "Saiba mais" da confirmação com multa abre o artigo de sair da fila e mostra o aviso de novo', () => {
+    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    tocar(getByTestId);
+    const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
+    botoes.find((b) => b.text === 'Saiba mais')!.onPress!();
+    expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/sair-da-fila.html');
+    expect(alerta).toHaveBeenCalledTimes(2);
+    expect(alerta.mock.calls[1][0]).toBe('Sair da fila');
+    expect(attendanceService.cancel).not.toHaveBeenCalled();
+    abrir.mockRestore();
     alerta.mockRestore();
   });
 
@@ -246,7 +263,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
       await primeiro.find((b) => b.text === 'Sair')!.onPress!();
     });
     const [, , segundo] = alerta.mock.calls[1] as [string, string, BotaoDoAlert[]];
-    expect(segundo.map((b) => b.text)).toEqual(['Cancelar', 'Sair']);
+    expect(segundo.map((b) => b.text)).toEqual(['Cancelar', 'Sair', 'Saiba mais']);
     expect(attendanceService.cancel).toHaveBeenCalledTimes(1);
     expect(mockNavigate).not.toHaveBeenCalled();
     expect(mockLeave).not.toHaveBeenCalled();

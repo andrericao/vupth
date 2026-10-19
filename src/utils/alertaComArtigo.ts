@@ -18,6 +18,22 @@ import { abrirArtigo, type Artigo } from "@utils/artigosDoSuporte";
 // destrutivo, e um terceiro solido tiraria o peso da acao. Entao ele vai como
 // "cancel" (vazado) — a menos que a caixa ja tenha um cancel (o iOS nativo so
 // aceita um) ou um destrutivo (a cor do cancel muda de papel ali).
+export function comSaibaMais(botoes: AlertButton[], artigo: Artigo, reabrir: () => void): AlertButton[] {
+  const temCancel = botoes.some((b) => b.style === "cancel");
+  const temDestrutivo = botoes.some((b) => b.style === "destructive");
+  return [
+    ...botoes,
+    {
+      text: "Saiba mais",
+      style: temCancel || temDestrutivo ? "default" : "cancel",
+      onPress: () => {
+        void abrirArtigo(artigo);
+        reabrir();
+      },
+    },
+  ];
+}
+
 export function alertaComArtigo(
   titulo: string,
   mensagem: string | undefined,
@@ -25,22 +41,10 @@ export function alertaComArtigo(
   artigo: Artigo,
   opcoes?: AlertOptions,
 ): void {
-  const temCancel = botoes.some((b) => b.style === "cancel");
-  const temDestrutivo = botoes.some((b) => b.style === "destructive");
   Alert.alert(
     titulo,
     mensagem,
-    [
-      ...botoes,
-      {
-        text: "Saiba mais",
-        style: temCancel || temDestrutivo ? "default" : "cancel",
-        onPress: () => {
-          void abrirArtigo(artigo);
-          alertaComArtigo(titulo, mensagem, botoes, artigo, opcoes);
-        },
-      },
-    ],
+    comSaibaMais(botoes, artigo, () => alertaComArtigo(titulo, mensagem, botoes, artigo, opcoes)),
     opcoes,
   );
 }

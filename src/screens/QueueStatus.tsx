@@ -459,7 +459,7 @@ export function QueueStatus() {
         alertaTipado(aviso.titulo, aviso.mensagem, [
           { text: aviso.nao, style: "cancel" },
           { text: aviso.sim, style: "destructive", onPress: () => sair(valorDoServidor) },
-        ], { tipo: "dinheiro", selo: "Multa" });
+        ], { tipo: "dinheiro", selo: "Multa", artigo: "sairDaFila" });
         return;
       }
       // Ja nao esta na fila (o profissional removeu, ou um toque duplo
@@ -547,7 +547,7 @@ export function QueueStatus() {
       // Evitar a multa sem sair (Andre, 26/09 — esboço): adiar a vez nao custa.
       ...(canReshuffle ? [{ text: "Adiar", onPress: () => { handleOpenChangeTurn(); } }] : []),
       { text: saida.confirmacao.sim, style: "destructive", onPress: () => sair(saida.valorConfirmado) },
-    ], { tipo: "dinheiro", selo: "Multa" });
+    ], { tipo: "dinheiro", selo: "Multa", artigo: "sairDaFila" });
   }
 
   // "Mudar minha vez": busca o ETA do fim da fila (piso de agendamento) e abre o
@@ -678,7 +678,7 @@ export function QueueStatus() {
       alertaTipado("Ir para o fim da fila", message, [
         { text: "Cancelar", style: "cancel" },
         { text: "Ir para o fim", style: "destructive", onPress: submitMoveToEnd },
-      ], { tipo: "dinheiro", selo: "Multa" });
+      ], { tipo: "dinheiro", selo: "Multa", artigo: "mudarAVez" });
       return;
     }
     Alert.alert(
