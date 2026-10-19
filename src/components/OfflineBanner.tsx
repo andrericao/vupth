@@ -2,6 +2,7 @@ import { Animated, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useIsOnline } from "@hooks/useNetwork";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 import { useEntrada } from "@utils/motion";
 
@@ -20,6 +21,7 @@ export function OfflineBanner() {
 function BarraOffline() {
   const insets = useSafeAreaInsets();
   const entrada = useEntrada({ dy: -12 });
+  const { cores } = useTema();
 
   return (
     <Animated.View
@@ -32,7 +34,7 @@ function BarraOffline() {
         paddingTop: insets.top + 4,
         paddingBottom: 6,
         paddingHorizontal: 12,
-        backgroundColor: "#B3261E",
+        backgroundColor: cores.danger,
         alignItems: "center",
         zIndex: 9999,
         elevation: 9999,
@@ -40,7 +42,7 @@ function BarraOffline() {
         entrada,
       ]}
     >
-      <Text style={{ color: "#FFFFFF", fontSize: fs(12), fontWeight: "600" }}>
+      <Text style={{ color: cores.onDanger, fontSize: fs(12), fontWeight: "600" }}>
         Sem conexão — os dados podem estar desatualizados
       </Text>
     </Animated.View>

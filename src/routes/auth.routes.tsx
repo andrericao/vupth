@@ -28,8 +28,9 @@ import { DadosCadastrais } from "@screens/DadosCadastrais";
 import { Promocoes } from "@screens/Promocoes";
 import { ServiceSelection } from "@screens/ServiceSelection";
 import { ProfessionalInfo } from "@screens/ProfessionalInfo";
-import { TabPill, TabLabel, TAB_ACTIVE, TAB_INACTIVE, tabBarShadow } from "@components/TabPill";
+import { TabPill, TabLabel, coresDaBarraDeAbas, tabBarShadow } from "@components/TabPill";
 import { ServiceType } from "@domain/establishment/types";
+import { useTema } from "@hooks/useTema";
 
 export type AppRoutes = {
   home: { filter?: ServiceType | "ALL" } | undefined;
@@ -191,20 +192,22 @@ const Tab = createBottomTabNavigator<TabRoutes>();
 
 export function AuthRoutes() {
   const insets = useSafeAreaInsets();
+  const { cores } = useTema();
+  const barra = coresDaBarraDeAbas(cores);
 
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: TAB_ACTIVE,
-        tabBarInactiveTintColor: TAB_INACTIVE,
+        tabBarActiveTintColor: barra.iconeAtivo,
+        tabBarInactiveTintColor: barra.inativo,
         // O rotulo fica SEMPRE embaixo do icone. Sem isto o React Navigation
         // decide sozinho e, com a barra baixa, joga o rotulo AO LADO — que com
         // a pilula (larga, 16px de padding horizontal) cai por cima do icone.
         // Foi o que aconteceu: "Início" impresso sobre a casinha.
         tabBarLabelPosition: "below-icon",
         tabBarStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: barra.fundo,
           borderTopWidth: 0,
           // A altura tem de caber PILULA + ROTULO, medidos: 34 + 13 + 2 de
           // respiro = 49. Com 6 de padding em cima e embaixo, 61 — arredondado

@@ -7,10 +7,8 @@ import { reconcileQueueEstimate, AttendanceStatus, saiuSemAtendimento } from '@d
 
 export type UrgencyLevel = 'normal' | 'urgent';
 
-export const URGENCY_COLORS = {
-  normal: '#F59E0B',
-  urgent: '#EF4444',
-} as const;
+// tema-fixo: o âmbar e o vermelho da contagem são da paleta de status, fora do tokens.json, e valem o mesmo nos dois temas. Sobre a surface do escuro dão 6,5:1 e 3,7:1, acima do mínimo de texto grande (3:1) do número de 36 px. Trocar por token muda o claro: decisão da Design
+export const URGENCY_COLORS = { normal: '#F59E0B', urgent: '#EF4444' } as const;
 
 /** `null` enquanto o servidor nao disse a previsao — nao e "agora". */
 function getRemainingMinutes(queue: ActiveQueue): number | null {

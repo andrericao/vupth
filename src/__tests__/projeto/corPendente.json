@@ -1,61 +1,4 @@
 {
-  "src/components/AtualizarNoNavegador.tsx": {
-    "hex": 1,
-    "forest": 1
-  },
-  "src/components/CardDaLoja.tsx": {
-    "hex": 2,
-    "forest": 2
-  },
-  "src/components/DaySelector.tsx": {
-    "forest": 2
-  },
-  "src/components/FaixaAvaliar.tsx": {
-    "hex": 3
-  },
-  "src/components/FaixaBaixarApp.tsx": {
-    "forest": 2,
-    "branco": 2
-  },
-  "src/components/FaixaDaTolerancia.tsx": {
-    "hex": 1,
-    "forest": 1
-  },
-  "src/components/FotoAmpliada.tsx": {
-    "hex": 2
-  },
-  "src/components/MenuDoPerfil.tsx": {
-    "hex": 1
-  },
-  "src/components/NotaDaLoja.tsx": {
-    "hex": 2
-  },
-  "src/components/OfflineBanner.tsx": {
-    "hex": 2
-  },
-  "src/components/PreparingServer.tsx": {
-    "hex": 1
-  },
-  "src/components/PushDiagnostics.tsx": {
-    "forest": 3,
-    "branco": 1
-  },
-  "src/components/ScreenHeader.tsx": {
-    "hex": 1,
-    "forest": 1
-  },
-  "src/components/TabPill.tsx": {
-    "hex": 4
-  },
-  "src/components/WsDiagnostics.tsx": {
-    "forest": 2
-  },
-  "src/hooks/useQueueCountdown.ts": {
-    "hex": 2
-  },
-  "src/routes/auth.routes.tsx": {
-    "hex": 1
-  },
   "src/screens/Attendances.tsx": {
     "hex": 22,
     "forest": 4
@@ -130,8 +73,5 @@
   },
   "src/screens/Terms.tsx": {
     "forest": 1
-  },
-  "src/utils/styles.ts": {
-    "hex": 1
   }
 }

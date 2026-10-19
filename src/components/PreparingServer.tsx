@@ -17,6 +17,7 @@ import { EASE, MS, movimentoReduzido } from "@utils/motion";
 // 96 pt de uma vez, e o pulso escurecia o V até 55% de opacidade a cada ciclo.
 // O pulso agora vai só de 1 a 0,92, e a saída tira o V inteiro de cena.
 
+// tema-fixo: o fundo e o do splash nativo (assets/splash.png), que nao conhece o tema; trocar aqui faria a abertura piscar na passagem do splash para esta tela
 const VERDE_DA_MARCA = "#2E432F";
 const LOGO_V = require("../../assets/logo-v-branco.png");
 const PROPORCAO_DO_LOGO = 256 / 306;

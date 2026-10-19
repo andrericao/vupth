@@ -3,6 +3,7 @@ import { TouchableOpacity } from "react-native";
 import { VStack, Text, Box, HStack } from "@gluestack-ui/themed";
 import { ChevronRight } from "lucide-react-native";
 
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 // As linhas e o cartao do Perfil (Settings) e do submenu "Dados cadastrais".
@@ -22,6 +23,7 @@ export function MenuItem({
   /** Ultima linha do card nao leva divisor. */
   last?: boolean;
 }) {
+  const { cores } = useTema();
   return (
     <TouchableOpacity onPress={onPress}>
       <HStack px={16} py={15} gap="$3" alignItems="center">
@@ -36,7 +38,7 @@ export function MenuItem({
             </Text>
           )}
         </VStack>
-        <ChevronRight size={18} color="#454745" />
+        <ChevronRight size={18} color={cores.textSecondary} />
       </HStack>
       {!last && <Box height={1} bg="$brandBorder" />}
     </TouchableOpacity>

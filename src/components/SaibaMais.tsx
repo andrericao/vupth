@@ -10,7 +10,7 @@ import { abrirArtigo, type Artigo } from "@utils/artigosDoSuporte";
 export function SaibaMais({
   artigo,
   testID = "saiba-mais",
-  color = "$forest",
+  color = "$brandTextPrimary",
 }: {
   artigo: Artigo;
   testID?: string;
