@@ -75,11 +75,14 @@ describe('ModalDePagamento', () => {
     expect(tela.getByTestId('pix-codigo').props.children).toBe('000201pix');
     expect(tela.getByTestId('pix-qr')).toBeTruthy();
 
+    expect(tela.queryByTestId('pix-copiado-check')).toBeNull();
     await act(async () => {
       fireEvent.press(tela.getByTestId('pix-copiar'));
     });
     expect(mockCopiar).toHaveBeenCalledWith('000201pix');
     expect(tela.getByText('Copiado')).toBeTruthy();
+    // Quem copia um codigo Pix precisa ter certeza de que copiou: alem do texto, o check.
+    expect(tela.getByTestId('pix-copiado-check')).toBeTruthy();
 
     const invalidar = jest.spyOn(client, 'invalidateQueries');
     await act(async () => {
