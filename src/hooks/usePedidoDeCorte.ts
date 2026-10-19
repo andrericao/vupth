@@ -3,11 +3,12 @@ import { Alert } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 
 import { attendanceService } from '@services/attendanceService';
-import { desfechoDoPedido } from '@domain/queue/pedidoDeCorte';
+import { desfechoDoPedido, avisoDoPedidoNaoAceito } from '@domain/queue/pedidoDeCorte';
 import { filaDoAtendimento } from '@domain/queue/reconciliar';
 import { useAuthStore } from '@stores/authStore';
 import { useQueueStore } from '@stores/queueStore';
 import { usePedidoDeCorteStore } from '@stores/pedidoDeCorteStore';
+import { abrirLoja } from '@routes/navigationRef';
 
 /**
  * Vigia os pedidos de corte que esperam resposta e AVISA o desfecho — aceito
@@ -56,9 +57,20 @@ export function usePedidoDeCorte() {
             `${pedido.professionalName || 'O profissional'} aceitou o seu pedido. Você já está na fila — acompanhe o seu tempo no Início.`,
           );
         } else {
+          // O historico nao separa recusa de silencio, e o aviso diz o que vale
+          // para os dois: o profissional nao respondeu a tempo. Os dois botoes sao
+          // os dois caminhos que o texto antigo apontava. Sem `cancelable`, o
+          // voltar do Android responderia como o primeiro botao e levaria a pessoa
+          // para outra tela sem ela ter escolhido.
+          const aviso = avisoDoPedidoNaoAceito(pedido);
           Alert.alert(
-            'Pedido não aceito',
-            `${pedido.professionalName || 'O profissional'} não aceitou o pedido a tempo: recusou ou não respondeu em 5 minutos. Você pode escolher outro profissional ou agendar.`,
+            aviso.titulo,
+            aviso.mensagem,
+            [
+              { text: aviso.escolherOutro, onPress: () => abrirLoja(pedido.establishmentId) },
+              { text: aviso.agendar, onPress: () => abrirLoja(pedido.establishmentId, pedido.professionalId) },
+            ],
+            { cancelable: false },
           );
         }
       }

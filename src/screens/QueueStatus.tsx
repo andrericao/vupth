@@ -18,7 +18,7 @@ import { RescheduleModal } from "@components/RescheduleModal";
 import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor } from "@domain/queue/saidaDaFila";
 import { advertenciaDaMulta, deveAdvertir } from "@domain/queue/advertenciaDaMulta";
 import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
-import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
+import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { recusaAoEntrar, atendimentoNaFilaDoProfissional, avisoDeFilaExistente } from "@domain/queue/entrarNaFila";
 import { filaDoAtendimento } from "@domain/queue/reconciliar";
@@ -696,9 +696,9 @@ export function QueueStatus() {
           </Text>
           {canRequestCut && (
             <Button
-              title={isRequestingCut ? "Enviando pedido..." : "Solicitar corte"}
+              title="Pedir corte"
               mt="$4"
-              isDisabled={isRequestingCut}
+              isLoading={isRequestingCut}
               onPress={async () => {
                 if (!accessToken || isRequestingCut) return;
                 setIsRequestingCut(true);
@@ -708,22 +708,19 @@ export function QueueStatus() {
                     accessToken,
                   );
                   // Guarda o pedido para o app avisar a resposta (usePedidoDeCorte).
-                  await usePedidoDeCorteStore.getState().adicionar(
-                    pedidoDaResposta(
-                      pedido,
-                      {
-                        professionalId,
-                        professionalName: paramProfName ?? "",
-                        establishmentId,
-                        establishmentName: paramEstName ?? "",
-                      },
-                      Date.now(),
-                    ),
+                  const guardado = pedidoDaResposta(
+                    pedido,
+                    {
+                      professionalId,
+                      professionalName: paramProfName ?? "",
+                      establishmentId,
+                      establishmentName: paramEstName ?? "",
+                    },
+                    Date.now(),
                   );
-                  Alert.alert(
-                    "Pedido enviado! ⏳",
-                    "O profissional tem 5 minutos para responder. A resposta aparece aqui no app — o pedido fica no Início enquanto isso.",
-                  );
+                  await usePedidoDeCorteStore.getState().adicionar(guardado);
+                  const enviado = avisoDoPedidoEnviado(guardado);
+                  Alert.alert(enviado.titulo, enviado.mensagem, [{ text: "Ok" }]);
                   navigation.goBack();
                 } catch (error: any) {
                   const code = error.response?.data?.code;

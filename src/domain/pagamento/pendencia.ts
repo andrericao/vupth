@@ -56,14 +56,18 @@ export function pendenciasDoErro(erro: unknown): PagamentoPendente[] | null {
   return Array.isArray(data.items) ? (data.items as PagamentoPendente[]) : [];
 }
 
-/** O texto do modal ao tentar marcar com pendência. */
+/**
+ * O texto do modal ao tentar marcar com pendência. Título que diz o fato e corpo
+ * de uma linha, "R$ X com Nome." (guia de texto, §4.5): o título já diz que há
+ * pagamento pendente, e o "Pagar" ao lado diz o que fazer.
+ */
 export function avisoDaPendencia(itens: PagamentoPendente[]): { titulo: string; mensagem: string } {
   const total = itens.reduce((soma, i) => soma + (Number(i.amount) || 0), 0);
   const quem = itens.length === 1 && itens[0].professional_name ? ` com ${itens[0].professional_name}` : '';
   return {
     titulo: 'Pagamento pendente',
     mensagem: itens.length
-      ? `Falta pagar ${reais(total)}${quem}. Pague para marcar de novo.`
+      ? `${reais(total)}${quem}.`
       : 'Há um pagamento pendente. Pague para marcar de novo.',
   };
 }

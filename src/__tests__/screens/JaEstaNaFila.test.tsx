@@ -114,9 +114,9 @@ describe('Entrar na fila — recusas do backend viram diálogo', () => {
     alerta.mockRestore();
   });
 
-  it('loja fechada continua em TELA — ali existe o "Solicitar corte"', async () => {
+  it('loja fechada continua em TELA — ali existe o "Pedir corte"', async () => {
     mockCreate.mockRejectedValue(conflito('ESTABLISHMENT_NOT_OPEN'));
     const { findByText } = renderWithProviders(<QueueStatus />);
-    expect(await findByText('Solicitar corte')).toBeTruthy();
+    expect(await findByText('Pedir corte')).toBeTruthy();
   });
 });
