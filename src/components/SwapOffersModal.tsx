@@ -9,6 +9,7 @@ import { formatClockTime } from "@domain/queue/types";
 import { queueService, QueueResponse } from "@services/queueService";
 import { swapOfferService, SwapOfferResponse } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   visible: boolean;
@@ -23,6 +24,7 @@ type Props = {
 // cancelar). Abre pelo botão "Trocar" da fila. Busca fresco ao abrir.
 export function SwapOffersModal({ visible, professionalId, establishmentId, onClose, onChanged }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
+  const { cores, veu } = useTema();
   const [acceptable, setAcceptable] = useState<SwapOfferResponse[]>([]);
   const [mine, setMine] = useState<SwapOfferResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -95,15 +97,15 @@ export function SwapOffersModal({ visible, professionalId, establishmentId, onCl
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
+      <Box flex={1} bg={veu} justifyContent="center" px={24}>
+        <VStack bg="$painel" borderRadius="$card" p="$6" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
             Trocar de lugar
           </Heading>
 
           {loading && (
             <HStack alignItems="center" gap="$2" mt="$4">
-              <Spinner color="$forest" />
+              <Spinner color={cores.textPrimary} />
               <Text size="sm" color="$brandTextSecondary">Carregando ofertas...</Text>
             </HStack>
           )}
@@ -119,12 +121,12 @@ export function SwapOffersModal({ visible, professionalId, establishmentId, onCl
             <VStack gap="$3" mt="$4">
               <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">PODE ACEITAR</Text>
               {acceptable.map((o) => (
-                <Box key={o.id} bg="$brandSurface" borderRadius="$card" p="$3">
+                <Box key={o.id} bg="$sobrePainel" borderRadius="$card" p="$3">
                   <Text size="sm" color="$brandTextPrimary">{acceptOfferText(o.direction)}</Text>
                   {(() => {
                     const vaga = fila ? vagaNaFila(fila, o.requesterAttendanceId, lidoEm) : null;
                     return vaga ? (
-                      <Text size="sm" fontFamily="$heading" color="$forest" mt="$1" testID={`vaga-${o.id}`}>
+                      <Text size="sm" fontFamily="$heading" color="$brandTextPrimary" mt="$1" testID={`vaga-${o.id}`}>
                         Você vai para o {vaga.posicao}º lugar, por volta de {formatClockTime(new Date(vaga.horarioMs))}
                       </Text>
                     ) : null;

@@ -12,6 +12,7 @@ import { addressService } from "@services/addressService";
 import { useAuthStore } from "@stores/authStore";
 import { useLocationStore } from "@stores/locationStore";
 import { useDeviceLocation } from "@hooks/useDeviceLocation";
+import { useTema } from "@hooks/useTema";
 
 // Seletor de localização da Home (Fase 1 do filtro por bairro, Andre 2026-07-23).
 // Barra clicável mostrando o bairro/cidade atual; abre um modal p/ definir por
@@ -24,6 +25,7 @@ export function LocationSelector() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
   const { requestDeviceLocation } = useDeviceLocation();
+  const { cores, veu } = useTema();
 
   const [open, setOpen] = useState(false);
   const [cep, setCep] = useState("");
@@ -90,17 +92,17 @@ export function LocationSelector() {
     <>
       <TouchableOpacity onPress={() => setOpen(true)} accessibilityRole="button">
         <HStack alignItems="center" gap="$2" py="$1">
-          <MapPin size={18} color="#163300" />
-          <Text size="sm" fontFamily="$heading" color="$forest" flex={1} numberOfLines={1}>
+          <MapPin size={18} color={cores.textPrimary} />
+          <Text size="sm" fontFamily="$heading" color="$brandTextPrimary" flex={1} numberOfLines={1}>
             {label}
           </Text>
-          <ChevronRight size={16} color="#454745" />
+          <ChevronRight size={16} color={cores.textSecondary} />
         </HStack>
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-          <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow}>
+        <Box flex={1} bg={veu} justifyContent="center" px={24}>
+          <VStack bg="$painel" borderRadius="$card" p="$6" style={floatingShadow}>
             <Heading fontFamily="$heading" fontSize="$lg">
               Sua localização
             </Heading>
