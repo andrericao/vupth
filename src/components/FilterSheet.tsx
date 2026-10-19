@@ -3,6 +3,7 @@ import { VStack, HStack, Box, Text } from "@gluestack-ui/themed";
 
 import { ServiceType } from "@domain/establishment/types";
 import { SERVICE_TYPE_LABELS } from "@domain/establishment/serviceType";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 export type FilterValue = ServiceType | "ALL";
@@ -34,20 +35,22 @@ const OPCOES: { value: FilterValue; label: string }[] = [
  * `sliders-horizontal` era um icone SOLTO, sem Pressable e sem onPress. Parecia
  * botao e nao fazia nada; o filtro so mudava por parametro de rota.
  *
- * Chip selecionado = `forest` + texto `brandGreen`, o par da marca sobre fundo
- * escuro (mesmo dos chips de periodo do relatorio e das abas dos Termos).
+ * Chip selecionado = o papel `selecionado` (forest no claro, green no escuro) com
+ * o par `onSelecionado` por cima (green sobre forest no claro; onGreen sobre green
+ * no escuro), mesmo dos chips de periodo do relatorio e das abas dos Termos.
  */
 export function FilterSheet({ visible, value, onSelect, onClose }: Props) {
+  const { veu } = useTema();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="flex-end">
+      <Box flex={1} bg={veu} justifyContent="flex-end">
         <Pressable
           style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
           onPress={onClose}
           accessibilityLabel="Fechar filtro"
         />
         <VStack
-          bg="$brandBackground"
+          bg="$painel"
           borderTopLeftRadius="$hero"
           borderTopRightRadius="$hero"
           px="$5"
@@ -56,7 +59,7 @@ export function FilterSheet({ visible, value, onSelect, onClose }: Props) {
           gap="$4"
         >
           <VStack gap="$1">
-            <Text fontFamily="$display" fontSize={fs(20)} letterSpacing={-0.5} color="$forest">
+            <Text fontFamily="$display" fontSize={fs(20)} letterSpacing={-0.5} color="$brandTextPrimary">
               Filtrar por categoria
             </Text>
             <Text size="sm" color="$brandTextSecondary">
@@ -79,7 +82,7 @@ export function FilterSheet({ visible, value, onSelect, onClose }: Props) {
                   }}
                 >
                   <Box
-                    bg={ativo ? "$forest" : "$brandSurface"}
+                    bg={ativo ? "$selecionado" : "$sobrePainel"}
                     borderRadius="$full"
                     px={16}
                     py={10}
@@ -88,7 +91,7 @@ export function FilterSheet({ visible, value, onSelect, onClose }: Props) {
                     <Text
                       fontFamily="$heading"
                       fontSize={fs(13)}
-                      color={ativo ? "$brandGreen" : "$brandTextSecondary"}
+                      color={ativo ? "$onSelecionado" : "$brandTextSecondary"}
                     >
                       {op.label}
                     </Text>

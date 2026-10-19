@@ -6,6 +6,7 @@ import { Button } from "@components/Button";
 import { Input2 } from "@components/Input2";
 import { SaibaMais } from "@components/SaibaMais";
 import { floatingShadow } from "@utils/styles";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   visible: boolean;
@@ -36,6 +37,7 @@ type Props = {
  */
 export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onClose }: Props) {
   const [password, setPassword] = useState("");
+  const { veu } = useTema();
 
   function close() {
     setPassword("");
@@ -51,9 +53,9 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$card" p="$6" gap="$3" style={floatingShadow}>
-          <Heading fontFamily="$heading" fontSize="$lg">
+      <Box flex={1} bg={veu} justifyContent="center" px={24}>
+        <VStack bg="$painel" borderRadius="$card" p="$6" gap="$3" style={floatingShadow}>
+          <Heading fontFamily="$heading" fontSize="$lg" color="$brandTextPrimary">
             Excluir conta
           </Heading>
 

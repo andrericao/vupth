@@ -13,6 +13,7 @@ import { establishmentService } from "@services/establishmentService";
 import { useAuthStore } from "@stores/authStore";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   visible: boolean;
@@ -41,6 +42,7 @@ export function ScheduleModal({
   visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado, corte,
 }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
+  const { cores, veu } = useTema();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [horario, setHorario] = useState<Date | null>(null);
   const [agenda, setAgenda] = useState<AgendaPublica | null>(null);
@@ -116,7 +118,7 @@ export function ScheduleModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24} py={24}>
+      <Box flex={1} bg={veu} justifyContent="center" px={24} py={24}>
         {/* cancelar-cortado-no-solicitar (CLI, Andre 18/10, o mesmo defeito do
             cancelar-fora-da-caixa de 11/10 de volta): a rolagem envolvia TUDO,
             entao com tela pequena ou fonte ampliada o "Cancelar" ficava abaixo da
@@ -127,14 +129,14 @@ export function ScheduleModal({
             contêiner), nao a 90% da altura da janela: no Android com barras do
             sistema o Modal e menor que a janela e a caixa passava da tela. Altura
             cravada nunca: o app honra o ajuste de fonte do aparelho (DS4). */}
-        <VStack bg="$white" borderRadius="$card" style={[floatingShadow, { maxHeight: "100%" }]} testID="agenda-caixa">
+        <VStack bg="$painel" borderRadius="$card" style={[floatingShadow, { maxHeight: "100%" }]} testID="agenda-caixa">
           <ScrollView
             style={{ flexShrink: 1 }}
             contentContainerStyle={{ padding: 24, paddingBottom: 8 }}
             showsVerticalScrollIndicator={false}
             testID="agenda-rolagem"
           >
-          <Heading fontFamily="$heading" fontSize="$lg">
+          <Heading fontFamily="$heading" fontSize="$lg" color="$brandTextPrimary">
             {corte ? "Pedir corte" : "Agendar"}
           </Heading>
           <Text size="sm" color="$brandTextSecondary" mt="$1">
@@ -170,7 +172,7 @@ export function ScheduleModal({
             <Box mt="$4" testID="barra-de-encaixe">
               {!doDia ? (
                 <HStack gap="$2" alignItems="center">
-                  <Spinner color="$forest" />
+                  <Spinner color={cores.textPrimary} />
                   <Text size="sm" color="$brandTextSecondary">Buscando horários...</Text>
                 </HStack>
               ) : doDia.tipo === "livres" ? (
@@ -179,8 +181,8 @@ export function ScheduleModal({
                     const ativo = horario?.getTime() === h.getTime();
                     return (
                       <TouchableOpacity key={h.getTime()} onPress={() => setHorario(h)} testID={`horario-${formatClockTime(h)}`}>
-                        <Box bg={ativo ? "$forest" : "$brandSurface"} borderRadius="$full" px={14} py={8}>
-                          <Text fontWeight="$bold" color={ativo ? "$brandGreen" : "$forest"}>{formatClockTime(h)}</Text>
+                        <Box bg={ativo ? "$selecionado" : "$sobrePainel"} borderRadius="$full" px={14} py={8}>
+                          <Text fontWeight="$bold" color={ativo ? "$onSelecionado" : "$brandTextPrimary"}>{formatClockTime(h)}</Text>
                         </Box>
                       </TouchableOpacity>
                     );

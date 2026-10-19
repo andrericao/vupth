@@ -5,14 +5,14 @@ import { useEffect } from "react";
 import { useDialogoStore, type DialogoNaTela } from "@stores/dialogo.store";
 import { pesoDoBotao } from "@domain/pesoDoBotao";
 import {
-  TOKENS_CLARO,
+  aparenciaDoBotao,
   aparenciaDoTipo,
   ordemDosBotoes,
   papelDoBotao,
-  type PapelDoBotao,
   type TipoDeDialogo,
 } from "@domain/tipoDeDialogo";
 import { useAnimacaoDoDialogo } from "@hooks/useAnimacaoDoDialogo";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 // O diálogo do app — a mesma caixa nas duas plataformas e nos dois apps.
@@ -50,11 +50,6 @@ import { fs } from "@stores/fonteStore";
 // A entrada e a saída são animadas por dentro, com o `Modal` em
 // `animationType="none"`: o diálogo fica montado até a saída acabar (ver
 // `useAnimacaoDoDialogo`).
-const FOREST = "#163300";
-const BRAND_GREEN = "#9FE870";
-const DANGER = "#B3261E";
-const TEXT_SECONDARY = "#454745";
-
 const ICONES: Record<TipoDeDialogo, LucideIcon> = {
   informacao: Info,
   atencao: TriangleAlert,
@@ -62,10 +57,12 @@ const ICONES: Record<TipoDeDialogo, LucideIcon> = {
   erro: CircleX,
 };
 
-// Véu do desenho novo (tokens.json, primitivas.modal.veuClaro). O sem-tipo
-// continua com o forest a 45% do desenho antigo.
-const VEU_DO_TIPO = "rgba(22,51,0,.35)";
-const VEU_SEM_TIPO = "#16330073";
+// O véu do desenho novo vem do tokens.json (`veu` do `useTema`: forest a 35% no
+// claro, preto a 55% no escuro). O sem-tipo continua com o forest a 45% do
+// desenho antigo no claro; no escuro usa o do tokens, porque forest a 45% sobre
+// o fundo #0B1A04 mal separa o cartão da tela.
+// tema-fixo: só vale no claro (o escuro usa o véu do tokens); é o véu do desenho antigo, byte a byte
+const VEU_SEM_TIPO_CLARO = "#16330073";
 
 type EstiloDaFaixa = ReturnType<typeof useAnimacaoDoDialogo>["estiloDaFaixa"];
 
@@ -89,6 +86,7 @@ export function DialogoVupth() {
   const { mostrado, estiloDoVeu, estiloDoCartao, estiloDaFaixa } = useAnimacaoDoDialogo(atual);
 
   const indiceCancelar = atual ? atual.botoes.findIndex((b) => b.estilo === "cancel") : -1;
+  const { escuro, veu } = useTema();
 
   // O voltar do Android com um diálogo na tela. Teste de 25/09: num aviso só
   // com "OK", o voltar levou a TELA de volta e o diálogo ficou por cima. Então,
@@ -136,7 +134,7 @@ export function DialogoVupth() {
           pointerEvents="none"
           style={[
             StyleSheet.absoluteFill,
-            { backgroundColor: mostrado.tipo ? VEU_DO_TIPO : VEU_SEM_TIPO },
+            { backgroundColor: mostrado.tipo || escuro ? veu : VEU_SEM_TIPO_CLARO },
             estiloDoVeu,
           ]}
         />
@@ -157,12 +155,13 @@ export function DialogoVupth() {
 }
 
 function CartaoSemTipo({ atual, responder }: Cartao) {
+  const { cores } = useTema();
   return (
     <View
       accessibilityViewIsModal
       accessibilityLabel={atual.titulo}
       style={{
-        backgroundColor: "#FFFFFF",
+        backgroundColor: cores.painel,
         borderRadius: 20,
         padding: 22,
         gap: 16,
@@ -175,7 +174,7 @@ function CartaoSemTipo({ atual, responder }: Cartao) {
           fontFamily: "Archivo_800ExtraBold",
           fontSize: fs(18),
           letterSpacing: -0.4,
-          color: FOREST,
+          color: cores.textPrimary,
         }}
       >
         {atual.titulo}
@@ -190,7 +189,7 @@ function CartaoSemTipo({ atual, responder }: Cartao) {
               fontFamily: "Inter_400Regular",
               fontSize: fs(14),
               lineHeight: fs(20),
-              color: TEXT_SECONDARY,
+              color: cores.textSecondary,
             }}
           >
             {atual.mensagem}
@@ -219,16 +218,19 @@ function CartaoSemTipo({ atual, responder }: Cartao) {
                 alignItems: "center",
                 justifyContent: "center",
                 borderWidth: vazado ? 1.5 : 0,
-                // A borda é forest mesmo no destrutivo; só o RÓTULO é danger.
-                borderColor: FOREST,
-                backgroundColor: vazado ? "transparent" : BRAND_GREEN,
+                // A borda é o texto do tema (forest no claro) mesmo no destrutivo; só o
+                // RÓTULO é danger. `forest` fixo no escuro seria forest sobre o painel
+                // forest: o botão vazado sumiria.
+                borderColor: cores.textPrimary,
+                backgroundColor: vazado ? "transparent" : cores.green,
               }}
             >
               <Text
                 style={{
                   fontFamily: "Archivo_700Bold",
                   fontSize: fs(16),
-                  color: perigo ? DANGER : FOREST,
+                  // sólido: onGreen sobre o green; vazado: o texto do tema
+                  color: perigo ? cores.danger : vazado ? cores.textPrimary : cores.onGreen,
                 }}
               >
                 {botao.texto}
@@ -241,21 +243,14 @@ function CartaoSemTipo({ atual, responder }: Cartao) {
   );
 }
 
-// Os três papéis do desenho novo (design-modais). O rótulo do primário e do
-// secundário é forest nos dois temas; o do perigo é onDanger.
-const BOTAO: Record<PapelDoBotao, { fundo: string; texto: string }> = {
-  primario: { fundo: TOKENS_CLARO.green, texto: TOKENS_CLARO.onGreen },
-  secundario: { fundo: TOKENS_CLARO.surface, texto: TOKENS_CLARO.textPrimary },
-  perigo: { fundo: TOKENS_CLARO.danger, texto: TOKENS_CLARO.onDanger },
-};
-
 function CartaoComTipo({
   atual,
   tipo,
   responder,
   estiloDaFaixa,
 }: Cartao & { tipo: TipoDeDialogo; estiloDaFaixa: EstiloDaFaixa }) {
-  const aparencia = aparenciaDoTipo(tipo, atual.selo);
+  const { tema, cores } = useTema();
+  const aparencia = aparenciaDoTipo(tipo, atual.selo, tema);
   const Icone = ICONES[tipo];
 
   return (
@@ -264,7 +259,7 @@ function CartaoComTipo({
       accessibilityLabel={atual.titulo}
       // Sem borda e sem sombra no nativo: o véu já separa o cartão, e a borda da
       // mesma cor do fundo é o erro que a faixa veio substituir.
-      style={{ backgroundColor: "#FFFFFF", borderRadius: 20, padding: 16, width: "100%" }}
+      style={{ backgroundColor: cores.painel, borderRadius: 20, padding: 16, width: "100%" }}
     >
       {aparencia.faixa && (
         // A faixa cresce da esquerda (scaleX); o View de fora segura os 6 px de
@@ -302,7 +297,7 @@ function CartaoComTipo({
           fontFamily: "Archivo_700Bold",
           fontSize: fs(18),
           letterSpacing: -0.3,
-          color: TOKENS_CLARO.textPrimary,
+          color: cores.textPrimary,
           marginBottom: 6,
         }}
       >
@@ -316,7 +311,7 @@ function CartaoComTipo({
               fontFamily: "Inter_400Regular",
               fontSize: fs(14),
               lineHeight: fs(20),
-              color: TOKENS_CLARO.textSecondary,
+              color: cores.textSecondary,
             }}
           >
             {atual.mensagem}
@@ -330,7 +325,7 @@ function CartaoComTipo({
       <View style={{ gap: 8, marginTop: 14 }}>
         {ordemDosBotoes(atual.botoes).map((i) => {
           const botao = atual.botoes[i];
-          const cor = BOTAO[papelDoBotao(atual.botoes, i)];
+          const cor = aparenciaDoBotao(papelDoBotao(atual.botoes, i), tema);
           return (
             <Pressable
               key={`${botao.texto}-${i}`}

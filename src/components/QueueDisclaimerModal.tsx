@@ -5,6 +5,7 @@ import { Info, Check } from "lucide-react-native";
 
 import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 export const QUEUE_DISCLAIMER_TITLE = "Sobre o tempo estimado";
@@ -24,6 +25,7 @@ type Props = {
 // novamente"). O mesmo texto fica disponível sob demanda no ícone "i" da fila.
 export function QueueDisclaimerModal({ visible, onClose }: Props) {
   const [dontShow, setDontShow] = useState(false);
+  const { cores, veu } = useTema();
 
   return (
     <Modal
@@ -32,10 +34,10 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
       animationType="fade"
       onRequestClose={() => onClose(dontShow)}
     >
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$brandBackground" borderRadius="$hero" p="$6" style={floatingShadow}>
+      <Box flex={1} bg={veu} justifyContent="center" px={24}>
+        <VStack bg="$painel" borderRadius="$hero" p="$6" style={floatingShadow}>
           <HStack alignItems="center" gap="$2.5" mb="$3">
-            <Info size={24} color="#163300" />
+            <Info size={24} color={cores.textPrimary} />
             {/* Titulo em `forest`, nao no preto padrao do Heading: o Pencil
                 nao usa preto em lugar nenhum. */}
             <Text
@@ -43,7 +45,7 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
               fontSize={fs(19)}
               lineHeight={fs(23)}
               letterSpacing={-0.4}
-              color="$forest"
+              color="$brandTextPrimary"
               flex={1}
             >
               {QUEUE_DISCLAIMER_TITLE}
@@ -75,12 +77,12 @@ export function QueueDisclaimerModal({ visible, onClose }: Props) {
                 borderColor="$brandBorder"
                 bg={dontShow ? "$brandGreen" : "transparent"}
               >
-                {dontShow && <Check size={16} color="#163300" strokeWidth={3} />}
+                {dontShow && <Check size={16} color={cores.onGreen} strokeWidth={3} />}
               </Center>
               <Text
                 size="sm"
                 fontWeight={dontShow ? "$semibold" : "$normal"}
-                color={dontShow ? "$forest" : "$brandTextSecondary"}
+                color={dontShow ? "$brandTextPrimary" : "$brandTextSecondary"}
               >
                 Não mostrar novamente
               </Text>

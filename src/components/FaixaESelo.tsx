@@ -2,6 +2,7 @@ import { Text, View } from "react-native";
 import { CircleDollarSign, CircleX, Info, TriangleAlert, type LucideIcon } from "lucide-react-native";
 
 import { aparenciaDoTipo, type TipoDeDialogo } from "@domain/tipoDeDialogo";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 // A faixa de 6 px e o selo com icone de um cartao com tipo, para quem tem cartao
@@ -16,7 +17,8 @@ const ICONES: Record<TipoDeDialogo, LucideIcon> = {
 };
 
 export function FaixaESelo({ tipo, selo }: { tipo: TipoDeDialogo; selo?: string }) {
-  const aparencia = aparenciaDoTipo(tipo, selo);
+  const { tema } = useTema();
+  const aparencia = aparenciaDoTipo(tipo, selo, tema);
   const Icone = ICONES[tipo];
   return (
     <View>

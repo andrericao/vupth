@@ -5,6 +5,8 @@ import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
 import { ClientAttendance } from "@services/attendanceService";
 import { formatClockTime, STATUS_DESCONHECIDO } from "@domain/queue/types";
+import type { NomeDeCor } from "@domain/tema";
+import { useTema } from "@hooks/useTema";
 
 // [marca-vupth] Este era o ultimo lugar do app na paleta ANTERIOR (#3B7A3F,
 // #E63946, #F59E0B) e a unica cor por status, com texto branco fixo por cima.
@@ -15,13 +17,17 @@ import { formatClockTime, STATUS_DESCONHECIDO } from "@domain/queue/types";
 // "Em atendimento" da Attendances ($brandGreen + $forest) e SCHEDULED fica no
 // par neutro (o mesmo do fallback), porque "Aguardando" e estado normal — o
 // pessego e reservado pro LATE, que e o que pede atencao.
-const STATUS: Record<string, { label: string; bg: string; fg: string }> = {
-  FINISHED: { label: "Concluído", bg: "#E2F6D5", fg: "#163300" },       // greenTint
-  CANCELLED: { label: "Cancelado", bg: "#F3F5F1", fg: "#B3261E" },      // surface + danger
-  REMOVED: { label: "Retirado pela loja", bg: "#F3F5F1", fg: "#B3261E" }, // surface + danger
-  LATE: { label: "Atrasado", bg: "#FFC091", fg: "#163300" },            // accentPeach
-  IN_PROGRESS: { label: "Em atendimento", bg: "#9FE870", fg: "#163300" }, // brandGreen
-  SCHEDULED: { label: "Aguardando", bg: "#F3F5F1", fg: "#454745" },     // surface + neutro
+//
+// Cada cor e o NOME do token, resolvido no tema. A pilula neutra usa o papel
+// `sobrePainel` (a surface no claro): ela mora DENTRO do painel do modal, e a
+// surface do escuro e a cor do proprio painel — a pilula viraria so texto solto.
+const STATUS: Record<string, { label: string; bg: NomeDeCor; fg: NomeDeCor }> = {
+  FINISHED: { label: "Concluído", bg: "greenTint", fg: "onGreenTint" },
+  CANCELLED: { label: "Cancelado", bg: "sobrePainel", fg: "danger" },
+  REMOVED: { label: "Retirado pela loja", bg: "sobrePainel", fg: "danger" },
+  LATE: { label: "Atrasado", bg: "accentPeach", fg: "onAccentPeach" },
+  IN_PROGRESS: { label: "Em atendimento", bg: "green", fg: "onGreen" },
+  SCHEDULED: { label: "Aguardando", bg: "sobrePainel", fg: "textSecondary" },
 };
 
 function dateOnly(iso: string | null): string {
@@ -46,7 +52,7 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <HStack w="$full" justifyContent="space-between" mb="$2" alignItems="flex-start">
       <Text size="sm" color="$brandTextSecondary">{label}</Text>
-      <Text size="sm" fontFamily="$heading" flex={1} textAlign="right" ml="$3">
+      <Text size="sm" fontFamily="$heading" color="$brandTextPrimary" flex={1} textAlign="right" ml="$3">
         {value}
       </Text>
     </HStack>
@@ -66,20 +72,21 @@ type Props = {
 // Detalhes de um atendimento (quem atendeu, quando, serviços, duração, valor) +
 // opção de avaliar (quando FINISHED e ainda não avaliado).
 export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = true, onVerProfissional }: Props) {
+  const { cores, veu } = useTema();
   const a = attendance;
-  const st = a ? STATUS[a.status] ?? { label: STATUS_DESCONHECIDO, bg: "#F3F5F1", fg: "#454745" } : null;
+  const st = a ? STATUS[a.status] ?? { label: STATUS_DESCONHECIDO, bg: "sobrePainel" as const, fg: "textSecondary" as const } : null;
 
   return (
     <Modal visible={!!a} transparent animationType="fade" onRequestClose={onClose}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
+      <Box flex={1} bg={veu} justifyContent="center" px={24}>
         {a && st && (
-          <VStack bg="$white" borderRadius="$card" p="$6" style={floatingShadow} maxHeight="80%">
+          <VStack bg="$painel" borderRadius="$card" p="$6" style={floatingShadow} maxHeight="80%">
             <HStack justifyContent="space-between" alignItems="center" mb="$4">
-              <Heading fontFamily="$heading" fontSize="$lg" flex={1}>
+              <Heading fontFamily="$heading" fontSize="$lg" color="$brandTextPrimary" flex={1}>
                 Detalhes do atendimento
               </Heading>
-              <Badge bg={st.bg} borderRadius="$full" px="$3" py="$1">
-                <BadgeText color={st.fg} size="xs">{st.label}</BadgeText>
+              <Badge bg={cores[st.bg]} borderRadius="$full" px="$3" py="$1">
+                <BadgeText color={cores[st.fg]} size="xs">{st.label}</BadgeText>
               </Badge>
             </HStack>
 
