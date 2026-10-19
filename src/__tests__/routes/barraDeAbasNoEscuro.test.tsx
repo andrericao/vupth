@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 
 import { act } from '@testing-library/react-native';
@@ -39,12 +40,36 @@ jest.mock('@screens/ServiceSelection', () => ({ ServiceSelection: () => null }))
 jest.mock('@screens/ProfessionalInfo', () => ({ ProfessionalInfo: () => null }));
 jest.setTimeout(90000);
 
+type No = { props?: { style?: unknown }; children?: (No | string)[] | null };
+// Os estilos de todos os nos da arvore renderizada, achatados.
+function estilosDe(no: No | string | null): Record<string, unknown>[] {
+  if (!no || typeof no === 'string') return [];
+  const proprio = no.props?.style ? [StyleSheet.flatten(no.props.style as never) as Record<string, unknown>] : [];
+  return proprio.concat(...(no.children ?? []).map((f) => estilosDe(f)));
+}
+
 // A barra de abas do Client (AuthRoutes) leu as cores no codigo: fundo #FFFFFF, icone e
 // rotulo ativos #163300 e inativos #454745. No escuro o React Navigation recebe a cor
 // crua (nao aceita token), entao a barra vem de `useTema().cores`; sem isso ela ficaria
 // branca embaixo de uma tela escura, e o icone forest sobre a pilula escura sumiria.
 describe.each(TEMAS)('AuthRoutes no tema %s', (tema) => {
   afterAll(() => act(() => useTemaStore.setState({ preferencia: 'claro' })));
+
+  it('a linha de cima da barra: so no escuro, em surfaceAlt (a escolha da Design, 19/10)', () => {
+    const c = coresDoTema(tema);
+    const tela = montar(
+      tema,
+      <NavigationContainer>
+        <AuthRoutes />
+      </NavigationContainer>,
+    );
+    const comLinha = estilosDe(tela.toJSON() as unknown as No).filter((e) => e.borderTopWidth === 1);
+    if (tema === 'escuro') {
+      expect(comLinha.some((e) => e.borderTopColor === c.surfaceAlt)).toBe(true);
+    } else {
+      expect(comLinha).toEqual([]);
+    }
+  });
 
   it('o fundo da barra, o icone da aba ativa (sobre a pilula) e o das inativas', () => {
     const c = coresDoTema(tema);
