@@ -208,11 +208,30 @@ describe('QueueStatus — ir para o fim', () => {
     expect(alertSpy).toHaveBeenLastCalledWith('Pronto', 'Você foi para o fim da fila.');
   });
 
+  it('com 1h ou mais, o aviso e comum: sem tipo e sem vermelho', async () => {
+    mockRemaining = 120;
+    const { findByText } = renderWithProviders(<QueueStatus />);
+    fireEvent.press(await findByText('mudar-fim'));
+    expect(alertSpy).toHaveBeenLastCalledWith('Ir para o fim da fila', expect.not.stringContaining('multa'), [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Ir para o fim', onPress: expect.any(Function) },
+    ]);
+  });
+
   it('com menos de 1h, avisa a multa', async () => {
     mockRemaining = 20;
     const { findByText } = renderWithProviders(<QueueStatus />);
     fireEvent.press(await findByText('mudar-fim'));
-    expect(alertSpy).toHaveBeenLastCalledWith('Ir para o fim da fila', expect.stringContaining('multa'), expect.any(Array));
+    // Multa e dinheiro, e "Ir para o fim" GERA a multa: o botao e o vermelho.
+    expect(alertSpy).toHaveBeenLastCalledWith(
+      'Ir para o fim da fila',
+      expect.stringContaining('multa'),
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Ir para o fim', style: 'destructive', onPress: expect.any(Function) },
+      ],
+      { tipo: 'dinheiro', selo: 'Multa' }
+    );
   });
 
   it('a espera nova sem resposta não impede o "Pronto"', async () => {

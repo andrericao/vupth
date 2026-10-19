@@ -58,6 +58,7 @@ import { waitForBackend } from "@services/healthService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useMostraPosicao } from "@hooks/useMostraPosicao";
 import { NumeroComSalto } from "@components/NumeroComSalto";
+import { alertaTipado } from "@utils/alertaTipado";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
@@ -455,10 +456,10 @@ export function QueueStatus() {
       const valorDoServidor = multaSemCiencia(error);
       if (valorDoServidor != null) {
         const aviso = avisoDaMultaDoServidor(valorDoServidor);
-        Alert.alert(aviso.titulo, aviso.mensagem, [
+        alertaTipado(aviso.titulo, aviso.mensagem, [
           { text: aviso.nao, style: "cancel" },
           { text: aviso.sim, style: "destructive", onPress: () => sair(valorDoServidor) },
-        ]);
+        ], { tipo: "dinheiro", selo: "Multa" });
         return;
       }
       // Ja nao esta na fila (o profissional removeu, ou um toque duplo
@@ -540,12 +541,13 @@ export function QueueStatus() {
       sair(null);
       return;
     }
-    Alert.alert(saida.confirmacao.titulo, saida.confirmacao.mensagem, [
+    // Dinheiro, e a acao GERA a multa: o primario e o vermelho (`destructive`).
+    alertaTipado(saida.confirmacao.titulo, saida.confirmacao.mensagem, [
       { text: saida.confirmacao.nao, style: "cancel" },
       // Evitar a multa sem sair (Andre, 26/09 — esboço): adiar a vez nao custa.
       ...(canReshuffle ? [{ text: "Adiar", onPress: () => { handleOpenChangeTurn(); } }] : []),
       { text: saida.confirmacao.sim, style: "destructive", onPress: () => sair(saida.valorConfirmado) },
-    ]);
+    ], { tipo: "dinheiro", selo: "Multa" });
   }
 
   // "Mudar minha vez": busca o ETA do fim da fila (piso de agendamento) e abre o
@@ -670,6 +672,15 @@ export function QueueStatus() {
     const message = penalty
       ? `${base}\n\nComo falta menos de 1h, isso gera multa de R$ ${CANCELLATION_PENALTY_VALUE},00 no seu próximo atendimento.`
       : base;
+    // Com multa e dinheiro e a acao GERA a multa (`destructive`); sem multa e um
+    // aviso comum, como sempre foi.
+    if (penalty) {
+      alertaTipado("Ir para o fim da fila", message, [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Ir para o fim", style: "destructive", onPress: submitMoveToEnd },
+      ], { tipo: "dinheiro", selo: "Multa" });
+      return;
+    }
     Alert.alert(
       "Ir para o fim da fila",
       message,

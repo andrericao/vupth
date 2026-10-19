@@ -18,6 +18,7 @@ import { usePendenciaStore } from "@stores/pendenciaStore";
 import { fs } from "@stores/fonteStore";
 import { copiarTexto } from "@utils/copiar";
 import { movimentoReduzido } from "@utils/motion";
+import { FaixaESelo } from "@components/FaixaESelo";
 
 const FOREST = "#163300";
 const GREEN = "#9FE870";
@@ -153,6 +154,9 @@ export function ModalDePagamento() {
           testID={aviso ? "aviso-de-pendencia" : "pix-do-atendimento"}
           style={{ backgroundColor: "#FFFFFF", borderRadius: 20, padding: 22, gap: 14, width: "100%", maxWidth: 420, alignSelf: "center" }}
         >
+          {/* O aviso de pendencia e dinheiro: faixa e selo dizem isso antes do texto.
+              O Pix em si nao ganha selo (e a tela de pagar, nao um aviso). */}
+          {texto ? <FaixaESelo tipo="dinheiro" selo="Pagamento" /> : null}
           <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
             <Text style={{ flex: 1, fontFamily: "Archivo_800ExtraBold", fontSize: fs(18), color: FOREST }}>
               {texto ? texto.titulo : "Pagar por Pix"}

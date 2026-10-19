@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import { ReactNode } from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -55,6 +56,23 @@ describe('ModalDePagamento', () => {
     fireEvent.press(tela.getByTestId('pendencia-pagar'));
     expect(usePendenciaStore.getState().pagando).toBe('a1');
     expect(await tela.findByText('R$ 45,00', {}, { timeout: 15000 })).toBeTruthy();
+  });
+
+  // Aviso de pendencia = dinheiro: a faixa e o selo dizem isso antes do texto. O Pix
+  // em si e a tela de pagar, nao um aviso, e nao ganha selo.
+  it('o aviso de pendência é dinheiro: faixa forte e selo "Pagamento"; o Pix não tem selo', async () => {
+    act(() => usePendenciaStore.getState().avisar([{ attendance_id: 'a1', status: 'PENDING', amount: 45, professional_name: 'Carlos' }]));
+    const aviso = montar();
+    expect(aviso.getByTestId('selo-do-tipo')).toBeTruthy();
+    expect(aviso.getByText('Pagamento')).toBeTruthy();
+    expect(StyleSheet.flatten(aviso.getByTestId('faixa-do-tipo').props.style).backgroundColor).toBe('#B3261E');
+    aviso.unmount();
+
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const pix = montar();
+    expect(await pix.findByText('R$ 40,00')).toBeTruthy();
+    expect(pix.queryByTestId('selo-do-tipo')).toBeNull();
+    expect(pix.queryByTestId('faixa-do-tipo')).toBeNull();
   });
 
   it('o aviso sem itens só tem o "Agora não", que fecha', () => {
