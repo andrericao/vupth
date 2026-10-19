@@ -1,6 +1,3 @@
-import fs from "fs";
-import path from "path";
-
 import {
   TIPOS_DE_DIALOGO,
   TOKENS_CLARO,
@@ -9,17 +6,20 @@ import {
   papelDoBotao,
   tipoValido,
 } from "@domain/tipoDeDialogo";
+import { coresNoGluestack } from "@domain/tema";
 
 // modais-de-alerta (design-modais, 17/10; DEC-50): o tipo e dito por uma faixa
 // no topo e um selo com icone, nunca pela cor do botao.
 
 // O tema do Gluestack e a fonte das cores; este arquivo so da nome as cores do
-// dialogo. Le o texto do config (e um .ts do app, nao um modulo para importar).
-const CONFIG = fs.readFileSync(path.resolve(__dirname, "../../../config/gluestack-ui.config.ts"), "utf8");
+// dialogo. Pergunta ao proprio `coresNoGluestack`, que alimenta o config: o teste
+// lia o TEXTO do config com uma regex e quebrou quando os valores passaram a morar
+// em tokens.json (a `dev` ficou vermelha logo apos o merge do modo escuro).
+const CLARO = coresNoGluestack("claro") as unknown as Record<string, string>;
 const doTema = (nome: string): string => {
-  const m = new RegExp(`\\b${nome}:\\s*'(#[0-9A-Fa-f]{6})'`).exec(CONFIG);
-  if (!m) throw new Error(`token ${nome} nao existe no config do Gluestack`);
-  return m[1];
+  const valor = CLARO[nome];
+  if (!valor) throw new Error(`token ${nome} nao existe no tema claro do Gluestack`);
+  return valor;
 };
 
 function luminancia(hex: string): number {
