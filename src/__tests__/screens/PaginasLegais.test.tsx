@@ -46,15 +46,19 @@ describe('páginas legais', () => {
   });
 
   it('/excluir-conta diz como excluir nos dois apps e na web, e o que é apagado', () => {
-    const { getByText } = renderWithProviders(<ExcluirConta />);
+    const { getByText, getAllByText, queryByText } = renderWithProviders(<ExcluirConta />);
     expect(getByText('No app do cliente')).toBeTruthy();
     expect(getByText('No app do profissional (VUPTH Parceiros)')).toBeTruthy();
     expect(getByText('Pela web, sem o app')).toBeTruthy();
     expect(getByText('Esqueceu a senha')).toBeTruthy();
     expect(getByText('O que é apagado')).toBeTruthy();
+    // Guia de texto 4.7: o caminho escrito usa o nome do link do Perfil (no app e na web).
+    expect(getAllByText(/Perfil → Excluir conta/)).toHaveLength(2);
+    expect(getByText(/Conta → Excluir,/)).toBeTruthy();
+    expect(queryByText(/Deletar/)).toBeNull();
   });
 
-  it('"Ir para o Perfil" volta ao Perfil (Entrar ou Deletar conta)', () => {
+  it('"Ir para o Perfil" volta ao Perfil (Entrar ou Excluir conta)', () => {
     const { getByTestId } = renderWithProviders(<ExcluirConta />);
     fireEvent.press(getByTestId('ir-para-o-perfil'));
     expect(mockNavigate).toHaveBeenCalledWith('settings', undefined, { pop: true });

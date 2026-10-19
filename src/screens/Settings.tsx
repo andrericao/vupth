@@ -278,13 +278,13 @@ export function Settings() {
               existem, e abrir o site tiraria a pessoa do app para ler o mesmo
               texto. Um unico "Termos e Privacidade" nao dizia que eram dois. */}
           <LinksLegais aoAbrir={(pagina) => navigation.navigate(pagina === "termos" ? "terms" : "privacy")} />
-          {/* Deletar conta desce pra ca como LINK: e irreversivel, entao nao
+          {/* Excluir conta desce pra ca como LINK: e irreversivel, entao nao
               disputa atencao com o resto — mas continua alcancavel por quem
               procura (era um botao de mesmo peso que "sair"). */}
           {isAuthenticated && (
             <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
               <Text size="xs" fontWeight="$semibold" color="$brandDanger">
-                Deletar minha conta
+                Excluir conta
               </Text>
             </TouchableOpacity>
           )}

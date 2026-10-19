@@ -68,8 +68,8 @@ name: Perfil e Configuracoes - editar dados, email, senha, endereco
 - assertVisible: "Adicionar endereço"
 - back
 
-# 7. Verificar botao Deletar conta existe
-- assertVisible: "Deletar conta"
+# 7. Verificar o link Excluir conta (fim do Perfil)
+- assertVisible: "Excluir conta"
 
 # Voltar para Home
 - back
