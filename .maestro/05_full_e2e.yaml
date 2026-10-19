@@ -94,8 +94,7 @@ name: E2E completo - cadastro, login e check-in
           timeout: ${10000 * LENTO}
       - assertVisible: "Tempo estimado"
       - tapOn: "Sair da fila"
-      - tapOn:
-          id: "dialogo-botao-destrutivo"
+      - tapOn: "Sim, sair"
       - extendedWaitUntil:
           visible: "Estabelecimentos"
           timeout: ${5000 * LENTO}

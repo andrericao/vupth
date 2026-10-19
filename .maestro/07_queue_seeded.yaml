@@ -140,8 +140,7 @@ env:
 
 # CANCELAMENTO
 - tapOn: "Sair da fila"
-- tapOn:
-    id: "dialogo-botao-destrutivo"
+- tapOn: "Sim, sair"
 - extendedWaitUntil:
     visible: "Estabelecimentos"
     timeout: ${5000 * LENTO}

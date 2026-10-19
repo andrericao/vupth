@@ -5,60 +5,64 @@ import { avisoDeAtraso, precisaAvisarAtraso } from '../../domain/queue/ciencia';
 // multa, porque é a contagem que torna a terceira vez justa.
 
 describe('avisoDeAtraso', () => {
-  // GUIA_DE_TEXTO.md §4.3: o título diz o fato; o corpo é uma linha; o resto
-  // (a regra completa dos 3 atrasos) mora no "Saiba mais".
-  it('1º atraso: o título diz que trocou de lugar, e o corpo diz o que vem no 3º', () => {
+  it('sem multa, diz qual atraso é e quantos faltam para a multa', () => {
     const a = avisoDeAtraso({ contagem: 1 });
-    expect(a.titulo).toBe('Você trocou de lugar');
-    expect(a.mensagem).toBe('1º atraso, sem multa. No 3º, R$ 5,00 e fim da fila.');
+    expect(a.mensagem).toMatch(/1º atraso — sem multa/);
+    expect(a.mensagem).toMatch(/No 3º, multa de R\$ 5,00 e você vai para o fim da fila/);
+    expect(a.mensagem).toMatch(/trocou de lugar com o próximo/);
+    expect(a.mensagem).toMatch(/faltam 2/);
     expect(a.botao).toBe('Entendi');
   });
 
-  it('2º atraso: o mesmo texto com o ordinal do servidor', () => {
-    expect(avisoDeAtraso({ contagem: 2 }).mensagem).toBe('2º atraso, sem multa. No 3º, R$ 5,00 e fim da fila.');
+  it('na segunda, o texto muda para "falta uma"', () => {
+    expect(avisoDeAtraso({ contagem: 2 }).mensagem).toMatch(/falta um\)/);
   });
 
-  it('3º atraso: o título é o ordinal e o corpo diz a multa e o fim da fila', () => {
+  it('na terceira, há multa — e o aviso diz o valor', () => {
     const a = avisoDeAtraso({ contagem: 3 });
-    expect(a.titulo).toBe('3º atraso');
-    expect(a.mensagem).toBe('Multa de R$ 5,00 e você foi para o fim da fila.');
-    expect(a.botao).toBe('Entendi');
+    expect(a.mensagem).toMatch(/3º atraso/);
+    expect(a.mensagem).toMatch(/multa de R\$ 5,00 no seu próximo atendimento/);
+    expect(a.mensagem).toMatch(/fim da fila/);
+    expect(a.mensagem).toMatch(/sair sem nova multa/);
   });
 
   it('o backend manda quem decide: `multa` vence a contagem', () => {
-    expect(avisoDeAtraso({ contagem: 1, multa: true }).mensagem).toMatch(/^Multa de R\$ 5,00/);
+    expect(avisoDeAtraso({ contagem: 1, multa: true }).mensagem).toMatch(/multa/);
     expect(avisoDeAtraso({ contagem: 5, multa: false }).mensagem).toMatch(/sem multa/);
+    // Contagem acima do limite sem multa não vira "faltam -2".
+    expect(avisoDeAtraso({ contagem: 5, multa: false }).mensagem).not.toMatch(/faltam/);
   });
 
-  it('multa sem contagem: é o 3º por regra, com o valor e o fim da fila', () => {
+  it('multa sem contagem: diz o valor e o fim da fila, sem ordinal', () => {
     const a = avisoDeAtraso({ multa: true });
-    expect(a.titulo).toBe('3º atraso');
-    expect(a.mensagem).toBe('Multa de R$ 5,00 e você foi para o fim da fila.');
+    expect(a.mensagem).not.toMatch(/\dº atraso/);
+    expect(a.mensagem).toMatch(/^multa de R\$ 5,00/);
   });
 
-  // Andre, 26/09 (esboço): desde o 1º atraso, a opção de adiar.
-  it('antes da multa oferece adiar; no 3º, não', () => {
+  // Andre, 26/09 (esboço): desde o 1º atraso, tom positivo e a opção de adiar.
+  it('antes da multa: título positivo e oferece adiar; no 3º, não', () => {
     for (const s of [{}, { contagem: 1 }, { contagem: 2 }]) {
       const a = avisoDeAtraso(s);
-      expect(a.titulo).toBe('Você trocou de lugar');
+      expect(a.titulo).toBe('Não se atrase — evite a multa');
       expect(a.oferecerAdiar).toBe(true);
+      expect(a.mensagem).toMatch(/adie a sua vez/);
     }
     expect(avisoDeAtraso({ contagem: 3 }).oferecerAdiar).toBe(false);
   });
 
   it('SEM a contagem (o backend ainda não manda), não inventa ordinal', () => {
     const a = avisoDeAtraso({});
-    expect(a.mensagem).not.toMatch(/\dº atraso, sem/);
-    expect(a.mensagem).toBe('Sem multa por enquanto. No 3º atraso, R$ 5,00 e fim da fila.');
+    expect(a.mensagem).not.toMatch(/\dº atraso/);
+    expect(a.mensagem).toMatch(/por enquanto sem multa/);
+    expect(a.mensagem).toMatch(/no 3º, multa de R\$ 5,00/);
   });
 
-  it('segue as medidas do guia: título de até 4 palavras, corpo de até 70 caracteres', () => {
-    for (const s of [{}, { contagem: 1 }, { contagem: 2 }, { contagem: 3 }]) {
-      const a = avisoDeAtraso(s);
-      expect(a.titulo.split(' ').length).toBeLessThanOrEqual(4);
-      expect(a.mensagem.length).toBeLessThanOrEqual(70);
-      expect(a.botao.split(' ')).toHaveLength(1);
+  it('em todos os casos o cliente CONTINUA na fila — o atraso não o tira dela', () => {
+    for (const s of [{}, { contagem: 1 }, { contagem: 2 }]) {
+      expect(avisoDeAtraso(s).mensagem).toMatch(/continua na fila/);
     }
+    // No 3º ele vai para o fim — ainda na fila, e pode sair sem nova multa.
+    expect(avisoDeAtraso({ contagem: 3 }).mensagem).toMatch(/fim da fila\. Pode continuar nela/);
   });
 });
 

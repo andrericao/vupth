@@ -16,7 +16,7 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor } from "@domain/queue/saidaDaFila";
-import { advertenciaDaMulta, deveAdvertir, limiteDaSaidaGratis } from "@domain/queue/advertenciaDaMulta";
+import { advertenciaDaMulta, deveAdvertir } from "@domain/queue/advertenciaDaMulta";
 import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
@@ -46,7 +46,6 @@ import {
 } from "@domain/queue/types";
 import { jaSaiuDaFila, mensagemDeFalhaAoSair, multaSemCiencia } from "@domain/queue/leave";
 import { SUPORTE_SAIR_DA_FILA_URL } from "@utils/suporte";
-import { alertaComArtigo } from "@utils/alertaComArtigo";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -466,7 +465,7 @@ export function QueueStatus() {
       // cancelou antes): o objetivo do usuario esta cumprido. Segue pra
       // limpeza, senao ele fica preso numa tela de fila que nao existe.
       if (!jaSaiuDaFila(error)) {
-        Alert.alert("Não deu para sair", mensagemDeFalhaAoSair(error));
+        Alert.alert("Nao foi possivel sair da fila", mensagemDeFalhaAoSair(error));
         return;
       }
     }
@@ -504,21 +503,12 @@ export function QueueStatus() {
     updateQueue({ multaAdvertida: true });
     const naTolerancia = !!activeQueue.toleranceUntil && Date.now() < activeQueue.toleranceUntil;
     const regra = regraDaSaida(naTolerancia);
-    const aviso = advertenciaDaMulta({
-      sairCustaAgora: regra.multa || !!regra.semPrevisao,
-      podeAdiar: canReshuffle,
-      // A hora em que sair passa a custar: o aviso diz o relogio, nao as faixas.
-      gratisAte: limiteDaSaidaGratis({
-        restante: remaining ?? 0,
-        agora: Date.now(),
-        toleranceUntil: activeQueue.toleranceUntil,
-      }),
-    });
-    alertaComArtigo(aviso.titulo, aviso.mensagem, [
+    const aviso = advertenciaDaMulta({ sairCustaAgora: regra.multa || !!regra.semPrevisao, podeAdiar: canReshuffle });
+    Alert.alert(aviso.titulo, aviso.mensagem, [
       { text: aviso.ficar, style: "cancel" },
       ...(aviso.adiar ? [{ text: aviso.adiar, onPress: () => { handleOpenChangeTurn(); } }] : []),
       ...(aviso.sairDeGraca ? [{ text: aviso.sairDeGraca, onPress: () => { sair(null); } }] : []),
-    ], "sairDaFila");
+    ]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeQueue?.attendanceId, activeQueue?.multaAdvertida, remaining, semPrevisao, canReshuffle, avisoDaEstimativaSaiu]);
 
@@ -545,7 +535,7 @@ export function QueueStatus() {
     alertaTipado(saida.confirmacao.titulo, saida.confirmacao.mensagem, [
       { text: saida.confirmacao.nao, style: "cancel" },
       // Evitar a multa sem sair (Andre, 26/09 — esboço): adiar a vez nao custa.
-      ...(canReshuffle ? [{ text: "Adiar", onPress: () => { handleOpenChangeTurn(); } }] : []),
+      ...(canReshuffle ? [{ text: "Adiar minha vez", onPress: () => { handleOpenChangeTurn(); } }] : []),
       { text: saida.confirmacao.sim, style: "destructive", onPress: () => sair(saida.valorConfirmado) },
     ], { tipo: "dinheiro", selo: "Multa" });
   }

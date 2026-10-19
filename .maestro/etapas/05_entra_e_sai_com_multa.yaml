@@ -48,7 +48,7 @@ appId: ${APP_ID}
     label: "05.06 · espera o aviso da política da multa"
 - tapOn:
     id: "dialogo-botao-0"
-    label: "05.07 · toca em Ficar"
+    label: "05.07 · toca em Continuar na fila"
 
 # O push pode chegar depois da politica: espera um pouco por ele e fecha.
 - extendedWaitUntil:
@@ -75,7 +75,7 @@ appId: ${APP_ID}
 # Em laço, conferindo de novo depois de 5 s: a faixa pode sumir por um
 # instante num re-render, e um notVisible so passava cedo (bateria 09/10
 # 20:30, 06: passou em 33 s com "sem custo até 20:50" na tela, e a saida foi de
-# graca, sem a caixa de confirmacao).
+# graca, sem a caixa "Sair da fila?").
 # Voltas de 30 s, com o "Wait" do ANR entre elas: a tolerancia e tempo de
 # relogio, e uma espera longa e continua derrubava o adb no emulador ("device
 # offline" na 06, baterias 11/10 23:57 e 12/10 02:09). 40 voltas cobrem os
@@ -140,7 +140,7 @@ appId: ${APP_ID}
     id: "leave-queue"
     label: "05.1E · um toque em leave-queue"
 - assertVisible:
-    text: "Sair agora gera multa de R\\$.*"
+    text: "Se sair, você paga uma multa de R\\$.*"
     label: "05.1F · a faixa diz a multa em uma linha"
 - assertVisible:
     id: "saida-saiba-mais"
@@ -153,19 +153,16 @@ appId: ${APP_ID}
 - doubleTapOn:
     id: "leave-queue"
     label: "05.12 · toque duplo em leave-queue"
-# Pelo id, nao pelo titulo: o titulo da caixa e "Sair da fila", igual ao botao
-# da tela — esperar o texto passava sem a caixa (antes o "?" do titulo
-# distinguia os dois, e o titulo perdeu o "?" no guia de texto). O botao
-# destrutivo so existe na caixa.
+# O "?" escapado: o texto e um regex, e "Sair da fila?" casava com o proprio
+# botao "Sair da fila" (o ? deixava o "a" opcional) — passava sem a caixa.
 - extendedWaitUntil:
-    visible:
-      id: "dialogo-botao-destrutivo"
+    visible: "Sair da fila\\?"
     timeout: ${10000 * LENTO}
-    label: "05.13 · espera a caixa de confirmacao da saida"
-# Pelo id: o "Sair" muda de posicao com o "Adiar".
+    label: "05.13 · espera Sair da fila?"
+# Pelo id: o "Sim, sair" muda de posicao com o "Adiar minha vez".
 - tapOn:
     id: "dialogo-botao-destrutivo"
-    label: "05.14 · toca em Sair"
+    label: "05.14 · toca em Sim, sair"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "05.15 · roda fechar_aviso"

@@ -1,4 +1,4 @@
-import { LATE_PENALTY_THRESHOLD_MINUTES, formatClockTime } from './types';
+import { LATE_PENALTY_THRESHOLD_MINUTES } from './types';
 
 // Advertencia ANTES da multa (decisao do Andre, 03/10, CLI-12 · adiar-no-atraso).
 //
@@ -22,29 +22,10 @@ export function deveAdvertir(s: {
   return s.restante < LIMIAR_DA_ADVERTENCIA_MINUTOS;
 }
 
-/**
- * Ate que horas sair e de graca: o aviso diz a HORA ("Depois das 14:35"), nao as
- * faixas de valor — a pessoa nao calcula "entre 30 minutos e 1 hora", ela olha o
- * relogio. E o limite de 1 h antes da vez, ou o fim da tolerancia do servidor, o
- * que for mais tarde (dentro da tolerancia sair nao custa, D13). As faixas e os
- * valores ficam no artigo do Suporte.
- */
-export function limiteDaSaidaGratis(s: {
-  /** Minutos ate a vez (a previsao de agora). */
-  restante: number;
-  /** Relogio de agora (ms) — injetado para o calculo ser testavel. */
-  agora: number;
-  /** Fim da tolerancia informado pelo servidor (ms), se houver. */
-  toleranceUntil?: number | null;
-}): number {
-  const antesDeComecarACustar = s.agora + Math.max(s.restante - LATE_PENALTY_THRESHOLD_MINUTES, 0) * 60000;
-  return Math.max(antesDeComecarACustar, s.toleranceUntil ?? 0);
-}
-
 export type Advertencia = {
   titulo: string;
   mensagem: string;
-  /** "Sair" so aparece quando sair AGORA nao custa. */
+  /** "Sair agora de graça" so aparece quando sair AGORA nao custa. */
   sairDeGraca: string | null;
   adiar: string | null;
   ficar: string;
@@ -54,23 +35,15 @@ export function advertenciaDaMulta(s: {
   /** Sair agora custa? (a mesma regra da saida: servidor, tolerancia, 1h). */
   sairCustaAgora: boolean;
   podeAdiar: boolean;
-  /** Ate quando sair e de graca (ms) — ver `limiteDaSaidaGratis`. */
-  gratisAte?: number | null;
 }): Advertencia {
-  // De 244 caracteres para uma linha (guia de texto, §4.2). O corpo antigo
-  // trazia as tres faixas de valor e o "adiar nao tem custo"; a hora substitui
-  // as faixas e o resto mora no "Saiba mais".
-  let mensagem = 'Sair agora gera multa.';
-  if (!s.sairCustaAgora) {
-    mensagem = s.gratisAte
-      ? `Sair agora ainda é de graça. Depois das ${formatClockTime(new Date(s.gratisAte))}, gera multa.`
-      : 'Sair agora ainda é de graça. Depois, gera multa.';
-  }
   return {
     titulo: 'Sua vez está chegando',
-    mensagem,
-    sairDeGraca: s.sairCustaAgora ? null : 'Sair',
-    adiar: s.podeAdiar ? 'Adiar' : null,
-    ficar: 'Ficar',
+    mensagem:
+      'Se precisar desistir, faça agora: sair é de graça com 1 hora ou mais para a sua vez. ' +
+      'Entre 30 minutos e 1 hora, a saída gera multa de R$ 3,00; com 30 minutos ou menos, R$ 5,00 — ' +
+      'cobrada no seu próximo atendimento. Adiar a sua vez não tem custo.',
+    sairDeGraca: s.sairCustaAgora ? null : 'Sair agora de graça',
+    adiar: s.podeAdiar ? 'Adiar minha vez' : null,
+    ficar: 'Continuar na fila',
   };
 }
