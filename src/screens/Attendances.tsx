@@ -39,22 +39,25 @@ import { groupIntentionsByDay } from "@domain/schedule/agenda";
 import { formatWaitTime, formatClockTime, STATUS_DESCONHECIDO, filaEncerrada } from "@domain/queue/types";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { usePilulaDeTopo } from "@hooks/usePilulaDeTopo";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 // [marca-vupth] Cada status e um PAR (fundo, texto). Antes era so uma cor de
 // FUNDO com texto branco fixo por cima, e "Atrasado" (#F59E0B + branco) dava
-// 2,15:1 — abaixo do minimo WCAG de 4,5:1. Os pares abaixo usam tokens da
-// marca: fundo claro com `forest` por cima, que e a regra de contraste da
-// identidade (accentPeach + forest = 8,76:1).
+// 2,15:1 — abaixo do minimo WCAG de 4,5:1. Os pares abaixo sao tokens da marca,
+// cada fundo com o seu `on*` (accentPeach + onAccentPeach = 8,76:1 no claro), e
+// trocam de tema sozinhos: um hex aqui deixaria o "Concluido" claro berrante
+// no meio do cartao escuro. `sobrePainel` e a surface no claro e o segundo
+// nivel no escuro, para o selo nao sumir dentro do cartao surface.
 const HISTORY_STATUS: Record<string, { label: string; bg: string; fg: string }> = {
-  FINISHED: { label: "Concluído", bg: "#E2F6D5", fg: "#163300" },   // greenTint
-  CANCELLED: { label: "Cancelado", bg: "#F3F5F1", fg: "#B3261E" },  // surface + danger
+  FINISHED: { label: "Concluído", bg: "$greenTint", fg: "$onGreenTint" },
+  CANCELLED: { label: "Cancelado", bg: "$sobrePainel", fg: "$brandDanger" },
   // A loja tirou da fila (contrato de 18/09). O CANCELLED fica "Cancelado", e nao
   // "Você saiu da fila": os atendimentos ANTIGOS seguem CANCELLED mesmo quando foi
   // a loja, e o rotulo pessoal poria na conta do cliente o que ele nao fez.
-  REMOVED: { label: "Retirado pela loja", bg: "#F3F5F1", fg: "#B3261E" }, // surface + danger
-  LATE: { label: "Atrasado", bg: "#FFC091", fg: "#163300" },        // accentPeach
+  REMOVED: { label: "Retirado pela loja", bg: "$sobrePainel", fg: "$brandDanger" },
+  LATE: { label: "Atrasado", bg: "$accentPeach", fg: "$onAccentPeach" },
 };
 
 function formatDateTime(iso: string): string {
@@ -67,6 +70,7 @@ function formatDateTime(iso: string): string {
 }
 
 export function Attendances() {
+  const { cores } = useTema();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   // Tocar na aba JA ATIVA volta ao topo da lista (Andre, 18/09): e o gesto que
   // todo app de lista tem, e o caminho natural de quem desceu demais. O
@@ -241,7 +245,7 @@ export function Attendances() {
         scrollEventThrottle={32}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
         refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#163300" colors={["#163300"]} />
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={cores.textPrimary} colors={[cores.textPrimary]} />
         }
       >
         {pendentes.length > 0 && (
@@ -258,7 +262,7 @@ export function Attendances() {
                       {[p.professional_name, p.establishment_name].filter(Boolean).join(" · ") || "Toque para pagar"}
                     </Text>
                   </VStack>
-                  <ChevronRight size={16} color="#163300" />
+                  <ChevronRight size={16} color={cores.textPrimary} />
                 </HStack>
               </TouchableOpacity>
             ))}
@@ -269,9 +273,9 @@ export function Attendances() {
           <Box px={16} mt="$5">
             <TouchableOpacity onPress={() => setDetailFor(semAvaliar)} testID="convite-avaliar">
               <HStack bg="$greenTint" borderRadius="$card" p="$4" gap="$3" alignItems="center">
-                <Star size={20} color="#163300" />
+                <Star size={20} color={cores.onGreenTint} />
                 <VStack flex={1}>
-                  <Text fontFamily="$heading" size="sm" color="$forest">
+                  <Text fontFamily="$heading" size="sm" color="$onGreenTint">
                     Como foi com {semAvaliar.professionalName}?
                   </Text>
                   <Text size="xs" color="$brandTextSecondary">
@@ -285,7 +289,7 @@ export function Attendances() {
                   testID="avaliar-agora"
                 >
                   <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
-                    <Text fontFamily="$heading" fontSize={fs(12)} color="$forest">
+                    <Text fontFamily="$heading" fontSize={fs(12)} color="$onGreen">
                       Avaliar
                     </Text>
                   </Box>
@@ -322,16 +326,16 @@ export function Attendances() {
                 gap="$2"
               >
                 <HStack alignItems="center" gap="$2.5">
-                  <Users size={20} color="#163300" />
+                  <Users size={20} color={cores.textPrimary} />
                   <VStack flex={1} gap="$0.5">
-                    <Text fontFamily="$display" fontSize={fs(16)} letterSpacing={-0.4} color="$forest">
+                    <Text fontFamily="$display" fontSize={fs(16)} letterSpacing={-0.4} color="$brandTextPrimary">
                       {activeQueue.establishmentName}
                     </Text>
                     <Text size="xs" color="$brandTextSecondary">
                       {activeQueue.professionalName}
                     </Text>
                   </VStack>
-                  <ChevronRight size={18} color="#454745" />
+                  <ChevronRight size={18} color={cores.textSecondary} />
                 </HStack>
                 <HStack
                   bg="$brandGreen"
@@ -344,8 +348,8 @@ export function Attendances() {
                 >
                   {/* Pausado NAO pisca: o atendimento esta parado, e ponto
                       piscando sinalizaria movimento. */}
-                  <LiveDot size={8} color="#163300" pulsing={!isPaused} />
-                  <Text size="xs" fontWeight="$semibold" color="$forest">
+                  <LiveDot size={8} color={cores.onGreen} pulsing={!isPaused} />
+                  <Text size="xs" fontWeight="$semibold" color="$onGreen">
                     {isBeingAttended
                       ? "Em atendimento"
                       : isPaused
@@ -385,7 +389,7 @@ export function Attendances() {
               {pendingSwaps.map((s) => (
                 <Box key={s.offerId} bg="$brandSurface" p="$4" borderRadius="$card">
                   <HStack alignItems="center" gap="$3">
-                    <Repeat2 size={22} color="#163300" />
+                    <Repeat2 size={22} color={cores.textPrimary} />
                     <VStack flex={1}>
                       <Text fontFamily="$heading" size="sm">
                         {s.professionalName}
@@ -434,7 +438,7 @@ export function Attendances() {
                   {group.items.map((i) => (
                     <Box key={i.id} bg="$brandSurface" p="$4" borderRadius="$card">
                       <HStack alignItems="center" gap="$3">
-                        <Calendar size={22} color="#163300" />
+                        <Calendar size={22} color={cores.textPrimary} />
                         <VStack flex={1}>
                           <Text fontFamily="$heading" size="sm">
                             {i.professionalName}
@@ -482,6 +486,7 @@ export function Attendances() {
             <SkeletonList count={3} />
           ) : realizados.length === 0 ? (
             <Center py="$8">
+              {/* tema-fixo: icone decorativo em cinza neutro, que le nos dois fundos (7:1 sobre o escuro) */}
               <Clock size={40} color="#9CA3AF" />
               <Text size="sm" color="$brandTextSecondary" mt="$2">
                 Nenhum atendimento realizado ainda
@@ -492,8 +497,8 @@ export function Attendances() {
               {realizados.map((a) => {
                 const st = HISTORY_STATUS[a.status] ?? {
                   label: STATUS_DESCONHECIDO,
-                  bg: "#F3F5F1",
-                  fg: "#454745",
+                  bg: "$sobrePainel",
+                  fg: "$brandTextSecondary",
                 };
                 const canRate = podeAvaliar(a, ratedIds);
                 return (
@@ -537,7 +542,7 @@ export function Attendances() {
                         </VStack>
                       </HStack>
                       <HStack alignItems="center" gap="$1" mt="$3">
-                        <ChevronRight size={13} color={canRate ? "#163300" : "#454745"} />
+                        <ChevronRight size={13} color={canRate ? cores.textPrimary : cores.textSecondary} />
                         <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">
                           {canRate ? "Toque para detalhes e avaliar" : "Toque para ver detalhes"}
                         </Text>

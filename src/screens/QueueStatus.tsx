@@ -57,6 +57,7 @@ import { queueService } from "@services/queueService";
 import { waitForBackend } from "@services/healthService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useMostraPosicao } from "@hooks/useMostraPosicao";
+import { useTema } from "@hooks/useTema";
 import { NumeroComSalto } from "@components/NumeroComSalto";
 import { alertaTipado } from "@utils/alertaTipado";
 import { posicaoVisivel } from "@domain/queue/posicao";
@@ -96,6 +97,7 @@ export function QueueStatus() {
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const oferecerPush = useFirstRunStore((s) => s.oferecerPush);
+  const { cores } = useTema();
 
   // ligar-push-permission (Andre, 05/10): a primeira vez na fila e quando o
   // aviso faz sentido — a tela 10 explica antes da caixa do sistema.
@@ -373,8 +375,10 @@ export function QueueStatus() {
   const { data: acceptableOffers = [] } = useSwapOffers(professionalId, canReshuffle);
   const acceptableCount = acceptableOffers.length;
 
-  const borderColor = isInQueue ? color : "#163300";
-  const timeColor = isInQueue ? color : "#163300";
+  // `color` e a urgencia (ambar/vermelho) e vem do hook; fora da fila o cartao e
+  // o do tema: forest no claro, quase branco no escuro (forest sobre a surface sumiria).
+  const borderColor = isInQueue ? color : cores.textPrimary;
+  const timeColor = isInQueue ? color : cores.textPrimary;
   // Finalizado: "Finalizado". Em atendimento: tempo decorrido rolando (m:ss).
   // Na fila: countdown ("Aguardando" quando zera).
   const timeLabel = isFinished
@@ -694,7 +698,7 @@ export function QueueStatus() {
   if (isCreating) {
     return (
       <Center flex={1} bg="$brandBackground" px={16}>
-        <ActivityIndicator size="large" color="#163300" />
+        <ActivityIndicator size="large" color={cores.textPrimary} />
         <Text mt="$2" color="$brandTextSecondary">{createMsg}</Text>
       </Center>
     );
@@ -794,7 +798,7 @@ export function QueueStatus() {
 
     return (
       <ScrollView
-        style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+        style={{ flex: 1, backgroundColor: cores.background }}
         contentContainerStyle={{ flexGrow: 1, paddingBottom: 32 }}
         showsVerticalScrollIndicator={false}
       >
@@ -803,13 +807,13 @@ export function QueueStatus() {
               do safe-area, nao de um 56 chutado. */}
           <VStack style={{ paddingTop: insets.top + 12 }} px={16} gap="$4" alignItems="center">
             <Center width={96} height={96} borderRadius={48} bg="$brandGreen">
-              <Check size={48} color="#163300" />
+              <Check size={48} color={cores.onGreen} />
             </Center>
             <Text
               fontFamily="$display"
               fontSize={fs(32)}
               letterSpacing={-1.4}
-              color="$forest"
+              color="$brandTextPrimary"
               textAlign="center"
             >
               PRONTO!
@@ -857,16 +861,17 @@ export function QueueStatus() {
                     name={activeQueue.professionalName ?? "?"}
                     size={52}
                     bg="$brandGreen"
+                    color="$onGreen"
                   />
                   <VStack flex={1} gap="$0.5">
-                    <Text fontFamily="$heading" fontSize={fs(15)} color="$forest">
+                    <Text fontFamily="$heading" fontSize={fs(15)} color="$onGreenTint">
                       Marcar de novo com {activeQueue.professionalName ?? "o profissional"}
                     </Text>
-                    <Text size="xs" color="$forest">
+                    <Text size="xs" color="$onGreenTint">
                       {activeQueue.establishmentName ?? ""}
                     </Text>
                   </VStack>
-                  <ChevronRight size={20} color="#163300" />
+                  <ChevronRight size={20} color={cores.onGreenTint} />
                 </HStack>
               </TouchableOpacity>
             )}
@@ -911,7 +916,7 @@ export function QueueStatus() {
                 testID="queue-info"
                 accessibilityLabel="Sobre o tempo estimado"
               >
-                <Info size={20} color="#163300" />
+                <Info size={20} color={cores.onGreen} />
               </HeaderIconButton>
             }
           />
@@ -921,7 +926,7 @@ export function QueueStatus() {
           contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 20 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#163300" colors={["#163300"]} />
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={cores.onGreen} colors={[cores.onGreen]} />
           }
         >
           <Text
@@ -929,7 +934,7 @@ export function QueueStatus() {
             fontSize={fs(13)}
             fontWeight="$bold"
             letterSpacing={1}
-            color="$forest"
+            color="$onGreen"
           >
             PARA A SUA VEZ
           </Text>
@@ -945,7 +950,7 @@ export function QueueStatus() {
                   fontSize={fs(110)}
                   lineHeight={fs(112)}
                   letterSpacing={-6}
-                  color="$forest"
+                  color="$onGreen"
                   testID="queue-position"
                 >
                   {peopleAhead}
@@ -955,7 +960,7 @@ export function QueueStatus() {
                 fontFamily="$display"
                 fontSize={fs(26)}
                 letterSpacing={-0.8}
-                color="$forest"
+                color="$onGreen"
                 textAlign="center"
               >
                 {peopleAhead === 0
@@ -971,7 +976,7 @@ export function QueueStatus() {
               fontSize={fs(72)}
               lineHeight={fs(78)}
               letterSpacing={-3}
-              color="$forest"
+              color="$onGreen"
               testID="queue-time"
             >
               {timeLabel}
@@ -982,7 +987,7 @@ export function QueueStatus() {
               da tela ele hierarquiza sem virar uma segunda cor. So o ALPHA
               subiu — 0x99 dava 3,40:1 sobre o verde e reprovava no AA; 0xBF da
               4,99:1 e continua mais leve que o forest chapado do numero. */}
-          <Text fontFamily="$body" fontSize={fs(15)} color="#163300BF" mt="$1">
+          <Text fontFamily="$body" fontSize={fs(15)} color={`${cores.onGreen}BF`} mt="$1">
             {semPrevisao
               ? "calculando a espera"
               : remaining! <= 0
@@ -1005,9 +1010,9 @@ export function QueueStatus() {
                       height={done ? 12 : 8}
                       borderRadius="$full"
                       // O ponto apagado e TRILHA (decoracao), nao informacao:
-                      // quem informa e o ponto cheio, em $forest e maior. Por
+                      // quem informa e o ponto cheio, em onGreen e maior. Por
                       // isso o alpha baixo fica.
-                      bg={done ? "$forest" : "#16330040"}
+                      bg={done ? "$onGreen" : `${cores.onGreen}40`}
                     />
                   );
                 })}
@@ -1015,7 +1020,7 @@ export function QueueStatus() {
               {/* [contraste] Mesma logica do subtitulo acima: alpha 0xB3 dava
                   4,38:1 sobre o verde, 0xCC da 5,69:1. Fica um degrau ACIMA do
                   subtitulo, como era antes. */}
-              <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color="#163300CC" mt="$3">
+              <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color={`${cores.onGreen}CC`} mt="$3">
                 Você já passou {passed} {passed === 1 ? "pessoa" : "pessoas"}
               </Text>
             </>
@@ -1049,8 +1054,10 @@ export function QueueStatus() {
               testID="faixa-de-saida"
             >
               <HStack alignItems="center" gap="$2">
-                <Info size={16} color="#163300" />
-                <Text size="xs" color="$forest" flex={1}>
+                {/* O texto e o par do fundo: onAccentPeach sobre o ambar (no escuro o
+                    ambar vira um marrom e forest sumiria), textPrimary sobre o fundo. */}
+                <Info size={16} color={saidaAtual.confirmacao ? cores.onAccentPeach : cores.textPrimary} />
+                <Text size="xs" color={saidaAtual.confirmacao ? "$onAccentPeach" : "$brandTextPrimary"} flex={1}>
                   {saidaAtual.faixa}
                 </Text>
                 {/* sair-da-fila-texto (Andre, 15/10): o artigo do suporte. */}
@@ -1058,7 +1065,7 @@ export function QueueStatus() {
                   onPress={() => Linking.openURL(SUPORTE_SAIR_DA_FILA_URL)}
                   testID="saida-saiba-mais"
                 >
-                  <Text size="xs" fontWeight="$semibold" color="$forest" underline>
+                  <Text size="xs" fontWeight="$semibold" color={saidaAtual.confirmacao ? "$onAccentPeach" : "$brandTextPrimary"} underline>
                     Saiba mais
                   </Text>
                 </TouchableOpacity>
@@ -1076,6 +1083,7 @@ export function QueueStatus() {
               testID="change-turn"
             >
               <HStack
+                // tema-fixo: pilula forest sobre o hero brandGreen, que e verde nos dois temas
                 bg="$forest"
                 borderRadius="$full"
                 gap="$2"
@@ -1085,7 +1093,7 @@ export function QueueStatus() {
                 alignItems="center"
                 opacity={isRemanejando ? 0.6 : 1}
               >
-                <Repeat2 size={17} color="#9FE870" />
+                <Repeat2 size={17} color={cores.green} />
                 <Text fontFamily="$heading" fontSize={fs(15)} color="$brandGreen">
                   {isRemanejando ? "Um instante..." : "Mudar minha vez"}
                 </Text>
@@ -1097,7 +1105,7 @@ export function QueueStatus() {
               solicitacao depois"). A tela verde nao tinha como chegar neles. */}
           {canReshuffle && (
             <TouchableOpacity onPress={() => setShowSwapOffers(true)} testID="ver-trocas">
-              <Text fontFamily="$heading" fontSize={fs(14)} color="$forest">
+              <Text fontFamily="$heading" fontSize={fs(14)} color="$onGreen">
                 {acceptableCount > 0 ? `Pedidos de troca (${acceptableCount})` : "Pedidos de troca"}
               </Text>
             </TouchableOpacity>
@@ -1107,7 +1115,7 @@ export function QueueStatus() {
               para quem procura, sem gritar para quem nao esta procurando. */}
           {canCancel && (
             <TouchableOpacity onPress={handleCancel} disabled={isRemanejando} testID="leave-queue">
-              <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color="#163300CC">
+              <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color={`${cores.onGreen}CC`}>
                 Sair da fila
               </Text>
             </TouchableOpacity>
@@ -1159,7 +1167,7 @@ export function QueueStatus() {
         contentContainerStyle={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#163300" colors={["#163300"]} />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={cores.textPrimary} colors={[cores.textPrimary]} />
         }
       >
       <Center flex={1}>
@@ -1199,7 +1207,7 @@ export function QueueStatus() {
                   hitSlop={8}
                 >
                   {/* #9CA3AF da 2,85:1 no claro e reprova no AA. */}
-                  <Info size={16} color="#454745" />
+                  <Info size={16} color={cores.textSecondary} />
                 </TouchableOpacity>
               )}
             </HStack>
