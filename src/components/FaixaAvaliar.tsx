@@ -12,9 +12,7 @@ import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
 import { fs } from "@stores/fonteStore";
 import { useEntrada } from "@utils/motion";
-
-const FOREST = "#163300";
-const TINT = "#E2F6D5";
+import { useTema } from "@hooks/useTema";
 
 /** O ultimo atendimento cuja faixa ja apareceu (uma vez so por atendimento). */
 export const FAIXA_AVALIAR_KEY = "vupth_faixa_avaliar";
@@ -31,6 +29,7 @@ export function FaixaAvaliar() {
   const ratedIds = useRatedStore((s) => s.ids);
   const { data: history = [] } = useClientAttendances();
   const insets = useSafeAreaInsets();
+  const { cores } = useTema();
   const [vista, setVista] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
@@ -62,11 +61,12 @@ export function FaixaAvaliar() {
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-        backgroundColor: TINT,
+        backgroundColor: cores.greenTint,
         borderRadius: 16,
         paddingVertical: 12,
         paddingHorizontal: 14,
         elevation: 6,
+        // tema-fixo: sombra preta nos dois temas; ela nao carrega texto nem sentido
         shadowColor: "#000",
         shadowOpacity: 0.12,
         shadowRadius: 8,
@@ -75,7 +75,7 @@ export function FaixaAvaliar() {
         entrada,
       ]}
     >
-      <Star size={18} color={FOREST} />
+      <Star size={18} color={cores.onGreenTint} />
       <Pressable
         style={{ flex: 1 }}
         onPress={() => {
@@ -85,13 +85,13 @@ export function FaixaAvaliar() {
         testID="faixa-avaliar-abrir"
         accessibilityRole="button"
       >
-        <Text style={{ color: FOREST, fontSize: fs(14), fontWeight: "600" }}>
+        <Text style={{ color: cores.onGreenTint, fontSize: fs(14), fontWeight: "600" }}>
           Como foi com {pendente.professionalName}?
         </Text>
-        <Text style={{ color: FOREST, fontSize: fs(13) }}>Toque para avaliar</Text>
+        <Text style={{ color: cores.onGreenTint, fontSize: fs(13) }}>Toque para avaliar</Text>
       </Pressable>
       <Pressable onPress={marcarVista} testID="faixa-avaliar-fechar" accessibilityLabel="Fechar" hitSlop={12}>
-        <X size={18} color={FOREST} />
+        <X size={18} color={cores.onGreenTint} />
       </Pressable>
     </Animated.View>
   );

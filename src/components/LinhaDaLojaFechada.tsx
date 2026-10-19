@@ -31,7 +31,7 @@ export function LinhaDaLojaFechada({
         <HStack alignItems="center" gap="$3">
           <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} />
           <VStack flex={1}>
-            <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+            <Text fontFamily="$heading" fontSize="$sm" color="$brandTextPrimary">
               {establishment.name}
             </Text>
             <Text size="xs" color="$brandTextSecondary" mt="$0.5">

@@ -3,6 +3,7 @@ import { HStack, Text } from "@gluestack-ui/themed";
 import { RefreshCw } from "lucide-react-native";
 
 import { ehNavegador } from "@utils/ehNavegador";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 // Puxar para atualizar (RefreshControl) nao existe no navegador: com mouse nao
@@ -17,6 +18,7 @@ export function AtualizarNoNavegador({
   atualizando: boolean;
   onPress: () => void;
 }) {
+  const { cores } = useTema();
   if (!ehNavegador()) return null;
   return (
     <TouchableOpacity
@@ -34,8 +36,8 @@ export function AtualizarNoNavegador({
         alignItems="center"
         opacity={atualizando ? 0.6 : 1}
       >
-        <RefreshCw size={15} color="#163300" />
-        <Text fontFamily="$heading" fontSize={fs(13)} color="$forest">
+        <RefreshCw size={15} color={cores.textPrimary} />
+        <Text fontFamily="$heading" fontSize={fs(13)} color="$brandTextPrimary">
           {atualizando ? "Atualizando..." : "Atualizar"}
         </Text>
       </HStack>

@@ -18,6 +18,7 @@
  * import antigo continuar passando batido.
  */
 export const floatingShadow = {
+  // tema-fixo: sombra forest a 8%, sem texto; no escuro ela some contra o fundo e o que separa a peca e o painel
   shadowColor: "#163300", // [marca-vupth] $forest
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.08,
