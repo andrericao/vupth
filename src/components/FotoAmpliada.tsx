@@ -14,6 +14,7 @@ export function FotoAmpliada({ uri, onClose }: { uri: string | null; onClose: ()
         onPress={onClose}
         testID="foto-ampliada"
         accessibilityLabel="Fechar a foto"
+        // tema-fixo: visualizador de foto, fundo preto a 90% nos dois temas (a foto pede um fundo neutro e escuro)
         style={{ flex: 1, backgroundColor: "#000000E6", alignItems: "center", justifyContent: "center" }}
       >
         {uri && (
@@ -26,6 +27,7 @@ export function FotoAmpliada({ uri, onClose }: { uri: string | null; onClose: ()
           accessibilityLabel="Fechar"
           style={{ position: "absolute", top: 48, right: 20 }}
         >
+          {/* tema-fixo: o X e branco sobre o fundo preto da foto, nos dois temas */}
           <X size={26} color="#FFFFFF" />
         </Pressable>
       </Pressable>

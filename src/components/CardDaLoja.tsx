@@ -12,6 +12,7 @@ import { NotaDaLoja } from "@components/NotaDaLoja";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
 import { BadgeAgendar } from "@components/BadgeAgendar";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 // O card de uma loja na lista do Inicio (saiu da Home em 09/10, junto com a
@@ -36,6 +37,7 @@ import { fs } from "@stores/fonteStore";
  * fechada e ruido.
  */
 function StatusPill({ label, live }: { label: string; live: boolean }) {
+  const { cores } = useTema();
   // agendar-ambar (18/10): fechada, o convite e o selo ambar AGENDAR.
   if (!live) return <BadgeAgendar testID="status-agendar" />;
   return (
@@ -49,12 +51,13 @@ function StatusPill({ label, live }: { label: string; live: boolean }) {
       py={6}
       alignItems="center"
     >
-      {live && <LiveDot size={8} color="#163300" pulsing />}
+      {/* O ponto e o rotulo estao sobre o green, que e o mesmo nos dois temas: o par e o onGreen. */}
+      {live && <LiveDot size={8} color={cores.onGreen} pulsing />}
       <Text
         fontFamily="$display"
         fontSize={fs(12)}
         fontWeight="$bold"
-        color={live ? "$forest" : "$brandTextSecondary"}
+        color={live ? "$onGreen" : "$brandTextSecondary"}
       >
         {label}
       </Text>
@@ -83,6 +86,7 @@ export const CardDaLoja = memo(function CardDaLoja({
   semGps?: boolean;
   onPress: (establishment: Establishment) => void;
 }) {
+  const { cores } = useTema();
   // "Aberta AGORA" efetiva (inclui horario de funcionamento) — loja OPEN fora
   // do horario mostra fechada (feedback Andre 2026-07-22).
   // Sem contagem de pessoas na listagem (o backend so expoe tempo estimado):
@@ -115,7 +119,8 @@ export const CardDaLoja = memo(function CardDaLoja({
           4,92:1, e a linha cinza dizia "nao da pra nada" numa loja que aceita
           agendar. O aviso e o selo AGENDAR, no canto. */}
       <HStack bg="$brandSurface" borderRadius={18} gap={14} p={14} mb={12} alignItems="center">
-        <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} bg="$greenTint" color="$forest" />
+        {/* As iniciais saem no par do greenTint (o padrao do avatar): forest no claro, green no escuro. */}
+        <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} />
         <VStack flex={1} gap={4}>
           <Text fontFamily="$display" fontSize={fs(15)} fontWeight="$bold" color="$brandTextPrimary">
             {establishment.name}
@@ -145,7 +150,7 @@ export const CardDaLoja = memo(function CardDaLoja({
               <HStack gap={8} alignItems="center">
                 <Center width={3} height={3} borderRadius={1.5} bg="$brandTextSecondary" />
                 <HStack gap={3} alignItems="center" testID={`distancia-${establishment.id}`}>
-                  <MapPin size={12} color="#163300" />
+                  <MapPin size={12} color={cores.textPrimary} />
                   <Text fontFamily="$body" fontSize={fs(13)} color="$brandTextSecondary">
                     {distancia}
                   </Text>

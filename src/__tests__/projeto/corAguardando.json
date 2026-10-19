@@ -1,8 +1,1 @@
-{
-  "src/components/BadgeAgendar.tsx": { "pr": "#95", "forest": 1 },
-  "src/components/DialogoVupth.tsx": { "pr": "#96 e #97", "hex": 8 },
-  "src/components/LinhaDaLojaFechada.tsx": { "pr": "#95", "forest": 1 },
-  "src/components/SaibaMais.tsx": { "pr": "#107", "forest": 1 },
-  "src/components/SaibaMaisDoPreco.tsx": { "pr": "#100", "forest": 1 },
-  "src/domain/tipoDeDialogo.ts": { "pr": "#96 e #97", "hex": 12 }
-}
+{}

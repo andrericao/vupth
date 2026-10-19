@@ -2,6 +2,7 @@ import { Modal, TouchableOpacity, Pressable } from "react-native";
 import { VStack, HStack, Box, Text } from "@gluestack-ui/themed";
 import { ChevronRight } from "lucide-react-native";
 import type { ComponentType } from "react";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 export type MoreOption = {
@@ -40,18 +41,19 @@ type Props = {
 // O padrão é o mesmo do menu do dono e do perfil do profissional no partner:
 // linha com ícone, título, apoio e chevron.
 export function MoreOptionsModal({ visible, title, subtitle, options, onClose }: Props) {
+  const { cores, veu } = useTema();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
+      <Box flex={1} bg={veu} justifyContent="center" px={24}>
         {/* Tocar fora fecha — era só pelo botão e pelo voltar do Android. */}
         <Pressable
           style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
           onPress={onClose}
           accessibilityLabel="Fechar mais opções"
         />
-        <VStack bg="$brandBackground" borderRadius="$hero" p="$5" gap="$4">
+        <VStack bg="$painel" borderRadius="$hero" p="$5" gap="$4">
           <VStack gap="$1">
-            <Text fontFamily="$display" fontSize={fs(20)} letterSpacing={-0.5} color="$forest">
+            <Text fontFamily="$display" fontSize={fs(20)} letterSpacing={-0.5} color="$brandTextPrimary">
               {title ?? "Mais opções"}
             </Text>
             {subtitle && (
@@ -75,17 +77,18 @@ export function MoreOptionsModal({ visible, title, subtitle, options, onClose }:
                   accessibilityLabel={option.title}
                   accessibilityState={{ disabled: !!option.disabled }}
                 >
+                  {/* `sobrePainel`: a surface no claro; no escuro a surface e a cor do painel */}
                   <HStack
-                    bg="$brandSurface"
+                    bg="$sobrePainel"
                     borderRadius="$card"
                     p="$4"
                     gap="$3"
                     alignItems="center"
                     opacity={option.disabled ? 0.5 : 1}
                   >
-                    {Icon && <Icon size={20} color="#163300" />}
+                    {Icon && <Icon size={20} color={cores.textPrimary} />}
                     <VStack flex={1} gap="$0.5">
-                      <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                      <Text fontFamily="$heading" fontSize="$sm" color="$brandTextPrimary">
                         {option.title}
                       </Text>
                       {option.description && (
@@ -94,7 +97,7 @@ export function MoreOptionsModal({ visible, title, subtitle, options, onClose }:
                         </Text>
                       )}
                     </VStack>
-                    <ChevronRight size={18} color="#454745" />
+                    <ChevronRight size={18} color={cores.textSecondary} />
                   </HStack>
                 </TouchableOpacity>
               );

@@ -6,6 +6,7 @@ import { Button } from "@components/Button";
 import { floatingShadow } from "@utils/styles";
 import { formatClockTime } from "@domain/queue/types";
 import { SwapOfferDirection } from "@services/swapOfferService";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 type Props = {
@@ -87,10 +88,12 @@ function Radio({ selected, disabled }: { selected: boolean; disabled?: boolean }
   // de contraste — baixo contraste e justamente o sinal de "indisponivel" (a
   // linha inteira ainda leva opacity 0.45). Nao trocar por token de texto: em
   // qualquer OUTRO lugar esse cinza reprova e ja foi substituido.
-  const color = disabled ? "$gray400" : selected ? "$forest" : "$brandBorder";
+  // Marcado = o papel `selecionado` (forest no claro, green no escuro: forest no
+  // escuro e a surface e o radio marcado ficaria igual ao vazio).
+  const color = disabled ? "$gray400" : selected ? "$selecionado" : "$brandBorder";
   return (
     <Center w={22} h={22} rounded="$full" borderWidth="$2" borderColor={color}>
-      {selected && <Box w={10} h={10} rounded="$full" bg="$forest" />}
+      {selected && <Box w={10} h={10} rounded="$full" bg="$selecionado" />}
     </Center>
   );
 }
@@ -99,6 +102,7 @@ function Radio({ selected, disabled }: { selected: boolean; disabled?: boolean }
 // confirma. Troca = /swap-offers (backend fatia 1), nunca gera multa.
 export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveToEnd, onReschedule, onCreateSwapOffer, onClose }: Props) {
   const [selected, setSelected] = useState<TurnOption | null>(null);
+  const { veu } = useTema();
 
   function close() {
     setSelected(null);
@@ -123,15 +127,15 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$brandBackground" borderRadius="$hero" p="$6" gap="$4" style={floatingShadow}>
+      <Box flex={1} bg={veu} justifyContent="center" px={24}>
+        <VStack bg="$painel" borderRadius="$hero" p="$6" gap="$4" style={floatingShadow}>
           <VStack gap="$1">
             <Text
               fontFamily="$display"
               fontSize={fs(22)}
               lineHeight={fs(26)}
               letterSpacing={-0.6}
-              color="$forest"
+              color="$brandTextPrimary"
             >
               Mudar minha vez
             </Text>
@@ -183,13 +187,13 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
                       px="$3.5"
                       borderRadius="$card"
                       borderWidth="$1"
-                      borderColor={isSelected ? "$forest" : "$brandBorder"}
-                      bg={isSelected ? "$greenTint" : "$brandBackground"}
+                      borderColor={isSelected ? "$selecionado" : "$brandBorder"}
+                      bg={isSelected ? "$greenTint" : "$painel"}
                       opacity={disabled ? 0.45 : 1}
                     >
                       <Radio selected={isSelected} disabled={disabled} />
                       <VStack flex={1} gap="$0.5">
-                        <Text fontFamily="$heading" fontSize={fs(14)} color="$forest">
+                        <Text fontFamily="$heading" fontSize={fs(14)} color={isSelected ? "$onGreenTint" : "$brandTextPrimary"}>
                           {option.title}
                         </Text>
                         <Text size="xs" color="$brandTextSecondary">
