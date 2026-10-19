@@ -17,8 +17,8 @@ export type AvisoDeAtraso = {
   /** Um só, e obrigatório: é ele que registra a ciência. */
   botao: string;
   /**
-   * Oferece "Adiar minha vez" no mesmo aviso (Andre, 26/09 — esboço): adiar
-   * evita o próximo atraso. Não no 3º: ali ele já foi para o fim da fila.
+   * Oferece "Adiar" no mesmo aviso (Andre, 26/09 — esboço): adiar evita o
+   * próximo atraso. Não no 3º: ali ele já foi para o fim da fila.
    */
   oferecerAdiar: boolean;
 };
@@ -31,8 +31,9 @@ const MULTA_NA_TERCEIRA = 3;
 export const MULTA_POR_ATRASO = 5;
 
 const ordinal = (n: number): string => `${n}º`;
-// Tom positivo antes da multa (Andre, 26/09: "não se atrase / evite multa").
-const TITULO_POSITIVO = 'Não se atrase — evite a multa';
+// O título diz o FATO (guia de texto, §4.3): a troca de lugar já aconteceu. O
+// tom de "evite a multa" (Andre, 26/09) passou para o corpo: "No 3º, R$ 5,00".
+const TITULO_DA_TROCA = 'Você trocou de lugar';
 const reais = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`;
 
 export function avisoDeAtraso(s: {
@@ -45,29 +46,20 @@ export function avisoDeAtraso(s: {
   const valor = reais(s.valor ?? MULTA_POR_ATRASO);
   const temContagem = typeof s.contagem === 'number' && s.contagem > 0;
   const multa = s.multa ?? (temContagem ? s.contagem! >= MULTA_NA_TERCEIRA : false);
-  const titulo = 'Você foi chamado e não chegou';
-
   if (multa) {
     return {
-      titulo,
-      mensagem:
-        (temContagem ? `Este é o seu ${ordinal(s.contagem!)} atraso: ` : '') +
-        `multa de ${valor} no seu próximo atendimento, e você foi para o fim da fila. ` +
-        'Pode continuar nela ou sair sem nova multa.',
+      // No 3º por regra; com a contagem do servidor, o ordinal dele.
+      titulo: `${ordinal(temContagem ? s.contagem! : MULTA_NA_TERCEIRA)} atraso`,
+      mensagem: `Multa de ${valor} e você foi para o fim da fila.`,
       botao: 'Entendi',
       oferecerAdiar: false,
     };
   }
 
   if (temContagem) {
-    const faltam = MULTA_NA_TERCEIRA - s.contagem!;
     return {
-      titulo: TITULO_POSITIVO,
-      mensagem:
-        `Este é o seu ${ordinal(s.contagem!)} atraso — sem multa. Você trocou de lugar com o próximo e continua na fila. ` +
-        `No ${ordinal(MULTA_NA_TERCEIRA)}, multa de ${valor} e você vai para o fim da fila` +
-        (faltam > 0 ? ` (${faltam === 1 ? 'falta um' : `faltam ${faltam}`}).` : '.') +
-        ' Se não vai dar tempo, adie a sua vez.',
+      titulo: TITULO_DA_TROCA,
+      mensagem: `${ordinal(s.contagem!)} atraso, sem multa. No ${ordinal(MULTA_NA_TERCEIRA)}, ${valor} e fim da fila.`,
       botao: 'Entendi',
       oferecerAdiar: true,
     };
@@ -75,10 +67,8 @@ export function avisoDeAtraso(s: {
 
   // Sem a contagem do servidor: avisa o que SABE, e não inventa ordinal.
   return {
-    titulo: TITULO_POSITIVO,
-    mensagem:
-      'Você trocou de lugar com o próximo e continua na fila, por enquanto sem multa. Os atrasos se acumulam — ' +
-      `no ${ordinal(MULTA_NA_TERCEIRA)}, multa de ${valor} e você vai para o fim da fila. Se não vai dar tempo, adie a sua vez.`,
+    titulo: TITULO_DA_TROCA,
+    mensagem: `Sem multa por enquanto. No ${ordinal(MULTA_NA_TERCEIRA)} atraso, ${valor} e fim da fila.`,
     botao: 'Entendi',
     oferecerAdiar: true,
   };

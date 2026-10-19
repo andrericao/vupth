@@ -69,7 +69,7 @@ appId: ${APP_ID}
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "10.09 · roda fechar_aviso"
-# Ja na fila: o aviso da politica da multa (CLI-12) — "Continuar na fila".
+# Ja na fila: o aviso da politica da multa (CLI-12) — "Ficar".
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "10.10 · roda fechar_aviso"
