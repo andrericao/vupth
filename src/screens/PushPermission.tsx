@@ -90,10 +90,10 @@ export function PushPermission() {
         {/* Nao pedimos a permissao aqui: quem pede e o `usePushRegistration`,
             assim que esta tela e respondida. Ela aparece na primeira entrada
             numa fila (ligar-push-permission, 05/10), sobre a tela da fila. */}
-        <Button title="Quero ser avisada" onPress={aceitar} testID="push-accept" />
+        <Button title="Avisar" onPress={aceitar} testID="push-accept" />
         <TouchableOpacity onPress={recusar} testID="push-skip">
           <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
-            Prefiro acompanhar pelo app
+            Agora não
           </Text>
         </TouchableOpacity>
       </VStack>
