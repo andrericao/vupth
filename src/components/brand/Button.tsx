@@ -24,7 +24,15 @@ export function BrandButton({
   const isOutline = variant === "outline";
   const bg =
     variant === "primary" ? "$brandGreen" : variant === "secondary" ? "$greenTint" : "transparent";
-  const textColor = isGhost ? "$brandTextSecondary" : "$forest";
+  // O rotulo e o par do fundo (onGreen sobre o green, onGreenTint sobre o tint,
+  // textPrimary no vazado); `$forest` fixo daria forest sobre forest no escuro.
+  const textColor = isGhost
+    ? "$brandTextSecondary"
+    : variant === "primary"
+      ? "$onGreen"
+      : variant === "secondary"
+        ? "$onGreenTint"
+        : "$brandTextPrimary";
 
   return (
     <GluestackButton
@@ -35,7 +43,7 @@ export function BrandButton({
       bg={bg}
       $active-bg={variant === "primary" ? "$brandSuccess" : variant === "secondary" ? "$brandSurfaceAlt" : "transparent"}
       borderWidth={isOutline ? "$2" : "$0"}
-      borderColor="$forest"
+      borderColor="$brandTextPrimary"
       // `isDisabled` do Gluestack e so visual; o `disabled` de verdade (Pressable)
       // vai amarrado junto — ver nota no Button.tsx original.
       isDisabled={isDisabled}

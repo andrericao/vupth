@@ -4,6 +4,7 @@ import { Input as GluestackInput2, InputField, HStack, Text, VStack } from "@glu
 import { Eye, EyeOff, Search, CircleX } from "lucide-react-native";
 
 import { DICA_DA_SENHA, SENHA_MAX } from "@domain/auth/validateAuth";
+import { useTema } from "@hooks/useTema";
 
 type Props = ComponentProps<typeof InputField> & {
   isPassword?: boolean;
@@ -14,6 +15,7 @@ type Props = ComponentProps<typeof InputField> & {
 };
 
 export function Input2({ isPassword = false, showSearchIcon = false, onClear, secureTextEntry, value, mostrarLimites = true, ...rest }: Props) {
+  const { cores } = useTema();
   const [visible, setVisible] = useState(false);
 
   const isSecure = isPassword ? !visible : secureTextEntry;
@@ -29,13 +31,13 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
       // para os formularios dos dois apps seguirem do mesmo tamanho.
       style={{ minHeight: 48 }}
       px="$3"
-      bg="$white"
+      bg="$brandBackground"
       borderWidth="$1"
       borderColor="$brandBorder"
       borderRadius="$xl"
       variant="outline"
       $focus-borderWidth="$2"
-      $focus-borderColor="$forest"
+      $focus-borderColor="$brandTextPrimary"
     >
       <HStack flex={1} alignItems="center">
         <InputField
@@ -58,18 +60,18 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
             testID="input-ver-senha"
           >
             {visible ? (
-              <Eye size={22} color="#454745" />
+              <Eye size={22} color={cores.textSecondary} />
             ) : (
-              <EyeOff size={22} color="#454745" />
+              <EyeOff size={22} color={cores.textSecondary} />
             )}
           </TouchableOpacity>
         )}
         {showSearchIcon && !hasValue && (
-          <Search size={20} color="#454745" />
+          <Search size={20} color={cores.textSecondary} />
         )}
         {showSearchIcon && hasValue && onClear && (
           <TouchableOpacity onPress={onClear} hitSlop={8} accessibilityLabel="Limpar" testID="input-limpar">
-            <CircleX size={22} color="#454745" />
+            <CircleX size={22} color={cores.textSecondary} />
           </TouchableOpacity>
         )}
       </HStack>

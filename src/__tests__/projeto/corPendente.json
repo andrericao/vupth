@@ -7,9 +7,6 @@
     "hex": 1,
     "forest": 1
   },
-  "src/components/Button.tsx": {
-    "forest": 1
-  },
   "src/components/CardDaLoja.tsx": {
     "hex": 2,
     "forest": 2
@@ -31,10 +28,6 @@
   "src/components/DialogoVupth.tsx": {
     "hex": 6
   },
-  "src/components/ErrorBoundary.tsx": {
-    "hex": 1,
-    "forest": 1
-  },
   "src/components/FaixaAvaliar.tsx": {
     "hex": 3
   },
@@ -52,14 +45,6 @@
   },
   "src/components/FotoAmpliada.tsx": {
     "hex": 2
-  },
-  "src/components/Input2.tsx": {
-    "hex": 4,
-    "forest": 1,
-    "branco": 1
-  },
-  "src/components/LiveDot.tsx": {
-    "hex": 1
   },
   "src/components/LocationSelector.tsx": {
     "hex": 3,
@@ -84,16 +69,6 @@
   },
   "src/components/OfflineBanner.tsx": {
     "hex": 2
-  },
-  "src/components/PasswordRules.tsx": {
-    "hex": 2,
-    "forest": 1
-  },
-  "src/components/PilulaVoltarAoTopo.tsx": {
-    "hex": 2
-  },
-  "src/components/PlaceAvatar.tsx": {
-    "forest": 1
   },
   "src/components/PreparingServer.tsx": {
     "hex": 1
@@ -120,11 +95,8 @@
     "branco": 1
   },
   "src/components/ScreenHeader.tsx": {
-    "hex": 3,
+    "hex": 1,
     "forest": 1
-  },
-  "src/components/Skeleton.tsx": {
-    "hex": 1
   },
   "src/components/SwapOffersModal.tsx": {
     "hex": 1,
@@ -135,9 +107,6 @@
     "hex": 4
   },
   "src/components/WsDiagnostics.tsx": {
-    "forest": 2
-  },
-  "src/components/brand/Button.tsx": {
     "forest": 2
   },
   "src/hooks/useQueueCountdown.ts": {
