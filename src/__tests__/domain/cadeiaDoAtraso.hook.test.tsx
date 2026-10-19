@@ -77,7 +77,7 @@ describe('a cadeia do aviso de atraso', () => {
     await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith(
         expect.any(String),
-        expect.stringMatching(/^2º atraso, sem multa/),
+        expect.stringMatching(/Este é o seu 2º atraso/),
         expect.any(Array),
         { cancelable: false },
       ),

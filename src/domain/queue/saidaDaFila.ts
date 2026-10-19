@@ -4,26 +4,23 @@ import { CANCELLATION_PENALTY_VALUE } from './types';
 // versao final esta no vupth-docs):
 //
 // - "Sair da fila" SEMPRE pede dois toques seguidos. Um toque so mostra uma
-//   faixa curta com o que sair custa — sair por engano custa a vaga (e, fora da
-//   tolerancia, dinheiro). A faixa NAO explica o gesto ("Toque 2 vezes para
-//   sair"): explicar o obvio faz a pessoa parar de ler o resto, inclusive o
-//   valor da multa, que e o que importa (guia de texto, §2).
+//   faixa curta dizendo isso — sair por engano custa a vaga (e, fora da
+//   tolerancia, dinheiro).
 // - Enquanto a pessoa so espera, NADA aparece na tela. A faixa vem ao tentar
 //   sair.
-// - Com multa, a faixa diz o valor; os dois toques abrem uma confirmacao
-//   "Sair / Cancelar", e so o "Sair" tira da fila.
+// - Com multa, a faixa diz o valor e o porque; os dois toques abrem uma
+//   confirmacao "Sim / Nao", e so o "Sim" tira da fila.
 // - Sem multa, os dois toques tiram direto, sem confirmacao.
 //
-// O "Sair" com multa e a CIENCIA da multa (Backend 0caf229, em producao desde
-// 26/09): o valor que a confirmacao mostrou vai junto na saida. Sem ele — ou com
-// valor menor — o servidor responde 409 com o valor certo e NAO tira da fila; o
-// app mostra o aviso com esse valor e repete no "Sair" (`avisoDaMultaDoServidor`).
+// O "Sim" e a CIENCIA da multa (Backend 0caf229, em producao desde 26/09): o
+// valor que a confirmacao mostrou vai junto na saida. Sem ele — ou com valor
+// menor — o servidor responde 409 com o valor certo e NAO tira da fila; o app
+// mostra o aviso com esse valor e repete no "Sim" (`avisoDaMultaDoServidor`).
 //
-// sair-da-fila-texto (Andre, 15/10) e guia de texto (DEC-63, §4.1): a faixa e de
-// UMA linha, com o "Saiba mais" ao lado (o artigo do suporte). Sem multa, NAO
-// diz que e de graca: so tenta reter ("Faltam so X min."). Com multa: "Sair
-// agora gera multa de R$ X.". Botao de uma palavra (Sair / Cancelar) e titulo
-// que diz o fato ("Sair da fila"), nao a pergunta.
+// sair-da-fila-texto (Andre, 15/10): a faixa e de UMA linha, com o "Saiba
+// mais" ao lado (o artigo do suporte). Sem multa, NAO diz que e de graca: so
+// tenta reter ("Tem certeza? Faltam so X min"). Com multa: "Se sair, voce paga
+// uma multa de R$ X".
 //
 // Substitui o dialogo do D10 ("Ficar na fila / Trocar de lugar / Sair mesmo
 // assim"): a troca deixou de morar na saida (D16 a leva para um popup).
@@ -44,6 +41,8 @@ export type SaidaDaFila = {
   valorConfirmado: number | null;
 };
 
+const INSTRUCAO = 'Toque 2 vezes para sair.';
+
 const reais = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`;
 
 export function saidaDaFila(s: {
@@ -62,43 +61,45 @@ export function saidaDaFila(s: {
   const valor = reais(s.valor ?? CANCELLATION_PENALTY_VALUE);
 
   if (s.semPrevisao) {
-    // Sem previsao a multa e CONDICIONAL: a mesma frase serve de faixa e de
-    // corpo. "R$ X de multa no proximo atendimento" afirmaria o que o app nao sabe.
-    const condicional = `Sair a menos de 1 h da vez gera multa de ${valor}.`;
     return {
-      faixa: condicional,
-      confirmacao: { titulo: 'Sair da fila', mensagem: condicional, sim: 'Sair', nao: 'Cancelar' },
+      faixa: `Se faltar menos de 1 h, sair gera multa de ${valor}. ${INSTRUCAO}`,
+      confirmacao: {
+        titulo: 'Sair da fila?',
+        mensagem: `Se faltar menos de 1 hora para a sua vez, a saída gera multa de ${valor} no seu próximo atendimento.`,
+        sim: 'Sim, sair',
+        nao: 'Não',
+      },
       valorConfirmado: s.valor ?? CANCELLATION_PENALTY_VALUE,
     };
   }
 
   if (s.multa) {
     return {
-      faixa: `Sair agora gera multa de ${valor}.`,
+      faixa: `Se sair, você paga uma multa de ${valor}. ${INSTRUCAO}`,
       confirmacao: {
-        titulo: 'Sair da fila',
-        mensagem: `${valor} de multa no próximo atendimento.`,
-        sim: 'Sair',
-        nao: 'Cancelar',
+        titulo: 'Sair da fila?',
+        mensagem: `A multa de ${valor} será cobrada no seu próximo atendimento.`,
+        sim: 'Sim, sair',
+        nao: 'Não',
       },
       valorConfirmado: s.valor ?? CANCELLATION_PENALTY_VALUE,
     };
   }
 
-  const faixa = s.minutos != null && s.minutos > 0 ? `Faltam só ${Math.ceil(s.minutos)} min.` : 'Tem certeza?';
-  return { faixa, confirmacao: null, valorConfirmado: null };
+  const faltam = s.minutos != null && s.minutos > 0 ? ` Faltam só ${Math.ceil(s.minutos)} min.` : '';
+  return { faixa: `Tem certeza?${faltam} ${INSTRUCAO}`, confirmacao: null, valorConfirmado: null };
 }
 
 /**
  * O servidor recusou a saida pedindo a ciencia da multa (409): o aviso com o
- * valor DELE. O "Sair" repete a saida com esse valor.
+ * valor DELE. O "Sim" repete a saida com esse valor.
  */
 export function avisoDaMultaDoServidor(valor: number) {
   return {
-    titulo: 'Sair da fila',
-    mensagem: `${reais(valor)} de multa no próximo atendimento.`,
-    sim: 'Sair',
-    nao: 'Cancelar',
+    titulo: 'Sair da fila?',
+    mensagem: `Sair agora gera multa de ${reais(valor)}, cobrada no seu próximo atendimento. Sem o seu "Sim", você continua na fila.`,
+    sim: 'Sim, sair',
+    nao: 'Não',
   };
 }
 

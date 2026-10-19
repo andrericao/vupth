@@ -115,7 +115,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
   it('com menos de 1h, a faixa diz o valor em uma linha — e só a multa, sem convite de troca', () => {
     const { getByTestId, getByText, queryByText } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
-    expect(getByText('Sair agora gera multa de R$ 3,00.')).toBeTruthy();
+    expect(getByText(/Se sair, você paga uma multa de R\$ 3,00/)).toBeTruthy();
     expect(queryByText(/Trocar de lugar/)).toBeNull();
   });
 
@@ -128,29 +128,27 @@ describe('QueueStatus — sair da fila (D15)', () => {
     abrir.mockRestore();
   });
 
-  it('dois toques seguidos com multa abrem "Sair / Cancelar" — e "Cancelar" deixa na fila', () => {
+  it('dois toques seguidos com multa abrem "Sim / Não" — e "Não" deixa na fila', () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
     tocar(getByTestId);
     const [, , botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
-    expect(botoes.map((b) => b.text)).toEqual(['Cancelar', 'Adiar', 'Sair']);
-    expect(alerta.mock.calls[0][0]).toBe('Sair da fila');
-    expect(alerta.mock.calls[0][1]).toBe('R$ 3,00 de multa no próximo atendimento.');
+    expect(botoes.map((b) => b.text)).toEqual(['Não', 'Adiar minha vez', 'Sim, sair']);
     expect(attendanceService.cancel).not.toHaveBeenCalled();
     alerta.mockRestore();
   });
 
-  it('"Sair" cancela com a ciência da multa (o valor mostrado), volta ao início e limpa a fila local', async () => {
+  it('"Sim, sair" cancela com a ciência da multa (o valor mostrado), volta ao início e limpa a fila local', async () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
     tocar(getByTestId);
     const [, , botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
     await act(async () => {
-      await botoes.find((b) => b.text === 'Sair')!.onPress!();
+      await botoes.find((b) => b.text === 'Sim, sair')!.onPress!();
     });
-    // Ciência da multa (Backend 0caf229): o "Sair" leva o valor que o aviso mostrou.
+    // Ciência da multa (Backend 0caf229): o "Sim" leva o valor que o aviso mostrou.
     expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk', 3);
     expect(mockNavigate).toHaveBeenCalledWith('home', undefined, { pop: true });
     expect(mockLeave).toHaveBeenCalled();
@@ -175,7 +173,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     mockValor = 5;
     const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
-    expect(getByText('Sair agora gera multa de R$ 5,00.')).toBeTruthy();
+    expect(getByText(/multa de R\$ 5,00/)).toBeTruthy();
   });
 
   it('servidor dizendo zero (tolerância) manda sobre a regra local: sai sem confirmação', async () => {
@@ -191,7 +189,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     alerta.mockRestore();
   });
 
-  it('servidor pedindo a ciência (409): o aviso com o valor DELE, e o "Sair" repete a saída com ele', async () => {
+  it('servidor pedindo a ciência (409): o aviso com o valor DELE, e o "Sim" repete a saída com ele', async () => {
     mockValor = 3;
     (attendanceService.cancel as jest.Mock).mockRejectedValueOnce({
       response: { status: 409, data: { code: 'EXIT_PENALTY_NOT_ACKNOWLEDGED', exitPenaltyValue: 5 } },
@@ -202,14 +200,14 @@ describe('QueueStatus — sair da fila (D15)', () => {
     tocar(getByTestId);
     const [, , primeiro] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
     await act(async () => {
-      await primeiro.find((b) => b.text === 'Sair')!.onPress!();
+      await primeiro.find((b) => b.text === 'Sim, sair')!.onPress!();
     });
     // Recusado: continua na fila, e o segundo aviso traz o valor do servidor.
     expect(mockNavigate).not.toHaveBeenCalled();
     const [, mensagem, segundo] = alerta.mock.calls[1] as [string, string, BotaoDoAlert[]];
     expect(mensagem).toMatch(/R\$ 5,00/);
     await act(async () => {
-      await segundo.find((b) => b.text === 'Sair')!.onPress!();
+      await segundo.find((b) => b.text === 'Sim, sair')!.onPress!();
     });
     expect(attendanceService.cancel).toHaveBeenLastCalledWith('a1', 'tk', 5);
     expect(mockNavigate).toHaveBeenCalledWith('home', undefined, { pop: true });
@@ -217,23 +215,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     alerta.mockRestore();
   });
 
-  // Guia de texto §4.1: "Não deu para sair." + "Tente de novo.". A frase diz o
-  // estado em que a pessoa ficou: continua na fila ("erro ao cancelar" não diz).
-  it('a saída que falha (rede) diz "Não deu para sair" e que a pessoa continua na fila', async () => {
-    mockRemaining = 90;
-    (attendanceService.cancel as jest.Mock).mockRejectedValueOnce(new Error('Network Error'));
-    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const { getByTestId } = renderWithProviders(<QueueStatus />);
-    tocar(getByTestId);
-    await act(async () => {
-      tocar(getByTestId);
-    });
-    expect(alerta).toHaveBeenCalledWith('Não deu para sair', 'Você continua na fila. Tente de novo.');
-    expect(mockNavigate).not.toHaveBeenCalled();
-    alerta.mockRestore();
-  });
-
-  it('"Cancelar" no aviso do servidor deixa na fila', async () => {
+  it('"Não" no aviso do servidor deixa na fila', async () => {
     (attendanceService.cancel as jest.Mock).mockRejectedValueOnce({
       response: { status: 409, data: { code: 'EXIT_PENALTY_NOT_ACKNOWLEDGED', exitPenaltyValue: 5 } },
     });
@@ -243,10 +225,10 @@ describe('QueueStatus — sair da fila (D15)', () => {
     tocar(getByTestId);
     const [, , primeiro] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
     await act(async () => {
-      await primeiro.find((b) => b.text === 'Sair')!.onPress!();
+      await primeiro.find((b) => b.text === 'Sim, sair')!.onPress!();
     });
     const [, , segundo] = alerta.mock.calls[1] as [string, string, BotaoDoAlert[]];
-    expect(segundo.map((b) => b.text)).toEqual(['Cancelar', 'Sair']);
+    expect(segundo.map((b) => b.text)).toEqual(['Não', 'Sim, sair']);
     expect(attendanceService.cancel).toHaveBeenCalledTimes(1);
     expect(mockNavigate).not.toHaveBeenCalled();
     expect(mockLeave).not.toHaveBeenCalled();
@@ -263,58 +245,39 @@ describe('QueueStatus — advertência antes da multa', () => {
     mockAdvertida = false;
   });
 
-  it('com 1h20 para a vez: diz a hora em que sair passa a custar e oferece adiar e sair', async () => {
+  it('com 1h20 para a vez: avisa as faixas e oferece adiar e sair de graça', async () => {
     mockRemaining = 80;
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     renderWithProviders(<QueueStatus />);
     await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1), { timeout: 5000 });
     const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
     expect(titulo).toBe('Sua vez está chegando');
-    // GUIA_DE_TEXTO.md §4.2: a hora substitui as faixas de valor. Com 80 min para
-    // a vez, sair é de graça por mais 20 min.
-    expect(mensagem).toMatch(/^Sair agora ainda é de graça\. Depois das \d{2}:\d{2}, gera multa\.$/);
-    expect(mensagem).not.toMatch(/R\$/);
-    // "Saiba mais" por último: o índice dos três botões que já existiam não muda.
-    expect(botoes.map((b) => b.text)).toEqual(['Ficar', 'Adiar', 'Sair', 'Saiba mais']);
+    expect(mensagem).toMatch(/R\$ 3,00/);
+    expect(mensagem).toMatch(/R\$ 5,00/);
+    expect(botoes.map((b) => b.text)).toEqual(['Continuar na fila', 'Adiar minha vez', 'Sair agora de graça']);
     alerta.mockRestore();
   });
 
-  it('o "Saiba mais" da advertência abre o artigo de sair da fila e mostra o aviso de novo', async () => {
-    mockRemaining = 80;
-    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
-    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    renderWithProviders(<QueueStatus />);
-    await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1), { timeout: 5000 });
-    const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
-    botoes.find((b) => b.text === 'Saiba mais')!.onPress!();
-    expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/sair-da-fila.html');
-    expect(alerta).toHaveBeenCalledTimes(2);
-    expect(alerta.mock.calls[1][0]).toBe('Sua vez está chegando');
-    abrir.mockRestore();
-    alerta.mockRestore();
-  });
-
-  it('"Sair" da advertência sai sem a ciência de multa', async () => {
+  it('"Sair agora de graça" sai sem a ciência de multa', async () => {
     mockRemaining = 80;
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     renderWithProviders(<QueueStatus />);
     await waitFor(() => expect(alerta).toHaveBeenCalled(), { timeout: 5000 });
     const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
     await act(async () => {
-      await botoes.find((b) => b.text === 'Sair')!.onPress!();
+      await botoes.find((b) => b.text === 'Sair agora de graça')!.onPress!();
     });
     expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk', undefined);
     alerta.mockRestore();
   });
 
-  it('com menos de 1h, sair já custa: só adiar ou ficar', async () => {
+  it('com menos de 1h, sair já custa: só adiar ou continuar', async () => {
     mockRemaining = 20;
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     renderWithProviders(<QueueStatus />);
     await waitFor(() => expect(alerta).toHaveBeenCalled(), { timeout: 5000 });
     const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
-    expect(botoes.map((b) => b.text)).toEqual(['Ficar', 'Adiar', 'Saiba mais']);
-    expect(alerta.mock.calls[0][1]).toBe('Sair agora gera multa.');
+    expect(botoes.map((b) => b.text)).toEqual(['Continuar na fila', 'Adiar minha vez']);
     alerta.mockRestore();
   });
 

@@ -1,4 +1,4 @@
-import { Alert, Linking } from 'react-native';
+import { Alert } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 
 import { useAvisoDeAtraso } from '@hooks/useAvisoDeAtraso';
@@ -46,34 +46,20 @@ describe('useAvisoDeAtraso', () => {
     const [titulo, mensagem, botoes, opcoes] = alerta.mock.calls[0] as [
       string, string, { text: string; onPress?: () => void }[], { cancelable?: boolean },
     ];
-    // Esboço de 26/09: "Adiar" no mesmo aviso. Guia de texto §4.3: o título diz o
-    // fato e o "Saiba mais" é o último botão, depois dos dois que já existiam.
-    expect(titulo).toBe('Você trocou de lugar');
-    expect(mensagem).toBe('Sem multa por enquanto. No 3º atraso, R$ 5,00 e fim da fila.');
-    expect(botoes.map((b) => b.text)).toEqual(['Adiar', 'Entendi', 'Saiba mais']);
+    // Esboço de 26/09: tom positivo e "Adiar minha vez" no mesmo aviso.
+    expect(titulo).toBe('Não se atrase — evite a multa');
+    expect(mensagem).toMatch(/continua na fila/);
+    expect(botoes.map((b) => b.text)).toEqual(['Adiar minha vez', 'Entendi']);
     expect(opcoes.cancelable).toBe(false);
-  });
-
-  it('o "Saiba mais" abre o artigo de atrasos e NÃO registra a ciência: o aviso volta', () => {
-    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
-    porNaFila('LATE');
-    renderHook(() => useAvisoDeAtraso());
-    const [, , botoes] = alerta.mock.calls[0] as [string, string, { text: string; onPress?: () => void }[]];
-    botoes.find((b) => b.text === 'Saiba mais')!.onPress!();
-    expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/atrasos.html');
-    expect(useCienciaStore.getState().ids).toEqual([]);
-    expect(alerta).toHaveBeenCalledTimes(2);
-    expect(alerta.mock.calls[1][3]).toEqual({ cancelable: false });
-    abrir.mockRestore();
   });
 
   it('o toque registra a ciência — e o aviso não volta', async () => {
     porNaFila('LATE');
     const { rerender } = renderHook(() => useAvisoDeAtraso());
-    const [, , botoes] = alerta.mock.calls[0] as [string, string, { text: string; onPress?: () => void }[]];
+    const [, , botoes] = alerta.mock.calls[0] as [string, string, { onPress?: () => void }[]];
 
     await act(async () => {
-      botoes.find((b) => b.text === 'Entendi')!.onPress!();
+      botoes[botoes.length - 1].onPress!();
     });
     expect(useCienciaStore.getState().ids).toEqual(['a1']);
 
@@ -102,12 +88,12 @@ describe('useAvisoDeAtraso', () => {
     expect(alerta).toHaveBeenCalledTimes(1);
   });
 
-  it('"Adiar" registra a ciência e abre o Mudar minha vez da fila', async () => {
+  it('"Adiar minha vez" registra a ciência e abre o Mudar minha vez da fila', async () => {
     porNaFila('LATE');
     renderHook(() => useAvisoDeAtraso());
     const [, , botoes] = alerta.mock.calls[0] as [string, string, { text: string; onPress?: () => void }[]];
     await act(async () => {
-      botoes.find((b) => b.text === 'Adiar')!.onPress!();
+      botoes.find((b) => b.text === 'Adiar minha vez')!.onPress!();
     });
     expect(useCienciaStore.getState().ids).toEqual(['a1']);
     expect(mockAbrir).toHaveBeenCalledWith(expect.objectContaining({ professionalId: 'p1', establishmentId: 'e1' }));
