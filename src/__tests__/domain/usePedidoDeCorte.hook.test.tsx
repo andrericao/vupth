@@ -14,6 +14,8 @@ import { PedidoDeCorte } from '@domain/queue/pedidoDeCorte';
 // WebSocket (só com fila ativa) nem o push alcançavam quem só pediu corte.
 
 jest.mock('expo-secure-store');
+const mockAbrirLoja = jest.fn();
+jest.mock('@routes/navigationRef', () => ({ abrirLoja: (...a: unknown[]) => mockAbrirLoja(...a) }));
 jest.mock('@services/attendanceService', () => ({
   attendanceService: { listClientHistory: jest.fn() },
 }));
@@ -76,9 +78,33 @@ describe('usePedidoDeCorte', () => {
 
     renderHook(() => usePedidoDeCorte(), { wrapper });
 
-    await waitFor(() => expect(Alert.alert).toHaveBeenCalledWith('Pedido não aceito', expect.stringMatching(/recusou ou não respondeu/)));
+    // Guia de texto §4.6: título que diz o fato, corpo de uma linha e os dois caminhos.
+    await waitFor(() =>
+      expect(Alert.alert).toHaveBeenCalledWith(
+        'Pedido não aceito',
+        'Carlos não respondeu a tempo.',
+        [expect.objectContaining({ text: 'Escolher outro' }), expect.objectContaining({ text: 'Agendar' })],
+        { cancelable: false },
+      ),
+    );
     expect(usePedidoDeCorteStore.getState().pedidos).toEqual([]);
     expect(useQueueStore.getState().activeQueue).toBeNull();
+  });
+
+  it('"Escolher outro" abre a loja; "Agendar" abre a loja já nos serviços do mesmo profissional', async () => {
+    usePedidoDeCorteStore.setState({
+      pedidos: [pedido({ criadoEm: Date.now() - 10 * 60_000, expiraEm: Date.now() - 5 * 60_000 })],
+    });
+    mockHistory.mockResolvedValue({ data: [] });
+
+    renderHook(() => usePedidoDeCorte(), { wrapper });
+
+    await waitFor(() => expect(Alert.alert).toHaveBeenCalled());
+    const botoes = (Alert.alert as jest.Mock).mock.calls[0][2] as { text: string; onPress: () => void }[];
+    botoes.find((b) => b.text === 'Escolher outro')!.onPress();
+    expect(mockAbrirLoja).toHaveBeenLastCalledWith('e1');
+    botoes.find((b) => b.text === 'Agendar')!.onPress();
+    expect(mockAbrirLoja).toHaveBeenLastCalledWith('e1', 'p1');
   });
 
   it('dentro do prazo e sem atendimento: não diz nada e mantém o pedido', async () => {
@@ -123,7 +149,7 @@ describe('usePedidoDeCorte', () => {
 
     renderHook(() => usePedidoDeCorte(), { wrapper });
 
-    await waitFor(() => expect(Alert.alert).toHaveBeenCalledWith('Pedido não aceito', expect.stringMatching(/^O profissional não aceitou/)));
+    await waitFor(() => expect(Alert.alert).toHaveBeenCalledWith('Pedido não aceito', 'O profissional não respondeu a tempo.', expect.any(Array), { cancelable: false }));
     expect(usePedidoDeCorteStore.getState().pedidos.map((p) => p.id)).toEqual(['cr1']);
   });
 });

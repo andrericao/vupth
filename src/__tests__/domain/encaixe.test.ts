@@ -51,6 +51,46 @@ describe('os horários do dia', () => {
   });
 });
 
+// agendar-amanha-com-fila-aberta (Andre, 18/10): "os dias aparecem, mas não seguem".
+// A tela da loja já escreve "24 horas" (abre = fecha) e "22:00 às 02:00 (vira o
+// dia)", mas a barra de encaixe lia essas faixas como "fecha antes de abrir" e
+// respondia "Não há horário livre" em TODO dia: o cliente escolhia o dia e não
+// tinha horário para tocar.
+describe('os horários do dia — 24 horas e a faixa que vira o dia', () => {
+  const unica = (opens: string, closes: string) =>
+    horarios({ weekly: [{ day: 'THURSDAY', closed: false, opens, closes }] });
+
+  it('24 horas (abre = fecha): o dia inteiro, do 00:00 ao 23:30', () => {
+    const r = horariosDoDia({ dia: new Date(2026, 9, 1), agoraMs: local(7, 0, 0), horarios: unica('00:00', '00:00'), agenda: null, minutosDoServico: 30 });
+    const lista = horas(r) as string[];
+    expect(lista[0]).toBe('00:00');
+    expect(lista[lista.length - 1]).toBe('23:30');
+    expect(lista).toHaveLength(48);
+  });
+
+  it('abre e fecha na mesma hora do meio do dia também é 24 horas, a partir da abertura', () => {
+    const r = horariosDoDia({ dia: new Date(2026, 9, 1), agoraMs: local(7, 0, 0), horarios: unica('08:00', '08:00'), agenda: null, minutosDoServico: 60 });
+    const lista = horas(r) as string[];
+    expect(lista[0]).toBe('08:00');
+    // O último que cabe 1 h antes das 08:00 do dia seguinte.
+    expect(lista[lista.length - 1]).toBe('07:00');
+  });
+
+  it('vira o dia (22:00 às 02:00): oferece até caber antes das 02:00 do dia seguinte', () => {
+    const r = horariosDoDia({ dia: new Date(2026, 9, 1), agoraMs: local(7, 0, 0), horarios: unica('22:00', '02:00'), agenda: null, minutosDoServico: 60 });
+    expect(horas(r)).toEqual(['22:00', '22:30', '23:00', '23:30', '00:00', '00:30', '01:00']);
+    // Os horários depois da meia-noite são do dia SEGUINTE, não do mesmo dia.
+    const datas = (r as { horarios: Date[] }).horarios;
+    expect(datas[4].getDate()).toBe(2);
+    expect(datas[3].getDate()).toBe(1);
+  });
+
+  it('faixa comum (abre antes de fechar) segue como era', () => {
+    const r = horariosDoDia({ dia: new Date(2026, 9, 1), agoraMs: local(7, 0, 0), horarios: unica('09:00', '10:00'), agenda: null, minutosDoServico: 30 });
+    expect(horas(r)).toEqual(['09:00', '09:30']);
+  });
+});
+
 describe('a recusa do servidor ao agendar', () => {
   it('cada código tem a sua frase', () => {
     expect(mensagemDoAgendamento(422, 'INTENTION_OUTSIDE_BUSINESS_HOURS')).toMatch(/fora do expediente/);

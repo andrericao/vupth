@@ -40,4 +40,18 @@ describe('LinksLegais', () => {
     expect(abrir).toHaveBeenCalled();
     abrir.mockRestore();
   });
+
+  // Dentro do navegador (o Perfil) as telas de Termos e Privacidade ja existem:
+  // abrir o site tiraria a pessoa do app para ler o mesmo texto.
+  it('com aoAbrir, o toque navega no app e não abre o navegador', async () => {
+    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    const aoAbrir = jest.fn();
+    const { getByTestId } = renderWithProviders(<LinksLegais aoAbrir={aoAbrir} />);
+    fireEvent.press(getByTestId('link-termos'));
+    expect(aoAbrir).toHaveBeenLastCalledWith('termos');
+    fireEvent.press(getByTestId('link-privacidade'));
+    expect(aoAbrir).toHaveBeenLastCalledWith('privacidade');
+    expect(abrir).not.toHaveBeenCalled();
+    abrir.mockRestore();
+  });
 });

@@ -52,7 +52,7 @@ describe('ModalDePagamento', () => {
   it('o aviso do 409: o total, com quem, e o "Pagar" abre o Pix dele', async () => {
     act(() => usePendenciaStore.getState().avisar([{ attendance_id: 'a1', status: 'PENDING', amount: 45, professional_name: 'Carlos' }]));
     const tela = montar();
-    expect(tela.getByText('Falta pagar R$ 45,00 com Carlos. Pague para marcar de novo.')).toBeTruthy();
+    expect(tela.getByText('R$ 45,00 com Carlos.')).toBeTruthy();
     fireEvent.press(tela.getByTestId('pendencia-pagar'));
     expect(usePendenciaStore.getState().pagando).toBe('a1');
     expect(await tela.findByText('R$ 45,00', {}, { timeout: 15000 })).toBeTruthy();

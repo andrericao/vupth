@@ -1,3 +1,4 @@
+import { Linking } from 'react-native';
 import { fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
@@ -19,6 +20,36 @@ function setup(overrides: Partial<React.ComponentProps<typeof DeleteAccountModal
   };
   return { props, ...renderWithProviders(<DeleteAccountModal {...props} />) };
 }
+
+describe('DeleteAccountModal — textos curtos (GUIA_DE_TEXTO.md §4.7)', () => {
+  it('Excluir conta · uma linha de corpo · Saiba mais · Excluir / Cancelar, sem "Deletar"', () => {
+    const { getByText, queryByText, toJSON } = setup();
+    expect(getByText('Excluir conta')).toBeTruthy();
+    expect(getByText('Seus dados são apagados. Para confirmar, digite a senha.')).toBeTruthy();
+    expect(getByText('Saiba mais')).toBeTruthy();
+    expect(getByText('Excluir')).toBeTruthy();
+    expect(getByText('Cancelar')).toBeTruthy();
+    expect(queryByText(/Delet/)).toBeNull();
+    expect(JSON.stringify(toJSON())).not.toMatch(/Delet/);
+    expect('Seus dados são apagados. Para confirmar, digite a senha.'.length).toBeLessThanOrEqual(70);
+  });
+
+  it('o Saiba mais abre o artigo de excluir a conta no navegador', () => {
+    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    const { getByTestId } = setup();
+    fireEvent.press(getByTestId('excluir-conta-saiba-mais'));
+    expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/excluir-conta.html');
+    abrir.mockRestore();
+  });
+
+  it('excluindo, o botão vira o spinner (sem "Deletando...") e não confirma de novo', () => {
+    const { props, getByTestId, queryByText } = setup({ isDeleting: true });
+    expect(queryByText('Excluir')).toBeNull();
+    fireEvent.changeText(getByTestId('delete-account-password'), 'Senha@123');
+    fireEvent.press(getByTestId('delete-account-confirm'));
+    expect(props.onConfirm).not.toHaveBeenCalled();
+  });
+});
 
 describe('DeleteAccountModal', () => {
   it('não deixa confirmar sem a senha — o backend recusaria com 422', () => {

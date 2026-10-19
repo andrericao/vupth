@@ -196,7 +196,7 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     );
   });
 
-  it('LOJA FECHADA: primária é agendar e o "Solicitar corte" mora no menu', async () => {
+  it('LOJA FECHADA: primária é agendar e o "Pedir corte" mora no menu', async () => {
     useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
     setRouteParams({ ...OPEN_PARAMS, establishmentOpen: false });
     mockCreateCut.mockResolvedValue({ data: { id: 'cut-1' } });
@@ -496,7 +496,11 @@ describe('ServiceSelection — pedido de corte com dia e horário', () => {
       expect.objectContaining({ professionalId: 'p1', establishmentId: 'e1', serviceItemIds: ['s1'] }),
     );
     expect(dados.desiredTime).toMatch(/T09:30:00[+-]\d{2}:\d{2}$/);
-    expect(alerta).toHaveBeenCalledWith('Pedido enviado! ⏳', expect.stringMatching(/amanhã às 09:30/));
+    expect(alerta).toHaveBeenCalledWith(
+      'Pedido enviado',
+      expect.stringMatching(/^Você pediu para amanhã às 09:30\. .* responde até \d{2}:\d{2}\.$/),
+      [{ text: 'Ok' }],
+    );
     expect(mockNavigate).toHaveBeenCalledWith('home', undefined, { pop: true });
     alerta.mockRestore();
   });

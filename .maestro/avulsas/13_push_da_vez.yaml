@@ -27,7 +27,7 @@ onFlowComplete:
 
 # A permissao vem pelo caminho do app (bateria 10/10 08:06, 13.T3: o "allow"
 # do launchApp nao valia no aparelho e o app, que so pede depois da tela 10,
-# ficava sem token). Entra na fila pelo app, a tela 10 vem, "Quero ser avisada"
+# ficava sem token). Entra na fila pelo app, a tela 10 vem, "Avisar"
 # e permitir na caixa do sistema; depois sai pela API, na tolerancia.
 - runFlow:
     file: ../apoio/abrir_a_loja.yaml
@@ -76,7 +76,7 @@ onFlowComplete:
     label: "13.A7 · espera a tela 10"
 - tapOn:
     id: "push-accept"
-    label: "13.A8 · toca em Quero ser avisada"
+    label: "13.A8 · toca em Avisar"
 - extendedWaitUntil:
     visible:
       id: "com.android.permissioncontroller:id/permission_allow_button"

@@ -1,5 +1,5 @@
 # A tela 10 (ligar-push-permission, 62e8ae9): na primeira entrada numa fila,
-# antes da caixa do sistema. "Quero ser avisada" deixa a caixa vir.
+# antes da caixa do sistema. "Avisar" deixa a caixa vir.
 appId: ${APP_ID}
 ---
 - tapOn:
@@ -15,8 +15,8 @@ appId: ${APP_ID}
 # A politica da multa ("Sua vez está chegando") e o push da vez sao caixas
 # (Modal) e ficam POR CIMA da tela 10, que e uma camada na raiz: com uma delas
 # aberta o texto da tela 10 nem aparece na arvore (bateria 09/10 20:30, 24.04).
-# Fecha as duas pelo botao 0 ("Continuar na fila" / "OK") — nunca o
-# fechar_aviso aqui: ele tocaria em "Prefiro acompanhar pelo app".
+# Fecha as duas pelo botao 0 ("Ficar" / "OK") — nunca o
+# fechar_aviso aqui: ele tocaria em "Agora não".
 - repeat:
     times: 3
     while:
@@ -39,7 +39,7 @@ appId: ${APP_ID}
     label: "24.05 · print para o André"
 - tapOn:
     id: "push-accept"
-    label: "24.06 · toca em Quero ser avisada"
+    label: "24.06 · toca em Avisar"
 - extendedWaitUntil:
     visible:
       id: "com.android.permissioncontroller:id/permission_allow_button"

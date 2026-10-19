@@ -29,6 +29,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 
 import { configComFonte } from "./config/gluestack-ui.config";
 import { useFonteStore } from "@stores/fonteStore";
+import { TemaDoApp, useBarraDeStatus } from "@components/TemaDoApp";
 
 import { Routes } from "@routes/index";
 
@@ -128,6 +129,7 @@ export default function App() {
   // que os tamanhos escritos direto nas telas (fs) tambem acompanhem.
   const passoDaFonte = useFonteStore((s) => s.passo);
   const configDoTema = useMemo(() => configComFonte(passoDaFonte), [passoDaFonte]);
+  const estiloDaBarra = useBarraDeStatus();
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
   // A abertura continua montada por cima da Home até o V terminar de sair: a
@@ -219,11 +221,12 @@ export default function App() {
       }}
     >
       <GluestackUIProvider config={configDoTema} key={passoDaFonte}>
+        <TemaDoApp>
         {/* preview-nao-abre (17/10): o FaixaAvaliar usa useSafeAreaInsets e fica
             fora do Routes (que ja traz o seu provider) — sem este, o render da
             abertura estoura "No safe area value available" e o app fecha. */}
         <SafeAreaProvider>
-        <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
+        <StatusBar style={estiloDaBarra.style} backgroundColor={estiloDaBarra.fundo} translucent={false} />
 
         <QueryScopedHooks />
         {/* Erro de render deixa de fechar o app e vira tela com mensagem. Fica
@@ -254,6 +257,7 @@ export default function App() {
           </ErrorBoundary>
         ) : null}
         </SafeAreaProvider>
+        </TemaDoApp>
       </GluestackUIProvider>
     </PersistQueryClientProvider>
   );

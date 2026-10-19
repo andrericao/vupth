@@ -6,7 +6,6 @@ import {
   VStack,
   Text,
   Box,
-  HStack,
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
@@ -18,6 +17,7 @@ import { nomeDeExibicao } from "@domain/auth/displayName";
 import { Button } from "@components/Button";
 import { MenuItem, Grupo } from "@components/MenuDoPerfil";
 import { VersaoDoApp } from "@components/VersaoDoApp";
+import { LinksLegais } from "@components/LinksLegais";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
@@ -46,7 +46,9 @@ export function Settings() {
       .join("") || user?.email?.[0]?.toUpperCase() || "?";
 
   function handleLogout() {
-    Alert.alert("Sair da conta", "Tem certeza que deseja sair da sua conta?", [
+    // Titulo que diz o fato e nenhum corpo (guia de texto, §4.7): a pergunta ja
+    // esta nos dois botoes, Sair e Cancelar.
+    Alert.alert("Sair da conta", undefined, [
       { text: "Cancelar", style: "cancel" },
       {
         text: "Sair",
@@ -157,20 +159,6 @@ export function Settings() {
                 last
               />
             </Grupo>
-
-            {/* botao-sair-igual (CLI-3, Andre 15/10): o Sair e o do Partner — texto
-                vermelho, solto, fora dos grupos, centralizado, sem icone nem caixa. */}
-            <TouchableOpacity
-              onPress={handleLogout}
-              testID="logout"
-              accessibilityRole="button"
-              accessibilityLabel="Sair"
-              style={{ paddingVertical: 4, marginTop: 16 }}
-            >
-              <Text size="sm" fontWeight="$semibold" color="$brandDanger" textAlign="center">
-                Sair da conta
-              </Text>
-            </TouchableOpacity>
           </>
         ) : (
           /* Pro VISITANTE o convite e o UNICO conteudo da tela. Encostado no
@@ -262,28 +250,44 @@ export function Settings() {
         </VStack>
         )}
 
+        {/* botao-sair-igual (CLI-3, Andre 15/10): o Sair e o do Partner — texto
+            vermelho, solto, fora dos grupos, centralizado, sem icone nem caixa.
+            sair-da-conta-embaixo (CLI-1, Andre 18/10): no FIM do Perfil, depois de
+            Sistema e acima de Termos e Privacidade. */}
+        {isAuthenticated && (
+          <TouchableOpacity
+            onPress={handleLogout}
+            testID="logout"
+            accessibilityRole="button"
+            accessibilityLabel="Sair"
+            style={{ paddingVertical: 4, marginTop: 24 }}
+          >
+            <Text size="sm" fontWeight="$semibold" color="$brandDanger" textAlign="center">
+              Sair da conta
+            </Text>
+          </TouchableOpacity>
+        )}
+
         {/* `flex-end` empurra o rodape pro fim: antes ele vinha logo abaixo do
             conteudo e sobrava um vazio grande embaixo, que fazia a tela
             parecer inacabada — principalmente pro VISITANTE, que so tem o
             convite de conta acima. */}
         <VStack flex={1} justifyContent="flex-end" mt="$10" alignItems="center" gap="$3">
+          {/* Os mesmos dois links das telas de entrada (termos-no-rodape), mas
+              aqui levam as telas de Termos e Privacidade do proprio app: ja
+              existem, e abrir o site tiraria a pessoa do app para ler o mesmo
+              texto. Um unico "Termos e Privacidade" nao dizia que eram dois. */}
+          <LinksLegais aoAbrir={(pagina) => navigation.navigate(pagina === "termos" ? "terms" : "privacy")} />
           {/* Deletar conta desce pra ca como LINK: e irreversivel, entao nao
               disputa atencao com o resto — mas continua alcancavel por quem
               procura (era um botao de mesmo peso que "sair"). */}
-          <HStack gap="$4" alignItems="center">
-            <TouchableOpacity onPress={() => navigation.navigate("terms")} testID="terms">
-              <Text size="xs" color="$brandTextSecondary">
-                Termos e Privacidade
+          {isAuthenticated && (
+            <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
+              <Text size="xs" fontWeight="$semibold" color="$brandDanger">
+                Deletar minha conta
               </Text>
             </TouchableOpacity>
-            {isAuthenticated && (
-              <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
-                <Text size="xs" fontWeight="$semibold" color="$brandDanger">
-                  Deletar minha conta
-                </Text>
-              </TouchableOpacity>
-            )}
-          </HStack>
+          )}
           {!isAuthenticated && (
             <VersaoDoApp testID="versao-visitante" />
           )}

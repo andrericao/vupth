@@ -121,10 +121,14 @@ describe('Perfil — a conta', () => {
     await act(async () => {});
   });
 
-  it('sair pergunta, sai e volta ao Início', async () => {
+  it('sair pergunta (só o título "Sair da conta", sem corpo), sai e volta ao Início', async () => {
     const { getByTestId } = renderWithProviders(<Settings />);
     fireEvent.press(getByTestId('logout'));
+    // GUIA_DE_TEXTO.md §4.7: a pergunta já está nos dois botões, Sair e Cancelar.
+    expect(alertSpy.mock.calls[0][0]).toBe('Sair da conta');
+    expect(alertSpy.mock.calls[0][1]).toBeUndefined();
     const botoes = alertSpy.mock.calls[0][2] as { text: string; onPress?: () => Promise<void> }[];
+    expect(botoes.map((b) => b.text)).toEqual(['Cancelar', 'Sair']);
     await act(async () => {
       await botoes.find((b) => b.text === 'Sair')!.onPress!();
     });
@@ -209,9 +213,13 @@ describe('Perfil — visitante', () => {
     expect(mockParentNavigate).toHaveBeenLastCalledWith('homeTab', { screen: 'login', params: {}, pop: true });
   });
 
-  it('os Termos', () => {
-    const { getByTestId } = renderWithProviders(<Settings />);
-    fireEvent.press(getByTestId('terms'));
-    expect(mockNavigate).toHaveBeenCalledWith('terms');
+  it('Termos de uso e Política de privacidade: dois links, cada um na sua tela do app', () => {
+    const { getByTestId, getByText } = renderWithProviders(<Settings />);
+    expect(getByText('Termos de uso')).toBeTruthy();
+    expect(getByText('Política de privacidade')).toBeTruthy();
+    fireEvent.press(getByTestId('link-termos'));
+    expect(mockNavigate).toHaveBeenLastCalledWith('terms');
+    fireEvent.press(getByTestId('link-privacidade'));
+    expect(mockNavigate).toHaveBeenLastCalledWith('privacy');
   });
 });

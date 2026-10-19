@@ -1,0 +1,62 @@
+{
+  "fonte": "Papéis do app: um nome para o lugar onde o desenho usa um token no claro e OUTRO no escuro. Cada papel aponta para tokens do tokens.json (nunca para um hex), então não existe valor novo aqui, só a escolha de qual token vale em cada tema. O tema.test.ts mede cada par de 'textos' dos papéis nos dois temas (4,5:1) e confere que, no claro, cada papel é o token que a tela já usava.",
+  "papeis": {
+    "painel": {
+      "claro": "background",
+      "escuro": "surface",
+      "papel": "Fundo do painel de modal e de diálogo: branco no claro, surface no escuro (design-modais.html: .modal #fff / #163300). background no escuro ficaria da cor da tela atrás do véu.",
+      "textos": [
+        "textPrimary",
+        "textSecondary",
+        "danger"
+      ]
+    },
+    "sobrePainel": {
+      "claro": "surface",
+      "escuro": "surfaceAlt",
+      "papel": "Bloco ou botão secundário DENTRO do painel (design-modais.html: .btn.sec #F3F5F1 / #1F3F0B). surface no escuro some: é a cor do painel.",
+      "textos": [
+        "textPrimary",
+        "textSecondary"
+      ]
+    },
+    "selecionado": {
+      "claro": "forest",
+      "escuro": "green",
+      "papel": "Fundo do chip, opção ou pílula SELECIONADA. forest no escuro é a surface (a opção marcada ficaria igual às outras); green é o fundo de ação.",
+      "textos": [
+        "onSelecionado"
+      ]
+    },
+    "onSelecionado": {
+      "claro": "green",
+      "escuro": "onGreen",
+      "papel": "Texto e ícone sobre selecionado: green sobre forest no claro; onGreen sobre green no escuro."
+    },
+    "onSelecionadoBranco": {
+      "claro": "background",
+      "escuro": "onGreen",
+      "papel": "Texto e ícone BRANCOS sobre selecionado no claro (chips e opções que já eram forest com texto branco). No escuro, onGreen sobre green. Mesma função de onSelecionado, mantida à parte só porque o claro tem duas versões (green e branco) e nenhuma delas muda."
+    },
+    "pessego": {
+      "claro": "accentPeach",
+      "escuro": "onAccentPeach",
+      "papel": "O pêssego #FFC091 como COR de ponto, texto ou ícone (o dot de pendência, o ponto de Intervalo). É o mesmo hex nos dois temas: o token warning é fundo e no escuro vira um marrom escuro, que como ponto ou texto some."
+    },
+    "esqueleto": {
+      "claro": "border",
+      "escuro": "surfaceAlt",
+      "papel": "Bloco do esqueleto de carregamento, sobre o cartão surface. border no escuro é um verde vivo (4,4:1 sobre o fundo) e o esqueleto berraria; surfaceAlt é o segundo nível de bloco e fica discreto."
+    },
+    "trilho": {
+      "claro": "border",
+      "escuro": "surfaceAlt",
+      "papel": "Trilho vazio de uma barra de progresso sobre o cartão surface. Mesmo par do esqueleto: border no escuro é um verde vivo (4,4:1) e o trilho berraria."
+    },
+    "progressoSuave": {
+      "claro": "greenTint",
+      "escuro": "border",
+      "papel": "Preenchimento da barra de progresso de segundo plano (a do perfil, sobre o trilho). greenTint no escuro é #223D0D, que some sobre o trilho surfaceAlt; border (#5C8A3A) aparece e fica abaixo do green da barra principal."
+    }
+  }
+}

@@ -18,9 +18,9 @@ appId: ${APP_ID}
     id: "corte-assim-que-abrir"
     label: "23.04 · toca em Assim que abrir"
 - extendedWaitUntil:
-    visible: "Pedido enviado!.*"
+    visible: "Pedido enviado.*"
     timeout: ${30000 * LENTO}
-    label: "23.05 · espera Pedido enviado!"
+    label: "23.05 · espera Pedido enviado"
 - assertVisible:
     text: ".*O profissional tem 5 minutos para responder.*"
     label: "23.06 · a confirmação diz o prazo de 5 minutos (expires_at do servidor)"

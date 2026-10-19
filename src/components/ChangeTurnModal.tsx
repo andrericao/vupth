@@ -36,36 +36,45 @@ type TurnOption = "earlier" | "later" | "end" | "schedule";
 // "quero ser atendido mais cedo". A mecânica é o contrário — ceder seu lugar a
 // quem está atrás te joga para DEPOIS —, então ela mora no grupo de mais
 // tempo. Agrupar pela intenção errada é pior do que não agrupar.
+//
+// Textos curtos (guia de texto, §4.4): os grupos viram "Mais cedo" / "Mais tarde"
+// (rotulo `text-xs`, sem caixa alta) e cada opcao e UMA palavra de verbo — o grupo
+// ja diz "minha vez"; a descricao de uma linha fica. O grupo tem `id` porque a
+// legenda da fila de hoje se amarra a ele, e amarrar a um texto de tela quebra
+// toda vez que o texto muda.
 const GRUPOS: {
+  id: "cedo" | "tarde";
   titulo: string;
   opcoes: { value: TurnOption; title: string; description: string }[];
 }[] = [
   {
-    titulo: "QUERO SER ATENDIDO MAIS CEDO",
+    id: "cedo",
+    titulo: "Mais cedo",
     opcoes: [
       {
         value: "earlier",
-        title: "Adiantar minha vez",
+        title: "Adiantar",
         description: "Publicamos seu pedido para quem está à frente",
       },
     ],
   },
   {
-    titulo: "PRECISO DE MAIS TEMPO",
+    id: "tarde",
+    titulo: "Mais tarde",
     opcoes: [
       {
         value: "later",
-        title: "Trocar com alguém atrás",
+        title: "Trocar",
         description: "A troca é entre vocês dois e dá para cancelar",
       },
       {
         value: "end",
-        title: "Ir para o fim da fila",
+        title: "Ir para o fim",
         description: "Sua vez passa para depois de quem espera",
       },
       {
         value: "schedule",
-        title: "Agendar para depois",
+        title: "Agendar",
         description: "Escolha um horário fora da fila de espera",
       },
     ],
@@ -132,12 +141,11 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
           </VStack>
 
           {GRUPOS.map((grupo) => (
-            <VStack key={grupo.titulo} gap="$2">
+            <VStack key={grupo.id} gap="$2">
               <Text
                 fontFamily="$body"
-                fontSize={fs(11)}
+                fontSize={fs(12)}
                 fontWeight="$bold"
-                letterSpacing={0.8}
                 color="$brandTextSecondary"
               >
                 {grupo.titulo}
@@ -147,7 +155,7 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
                   uma caixa amarela do tamanho de meio modal, na paleta
                   anterior, acima de tudo. Vira a legenda do grupo a que ela
                   se refere. */}
-              {grupo.titulo === "PRECISO DE MAIS TEMPO" && tailEtaMs != null && (
+              {grupo.id === "tarde" && tailEtaMs != null && (
                 <Text size="xs" color="$brandTextSecondary" mt={-4}>
                   A fila de hoje termina às {formatClockTime(new Date(tailEtaMs))}.
                 </Text>
@@ -198,8 +206,11 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
           ))}
 
           <VStack gap="$3" alignItems="center">
+            {/* "Publicando..." saiu do rotulo (guia de texto, regra 6): o botao
+                desabilitado com o spinner ja diz que esta publicando. */}
             <Button
-              title={swapBusy ? "Publicando..." : "Confirmar"}
+              title="Confirmar"
+              isLoading={swapBusy}
               isDisabled={!selected || swapBusy}
               testID="change-turn-confirm"
               onPress={handleConfirm}

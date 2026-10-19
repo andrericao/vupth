@@ -1,5 +1,6 @@
+import { useMemo } from "react";
 import { Platform } from "react-native";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context";
 
@@ -10,18 +11,11 @@ import { Onboarding } from "@screens/Onboarding";
 import { PushPermission } from "@screens/PushPermission";
 import { useFirstRunStore } from "@stores/firstRunStore";
 
-import { gluestackUIConfig } from "config/gluestack-ui.config";
 import { Box } from "@gluestack-ui/themed";
 import { OfflineBanner } from "@components/OfflineBanner";
 import { FaixaBaixarApp } from "@components/FaixaBaixarApp";
-
-const theme = {
-	...DefaultTheme,
-	colors: {
-		...DefaultTheme.colors,
-		background: gluestackUIConfig.tokens.colors.white,
-	},
-};
+import { useTema } from "@hooks/useTema";
+import { temaDeNavegacao } from "@utils/temaDeNavegacao";
 
 // A tela de entrada num navegador proprio (bateria 10/10 08:06, 01.01): solta
 // direto no NavigationContainer, no Android de ponta a ponta ela media mais que
@@ -39,6 +33,10 @@ function Entrada() {
 }
 
 export function Routes(){
+	// O fundo atras das telas (o tema do navegador) e o `background` do tema:
+	// branco no claro, o de antes; no escuro, o do tokens.json.
+	const { escuro, cores } = useTema();
+	const theme = useMemo(() => temaDeNavegacao(escuro, cores), [escuro, cores]);
 	// A abertura vem ACIMA da navegacao de abas de proposito: onboarding com a
 	// barra de abas embaixo entrega o app antes de apresenta-lo, e a pessoa
 	// simplesmente toca numa aba e pula a conversa. `restored` evita o
@@ -53,7 +51,7 @@ export function Routes(){
 	// nascia atras da barra do celular.
 	return(
 		<SafeAreaProvider initialMetrics={initialWindowMetrics}>
-		<Box flex={1} bg="$white">
+		<Box flex={1} bg="$brandBackground">
 		{/* Na web: "Baixar o app" ou "Continuar na web" (link-de-divulgacao). */}
 		<FaixaBaixarApp />
 		{/* Na web a navegacao entra no historico do navegador — sem isto o voltar

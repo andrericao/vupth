@@ -109,8 +109,9 @@ export function LocationSelector() {
             </Text>
 
             <Button
-              title={busy ? "Buscando..." : "Usar minha localização atual"}
+              title="Usar localização"
               mt="$5"
+              isLoading={busy}
               isDisabled={busy}
               testID="use-gps"
               onPress={useGps}
@@ -118,9 +119,10 @@ export function LocationSelector() {
 
             {isAuthenticated && (
               <Button
-                title={busy ? "Buscando..." : "Usar meu endereço cadastrado"}
+                title="Usar endereço"
                 variant="outline"
                 mt="$3"
+                isLoading={busy}
                 isDisabled={busy}
                 onPress={useMyAddress}
               />

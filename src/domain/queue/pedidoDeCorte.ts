@@ -1,6 +1,7 @@
 import { ClientAttendance } from '@services/attendanceService';
 
 import { estaAtivo } from './reconciliar';
+import { formatClockTime } from './types';
 
 // O pedido de corte (loja fechada para novos) e a RESPOSTA que o cliente nunca
 // via (teste do Andre de 25/09: "nao sabe se foi aceita ou nao, nem por
@@ -69,4 +70,41 @@ export function pedidoDaResposta(
   if (resposta.expires_at === null) return { id: resposta.id, ...contexto, criadoEm, expiraEm: null };
   const expiraEm = Date.parse(resposta.expires_at ?? '') || criadoEm + 5 * 60_000;
   return { id: resposta.id, ...contexto, criadoEm, expiraEm };
+}
+
+/**
+ * O aviso de que o pedido foi enviado (guia de texto, §4.6): o título diz o fato
+ * e o corpo, uma linha — quem responde e ATÉ QUANDO. A hora substitui "5
+ * minutos": a pessoa olha o relógio, não faz a conta.
+ *
+ * Pedido para outro dia (DEC-27) não tem prazo: o profissional decide quando abrir
+ * a agenda daquele dia, e o corpo diz isso. `quando` ("amanhã às 09:30") entra
+ * quando a pessoa escolheu o horário: é o único lugar que repete o que ela pediu.
+ */
+export function avisoDoPedidoEnviado(
+  pedido: Pick<PedidoDeCorte, 'professionalName' | 'expiraEm'>,
+  quando?: string,
+): { titulo: string; mensagem: string } {
+  const nome = pedido.professionalName || 'O profissional';
+  const prefixo = quando ? `Você pediu para ${quando}. ` : '';
+  const resposta =
+    pedido.expiraEm != null
+      ? `${nome} responde até ${formatClockTime(new Date(pedido.expiraEm))}.`
+      : `${nome} responde quando abrir a agenda desse dia.`;
+  return { titulo: 'Pedido enviado', mensagem: `${prefixo}${resposta}` };
+}
+
+/** O aviso de que o pedido venceu sem aceite (a resposta chega pelo vigia de `usePedidoDeCorte`). */
+export function avisoDoPedidoNaoAceito(pedido: Pick<PedidoDeCorte, 'professionalName'>): {
+  titulo: string;
+  mensagem: string;
+  escolherOutro: string;
+  agendar: string;
+} {
+  return {
+    titulo: 'Pedido não aceito',
+    mensagem: `${pedido.professionalName || 'O profissional'} não respondeu a tempo.`,
+    escolherOutro: 'Escolher outro',
+    agendar: 'Agendar',
+  };
 }

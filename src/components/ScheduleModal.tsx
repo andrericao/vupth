@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Modal, ScrollView, TouchableOpacity, useWindowDimensions } from "react-native";
+import { Alert, Modal, ScrollView, TouchableOpacity } from "react-native";
 import { VStack, HStack, Box, Text, Heading, Spinner } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
@@ -74,8 +74,6 @@ export function ScheduleModal({
     onClose();
   }
 
-  const { height: altura } = useWindowDimensions();
-
   const doDia = selectedDate && agora
     ? horariosDoDia({ dia: selectedDate, agoraMs: agora, horarios: horariosDaLoja, agenda, minutosDoServico })
     : null;
@@ -118,12 +116,24 @@ export function ScheduleModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        {/* cancelar-fora-da-caixa (CLI-7, Andre 11/10): a caixa nunca passa de 90% da
-            tela e o conteudo rola dentro dela — com a fonte ampliada o "Cancelar"
-            ficava cortado fora da caixa branca. */}
-        <VStack bg="$white" borderRadius="$card" style={[floatingShadow, { maxHeight: altura * 0.9 }]}>
-          <ScrollView contentContainerStyle={{ padding: 24 }} showsVerticalScrollIndicator={false} testID="agenda-rolagem">
+      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24} py={24}>
+        {/* cancelar-cortado-no-solicitar (CLI, Andre 18/10, o mesmo defeito do
+            cancelar-fora-da-caixa de 11/10 de volta): a rolagem envolvia TUDO,
+            entao com tela pequena ou fonte ampliada o "Cancelar" ficava abaixo da
+            dobra, cortado na borda da caixa, sem nada avisando que dava para
+            rolar. Agora so o miolo (titulo, dias, horarios) rola; os botoes ficam
+            no rodape da caixa e aparecem sempre.
+            A altura maxima e relativa ao espaco que o Modal realmente tem (100% do
+            contêiner), nao a 90% da altura da janela: no Android com barras do
+            sistema o Modal e menor que a janela e a caixa passava da tela. Altura
+            cravada nunca: o app honra o ajuste de fonte do aparelho (DS4). */}
+        <VStack bg="$white" borderRadius="$card" style={[floatingShadow, { maxHeight: "100%" }]} testID="agenda-caixa">
+          <ScrollView
+            style={{ flexShrink: 1 }}
+            contentContainerStyle={{ padding: 24, paddingBottom: 8 }}
+            showsVerticalScrollIndicator={false}
+            testID="agenda-rolagem"
+          >
           <Heading fontFamily="$heading" fontSize="$lg">
             {corte ? "Solicitar corte" : "Agendar"}
           </Heading>
@@ -187,17 +197,17 @@ export function ScheduleModal({
               )}
             </Box>
           )}
-
-          <Button
-            title={enviando ? "Agendando..." : corte ? "Solicitar" : "Confirmar"}
-            mt="$5"
-            isDisabled={horario == null || enviando}
-            opacity={horario == null ? 0.5 : 1}
-            onPress={confirmar}
-            testID="confirmar-agendamento"
-          />
-          <Button title="Cancelar" variant="outline" mt="$3" onPress={close} />
           </ScrollView>
+          <VStack px={24} pt="$3" pb={24} gap="$3" testID="agenda-rodape">
+            <Button
+              title={enviando ? "Agendando..." : corte ? "Solicitar" : "Confirmar"}
+              isDisabled={horario == null || enviando}
+              opacity={horario == null ? 0.5 : 1}
+              onPress={confirmar}
+              testID="confirmar-agendamento"
+            />
+            <Button title="Cancelar" variant="outline" onPress={close} />
+          </VStack>
         </VStack>
       </Box>
     </Modal>

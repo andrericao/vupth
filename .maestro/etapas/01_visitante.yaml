@@ -2,7 +2,7 @@
 # Criar conta e Entrar —, os Termos e a versao. Nenhum grupo de menu.
 appId: ${APP_ID}
 ---
-# entrar-atras-da-barra (Andre, 09/10): o "Já tem conta? Entrar" ficava atras
+# entrar-atras-da-barra (Andre, 09/10): o botao "Entrar" ficava atras
 # da barra de navegacao do celular. O toque do Maestro cai no centro do
 # elemento: se ele estiver sob a barra, o toque vai para o sistema e o login
 # nao abre. Entra pelo "Entrar" e volta: o visitante segue sem conta.
@@ -30,9 +30,17 @@ appId: ${APP_ID}
       - runFlow:
           file: ../apoio/fechar_aviso.yaml
     label: "01.00 · reabre até a entrada rodar o OTA (o commit no rodape)"
+# termos-no-rodape + tela-de-entrada (17/10): o rodape fixo da entrada traz os
+# dois links legais, acima da versao.
+- assertVisible:
+    id: "link-termos"
+    label: "01.00a · a entrada mostra Termos de uso no rodape fixo"
+- assertVisible:
+    id: "link-privacidade"
+    label: "01.00b · a entrada mostra Política de privacidade no rodape fixo"
 - tapOn:
     id: "onboarding-login"
-    label: "01.01 · toca em Já tem conta? Entrar"
+    label: "01.01 · toca no botão Entrar"
 - extendedWaitUntil:
     visible:
       id: "primary-login"
@@ -76,8 +84,8 @@ appId: ${APP_ID}
     text: "Já tenho conta"
     label: "01.05 · vê Já tenho conta"
 - assertVisible:
-    id: "terms"
-    label: "01.06 · vê terms"
+    id: "link-termos"
+    label: "01.06 · vê Termos de uso (os dois links legais do Perfil)"
 # A versao e o primeiro lugar em que o commit aparece: se nao for o esperado,
 # a bateria para aqui (bateria-confere-versao, 03/10).
 - runFlow:

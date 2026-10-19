@@ -17,7 +17,7 @@ appId: ${APP_ID}
           commands:
             - tapOn: "Entendi"
       # A politica da multa (bateria 10/10 15:32, 11.08 e 21.04): o Modal
-      # tambem esconde a fila. O botao 0 e o "Continuar na fila".
+      # tambem esconde a fila. O botao 0 e o "Ficar".
       - runFlow:
           when:
             visible: "Sua vez está chegando"

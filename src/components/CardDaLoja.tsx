@@ -11,6 +11,7 @@ import { resolveRating } from "@domain/establishment/rating";
 import { NotaDaLoja } from "@components/NotaDaLoja";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
+import { BadgeAgendar } from "@components/BadgeAgendar";
 import { fs } from "@stores/fonteStore";
 
 // O card de uma loja na lista do Inicio (saiu da Home em 09/10, junto com a
@@ -35,6 +36,8 @@ import { fs } from "@stores/fonteStore";
  * fechada e ruido.
  */
 function StatusPill({ label, live }: { label: string; live: boolean }) {
+  // agendar-ambar (18/10): fechada, o convite e o selo ambar AGENDAR.
+  if (!live) return <BadgeAgendar testID="status-agendar" />;
   return (
     <HStack
       bg={live ? "$brandGreen" : "transparent"}

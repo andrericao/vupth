@@ -1,6 +1,5 @@
 import { Component, ErrorInfo, ReactNode } from "react";
-import { ScrollView } from "react-native";
-import { VStack, Text, Heading, Box } from "@gluestack-ui/themed";
+import { VStack, Text, Heading, Box, ScrollView } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
 
@@ -51,11 +50,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
     return (
       <ScrollView
-        style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+        flex={1}
+        bg="$brandBackground"
         contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}
       >
         <VStack gap="$4">
-          <Heading fontFamily="$heading" fontSize="$xl" color="$forest">
+          <Heading fontFamily="$heading" fontSize="$xl" color="$brandTextPrimary">
             Alguma coisa quebrou aqui
           </Heading>
           <Text fontFamily="$body" fontSize="$md" color="$brandTextSecondary">
