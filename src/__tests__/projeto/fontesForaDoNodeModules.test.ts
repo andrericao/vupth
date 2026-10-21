@@ -53,8 +53,12 @@ describe("fontes da marca sobrevivem ao deploy web", () => {
     // que falha tem de degradar para a do sistema.
     expect(APP).toMatch(/const \[fontsLoaded, fontError\] = useFonts\(/);
     expect(APP).toMatch(/fontsLoaded \|\| Boolean\(fontError\)/);
-    // E o portao de render tem de usar a variavel combinada, nao o cru.
-    expect(APP).toContain("{!fontGateOpen ||");
+    // E o portao de render tem de usar a variavel combinada, nao o cru. Desde a
+    // abertura sem piscar o portao e o `pronto`, que alimenta a saida do V e a
+    // montagem das rotas: se ele lesse `fontsLoaded`, a falha de fonte prenderia
+    // o V na tela para sempre.
+    expect(APP).toMatch(/const pronto = fontGateOpen && backendReady/);
+    expect(APP).not.toMatch(/const pronto = fontsLoaded/);
     expect(APP).not.toContain("{!fontsLoaded ?");
   });
 });

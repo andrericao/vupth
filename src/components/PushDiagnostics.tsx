@@ -36,7 +36,7 @@ function Linha({ rotulo, valor, ok }: { rotulo: string; valor: string; ok: boole
       <Text
         fontFamily="$mono"
         fontSize="$sm"
-        color={ok === null ? "$brandTextSecondary" : ok ? "$forest" : "$brandDanger"}
+        color={ok === null ? "$brandTextSecondary" : ok ? "$brandTextPrimary" : "$brandDanger"}
         flexShrink={1}
         textAlign="right"
       >
@@ -53,7 +53,7 @@ export function PushDiagnostics() {
   return (
     <Box bg="$brandSurface" borderRadius="$lg" p="$3" mt="$3">
       <VStack gap="$2">
-        <Heading fontFamily="$heading" fontSize="$sm" color="$forest">
+        <Heading fontFamily="$heading" fontSize="$sm" color="$brandTextPrimary">
           Push
         </Heading>
 
@@ -85,8 +85,8 @@ export function PushDiagnostics() {
               // `expo-clipboard`, que e modulo NATIVO — entraria so com build
               // novo, e a graca disto e chegar por OTA no APK que ja esta
               // instalado. Segurar o texto abre o menu de copiar do sistema.
-              <Box bg="$white" borderRadius="$sm" p="$2">
-                <Text selectable fontFamily="$mono" fontSize="$xs" color="$forest">
+              <Box bg="$brandBackground" borderRadius="$sm" p="$2">
+                <Text selectable fontFamily="$mono" fontSize="$xs" color="$brandTextPrimary">
                   {token}
                 </Text>
               </Box>

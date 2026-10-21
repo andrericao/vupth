@@ -1,8 +1,18 @@
-import { Modal, View, Text, Pressable, ScrollView, BackHandler } from "react-native";
+import { Animated, Modal, View, Text, Pressable, ScrollView, BackHandler, StyleSheet } from "react-native";
+import { CircleDollarSign, CircleX, Info, TriangleAlert, type LucideIcon } from "lucide-react-native";
 import { useEffect } from "react";
 
-import { useDialogoStore } from "@stores/dialogo.store";
+import { useDialogoStore, type DialogoNaTela } from "@stores/dialogo.store";
 import { pesoDoBotao } from "@domain/pesoDoBotao";
+import {
+  aparenciaDoBotao,
+  aparenciaDoTipo,
+  ordemDosBotoes,
+  papelDoBotao,
+  type TipoDeDialogo,
+} from "@domain/tipoDeDialogo";
+import { useAnimacaoDoDialogo } from "@hooks/useAnimacaoDoDialogo";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 // O diálogo do app — a mesma caixa nas duas plataformas e nos dois apps.
@@ -31,10 +41,35 @@ import { fs } from "@stores/fonteStore";
 //
 // Um só na árvore. Ele avisa a store que existe — sem isso, quem chama cai no
 // Alert do sistema em vez de ficar mudo.
-const FOREST = "#163300";
-const BRAND_GREEN = "#9FE870";
-const DANGER = "#B3261E";
-const TEXT_SECONDARY = "#454745";
+//
+// COM `tipo` (design-modais, 17/10) o cartão ganha a identidade do tipo — faixa
+// de 6 px no topo e selo com ícone — e a hierarquia dos botões do desenho novo:
+// o primário é sempre brandGreen + forest, e só a ação destrutiva é danger. SEM
+// `tipo` é o cartão de antes, número por número.
+//
+// A entrada e a saída são animadas por dentro, com o `Modal` em
+// `animationType="none"`: o diálogo fica montado até a saída acabar (ver
+// `useAnimacaoDoDialogo`).
+const ICONES: Record<TipoDeDialogo, LucideIcon> = {
+  informacao: Info,
+  atencao: TriangleAlert,
+  dinheiro: CircleDollarSign,
+  erro: CircleX,
+};
+
+// O véu do desenho novo vem do tokens.json (`veu` do `useTema`: forest a 35% no
+// claro, preto a 55% no escuro). O sem-tipo continua com o forest a 45% do
+// desenho antigo no claro; no escuro usa o do tokens, porque forest a 45% sobre
+// o fundo #0B1A04 mal separa o cartão da tela.
+// tema-fixo: só vale no claro (o escuro usa o véu do tokens); é o véu do desenho antigo, byte a byte
+const VEU_SEM_TIPO_CLARO = "#16330073";
+
+type EstiloDaFaixa = ReturnType<typeof useAnimacaoDoDialogo>["estiloDaFaixa"];
+
+type Cartao = {
+  atual: DialogoNaTela;
+  responder: (i: number) => void;
+};
 
 export function DialogoVupth() {
   const atual = useDialogoStore((s) => s.atual);
@@ -46,7 +81,12 @@ export function DialogoVupth() {
     return () => marcarHost(false);
   }, [marcarHost]);
 
+  // `mostrado` continua o último pedido enquanto a saída anima, mesmo com a
+  // loja já vazia.
+  const { mostrado, estiloDoVeu, estiloDoCartao, estiloDaFaixa } = useAnimacaoDoDialogo(atual);
+
   const indiceCancelar = atual ? atual.botoes.findIndex((b) => b.estilo === "cancel") : -1;
+  const { escuro, veu } = useTema();
 
   // O voltar do Android com um diálogo na tela. Teste de 25/09: num aviso só
   // com "OK", o voltar levou a TELA de volta e o diálogo ficou por cima. Então,
@@ -62,111 +102,252 @@ export function DialogoVupth() {
     return () => sub.remove();
   }, [atual, indiceCancelar, responder]);
 
-  if (!atual) return null;
+  if (!mostrado) return null;
+
+  // Durante a saída o cartão ainda esta na tela mostrando os botoes do pedido
+  // que acabou de responder. Um 2o toque nele chamaria `responder` e, se houver
+  // outro aviso na fila, o responderia por engano.
+  const interativo = mostrado === atual;
 
   return (
     <Modal
       visible
       transparent
-      animationType="fade"
+      animationType="none"
       // Voltar (Android) equivale ao cancelar; sem ele, o único jeito de sair de
       // um aviso seria acertar o botão.
       onRequestClose={() => {
-        if (atual.cancelavel) responder(indiceCancelar >= 0 ? indiceCancelar : 0);
+        if (atual?.cancelavel) responder(indiceCancelar >= 0 ? indiceCancelar : 0);
       }}
     >
       <View
         style={{
           flex: 1,
-          // Forest a 45%, não preto: preto apaga a marca justo no momento em que
-          // a tela para.
-          backgroundColor: "#16330073",
           alignItems: "center",
           justifyContent: "center",
           paddingHorizontal: 24,
         }}
       >
-        <View
-          accessibilityViewIsModal
-          accessibilityLabel={atual.titulo}
-          style={{
-            backgroundColor: "#FFFFFF",
-            borderRadius: 20,
-            padding: 22,
-            gap: 16,
-            width: "100%",
-            maxWidth: 420,
-          }}
+        {/* Forest a 45%, não preto: preto apaga a marca justo no momento em que
+            a tela para. */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: mostrado.tipo || escuro ? veu : VEU_SEM_TIPO_CLARO },
+            estiloDoVeu,
+          ]}
+        />
+        <Animated.View
+          testID="dialogo-cartao"
+          pointerEvents={interativo ? "auto" : "none"}
+          style={[{ width: "100%", maxWidth: 420 }, estiloDoCartao]}
         >
-          <Text
-            style={{
-              fontFamily: "Archivo_800ExtraBold",
-              fontSize: fs(18),
-              letterSpacing: -0.4,
-              color: FOREST,
-            }}
-          >
-            {atual.titulo}
-          </Text>
-
-          {/* Mensagem longa rola em vez de empurrar os botões para fora — erro
-              de backend às vezes vem com parágrafo inteiro. */}
-          {!!atual.mensagem && (
-            <ScrollView style={{ maxHeight: 260 }}>
-              <Text
-                style={{
-                  fontFamily: "Inter_400Regular",
-                  fontSize: fs(14),
-                  lineHeight: fs(20),
-                  color: TEXT_SECONDARY,
-                }}
-              >
-                {atual.mensagem}
-              </Text>
-            </ScrollView>
+          {mostrado.tipo ? (
+            <CartaoComTipo atual={mostrado} tipo={mostrado.tipo} responder={responder} estiloDaFaixa={estiloDaFaixa} />
+          ) : (
+            <CartaoSemTipo atual={mostrado} responder={responder} />
           )}
-
-          <View style={{ gap: 12 }}>
-            {atual.botoes.map((botao, i) => {
-              const peso = pesoDoBotao(atual.botoes, i);
-              const vazado = peso !== "solido";
-              const perigo = peso === "vazado-perigo";
-              return (
-                <Pressable
-                  key={`${botao.texto}-${i}`}
-                  // O destrutivo tem id próprio: a posição dele muda com os
-                  // botões do meio (ex.: "Adiar minha vez"), e a bateria
-                  // Maestro não achava o "Sim, sair" pelo texto (02/10).
-                  testID={botao.estilo === "destructive" ? "dialogo-botao-destrutivo" : `dialogo-botao-${i}`}
-                  accessibilityRole="button"
-                  onPress={() => responder(i)}
-                  style={{
-                    minHeight: 54,
-                    borderRadius: 9999,
-                    paddingHorizontal: 24,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderWidth: vazado ? 1.5 : 0,
-                    // A borda é forest mesmo no destrutivo; só o RÓTULO é danger.
-                    borderColor: FOREST,
-                    backgroundColor: vazado ? "transparent" : BRAND_GREEN,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontFamily: "Archivo_700Bold",
-                      fontSize: fs(16),
-                      color: perigo ? DANGER : FOREST,
-                    }}
-                  >
-                    {botao.texto}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
+        </Animated.View>
       </View>
     </Modal>
+  );
+}
+
+function CartaoSemTipo({ atual, responder }: Cartao) {
+  const { cores } = useTema();
+  return (
+    <View
+      accessibilityViewIsModal
+      accessibilityLabel={atual.titulo}
+      style={{
+        backgroundColor: cores.painel,
+        borderRadius: 20,
+        padding: 22,
+        gap: 16,
+        width: "100%",
+        maxWidth: 420,
+      }}
+    >
+      <Text
+        style={{
+          fontFamily: "Archivo_800ExtraBold",
+          fontSize: fs(18),
+          letterSpacing: -0.4,
+          color: cores.textPrimary,
+        }}
+      >
+        {atual.titulo}
+      </Text>
+
+      {/* Mensagem longa rola em vez de empurrar os botões para fora — erro
+          de backend às vezes vem com parágrafo inteiro. */}
+      {!!atual.mensagem && (
+        <ScrollView style={{ maxHeight: 260 }}>
+          <Text
+            style={{
+              fontFamily: "Inter_400Regular",
+              fontSize: fs(14),
+              lineHeight: fs(20),
+              color: cores.textSecondary,
+            }}
+          >
+            {atual.mensagem}
+          </Text>
+        </ScrollView>
+      )}
+
+      <View style={{ gap: 12 }}>
+        {atual.botoes.map((botao, i) => {
+          const peso = pesoDoBotao(atual.botoes, i);
+          const vazado = peso !== "solido";
+          const perigo = peso === "vazado-perigo";
+          return (
+            <Pressable
+              key={`${botao.texto}-${i}`}
+              // O destrutivo tem id próprio: a posição dele muda com os
+              // botões do meio (ex.: "Adiar minha vez"), e a bateria
+              // Maestro não achava o "Sim, sair" pelo texto (02/10).
+              testID={botao.estilo === "destructive" ? "dialogo-botao-destrutivo" : `dialogo-botao-${i}`}
+              accessibilityRole="button"
+              onPress={() => responder(i)}
+              style={{
+                minHeight: 54,
+                borderRadius: 9999,
+                paddingHorizontal: 24,
+                alignItems: "center",
+                justifyContent: "center",
+                borderWidth: vazado ? 1.5 : 0,
+                // A borda é o texto do tema (forest no claro) mesmo no destrutivo; só o
+                // RÓTULO é danger. `forest` fixo no escuro seria forest sobre o painel
+                // forest: o botão vazado sumiria.
+                borderColor: cores.textPrimary,
+                backgroundColor: vazado ? "transparent" : cores.green,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "Archivo_700Bold",
+                  fontSize: fs(16),
+                  // sólido: onGreen sobre o green; vazado: o texto do tema
+                  color: perigo ? cores.danger : vazado ? cores.textPrimary : cores.onGreen,
+                }}
+              >
+                {botao.texto}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+function CartaoComTipo({
+  atual,
+  tipo,
+  responder,
+  estiloDaFaixa,
+}: Cartao & { tipo: TipoDeDialogo; estiloDaFaixa: EstiloDaFaixa }) {
+  const { tema, cores } = useTema();
+  const aparencia = aparenciaDoTipo(tipo, atual.selo, tema);
+  const Icone = ICONES[tipo];
+
+  return (
+    <View
+      accessibilityViewIsModal
+      accessibilityLabel={atual.titulo}
+      // Sem borda e sem sombra no nativo: o véu já separa o cartão, e a borda da
+      // mesma cor do fundo é o erro que a faixa veio substituir.
+      style={{ backgroundColor: cores.painel, borderRadius: 20, padding: 16, width: "100%" }}
+    >
+      {aparencia.faixa && (
+        // A faixa cresce da esquerda (scaleX); o View de fora segura os 6 px de
+        // altura para o cartão não pular quando ela aparece.
+        <View style={{ height: 6, marginTop: -4, marginBottom: 12 }}>
+          <Animated.View
+            testID="dialogo-faixa"
+            style={[{ height: 6, borderRadius: 999, backgroundColor: aparencia.corDaFaixa ?? aparencia.fundo }, estiloDaFaixa]}
+          />
+        </View>
+      )}
+
+      <View
+        testID="dialogo-selo"
+        style={{
+          alignSelf: "flex-start",
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 6,
+          paddingVertical: 3,
+          paddingHorizontal: 9,
+          borderRadius: 999,
+          marginBottom: 10,
+          backgroundColor: aparencia.fundo,
+        }}
+      >
+        <Icone size={16} color={aparencia.texto} />
+        <Text style={{ fontFamily: "Inter_700Bold", fontSize: fs(12), color: aparencia.texto }}>
+          {aparencia.selo}
+        </Text>
+      </View>
+
+      <Text
+        style={{
+          fontFamily: "Archivo_700Bold",
+          fontSize: fs(18),
+          letterSpacing: -0.3,
+          color: cores.textPrimary,
+          marginBottom: 6,
+        }}
+      >
+        {atual.titulo}
+      </Text>
+
+      {!!atual.mensagem && (
+        <ScrollView style={{ maxHeight: 260 }}>
+          <Text
+            style={{
+              fontFamily: "Inter_400Regular",
+              fontSize: fs(14),
+              lineHeight: fs(20),
+              color: cores.textSecondary,
+            }}
+          >
+            {atual.mensagem}
+          </Text>
+        </ScrollView>
+      )}
+
+      {/* Primário em cima, "Cancelar" embaixo. O índice devolvido é o da lista
+          original, e o id da bateria também: o destrutivo tem id fixo, os outros
+          vêm da posição na lista, não da posição na tela. */}
+      <View style={{ gap: 8, marginTop: 14 }}>
+        {ordemDosBotoes(atual.botoes).map((i) => {
+          const botao = atual.botoes[i];
+          const cor = aparenciaDoBotao(papelDoBotao(atual.botoes, i), tema);
+          return (
+            <Pressable
+              key={`${botao.texto}-${i}`}
+              testID={botao.estilo === "destructive" ? "dialogo-botao-destrutivo" : `dialogo-botao-${i}`}
+              accessibilityRole="button"
+              onPress={() => responder(i)}
+              style={{
+                minHeight: 54,
+                borderRadius: 9999,
+                paddingHorizontal: 16,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: cor.fundo,
+              }}
+            >
+              <Text style={{ fontFamily: "Archivo_700Bold", fontSize: fs(16), color: cor.texto }}>
+                {botao.texto}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
   );
 }

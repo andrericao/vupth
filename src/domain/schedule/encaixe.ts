@@ -13,12 +13,12 @@ export interface AgendaPublica {
   blocks: { start: string; durationMinutes: number }[];
 }
 
-/** "08:30" no dia de `dia`, no relogio do aparelho. */
-function naHora(dia: Date, hhmm: string | null | undefined): number | null {
+/** "08:30" no dia de `dia` (ou `diasDepois` dias adiante), no relogio do aparelho. */
+function naHora(dia: Date, hhmm: string | null | undefined, diasDepois = 0): number | null {
   if (!hhmm) return null;
   const [h, m] = hhmm.split(':').map(Number);
   if (!Number.isInteger(h) || !Number.isInteger(m)) return null;
-  return new Date(dia.getFullYear(), dia.getMonth(), dia.getDate(), h, m, 0, 0).getTime();
+  return new Date(dia.getFullYear(), dia.getMonth(), dia.getDate() + diasDepois, h, m, 0, 0).getTime();
 }
 
 const mesmoDia = (a: Date, b: Date) =>
@@ -46,8 +46,13 @@ export function horariosDoDia(p: {
   if (!faixa) return { tipo: 'sem-horario' };
   if (faixa.closed) return { tipo: 'fechada' };
   const abre = naHora(p.dia, faixa.opens);
-  const fecha = naHora(p.dia, faixa.closes);
+  let fecha = naHora(p.dia, faixa.closes);
   if (abre == null || fecha == null) return { tipo: 'sem-horario' };
+  // Fecha na mesma hora em que abre = 24 horas; fecha ANTES de abrir = a janela
+  // vira o dia ("22:00 as 02:00"). A tela da loja ja le as duas assim
+  // (`textoDaFaixa`); sem isto o fim caia antes do comeco e todo dia dava
+  // "Nao ha horario livre" (agendar-amanha-com-fila-aberta, 18/10).
+  if (fecha <= abre) fecha = naHora(p.dia, faixa.closes, 1) as number;
 
   let piso = Math.max(abre, p.agoraMs);
   if (mesmoDia(p.dia, new Date(p.agoraMs))) {

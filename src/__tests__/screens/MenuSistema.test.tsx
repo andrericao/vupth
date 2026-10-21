@@ -1,8 +1,9 @@
-import { fireEvent } from '@testing-library/react-native';
+import { fireEvent, within } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { Settings } from '@screens/Settings';
 import { Sistema } from '@screens/Sistema';
+import { COMO_EXCLUIR } from '@screens/ExcluirConta';
 
 // Andre 2026-09-16: "quero que o menu fique igual o do partner (com submenus,
 // a versao deve ser escondida)". O Perfil passa a ser um menu em grupos, e a
@@ -82,10 +83,24 @@ describe('Perfil — menu em grupos, como o do partner', () => {
     expect(queryByText('Tema e tamanho da fonte')).toBeNull();
     expect(getByText('Criar conta grátis')).toBeTruthy();
     expect(getByText('Já tenho conta')).toBeTruthy();
-    expect(getByTestId('terms')).toBeTruthy();
+    expect(getByTestId('link-termos')).toBeTruthy();
+    expect(getByTestId('link-privacidade')).toBeTruthy();
     expect(getByTestId('versao-visitante')).toBeTruthy();
     expect(queryByText('Sair da conta')).toBeNull();
+    expect(queryByText('Excluir conta')).toBeNull();
+  });
+
+  // Guia de texto 4.7: "Deletar" sai do app. O link do Perfil e a página
+  // /excluir-conta (que a loja de apps exige e que ensina o caminho) têm de dizer
+  // a MESMA palavra: quem segue "Perfil → Excluir conta" e acha "Deletar minha
+  // conta" não sabe se chegou no lugar certo.
+  it('LOGADO: o link do fim do Perfil diz "Excluir conta", o nome que a página /excluir-conta cita', () => {
+    const { getByTestId, queryByText } = renderWithProviders(<Settings />);
+    expect(within(getByTestId('delete-account')).getByText('Excluir conta')).toBeTruthy();
     expect(queryByText('Deletar minha conta')).toBeNull();
+    const doPerfil = COMO_EXCLUIR.filter((s) => s.corpo.includes('Perfil →'));
+    expect(doPerfil.length).toBeGreaterThan(0);
+    for (const secao of doPerfil) expect(secao.corpo).toContain('Perfil → Excluir conta');
   });
 
   it('mostra os grupos Conta e Sistema', () => {

@@ -5,7 +5,7 @@ import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
 
 // cobertura-98 (08/10): entrar na fila — o servidor sem acordar, a loja fechada
-// com o "Solicitar corte", a fila fechada do profissional e os outros erros.
+// com o "Pedir corte", a fila fechada do profissional e os outros erros.
 
 const mockGoBack = jest.fn();
 const mockLeave = jest.fn();
@@ -144,11 +144,11 @@ describe('QueueStatus — entrar na fila', () => {
   });
 });
 
-describe('QueueStatus — loja fechada: Solicitar corte', () => {
+describe('QueueStatus — loja fechada: Pedir corte', () => {
   it('oferece o pedido de corte, envia, guarda e volta', async () => {
     mockCreate.mockRejectedValue(lojaFechada);
     const { findByText } = renderWithProviders(<QueueStatus />);
-    const botao = await findByText('Solicitar corte');
+    const botao = await findByText('Pedir corte');
     await act(async () => {
       fireEvent.press(botao);
     });
@@ -157,7 +157,12 @@ describe('QueueStatus — loja fechada: Solicitar corte', () => {
       'tk',
     ));
     await waitFor(() => expect(mockAdicionar).toHaveBeenCalled());
-    expect(alertSpy).toHaveBeenLastCalledWith('Pedido enviado! ⏳', expect.any(String));
+    // Guia de texto §4.6: título que diz o fato, quem responde e até quando, e "Ok".
+    expect(alertSpy).toHaveBeenLastCalledWith(
+      'Pedido enviado',
+      expect.stringMatching(/^Carlos responde até \d{2}:\d{2}\.$/),
+      [{ text: 'Ok' }],
+    );
     expect(mockGoBack).toHaveBeenCalled();
   });
 
@@ -165,7 +170,7 @@ describe('QueueStatus — loja fechada: Solicitar corte', () => {
     mockParams = { professionalId: 'p1', establishmentId: 'e1', serviceItemIds: ['s1'] };
     mockCreate.mockRejectedValue(lojaFechada);
     const { findByText } = renderWithProviders(<QueueStatus />);
-    const botao = await findByText('Solicitar corte');
+    const botao = await findByText('Pedir corte');
     await act(async () => {
       fireEvent.press(botao);
     });
@@ -176,7 +181,7 @@ describe('QueueStatus — loja fechada: Solicitar corte', () => {
     mockCreate.mockRejectedValue(lojaFechada);
     mockCutCreate.mockRejectedValue({ response: { data: { code: 'CUT_REQUEST_NOT_ALLOWED' } } });
     const { findByText } = renderWithProviders(<QueueStatus />);
-    const botao = await findByText('Solicitar corte');
+    const botao = await findByText('Pedir corte');
     await act(async () => {
       fireEvent.press(botao);
     });
@@ -187,14 +192,14 @@ describe('QueueStatus — loja fechada: Solicitar corte', () => {
     mockCreate.mockRejectedValue(lojaFechada);
     mockCutCreate.mockRejectedValueOnce({ response: { data: { message: 'Limite' } } });
     const { findByText } = renderWithProviders(<QueueStatus />);
-    const botao = await findByText('Solicitar corte');
+    const botao = await findByText('Pedir corte');
     await act(async () => {
       fireEvent.press(botao);
     });
     await waitFor(() => expect(alertSpy).toHaveBeenLastCalledWith('Erro', 'Limite'));
 
     mockCutCreate.mockRejectedValueOnce(new Error('x'));
-    const botao2 = await findByText('Solicitar corte');
+    const botao2 = await findByText('Pedir corte');
     await act(async () => {
       fireEvent.press(botao2);
     });

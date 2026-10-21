@@ -6,7 +6,6 @@ import {
   VStack,
   Text,
   Box,
-  HStack,
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
@@ -18,6 +17,7 @@ import { nomeDeExibicao } from "@domain/auth/displayName";
 import { Button } from "@components/Button";
 import { MenuItem, Grupo } from "@components/MenuDoPerfil";
 import { VersaoDoApp } from "@components/VersaoDoApp";
+import { LinksLegais } from "@components/LinksLegais";
 import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
 import { profileService } from "@services/profileService";
@@ -46,7 +46,9 @@ export function Settings() {
       .join("") || user?.email?.[0]?.toUpperCase() || "?";
 
   function handleLogout() {
-    Alert.alert("Sair da conta", "Tem certeza que deseja sair da sua conta?", [
+    // Titulo que diz o fato e nenhum corpo (guia de texto, §4.7): a pergunta ja
+    // esta nos dois botoes, Sair e Cancelar.
+    Alert.alert("Sair da conta", undefined, [
       { text: "Cancelar", style: "cancel" },
       {
         text: "Sair",
@@ -271,23 +273,21 @@ export function Settings() {
             parecer inacabada — principalmente pro VISITANTE, que so tem o
             convite de conta acima. */}
         <VStack flex={1} justifyContent="flex-end" mt="$10" alignItems="center" gap="$3">
-          {/* Deletar conta desce pra ca como LINK: e irreversivel, entao nao
+          {/* Os mesmos dois links das telas de entrada (termos-no-rodape), mas
+              aqui levam as telas de Termos e Privacidade do proprio app: ja
+              existem, e abrir o site tiraria a pessoa do app para ler o mesmo
+              texto. Um unico "Termos e Privacidade" nao dizia que eram dois. */}
+          <LinksLegais aoAbrir={(pagina) => navigation.navigate(pagina === "termos" ? "terms" : "privacy")} />
+          {/* Excluir conta desce pra ca como LINK: e irreversivel, entao nao
               disputa atencao com o resto — mas continua alcancavel por quem
               procura (era um botao de mesmo peso que "sair"). */}
-          <HStack gap="$4" alignItems="center">
-            <TouchableOpacity onPress={() => navigation.navigate("terms")} testID="terms">
-              <Text size="xs" color="$brandTextSecondary">
-                Termos e Privacidade
+          {isAuthenticated && (
+            <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
+              <Text size="xs" fontWeight="$semibold" color="$brandDanger">
+                Excluir conta
               </Text>
             </TouchableOpacity>
-            {isAuthenticated && (
-              <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
-                <Text size="xs" fontWeight="$semibold" color="$brandDanger">
-                  Deletar minha conta
-                </Text>
-              </TouchableOpacity>
-            )}
-          </HStack>
+          )}
           {!isAuthenticated && (
             <VersaoDoApp testID="versao-visitante" />
           )}

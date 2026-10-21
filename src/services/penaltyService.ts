@@ -7,8 +7,6 @@ export interface PendingPenalty {
   /** LATE_CANCEL = saiu da fila · NO_SHOW = nao compareceu · LATE_ARRIVAL = 3o atraso */
   type: string;
   amount: number;
-  gatewayFee?: number | null;
-  appShare?: number | null;
   originAttendanceId?: string | null;
   originDate?: string | null;
   originProfessionalName?: string | null;

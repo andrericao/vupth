@@ -16,6 +16,7 @@ import { Button } from "@components/Button";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { SkeletonList } from "@components/Skeleton";
 import { ScheduleModal } from "@components/ScheduleModal";
+import { SaibaMaisDoPreco } from "@components/SaibaMaisDoPreco";
 import { MoreOptionsModal, MoreOption } from "@components/MoreOptionsModal";
 import { formatWaitTime, estimatedStartTime } from "@domain/queue/types";
 import { ServiceItemResponse } from "@domain/professional/types";
@@ -29,7 +30,7 @@ import { swapOfferService } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
 import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
-import { pedidoDaResposta } from "@domain/queue/pedidoDeCorte";
+import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
@@ -285,14 +286,9 @@ export function ServiceSelection() {
       const guardado = pedidoDaResposta(pedido, { professionalId, professionalName, establishmentId, establishmentName }, agora());
       await guardarPedidoDeCorte(guardado);
       // Pedido para outro dia (DEC-27): sem prazo — o profissional decide quando
-      // abrir a agenda daquele dia.
-      const prazo = guardado.expiraEm != null
-        ? "O profissional tem 5 minutos para responder."
-        : "O profissional responde quando abrir a agenda desse dia.";
-      Alert.alert(
-        "Pedido enviado! ⏳",
-        `${horario ? `Você pediu para ${quandoDoPedido(horario, agora())}. ` : ""}${prazo} A resposta aparece aqui no app — o pedido fica no Início enquanto isso.`,
-      );
+      // abrir a agenda daquele dia (o aviso diz isso em vez da hora).
+      const enviado = avisoDoPedidoEnviado(guardado, horario ? quandoDoPedido(horario, agora()) : undefined);
+      Alert.alert(enviado.titulo, enviado.mensagem, [{ text: "Ok" }]);
       navigation.navigate("home", undefined, { pop: true });
     } catch (error: any) {
       // Pagamento pendente (CLI-30): o aviso com o "Pagar", no lugar do erro.
@@ -334,7 +330,7 @@ export function ServiceSelection() {
     cut: {
       key: "cut",
       icon: Scissors,
-      title: isRequestingCut ? "Enviando pedido..." : "Solicitar corte",
+      title: "Pedir corte",
       // DEC-27: o cliente sempre pode pedir; quem decide e o profissional.
       description: profissionalFora
         ? "A fila está fechada — peça o corte e o profissional decide."
@@ -528,6 +524,15 @@ export function ServiceSelection() {
                     <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">+ {reais(conta.totalMultas)}</Text>
                   </HStack>
                 )}
+                {/* politica-de-preco-saiba-mais (DEC-91, Andre 18/10): o preco que
+                    aparece nos botoes ja inclui a taxa de pagamento, que varia por
+                    faixa. O "Saiba mais" abre o artigo do Suporte (DEC-96). */}
+                <HStack justifyContent="space-between" alignItems="center" gap="$3" testID="preco-explicacao">
+                  <Text size="xs" color="#FFFFFFB3" flex={1}>
+                    O preço inclui a taxa de pagamento.
+                  </Text>
+                  <SaibaMaisDoPreco color="$brandGreen" />
+                </HStack>
               </VStack>
             )}
           </ScrollView>

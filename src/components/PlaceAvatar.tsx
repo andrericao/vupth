@@ -31,7 +31,7 @@ export function PlaceAvatar({
   size = 44,
   photoUrl,
   bg = "$greenTint",
-  color = "$forest",
+  color = "$onGreenTint",
 }: Props) {
   const [imageFailed, setImageFailed] = useState(false);
 

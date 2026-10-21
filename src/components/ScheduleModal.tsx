@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Modal, ScrollView, TouchableOpacity, useWindowDimensions } from "react-native";
+import { Alert, Modal, ScrollView, TouchableOpacity } from "react-native";
 import { VStack, HStack, Box, Text, Heading, Spinner } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
@@ -13,6 +13,7 @@ import { establishmentService } from "@services/establishmentService";
 import { useAuthStore } from "@stores/authStore";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   visible: boolean;
@@ -41,6 +42,7 @@ export function ScheduleModal({
   visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado, corte,
 }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
+  const { cores, veu } = useTema();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [horario, setHorario] = useState<Date | null>(null);
   const [agenda, setAgenda] = useState<AgendaPublica | null>(null);
@@ -73,8 +75,6 @@ export function ScheduleModal({
     setAgora(0);
     onClose();
   }
-
-  const { height: altura } = useWindowDimensions();
 
   const doDia = selectedDate && agora
     ? horariosDoDia({ dia: selectedDate, agoraMs: agora, horarios: horariosDaLoja, agenda, minutosDoServico })
@@ -118,18 +118,30 @@ export function ScheduleModal({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        {/* cancelar-fora-da-caixa (CLI-7, Andre 11/10): a caixa nunca passa de 90% da
-            tela e o conteudo rola dentro dela — com a fonte ampliada o "Cancelar"
-            ficava cortado fora da caixa branca. */}
-        <VStack bg="$white" borderRadius="$card" style={[floatingShadow, { maxHeight: altura * 0.9 }]}>
-          <ScrollView contentContainerStyle={{ padding: 24 }} showsVerticalScrollIndicator={false} testID="agenda-rolagem">
+      <Box flex={1} bg={veu} justifyContent="center" px={24} py={24}>
+        {/* cancelar-cortado-no-solicitar (CLI, Andre 18/10, o mesmo defeito do
+            cancelar-fora-da-caixa de 11/10 de volta): a rolagem envolvia TUDO,
+            entao com tela pequena ou fonte ampliada o "Cancelar" ficava abaixo da
+            dobra, cortado na borda da caixa, sem nada avisando que dava para
+            rolar. Agora so o miolo (titulo, dias, horarios) rola; os botoes ficam
+            no rodape da caixa e aparecem sempre.
+            A altura maxima e relativa ao espaco que o Modal realmente tem (100% do
+            contêiner), nao a 90% da altura da janela: no Android com barras do
+            sistema o Modal e menor que a janela e a caixa passava da tela. Altura
+            cravada nunca: o app honra o ajuste de fonte do aparelho (DS4). */}
+        <VStack bg="$painel" borderRadius="$card" style={[floatingShadow, { maxHeight: "100%" }]} testID="agenda-caixa">
+          <ScrollView
+            style={{ flexShrink: 1 }}
+            contentContainerStyle={{ padding: 24, paddingBottom: 8 }}
+            showsVerticalScrollIndicator={false}
+            testID="agenda-rolagem"
+          >
           <Heading fontFamily="$heading" fontSize="$lg">
-            {corte ? "Solicitar corte" : "Agendar"}
+            {corte ? "Pedir corte" : "Agendar"}
           </Heading>
           <Text size="sm" color="$brandTextSecondary" mt="$1">
             {corte
-              ? "Para quando? O profissional tem 5 minutos para responder."
+              ? "O profissional responde em 5 min."
               : "Escolha o dia e o horário."}
           </Text>
 
@@ -160,7 +172,7 @@ export function ScheduleModal({
             <Box mt="$4" testID="barra-de-encaixe">
               {!doDia ? (
                 <HStack gap="$2" alignItems="center">
-                  <Spinner color="$forest" />
+                  <Spinner color={cores.textPrimary} />
                   <Text size="sm" color="$brandTextSecondary">Buscando horários...</Text>
                 </HStack>
               ) : doDia.tipo === "livres" ? (
@@ -169,8 +181,8 @@ export function ScheduleModal({
                     const ativo = horario?.getTime() === h.getTime();
                     return (
                       <TouchableOpacity key={h.getTime()} onPress={() => setHorario(h)} testID={`horario-${formatClockTime(h)}`}>
-                        <Box bg={ativo ? "$forest" : "$brandSurface"} borderRadius="$full" px={14} py={8}>
-                          <Text fontWeight="$bold" color={ativo ? "$brandGreen" : "$forest"}>{formatClockTime(h)}</Text>
+                        <Box bg={ativo ? "$selecionado" : "$sobrePainel"} borderRadius="$full" px={14} py={8}>
+                          <Text fontWeight="$bold" color={ativo ? "$onSelecionado" : "$brandTextPrimary"}>{formatClockTime(h)}</Text>
                         </Box>
                       </TouchableOpacity>
                     );
@@ -187,17 +199,20 @@ export function ScheduleModal({
               )}
             </Box>
           )}
-
-          <Button
-            title={enviando ? "Agendando..." : corte ? "Solicitar" : "Confirmar"}
-            mt="$5"
-            isDisabled={horario == null || enviando}
-            opacity={horario == null ? 0.5 : 1}
-            onPress={confirmar}
-            testID="confirmar-agendamento"
-          />
-          <Button title="Cancelar" variant="outline" mt="$3" onPress={close} />
           </ScrollView>
+          <VStack px={24} pt="$3" pb={24} gap="$3" testID="agenda-rodape">
+            {/* O rotulo nao vira "Agendando..." (guia de texto, regra 6): o botao
+                desabilitado com o spinner ja diz que esta enviando. */}
+            <Button
+              title={corte ? "Pedir" : "Agendar"}
+              isLoading={enviando}
+              isDisabled={horario == null || enviando}
+              opacity={horario == null ? 0.5 : 1}
+              onPress={confirmar}
+              testID="confirmar-agendamento"
+            />
+            <Button title="Cancelar" variant="outline" onPress={close} />
+          </VStack>
         </VStack>
       </Box>
     </Modal>

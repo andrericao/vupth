@@ -1,5 +1,5 @@
-import { Alert } from 'react-native';
-import { act, fireEvent } from '@testing-library/react-native';
+import { ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { act, fireEvent, within } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ScheduleModal } from '@components/ScheduleModal';
@@ -49,7 +49,15 @@ describe('ScheduleModal — barra de encaixe', () => {
     });
   });
 
-  it('sem horário escolhido, "Confirmar" não agenda', async () => {
+  it('o título e o botão dizem só "Agendar" — sem "Confirmar" (guia de texto 4.6)', async () => {
+    const { getAllByText, queryByText } = abrir();
+    await act(async () => {});
+    expect(getAllByText('Agendar')).toHaveLength(2); // o título e o botão
+    expect(queryByText('Confirmar')).toBeNull();
+    expect(queryByText('Pedir')).toBeNull();
+  });
+
+  it('sem horário escolhido, "Agendar" não agenda', async () => {
     const { getByTestId } = abrir();
     await act(async () => {});
     fireEvent.press(getByTestId('confirmar-agendamento'));
@@ -158,7 +166,8 @@ describe('ScheduleModal — modo corte', () => {
     const onEscolher = jest.fn();
     const { getByTestId, getByText, props } = abrir({ corte: { onEscolher } });
     await act(async () => {});
-    expect(getByText('Solicitar corte')).toBeTruthy();
+    expect(getByText('Pedir corte')).toBeTruthy();
+    expect(getByText('O profissional responde em 5 min.')).toBeTruthy();
     fireEvent.press(getByTestId('corte-assim-que-abrir'));
     expect(onEscolher).toHaveBeenCalledWith(null);
     expect(props.onClose).toHaveBeenCalled();
@@ -172,6 +181,38 @@ describe('ScheduleModal — modo corte', () => {
     expect(getByText('Cancelar')).toBeTruthy();
   });
 
+  // cancelar-cortado-no-solicitar (Andre, 18/10): com a rolagem em volta de TUDO, o
+  // "Cancelar" ficava abaixo da dobra, cortado na borda da caixa, sem nada que
+  // avisasse que dava para rolar. Os botões saem da rolagem e ficam no rodapé da
+  // caixa: o que cresce com a fonte do aparelho é o miolo, que rola; os botões
+  // aparecem sempre.
+  it('"Pedir" e "Cancelar" ficam no rodapé fixo, fora da rolagem', async () => {
+    const { getByTestId } = abrir({ corte: { onEscolher: jest.fn() } });
+    await act(async () => {});
+    const rolagem = within(getByTestId('agenda-rolagem'));
+    expect(rolagem.queryByText('Cancelar')).toBeNull();
+    expect(rolagem.queryByText('Pedir')).toBeNull();
+    expect(rolagem.queryByTestId('confirmar-agendamento')).toBeNull();
+    const rodape = within(getByTestId('agenda-rodape'));
+    expect(rodape.getByText('Cancelar')).toBeTruthy();
+    expect(rodape.getByText('Pedir')).toBeTruthy();
+    expect(rodape.getByTestId('confirmar-agendamento')).toBeTruthy();
+    // O miolo (título, "Assim que abrir", dias) é o que rola.
+    expect(rolagem.getByText('Pedir corte')).toBeTruthy();
+    expect(rolagem.getByTestId('corte-assim-que-abrir')).toBeTruthy();
+  });
+
+  it('a caixa tem altura MÁXIMA relativa ao espaço da janela, nunca altura cravada (fonte ampliada)', async () => {
+    const { getByTestId } = abrir({ corte: { onEscolher: jest.fn() } });
+    await act(async () => {});
+    const caixa = StyleSheet.flatten(getByTestId('agenda-caixa').props.style);
+    expect(caixa.maxHeight).toBe('100%');
+    expect(caixa.height).toBeUndefined();
+    // O miolo encolhe antes de empurrar o rodapé para fora da caixa.
+    const rolagem = StyleSheet.flatten(getByTestId('agenda-rolagem').props.style);
+    expect(rolagem.flexShrink).toBe(1);
+  });
+
   it('com dia e horário escolhidos, devolve o horário — sem criar intenção', async () => {
     const onEscolher = jest.fn();
     const { getAllByRole, findByTestId, getByTestId, getByText, props } = abrir({ corte: { onEscolher } });
@@ -179,8 +220,8 @@ describe('ScheduleModal — modo corte', () => {
     // O 1º botão é o "Assim que abrir"; depois vêm hoje e amanhã.
     fireEvent.press(getAllByRole('button')[2]);
     fireEvent.press(await findByTestId('horario-09:30'));
-    // cancelar-fora-da-caixa (CLI-7): o botão diz só "Solicitar" — o horário já está escolhido acima.
-    expect(getByText('Solicitar')).toBeTruthy();
+    // cancelar-fora-da-caixa (CLI-7): o botão diz só "Pedir" — o horário já está escolhido acima.
+    expect(getByText('Pedir')).toBeTruthy();
     await act(async () => {
       fireEvent.press(getByTestId('confirmar-agendamento'));
     });
@@ -230,17 +271,25 @@ describe('ScheduleModal — o que sobra (cobertura-98)', () => {
     await act(async () => soltar(Promise.reject(new Error('y'))));
   });
 
-  it('"Agendando..." enquanto o servidor responde', async () => {
+  // Guia de texto, regra 6: "Agendando..." dentro do botão vira o botão
+  // desabilitado com o spinner. Sem isso, o rótulo trocava de palavra a cada
+  // estado e o toque repetido mandava a intenção duas vezes.
+  it('enquanto o servidor responde: o botão fica desabilitado com o spinner, sem "Agendando..." e sem enviar de novo', async () => {
     horas({ closed: false, opens: '09:00', closes: '11:00' });
     (intentionsService.create as jest.Mock).mockReturnValue(new Promise(() => {}));
-    const { getAllByRole, findByTestId, getByTestId, getByText } = abrir();
+    const { getAllByRole, findByTestId, getByTestId, queryByText } = abrir();
     await act(async () => {});
     fireEvent.press(getAllByRole('button')[1]);
     fireEvent.press(await findByTestId('horario-09:00'));
     await act(async () => {
       fireEvent.press(getByTestId('confirmar-agendamento'));
     });
-    expect(getByText('Agendando...')).toBeTruthy();
+    expect(queryByText(/Agendando/)).toBeNull();
+    expect(within(getByTestId('confirmar-agendamento')).UNSAFE_queryAllByType(ActivityIndicator).length).toBeGreaterThan(0);
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    expect(intentionsService.create).toHaveBeenCalledTimes(1);
   });
 });
 

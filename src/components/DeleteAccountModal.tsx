@@ -4,7 +4,9 @@ import { VStack, Box, Text, Heading } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
 import { Input2 } from "@components/Input2";
+import { SaibaMais } from "@components/SaibaMais";
 import { floatingShadow } from "@utils/styles";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   visible: boolean;
@@ -16,10 +18,15 @@ type Props = {
 };
 
 /**
- * Confirmação para apagar a conta. Pede a **senha atual** porque o backend
- * passou a exigi-la (2026-08-07): o app fica logado por muito tempo e apagar a
+ * Confirmação para excluir a conta. Pede a **senha atual** porque o backend
+ * passou a exigi-la (2026-08-07): o app fica logado por muito tempo e excluir a
  * conta é irreversível — o token de acesso sozinho não prova que quem pediu é o
  * titular.
+ *
+ * Corpo de uma linha e "Saiba mais" para o resto (guia de texto, §4.7): o que
+ * fica no histórico do profissional e o que não dá para desfazer moram no
+ * artigo. A palavra é "Excluir": "Deletar" é a do banco de dados, não a da
+ * pessoa.
  *
  * Não dá para usar `Alert.prompt`: ele só existe no iOS.
  *
@@ -30,6 +37,7 @@ type Props = {
  */
 export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onClose }: Props) {
   const [password, setPassword] = useState("");
+  const { veu } = useTema();
 
   function close() {
     setPassword("");
@@ -45,19 +53,16 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-        <VStack bg="$white" borderRadius="$card" p="$6" gap="$3" style={floatingShadow}>
+      <Box flex={1} bg={veu} justifyContent="center" px={24}>
+        <VStack bg="$painel" borderRadius="$card" p="$6" gap="$3" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
-            Deletar conta
+            Excluir conta
           </Heading>
 
           <Text size="sm" color="$brandTextSecondary">
-            Seus dados pessoais serão apagados e você sairá do app. Os atendimentos
-            que você já fez continuam no histórico do profissional, sem o seu nome.
+            Seus dados são apagados. Para confirmar, digite a senha.
           </Text>
-          <Text size="sm" color="$brandTextSecondary">
-            Para confirmar que é você, digite sua senha atual.
-          </Text>
+          <SaibaMais artigo="excluirConta" testID="excluir-conta-saiba-mais" />
 
           <Input2
             isPassword
@@ -75,10 +80,11 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
           )}
 
           <Button
-            title={isDeleting ? "Deletando..." : "Deletar minha conta"}
+            title="Excluir"
             variant="outline"
             borderColor="$brandDanger"
             $active-bg="$brandDangerTint"
+            isLoading={isDeleting}
             isDisabled={password.length === 0 || isDeleting}
             testID="delete-account-confirm"
             onPress={confirm}

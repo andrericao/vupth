@@ -1,4 +1,5 @@
-import { fireEvent, within } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
+import { fireEvent, waitFor, within } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { CardDaLoja } from '@components/CardDaLoja';
 import { Establishment } from '@domain/establishment/types';
@@ -11,6 +12,15 @@ jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 
 jest.setTimeout(90000);
+
+// Os estilos de todos os Views/Texts renderizados (o Gluestack os resolve depois
+// da primeira pintura, entao quem le precisa esperar o fundo da linha aparecer).
+type No = { props?: Record<string, unknown>; children?: (No | string)[] | null };
+function estilosRenderizados(no: No | string | null): Record<string, unknown>[] {
+  if (!no || typeof no === 'string') return [];
+  const proprio = no.props?.style ? [StyleSheet.flatten(no.props.style as never) as Record<string, unknown>] : [];
+  return proprio.concat(...(no.children ?? []).map((f) => estilosRenderizados(f)));
+}
 
 function loja(extra: Partial<Establishment> = {}): Establishment {
   return {
@@ -100,5 +110,22 @@ describe('o card da loja na Home', () => {
     expect(await findByText('Senta em ~10 min')).toBeTruthy();
     fireEvent.press(getByTestId('establishment-e1'));
     expect(onPress).toHaveBeenCalledWith(e);
+  });
+
+  it('loja fechada: a linha não é apagada, sem opacity em bloco nenhum e nome na cor normal', async () => {
+    const e = loja({ is_open: false, open_status: 'CLOSED' as Establishment['open_status'], rating_average: 4.5 });
+    const { findByTestId, getByText, toJSON } = renderWithProviders(
+      <CardDaLoja establishment={e} distanceKm={null} onPress={jest.fn()} />,
+    );
+    await findByTestId('establishment-e1', {}, { timeout: 15000 });
+    // Espera o estilo existir (a linha tem fundo surface) antes de afirmar que
+    // nao ha opacity: sem isso o teste passaria com o estilo ainda vazio.
+    await waitFor(() => expect(estilosRenderizados(toJSON() as No | null).some((x) => x.backgroundColor === '#F3F5F1')).toBe(true), {
+      timeout: 15000,
+    });
+    expect(estilosRenderizados(toJSON() as No | null).filter((x) => x.opacity != null && x.opacity !== 1)).toEqual([]);
+    await waitFor(() => expect(StyleSheet.flatten(getByText('Barbearia do Zé').props.style).color).toBe('#163300'), {
+      timeout: 15000,
+    });
   });
 });

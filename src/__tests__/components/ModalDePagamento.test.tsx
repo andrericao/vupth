@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import { ReactNode } from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -51,10 +52,27 @@ describe('ModalDePagamento', () => {
   it('o aviso do 409: o total, com quem, e o "Pagar" abre o Pix dele', async () => {
     act(() => usePendenciaStore.getState().avisar([{ attendance_id: 'a1', status: 'PENDING', amount: 45, professional_name: 'Carlos' }]));
     const tela = montar();
-    expect(tela.getByText('Falta pagar R$ 45,00 com Carlos. Pague para marcar de novo.')).toBeTruthy();
+    expect(tela.getByText('R$ 45,00 com Carlos.')).toBeTruthy();
     fireEvent.press(tela.getByTestId('pendencia-pagar'));
     expect(usePendenciaStore.getState().pagando).toBe('a1');
     expect(await tela.findByText('R$ 45,00', {}, { timeout: 15000 })).toBeTruthy();
+  });
+
+  // Aviso de pendencia = dinheiro: a faixa e o selo dizem isso antes do texto. O Pix
+  // em si e a tela de pagar, nao um aviso, e nao ganha selo.
+  it('o aviso de pendência é dinheiro: faixa forte e selo "Pagamento"; o Pix não tem selo', async () => {
+    act(() => usePendenciaStore.getState().avisar([{ attendance_id: 'a1', status: 'PENDING', amount: 45, professional_name: 'Carlos' }]));
+    const aviso = montar();
+    expect(aviso.getByTestId('selo-do-tipo')).toBeTruthy();
+    expect(aviso.getByText('Pagamento')).toBeTruthy();
+    expect(StyleSheet.flatten(aviso.getByTestId('faixa-do-tipo').props.style).backgroundColor).toBe('#B3261E');
+    aviso.unmount();
+
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const pix = montar();
+    expect(await pix.findByText('R$ 40,00')).toBeTruthy();
+    expect(pix.queryByTestId('selo-do-tipo')).toBeNull();
+    expect(pix.queryByTestId('faixa-do-tipo')).toBeNull();
   });
 
   it('o aviso sem itens só tem o "Agora não", que fecha', () => {
@@ -75,11 +93,14 @@ describe('ModalDePagamento', () => {
     expect(tela.getByTestId('pix-codigo').props.children).toBe('000201pix');
     expect(tela.getByTestId('pix-qr')).toBeTruthy();
 
+    expect(tela.queryByTestId('pix-copiado-check')).toBeNull();
     await act(async () => {
       fireEvent.press(tela.getByTestId('pix-copiar'));
     });
     expect(mockCopiar).toHaveBeenCalledWith('000201pix');
     expect(tela.getByText('Copiado')).toBeTruthy();
+    // Quem copia um codigo Pix precisa ter certeza de que copiou: alem do texto, o check.
+    expect(tela.getByTestId('pix-copiado-check')).toBeTruthy();
 
     const invalidar = jest.spyOn(client, 'invalidateQueries');
     await act(async () => {

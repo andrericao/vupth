@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ServiceSelection } from '@screens/ServiceSelection';
@@ -113,6 +113,20 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
     expect(queryByText(/multa|sem custo/i)).toBeNull();
   });
 
+  // politica-de-preco-saiba-mais (DEC-91, Andre 18/10): onde o preço aparece, o
+  // "Saiba mais" leva ao artigo do Suporte. Sem serviço marcado não há preço a explicar.
+  it('com serviço escolhido, o resumo traz o Saiba mais do preço, que abre o artigo do Suporte', async () => {
+    useAuthStore.setState({ isAuthenticated: true });
+    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
+    const { queryByTestId, getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    await findByTestId('service-s1', {}, { timeout: 15000 });
+    expect(queryByTestId('preco-saiba-mais')).toBeNull();
+    fireEvent.press(getByTestId('service-s1'));
+    fireEvent.press(getByTestId('preco-saiba-mais'));
+    expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/por-que-o-preco-muda.html');
+    abrir.mockRestore();
+  });
+
   it('LOGADO: confirmar vai direto pra queueStatus', async () => {
     useAuthStore.setState({ isAuthenticated: true });
     const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
@@ -196,7 +210,7 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     );
   });
 
-  it('LOJA FECHADA: primária é agendar e o "Solicitar corte" mora no menu', async () => {
+  it('LOJA FECHADA: primária é agendar e o "Pedir corte" mora no menu', async () => {
     useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
     setRouteParams({ ...OPEN_PARAMS, establishmentOpen: false });
     mockCreateCut.mockResolvedValue({ data: { id: 'cut-1' } });
@@ -496,7 +510,11 @@ describe('ServiceSelection — pedido de corte com dia e horário', () => {
       expect.objectContaining({ professionalId: 'p1', establishmentId: 'e1', serviceItemIds: ['s1'] }),
     );
     expect(dados.desiredTime).toMatch(/T09:30:00[+-]\d{2}:\d{2}$/);
-    expect(alerta).toHaveBeenCalledWith('Pedido enviado! ⏳', expect.stringMatching(/amanhã às 09:30/));
+    expect(alerta).toHaveBeenCalledWith(
+      'Pedido enviado',
+      expect.stringMatching(/^Você pediu para amanhã às 09:30\. .* responde até \d{2}:\d{2}\.$/),
+      [{ text: 'Ok' }],
+    );
     expect(mockNavigate).toHaveBeenCalledWith('home', undefined, { pop: true });
     alerta.mockRestore();
   });

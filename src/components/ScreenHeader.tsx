@@ -4,6 +4,8 @@ import { VStack, HStack, Text, Center } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
 import { fs } from "@stores/fonteStore";
+import type { Cores } from "@domain/tema";
+import { useTema } from "@hooks/useTema";
 
 type Props = {
   /**
@@ -32,9 +34,18 @@ type Props = {
 };
 
 function buttonBg(ground: Props["ground"]) {
+  // tema-fixo: sobre a foto e sobre o hero verde os fundos sao os mesmos nos dois temas
   if (ground === "foto") return "#FFFFFFE6";
+  // tema-fixo: forest translucido sobre o hero verde, que e green nos dois temas
   if (ground === "marca") return "#16330014";
   return "$greenTint";
+}
+
+/** A cor do icone do botao redondo: o par do fundo que `buttonBg` escolheu. */
+export function corDoIconeDoCabecalho(ground: Props["ground"], cores: Cores): string {
+  if (ground === "foto") return cores.forest; // branco translucido sobre a foto: forest nos dois temas
+  if (ground === "marca") return cores.onGreen; // forest translucido sobre o green
+  return cores.onGreenTint; // greenTint: forest no claro, green no escuro
 }
 
 /**
@@ -85,6 +96,7 @@ export function HeaderIconButton({
  * aparelho com notch alto e sobrava em tela sem entalhe).
  */
 export function ScreenHeader({ title, subtitle, action, onBack, root, ground }: Props) {
+  const { cores } = useTema();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const showBack = !root;
@@ -104,7 +116,7 @@ export function ScreenHeader({ title, subtitle, action, onBack, root, ground }: 
             testID="back-button"
             accessibilityLabel="Voltar"
           >
-            <ChevronLeft size={20} color="#163300" />
+            <ChevronLeft size={20} color={corDoIconeDoCabecalho(ground, cores)} />
           </HeaderIconButton>
         )}
 
@@ -120,7 +132,8 @@ export function ScreenHeader({ title, subtitle, action, onBack, root, ground }: 
           fontSize={fs(26)}
           lineHeight={fs(30)}
           letterSpacing={-1}
-          color="$forest"
+          // tema-fixo: sobre a foto o titulo e forest nos dois temas (a foto e clara nos dois)
+          color={ground === "marca" ? "$onGreen" : ground === "foto" ? "$forest" : "$brandTextPrimary"}
         >
           {title}
         </Text>

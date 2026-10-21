@@ -29,10 +29,12 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 
 import { configComFonte } from "./config/gluestack-ui.config";
 import { useFonteStore } from "@stores/fonteStore";
+import { TemaDoApp, useBarraDeStatus } from "@components/TemaDoApp";
 
 import { Routes } from "@routes/index";
 
 import { PreparingServer } from "@components/PreparingServer";
+import { EntradaDaHome } from "@components/EntradaDaHome";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -127,8 +129,13 @@ export default function App() {
   // que os tamanhos escritos direto nas telas (fs) tambem acompanhem.
   const passoDaFonte = useFonteStore((s) => s.passo);
   const configDoTema = useMemo(() => configComFonte(passoDaFonte), [passoDaFonte]);
+  const estiloDaBarra = useBarraDeStatus();
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
+  // A abertura continua montada por cima da Home até o V terminar de sair: a
+  // troca seca de <PreparingServer /> por <Routes /> cortava a saída no meio.
+  const [aberturaFechada, setAberturaFechada] = useState(false);
+  const pronto = fontGateOpen && backendReady;
 
   useEffect(() => {
     restoreSession();
@@ -214,11 +221,12 @@ export default function App() {
       }}
     >
       <GluestackUIProvider config={configDoTema} key={passoDaFonte}>
+        <TemaDoApp>
         {/* preview-nao-abre (17/10): o FaixaAvaliar usa useSafeAreaInsets e fica
             fora do Routes (que ja traz o seu provider) — sem este, o render da
             abertura estoura "No safe area value available" e o app fecha. */}
         <SafeAreaProvider>
-        <StatusBar style="dark" backgroundColor="#FFFFFF" translucent={false} />
+        <StatusBar style={estiloDaBarra.style} backgroundColor={estiloDaBarra.fundo} translucent={false} />
 
         <QueryScopedHooks />
         {/* Erro de render deixa de fechar o app e vira tela com mensagem. Fica
@@ -227,7 +235,12 @@ export default function App() {
         <ErrorBoundary>
           {/* abertura-sem-retangulo-e-sem-tela-verde (17/10): o V pulsando ja na espera da fonte —
               sem o spinner/tela vazia entre o splash nativo e a abertura. A tela do V nao usa fonte. */}
-          {!fontGateOpen || !backendReady ? <PreparingServer /> : <Routes />}
+          {pronto ? (
+            <EntradaDaHome>
+              <Routes />
+            </EntradaDaHome>
+          ) : null}
+          {aberturaFechada ? null : <PreparingServer pronto={pronto} onSaiu={() => setAberturaFechada(true)} />}
         </ErrorBoundary>
         {/* Um so na arvore, FORA do portao de fonte: um aviso disparado antes
             de a fonte carregar precisa aparecer do mesmo jeito. */}
@@ -238,12 +251,13 @@ export default function App() {
         {/* pedido-de-feedback (CLI-34): depois de avaliar, uma vez a cada 30 dias. */}
         <ModalDeFeedback />
         {/* notificacao-avaliar (CLI-33): uma vez, no topo, depois do corte. */}
-        {fontGateOpen && backendReady ? (
+        {pronto ? (
           <ErrorBoundary>
             <FaixaAvaliar />
           </ErrorBoundary>
         ) : null}
         </SafeAreaProvider>
+        </TemaDoApp>
       </GluestackUIProvider>
     </PersistQueryClientProvider>
   );

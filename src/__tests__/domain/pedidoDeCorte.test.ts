@@ -1,4 +1,11 @@
-import { desfechoDoPedido, pedidoDaResposta, FOLGA_DO_PRAZO_MS, PedidoDeCorte } from '@domain/queue/pedidoDeCorte';
+import {
+  desfechoDoPedido,
+  pedidoDaResposta,
+  avisoDoPedidoEnviado,
+  avisoDoPedidoNaoAceito,
+  FOLGA_DO_PRAZO_MS,
+  PedidoDeCorte,
+} from '@domain/queue/pedidoDeCorte';
 import { ClientAttendance } from '@services/attendanceService';
 
 // Teste do Andre de 25/09: "o cliente não sabe se a solicitação de corte foi
@@ -66,5 +73,51 @@ describe('o pedido a partir da resposta do servidor', () => {
     const p = pedidoDaResposta({ id: 'cr1', created_at: null, expires_at: null }, ctx, CRIADO);
     expect(p.expiraEm).toBeNull();
     expect(desfechoDoPedido(p, [], CRIADO + 3 * 24 * 3_600_000).tipo).toBe('aguardando');
+  });
+});
+
+// GUIA_DE_TEXTO.md §4.6: o aviso do pedido enviado e o do pedido que venceu.
+describe('avisoDoPedidoEnviado', () => {
+  const hhmm = (ms: number) => {
+    const d = new Date(ms);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
+
+  it('diz quem responde e ATÉ QUANDO (a hora, não "5 minutos")', () => {
+    const expiraEm = new Date(2026, 9, 18, 14, 35).getTime();
+    const aviso = avisoDoPedidoEnviado({ professionalName: 'Ana', expiraEm });
+    expect(aviso).toEqual({ titulo: 'Pedido enviado', mensagem: `Ana responde até ${hhmm(expiraEm)}.` });
+    expect(aviso.mensagem).toBe('Ana responde até 14:35.');
+    expect(aviso.mensagem.length).toBeLessThanOrEqual(70);
+  });
+
+  it('sem o nome do profissional, diz "O profissional"', () => {
+    const expiraEm = new Date(2026, 9, 18, 9, 5).getTime();
+    expect(avisoDoPedidoEnviado({ professionalName: '', expiraEm }).mensagem).toBe('O profissional responde até 09:05.');
+  });
+
+  it('pedido para outro dia não tem prazo: o profissional decide quando abrir a agenda', () => {
+    expect(avisoDoPedidoEnviado({ professionalName: 'Ana', expiraEm: null }).mensagem).toBe(
+      'Ana responde quando abrir a agenda desse dia.',
+    );
+  });
+
+  it('com o horário escolhido, repete o que a pessoa pediu', () => {
+    const expiraEm = new Date(2026, 9, 18, 14, 35).getTime();
+    expect(avisoDoPedidoEnviado({ professionalName: 'Ana', expiraEm }, 'amanhã às 09:30').mensagem).toBe(
+      'Você pediu para amanhã às 09:30. Ana responde até 14:35.',
+    );
+  });
+});
+
+describe('avisoDoPedidoNaoAceito', () => {
+  it('título que diz o fato, uma linha de corpo e os dois caminhos', () => {
+    expect(avisoDoPedidoNaoAceito({ professionalName: 'Ana' })).toEqual({
+      titulo: 'Pedido não aceito',
+      mensagem: 'Ana não respondeu a tempo.',
+      escolherOutro: 'Escolher outro',
+      agendar: 'Agendar',
+    });
+    expect(avisoDoPedidoNaoAceito({ professionalName: '' }).mensagem).toBe('O profissional não respondeu a tempo.');
   });
 });

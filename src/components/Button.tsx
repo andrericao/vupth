@@ -27,7 +27,10 @@ export function Button({
   const isOutline = variant === "outline";
   const isDestructive = variant === "destructive";
   const isGhost = isOutline || isDestructive; // fundo transparente + borda
-  const accent = isDestructive ? "$brandDanger" : "$forest";
+  // O rotulo (e a borda do vazado) e o par do fundo: onGreen sobre o green do
+  // solido, textPrimary sobre a tela no vazado, danger no destrutivo. `$forest`
+  // fixo daria forest sobre forest no escuro (o vazado some).
+  const accent = isDestructive ? "$brandDanger" : isOutline ? "$brandTextPrimary" : "$onGreen";
 
   return (
     <GluestackButton
@@ -43,6 +46,9 @@ export function Button({
       $active-bg={isDestructive ? "$brandDangerTint" : isOutline ? "$greenTint" : "$brandSuccess"}
       borderWidth={isGhost ? "$2" : "$0"}
       borderColor={accent}
+      // O toque encolhe a pilula um pouco, alem de trocar o fundo. Escala estatica
+      // no pressionado: nao ha Reanimated no app, e uma transicao pediria um.
+      sx={{ ":active": { transform: [{ scale: 0.97 }] } }}
       // `isDisabled` do Gluestack e so ESTADO VISUAL: deixa o botao apagado mas
       // o toque continua disparando o `onPress` (descoberto em 2026-08-07, pelo
       // teste do DeleteAccountModal). Quem escapou disso ate hoje escapou por

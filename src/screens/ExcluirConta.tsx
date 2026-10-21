@@ -24,16 +24,16 @@ type Secao = { titulo: string; corpo: string };
 export const COMO_EXCLUIR: Secao[] = [
   {
     titulo: "No app do cliente",
-    corpo: "Perfil → Deletar conta. Para confirmar que é você, digite a sua senha atual.",
+    corpo: "Perfil → Excluir conta. Para confirmar que é você, digite a sua senha atual.",
   },
   {
     titulo: "No app do profissional (VUPTH Parceiros)",
-    corpo: "Conta → Deletar conta, também com a senha atual.",
+    corpo: "Conta → Excluir, também com a senha atual.",
   },
   {
     titulo: "Pela web, sem o app",
     corpo:
-      "Entre na sua conta em vupth.pages.dev e vá em Perfil → Deletar conta. O botão abaixo leva até lá.",
+      "Entre na sua conta em vupth.pages.dev e vá em Perfil → Excluir conta. O botão abaixo leva até lá.",
   },
   {
     titulo: "Esqueceu a senha",
@@ -73,7 +73,7 @@ export function ExcluirConta() {
           </VStack>
         ))}
 
-        {/* O Perfil mostra "Entrar" a quem nao esta logado, e "Deletar conta" a
+        {/* O Perfil mostra "Entrar" a quem nao esta logado, e "Excluir conta" a
             quem esta: um botao so serve os dois. */}
         <TouchableOpacity
           onPress={() => navigation.navigate("settings", undefined, { pop: true })}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Animated, Modal, Pressable, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
-import { X } from "lucide-react-native";
+import { Check, X } from "lucide-react-native";
 import QRCode from "react-native-qrcode-svg";
 
 import {
@@ -17,40 +17,76 @@ import { useAuthStore } from "@stores/authStore";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { fs } from "@stores/fonteStore";
 import { copiarTexto } from "@utils/copiar";
+import { movimentoReduzido } from "@utils/motion";
+import { FaixaESelo } from "@components/FaixaESelo";
+import { useTema } from "@hooks/useTema";
 
-const FOREST = "#163300";
-const GREEN = "#9FE870";
-const TEXT_SECONDARY = "#454745";
-
-function Botao({ titulo, onPress, claro, testID, desligado }: {
-  titulo: string; onPress: () => void; claro?: boolean; testID: string; desligado?: boolean;
+function Botao({ titulo, onPress, claro, testID, desligado, feito }: {
+  titulo: string; onPress: () => void; claro?: boolean; testID: string; desligado?: boolean; feito?: boolean;
 }) {
+  const { cores } = useTema();
+  // O primario e green + onGreen nos dois temas; o "claro" (vazado) e painel + o texto do tema.
+  const rotulo = claro ? cores.textPrimary : cores.onGreen;
   return (
     <Pressable
       onPress={onPress}
       disabled={desligado}
       testID={testID}
       accessibilityRole="button"
-      style={{
-        backgroundColor: claro ? "#FFFFFF" : GREEN,
+      // Escala estatica no pressionado (sem Reanimated no app): o toque encolhe o botao.
+      style={({ pressed }) => ({
+        backgroundColor: claro ? cores.painel : cores.green,
         borderWidth: claro ? 1 : 0,
-        borderColor: FOREST,
+        borderColor: cores.textPrimary,
         borderRadius: 999,
         paddingVertical: 12,
         alignItems: "center",
         opacity: desligado ? 0.5 : 1,
-      }}
+        transform: [{ scale: pressed ? 0.97 : 1 }],
+      })}
     >
-      <Text style={{ color: FOREST, fontFamily: "Inter_600SemiBold", fontSize: fs(15) }}>{titulo}</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        {feito ? <ChecagemQueSurge cor={rotulo} /> : null}
+        <Text style={{ color: rotulo, fontFamily: "Inter_600SemiBold", fontSize: fs(15) }}>{titulo}</Text>
+      </View>
     </Pressable>
   );
 }
 
+// "Copiado" so trocava o texto, e quem copia um codigo Pix precisa ter certeza de que
+// copiou. O check surge com um salto (0 a 1, passando de 1 por um instante).
+function ChecagemQueSurge({ cor }: { cor: string }) {
+  const [escala] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    let vivo = true;
+    let anim: Animated.CompositeAnimation | null = null;
+    movimentoReduzido().then((reduzido) => {
+      if (!vivo) return;
+      if (reduzido) {
+        escala.setValue(1);
+        return;
+      }
+      anim = Animated.spring(escala, { toValue: 1, friction: 5, tension: 200, useNativeDriver: true });
+      anim.start();
+    });
+    return () => {
+      vivo = false;
+      anim?.stop();
+    };
+  }, [escala]);
+  return (
+    <Animated.View testID="pix-copiado-check" style={{ transform: [{ scale: escala }] }}>
+      <Check size={16} color={cor} />
+    </Animated.View>
+  );
+}
+
 function Linha({ rotulo, valor, forte }: { rotulo: string; valor: string; forte?: boolean }) {
+  const { cores } = useTema();
   return (
     <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-      <Text style={{ color: TEXT_SECONDARY, fontSize: fs(14) }}>{rotulo}</Text>
-      <Text style={{ color: FOREST, fontSize: fs(14), fontWeight: forte ? "700" : "500" }}>{valor}</Text>
+      <Text style={{ color: cores.textSecondary, fontSize: fs(14) }}>{rotulo}</Text>
+      <Text style={{ color: cores.textPrimary, fontSize: fs(14), fontWeight: forte ? "700" : "500" }}>{valor}</Text>
     </View>
   );
 }
@@ -67,6 +103,7 @@ export function ModalDePagamento() {
   const fechar = usePendenciaStore((s) => s.fechar);
   const accessToken = useAuthStore((s) => s.accessToken);
   const queryClient = useQueryClient();
+  const { cores, veu } = useTema();
   const [pagamento, setPagamento] = useState<Pagamento | null>(null);
   const [erro, setErro] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -113,54 +150,58 @@ export function ModalDePagamento() {
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={fechar}>
-      <View style={{ flex: 1, backgroundColor: "#16330073", justifyContent: "center", paddingHorizontal: 24 }}>
+      <View style={{ flex: 1, backgroundColor: veu, justifyContent: "center", paddingHorizontal: 24 }}>
         <View
           accessibilityViewIsModal
           testID={aviso ? "aviso-de-pendencia" : "pix-do-atendimento"}
-          style={{ backgroundColor: "#FFFFFF", borderRadius: 20, padding: 22, gap: 14, width: "100%", maxWidth: 420, alignSelf: "center" }}
+          style={{ backgroundColor: cores.painel, borderRadius: 20, padding: 22, gap: 14, width: "100%", maxWidth: 420, alignSelf: "center" }}
         >
+          {/* O aviso de pendencia e dinheiro: faixa e selo dizem isso antes do texto.
+              O Pix em si nao ganha selo (e a tela de pagar, nao um aviso). */}
+          {texto ? <FaixaESelo tipo="dinheiro" selo="Pagamento" /> : null}
           <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
-            <Text style={{ flex: 1, fontFamily: "Archivo_800ExtraBold", fontSize: fs(18), color: FOREST }}>
+            <Text style={{ flex: 1, fontFamily: "Archivo_800ExtraBold", fontSize: fs(18), color: cores.textPrimary }}>
               {texto ? texto.titulo : "Pagar por Pix"}
             </Text>
             <Pressable onPress={fechar} hitSlop={12} accessibilityRole="button" accessibilityLabel="Fechar" testID="pagamento-fechar">
-              <X size={20} color={FOREST} />
+              <X size={20} color={cores.textPrimary} />
             </Pressable>
           </View>
 
           {texto ? (
             <>
-              <Text style={{ color: TEXT_SECONDARY, fontSize: fs(14), lineHeight: fs(20) }}>{texto.mensagem}</Text>
+              <Text style={{ color: cores.textSecondary, fontSize: fs(14), lineHeight: fs(20) }}>{texto.mensagem}</Text>
               {aviso && aviso.length > 0 ? (
                 <Botao titulo="Pagar" testID="pendencia-pagar" onPress={() => pagar(aviso[0].attendance_id)} />
               ) : null}
               <Botao titulo="Agora não" claro testID="pendencia-agora-nao" onPress={fechar} />
             </>
           ) : erro ? (
-            <Text style={{ color: TEXT_SECONDARY, fontSize: fs(14) }}>Não foi possível carregar o pagamento. Tente de novo.</Text>
+            <Text style={{ color: cores.textSecondary, fontSize: fs(14) }}>Não foi possível carregar o pagamento. Tente de novo.</Text>
           ) : !pagamento ? (
-            <Text style={{ color: TEXT_SECONDARY, fontSize: fs(14) }}>Carregando...</Text>
+            <Text style={{ color: cores.textSecondary, fontSize: fs(14) }}>Carregando...</Text>
           ) : (
             <>
-              <Text testID="pix-status" style={{ color: FOREST, fontSize: fs(14), fontWeight: "600" }}>
+              <Text testID="pix-status" style={{ color: cores.textPrimary, fontSize: fs(14), fontWeight: "600" }}>
                 {textoDoStatus(pagamento.status)}
               </Text>
               {servicos > 0 ? <Linha rotulo="Serviço" valor={reais(servicos)} /> : null}
               {multas > 0 ? <Linha rotulo="Multa" valor={reais(multas)} /> : null}
               <Linha rotulo="Total" valor={reais(pagamento.amount)} forte />
               {pagamento.holder_name ? (
-                <Text style={{ color: TEXT_SECONDARY, fontSize: fs(13) }}>Para: {pagamento.holder_name}</Text>
+                <Text style={{ color: cores.textSecondary, fontSize: fs(13) }}>Para: {pagamento.holder_name}</Text>
               ) : null}
               {pagamento.pix_copy_paste && podeAvisarQuePagou(pagamento.status) ? (
                 <>
                   {/* pagamento-no-concluido (DEC-78): o QR em cima do copiar. */}
                   <View style={{ alignItems: "center" }} testID="pix-qr">
-                    <QRCode value={pagamento.pix_copy_paste} size={180} color={FOREST} backgroundColor="#FFFFFF" />
+                    {/* tema-fixo: QR escuro sobre branco nos dois temas; o leitor do banco nao le o codigo invertido */}
+                    <QRCode value={pagamento.pix_copy_paste} size={180} color={cores.forest} backgroundColor="#FFFFFF" />
                   </View>
-                  <Text selectable numberOfLines={3} testID="pix-codigo" style={{ color: FOREST, fontSize: fs(12), backgroundColor: "#F3F5F1", borderRadius: 10, padding: 10 }}>
+                  <Text selectable numberOfLines={3} testID="pix-codigo" style={{ color: cores.textPrimary, fontSize: fs(12), backgroundColor: cores.sobrePainel, borderRadius: 10, padding: 10 }}>
                     {pagamento.pix_copy_paste}
                   </Text>
-                  <Botao titulo={copiado ? "Copiado" : "Copiar código Pix"} claro testID="pix-copiar" onPress={copiar} />
+                  <Botao titulo={copiado ? "Copiado" : "Copiar código Pix"} claro feito={copiado} testID="pix-copiar" onPress={copiar} />
                 </>
               ) : null}
               {podeAvisarQuePagou(pagamento.status) ? (

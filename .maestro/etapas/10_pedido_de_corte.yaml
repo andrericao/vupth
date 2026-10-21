@@ -18,21 +18,24 @@ appId: ${APP_ID}
     label: "10.04 · toca em more-option-cut"
 # Desde o 77b918d o pedido abre a barra de quando: "Assim que abrir" e o
 # pedido de sempre (o profissional tem 5 minutos).
-# cancelar-fora-da-caixa (CLI): a caixa rola dentro de si e o Cancelar fica nela.
-- scrollUntilVisible:
-    element:
-      text: "Cancelar"
-    label: "10.0A · rola a caixa até o Cancelar"
+# cancelar-cortado-no-solicitar (CLI): os botões ficam no rodapé fixo da caixa,
+# fora da rolagem, então aparecem sem rolar nada, também com a fonte ampliada.
 - assertVisible:
-    text: "Solicitar"
-    label: "10.0Aa · o botão diz Solicitar"
+    id: "agenda-rodape"
+    label: "10.0A · o rodapé da caixa está na tela, sem rolar"
+- assertVisible:
+    text: "Cancelar"
+    label: "10.0Aa · o Cancelar aparece inteiro"
+- assertVisible:
+    text: "Pedir"
+    label: "10.0Ab · o botão diz Pedir"
 - tapOn:
     id: "corte-assim-que-abrir"
     label: "10.0B · toca em Assim que abrir"
 - extendedWaitUntil:
-    visible: "Pedido enviado!.*"
+    visible: "Pedido enviado.*"
     timeout: ${30000 * LENTO}
-    label: "10.05 · espera Pedido enviado!"
+    label: "10.05 · espera Pedido enviado"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "10.06 · roda fechar_aviso"

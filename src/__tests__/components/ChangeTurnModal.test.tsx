@@ -1,4 +1,4 @@
-import { fireEvent } from '@testing-library/react-native';
+import { fireEvent, within } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ChangeTurnModal } from '@components/ChangeTurnModal';
@@ -31,6 +31,38 @@ describe('ChangeTurnModal', () => {
     expect(getByTestId('change-turn-later')).toBeTruthy();
     expect(getByTestId('change-turn-end')).toBeTruthy();
     expect(getByTestId('change-turn-schedule')).toBeTruthy();
+  });
+
+  // GUIA_DE_TEXTO.md §4.4: grupos "Mais cedo" / "Mais tarde" (sem caixa alta) e
+  // cada opção em um verbo; a descrição de uma linha fica.
+  it('os grupos e as opções seguem o guia de texto', () => {
+    const { getByText, getByTestId, queryByText } = setup();
+
+    expect(getByText('Mais cedo')).toBeTruthy();
+    expect(getByText('Mais tarde')).toBeTruthy();
+    expect(queryByText(/QUERO SER ATENDIDO|PRECISO DE MAIS TEMPO/)).toBeNull();
+    for (const [id, rotulo] of [
+      ['earlier', 'Adiantar'],
+      ['later', 'Trocar'],
+      ['end', 'Ir para o fim'],
+      ['schedule', 'Agendar'],
+    ]) {
+      expect(within(getByTestId(`change-turn-${id}`)).getByText(rotulo)).toBeTruthy();
+    }
+    expect(getByText('Publicamos seu pedido para quem está à frente')).toBeTruthy();
+  });
+
+  it('a fila de hoje é a legenda de "Mais tarde", não de "Mais cedo"', () => {
+    const { getByText } = setup({ tailEtaMs: new Date(2026, 9, 18, 14, 35).getTime() });
+    expect(getByText('A fila de hoje termina às 14:35.')).toBeTruthy();
+  });
+
+  it('publicando: o botão continua "Confirmar", desabilitado, com o spinner (sem "Publicando...")', () => {
+    const { props, getByTestId, queryByText } = setup({ swapBusy: true });
+    fireEvent.press(getByTestId('change-turn-earlier'));
+    fireEvent.press(getByTestId('change-turn-confirm'));
+    expect(props.onCreateSwapOffer).not.toHaveBeenCalled();
+    expect(queryByText(/Publicando/)).toBeNull();
   });
 
   it('não confirma nada enquanto nenhuma opção estiver marcada', () => {

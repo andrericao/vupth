@@ -2,6 +2,18 @@ import { AnimationResolver } from '@gluestack-style/animation-resolver';
 import { MotionAnimationDriver } from '@gluestack-style/legend-motion-animation-driver';
 import { createConfig, createComponents } from '@gluestack-style/react';
 import * as componentsTheme from './theme';
+import { coresNoGluestack } from '../src/domain/tema';
+
+// O Text e o Heading do Gluestack tem cor PADRAO fixa ($textLight700 = #525252,
+// $textLight900 = #262626): no escuro, todo texto sem `color` saia cinza escuro
+// sobre o painel forest (ex.: #525252 sobre #163300, quase invisivel). Dentro do
+// tema escuro esses dois tokens passam a ser o texto secundario e o principal;
+// no claro seguem os de sempre. Qualquer texto novo sem cor ja nasce legivel.
+const coresDoEscuro = {
+  ...coresNoGluestack('escuro'),
+  textLight700: coresNoGluestack('escuro').brandTextSecondary,
+  textLight900: coresNoGluestack('escuro').brandTextPrimary,
+};
 
 const configBase = {
   aliases: {
@@ -438,39 +450,20 @@ const configBase = {
       white: '#FFFFFF',
       black: '#000000',
 
-      // [marca-vupth] Tokens da nova identidade (Pencil, doc pencil-new.pen).
-      // Aditivos: nao remapeiam green50-900 acima (ainda usado como texto em
-      // varias telas) porque brandGreen e claro demais pra texto/icone sobre
-      // fundo claro — so entra como FUNDO, com forest por cima. Ver CLAUDE
-      // memory "vupth-marca": o par certo e sempre brandGreen (fundo) + forest
-      // (texto/icone), nunca o inverso.
-      brandGreen: '#9FE870',
-      forest: '#163300',
-      forestSoft: '#223D0D',
-      greenTint: '#E2F6D5',
-      accentBlue: '#A0E1E1',
-      accentPeach: '#FFC091',
-      accentPink: '#FFD7EF',
-      accentPlum: '#260A2F',
-      brandBackground: '#FFFFFF',
-      brandSurface: '#F3F5F1',
-      brandSurfaceAlt: '#E2F6D5',
-      brandTextPrimary: '#163300',
-      brandTextSecondary: '#454745',
-      // [marca-vupth] Placeholder de campo. NAO e `textSecondary`: com o texto
-      // digitado em forest (#163300), o #454745 dava 1,49:1 entre os dois — o
-      // MESMO numero do DS5.1 — e o campo vazio parecia preenchido (Andre,
-      // 14/09). Este valor passa AA no branco (5,05:1) e quase dobra a
-      // separacao para o texto digitado (2,76:1).
-      brandTextPlaceholder: '#6B706B',
-      brandBorder: '#D7DDD3',
-      brandDanger: '#B3261E',
-      // Fundo do aviso de multa: `brandDanger` diluido no branco. Existia como
-      // `$red100` (#fee2e2), da escala generica do gluestack, que puxa pro rosa
-      // e nao e parente da nossa cor de perigo.
-      brandDangerTint: '#F7E4E2',
-      brandWarning: '#FFC091',
-      brandSuccess: '#9FE870',
+      // [marca-vupth] Tokens da identidade, no claro e no escuro. Os VALORES moram
+      // em src/theme/tokens.json (copia do pacote da Design, travada por teste):
+      // aqui entra o tema CLARO, e `themes.escuro` (no fim deste arquivo) traz as do
+      // escuro. Aditivos: nao remapeiam green50-900 acima (ainda usado como texto
+      // em varias telas) porque brandGreen e claro demais pra texto/icone sobre
+      // fundo claro — so entra como FUNDO, com forest (onGreen) por cima. O par
+      // certo e sempre brandGreen (fundo) + forest (texto/icone), nunca o inverso.
+      //
+      // 🔴 Texto usa brandTextPrimary/brandTextSecondary, NAO `forest`: no escuro o
+      // forest e a surface, e forest sobre forest da 1:1. O placeholder
+      // (brandTextPlaceholder) nao e o textSecondary: com o texto digitado em
+      // forest o #454745 dava 1,49:1 entre os dois e o campo vazio parecia
+      // preenchido (Andre, 14/09).
+      ...coresNoGluestack('claro'),
     },
     space: {
       'px': '1px',
@@ -755,6 +748,17 @@ const configBase = {
       },
     },
   },
+  // O tema escuro (DEC-75): as cores da marca com os valores do escuro. O Gluestack
+  // v1 resolve token por TEMA: um `bg="$brandSurface"` vale a surface do claro e,
+  // dentro de `<Theme name="escuro">`, a do escuro — sem refazer o config nem
+  // remontar a arvore. Refazer o config com outro valor para o mesmo token NAO
+  // repinta: o Gluestack guarda o estilo resolvido por hash do estilo, e o token
+  // `$brandSurface` tem o mesmo hash nos dois configs (src/__tests__/theme).
+  // Sem `colorMode="dark"` de proposito: ele ligaria os `_dark` genericos que os
+  // temas dos componentes ainda trazem do Gluestack, com a paleta cinza dele.
+  themes: {
+    escuro: { colors: coresDoEscuro },
+  },
   plugins: [new AnimationResolver(MotionAnimationDriver)],
 } as const;
 
@@ -788,7 +792,8 @@ export const config = {
 /**
  * O tema com a letra maior — o "Tamanho da letra" das Configuracoes (Andre,
  * 26/09: 10 → 11 → 12 → 13 → 14, ate +4). So os tamanhos e as alturas de linha
- * mudam; o resto do tema e o mesmo.
+ * mudam; o resto do tema (inclusive o tema escuro) e o mesmo. Como o config
+ * muda, o App remonta a arvore.
  */
 export function configComFonte(passo: number): typeof config {
   if (!passo) return config;
