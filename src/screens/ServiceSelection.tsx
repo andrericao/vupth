@@ -24,6 +24,7 @@ import { outOfQueueOfferErrorMessage } from "@domain/queue/swap";
 import { mostraPosicao } from "@domain/queue/posicao";
 import { establishmentService } from "@services/establishmentService";
 import { comTempoAtual, duracaoDoServico } from "@domain/professional/duracaoDoServico";
+import { formatarReais } from "@utils/formatarReais";
 import { useSnapshotDaLoja } from "@hooks/useEstablishments";
 import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService } from "@services/swapOfferService";
@@ -459,7 +460,7 @@ export function ServiceSelection() {
                         </Text>
                       </VStack>
                       <Text fontFamily="$heading" fontSize="$sm" color="$forest">
-                        R$ {service.price.toFixed(2)}
+                        {formatarReais(service.price)}
                       </Text>
                     </HStack>
                   </TouchableOpacity>
@@ -547,13 +548,13 @@ export function ServiceSelection() {
                   corte fica no menu — nunca "Entrar na fila". */}
               {principal === "fila" ? (
                 <Button
-                  title={`Entrar na fila · R$ ${conta.total.toFixed(2)}`}
+                  title={`Entrar na fila · ${formatarReais(conta.total)}`}
                   testID="primary-queue"
                   onPress={handleConfirm}
                 />
               ) : (
                 <Button
-                  title={`Agendar · R$ ${conta.total.toFixed(2)}`}
+                  title={`Agendar · ${formatarReais(conta.total)}`}
                   testID="primary-schedule"
                   onPress={abrirAgendar}
                 />

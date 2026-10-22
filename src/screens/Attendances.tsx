@@ -16,6 +16,7 @@ import { Users, Clock, ChevronRight, Calendar, Repeat2, Star, X } from "lucide-r
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
+import { formatarReais } from "@utils/formatarReais";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { useClientIntentions } from "@hooks/useIntentions";
@@ -572,7 +573,7 @@ export function Attendances() {
                             {/* Sem valor a tela nao quebra: `toFixed` em
                                  undefined derruba a lista inteira, e um card
                                  sem preco e melhor que uma tela branca. */}
-                            {a.totalValue != null ? `R$ ${a.totalValue.toFixed(2)}` : "—"}
+                            {a.totalValue != null ? formatarReais(a.totalValue) : "—"}
                           </Text>
                         </VStack>
                       </HStack>

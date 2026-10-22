@@ -24,6 +24,7 @@ import { filaDoAtendimento } from "@domain/queue/reconciliar";
 import { avisoDepoisDoIntervalo, avisoDoReagendamento } from "@domain/queue/horarioPedido";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
 import { ehNavegador } from "@utils/ehNavegador";
+import { formatarReais } from "@utils/formatarReais";
 import { podeOferecerPush } from "@hooks/ofertaDePush";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
@@ -608,7 +609,7 @@ export function QueueStatus() {
     // Ir pro fim com < 1h também vaga um lugar perto do início → avisa multa.
     const base = "Sua vez passa para depois de quem está esperando. Você continua na fila, sem perder o atendimento.";
     const message = penalty
-      ? `${base}\n\nComo falta menos de 1h, isso gera multa de R$ ${CANCELLATION_PENALTY_VALUE},00 no seu próximo atendimento.`
+      ? `${base}\n\nComo falta menos de 1h, isso gera multa de ${formatarReais(CANCELLATION_PENALTY_VALUE)} no seu próximo atendimento.`
       : base;
     // Com multa e dinheiro e a acao GERA a multa (`destructive`); sem multa e um
     // aviso comum, como sempre foi.

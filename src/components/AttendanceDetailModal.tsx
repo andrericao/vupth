@@ -6,6 +6,7 @@ import { floatingShadow } from "@utils/styles";
 import { ClientAttendance } from "@services/attendanceService";
 import { formatClockTime, STATUS_DESCONHECIDO } from "@domain/queue/types";
 import type { NomeDeCor } from "@domain/tema";
+import { formatarReais } from "@utils/formatarReais";
 import { useTema } from "@hooks/useTema";
 
 // [marca-vupth] Este era o ultimo lugar do app na paleta ANTERIOR (#3B7A3F,
@@ -103,7 +104,7 @@ export function AttendanceDetailModal({ attendance, onClose, onRate, canRate = t
               {a.durationInMinutes != null ? (
                 <Row label="Duração" value={`${a.durationInMinutes} min`} />
               ) : null}
-              <Row label="Valor" value={a.totalValue != null ? `R$ ${a.totalValue.toFixed(2)}` : "—"} />
+              <Row label="Valor" value={a.totalValue != null ? formatarReais(a.totalValue) : "—"} />
             </ScrollView>
 
             {a.status === "FINISHED" && canRate && (

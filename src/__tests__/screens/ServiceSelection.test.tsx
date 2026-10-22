@@ -366,7 +366,7 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       expect(await findByTestId('multas-pendentes', {}, { timeout: 15000 })).toBeTruthy();
       expect(getByText('+ R$ 5,00')).toBeTruthy();
       expect(queryByText(/Saiu da fila · Carlos/)).toBeNull();
-      expect(getByText(/Entrar na fila · R\$ 35\.00/)).toBeTruthy();
+      expect(getByText(/Entrar na fila · R\$ 35,00/)).toBeTruthy();
       fireEvent.press(getByTestId('ver-multas'));
       expect(getByText('Saiu da fila · Carlos')).toBeTruthy();
     });

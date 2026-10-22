@@ -1,3 +1,4 @@
+import { formatarReais } from '@utils/formatarReais';
 import { CANCELLATION_PENALTY_VALUE } from './types';
 
 // Como se sai da fila — decisao D15 do Andre (24/09, em varias respostas; a
@@ -43,7 +44,7 @@ export type SaidaDaFila = {
 
 const INSTRUCAO = 'Toque 2 vezes para sair.';
 
-const reais = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`;
+const reais = formatarReais;
 
 export function saidaDaFila(s: {
   /** Sair agora gera multa (pela regra que o servidor aplica hoje)? */

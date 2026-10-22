@@ -13,6 +13,7 @@ import { textoDeDivulgacao } from "@domain/divulgacao";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { SkeletonList } from "@components/Skeleton";
 import { FotoAmpliada } from "@components/FotoAmpliada";
+import { formatarReais } from "@utils/formatarReais";
 import { useEstablishment, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { establishmentService } from "@services/establishmentService";
 import { resolveRating } from "@domain/establishment/rating";
@@ -191,7 +192,7 @@ export function ProfessionalInfo() {
                     </Text>
                   </VStack>
                   <Text fontFamily="$heading" fontSize="$sm" color="$forest">
-                    R$ {s.price.toFixed(2)}
+                    {formatarReais(s.price)}
                   </Text>
                 </HStack>
               ))}
