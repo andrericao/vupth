@@ -23,8 +23,6 @@ export function useMultasPendentes(): { data: PendingPenaltiesResponse | null; r
   }, [accessToken]);
   useEffect(() => {
     vivo.current = true;
-    // A leitura ao montar e o gatilho do estado.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     refetch();
     return () => {
       vivo.current = false;
