@@ -148,7 +148,6 @@ export function Login() {
           <VStack gap="$1">
             <Input2
               isPassword
-              mostrarLimites={false}
               placeholder="Senha"
               value={password}
               onChangeText={(text: string) => { setPassword(text); setErrors({}); }}

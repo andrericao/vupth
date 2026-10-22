@@ -23,14 +23,13 @@ describe('Input2', () => {
     expect(getByTestId('input-ver-senha').props.accessibilityLabel).toBe('Esconder a senha');
   });
 
-  it('senha (DEC-79): mostra "De 6 a 64 caracteres" e corta em 64; no confirmar, sem a dica', () => {
-    const { getByText, getByPlaceholderText } = renderWithProviders(
+  it('senha (DEC-79): corta em 64 e não deixa a dica fixa embaixo (ela mora na lista de requisitos)', () => {
+    const { queryByText, queryByTestId, getByPlaceholderText } = renderWithProviders(
       <Input2 placeholder="Senha" isPassword />,
     );
-    expect(getByText('De 6 a 64 caracteres')).toBeTruthy();
     expect(getByPlaceholderText('Senha').props.maxLength).toBe(64);
-    const confirmar = renderWithProviders(<Input2 placeholder="Confirmar" isPassword mostrarLimites={false} />);
-    expect(confirmar.queryByTestId('dica-da-senha')).toBeNull();
+    expect(queryByText('De 6 a 64 caracteres')).toBeNull();
+    expect(queryByTestId('dica-da-senha')).toBeNull();
   });
 
   it('fora da senha, vale o secureTextEntry de quem chama', () => {
