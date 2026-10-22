@@ -62,13 +62,13 @@ onFlowComplete:
 - repeat:
     times: 3
     while:
-      visible: "(Sua vez está chegando|É quase a sua vez!)"
+      visible: "É quase a sua vez!"
     commands:
       - tapOn:
           id: "dialogo-botao-0"
       - waitForAnimationToEnd:
           timeout: 3000
-    label: "13.A6 · fecha a política da multa e o push da vez, se cobrem a tela 10"
+    label: "13.A6 · fecha o push da vez, se cobre a tela 10"
 - extendedWaitUntil:
     visible:
       id: "push-accept"

@@ -19,7 +19,7 @@ describe('o que a saída diz', () => {
     const s = saidaDaFila({ multa: true });
     expect(s.faixa).toBe('Se sair, você paga uma multa de R$ 3,00. Toque 2 vezes para sair.');
     expect(s.confirmacao?.sim).toBe('Sim, sair');
-    expect(s.confirmacao?.nao).toBe('Não');
+    expect(s.confirmacao?.nao).toBe('Permanecer na fila');
   });
 
   it('sem multa: retém, não diz que é de graça, e nada de confirmação', () => {

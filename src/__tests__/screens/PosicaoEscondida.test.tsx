@@ -51,7 +51,6 @@ function fila() {
     refresh: jest.fn(),
     activeQueue: {
       attendanceId: 'a1',
-      multaAdvertida: true,
       professionalId: 'p1',
       professionalName: 'Carlos',
       establishmentId: 'e1',

@@ -1,6 +1,6 @@
 # Etapa avulsa 11 (bateria-nao-para): roda num maestro test proprio.
-# 11 reabre o app com o cliente na fila e confere que a politica da multa nao
-# volta — ela precisa ter sido vista antes, entao a 10 (pedido aceito) roda antes.
+# 11 reabre o app com o cliente na fila e confere que o aviso da estimativa nao
+# volta — ele precisa ter sido visto antes, entao a 10 (pedido aceito) roda antes.
 appId: ${APP_ID}
 env:
   APP_ID: com.vupth.client.preview

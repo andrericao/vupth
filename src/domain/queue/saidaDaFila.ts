@@ -67,7 +67,7 @@ export function saidaDaFila(s: {
         titulo: 'Sair da fila?',
         mensagem: `Se faltar menos de 1 hora para a sua vez, a saída gera multa de ${valor} no seu próximo atendimento.`,
         sim: 'Sim, sair',
-        nao: 'Não',
+        nao: 'Permanecer na fila',
       },
       valorConfirmado: s.valor ?? CANCELLATION_PENALTY_VALUE,
     };
@@ -80,7 +80,7 @@ export function saidaDaFila(s: {
         titulo: 'Sair da fila?',
         mensagem: `A multa de ${valor} será cobrada no seu próximo atendimento.`,
         sim: 'Sim, sair',
-        nao: 'Não',
+        nao: 'Permanecer na fila',
       },
       valorConfirmado: s.valor ?? CANCELLATION_PENALTY_VALUE,
     };
@@ -99,7 +99,7 @@ export function avisoDaMultaDoServidor(valor: number) {
     titulo: 'Sair da fila?',
     mensagem: `Sair agora gera multa de ${reais(valor)}, cobrada no seu próximo atendimento. Sem o seu "Sim", você continua na fila.`,
     sim: 'Sim, sair',
-    nao: 'Não',
+    nao: 'Permanecer na fila',
   };
 }
 
