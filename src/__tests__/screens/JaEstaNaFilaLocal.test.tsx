@@ -53,7 +53,7 @@ jest.mock('@components/QueueDisclaimerModal', () => ({ QueueDisclaimerModal: () 
 const fila = (over: Record<string, unknown> = {}) => ({
   attendanceId: 'a1', professionalId: 'p1', professionalName: 'Carlos',
   establishmentId: 'e1', establishmentName: 'Barbearia', status: 'SCHEDULED',
-  enteredAt: Date.now(), estimatedMinutes: 30, multaAdvertida: true, ...over,
+  enteredAt: Date.now(), estimatedMinutes: 30, ...over,
 });
 
 describe('Entrar na fila que o aparelho já tem — o aviso (q246)', () => {

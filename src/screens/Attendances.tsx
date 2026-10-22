@@ -11,11 +11,12 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Users, Clock, ChevronRight, Calendar, Repeat2, Star } from "lucide-react-native";
+import { Users, Clock, ChevronRight, Calendar, Repeat2, Star, X } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
+import { formatarReais } from "@utils/formatarReais";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { useClientIntentions } from "@hooks/useIntentions";
@@ -25,6 +26,10 @@ import { SkeletonList } from "@components/Skeleton";
 import { LiveDot } from "@components/LiveDot";
 import { RatingModal } from "@components/RatingModal";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
+import { useMultasPendentes } from "@hooks/useMultasPendentes";
+import { useCardFechado } from "@hooks/useCardFechado";
+import { useTema } from "@hooks/useTema";
+import { origemDaMulta } from "@domain/queue/multasPendentes";
 import { reais, textoDoStatus } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
@@ -110,9 +115,15 @@ export function Attendances() {
   // pode ser jogado nele de novo (Andre, 19/09). Aqui ele fica à mão, e leva ao
   // atendimento que aconteceu — quem não quiser, só ignora.
   const semAvaliar = atendimentoSemAvaliar(history, ratedIds);
+  const { cores } = useTema();
+  const conviteFechado = useCardFechado(semAvaliar ? `avaliar_${semAvaliar.id}` : null);
   // pendencia-de-pagamento (CLI-30): o que falta pagar, no topo, com o ponto.
   const { data: pendentes = [], refetch: refetchPendentes } = usePagamentosPendentes();
   const pagar = usePendenciaStore((s) => s.pagar);
+  // multas-no-relatorio (André, 22/10): a multa pendente aparece aqui desde o
+  // começo, não só na conta de quem marca o próximo corte (DEC-93).
+  const { data: multasPendentes, refetch: refetchMultas } = useMultasPendentes();
+  const multas = multasPendentes?.penalties ?? [];
 
   // Push de concluido (notificacao-avaliar, CLI-33): chega com o atendimento a
   // avaliar; com o historico na mao, abre a avaliacao dele uma vez.
@@ -136,7 +147,8 @@ export function Attendances() {
       refetch();
       refetchIntentions();
       refetchPendentes();
-    }, [refetch, refetchIntentions, refetchPendentes]),
+      refetchMultas();
+    }, [refetch, refetchIntentions, refetchPendentes, refetchMultas]),
   );
 
   // Cancela uma intenção (meus agendamentos) com confirmação.
@@ -265,7 +277,48 @@ export function Attendances() {
           </VStack>
         )}
 
-        {semAvaliar && (
+        {multas.length > 0 && (
+          <VStack px={16} mt="$5" gap="$2" testID="multas-em-atendimentos">
+            <Text fontFamily="$heading" size="sm">
+              Multas pendentes · {reais(multasPendentes?.total ?? 0)}
+            </Text>
+            {/* faixa-de-multa-clicavel (André, 22/10): faixa com o âmbar da multa (o mesmo da
+                faixa de saída), e o toque abre o atendimento que gerou a multa. */}
+            {multas.map((m) => {
+              const origem = history.find((a) => a.id === m.originAttendanceId);
+              return (
+                <TouchableOpacity
+                  key={m.penaltyId}
+                  activeOpacity={0.7}
+                  disabled={!origem}
+                  onPress={() => origem && setDetailFor(origem)}
+                  testID={`multa-${m.penaltyId}`}
+                >
+                  <HStack
+                    bg="$brandWarning"
+                    borderRadius="$card"
+                    p="$4"
+                    gap="$3"
+                    alignItems="center"
+                  >
+                    <Text size="xs" color="$onAccentPeach" flex={1}>
+                      {origemDaMulta(m)}
+                    </Text>
+                    <Text fontFamily="$heading" size="sm" color="$onAccentPeach">
+                      {reais(m.amount)}
+                    </Text>
+                    {origem ? <ChevronRight size={16} color={cores.onAccentPeach} /> : null}
+                  </HStack>
+                </TouchableOpacity>
+              );
+            })}
+            <Text size="xs" color="$brandTextSecondary">
+              Cobradas junto do seu próximo corte.
+            </Text>
+          </VStack>
+        )}
+
+        {semAvaliar && !conviteFechado.fechado && (
           <Box px={16} mt="$5">
             <TouchableOpacity onPress={() => setDetailFor(semAvaliar)} testID="convite-avaliar">
               <HStack bg="$greenTint" borderRadius="$card" p="$4" gap="$3" alignItems="center">
@@ -289,6 +342,14 @@ export function Attendances() {
                       Avaliar
                     </Text>
                   </Box>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={conviteFechado.fechar}
+                  hitSlop={8}
+                  accessibilityLabel="Fechar"
+                  testID="convite-avaliar-fechar"
+                >
+                  <X size={16} color={cores.onGreenTint} />
                 </TouchableOpacity>
               </HStack>
             </TouchableOpacity>
@@ -532,7 +593,7 @@ export function Attendances() {
                             {/* Sem valor a tela nao quebra: `toFixed` em
                                  undefined derruba a lista inteira, e um card
                                  sem preco e melhor que uma tela branca. */}
-                            {a.totalValue != null ? `R$ ${a.totalValue.toFixed(2)}` : "—"}
+                            {a.totalValue != null ? formatarReais(a.totalValue) : "—"}
                           </Text>
                         </VStack>
                       </HStack>

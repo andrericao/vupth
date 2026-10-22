@@ -26,6 +26,8 @@ export type Pagamento = {
   pix_copy_paste?: string | null;
   holder_name?: string | null;
   key_type?: string | null;
+  /** A chave Pix do profissional, em texto (pix-do-profissional-ao-concluir). */
+  pix_key?: string | null;
   claimed_at?: string | null;
   confirmed_at?: string | null;
 };

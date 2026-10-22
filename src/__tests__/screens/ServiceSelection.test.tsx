@@ -1,4 +1,4 @@
-import { Alert, Linking } from 'react-native';
+import { Alert, Linking, StyleSheet } from 'react-native';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ServiceSelection } from '@screens/ServiceSelection';
@@ -20,6 +20,8 @@ const OPEN_PARAMS = {
 // Mutável: o mock do useRoute lê daqui (loja aberta x fechada por teste).
 const mockRouteParams: Record<string, unknown> = { ...OPEN_PARAMS };
 
+let mockInset = 0;
+jest.mock('@hooks/useTabBarInset', () => ({ useTabBarInset: () => mockInset }));
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
@@ -77,6 +79,13 @@ function setRouteParams(params: Record<string, unknown>) {
 // da tempo folgado e deixa o portao dizer a verdade.
 jest.setTimeout(90000);
 
+// aviso-de-chegada-na-entrada (André, 22/10): com menos de 1 h de espera, "Entrar na
+// fila" abre o aviso "Esteja na loja às …"; o Confirmar é que segue.
+function confirmarChegada(alerta: jest.SpyInstance) {
+  const botoes = alerta.mock.calls[alerta.mock.calls.length - 1][2] as { text: string; onPress?: () => void }[];
+  botoes.find((b) => b.text === 'Confirmar')!.onPress!();
+}
+
 describe('ServiceSelection — portão de auth (modo visitante)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -88,12 +97,15 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
 
   it('VISITANTE: confirmar manda pro login levando a seleção (redirectTo queueStatus)', async () => {
     useAuthStore.setState({ isAuthenticated: false });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
 
     // findByTestId default é 1s; o 1º mount do Gluestack pode passar disso sob
     // carga (flaky) — dá 15s (jest.setTimeout acima cobre).
     fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
     fireEvent.press(getByTestId('primary-queue'));
+    confirmarChegada(alerta);
+    alerta.mockRestore();
 
     expect(mockNavigate).toHaveBeenCalledWith(
       'login',
@@ -103,6 +115,23 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
         serviceItemIds: ['s1'],
       }),
     );
+  });
+
+  // aviso-de-chegada-na-entrada (André, 22/10).
+  it('Entrar na fila com menos de 1 h: avisa o horário; Cancelar não entra, Confirmar entra', async () => {
+    useAuthStore.setState({ isAuthenticated: true });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent.press(getByTestId('primary-queue'));
+    const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, { text: string; style?: string; onPress?: () => void }[]];
+    expect(titulo).toBe('Esteja na loja');
+    expect(mensagem).toMatch(/^Esteja na loja às \d{2}:\d{2}\.$/);
+    expect(botoes.map((b) => b.text)).toEqual(['Cancelar', 'Confirmar']);
+    expect(mockNavigate).not.toHaveBeenCalledWith('queueStatus', expect.anything());
+    confirmarChegada(alerta);
+    expect(mockNavigate).toHaveBeenCalledWith('queueStatus', expect.objectContaining({ professionalId: 'p1' }));
+    alerta.mockRestore();
   });
 
   it('com serviço escolhido, o resumo não fala de multa nem da saída sem custo (DEC-1, Andre 05/10)', async () => {
@@ -129,10 +158,13 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
 
   it('LOGADO: confirmar vai direto pra queueStatus', async () => {
     useAuthStore.setState({ isAuthenticated: true });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
 
     fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
     fireEvent.press(getByTestId('primary-queue'));
+    confirmarChegada(alerta);
+    alerta.mockRestore();
 
     expect(mockNavigate).toHaveBeenCalledWith(
       'queueStatus',
@@ -349,6 +381,28 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     });
   });
 
+  // mais-opcoes-cortado (André, 22/10): os botões do rodapé ficam acima da barra de abas.
+  describe('rodapé acima da barra de abas', () => {
+    beforeEach(() => {
+      setRouteParams({ ...OPEN_PARAMS });
+      useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    });
+
+    it('sem barra de abas, fica a 30 do fundo; com ela, 16 acima da barra', async () => {
+      mockInset = 0;
+      const sem = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await sem.findByTestId('service-s1', {}, { timeout: 15000 }));
+      expect(StyleSheet.flatten(sem.getByTestId('rodape-da-escolha').props.style).bottom).toBe(30);
+      sem.unmount();
+
+      mockInset = 90;
+      const com = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await com.findByTestId('service-s1', {}, { timeout: 15000 }));
+      expect(StyleSheet.flatten(com.getByTestId('rodape-da-escolha').props.style).bottom).toBe(106);
+      mockInset = 0;
+    });
+  });
+
   describe('multas pendentes na conta (Backend 389a152)', () => {
     beforeEach(() => {
       setRouteParams({ ...OPEN_PARAMS });
@@ -366,7 +420,7 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       expect(await findByTestId('multas-pendentes', {}, { timeout: 15000 })).toBeTruthy();
       expect(getByText('+ R$ 5,00')).toBeTruthy();
       expect(queryByText(/Saiu da fila · Carlos/)).toBeNull();
-      expect(getByText(/Entrar na fila · R\$ 35\.00/)).toBeTruthy();
+      expect(getByText(/Entrar na fila · R\$ 35,00/)).toBeTruthy();
       fireEvent.press(getByTestId('ver-multas'));
       expect(getByText('Saiu da fila · Carlos')).toBeTruthy();
     });

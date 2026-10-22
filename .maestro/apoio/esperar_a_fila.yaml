@@ -1,7 +1,7 @@
 # Espera a tela da fila (queue-position) fechando o aviso "Sobre o tempo
 # estimado" no meio do caminho. Ele abre a CADA entrada na tela da fila (salvo
 # "Não mostrar novamente") e, como Modal, esconde o queue-position do Maestro
-# (bateria 10/10 08:06: 11.08 e 21.04). Fecha tambem a politica da multa e a
+# (bateria 10/10 08:06: 11.08 e 21.04). Fecha tambem a
 # tela 10, que vem junto na primeira entrada. 20 voltas ~ 1 min.
 appId: ${APP_ID}
 ---
@@ -16,14 +16,6 @@ appId: ${APP_ID}
             visible: "Sobre o tempo estimado"
           commands:
             - tapOn: "Entendi"
-      # A politica da multa (bateria 10/10 15:32, 11.08 e 21.04): o Modal
-      # tambem esconde a fila. O botao 0 e o "Continuar na fila".
-      - runFlow:
-          when:
-            visible: "Sua vez está chegando"
-          commands:
-            - tapOn:
-                id: "dialogo-botao-0"
       # A tela 10 (21.04: veio por baixo da politica) e a caixa do sistema.
       - runFlow:
           file: fechar_aviso.yaml

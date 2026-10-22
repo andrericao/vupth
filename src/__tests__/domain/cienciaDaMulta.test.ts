@@ -50,6 +50,6 @@ describe('o aviso quando o servidor pede a ciência', () => {
     expect(aviso.mensagem).toContain('R$ 5,00');
     expect(aviso.mensagem).toContain('continua na fila');
     expect(aviso.sim).toBe('Sim, sair');
-    expect(aviso.nao).toBe('Não');
+    expect(aviso.nao).toBe('Permanecer na fila');
   });
 });

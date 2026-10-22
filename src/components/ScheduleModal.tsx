@@ -14,6 +14,8 @@ import { useAuthStore } from "@stores/authStore";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { useTema } from "@hooks/useTema";
+import { avisoDeChegada } from "@domain/queue/avisoDeChegada";
+import { alertaTipado } from "@utils/alertaTipado";
 
 type Props = {
   visible: boolean;
@@ -33,6 +35,9 @@ type Props = {
    */
   corte?: { onEscolher: (horario: Date | null) => void };
 };
+
+// Relógio fora do componente (regra de pureza do React): o aviso de chegada lê o agora.
+const relogio = () => Date.now();
 
 // "Agendar" = INTENCAO (Item ②). Escolhe o dia, ve a BARRA DE ENCAIXE daquele
 // dia — os horarios em que o servico cabe — e confirma (Andre, 26/09: "temos que
@@ -92,6 +97,21 @@ export function ScheduleModal({
       onPrecisaLogin?.();
       return;
     }
+    // aviso-de-chegada-na-entrada (André, 22/10): agendando para daqui a menos de
+    // 1 hora, o mesmo aviso diz até que horas estar na loja; Cancelar não agenda.
+    const aviso = avisoDeChegada((horario.getTime() - relogio()) / 60000, relogio());
+    if (aviso) {
+      alertaTipado(aviso.titulo, aviso.mensagem, [
+        { text: aviso.cancelar, style: "cancel" },
+        { text: aviso.confirmar, onPress: () => { void enviar(horario); } },
+      ], { tipo: "atencao" });
+      return;
+    }
+    await enviar(horario);
+  }
+
+  async function enviar(horario: Date) {
+    if (!accessToken || !professionalId) return;
     setEnviando(true);
     try {
       await intentionsService.create(

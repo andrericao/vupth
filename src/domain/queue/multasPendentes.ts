@@ -1,3 +1,4 @@
+import { formatarReais } from '@utils/formatarReais';
 import type { PendingPenalty } from '@services/penaltyService';
 
 // A conta da escolha de servicos (Andre, 25/09): as multas pendentes entram
@@ -10,7 +11,7 @@ const MOTIVO: Record<string, string> = {
   LATE_ARRIVAL: '3º atraso',
 };
 
-export const reais = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`;
+export const reais = formatarReais;
 
 const dataCurta = (iso?: string | null): string | null => {
   if (!iso) return null;

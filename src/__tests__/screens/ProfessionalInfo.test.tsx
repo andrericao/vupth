@@ -73,7 +73,7 @@ describe('ProfessionalInfo (informacoes-do-profissional)', () => {
     expect(await findByText('Barbearia do Zé')).toBeTruthy();
     expect(within(getByTestId('nota-do-profissional')).getByText('4.8')).toBeTruthy();
     expect(await findByText('Corte')).toBeTruthy();
-    expect(await findByText('R$ 30.00')).toBeTruthy();
+    expect(await findByText('R$ 30,00')).toBeTruthy();
     expect(await findByText('40 min')).toBeTruthy();
     expect(await findByText('+55 (11) 98888-7777')).toBeTruthy();
     // Andre, 05/10: sem Ligar e sem WhatsApp.

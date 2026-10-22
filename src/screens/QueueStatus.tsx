@@ -16,7 +16,6 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor } from "@domain/queue/saidaDaFila";
-import { advertenciaDaMulta, deveAdvertir } from "@domain/queue/advertenciaDaMulta";
 import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
@@ -25,6 +24,7 @@ import { filaDoAtendimento } from "@domain/queue/reconciliar";
 import { avisoDepoisDoIntervalo, avisoDoReagendamento } from "@domain/queue/horarioPedido";
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
 import { ehNavegador } from "@utils/ehNavegador";
+import { formatarReais } from "@utils/formatarReais";
 import { podeOferecerPush } from "@hooks/ofertaDePush";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
@@ -60,7 +60,7 @@ import { NumeroComSalto } from "@components/NumeroComSalto";
 import { alertaTipado } from "@utils/alertaTipado";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
-import { pendenciasDoErro } from "@domain/pagamento/pendencia";
+import { pendenciasDoErro, reais } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { paymentService } from "@services/paymentService";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
@@ -86,9 +86,6 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: "Cancelado",
   REMOVED: "Retirado pela loja",
 };
-
-// O fade do Modal do aviso da estimativa (~300ms) com folga.
-const FADE_DO_AVISO_MS = 600;
 
 export function QueueStatus() {
   const insets = useSafeAreaInsets();
@@ -134,8 +131,6 @@ export function QueueStatus() {
   const [canRequestCut, setCanRequestCut] = useState(false);
   const [isRequestingCut, setIsRequestingCut] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
-  // Ja se sabe se o aviso da estimativa abre? Ate la, nenhum outro dialogo.
-  const [disclaimerDecidido, setDisclaimerDecidido] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isRemanejando, setIsRemanejando] = useState(false);
@@ -165,36 +160,13 @@ export function QueueStatus() {
   useEffect(() => {
     let active = true;
     (async () => {
-      try {
-        const hidden = await SecureStore.getItemAsync(DISCLAIMER_KEY);
-        if (active && hidden !== "1") setShowDisclaimer(true);
-      } finally {
-        if (active) setDisclaimerDecidido(true);
-      }
+      const hidden = await SecureStore.getItemAsync(DISCLAIMER_KEY);
+      if (active && hidden !== "1") setShowDisclaimer(true);
     })();
     return () => {
       active = false;
     };
   }, []);
-
-  // O aviso da estimativa ja saiu da tela? Fechar nao basta: o Modal ainda faz
-  // o fade, e um Alert aberto nesse meio some com ele no Android (bateria
-  // 03/10 21h25, 05.05 — a advertencia da multa nunca apareceu).
-  const [avisoDaEstimativaSaiu, setAvisoDaEstimativaSaiu] = useState(false);
-  const disclaimerAbriu = useRef(false);
-  useEffect(() => {
-    if (showDisclaimer) {
-      disclaimerAbriu.current = true;
-      return;
-    }
-    if (!disclaimerDecidido) return;
-    if (!disclaimerAbriu.current) {
-      setAvisoDaEstimativaSaiu(true);
-      return;
-    }
-    const t = setTimeout(() => setAvisoDaEstimativaSaiu(true), FADE_DO_AVISO_MS);
-    return () => clearTimeout(t);
-  }, [showDisclaimer, disclaimerDecidido]);
 
   async function handleCloseDisclaimer(dontShowAgain: boolean) {
     setShowDisclaimer(false);
@@ -418,6 +390,10 @@ export function QueueStatus() {
     // Os minutos que faltam: a frase de retencao sem multa (sair-da-fila-texto).
     const minutos = semPrevisao ? null : remaining;
     const doServidor = activeQueue?.exitPenaltyValue;
+    // saida-sem-multa-no-primeiro (DEC-104): isento, a saida nao fala de multa.
+    if (activeQueue?.penaltyExempt) {
+      return { multa: false, isento: true, semPrevisao: false, minutos };
+    }
     if (typeof doServidor === "number") {
       return { multa: doServidor > 0, valor: doServidor, semPrevisao: false, minutos };
     }
@@ -473,12 +449,6 @@ export function QueueStatus() {
     await leaveQueue();
   };
 
-  // Advertencia antes da multa (CLI-12, Andre 03/10): abaixo de 1h30 para a
-  // vez, uma vez por atendimento, a politica com as saidas sem custo. Adiar
-  // nao da tolerancia nova — o `toleranceUntil` segue o da entrada.
-  // O ref segura o segundo aviso enquanto a marca no store ainda esta sendo gravada.
-  // Espera o aviso da estimativa ("Entendi") sair da tela: os dois abriam juntos
-  // na entrada e, no Android, a advertencia sumia com ele (bateria 03/10, 05.05).
   // pagamento-no-concluido (CLI-34, DEC-78): o corte concluiu e o pagamento
   // segue pendente — o modal do Pix (QR e "Copiar código Pix") abre uma vez.
   const pagamentoAberto = useRef<string | null>(null);
@@ -488,29 +458,11 @@ export function QueueStatus() {
     paymentService
       .get(attendanceId, accessToken)
       .then(({ data }) => {
-        if (data.status === "PENDING") usePendenciaStore.getState().pagar(attendanceId);
+        // Sem Pix do profissional não há modal: só ele confirma que recebeu.
+        if (data.status === "PENDING" && data.pix_copy_paste) usePendenciaStore.getState().pagar(attendanceId);
       })
       .catch(() => {});
   }, [isFinished, attendanceId, accessToken]);
-
-  const advertiu = useRef<string | null>(null);
-  useEffect(() => {
-    const id = activeQueue?.attendanceId;
-    if (!id || !avisoDaEstimativaSaiu) return;
-    const jaAdvertido = !!activeQueue.multaAdvertida || advertiu.current === id;
-    if (!deveAdvertir({ restante: semPrevisao ? null : remaining, aguardando: canReshuffle, jaAdvertido })) return;
-    advertiu.current = id;
-    updateQueue({ multaAdvertida: true });
-    const naTolerancia = !!activeQueue.toleranceUntil && Date.now() < activeQueue.toleranceUntil;
-    const regra = regraDaSaida(naTolerancia);
-    const aviso = advertenciaDaMulta({ sairCustaAgora: regra.multa || !!regra.semPrevisao, podeAdiar: canReshuffle });
-    Alert.alert(aviso.titulo, aviso.mensagem, [
-      { text: aviso.ficar, style: "cancel" },
-      ...(aviso.adiar ? [{ text: aviso.adiar, onPress: () => { handleOpenChangeTurn(); } }] : []),
-      ...(aviso.sairDeGraca ? [{ text: aviso.sairDeGraca, onPress: () => { sair(null); } }] : []),
-    ]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeQueue?.attendanceId, activeQueue?.multaAdvertida, remaining, semPrevisao, canReshuffle, avisoDaEstimativaSaiu]);
 
   // D15 (Andre, 24/09): "Sair da fila" pede DOIS toques seguidos. O primeiro so
   // mostra a faixa — o que acontece se sair, e a instrucao. Com multa (ou sem
@@ -534,10 +486,8 @@ export function QueueStatus() {
     // Dinheiro, e a acao GERA a multa: o primario e o vermelho (`destructive`).
     alertaTipado(saida.confirmacao.titulo, saida.confirmacao.mensagem, [
       { text: saida.confirmacao.nao, style: "cancel" },
-      // Evitar a multa sem sair (Andre, 26/09 — esboço): adiar a vez nao custa.
-      ...(canReshuffle ? [{ text: "Adiar minha vez", onPress: () => { handleOpenChangeTurn(); } }] : []),
       { text: saida.confirmacao.sim, style: "destructive", onPress: () => sair(saida.valorConfirmado) },
-    ], { tipo: "dinheiro", selo: "Multa" });
+    ], activeQueue?.penaltyExempt ? { tipo: "atencao" } : { tipo: "dinheiro", selo: "Multa" });
   }
 
   // "Mudar minha vez": busca o ETA do fim da fila (piso de agendamento) e abre o
@@ -660,7 +610,7 @@ export function QueueStatus() {
     // Ir pro fim com < 1h também vaga um lugar perto do início → avisa multa.
     const base = "Sua vez passa para depois de quem está esperando. Você continua na fila, sem perder o atendimento.";
     const message = penalty
-      ? `${base}\n\nComo falta menos de 1h, isso gera multa de R$ ${CANCELLATION_PENALTY_VALUE},00 no seu próximo atendimento.`
+      ? `${base}\n\nComo falta menos de 1h, isso gera multa de ${formatarReais(CANCELLATION_PENALTY_VALUE)} no seu próximo atendimento.`
       : base;
     // Com multa e dinheiro e a acao GERA a multa (`destructive`); sem multa e um
     // aviso comum, como sempre foi.
@@ -1220,6 +1170,14 @@ export function QueueStatus() {
               <Text size="sm" fontFamily="$heading">
                 {formatWaitTime(activeQueue.serviceMinutes)}
               </Text>
+            </HStack>
+          )}
+
+          {/* valor-no-em-atendimento (André, 22/10): o cliente vê o valor do serviço. */}
+          {isBeingAttended && typeof activeQueue?.totalValue === "number" && (
+            <HStack w="$full" justifyContent="space-between" mb="$3" testID="em-atendimento-valor">
+              <Text size="sm" color="$brandTextSecondary">Valor</Text>
+              <Text size="sm" fontFamily="$heading">{reais(activeQueue.totalValue)}</Text>
             </HStack>
           )}
 

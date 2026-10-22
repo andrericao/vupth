@@ -76,7 +76,6 @@ export function EditPassword() {
           <VStack gap="$1">
             <Input2
               isPassword
-              mostrarLimites={false}
               placeholder="Senha atual"
               value={currentPassword}
               onChangeText={setCurrentPassword}
@@ -96,7 +95,6 @@ export function EditPassword() {
           <VStack gap="$1">
             <Input2
               isPassword
-              mostrarLimites={false}
               placeholder="Confirmar nova senha"
               value={confirmPassword}
               onChangeText={setConfirmPassword}

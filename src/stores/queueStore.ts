@@ -24,12 +24,16 @@ export interface ActiveQueue {
   toleranceUntil?: number | null;
   /** Quanto a saida custaria agora, SEGUNDO O SERVIDOR (D4). Ausente = regra de hoje. */
   exitPenaltyValue?: number | null;
+  /** Isento da multa de sair (DEC-104): o modal de saída não fala de multa. */
+  penaltyExempt?: boolean | null;
   /** Atrasos que contam (wait-time) — o aviso de atraso diz "este é o seu Nº". */
   lateCount?: number | null;
   // Preenchidos quando o atendimento inicia (IN_PROGRESS): início real (ms) e
   // duração estimada do serviço (min) — para tempo decorrido + término estimado.
   startedAt?: number;
   serviceMinutes?: number;
+  /** Valor do serviço (R$), do histórico: o "Em atendimento" mostra (valor-no-em-atendimento). */
+  totalValue?: number | null;
   // Posição na fila (1 = próximo). Vem do mesmo GET que já traz o tempo de
   // espera; a Home mostra "Faltam N" a partir dela.
   position?: number;
@@ -37,8 +41,6 @@ export interface ActiveQueue {
   // mexida: é o que permite dizer "você já passou N pessoas" (progresso feito),
   // e não só quantas faltam. Sem ela a tela só sabe o que resta.
   initialPosition?: number;
-  /** A advertência da multa (abaixo de 1h30) já apareceu para este atendimento. */
-  multaAdvertida?: boolean;
 }
 
 interface QueueState {

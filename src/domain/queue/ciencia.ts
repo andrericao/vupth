@@ -1,3 +1,4 @@
+import { formatarReais } from '@utils/formatarReais';
 /**
  * CIÊNCIA — "não podemos agir na surdina" (Andre, 18/09).
  *
@@ -33,7 +34,7 @@ export const MULTA_POR_ATRASO = 5;
 const ordinal = (n: number): string => `${n}º`;
 // Tom positivo antes da multa (Andre, 26/09: "não se atrase / evite multa").
 const TITULO_POSITIVO = 'Não se atrase — evite a multa';
-const reais = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`;
+const reais = formatarReais;
 
 export function avisoDeAtraso(s: {
   /** Quantos atrasos o cliente já tem, contando este (`lateCount` do wait-time). */

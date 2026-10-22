@@ -169,7 +169,7 @@ describe('QueueStatus — pagamento-no-concluido (CLI-34)', () => {
   afterEach(() => usePendenciaStore.getState().fechar());
 
   it('concluído com o pagamento pendente: abre o Pix uma vez', async () => {
-    mockPagamento.mockResolvedValue({ data: { status: 'PENDING', amount: 30 } });
+    mockPagamento.mockResolvedValue({ data: { status: 'PENDING', amount: 30, pix_copy_paste: '000201pix' } });
     estado({ isFinished: true });
     const { rerender } = renderWithProviders(<QueueStatus />);
     await waitFor(() => expect(usePendenciaStore.getState().pagando).toBe('a1'));
@@ -177,6 +177,15 @@ describe('QueueStatus — pagamento-no-concluido (CLI-34)', () => {
     usePendenciaStore.getState().fechar();
     rerender(<QueueStatus />);
     await waitFor(() => expect(usePendenciaStore.getState().pagando).toBeNull());
+  });
+
+  // pix-do-profissional-ao-concluir (André, 22/10): sem Pix do profissional, sem modal.
+  it('pendente mas o profissional não tem Pix: não abre; só ele confirma que recebeu', async () => {
+    mockPagamento.mockResolvedValue({ data: { status: 'PENDING', amount: 30, pix_copy_paste: null } });
+    estado({ isFinished: true });
+    renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(mockPagamento).toHaveBeenCalled());
+    expect(usePendenciaStore.getState().pagando).toBeNull();
   });
 
   it('já pago, ou sem conseguir ler: não abre', async () => {

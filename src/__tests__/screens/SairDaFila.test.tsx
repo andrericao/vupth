@@ -1,6 +1,5 @@
 import { Alert, Linking } from 'react-native';
-import { act, fireEvent, waitFor } from '@testing-library/react-native';
-import * as SecureStore from 'expo-secure-store';
+import { act, fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
@@ -14,8 +13,7 @@ const mockNavigate = jest.fn();
 const mockLeave = jest.fn();
 let mockRemaining = 20;
 let mockValor: number | null = null;
-// A advertência da multa (CLI-12) já apareceu — aqui o assunto é a saída.
-let mockAdvertida = true;
+let mockIsento = false;
 
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn().mockResolvedValue('1'),
@@ -43,7 +41,6 @@ jest.mock('@hooks/useQueueCountdown', () => ({
     refresh: jest.fn(),
     activeQueue: {
       attendanceId: 'a1',
-      multaAdvertida: mockAdvertida,
       professionalId: 'p1',
       professionalName: 'Carlos',
       establishmentId: 'e1',
@@ -52,6 +49,7 @@ jest.mock('@hooks/useQueueCountdown', () => ({
       estimatedMinutes: mockRemaining,
       status: 'SCHEDULED',
       exitPenaltyValue: mockValor,
+      penaltyExempt: mockIsento,
     },
   }),
 }));
@@ -99,7 +97,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     jest.clearAllMocks();
     mockRemaining = 20;
     mockValor = null;
-    mockAdvertida = true;
+    mockIsento = false;
   });
 
   it('um toque só mostra a faixa — não sai, não pergunta nada', () => {
@@ -128,13 +126,13 @@ describe('QueueStatus — sair da fila (D15)', () => {
     abrir.mockRestore();
   });
 
-  it('dois toques seguidos com multa abrem "Sim / Não" — e "Não" deixa na fila', () => {
+  it('dois toques seguidos com multa abrem "Sim, sair / Permanecer na fila" — e "Permanecer" deixa na fila', () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
     tocar(getByTestId);
     const [, , botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
-    expect(botoes.map((b) => b.text)).toEqual(['Não', 'Adiar minha vez', 'Sim, sair']);
+    expect(botoes.map((b) => b.text)).toEqual(['Permanecer na fila', 'Sim, sair']);
     expect(attendanceService.cancel).not.toHaveBeenCalled();
     alerta.mockRestore();
   });
@@ -189,6 +187,27 @@ describe('QueueStatus — sair da fila (D15)', () => {
     alerta.mockRestore();
   });
 
+  // saida-sem-multa-no-primeiro (DEC-104): isento, a caixa existe mas sem multa.
+  it('isento da multa: a faixa e a caixa não falam de multa; "Sim, sair" sai sem ciência', async () => {
+    mockIsento = true;
+    mockValor = 0;
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId, getByText, queryByText } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    expect(getByText(/Tem certeza\?/)).toBeTruthy();
+    expect(queryByText(/multa/i)).toBeNull();
+    tocar(getByTestId);
+    const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
+    expect(titulo).toBe('Sair da fila?');
+    expect(mensagem).not.toMatch(/multa/i);
+    expect(botoes.map((b) => b.text)).toEqual(['Permanecer na fila', 'Sim, sair']);
+    await act(async () => {
+      await botoes.find((b) => b.text === 'Sim, sair')!.onPress!();
+    });
+    expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk', undefined);
+    alerta.mockRestore();
+  });
+
   it('servidor pedindo a ciência (409): o aviso com o valor DELE, e o "Sim" repete a saída com ele', async () => {
     mockValor = 3;
     (attendanceService.cancel as jest.Mock).mockRejectedValueOnce({
@@ -215,7 +234,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     alerta.mockRestore();
   });
 
-  it('"Não" no aviso do servidor deixa na fila', async () => {
+  it('"Permanecer na fila" no aviso do servidor deixa na fila', async () => {
     (attendanceService.cancel as jest.Mock).mockRejectedValueOnce({
       response: { status: 409, data: { code: 'EXIT_PENALTY_NOT_ACKNOWLEDGED', exitPenaltyValue: 5 } },
     });
@@ -228,85 +247,10 @@ describe('QueueStatus — sair da fila (D15)', () => {
       await primeiro.find((b) => b.text === 'Sim, sair')!.onPress!();
     });
     const [, , segundo] = alerta.mock.calls[1] as [string, string, BotaoDoAlert[]];
-    expect(segundo.map((b) => b.text)).toEqual(['Não', 'Sim, sair']);
+    expect(segundo.map((b) => b.text)).toEqual(['Permanecer na fila', 'Sim, sair']);
     expect(attendanceService.cancel).toHaveBeenCalledTimes(1);
     expect(mockNavigate).not.toHaveBeenCalled();
     expect(mockLeave).not.toHaveBeenCalled();
-    alerta.mockRestore();
-  });
-});
-
-// CLI-12 (Andre, 03/10): abaixo de 1h30, uma vez, a política da multa com as
-// saídas sem custo. Adiar não dá tolerância nova.
-describe('QueueStatus — advertência antes da multa', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockValor = null;
-    mockAdvertida = false;
-  });
-
-  it('com 1h20 para a vez: avisa as faixas e oferece adiar e sair de graça', async () => {
-    mockRemaining = 80;
-    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    renderWithProviders(<QueueStatus />);
-    await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1), { timeout: 5000 });
-    const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
-    expect(titulo).toBe('Sua vez está chegando');
-    expect(mensagem).toMatch(/R\$ 3,00/);
-    expect(mensagem).toMatch(/R\$ 5,00/);
-    expect(botoes.map((b) => b.text)).toEqual(['Continuar na fila', 'Adiar minha vez', 'Sair agora de graça']);
-    alerta.mockRestore();
-  });
-
-  it('"Sair agora de graça" sai sem a ciência de multa', async () => {
-    mockRemaining = 80;
-    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    renderWithProviders(<QueueStatus />);
-    await waitFor(() => expect(alerta).toHaveBeenCalled(), { timeout: 5000 });
-    const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
-    await act(async () => {
-      await botoes.find((b) => b.text === 'Sair agora de graça')!.onPress!();
-    });
-    expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk', undefined);
-    alerta.mockRestore();
-  });
-
-  it('com menos de 1h, sair já custa: só adiar ou continuar', async () => {
-    mockRemaining = 20;
-    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    renderWithProviders(<QueueStatus />);
-    await waitFor(() => expect(alerta).toHaveBeenCalled(), { timeout: 5000 });
-    const botoes = alerta.mock.calls[0][2] as BotaoDoAlert[];
-    expect(botoes.map((b) => b.text)).toEqual(['Continuar na fila', 'Adiar minha vez']);
-    alerta.mockRestore();
-  });
-
-  it('com 1h30 ou mais, ou já avisado, não aparece', async () => {
-    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    mockRemaining = 120;
-    renderWithProviders(<QueueStatus />);
-    mockRemaining = 40;
-    mockAdvertida = true;
-    renderWithProviders(<QueueStatus />);
-    await act(async () => {});
-    expect(alerta).not.toHaveBeenCalled();
-    alerta.mockRestore();
-  });
-
-  // Bateria 03/10 (05.05): o aviso da estimativa e a advertência abriam juntos
-  // e, no Android, a advertência sumia. Agora ela espera o "Entendi".
-  it('com o aviso da estimativa aberto, a advertência só vem depois do Entendi', async () => {
-    mockRemaining = 20;
-    (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(null);
-    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const { findByText } = renderWithProviders(<QueueStatus />);
-    const entendi = await findByText('Entendi');
-    expect(alerta).not.toHaveBeenCalled();
-    fireEvent.press(entendi);
-    // Nem logo depois do Entendi: o Modal ainda esta no fade (bateria 03/10 21h25).
-    expect(alerta).not.toHaveBeenCalled();
-    await waitFor(() => expect(alerta).toHaveBeenCalledTimes(1), { timeout: 5000 });
-    expect(alerta.mock.calls[0][0]).toBe('Sua vez está chegando');
     alerta.mockRestore();
   });
 });

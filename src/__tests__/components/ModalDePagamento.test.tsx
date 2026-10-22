@@ -2,6 +2,9 @@ import { StyleSheet } from 'react-native';
 import { ReactNode } from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { GluestackUIProvider } from '@gluestack-ui/themed';
+
+import { config } from '../../../config/gluestack-ui.config';
 
 import { ModalDePagamento } from '@components/ModalDePagamento';
 import { paymentService } from '@services/paymentService';
@@ -30,7 +33,11 @@ const PIX = {
 
 let client: QueryClient;
 function montar() {
-  const Wrapper = ({ children }: { children: ReactNode }) => <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+  const Wrapper = ({ children }: { children: ReactNode }) => (
+    <GluestackUIProvider config={config}>
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    </GluestackUIProvider>
+  );
   return render(<ModalDePagamento />, { wrapper: Wrapper });
 }
 
@@ -92,6 +99,8 @@ describe('ModalDePagamento', () => {
     expect(tela.getByText('Para: Carlos Lima')).toBeTruthy();
     expect(tela.getByTestId('pix-codigo').props.children).toBe('000201pix');
     expect(tela.getByTestId('pix-qr')).toBeTruthy();
+    // politica-de-preco-saiba-mais (DEC-91): o total leva ao artigo do Suporte.
+    expect(tela.getByTestId('preco-saiba-mais')).toBeTruthy();
 
     expect(tela.queryByTestId('pix-copiado-check')).toBeNull();
     await act(async () => {
@@ -112,6 +121,24 @@ describe('ModalDePagamento', () => {
     expect(tela.queryByTestId('pix-ja-paguei')).toBeNull();
     fireEvent.press(tela.getByTestId('pix-ok'));
     expect(usePendenciaStore.getState().pagando).toBeNull();
+  });
+
+  // pix-do-profissional-ao-concluir (André, 22/10): a chave em texto junto do QR e do Copiar.
+  it('com a chave Pix do profissional: mostra em texto, junto do QR', async () => {
+    get.mockResolvedValue({ data: { ...PIX, pix_key: 'carlos@barbearia.com' } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    expect(await tela.findByText('carlos@barbearia.com')).toBeTruthy();
+    expect(tela.getByTestId('pix-chave')).toBeTruthy();
+    expect(tela.getByTestId('pix-qr')).toBeTruthy();
+    expect(tela.getByTestId('pix-copiar')).toBeTruthy();
+  });
+
+  it('profissional sem Pix cadastrado: o modal não fica (só ele confirma que recebeu)', async () => {
+    get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, pix_copy_paste: null } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    montar();
+    await waitFor(() => expect(usePendenciaStore.getState().pagando).toBeNull());
   });
 
   it('sem serviço/multa/quem/código; copiar falhando não marca', async () => {

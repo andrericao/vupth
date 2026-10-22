@@ -24,6 +24,10 @@ import { outOfQueueOfferErrorMessage } from "@domain/queue/swap";
 import { mostraPosicao } from "@domain/queue/posicao";
 import { establishmentService } from "@services/establishmentService";
 import { comTempoAtual, duracaoDoServico } from "@domain/professional/duracaoDoServico";
+import { formatarReais } from "@utils/formatarReais";
+import { useTabBarInset } from "@hooks/useTabBarInset";
+import { avisoDeChegada } from "@domain/queue/avisoDeChegada";
+import { alertaTipado } from "@utils/alertaTipado";
 import { useSnapshotDaLoja } from "@hooks/useEstablishments";
 import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService } from "@services/swapOfferService";
@@ -74,6 +78,9 @@ const agora = () => Date.now();
 
 export function ServiceSelection() {
   const insets = useSafeAreaInsets();
+  // mais-opcoes-cortado (André, 22/10): os botões do rodapé sobem acima da barra de abas.
+  const tabBarInset = useTabBarInset();
+  const rodape = Math.max(30, tabBarInset + 16);
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const {
@@ -188,7 +195,18 @@ export function ServiceSelection() {
   }
 
   function handleConfirm() {
-    if (semPendencia()) goToQueue();
+    if (!semPendencia()) return;
+    // aviso-de-chegada-na-entrada (André, 22/10): com menos de 1 h de espera, um
+    // aviso diz até que horas estar na loja; Cancelar não entra na fila.
+    const aviso = avisoDeChegada(estimatedWaitMinutes, agora());
+    if (!aviso) {
+      goToQueue();
+      return;
+    }
+    alertaTipado(aviso.titulo, aviso.mensagem, [
+      { text: aviso.cancelar, style: "cancel" },
+      { text: aviso.confirmar, onPress: () => goToQueue() },
+    ], { tipo: "atencao" });
   }
 
   // Portão de auth das ações que NÃO entram na fila (corte, troca): o visitante
@@ -418,7 +436,7 @@ export function ServiceSelection() {
         <>
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 200 }}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 200 + (rodape - 30) }}
           >
             <VStack gap="$2.5">
               {services.map((service) => {
@@ -459,7 +477,7 @@ export function ServiceSelection() {
                         </Text>
                       </VStack>
                       <Text fontFamily="$heading" fontSize="$sm" color="$forest">
-                        R$ {service.price.toFixed(2)}
+                        {formatarReais(service.price)}
                       </Text>
                     </HStack>
                   </TouchableOpacity>
@@ -538,7 +556,7 @@ export function ServiceSelection() {
           </ScrollView>
 
           {selectedIds.length > 0 && (
-            <VStack position="absolute" bottom={30} left={20} right={20} gap="$2">
+            <VStack position="absolute" style={{ bottom: rodape }} left={20} right={20} gap="$2" testID="rodape-da-escolha">
               {/* Uma ação primária só (Andre 2026-08-01): loja aberta = entrar na
                   fila; fechada = agendar (badge AGENDAR). Com a fila aberta o
                   agendar vem logo abaixo, como segunda porta (C20). O resto —
@@ -547,13 +565,13 @@ export function ServiceSelection() {
                   corte fica no menu — nunca "Entrar na fila". */}
               {principal === "fila" ? (
                 <Button
-                  title={`Entrar na fila · R$ ${conta.total.toFixed(2)}`}
+                  title={`Entrar na fila · ${formatarReais(conta.total)}`}
                   testID="primary-queue"
                   onPress={handleConfirm}
                 />
               ) : (
                 <Button
-                  title={`Agendar · R$ ${conta.total.toFixed(2)}`}
+                  title={`Agendar · ${formatarReais(conta.total)}`}
                   testID="primary-schedule"
                   onPress={abrirAgendar}
                 />

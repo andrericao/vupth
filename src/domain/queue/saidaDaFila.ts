@@ -1,3 +1,4 @@
+import { formatarReais } from '@utils/formatarReais';
 import { CANCELLATION_PENALTY_VALUE } from './types';
 
 // Como se sai da fila — decisao D15 do Andre (24/09, em varias respostas; a
@@ -43,7 +44,7 @@ export type SaidaDaFila = {
 
 const INSTRUCAO = 'Toque 2 vezes para sair.';
 
-const reais = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}`;
+const reais = formatarReais;
 
 export function saidaDaFila(s: {
   /** Sair agora gera multa (pela regra que o servidor aplica hoje)? */
@@ -57,8 +58,25 @@ export function saidaDaFila(s: {
   valor?: number;
   /** Minutos que faltam para a vez — a frase de retencao sem multa. */
   minutos?: number | null;
+  /** Isento da multa (DEC-104, sem atendimento concluido): nada de multa no texto. */
+  isento?: boolean;
 }): SaidaDaFila {
   const valor = reais(s.valor ?? CANCELLATION_PENALTY_VALUE);
+
+  // saida-sem-multa-no-primeiro (André, 22/10): a caixa existe (dois toques e
+  // "Permanecer na fila" / "Sim, sair"), mas sem falar de multa.
+  if (s.isento) {
+    return {
+      faixa: `Tem certeza? ${INSTRUCAO}`,
+      confirmacao: {
+        titulo: 'Sair da fila?',
+        mensagem: 'Você perde a sua vez.',
+        sim: 'Sim, sair',
+        nao: 'Permanecer na fila',
+      },
+      valorConfirmado: null,
+    };
+  }
 
   if (s.semPrevisao) {
     return {
@@ -67,7 +85,7 @@ export function saidaDaFila(s: {
         titulo: 'Sair da fila?',
         mensagem: `Se faltar menos de 1 hora para a sua vez, a saída gera multa de ${valor} no seu próximo atendimento.`,
         sim: 'Sim, sair',
-        nao: 'Não',
+        nao: 'Permanecer na fila',
       },
       valorConfirmado: s.valor ?? CANCELLATION_PENALTY_VALUE,
     };
@@ -80,7 +98,7 @@ export function saidaDaFila(s: {
         titulo: 'Sair da fila?',
         mensagem: `A multa de ${valor} será cobrada no seu próximo atendimento.`,
         sim: 'Sim, sair',
-        nao: 'Não',
+        nao: 'Permanecer na fila',
       },
       valorConfirmado: s.valor ?? CANCELLATION_PENALTY_VALUE,
     };
@@ -99,7 +117,7 @@ export function avisoDaMultaDoServidor(valor: number) {
     titulo: 'Sair da fila?',
     mensagem: `Sair agora gera multa de ${reais(valor)}, cobrada no seu próximo atendimento. Sem o seu "Sim", você continua na fila.`,
     sim: 'Sim, sair',
-    nao: 'Não',
+    nao: 'Permanecer na fila',
   };
 }
 

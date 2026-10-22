@@ -24,6 +24,7 @@ const ABERTA = {
 const mockRouteParams: Record<string, unknown> = { ...ABERTA };
 
 jest.mock('expo-secure-store');
+jest.mock('@hooks/useTabBarInset', () => ({ useTabBarInset: () => 0 }));
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate, goBack: mockGoBack }),
@@ -110,7 +111,11 @@ describe('ServiceSelection — escolher', () => {
     const tela = await escolher();
     fireEvent.press(tela.getByTestId('service-s1'));
     fireEvent.press(tela.getByTestId('service-s1'));
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     fireEvent.press(tela.getByTestId('primary-queue'));
+    const botoes = alerta.mock.calls[0][2] as { text: string; onPress?: () => void }[];
+    botoes.find((b) => b.text === 'Confirmar')!.onPress!();
+    alerta.mockRestore();
     expect(mockNavigate).toHaveBeenCalledWith('queueStatus', expect.objectContaining({ serviceItemIds: ['s1'] }));
   });
 

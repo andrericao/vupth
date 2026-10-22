@@ -1,7 +1,6 @@
 # Fechar e abrir o app com o cliente na fila (o pedido aceito da etapa 10):
 # nada do que ja foi respondido volta — a caixa de notificacao do app e a do
-# sistema (permissoes-repetidas) e o aviso da politica da multa, que e uma vez
-# por atendimento (adiar-no-atraso).
+# sistema (permissoes-repetidas) e o aviso da estimativa.
 appId: ${APP_ID}
 ---
 - stopApp:
@@ -32,5 +31,5 @@ appId: ${APP_ID}
     timeout: 3000
     label: "11.09 · espera a tela parar"
 - assertNotVisible:
-    text: "Sua vez está chegando"
-    label: "11.10 · não vê o aviso da política da multa de novo"
+    text: "Sobre o tempo estimado"
+    label: "11.10 · não vê o aviso da estimativa de novo"

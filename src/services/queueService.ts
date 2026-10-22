@@ -43,6 +43,8 @@ export interface WaitTimeResponse {
    * sem ele, o app usa a regra que o servidor aplica hoje (R$ 3, menos de 1h).
    */
   exitPenaltyValue?: number | null;
+  /** Backend 48a1dbf (DEC-104): sem atendimento concluído, sair da fila não gera multa (exitPenaltyValue vem 0). */
+  penaltyExempt?: boolean;
   /** Atrasos que contam, somando atendimentos (Backend e328629) — zera no 3º, que vira multa. */
   lateCount?: number | null;
   latesUntilPenalty?: number | null;

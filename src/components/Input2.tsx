@@ -1,27 +1,28 @@
 import { ComponentProps, useState } from "react";
 import { TouchableOpacity } from "react-native";
-import { Input as GluestackInput2, InputField, HStack, Text, VStack } from "@gluestack-ui/themed";
+import { Input as GluestackInput2, InputField, HStack } from "@gluestack-ui/themed";
 import { Eye, EyeOff, Search, CircleX } from "lucide-react-native";
 
-import { DICA_DA_SENHA, SENHA_MAX } from "@domain/auth/validateAuth";
+import { SENHA_MAX } from "@domain/auth/validateAuth";
 import { useTema } from "@hooks/useTema";
 
 type Props = ComponentProps<typeof InputField> & {
   isPassword?: boolean;
   showSearchIcon?: boolean;
   onClear?: () => void;
-  /** Senha (DEC-79): mostra "De 6 a 64 caracteres" embaixo. Falso no "confirmar". */
-  mostrarLimites?: boolean;
 };
 
-export function Input2({ isPassword = false, showSearchIcon = false, onClear, secureTextEntry, value, mostrarLimites = true, ...rest }: Props) {
+export function Input2({ isPassword = false, showSearchIcon = false, onClear, secureTextEntry, value, ...rest }: Props) {
   const { cores } = useTema();
   const [visible, setVisible] = useState(false);
 
   const isSecure = isPassword ? !visible : secureTextEntry;
   const hasValue = typeof value === "string" && value.length > 0;
 
-  const campo = (
+  // cadastro-pendente-no-client (André, 22/10): o "De 6 a 64 caracteres" deixou de
+  // ficar fixo embaixo do campo; ele é a primeira regra da lista de requisitos
+  // da senha (`getPasswordRules`), que aparece ao digitar.
+  return (
     // Mesma altura/padding dos campos do PARTNER (`h="$12"` / `px-3`), para os
     // dois apps terem formularios do mesmo tamanho (Andre 2026-08-05). Os
     // botoes ja batiam (54px nos dois).
@@ -76,14 +77,5 @@ export function Input2({ isPassword = false, showSearchIcon = false, onClear, se
         )}
       </HStack>
     </GluestackInput2>
-  );
-  if (!isPassword || !mostrarLimites) return campo;
-  return (
-    <VStack gap="$1">
-      {campo}
-      <Text size="xs" color="$brandTextSecondary" testID="dica-da-senha">
-        {DICA_DA_SENHA}
-      </Text>
-    </VStack>
   );
 }

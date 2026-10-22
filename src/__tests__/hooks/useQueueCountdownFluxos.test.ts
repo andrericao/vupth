@@ -94,13 +94,13 @@ describe('useQueueCountdown — a contagem', () => {
 describe('useQueueCountdown — o que o servidor manda', () => {
   it('a primeira consulta grava posição, âncora, tolerância, multa e atrasos', async () => {
     mockWait.mockResolvedValue({
-      data: { estimatedWaitingTime: 25, position: 3, toleranceUntil: new Date(AGORA + 60_000).toISOString(), exitPenaltyValue: 5, lateCount: 1 },
+      data: { estimatedWaitingTime: 25, position: 3, toleranceUntil: new Date(AGORA + 60_000).toISOString(), exitPenaltyValue: 5, lateCount: 1, penaltyExempt: true },
     });
     useQueueStore.setState({ activeQueue: fila() } as never);
     montar(fila());
     await avancar(1);
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ position: 3, initialPosition: 3, exitPenaltyValue: 5, lateCount: 1, toleranceUntil: AGORA + 60_000 }),
+      expect.objectContaining({ position: 3, initialPosition: 3, exitPenaltyValue: 5, lateCount: 1, penaltyExempt: true, toleranceUntil: AGORA + 60_000 }),
     );
   });
 
@@ -116,6 +116,14 @@ describe('useQueueCountdown — o que o servidor manda', () => {
     montar(fila({ position: 2, initialPosition: 2 }));
     await avancar(1);
     expect(update).not.toHaveBeenCalled();
+  });
+
+  it('guarda o valor do serviço que o histórico traz (valor-no-em-atendimento)', async () => {
+    mockWait.mockRejectedValue(new Error('x'));
+    mockHist.mockResolvedValue({ data: [{ id: 'a1', status: 'SCHEDULED', totalValue: 45, services: [] }] });
+    montar(fila());
+    await avancar(1);
+    expect(update).toHaveBeenCalledWith({ totalValue: 45 });
   });
 
   it('o atendimento começou: guarda o início e a duração', async () => {

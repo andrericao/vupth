@@ -26,3 +26,17 @@ appId: ${APP_ID}
 - tapOn:
     text: "Entendi"
     label: "06.07 · toca em Entendi"
+
+# multas-no-relatorio (André, 22/10): a multa pendente tambem aparece em
+# Atendimentos, com a regra de quando e cobrada (DEC-93).
+- tapOn:
+    text: "Atendimentos"
+    label: "06.08 · toca em Atendimentos"
+- extendedWaitUntil:
+    visible:
+      id: "multas-em-atendimentos"
+    timeout: ${30000 * LENTO}
+    label: "06.09 · espera multas-em-atendimentos"
+- assertVisible:
+    text: "Cobradas junto do seu próximo corte."
+    label: "06.0A · a multa diz que vai junto do próximo corte"

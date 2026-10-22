@@ -17,10 +17,11 @@ appId: ${APP_ID}
 - inputText:
     text: ${SENHA}
     label: "02.05 · digita ${SENHA}"
-# DEC-79: a senha mostra o intervalo; o confirmar nao repete a dica.
+# DEC-79: o intervalo e a 1a regra da lista de requisitos, que aparece ao digitar
+# (cadastro-pendente-no-client, 22/10: saiu a dica fixa embaixo do campo).
 - assertVisible:
     text: "De 6 a 64 caracteres"
-    label: "02.05a · vê De 6 a 64 caracteres sob a senha"
+    label: "02.05a · vê De 6 a 64 caracteres na lista de requisitos"
 - tapOn:
     text: "Confirmar senha"
     label: "02.06 · toca em Confirmar senha"
