@@ -32,6 +32,8 @@ export interface ActiveQueue {
   // duração estimada do serviço (min) — para tempo decorrido + término estimado.
   startedAt?: number;
   serviceMinutes?: number;
+  /** Valor do serviço (R$), do histórico: o "Em atendimento" mostra (valor-no-em-atendimento). */
+  totalValue?: number | null;
   // Posição na fila (1 = próximo). Vem do mesmo GET que já traz o tempo de
   // espera; a Home mostra "Faltam N" a partir dela.
   position?: number;

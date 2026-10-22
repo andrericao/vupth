@@ -118,6 +118,14 @@ describe('useQueueCountdown — o que o servidor manda', () => {
     expect(update).not.toHaveBeenCalled();
   });
 
+  it('guarda o valor do serviço que o histórico traz (valor-no-em-atendimento)', async () => {
+    mockWait.mockRejectedValue(new Error('x'));
+    mockHist.mockResolvedValue({ data: [{ id: 'a1', status: 'SCHEDULED', totalValue: 45, services: [] }] });
+    montar(fila());
+    await avancar(1);
+    expect(update).toHaveBeenCalledWith({ totalValue: 45 });
+  });
+
   it('o atendimento começou: guarda o início e a duração', async () => {
     mockWait.mockRejectedValue(new Error('saiu da fila'));
     mockHist.mockResolvedValue({

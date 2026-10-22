@@ -89,6 +89,10 @@ describe('o estado montado a partir do servidor', () => {
     expect(filaDoAtendimento(att()).attendanceId).toBe('a1');
   });
 
+  it('leva o valor do serviço (valor-no-em-atendimento)', () => {
+    expect(filaDoAtendimento({ ...att(), totalValue: 45 }).totalValue).toBe(45);
+  });
+
   it('NÃO inventa estimativa nem posição — o poll busca as reais', () => {
     const fila = filaDoAtendimento(att());
     // ZERO também é um chute: na tela vira "Agora", e com o profissional em

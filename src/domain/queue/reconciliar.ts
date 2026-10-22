@@ -77,6 +77,7 @@ export function filaDoAtendimento(
     estimatedMinutes: null,
     status: a.status as AttendanceStatus,
     ...(emAtendimento && a.startTime ? { startedAt: Date.parse(a.startTime) } : {}),
+    ...(typeof a.totalValue === 'number' ? { totalValue: a.totalValue } : {}),
     ...(a.services?.length
       ? { serviceMinutes: a.services.reduce((s, x) => s + (x.estimatedMinutes ?? 0), 0) }
       : {}),

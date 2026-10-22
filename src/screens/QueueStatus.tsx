@@ -56,6 +56,7 @@ import { waitForBackend } from "@services/healthService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useMostraPosicao } from "@hooks/useMostraPosicao";
 import { NumeroComSalto } from "@components/NumeroComSalto";
+import { reais } from "@domain/pagamento/pendencia";
 import { alertaTipado } from "@utils/alertaTipado";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
@@ -1168,6 +1169,14 @@ export function QueueStatus() {
               <Text size="sm" fontFamily="$heading">
                 {formatWaitTime(activeQueue.serviceMinutes)}
               </Text>
+            </HStack>
+          )}
+
+          {/* valor-no-em-atendimento (André, 22/10): o cliente vê o valor do serviço. */}
+          {isBeingAttended && typeof activeQueue?.totalValue === "number" && (
+            <HStack w="$full" justifyContent="space-between" mb="$3" testID="em-atendimento-valor">
+              <Text size="sm" color="$brandTextSecondary">Valor</Text>
+              <Text size="sm" fontFamily="$heading">{reais(activeQueue.totalValue)}</Text>
             </HStack>
           )}
 

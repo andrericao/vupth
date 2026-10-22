@@ -144,6 +144,17 @@ describe('QueueStatus — os rótulos do tempo (cobertura-98)', () => {
     expect(tela.toJSON()).toBeTruthy();
   });
 
+  // valor-no-em-atendimento (André, 22/10): em atendimento, o cliente vê o valor do serviço.
+  it('em atendimento: mostra o valor do serviço; na espera, não', () => {
+    estado({ isInQueue: false, isBeingAttended: true, activeQueue: { ...FILA, status: 'IN_PROGRESS', startedAt: Date.now() - 60000, totalValue: 45 } });
+    const em = renderWithProviders(<QueueStatus />);
+    expect(em.getByTestId('em-atendimento-valor')).toBeTruthy();
+    expect(em.getByText('R$ 45,00')).toBeTruthy();
+    estado({ activeQueue: { ...FILA, totalValue: 45 } });
+    const espera = renderWithProviders(<QueueStatus />);
+    expect(espera.queryByTestId('em-atendimento-valor')).toBeNull();
+  });
+
   it('na fila com a previsão vencida: "Aguardando"', () => {
     estado({ remaining: 0 });
     const tela = renderWithProviders(<QueueStatus />);

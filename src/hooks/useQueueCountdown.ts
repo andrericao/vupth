@@ -144,6 +144,7 @@ export function useQueueCountdown() {
             patch.startedAt = Date.parse(mine.startTime);
             patch.serviceMinutes = mine.services.reduce((s, x) => s + (x.estimatedMinutes ?? 0), 0);
           }
+          if (typeof mine.totalValue === 'number' && mine.totalValue !== q.totalValue) patch.totalValue = mine.totalValue;
           if (Object.keys(patch).length > 0) updateQueue(patch);
         }
       } catch {}
