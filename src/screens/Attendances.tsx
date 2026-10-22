@@ -282,16 +282,36 @@ export function Attendances() {
             <Text fontFamily="$heading" size="sm">
               Multas pendentes · {reais(multasPendentes?.total ?? 0)}
             </Text>
-            {multas.map((m) => (
-              <HStack key={m.penaltyId} bg="$brandSurface" borderRadius="$card" p="$4" gap="$3" alignItems="center">
-                <Text size="xs" color="$brandTextSecondary" flex={1}>
-                  {origemDaMulta(m)}
-                </Text>
-                <Text fontFamily="$heading" size="sm">
-                  {reais(m.amount)}
-                </Text>
-              </HStack>
-            ))}
+            {/* faixa-de-multa-clicavel (André, 22/10): faixa com o âmbar da multa (o mesmo da
+                faixa de saída), e o toque abre o atendimento que gerou a multa. */}
+            {multas.map((m) => {
+              const origem = history.find((a) => a.id === m.originAttendanceId);
+              return (
+                <TouchableOpacity
+                  key={m.penaltyId}
+                  activeOpacity={0.7}
+                  disabled={!origem}
+                  onPress={() => origem && setDetailFor(origem)}
+                  testID={`multa-${m.penaltyId}`}
+                >
+                  <HStack
+                    bg="$brandWarning"
+                    borderRadius="$card"
+                    p="$4"
+                    gap="$3"
+                    alignItems="center"
+                  >
+                    <Text size="xs" color="$onAccentPeach" flex={1}>
+                      {origemDaMulta(m)}
+                    </Text>
+                    <Text fontFamily="$heading" size="sm" color="$onAccentPeach">
+                      {reais(m.amount)}
+                    </Text>
+                    {origem ? <ChevronRight size={16} color={cores.onAccentPeach} /> : null}
+                  </HStack>
+                </TouchableOpacity>
+              );
+            })}
             <Text size="xs" color="$brandTextSecondary">
               Cobradas junto do seu próximo corte.
             </Text>

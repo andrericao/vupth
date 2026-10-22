@@ -184,6 +184,24 @@ describe('Atendimentos — multas pendentes', () => {
     expect(mockRefetchMultas).toHaveBeenCalled();
   });
 
+  // faixa-de-multa-clicavel (André, 22/10): a multa abre o atendimento que a gerou.
+  it('tocar na multa abre o atendimento de origem; sem ele no histórico, não é toque', () => {
+    historico([{ ...REALIZADO, id: 'orig1' }]);
+    mockMultas = {
+      total: 8,
+      penalties: [
+        { penaltyId: 'm1', type: 'LATE_CANCEL', amount: 3, originAttendanceId: 'orig1' },
+        { penaltyId: 'm2', type: 'NO_SHOW', amount: 5, originAttendanceId: 'fora-do-historico' },
+      ],
+    };
+    const { getByTestId, getByText, queryByText } = renderWithProviders(<Attendances />);
+    expect(queryByText('detalhe-fechar')).toBeNull();
+    fireEvent.press(getByTestId('multa-m2'));
+    expect(queryByText('detalhe-fechar')).toBeNull();
+    fireEvent.press(getByTestId('multa-m1'));
+    expect(getByText('detalhe-fechar')).toBeTruthy();
+  });
+
   it('sem multa, o bloco não aparece', () => {
     const { queryByTestId } = renderWithProviders(<Attendances />);
     expect(queryByTestId('multas-em-atendimentos')).toBeNull();
