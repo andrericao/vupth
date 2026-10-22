@@ -19,6 +19,7 @@ import { fs } from "@stores/fonteStore";
 import { copiarTexto } from "@utils/copiar";
 import { movimentoReduzido } from "@utils/motion";
 import { FaixaESelo } from "@components/FaixaESelo";
+import { SaibaMaisDoPreco } from "@components/SaibaMaisDoPreco";
 import { useTema } from "@hooks/useTema";
 
 function Botao({ titulo, onPress, claro, testID, desligado, feito }: {
@@ -188,6 +189,10 @@ export function ModalDePagamento() {
               {servicos > 0 ? <Linha rotulo="Serviço" valor={reais(servicos)} /> : null}
               {multas > 0 ? <Linha rotulo="Multa" valor={reais(multas)} /> : null}
               <Linha rotulo="Total" valor={reais(pagamento.amount)} forte />
+              {/* politica-de-preco-saiba-mais (DEC-91): o total inclui a taxa de pagamento. */}
+              <View style={{ alignItems: "flex-start" }} testID="pix-preco-saiba-mais">
+                <SaibaMaisDoPreco />
+              </View>
               {pagamento.holder_name ? (
                 <Text style={{ color: cores.textSecondary, fontSize: fs(13) }}>Para: {pagamento.holder_name}</Text>
               ) : null}
