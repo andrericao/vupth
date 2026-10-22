@@ -1,4 +1,4 @@
-import { Alert, Linking } from 'react-native';
+import { Alert, Linking, StyleSheet } from 'react-native';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { ServiceSelection } from '@screens/ServiceSelection';
@@ -20,6 +20,8 @@ const OPEN_PARAMS = {
 // Mutável: o mock do useRoute lê daqui (loja aberta x fechada por teste).
 const mockRouteParams: Record<string, unknown> = { ...OPEN_PARAMS };
 
+let mockInset = 0;
+jest.mock('@hooks/useTabBarInset', () => ({ useTabBarInset: () => mockInset }));
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
@@ -346,6 +348,28 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
       expect(queryByTestId('more-options')).toBeNull();
       expect(queryByTestId('regra-da-multa')).toBeNull();
       expect(getByTestId('so-agenda')).toBeTruthy();
+    });
+  });
+
+  // mais-opcoes-cortado (André, 22/10): os botões do rodapé ficam acima da barra de abas.
+  describe('rodapé acima da barra de abas', () => {
+    beforeEach(() => {
+      setRouteParams({ ...OPEN_PARAMS });
+      useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    });
+
+    it('sem barra de abas, fica a 30 do fundo; com ela, 16 acima da barra', async () => {
+      mockInset = 0;
+      const sem = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await sem.findByTestId('service-s1', {}, { timeout: 15000 }));
+      expect(StyleSheet.flatten(sem.getByTestId('rodape-da-escolha').props.style).bottom).toBe(30);
+      sem.unmount();
+
+      mockInset = 90;
+      const com = renderWithProviders(<ServiceSelection />);
+      fireEvent.press(await com.findByTestId('service-s1', {}, { timeout: 15000 }));
+      expect(StyleSheet.flatten(com.getByTestId('rodape-da-escolha').props.style).bottom).toBe(106);
+      mockInset = 0;
     });
   });
 

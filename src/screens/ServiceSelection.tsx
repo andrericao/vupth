@@ -25,6 +25,7 @@ import { mostraPosicao } from "@domain/queue/posicao";
 import { establishmentService } from "@services/establishmentService";
 import { comTempoAtual, duracaoDoServico } from "@domain/professional/duracaoDoServico";
 import { formatarReais } from "@utils/formatarReais";
+import { useTabBarInset } from "@hooks/useTabBarInset";
 import { useSnapshotDaLoja } from "@hooks/useEstablishments";
 import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService } from "@services/swapOfferService";
@@ -75,6 +76,9 @@ const agora = () => Date.now();
 
 export function ServiceSelection() {
   const insets = useSafeAreaInsets();
+  // mais-opcoes-cortado (André, 22/10): os botões do rodapé sobem acima da barra de abas.
+  const tabBarInset = useTabBarInset();
+  const rodape = Math.max(30, tabBarInset + 16);
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const {
@@ -419,7 +423,7 @@ export function ServiceSelection() {
         <>
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 200 }}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 200 + (rodape - 30) }}
           >
             <VStack gap="$2.5">
               {services.map((service) => {
@@ -539,7 +543,7 @@ export function ServiceSelection() {
           </ScrollView>
 
           {selectedIds.length > 0 && (
-            <VStack position="absolute" bottom={30} left={20} right={20} gap="$2">
+            <VStack position="absolute" style={{ bottom: rodape }} left={20} right={20} gap="$2" testID="rodape-da-escolha">
               {/* Uma ação primária só (Andre 2026-08-01): loja aberta = entrar na
                   fila; fechada = agendar (badge AGENDAR). Com a fila aberta o
                   agendar vem logo abaixo, como segunda porta (C20). O resto —
