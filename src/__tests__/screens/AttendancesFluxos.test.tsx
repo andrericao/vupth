@@ -351,6 +351,14 @@ describe('Atendimentos — realizados', () => {
     expect(getByText('avaliar-Carlos')).toBeTruthy();
   });
 
+  // fechar-cards-avaliacao-e-repetir (André, 22/10): o convite de avaliar ganha o X.
+  it('o convite de avaliar fecha no X', () => {
+    const { getByTestId, queryByTestId } = renderWithProviders(<Attendances />);
+    expect(getByTestId('convite-avaliar')).toBeTruthy();
+    fireEvent.press(getByTestId('convite-avaliar-fechar'));
+    expect(queryByTestId('convite-avaliar')).toBeNull();
+  });
+
   it('fechar o detalhe', () => {
     const { getByTestId, getByText, queryByText } = renderWithProviders(<Attendances />);
     fireEvent.press(getByTestId('convite-avaliar'));

@@ -11,7 +11,7 @@ import {
   Badge,
   BadgeText,
 } from "@gluestack-ui/themed";
-import { Users, Clock, ChevronRight, Calendar, Repeat2, Star } from "lucide-react-native";
+import { Users, Clock, ChevronRight, Calendar, Repeat2, Star, X } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -26,6 +26,7 @@ import { LiveDot } from "@components/LiveDot";
 import { RatingModal } from "@components/RatingModal";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
+import { useCardFechado } from "@hooks/useCardFechado";
 import { origemDaMulta } from "@domain/queue/multasPendentes";
 import { reais, textoDoStatus } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
@@ -112,6 +113,7 @@ export function Attendances() {
   // pode ser jogado nele de novo (Andre, 19/09). Aqui ele fica à mão, e leva ao
   // atendimento que aconteceu — quem não quiser, só ignora.
   const semAvaliar = atendimentoSemAvaliar(history, ratedIds);
+  const conviteFechado = useCardFechado(semAvaliar ? `avaliar_${semAvaliar.id}` : null);
   // pendencia-de-pagamento (CLI-30): o que falta pagar, no topo, com o ponto.
   const { data: pendentes = [], refetch: refetchPendentes } = usePagamentosPendentes();
   const pagar = usePendenciaStore((s) => s.pagar);
@@ -293,7 +295,7 @@ export function Attendances() {
           </VStack>
         )}
 
-        {semAvaliar && (
+        {semAvaliar && !conviteFechado.fechado && (
           <Box px={16} mt="$5">
             <TouchableOpacity onPress={() => setDetailFor(semAvaliar)} testID="convite-avaliar">
               <HStack bg="$greenTint" borderRadius="$card" p="$4" gap="$3" alignItems="center">
@@ -317,6 +319,14 @@ export function Attendances() {
                       Avaliar
                     </Text>
                   </Box>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={conviteFechado.fechar}
+                  hitSlop={8}
+                  accessibilityLabel="Fechar"
+                  testID="convite-avaliar-fechar"
+                >
+                  <X size={16} color="#163300" />
                 </TouchableOpacity>
               </HStack>
             </TouchableOpacity>

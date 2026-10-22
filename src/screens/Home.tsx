@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { ActivityIndicator, FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, TextStyle, ScrollView } from "react-native";
 import { useNavigation, useRoute, useScrollToTop, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
-import { Search, SlidersHorizontal, ChevronRight, Zap } from "lucide-react-native";
+import { Search, SlidersHorizontal, ChevronRight, Zap, X } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType } from "@domain/establishment/types";
@@ -15,6 +15,8 @@ import { vitrinePaginada } from "@domain/establishment/paginacao";
 import { ordenarPraOntem, rotuloPraOntem } from "@domain/establishment/praOntem";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useClientAttendances } from "@hooks/useAttendances";
+import { useCardFechado } from "@hooks/useCardFechado";
+import { useTema } from "@hooks/useTema";
 import { useAuthStore } from "@stores/authStore";
 import { useLocationStore } from "@stores/locationStore";
 import { addressService } from "@services/addressService";
@@ -150,6 +152,8 @@ export function Home() {
   // "favorito", entao usamos o historico. Sem historico, a secao nao aparece.
   const { data: history = [] } = useClientAttendances({ status: "FINISHED" });
   const lastVisit = history[0];
+  const { cores } = useTema();
+  const repetirFechado = useCardFechado(lastVisit ? `repetir_${lastVisit.id}` : null);
 
   // Home é a raiz do stack: evita que um único "voltar" do Android feche o app.
   useDoubleBackExit();
@@ -503,7 +507,7 @@ export function Home() {
       ))}
 
       {/* Recentes */}
-      {lastVisit && (
+      {lastVisit && !repetirFechado.fechado && (
         <VStack px={16} pt={22} gap={12}>
           <Text
             fontFamily="$display"
@@ -541,6 +545,14 @@ export function Home() {
                   Repetir
                 </Text>
               </Box>
+              <TouchableOpacity
+                onPress={repetirFechado.fechar}
+                hitSlop={8}
+                accessibilityLabel="Fechar"
+                testID="repetir-fechar"
+              >
+                <X size={16} color={cores.textSecondary} />
+              </TouchableOpacity>
             </HStack>
           </TouchableOpacity>
         </VStack>

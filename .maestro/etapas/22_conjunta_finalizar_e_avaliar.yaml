@@ -66,6 +66,10 @@ appId: ${APP_ID}
 - assertVisible:
     id: "sem-avaliar-.*"
     label: "22.07a · o card sem avaliar tem o ponto"
+# fechar-cards-avaliacao-e-repetir (22/10): o convite tem o X; o card de pagamento nao.
+- assertVisible:
+    id: "convite-avaliar-fechar"
+    label: "22.07a2 · o convite de avaliar tem o X de fechar"
 - assertVisible:
     id: "pagamentos-pendentes"
     label: "22.07b · o que falta pagar aparece no topo"
