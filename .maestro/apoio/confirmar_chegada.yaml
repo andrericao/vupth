@@ -1,0 +1,12 @@
+# aviso-de-chegada-na-entrada (André, 22/10): com menos de 1 h de espera, "Entrar na
+# fila" abre "Esteja na loja às HH:mm" com Cancelar e Confirmar. Confirma, se
+# aparecer (com 1 h ou mais de espera ele nao vem). O botao de confirmar e o
+# ultimo, pelo texto: o 0 e o "Cancelar", que NAO entra na fila.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      visible: "Esteja na loja"
+    commands:
+      - tapOn:
+          text: "Confirmar"

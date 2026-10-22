@@ -52,6 +52,9 @@ onFlowComplete:
 - tapOn:
     id: "primary-queue"
     label: "13.A3 · toca em primary-queue"
+- runFlow:
+    file: ../apoio/confirmar_chegada.yaml
+    label: "13.A3b · confirma o aviso 'Esteja na loja', se vier"
 - extendedWaitUntil:
     visible: "Entendi"
     timeout: ${60000 * LENTO}

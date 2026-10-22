@@ -26,6 +26,8 @@ import { establishmentService } from "@services/establishmentService";
 import { comTempoAtual, duracaoDoServico } from "@domain/professional/duracaoDoServico";
 import { formatarReais } from "@utils/formatarReais";
 import { useTabBarInset } from "@hooks/useTabBarInset";
+import { avisoDeChegada } from "@domain/queue/avisoDeChegada";
+import { alertaTipado } from "@utils/alertaTipado";
 import { useSnapshotDaLoja } from "@hooks/useEstablishments";
 import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService } from "@services/swapOfferService";
@@ -193,7 +195,18 @@ export function ServiceSelection() {
   }
 
   function handleConfirm() {
-    if (semPendencia()) goToQueue();
+    if (!semPendencia()) return;
+    // aviso-de-chegada-na-entrada (André, 22/10): com menos de 1 h de espera, um
+    // aviso diz até que horas estar na loja; Cancelar não entra na fila.
+    const aviso = avisoDeChegada(estimatedWaitMinutes, agora());
+    if (!aviso) {
+      goToQueue();
+      return;
+    }
+    alertaTipado(aviso.titulo, aviso.mensagem, [
+      { text: aviso.cancelar, style: "cancel" },
+      { text: aviso.confirmar, onPress: () => goToQueue() },
+    ], { tipo: "atencao" });
   }
 
   // Portão de auth das ações que NÃO entram na fila (corte, troca): o visitante

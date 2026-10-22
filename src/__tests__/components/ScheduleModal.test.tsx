@@ -87,6 +87,35 @@ describe('ScheduleModal — barra de encaixe', () => {
     alerta.mockRestore();
   });
 
+  // aviso-de-chegada-na-entrada (André, 22/10): faltando menos de 1 h para o horário
+  // agendado, o aviso diz até que horas estar na loja; Cancelar não agenda.
+  it('faltando menos de 1 h para o horário: avisa; Cancelar não agenda, Confirmar agenda', async () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    (intentionsService.create as jest.Mock).mockResolvedValue({ data: {} });
+    const { getAllByRole, findByTestId, getByTestId } = abrir();
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    await findByTestId('horario-09:00');
+    fireEvent.press(getByTestId('horario-09:30'));
+    const faltam45 = new Date(amanha());
+    faltam45.setHours(8, 45, 0, 0);
+    const agora = jest.spyOn(Date, 'now').mockReturnValue(faltam45.getTime());
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    expect(intentionsService.create).not.toHaveBeenCalled();
+    const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, { text: string; onPress?: () => void }[]];
+    expect(titulo).toBe('Esteja na loja');
+    expect(mensagem).toBe('Esteja na loja às 09:25.');
+    expect(botoes.map((b) => b.text)).toEqual(['Cancelar', 'Confirmar']);
+    await act(async () => {
+      botoes.find((b) => b.text === 'Confirmar')!.onPress!();
+    });
+    expect(intentionsService.create).toHaveBeenCalledTimes(1);
+    agora.mockRestore();
+    alerta.mockRestore();
+  });
+
   it('a recusa do servidor vira a frase dela', async () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     (intentionsService.create as jest.Mock).mockRejectedValue({ response: { status: 409, data: { code: 'PROFESSIONAL_AGENDA_FULL' } } });

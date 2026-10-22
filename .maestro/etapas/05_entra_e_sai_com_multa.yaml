@@ -5,6 +5,9 @@ appId: ${APP_ID}
 - tapOn:
     id: "primary-queue"
     label: "05.01 · toca em primary-queue"
+- runFlow:
+    file: ../apoio/confirmar_chegada.yaml
+    label: "05.01b · confirma o aviso 'Esteja na loja', se vier"
 # O push "É quase a sua vez!" pode chegar antes do Entendi e cobri-lo
 # (bateria 09/10 15:13): espera o que vier primeiro e fecha o push, se for ele.
 - extendedWaitUntil:

@@ -79,6 +79,13 @@ function setRouteParams(params: Record<string, unknown>) {
 // da tempo folgado e deixa o portao dizer a verdade.
 jest.setTimeout(90000);
 
+// aviso-de-chegada-na-entrada (André, 22/10): com menos de 1 h de espera, "Entrar na
+// fila" abre o aviso "Esteja na loja às …"; o Confirmar é que segue.
+function confirmarChegada(alerta: jest.SpyInstance) {
+  const botoes = alerta.mock.calls[alerta.mock.calls.length - 1][2] as { text: string; onPress?: () => void }[];
+  botoes.find((b) => b.text === 'Confirmar')!.onPress!();
+}
+
 describe('ServiceSelection — portão de auth (modo visitante)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -90,12 +97,15 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
 
   it('VISITANTE: confirmar manda pro login levando a seleção (redirectTo queueStatus)', async () => {
     useAuthStore.setState({ isAuthenticated: false });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
 
     // findByTestId default é 1s; o 1º mount do Gluestack pode passar disso sob
     // carga (flaky) — dá 15s (jest.setTimeout acima cobre).
     fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
     fireEvent.press(getByTestId('primary-queue'));
+    confirmarChegada(alerta);
+    alerta.mockRestore();
 
     expect(mockNavigate).toHaveBeenCalledWith(
       'login',
@@ -105,6 +115,23 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
         serviceItemIds: ['s1'],
       }),
     );
+  });
+
+  // aviso-de-chegada-na-entrada (André, 22/10).
+  it('Entrar na fila com menos de 1 h: avisa o horário; Cancelar não entra, Confirmar entra', async () => {
+    useAuthStore.setState({ isAuthenticated: true });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent.press(getByTestId('primary-queue'));
+    const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, { text: string; style?: string; onPress?: () => void }[]];
+    expect(titulo).toBe('Esteja na loja');
+    expect(mensagem).toMatch(/^Esteja na loja às \d{2}:\d{2}\.$/);
+    expect(botoes.map((b) => b.text)).toEqual(['Cancelar', 'Confirmar']);
+    expect(mockNavigate).not.toHaveBeenCalledWith('queueStatus', expect.anything());
+    confirmarChegada(alerta);
+    expect(mockNavigate).toHaveBeenCalledWith('queueStatus', expect.objectContaining({ professionalId: 'p1' }));
+    alerta.mockRestore();
   });
 
   it('com serviço escolhido, o resumo não fala de multa nem da saída sem custo (DEC-1, Andre 05/10)', async () => {
@@ -131,10 +158,13 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
 
   it('LOGADO: confirmar vai direto pra queueStatus', async () => {
     useAuthStore.setState({ isAuthenticated: true });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
 
     fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
     fireEvent.press(getByTestId('primary-queue'));
+    confirmarChegada(alerta);
+    alerta.mockRestore();
 
     expect(mockNavigate).toHaveBeenCalledWith(
       'queueStatus',
