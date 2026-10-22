@@ -136,7 +136,7 @@ export function Terms({ abaInicial = "uso" }: { abaInicial?: Aba }) {
               testID={`tab-${key}`}
             >
               <Center
-                bg={ativa ? "$forest" : "$brandSurface"}
+                bg={ativa ? "$selecionado" : "$brandSurface"}
                 borderRadius="$full"
                 py={11}
                 px={16}
@@ -144,7 +144,7 @@ export function Terms({ abaInicial = "uso" }: { abaInicial?: Aba }) {
                 <Text
                   fontFamily="$heading"
                   fontSize={fs(14)}
-                  color={ativa ? "$brandGreen" : "$brandTextSecondary"}
+                  color={ativa ? "$onSelecionado" : "$brandTextSecondary"}
                 >
                   {label}
                 </Text>

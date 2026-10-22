@@ -20,6 +20,7 @@ import { useLocationStore } from "@stores/locationStore";
 import { addressService } from "@services/addressService";
 import { useQueueCountdown } from "@hooks/useQueueCountdown";
 import { useMostraPosicao } from "@hooks/useMostraPosicao";
+import { useTema } from "@hooks/useTema";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { useDoubleBackExit } from "@hooks/useDoubleBackExit";
 import { SkeletonList } from "@components/Skeleton";
@@ -32,7 +33,6 @@ import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { PilulaVoltarAoTopo } from "@components/PilulaVoltarAoTopo";
 import { usePilulaDeTopo } from "@hooks/usePilulaDeTopo";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
-import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 import { fs } from "@stores/fonteStore";
 
 // [marca-vupth] Saudacao por horario do dia (Pencil CLIENT · 06 Home).
@@ -92,7 +92,7 @@ function PilulaDeFiltro({
       testID={testID}
     >
       <HStack
-        bg={ativa ? "$forest" : "$brandSurface"}
+        bg={ativa ? "$selecionado" : "$brandSurface"}
         borderRadius="$full"
         gap={6}
         px={12}
@@ -100,7 +100,7 @@ function PilulaDeFiltro({
         alignItems="center"
       >
         {icone}
-        <Text fontFamily="$display" fontSize={fs(13)} fontWeight="$bold" color={ativa ? "$brandGreen" : "$forest"}>
+        <Text fontFamily="$display" fontSize={fs(13)} fontWeight="$bold" color={ativa ? "$onSelecionado" : "$brandTextPrimary"}>
           {rotulo}
         </Text>
       </HStack>
@@ -109,6 +109,7 @@ function PilulaDeFiltro({
 }
 
 export function Home() {
+  const { cores } = useTema();
   const [search, setSearch] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<ServiceType | "ALL">("ALL");
   const [showFilter, setShowFilter] = useState(false);
@@ -249,7 +250,7 @@ export function Home() {
         onEndReachedThreshold={0.5}
         ListFooterComponent={
           paginada && vitrine.isFetchingNextPage ? (
-            <ActivityIndicator color="#163300" style={{ paddingVertical: 16 }} testID="carregando-mais-lojas" />
+            <ActivityIndicator color={cores.textPrimary} style={{ paddingVertical: 16 }} testID="carregando-mais-lojas" />
           ) : null
         }
         showsVerticalScrollIndicator={false}
@@ -258,8 +259,8 @@ export function Home() {
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={onRefresh}
-            colors={["#163300"]}
-            tintColor="#163300"
+            colors={[cores.textPrimary]}
+            tintColor={cores.textPrimary}
           />
         }
         ListHeaderComponent={
@@ -291,7 +292,7 @@ export function Home() {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={() => navigation.navigate("signUp", {})}>
-                <Text fontFamily="$display" fontSize={fs(14)} fontWeight="$bold" color="$forest">
+                <Text fontFamily="$display" fontSize={fs(14)} fontWeight="$bold" color="$brandTextPrimary">
                   Cadastrar
                 </Text>
               </TouchableOpacity>
@@ -316,19 +317,19 @@ export function Home() {
           minHeight={50}
           alignItems="center"
         >
-          <Search size={18} color="#454745" />
+          <Search size={18} color={cores.textSecondary} />
           <Box flex={1}>
             <TextInput
               value={search}
               onChangeText={setSearch}
               placeholder="Buscar serviço ou lugar"
-              placeholderTextColor={COR_DO_PLACEHOLDER}
+              placeholderTextColor={cores.textPlaceholder}
               style={[
                 {
                   fontFamily: "Inter_400Regular",
                   fontSize: fs(15),
                   lineHeight: fs(20),
-                  color: "#163300",
+                  color: cores.textPrimary,
                   paddingVertical: 12,
                   paddingHorizontal: 0,
                   includeFontPadding: false,
@@ -355,14 +356,14 @@ export function Home() {
             testID="open-filter"
           >
             <Box
-              bg={selectedFilter === "ALL" ? "transparent" : "$forest"}
+              bg={selectedFilter === "ALL" ? "transparent" : "$selecionado"}
               borderRadius="$full"
               px={selectedFilter === "ALL" ? 0 : 8}
               py={selectedFilter === "ALL" ? 0 : 6}
             >
               <SlidersHorizontal
                 size={18}
-                color={selectedFilter === "ALL" ? "#163300" : "#9FE870"}
+                color={selectedFilter === "ALL" ? cores.textPrimary : cores.onSelecionado}
               />
             </Box>
           </TouchableOpacity>
@@ -386,7 +387,7 @@ export function Home() {
               : "Pra ontem: tenho um compromisso e preciso cortar já"
           }
           testID="pra-ontem"
-          icone={<Zap size={13} color={praOntem ? "#9FE870" : "#163300"} />}
+          icone={<Zap size={13} color={praOntem ? cores.onSelecionado : cores.textPrimary} />}
           rotulo="Pra ontem"
         />
         {CATEGORIAS_DA_FAIXA.map((c) => (
@@ -425,11 +426,12 @@ export function Home() {
                   fontSize={fs(12)}
                   fontWeight="$bold"
                   letterSpacing={0.8}
-                  color="$forest"
+                  color="$onGreen"
                 >
                   {isLate ? "VOCÊ FOI CHAMADO" : "VOCÊ ESTÁ NA FILA"}
                 </Text>
                 <HStack
+                  // tema-fixo: selo forest sobre o cartao brandGreen, verde nos dois temas
                   bg="$forest"
                   borderRadius="$full"
                   gap={6}
@@ -437,7 +439,7 @@ export function Home() {
                   py={6}
                   alignItems="center"
                 >
-                  <LiveDot size={8} color="#9FE870" />
+                  <LiveDot size={8} color={cores.green} />
                   <Text fontFamily="$display" fontSize={fs(12)} fontWeight="$bold" color="$brandGreen">
                     Ao vivo
                   </Text>
@@ -451,7 +453,7 @@ export function Home() {
                     fontWeight="$extrabold"
                     letterSpacing={-2}
                     lineHeight={fs(46)}
-                    color="$forest"
+                    color="$onGreen"
                   >
                     {/* Posicao real (GET wait-time). Ate o 1o poll chegar, cai no
                         tempo — nunca inventa um numero de pessoas. */}
@@ -463,12 +465,12 @@ export function Home() {
                         ? "Calculando..."
                         : formatWaitTime(remaining)}
                   </Text>
-                  <Text fontFamily="$body" fontSize={fs(14)} color="$forest">
+                  <Text fontFamily="$body" fontSize={fs(14)} color="$onGreen">
                     {remaining == null ? "" : `~${formatWaitTime(remaining)} · `}
                     {activeQueue.establishmentName}
                   </Text>
                 </VStack>
-                <ChevronRight size={24} color="#163300" />
+                <ChevronRight size={24} color={cores.onGreen} />
               </HStack>
             </VStack>
           </TouchableOpacity>
@@ -486,11 +488,11 @@ export function Home() {
               fontSize={fs(12)}
               fontWeight="$bold"
               letterSpacing={0.8}
-              color="$forest"
+              color="$brandTextPrimary"
             >
               PEDIDO DE CORTE ENVIADO
             </Text>
-            <Text fontFamily="$display" fontSize={fs(18)} letterSpacing={-0.4} color="$forest">
+            <Text fontFamily="$display" fontSize={fs(18)} letterSpacing={-0.4} color="$brandTextPrimary">
               Aguardando {p.professionalName || "o profissional"} responder
             </Text>
             <Text fontFamily="$body" fontSize={fs(14)} color="$brandTextSecondary">
@@ -522,7 +524,7 @@ export function Home() {
             }
           >
             <HStack bg="$brandSurface" borderRadius={18} gap={14} p={14} alignItems="center">
-              <PlaceAvatar name={lastVisit.professionalName} bg="$accentPeach" />
+              <PlaceAvatar name={lastVisit.professionalName} bg="$accentPeach" color="$onAccentPeach" />
               <VStack flex={1} gap={3}>
                 <Text fontFamily="$display" fontSize={fs(15)} fontWeight="$bold" color="$brandTextPrimary">
                   {lastVisit.professionalName}
@@ -536,8 +538,10 @@ export function Home() {
                   </Text>
                 )}
               </VStack>
-              <Box bg="$forest" borderRadius="$full" px={14} py={9}>
-                <Text fontFamily="$display" fontSize={fs(13)} fontWeight="$bold" color="$brandGreen">
+              {/* Forest sobre o cartao surface some no escuro (forest e a surface): a
+                  pilula usa o par que vira green com onGreen. */}
+              <Box bg="$selecionado" borderRadius="$full" px={14} py={9}>
+                <Text fontFamily="$display" fontSize={fs(13)} fontWeight="$bold" color="$onSelecionado">
                   Repetir
                 </Text>
               </Box>

@@ -12,6 +12,7 @@ import { useEstablishments } from "@hooks/useEstablishments";
 import { isEffectivelyOpen } from "@domain/establishment/types";
 import { fs } from "@stores/fonteStore";
 import { bordasDaEntrada } from "@utils/bordasDaEntrada";
+import { useTema } from "@hooks/useTema";
 
 // O piso das bordas (insets zeradas na primeira abertura) mora em
 // @utils/bordasDaEntrada: a tela 10 tambem fica fora do navegador e usa o mesmo.
@@ -25,6 +26,7 @@ export { bordasDaEntrada, PISO_BARRA_DE_NAVEGACAO } from "@utils/bordasDaEntrada
  * produto.
  */
 export function Onboarding() {
+  const { cores } = useTema();
   const markOnboardingSeen = useFirstRunStore((s) => s.markOnboardingSeen);
   const { top, bottom } = bordasDaEntrada(useSafeAreaInsets());
   const { data: establishments = [] } = useEstablishments();
@@ -71,7 +73,7 @@ export function Onboarding() {
             fontSize={fs(38)}
             lineHeight={fs(39)}
             letterSpacing={-1.7}
-            color="$forest"
+            color="$brandTextPrimary"
           >
             CHEGA DE FILA
           </Text>
@@ -80,7 +82,7 @@ export function Onboarding() {
           </Text>
           {openNow > 0 && (
             <HStack gap="$2" alignItems="center" mt="$1">
-              <Users size={16} color="#163300" />
+              <Users size={16} color={cores.textPrimary} />
               <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary">
                 {openNow === 1
                   ? "1 lugar aberto agora perto de você"

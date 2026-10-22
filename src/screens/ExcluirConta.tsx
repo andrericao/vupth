@@ -80,8 +80,10 @@ export function ExcluirConta() {
           accessibilityRole="button"
           testID="ir-para-o-perfil"
         >
-          <Box bg="$forest" borderRadius="$full" py={14} alignItems="center">
-            <Text fontFamily="$heading" fontSize={fs(14)} color="$brandGreen">
+          {/* Forest sobre o fundo da tela some no escuro (forest e a surface, quase a cor
+              da tela): o par selecionado vira green com onGreen, como o botao primario. */}
+          <Box bg="$selecionado" borderRadius="$full" py={14} alignItems="center">
+            <Text fontFamily="$heading" fontSize={fs(14)} color="$onSelecionado">
               Ir para o Perfil
             </Text>
           </Box>

@@ -17,7 +17,7 @@ import { linkParaCompartilhar, raizDoSite } from "@routes/linking";
 import { textoDeDivulgacao } from "@domain/divulgacao";
 import { API_ENV } from "@services/api";
 
-import { ScreenHeader, HeaderIconButton } from "@components/ScreenHeader";
+import { ScreenHeader, HeaderIconButton, corDoIconeDoCabecalho } from "@components/ScreenHeader";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { Button } from "@components/Button";
@@ -37,6 +37,7 @@ import { formatWaitTime } from "@domain/queue/types";
 import { useEstablishment, useEstablishmentHours, useProfessionalsWithQueue } from "@hooks/useEstablishments";
 import { proximaAbertura, resumoDeHoje, semanaParaExibir } from "@domain/establishment/horarios";
 import { useQueueSocket } from "@hooks/useQueueSocket";
+import { useTema } from "@hooks/useTema";
 import { useFavoritesStore } from "@stores/favoritesStore";
 import { fs } from "@stores/fonteStore";
 
@@ -75,6 +76,7 @@ function ProfessionalRow({
   fora: boolean;
   onPress: () => void;
 }) {
+  const { cores } = useTema();
   const queueCount = professional.queue_count ?? 0;
   const r = resolveRating(
     professional.rating_average,
@@ -99,7 +101,7 @@ function ProfessionalRow({
             <PlaceAvatar name={professional.name} photoUrl={professional.profile_image_url} />
           )}
           <VStack flex={1}>
-            <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+            <Text fontFamily="$heading" fontSize="$sm" color="$brandTextPrimary">
               {professional.name}
             </Text>
             {/* ⚠️ Com a LOJA FECHADA, "Sem fila · Agora" convidava a ir agora
@@ -166,9 +168,9 @@ function ProfessionalRow({
             testID={`info-${professional.id}`}
             hitSlop={8}
           >
-            <Info size={18} color="#163300" />
+            <Info size={18} color={cores.textPrimary} />
           </TouchableOpacity>
-          <ChevronRight size={18} color="#454745" />
+          <ChevronRight size={18} color={cores.textSecondary} />
         </HStack>
       </Box>
     </TouchableOpacity>
@@ -177,6 +179,7 @@ function ProfessionalRow({
 
 export function EstablishmentDetail() {
   const insets = useSafeAreaInsets();
+  const { cores } = useTema();
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const { establishmentId, profissional: profissionalDoLink } = route.params as RouteParams;
@@ -321,6 +324,8 @@ export function EstablishmentDetail() {
   }
   // Um so botao de favorito pros dois ramos (com foto e sem): antes cada ramo
   // desenhava o proprio, e eles ja tinham saido com tamanhos diferentes.
+  // O icone e o par do botao redondo: foto (branco translucido) ou greenTint.
+  const corDoIcone = corDoIconeDoCabecalho(showPhoto ? "foto" : "claro", cores);
   const favorito = (
     <HeaderIconButton
       onPress={handleToggleFavorite}
@@ -331,7 +336,7 @@ export function EstablishmentDetail() {
     >
       {/* Favoritado ENCHE o coracao: o estado nao pode depender so de uma
           diferenca sutil de cor. */}
-      <Heart size={20} color="#163300" fill={isFavorite ? "#163300" : "none"} />
+      <Heart size={20} color={corDoIcone} fill={isFavorite ? corDoIcone : "none"} />
     </HeaderIconButton>
   );
 
@@ -343,7 +348,7 @@ export function EstablishmentDetail() {
         testID="compartilhar-loja"
         accessibilityLabel="Compartilhar a loja"
       >
-        <Share2 size={20} color="#163300" />
+        <Share2 size={20} color={corDoIcone} />
       </HeaderIconButton>
       {favorito}
     </HStack>
@@ -395,7 +400,7 @@ export function EstablishmentDetail() {
             fontSize={fs(26)}
             lineHeight={fs(30)}
             letterSpacing={-1}
-            color="$forest"
+            color="$brandTextPrimary"
           >
             {establishment.name}
           </Text>
@@ -418,7 +423,7 @@ export function EstablishmentDetail() {
             width={7}
             height={7}
             borderRadius="$full"
-            bg={isOpen ? "$brandGreen" : "$brandWarning"}
+            bg={isOpen ? "$brandGreen" : "$pessego"}
           />
           <Text size="sm" color="$brandTextSecondary" fontFamily="$heading">
             {/* `isOpen` e a LOJA, nao a fila. Dizer "fila fechada" aqui
@@ -449,7 +454,7 @@ export function EstablishmentDetail() {
             testID="horario-hoje"
           >
             <HStack alignItems="center" gap="$2" mt="$2">
-              <Clock size={14} color="#454745" />
+              <Clock size={14} color={cores.textSecondary} />
               <Text size="sm" color="$brandTextSecondary">
                 {hojeTexto}
                 {reabre ? ` · ${reabre}` : ""}
@@ -457,7 +462,7 @@ export function EstablishmentDetail() {
               {semana.length > 0 && (
                 <ChevronDown
                   size={14}
-                  color="#454745"
+                  color={cores.textSecondary}
                   style={{ transform: [{ rotate: mostrarSemana ? "180deg" : "0deg" }] }}
                 />
               )}
@@ -476,11 +481,11 @@ export function EstablishmentDetail() {
             testID="endereco-da-loja"
           >
             <HStack alignItems="flex-start" gap="$2" mt="$2">
-              <MapPin size={14} color="#454745" style={{ marginTop: 3 }} />
+              <MapPin size={14} color={cores.textSecondary} style={{ marginTop: 3 }} />
               <Text size="sm" color="$brandTextSecondary" flex={1}>
                 {endereco}
                 {mapa ? (
-                  <Text size="sm" color="$forest" fontFamily="$heading">
+                  <Text size="sm" color="$brandTextPrimary" fontFamily="$heading">
                     {"  "}Como chegar
                   </Text>
                 ) : null}
@@ -515,14 +520,14 @@ export function EstablishmentDetail() {
 
       <VStack flex={1} px={16} pt="$5">
         <HStack justifyContent="space-between" alignItems="center" mb="$3">
-          <Text fontFamily="$display" fontSize="$lg" color="$forest">
+          <Text fontFamily="$display" fontSize="$lg" color="$brandTextPrimary">
             Quem está atendendo
           </Text>
           {isOpen && (
             <Box bg="$greenTint" borderRadius="$full" px="$3" py="$1">
               <HStack alignItems="center" gap="$1">
-                <LiveDot size={5} color="#163300" />
-                <Text size="2xs" fontFamily="$heading" color="$forest">
+                <LiveDot size={5} color={cores.onGreenTint} />
+                <Text size="2xs" fontFamily="$heading" color="$onGreenTint">
                   Ao vivo
                 </Text>
               </HStack>
@@ -601,8 +606,8 @@ export function EstablishmentDetail() {
               py="$3"
             >
               <HStack alignItems="center" gap="$2">
-                <Info size={18} color="#163300" />
-                <Text size="xs" color="$forest" fontFamily="$heading" flex={1}>
+                <Info size={18} color={cores.onAccentPeach} />
+                <Text size="xs" color="$onAccentPeach" fontFamily="$heading" flex={1}>
                   Fechada agora — escolha um profissional para agendar ou
                   solicitar um corte.
                 </Text>

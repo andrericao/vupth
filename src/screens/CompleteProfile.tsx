@@ -12,6 +12,7 @@ import { postAuthRoute, PostAuthParams } from "@domain/auth/postAuthRoute";
 import { profileService } from "@services/profileService";
 import { useAuthStore } from "@stores/authStore";
 import { fs } from "@stores/fonteStore";
+import { useTema } from "@hooks/useTema";
 
 /**
  * Pede o NOME, logo depois do cadastro.
@@ -35,6 +36,7 @@ import { fs } from "@stores/fonteStore";
  * e obrigatorio pra nada.
  */
 export function CompleteProfile() {
+  const { cores } = useTema();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const params = (route.params as PostAuthParams) ?? {};
@@ -106,8 +108,8 @@ export function CompleteProfile() {
             alignItems="center"
             alignSelf="flex-start"
           >
-            <UserRound size={15} color="#163300" />
-            <Text fontFamily="$heading" fontSize={fs(12)} color="$forest">
+            <UserRound size={15} color={cores.onGreenTint} />
+            <Text fontFamily="$heading" fontSize={fs(12)} color="$onGreenTint">
               CONTA CRIADA
             </Text>
           </HStack>
@@ -117,7 +119,7 @@ export function CompleteProfile() {
             fontSize={fs(34)}
             lineHeight={fs(36)}
             letterSpacing={-1.5}
-            color="$forest"
+            color="$brandTextPrimary"
           >
             QUASE LÁ
           </Text>

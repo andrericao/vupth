@@ -8,11 +8,13 @@ import { ScreenHeader } from "@components/ScreenHeader";
 import { MenuItem, Grupo } from "@components/MenuDoPerfil";
 import { useAuthStore } from "@stores/authStore";
 import { addressService, AddressResponse } from "@services/addressService";
+import { useTema } from "@hooks/useTema";
 
 // dados-cadastrais-no-submenu (Andre, 17/10): no Perfil, a seção Conta tinha
 // os quatro dados todos expandidos. Agora uma linha "Dados cadastrais" abre
 // esta tela, e cada linha daqui abre o que abria antes. Só reorganização.
 export function DadosCadastrais() {
+  const { cores } = useTema();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const user = useAuthStore((s) => s.user);
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -44,25 +46,25 @@ export function DadosCadastrais() {
         <VStack mt="$4">
           <Grupo label="Conta">
             <MenuItem
-              icon={<User size={20} color="#163300" />}
+              icon={<User size={20} color={cores.textPrimary} />}
               label="Dados pessoais"
               value={displayName}
               onPress={() => navigation.navigate("editProfile")}
             />
             <MenuItem
-              icon={<Mail size={20} color="#163300" />}
+              icon={<Mail size={20} color={cores.textPrimary} />}
               label="E-mail"
               value={user?.email ?? "—"}
               onPress={() => navigation.navigate("editEmail")}
             />
             <MenuItem
-              icon={<Lock size={20} color="#163300" />}
+              icon={<Lock size={20} color={cores.textPrimary} />}
               label="Senha"
               value="••••••"
               onPress={() => navigation.navigate("editPassword")}
             />
             <MenuItem
-              icon={<MapPin size={20} color="#163300" />}
+              icon={<MapPin size={20} color={cores.textPrimary} />}
               label="Endereços"
               value={displayAddress}
               onPress={() => navigation.navigate("editAddress")}

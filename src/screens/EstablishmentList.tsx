@@ -18,7 +18,7 @@ import { SkeletonList } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LinhaDaLojaFechada } from "@components/LinhaDaLojaFechada";
 import { formatWaitTime } from "@domain/queue/types";
-import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
+import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 type SortBy = "wait" | "distance";
@@ -45,7 +45,7 @@ function OpenRow({
         <HStack alignItems="center" gap="$3">
           <PlaceAvatar name={establishment.name} photoUrl={establishment.urlImage} />
           <VStack flex={1}>
-            <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+            <Text fontFamily="$heading" fontSize="$sm" color="$brandTextPrimary">
               {establishment.name}
             </Text>
             {/* A ESPERA MORA NA TAG. Ela estava aqui E na pilula ao lado, que
@@ -69,7 +69,7 @@ function OpenRow({
               loja ABERTA (a fechada tem linha propria), entao ela sai "Livre"
               ou com o tempo. */}
           <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
-            <Text size="2xs" fontFamily="$heading" color="$forest">
+            <Text size="2xs" fontFamily="$heading" color="$onGreen">
               {statusTag(establishment).label}
             </Text>
           </Box>
@@ -80,6 +80,7 @@ function OpenRow({
 }
 
 export function EstablishmentList() {
+  const { cores } = useTema();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute<RouteProp<AppRoutes, "establishmentList">>();
   const filter = (route.params?.filter ?? "ALL") as ServiceType | "ALL";
@@ -132,14 +133,14 @@ export function EstablishmentList() {
           py={13}
           alignItems="center"
         >
-          <Search size={18} color="#454745" />
+          <Search size={18} color={cores.textSecondary} />
           <Box flex={1}>
             <TextInput
               value={search}
               onChangeText={setSearch}
               placeholder="Buscar pelo nome"
-              placeholderTextColor={COR_DO_PLACEHOLDER}
-              style={{ fontFamily: "Inter_400Regular", fontSize: fs(15), color: "#163300", padding: 0 }}
+              placeholderTextColor={cores.textPlaceholder}
+              style={{ fontFamily: "Inter_400Regular", fontSize: fs(15), color: cores.textPrimary, padding: 0 }}
               returnKeyType="search"
             />
           </Box>
@@ -150,6 +151,7 @@ export function EstablishmentList() {
         {best && (
           <TouchableOpacity onPress={() => goToDetail(best.id)} testID="shortest-wait-shortcut">
             <HStack
+              // tema-fixo: cartao forest com texto branco e verde; forest e o mesmo hex nos dois temas
               bg="$forest"
               borderRadius={20}
               gap={12}
@@ -157,9 +159,10 @@ export function EstablishmentList() {
               alignItems="center"
             >
               <Center width={38} height={38} borderRadius="$full" bg="$brandGreen">
-                <Zap size={20} color="#163300" />
+                <Zap size={20} color={cores.onGreen} />
               </Center>
               <VStack flex={1} gap={2}>
+                {/* tema-fixo: branco sobre o cartao forest, o mesmo hex nos dois temas */}
                 <Text fontFamily="$heading" fontSize={fs(15)} color="$white">
                   Entrar com menor espera
                 </Text>
@@ -167,7 +170,7 @@ export function EstablishmentList() {
                   {best.name} · {waitLabel(best).replace("~", "")}
                 </Text>
               </VStack>
-              <ChevronRight size={20} color="#9FE870" />
+              <ChevronRight size={20} color={cores.green} />
             </HStack>
           </TouchableOpacity>
         )}
@@ -191,7 +194,7 @@ export function EstablishmentList() {
                 py={7}
                 alignItems="center"
               >
-                <ArrowUpDown size={13} color="#163300" />
+                <ArrowUpDown size={13} color={cores.textPrimary} />
                 <Text fontFamily="$heading" fontSize={fs(12)} color="$brandTextPrimary">
                   {sortBy === "wait" ? "Menor espera" : "Mais perto"}
                 </Text>
@@ -218,8 +221,8 @@ export function EstablishmentList() {
               <RefreshControl
                 refreshing={isRefetching}
                 onRefresh={refetch}
-                colors={["#163300"]}
-                tintColor="#163300"
+                colors={[cores.textPrimary]}
+                tintColor={cores.textPrimary}
               />
             }
             renderItem={({ item }) =>

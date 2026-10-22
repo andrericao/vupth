@@ -8,6 +8,7 @@ import { useFirstRunStore } from "@stores/firstRunStore";
 import { fs } from "@stores/fonteStore";
 import { recusarAvisoDePush } from "@hooks/ofertaDePush";
 import { bordasDaEntrada } from "@utils/bordasDaEntrada";
+import { useTema } from "@hooks/useTema";
 
 const PROMESSAS = [
   "Avisamos faltando 2 pessoas",
@@ -27,6 +28,7 @@ const PROMESSAS = [
  * real de quem ja levou spam de outro app.
  */
 export function PushPermission() {
+  const { cores } = useTema();
   const markPushAsked = useFirstRunStore((s) => s.markPushAsked);
   // Por cima de tudo, fora do navegador (routes/index): nada reserva as bordas.
   // Sem as insets, no Android de ponta a ponta o "Prefiro acompanhar pelo app"
@@ -57,7 +59,7 @@ export function PushPermission() {
       <VStack flex={1} bg="$brandBackground" style={{ paddingTop: top }}>
       <Center flex={1} px={16}>
         <Center width={260} height={260} borderRadius={130} bg="$greenTint">
-          <BellRing size={92} color="#163300" />
+          <BellRing size={92} color={cores.onGreenTint} />
         </Center>
       </Center>
 
@@ -67,7 +69,7 @@ export function PushPermission() {
           fontSize={fs(32)}
           lineHeight={fs(34)}
           letterSpacing={-1.4}
-          color="$forest"
+          color="$brandTextPrimary"
         >
           PODE FECHAR O APP
         </Text>
@@ -77,7 +79,7 @@ export function PushPermission() {
         <VStack gap="$2.5" mt="$1.5">
           {PROMESSAS.map((p) => (
             <HStack key={p} gap="$2.5" alignItems="center">
-              <Check size={16} color="#163300" />
+              <Check size={16} color={cores.textPrimary} />
               <Text size="sm" fontWeight="$medium" color="$brandTextPrimary">
                 {p}
               </Text>

@@ -15,6 +15,7 @@ import { useAuthStore } from "@stores/authStore";
 import { useTabBarInset } from "@hooks/useTabBarInset";
 import { LinksLegais } from "@components/LinksLegais";
 import { fs } from "@stores/fonteStore";
+import { useTema } from "@hooks/useTema";
 
 type RouteParams = {
   email?: string;
@@ -30,6 +31,7 @@ type RouteParams = {
 };
 
 export function SignUp() {
+  const { cores } = useTema();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();
   const tabBarInset = useTabBarInset();
@@ -109,7 +111,7 @@ export function SignUp() {
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
-      style={{ backgroundColor: "#FFFFFF" }}
+      style={{ backgroundColor: cores.background }}
     >
       {/* pb soma a faixa da tab bar: estas telas vivem dentro do
           Tab.Navigator, e sem a reserva o CTA do rodape nasce POR BAIXO
@@ -144,8 +146,8 @@ export function SignUp() {
               alignItems="center"
               alignSelf="flex-start"
             >
-              <TriangleAlert size={15} color="#163300" />
-              <Text fontFamily="$heading" fontSize={fs(12)} color="$forest">
+              <TriangleAlert size={15} color={cores.textPrimary} />
+              <Text fontFamily="$heading" fontSize={fs(12)} color="$brandTextPrimary">
                 {params.professionalName
                   ? `ENTRANDO NA FILA · ${params.professionalName.toUpperCase()}`
                   : "VOCÊ ESTÁ ENTRANDO NA FILA"}
@@ -157,7 +159,7 @@ export function SignUp() {
             fontSize={fromQueue ? 32 : 34}
             lineHeight={fromQueue ? 34 : 36}
             letterSpacing={-1.4}
-            color="$forest"
+            color="$brandTextPrimary"
           >
             {fromQueue ? "NÃO PERCA SUA VEZ" : "CRIAR CONTA"}
           </Text>
@@ -204,13 +206,13 @@ export function SignUp() {
             />
             {passwordsMatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <Check size={14} color="#163300" />
-                <Text size="xs" color="$forest">Senhas conferem</Text>
+                <Check size={14} color={cores.textPrimary} />
+                <Text size="xs" color="$brandTextPrimary">Senhas conferem</Text>
               </HStack>
             )}
             {passwordsMismatch && (
               <HStack alignItems="center" gap="$1" mt="$1">
-                <X size={14} color="#B3261E" />
+                <X size={14} color={cores.danger} />
                 <Text size="xs" color="$brandDanger">Senhas não conferem</Text>
               </HStack>
             )}
@@ -243,7 +245,7 @@ export function SignUp() {
               Já tem conta?
             </Text>
             <TouchableOpacity onPress={handleLogin} testID="go-login">
-              <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+              <Text fontFamily="$heading" fontSize="$sm" color="$brandTextPrimary">
                 Entrar
               </Text>
             </TouchableOpacity>

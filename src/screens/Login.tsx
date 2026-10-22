@@ -15,6 +15,7 @@ import { AVISO_SEM_CONTA, erroDeAcesso } from "@domain/auth/errosDeAcesso";
 import { useAuthStore } from "@stores/authStore";
 import { useTabBarInset } from "@hooks/useTabBarInset";
 import { fs } from "@stores/fonteStore";
+import { useTema } from "@hooks/useTema";
 
 type RouteParams = {
   redirectTo?: string;
@@ -29,6 +30,7 @@ type RouteParams = {
 };
 
 export function Login() {
+  const { cores } = useTema();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -102,7 +104,7 @@ export function Login() {
     <ScrollView
       contentContainerStyle={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
-      style={{ backgroundColor: "#FFFFFF" }}
+      style={{ backgroundColor: cores.background }}
     >
       {/* pb soma a faixa da tab bar: estas telas vivem dentro do
           Tab.Navigator, e sem a reserva o CTA do rodape nasce POR BAIXO
@@ -119,7 +121,7 @@ export function Login() {
             fontSize={fs(34)}
             lineHeight={fs(36)}
             letterSpacing={-1.5}
-            color="$forest"
+            color="$brandTextPrimary"
           >
             OLÁ DE NOVO
           </Text>
@@ -181,7 +183,7 @@ export function Login() {
               Ainda não tem conta?
             </Text>
             <TouchableOpacity onPress={handleSignUp} testID="go-signup">
-              <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+              <Text fontFamily="$heading" fontSize="$sm" color="$brandTextPrimary">
                 Criar conta
               </Text>
             </TouchableOpacity>

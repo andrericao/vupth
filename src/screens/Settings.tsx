@@ -25,9 +25,11 @@ import { fs } from "@stores/fonteStore";
 import { SUPORTE_URL } from "@utils/suporte";
 import { CUPOM_LIGADO } from "@domain/campanhas";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
+import { useTema } from "@hooks/useTema";
 
 export function Settings() {
   const insets = useSafeAreaInsets();
+  const { cores } = useTema();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const user = useAuthStore((s) => s.user);
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -119,13 +121,15 @@ export function Settings() {
           loja. Sem conta, o cabecalho e o mesmo da aba Atendimentos: titulo
           em Archivo sobre o fundo claro. */}
       {isAuthenticated ? (
+        // tema-fixo: bloco forest da identidade; forest e o mesmo hex nos dois temas (e a surface no escuro)
         <VStack bg="$forest" style={{ paddingTop: insets.top + 24 }} pb={32} px={16} gap="$3" alignItems="center">
           <Center width={88} height={88} borderRadius={44} bg="$brandGreen">
-            <Text fontFamily="$display" fontSize={fs(32)} color="$forest">
+            <Text fontFamily="$display" fontSize={fs(32)} color="$onGreen">
               {initials}
             </Text>
           </Center>
           <VStack gap="$1" alignItems="center">
+            {/* tema-fixo: nome em branco sobre o bloco forest, o mesmo hex nos dois temas */}
             <Text fontFamily="$display" fontSize={fs(24)} letterSpacing={-0.8} color="$white">
               {nomeDoTopo}
             </Text>
@@ -152,7 +156,7 @@ export function Settings() {
               {/* dados-cadastrais-no-submenu (17/10): nome e e-mail como resumo; Dados
                   pessoais, E-mail, Senha e Endereços moram na tela que isto abre. */}
               <MenuItem
-                icon={<User size={20} color="#163300" />}
+                icon={<User size={20} color={cores.textPrimary} />}
                 label="Dados cadastrais"
                 value={[nomeDoTopo, user?.email].filter(Boolean).join(" · ")}
                 onPress={() => navigation.navigate("dadosCadastrais")}
@@ -196,7 +200,7 @@ export function Settings() {
         <VStack mt="$6">
           <Grupo label="Aparência">
             <MenuItem
-              icon={<Palette size={20} color="#163300" />}
+              icon={<Palette size={20} color={cores.textPrimary} />}
               label="Tema e tamanho da fonte"
               onPress={() => navigation.navigate("aparencia")}
               last
@@ -210,7 +214,7 @@ export function Settings() {
         <VStack mt="$6">
           <Grupo label="Promoções">
             <MenuItem
-              icon={<Ticket size={20} color="#163300" />}
+              icon={<Ticket size={20} color={cores.textPrimary} />}
               label="Cupom"
               onPress={() => navigation.navigate("promocoes")}
               last
@@ -226,7 +230,7 @@ export function Settings() {
         <VStack mt="$6">
           <Grupo label="Ajuda">
             <MenuItem
-              icon={<LifeBuoy size={20} color="#163300" />}
+              icon={<LifeBuoy size={20} color={cores.textPrimary} />}
               label="Suporte"
               onPress={() => Linking.openURL(SUPORTE_URL)}
               last
@@ -241,7 +245,7 @@ export function Settings() {
         <VStack mt="$6">
           <Grupo label="Sistema">
             <MenuItem
-              icon={<Smartphone size={20} color="#163300" />}
+              icon={<Smartphone size={20} color={cores.textPrimary} />}
               label="Versão do app"
               onPress={() => navigation.navigate("sistema")}
               last
