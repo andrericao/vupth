@@ -25,6 +25,8 @@ import { SkeletonList } from "@components/Skeleton";
 import { LiveDot } from "@components/LiveDot";
 import { RatingModal } from "@components/RatingModal";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
+import { useMultasPendentes } from "@hooks/useMultasPendentes";
+import { origemDaMulta } from "@domain/queue/multasPendentes";
 import { reais, textoDoStatus } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
@@ -113,6 +115,10 @@ export function Attendances() {
   // pendencia-de-pagamento (CLI-30): o que falta pagar, no topo, com o ponto.
   const { data: pendentes = [], refetch: refetchPendentes } = usePagamentosPendentes();
   const pagar = usePendenciaStore((s) => s.pagar);
+  // multas-no-relatorio (André, 22/10): a multa pendente aparece aqui desde o
+  // começo, não só na conta de quem marca o próximo corte (DEC-93).
+  const { data: multasPendentes, refetch: refetchMultas } = useMultasPendentes();
+  const multas = multasPendentes?.penalties ?? [];
 
   // Push de concluido (notificacao-avaliar, CLI-33): chega com o atendimento a
   // avaliar; com o historico na mao, abre a avaliacao dele uma vez.
@@ -136,7 +142,8 @@ export function Attendances() {
       refetch();
       refetchIntentions();
       refetchPendentes();
-    }, [refetch, refetchIntentions, refetchPendentes]),
+      refetchMultas();
+    }, [refetch, refetchIntentions, refetchPendentes, refetchMultas]),
   );
 
   // Cancela uma intenção (meus agendamentos) com confirmação.
@@ -262,6 +269,27 @@ export function Attendances() {
                 </HStack>
               </TouchableOpacity>
             ))}
+          </VStack>
+        )}
+
+        {multas.length > 0 && (
+          <VStack px={16} mt="$5" gap="$2" testID="multas-em-atendimentos">
+            <Text fontFamily="$heading" size="sm">
+              Multas pendentes · {reais(multasPendentes?.total ?? 0)}
+            </Text>
+            {multas.map((m) => (
+              <HStack key={m.penaltyId} bg="$brandSurface" borderRadius="$card" p="$4" gap="$3" alignItems="center">
+                <Text size="xs" color="$brandTextSecondary" flex={1}>
+                  {origemDaMulta(m)}
+                </Text>
+                <Text fontFamily="$heading" size="sm">
+                  {reais(m.amount)}
+                </Text>
+              </HStack>
+            ))}
+            <Text size="xs" color="$brandTextSecondary">
+              Cobradas junto do seu próximo corte.
+            </Text>
           </VStack>
         )}
 

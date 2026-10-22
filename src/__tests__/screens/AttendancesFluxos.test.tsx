@@ -43,6 +43,11 @@ const mockRefetchPendentes = jest.fn();
 jest.mock('@hooks/usePagamentosPendentes', () => ({
   usePagamentosPendentes: () => ({ data: mockPendentes, refetch: mockRefetchPendentes }),
 }));
+let mockMultas: unknown;
+const mockRefetchMultas = jest.fn();
+jest.mock('@hooks/useMultasPendentes', () => ({
+  useMultasPendentes: () => ({ data: mockMultas, refetch: mockRefetchMultas }),
+}));
 jest.mock('@hooks/useIntentions', () => ({
   useClientIntentions: () => ({ data: { intentions: mockIntentions }, refetch: mockRefetchIntentions }),
 }));
@@ -155,11 +160,34 @@ beforeEach(() => {
   mockPending = [];
   mockRouteParams = undefined;
   mockPendentes = undefined;
+  mockMultas = null;
   mockCancelIntention.mockResolvedValue({});
   mockCancelSwap.mockResolvedValue({});
   mockRemovePending.mockResolvedValue(undefined);
   contagem();
   historico();
+});
+
+// multas-no-relatorio (André, 22/10): a multa pendente aparece em Atendimentos
+// desde o começo, com a regra de quando é cobrada (DEC-93).
+describe('Atendimentos — multas pendentes', () => {
+  it('lista cada multa com a origem e diz que vai junto do próximo corte', () => {
+    mockMultas = {
+      total: 3,
+      penalties: [{ penaltyId: 'm1', type: 'LATE_CANCEL', amount: 3, originProfessionalName: 'Carlos', originDate: '2026-10-20T10:00:00Z' }],
+    };
+    const { getByTestId, getByText } = renderWithProviders(<Attendances />);
+    expect(getByTestId('multas-em-atendimentos')).toBeTruthy();
+    expect(getByText(/Multas pendentes · R\$ 3,00/)).toBeTruthy();
+    expect(getByText(/Saiu da fila · Carlos/)).toBeTruthy();
+    expect(getByText('Cobradas junto do seu próximo corte.')).toBeTruthy();
+    expect(mockRefetchMultas).toHaveBeenCalled();
+  });
+
+  it('sem multa, o bloco não aparece', () => {
+    const { queryByTestId } = renderWithProviders(<Attendances />);
+    expect(queryByTestId('multas-em-atendimentos')).toBeNull();
+  });
 });
 
 describe('Atendimentos — a fila viva', () => {

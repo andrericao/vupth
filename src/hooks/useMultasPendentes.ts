@@ -1,28 +1,34 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { penaltyService, PendingPenaltiesResponse } from "@services/penaltyService";
 import { useAuthStore } from "@stores/authStore";
 
 /**
  * As multas que entram no proximo atendimento — so de quem tem conta. Uma
- * leitura ao abrir a escolha de servicos, como a dos proprios servicos; falha
- * de rede nao trava a tela (a conta fica sem multa).
+ * leitura ao abrir a tela (e `refetch` ao voltar para ela); falha de rede nao
+ * trava a tela (fica sem multa).
  */
-export function useMultasPendentes(): { data: PendingPenaltiesResponse | null } {
+export function useMultasPendentes(): { data: PendingPenaltiesResponse | null; refetch: () => void } {
   const accessToken = useAuthStore((s) => s.accessToken);
   const [data, setData] = useState<PendingPenaltiesResponse | null>(null);
-  useEffect(() => {
+  const vivo = useRef(true);
+  const refetch = useCallback(() => {
     if (!accessToken) return;
-    let vivo = true;
     penaltyService
       .listPending(accessToken)
       .then((r) => {
-        if (vivo) setData(r.data);
+        if (vivo.current) setData(r.data);
       })
       .catch(() => {});
-    return () => {
-      vivo = false;
-    };
   }, [accessToken]);
-  return { data };
+  useEffect(() => {
+    vivo.current = true;
+    // A leitura ao montar e o gatilho do estado.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refetch();
+    return () => {
+      vivo.current = false;
+    };
+  }, [refetch]);
+  return { data, refetch };
 }
