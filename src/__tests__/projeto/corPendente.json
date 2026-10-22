@@ -1,8 +1,4 @@
 {
-  "src/screens/Attendances.tsx": {
-    "hex": 22,
-    "forest": 4
-  },
   "src/screens/CompleteProfile.tsx": {
     "hex": 1,
     "forest": 2
@@ -14,24 +10,11 @@
     "hex": 6,
     "forest": 1
   },
-  "src/screens/EstablishmentDetail.tsx": {
-    "hex": 10,
-    "forest": 6
-  },
-  "src/screens/EstablishmentList.tsx": {
-    "hex": 7,
-    "forest": 3,
-    "branco": 1
-  },
   "src/screens/ExcluirConta.tsx": {
     "forest": 1
   },
   "src/screens/ForgotPassword.tsx": {
     "forest": 2
-  },
-  "src/screens/Home.tsx": {
-    "hex": 11,
-    "forest": 11
   },
   "src/screens/Login.tsx": {
     "hex": 1,
@@ -48,15 +31,6 @@
   "src/screens/PushPermission.tsx": {
     "hex": 2,
     "forest": 1
-  },
-  "src/screens/QueueStatus.tsx": {
-    "hex": 18,
-    "forest": 12
-  },
-  "src/screens/ServiceSelection.tsx": {
-    "hex": 8,
-    "forest": 8,
-    "branco": 1
   },
   "src/screens/Settings.tsx": {
     "hex": 5,

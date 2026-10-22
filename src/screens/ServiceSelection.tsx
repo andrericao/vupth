@@ -25,6 +25,7 @@ import { mostraPosicao } from "@domain/queue/posicao";
 import { establishmentService } from "@services/establishmentService";
 import { comTempoAtual, duracaoDoServico } from "@domain/professional/duracaoDoServico";
 import { useSnapshotDaLoja } from "@hooks/useEstablishments";
+import { useTema } from "@hooks/useTema";
 import { cutRequestService } from "@services/cutRequestService";
 import { swapOfferService } from "@services/swapOfferService";
 import { useAuthStore } from "@stores/authStore";
@@ -45,6 +46,7 @@ import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 // dos 13 elementos que a tem. Nao usa a `floatingShadow` compartilhada porque
 // aquela e calibrada p/ superficie clara e some sobre o forest.
 const summaryShadow = {
+  // tema-fixo: a sombra do cartao forest; forest e o mesmo hex nos dois temas e, no escuro, a sombra some contra o fundo
   shadowColor: "#163300",
   shadowOffset: { width: 0, height: 4 },
   shadowOpacity: 0.15,
@@ -72,8 +74,12 @@ type RouteParams = {
 // Fora do corpo do componente: o relogio so e lido no toque, nunca no render.
 const agora = () => Date.now();
 
+// tema-fixo: o texto de apoio do resumo e branco a 70% sobre o cartao forest, que e o mesmo hex nos dois temas
+const SOBRE_O_RESUMO = "#FFFFFFB3";
+
 export function ServiceSelection() {
   const insets = useSafeAreaInsets();
+  const { cores, veu } = useTema();
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const {
@@ -397,12 +403,12 @@ export function ServiceSelection() {
           <HStack alignItems="center" gap="$1.5">
             <Text size="sm" color="$brandTextSecondary" numberOfLines={2} flexShrink={1}>
               Com{" "}
-              <Text size="sm" color="$forest" fontFamily="$heading" textDecorationLine="underline">
+              <Text size="sm" color="$brandTextPrimary" fontFamily="$heading" textDecorationLine="underline">
                 {professionalName}
               </Text>
               {` · ${establishmentName}`}
             </Text>
-            <Info size={14} color="#163300" />
+            <Info size={14} color={cores.textPrimary} />
           </HStack>
         </TouchableOpacity>
       </Box>
@@ -434,7 +440,7 @@ export function ServiceSelection() {
                       p="$4"
                       borderRadius={16}
                       borderWidth={isSelected ? 1.5 : 0}
-                      borderColor="$forest"
+                      borderColor="$selecionado"
                       gap="$3"
                       alignItems="center"
                     >
@@ -444,21 +450,21 @@ export function ServiceSelection() {
                         width={22}
                         height={22}
                         borderRadius={6}
-                        bg={isSelected ? "$forest" : "transparent"}
+                        bg={isSelected ? "$selecionado" : "transparent"}
                         borderWidth={isSelected ? 0 : 1.5}
                         borderColor="$brandBorder"
                       >
-                        {isSelected && <Check size={14} color="#FFFFFF" />}
+                        {isSelected && <Check size={14} color={cores.onSelecionadoBranco} />}
                       </Center>
                       <VStack flex={1} gap="$0.5">
-                        <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                        <Text fontFamily="$heading" fontSize="$sm" color={isSelected ? "$onGreenTint" : "$brandTextPrimary"}>
                           {service.customName}
                         </Text>
                         <Text size="xs" color="$brandTextSecondary">
                           {duracaoDoServico(service)} min
                         </Text>
                       </VStack>
-                      <Text fontFamily="$heading" fontSize="$sm" color="$forest">
+                      <Text fontFamily="$heading" fontSize="$sm" color={isSelected ? "$onGreenTint" : "$brandTextPrimary"}>
                         R$ {service.price.toFixed(2)}
                       </Text>
                     </HStack>
@@ -472,6 +478,7 @@ export function ServiceSelection() {
                 nao ha duracao nem preco a resumir. */}
             {selectedIds.length > 0 && (
               <VStack
+                // tema-fixo: cartao forest com texto claro; forest e o mesmo hex nos dois temas
                 bg="$forest"
                 borderRadius={18}
                 gap="$2.5"
@@ -480,7 +487,7 @@ export function ServiceSelection() {
                 style={summaryShadow}
               >
                 <HStack justifyContent="space-between" alignItems="center">
-                  <Text size="sm" color="#FFFFFFB3">
+                  <Text size="sm" color={SOBRE_O_RESUMO}>
                     Duração estimada
                   </Text>
                   <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
@@ -492,7 +499,7 @@ export function ServiceSelection() {
                     dado — melhor omitir a linha do que chutar um numero. */}
                 {queueCount != null && vaiPraFila && mostraPosicao(snapshot, professionalId) && (
                   <HStack justifyContent="space-between" alignItems="center">
-                    <Text size="sm" color="#FFFFFFB3">
+                    <Text size="sm" color={SOBRE_O_RESUMO}>
                       Sua posição
                     </Text>
                     <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
@@ -502,7 +509,7 @@ export function ServiceSelection() {
                 )}
                 {vaiPraFila && (
                   <HStack justifyContent="space-between" alignItems="center">
-                    <Text size="sm" color="#FFFFFFB3">
+                    <Text size="sm" color={SOBRE_O_RESUMO}>
                       Começa por volta de
                     </Text>
                     <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
@@ -517,7 +524,7 @@ export function ServiceSelection() {
                 {multas.length > 0 && (
                   <HStack justifyContent="space-between" alignItems="center" testID="multas-pendentes">
                     <TouchableOpacity onPress={() => setShowMultas(true)} testID="ver-multas">
-                      <Text size="sm" color="#FFFFFFB3" textDecorationLine="underline">
+                      <Text size="sm" color={SOBRE_O_RESUMO} textDecorationLine="underline">
                         Multa pendente · entenda
                       </Text>
                     </TouchableOpacity>
@@ -528,7 +535,7 @@ export function ServiceSelection() {
                     aparece nos botoes ja inclui a taxa de pagamento, que varia por
                     faixa. O "Saiba mais" abre o artigo do Suporte (DEC-96). */}
                 <HStack justifyContent="space-between" alignItems="center" gap="$3" testID="preco-explicacao">
-                  <Text size="xs" color="#FFFFFFB3" flex={1}>
+                  <Text size="xs" color={SOBRE_O_RESUMO} flex={1}>
                     O preço inclui a taxa de pagamento.
                   </Text>
                   <SaibaMaisDoPreco color="$brandGreen" />
@@ -597,16 +604,16 @@ export function ServiceSelection() {
 
       {/* A explicacao das multas que entram no total (DEC-1). */}
       <Modal visible={showMultas} transparent animationType="fade" onRequestClose={() => setShowMultas(false)}>
-        <Box flex={1} bg="rgba(0,0,0,0.45)" justifyContent="center" px={24}>
-          <VStack bg="$white" borderRadius="$card" p="$6" gap="$3" testID="explicacao-multas">
-            <Text fontFamily="$heading" fontSize="$lg" color="$forest">Multa pendente</Text>
+        <Box flex={1} bg={veu} justifyContent="center" px={24}>
+          <VStack bg="$painel" borderRadius="$card" p="$6" gap="$3" testID="explicacao-multas">
+            <Text fontFamily="$heading" fontSize="$lg" color="$brandTextPrimary">Multa pendente</Text>
             <Text size="sm" color="$brandTextSecondary">
               Entra no valor do seu próximo atendimento, separada do serviço.
             </Text>
             {multas.map((m) => (
               <HStack key={m.penaltyId} justifyContent="space-between" alignItems="flex-start" gap="$2">
                 <Text size="sm" color="$brandTextPrimary" flex={1}>{origemDaMulta(m)}</Text>
-                <Text fontFamily="$heading" fontSize="$sm" color="$forest">{reais(Number(m.amount) || 0)}</Text>
+                <Text fontFamily="$heading" fontSize="$sm" color="$brandTextPrimary">{reais(Number(m.amount) || 0)}</Text>
               </HStack>
             ))}
             <Button title="Entendi" mt="$2" onPress={() => setShowMultas(false)} />
