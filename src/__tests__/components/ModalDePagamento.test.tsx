@@ -123,6 +123,24 @@ describe('ModalDePagamento', () => {
     expect(usePendenciaStore.getState().pagando).toBeNull();
   });
 
+  // pix-do-profissional-ao-concluir (André, 22/10): a chave em texto junto do QR e do Copiar.
+  it('com a chave Pix do profissional: mostra em texto, junto do QR', async () => {
+    get.mockResolvedValue({ data: { ...PIX, pix_key: 'carlos@barbearia.com' } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    expect(await tela.findByText('carlos@barbearia.com')).toBeTruthy();
+    expect(tela.getByTestId('pix-chave')).toBeTruthy();
+    expect(tela.getByTestId('pix-qr')).toBeTruthy();
+    expect(tela.getByTestId('pix-copiar')).toBeTruthy();
+  });
+
+  it('profissional sem Pix cadastrado: o modal não fica (só ele confirma que recebeu)', async () => {
+    get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, pix_copy_paste: null } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    montar();
+    await waitFor(() => expect(usePendenciaStore.getState().pagando).toBeNull());
+  });
+
   it('sem serviço/multa/quem/código; copiar falhando não marca', async () => {
     get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, pix_copy_paste: 'p' } });
     mockCopiar.mockResolvedValue(false);

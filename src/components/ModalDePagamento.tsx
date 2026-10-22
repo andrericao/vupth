@@ -125,6 +125,13 @@ export function ModalDePagamento() {
     };
   }, [pagando, accessToken]);
 
+  // pix-do-profissional-ao-concluir (André, 22/10): profissional sem Pix cadastrado
+  // = sem modal de pagamento; só ele confirma que recebeu. Nunca a chave do dono.
+  const semPix = !!pagamento && !pagamento.pix_copy_paste && podeAvisarQuePagou(pagamento.status);
+  useEffect(() => {
+    if (pagando && semPix) fechar();
+  }, [pagando, semPix, fechar]);
+
   if (!aviso && !pagando) return null;
 
   async function jaPaguei() {
@@ -203,6 +210,14 @@ export function ModalDePagamento() {
                     {/* tema-fixo: QR escuro sobre branco nos dois temas; o leitor do banco nao le o codigo invertido */}
                     <QRCode value={pagamento.pix_copy_paste} size={180} color={cores.forest} backgroundColor="#FFFFFF" />
                   </View>
+                  {pagamento.pix_key ? (
+                    <View testID="pix-chave" style={{ gap: 2 }}>
+                      <Text style={{ color: cores.textSecondary, fontSize: fs(12) }}>Chave Pix</Text>
+                      <Text selectable style={{ color: cores.textPrimary, fontSize: fs(15), fontWeight: "600" }}>
+                        {pagamento.pix_key}
+                      </Text>
+                    </View>
+                  ) : null}
                   <Text selectable numberOfLines={3} testID="pix-codigo" style={{ color: cores.textPrimary, fontSize: fs(12), backgroundColor: cores.sobrePainel, borderRadius: 10, padding: 10 }}>
                     {pagamento.pix_copy_paste}
                   </Text>

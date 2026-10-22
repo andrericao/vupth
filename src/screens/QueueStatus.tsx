@@ -458,7 +458,8 @@ export function QueueStatus() {
     paymentService
       .get(attendanceId, accessToken)
       .then(({ data }) => {
-        if (data.status === "PENDING") usePendenciaStore.getState().pagar(attendanceId);
+        // Sem Pix do profissional não há modal: só ele confirma que recebeu.
+        if (data.status === "PENDING" && data.pix_copy_paste) usePendenciaStore.getState().pagar(attendanceId);
       })
       .catch(() => {});
   }, [isFinished, attendanceId, accessToken]);
