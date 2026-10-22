@@ -13,6 +13,7 @@ const mockNavigate = jest.fn();
 const mockLeave = jest.fn();
 let mockRemaining = 20;
 let mockValor: number | null = null;
+let mockIsento = false;
 
 jest.mock('expo-secure-store', () => ({
   getItemAsync: jest.fn().mockResolvedValue('1'),
@@ -48,6 +49,7 @@ jest.mock('@hooks/useQueueCountdown', () => ({
       estimatedMinutes: mockRemaining,
       status: 'SCHEDULED',
       exitPenaltyValue: mockValor,
+      penaltyExempt: mockIsento,
     },
   }),
 }));
@@ -95,6 +97,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     jest.clearAllMocks();
     mockRemaining = 20;
     mockValor = null;
+    mockIsento = false;
   });
 
   it('um toque só mostra a faixa — não sai, não pergunta nada', () => {
@@ -181,6 +184,27 @@ describe('QueueStatus — sair da fila (D15)', () => {
     });
     expect(alerta).not.toHaveBeenCalled();
     expect(attendanceService.cancel).toHaveBeenCalled();
+    alerta.mockRestore();
+  });
+
+  // saida-sem-multa-no-primeiro (DEC-104): isento, a caixa existe mas sem multa.
+  it('isento da multa: a faixa e a caixa não falam de multa; "Sim, sair" sai sem ciência', async () => {
+    mockIsento = true;
+    mockValor = 0;
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId, getByText, queryByText } = renderWithProviders(<QueueStatus />);
+    tocar(getByTestId);
+    expect(getByText(/Tem certeza\?/)).toBeTruthy();
+    expect(queryByText(/multa/i)).toBeNull();
+    tocar(getByTestId);
+    const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
+    expect(titulo).toBe('Sair da fila?');
+    expect(mensagem).not.toMatch(/multa/i);
+    expect(botoes.map((b) => b.text)).toEqual(['Permanecer na fila', 'Sim, sair']);
+    await act(async () => {
+      await botoes.find((b) => b.text === 'Sim, sair')!.onPress!();
+    });
+    expect(attendanceService.cancel).toHaveBeenCalledWith('a1', 'tk', undefined);
     alerta.mockRestore();
   });
 

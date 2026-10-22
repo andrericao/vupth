@@ -111,6 +111,8 @@ export function useQueueCountdown() {
         if ((ate || null) !== (q.toleranceUntil ?? null)) patch.toleranceUntil = ate || null;
         const valor = typeof data.exitPenaltyValue === 'number' ? data.exitPenaltyValue : null;
         if (valor !== (q.exitPenaltyValue ?? null)) patch.exitPenaltyValue = valor;
+        const isento = data.penaltyExempt === true;
+        if (isento !== (q.penaltyExempt === true)) patch.penaltyExempt = isento;
         // Lido ANTES do status (passo 2): quando o LATE chegar, o aviso ja sabe qual atraso e.
         const atrasos = typeof data.lateCount === 'number' ? data.lateCount : null;
         if (atrasos !== (q.lateCount ?? null)) patch.lateCount = atrasos;

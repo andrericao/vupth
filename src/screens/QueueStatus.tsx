@@ -389,6 +389,10 @@ export function QueueStatus() {
     // Os minutos que faltam: a frase de retencao sem multa (sair-da-fila-texto).
     const minutos = semPrevisao ? null : remaining;
     const doServidor = activeQueue?.exitPenaltyValue;
+    // saida-sem-multa-no-primeiro (DEC-104): isento, a saida nao fala de multa.
+    if (activeQueue?.penaltyExempt) {
+      return { multa: false, isento: true, semPrevisao: false, minutos };
+    }
     if (typeof doServidor === "number") {
       return { multa: doServidor > 0, valor: doServidor, semPrevisao: false, minutos };
     }
@@ -481,7 +485,7 @@ export function QueueStatus() {
     alertaTipado(saida.confirmacao.titulo, saida.confirmacao.mensagem, [
       { text: saida.confirmacao.nao, style: "cancel" },
       { text: saida.confirmacao.sim, style: "destructive", onPress: () => sair(saida.valorConfirmado) },
-    ], { tipo: "dinheiro", selo: "Multa" });
+    ], activeQueue?.penaltyExempt ? { tipo: "atencao" } : { tipo: "dinheiro", selo: "Multa" });
   }
 
   // "Mudar minha vez": busca o ETA do fim da fila (piso de agendamento) e abre o

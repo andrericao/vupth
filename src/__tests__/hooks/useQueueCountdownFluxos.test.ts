@@ -94,13 +94,13 @@ describe('useQueueCountdown — a contagem', () => {
 describe('useQueueCountdown — o que o servidor manda', () => {
   it('a primeira consulta grava posição, âncora, tolerância, multa e atrasos', async () => {
     mockWait.mockResolvedValue({
-      data: { estimatedWaitingTime: 25, position: 3, toleranceUntil: new Date(AGORA + 60_000).toISOString(), exitPenaltyValue: 5, lateCount: 1 },
+      data: { estimatedWaitingTime: 25, position: 3, toleranceUntil: new Date(AGORA + 60_000).toISOString(), exitPenaltyValue: 5, lateCount: 1, penaltyExempt: true },
     });
     useQueueStore.setState({ activeQueue: fila() } as never);
     montar(fila());
     await avancar(1);
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ position: 3, initialPosition: 3, exitPenaltyValue: 5, lateCount: 1, toleranceUntil: AGORA + 60_000 }),
+      expect.objectContaining({ position: 3, initialPosition: 3, exitPenaltyValue: 5, lateCount: 1, penaltyExempt: true, toleranceUntil: AGORA + 60_000 }),
     );
   });
 

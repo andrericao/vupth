@@ -24,6 +24,8 @@ export interface ActiveQueue {
   toleranceUntil?: number | null;
   /** Quanto a saida custaria agora, SEGUNDO O SERVIDOR (D4). Ausente = regra de hoje. */
   exitPenaltyValue?: number | null;
+  /** Isento da multa de sair (DEC-104): o modal de saída não fala de multa. */
+  penaltyExempt?: boolean | null;
   /** Atrasos que contam (wait-time) — o aviso de atraso diz "este é o seu Nº". */
   lateCount?: number | null;
   // Preenchidos quando o atendimento inicia (IN_PROGRESS): início real (ms) e

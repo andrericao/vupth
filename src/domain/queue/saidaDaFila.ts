@@ -57,8 +57,25 @@ export function saidaDaFila(s: {
   valor?: number;
   /** Minutos que faltam para a vez — a frase de retencao sem multa. */
   minutos?: number | null;
+  /** Isento da multa (DEC-104, sem atendimento concluido): nada de multa no texto. */
+  isento?: boolean;
 }): SaidaDaFila {
   const valor = reais(s.valor ?? CANCELLATION_PENALTY_VALUE);
+
+  // saida-sem-multa-no-primeiro (André, 22/10): a caixa existe (dois toques e
+  // "Permanecer na fila" / "Sim, sair"), mas sem falar de multa.
+  if (s.isento) {
+    return {
+      faixa: `Tem certeza? ${INSTRUCAO}`,
+      confirmacao: {
+        titulo: 'Sair da fila?',
+        mensagem: 'Você perde a sua vez.',
+        sim: 'Sim, sair',
+        nao: 'Permanecer na fila',
+      },
+      valorConfirmado: null,
+    };
+  }
 
   if (s.semPrevisao) {
     return {

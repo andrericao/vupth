@@ -22,6 +22,14 @@ describe('o que a saída diz', () => {
     expect(s.confirmacao?.nao).toBe('Permanecer na fila');
   });
 
+  it('isento (DEC-104): há caixa Permanecer / Sim, sair, e nada fala de multa', () => {
+    const s = saidaDaFila({ multa: false, isento: true });
+    expect(s.faixa).toBe('Tem certeza? Toque 2 vezes para sair.');
+    expect(s.confirmacao).toEqual({ titulo: 'Sair da fila?', mensagem: 'Você perde a sua vez.', sim: 'Sim, sair', nao: 'Permanecer na fila' });
+    expect(`${s.faixa} ${s.confirmacao?.mensagem}`).not.toMatch(/multa|R\$/i);
+    expect(s.valorConfirmado).toBeNull();
+  });
+
   it('sem multa: retém, não diz que é de graça, e nada de confirmação', () => {
     const s = saidaDaFila({ multa: false, minutos: 74.2 });
     expect(s.faixa).toBe('Tem certeza? Faltam só 75 min. Toque 2 vezes para sair.');
