@@ -27,6 +27,7 @@ import { RatingModal } from "@components/RatingModal";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
 import { useCardFechado } from "@hooks/useCardFechado";
+import { useTema } from "@hooks/useTema";
 import { origemDaMulta } from "@domain/queue/multasPendentes";
 import { reais, textoDoStatus } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
@@ -113,6 +114,7 @@ export function Attendances() {
   // pode ser jogado nele de novo (Andre, 19/09). Aqui ele fica à mão, e leva ao
   // atendimento que aconteceu — quem não quiser, só ignora.
   const semAvaliar = atendimentoSemAvaliar(history, ratedIds);
+  const { cores } = useTema();
   const conviteFechado = useCardFechado(semAvaliar ? `avaliar_${semAvaliar.id}` : null);
   // pendencia-de-pagamento (CLI-30): o que falta pagar, no topo, com o ponto.
   const { data: pendentes = [], refetch: refetchPendentes } = usePagamentosPendentes();
@@ -326,7 +328,7 @@ export function Attendances() {
                   accessibilityLabel="Fechar"
                   testID="convite-avaliar-fechar"
                 >
-                  <X size={16} color="#163300" />
+                  <X size={16} color={cores.onGreenTint} />
                 </TouchableOpacity>
               </HStack>
             </TouchableOpacity>
