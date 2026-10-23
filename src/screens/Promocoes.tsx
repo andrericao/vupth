@@ -8,10 +8,12 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { SeuLinkDeIndicacao } from "@components/SeuLinkDeIndicacao";
 import { useAuthStore } from "@stores/authStore";
+import { avisoDeFimDaCampanha } from "@utils/avisoDeFimDaCampanha";
 import { campaignService, Campanha } from "@services/campaignService";
 import {
   avisoDeValidade,
   cupomDigitado,
+  fimDoErro,
   mensagemDoCupom,
   nomeDaCampanha,
   regraDoCupom,
@@ -68,7 +70,9 @@ export function Promocoes() {
       );
       carregar();
     } catch (erro) {
-      Alert.alert("Cupom", mensagemDoCupom(erro));
+      const fim = fimDoErro(erro);
+      if (fim) avisoDeFimDaCampanha(fim);
+      else Alert.alert("Cupom", mensagemDoCupom(erro));
     } finally {
       setEnviando(false);
     }

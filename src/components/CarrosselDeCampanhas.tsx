@@ -4,6 +4,8 @@ import { Box, Text, VStack } from "@gluestack-ui/themed";
 import { Campanha, campaignService } from "@services/campaignService";
 import { detalhesDaCampanha } from "@domain/campanha/detalhes";
 import { ehCampanhaDeLink, mensagemDoParticipar } from "@domain/compartilhe";
+import { fimDaCampanha, fimDoErro } from "@domain/campanhas";
+import { avisoDeFimDaCampanha } from "@utils/avisoDeFimDaCampanha";
 import { useAuthStore } from "@stores/authStore";
 import { alertaTipado } from "@utils/alertaTipado";
 import { fs } from "@stores/fonteStore";
@@ -27,6 +29,8 @@ export function CarrosselDeCampanhas({ campanhas }: Props) {
         tipo: "informacao",
       });
     } catch (erro) {
+      const fim = fimDoErro(erro);
+      if (fim) return avisoDeFimDaCampanha(fim);
       alertaTipado("Campanha", mensagemDoParticipar(erro), [{ text: "Ok" }], { tipo: "erro" });
     }
   }
@@ -47,7 +51,9 @@ export function CarrosselDeCampanhas({ campanhas }: Props) {
       {campanhas.map((c) => (
         <TouchableOpacity
           key={c.id}
-          onPress={() =>
+          onPress={() => {
+            const fim = fimDaCampanha(c);
+            if (fim) return avisoDeFimDaCampanha(fim);
             alertaTipado(
               c.name ?? "Campanha",
               detalhesDaCampanha(c) || undefined,
@@ -55,8 +61,8 @@ export function CarrosselDeCampanhas({ campanhas }: Props) {
                 ? [{ text: "Participar", onPress: () => participar(c) }, { text: "Fechar", style: "cancel" }]
                 : [{ text: "Fechar" }],
               { tipo: "informacao" },
-            )
-          }
+            );
+          }}
           style={{ width: largura }}
           accessibilityRole="button"
           testID={`campanha-${c.id}`}

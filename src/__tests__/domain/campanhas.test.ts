@@ -5,6 +5,9 @@ import {
   nomeDaCampanha,
   regraDoCupom,
   avisoDeValidade,
+  fimDaCampanha,
+  fimDoErro,
+  textoDoFim,
   diasDoCupom,
   saibaMaisDoCupom,
   separarCupons,
@@ -85,8 +88,36 @@ describe('validade do cupom', () => {
     expect(diasDoCupom({ id: 'a', weekdays: 'XYZ' })).toBe('todos os dias');
   });
 
-  it('o Saiba mais junta regra, dias e prazo (sem prazo, só os dois primeiros)', () => {
-    expect(saibaMaisDoCupom({ id: 'a', value_amount: 5, ends_at: '2026-11-05T21:30:00' })).toBe('R$ 5,00 de desconto\nVale: todos os dias.\nPrazo: até 05/11 às 21:30.');
-    expect(saibaMaisDoCupom({ id: 'a' })).toBe('Vale: todos os dias.');
+  it('o Saiba mais junta descrição, regra, serviço, dias e prazo (sem prazo, sem a última linha)', () => {
+    expect(saibaMaisDoCupom({ id: 'a', value_amount: 5, ends_at: '2026-11-05T21:30:00' })).toBe('R$ 5,00 de desconto\nVale para qualquer serviço.\nDias: todos os dias.\nPrazo: até 05/11 às 21:30.');
+    expect(saibaMaisDoCupom({ id: 'a' })).toBe('Vale para qualquer serviço.\nDias: todos os dias.');
+  });
+});
+
+describe('promoção encerrada e esgotada (DEC-124)', () => {
+  const agora = new Date('2026-11-05T12:00:00');
+
+  it('passou do prazo = encerrada; no prazo sem vaga = esgotada; senão, nada', () => {
+    expect(fimDaCampanha({ id: 'a', ends_at: '2026-11-05T11:59:00' }, agora)).toBe('ENCERRADA');
+    expect(fimDaCampanha({ id: 'a', ends_at: '2026-11-05T11:59:00', remaining_slots: 0 }, agora)).toBe('ENCERRADA');
+    expect(fimDaCampanha({ id: 'a', ends_at: '2026-11-06T00:00:00', remaining_slots: 0 }, agora)).toBe('ESGOTADA');
+    expect(fimDaCampanha({ id: 'a', ends_at: '2026-11-06T00:00:00', remaining_slots: 3 }, agora)).toBeNull();
+    expect(fimDaCampanha({ id: 'a' }, agora)).toBeNull();
+  });
+
+  it('os códigos do Backend viram o mesmo fim; outro erro, nada', () => {
+    const e = (code: string) => ({ response: { data: { code } } });
+    expect(fimDoErro(e('CAMPAIGN_ENDED'))).toBe('ENCERRADA');
+    expect(fimDoErro(e('CAMPAIGN_SOLD_OUT'))).toBe('ESGOTADA');
+    expect(fimDoErro(e('OUTRO'))).toBeNull();
+    expect(fimDoErro(null)).toBeNull();
+    expect(mensagemDoCupom(e('CAMPAIGN_ENDED'))).toBe('Esta promoção foi encerrada.');
+    expect(mensagemDoCupom(e('CAMPAIGN_SOLD_OUT'))).toBe('Esta promoção esgotou.');
+  });
+
+  it('são duas mensagens distintas', () => {
+    expect(textoDoFim('ENCERRADA').titulo).toBe('Promoção encerrada');
+    expect(textoDoFim('ESGOTADA').titulo).toBe('Promoção esgotada');
+    expect(textoDoFim('ENCERRADA').mensagem).not.toBe(textoDoFim('ESGOTADA').mensagem);
   });
 });

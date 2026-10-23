@@ -26,6 +26,10 @@ export function mensagemDoCupom(erro: unknown): string {
       return 'Você já usou este cupom.';
     case 'COUPON_NOT_ACTIVE':
       return 'Este cupom não está valendo. Escolha outro ou siga sem cupom.';
+    case 'CAMPAIGN_ENDED':
+      return 'Esta promoção foi encerrada.';
+    case 'CAMPAIGN_SOLD_OUT':
+      return 'Esta promoção esgotou.';
     case 'CAMPAIGN_NOT_FOR_YOU':
       return 'Este cupom não vale para a sua conta.';
     default:
@@ -87,9 +91,9 @@ export function diasDoCupom(c: Campanha): string {
   return dias.length > 0 ? dias.join(', ') : 'todos os dias';
 }
 
-/** O "Saiba mais" do cupom: a regra, os dias e o prazo. */
+/** O "Saiba mais" do cupom: descrição, regra, serviços (hoje qualquer um), dias e prazo. */
 export function saibaMaisDoCupom(c: Campanha): string {
-  const linhas = [regraDoCupom(c), `Vale: ${diasDoCupom(c)}.`];
+  const linhas = [c.description ?? '', regraDoCupom(c), 'Vale para qualquer serviço.', `Dias: ${diasDoCupom(c)}.`];
   const fim = horaDoFim(c.ends_at);
   if (fim) linhas.push(`Prazo: até ${fim}.`);
   return linhas.filter(Boolean).join('\n');
@@ -107,4 +111,29 @@ export function situacaoDoCupom(c: Campanha): string {
 export function separarCupons(lista: Campanha[]): { ativos: Campanha[]; encerrados: Campanha[] } {
   const encerrado = (c: Campanha) => c.status === 'USED' || c.status === 'EXPIRED' || c.used === true;
   return { ativos: lista.filter((c) => !encerrado(c)), encerrados: lista.filter(encerrado) };
+}
+
+// campanha-encerrada-esgotada-e-validade (DEC-124): os dois modais, no cupom e no link.
+export type FimDaCampanha = 'ENCERRADA' | 'ESGOTADA';
+
+/** Passou do prazo = encerrada; no prazo e sem vaga = esgotada; senão, null. */
+export function fimDaCampanha(c: Campanha, agora: Date = new Date()): FimDaCampanha | null {
+  if (c.ends_at && new Date(c.ends_at).getTime() <= agora.getTime()) return 'ENCERRADA';
+  if (c.remaining_slots === 0) return 'ESGOTADA';
+  return null;
+}
+
+/** O fim que o Backend recusou (409 CAMPAIGN_ENDED / CAMPAIGN_SOLD_OUT), ou null. */
+export function fimDoErro(erro: unknown): FimDaCampanha | null {
+  const code = (erro as { response?: { data?: { code?: string } } } | null)?.response?.data?.code;
+  if (code === 'CAMPAIGN_ENDED') return 'ENCERRADA';
+  if (code === 'CAMPAIGN_SOLD_OUT') return 'ESGOTADA';
+  return null;
+}
+
+/** O texto do modal: título e uma frase. */
+export function textoDoFim(fim: FimDaCampanha): { titulo: string; mensagem: string } {
+  return fim === 'ENCERRADA'
+    ? { titulo: 'Promoção encerrada', mensagem: 'O prazo desta promoção acabou.' }
+    : { titulo: 'Promoção esgotada', mensagem: 'As vagas desta promoção acabaram.' };
 }

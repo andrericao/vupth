@@ -24,6 +24,18 @@ describe('useCampanhasAtivas', () => {
     expect(lista).toHaveBeenCalledWith('tk');
   });
 
+  it('campanha encerrada ou esgotada some da lista (DEC-124)', async () => {
+    lista.mockResolvedValue({
+      data: [
+        { id: 'a', name: 'Vale', ends_at: '2099-01-01T00:00:00', remaining_slots: 2 },
+        { id: 'b', name: 'Passou', ends_at: '2020-01-01T00:00:00' },
+        { id: 'c', name: 'Esgotou', ends_at: '2099-01-01T00:00:00', remaining_slots: 0 },
+      ],
+    });
+    const { result } = renderHook(() => useCampanhasAtivas());
+    await waitFor(() => expect(result.current.map((c) => c.id)).toEqual(['a']));
+  });
+
   it('sem conta não lê nada', () => {
     mockToken = null;
     const { result } = renderHook(() => useCampanhasAtivas());

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { campaignService, Campanha } from "@services/campaignService";
+import { fimDaCampanha } from "@domain/campanhas";
 import { useAuthStore } from "@stores/authStore";
 
 /**
@@ -16,7 +17,7 @@ export function useCampanhasAtivas(): Campanha[] {
     campaignService
       .listActive(accessToken)
       .then((r) => {
-        if (vivo && Array.isArray(r.data)) setCampanhas(r.data.filter((c) => !!c.name));
+        if (vivo && Array.isArray(r.data)) setCampanhas(r.data.filter((c) => !!c.name && !fimDaCampanha(c)));
       })
       .catch(() => {});
     return () => {

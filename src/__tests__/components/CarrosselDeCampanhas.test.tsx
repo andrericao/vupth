@@ -69,4 +69,29 @@ describe('CarrosselDeCampanhas', () => {
     expect(mockJoin).not.toHaveBeenCalled();
     spy.mockRestore();
   });
+
+  // DEC-124: o toque numa campanha que passou do prazo ou esgotou abre o modal, sem os detalhes.
+  it('campanha encerrada ou esgotada abre o modal certo; Participar recusado também', async () => {
+    useAuthStore.setState({ accessToken: 'tk' } as never);
+    const spy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const t = wrap(
+      <CarrosselDeCampanhas
+        campanhas={[
+          { id: 'e', name: 'Velha', ends_at: '2020-01-01T00:00:00' },
+          { id: 's', name: 'Sem vaga', ends_at: '2099-01-01T00:00:00', remaining_slots: 0 },
+          { id: 'l', name: 'Link', type: 'REFERRAL_BONUS' },
+        ]}
+      />
+    );
+    fireEvent.press(t.getByTestId('campanha-e'));
+    expect(spy).toHaveBeenLastCalledWith('Promoção encerrada', expect.any(String), expect.any(Array), expect.anything());
+    fireEvent.press(t.getByTestId('campanha-s'));
+    expect(spy).toHaveBeenLastCalledWith('Promoção esgotada', expect.any(String), expect.any(Array), expect.anything());
+    mockJoin.mockRejectedValue({ response: { status: 409, data: { code: 'CAMPAIGN_SOLD_OUT' } } });
+    fireEvent.press(t.getByTestId('campanha-l'));
+    const botoes = spy.mock.calls[spy.mock.calls.length - 1][2] as { onPress?: () => void }[];
+    await act(async () => { botoes[0].onPress?.(); });
+    expect(spy).toHaveBeenLastCalledWith('Promoção esgotada', expect.any(String), expect.any(Array), expect.anything());
+    spy.mockRestore();
+  });
 });

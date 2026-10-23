@@ -71,7 +71,7 @@ describe('Promoções', () => {
     expect(msg).toBe('Terça\nCupom válido até 05/11 às 21:30. Se não usar até lá, perde.');
     expect(botoes.map((b: { text: string }) => b.text)).toEqual(['Saiba mais', 'Ok']);
     botoes[0].onPress();
-    expect(alerta).toHaveBeenLastCalledWith('Terça', '10% de desconto\nVale: terça, quarta.\nPrazo: até 05/11 às 21:30.');
+    expect(alerta).toHaveBeenLastCalledWith('Terça', '10% de desconto\nVale para qualquer serviço.\nDias: terça, quarta.\nPrazo: até 05/11 às 21:30.');
   });
 
   it('lista os ativos com regra e validade, e os usados e vencidos à parte', async () => {
@@ -124,5 +124,19 @@ describe('Promoções', () => {
     const outra = renderWithProviders(<Promocoes />);
     await waitFor(() => expect(mockListMine).toHaveBeenCalledTimes(2));
     expect(outra.queryByTestId('cupons-meus')).toBeNull();
+  });
+
+  // DEC-124: cupom encerrado ou esgotado abre o modal certo (formato dos alertas do app).
+  it.each([
+    ['CAMPAIGN_ENDED', 'Promoção encerrada'],
+    ['CAMPAIGN_SOLD_OUT', 'Promoção esgotada'],
+  ])('recusa %s mostra o modal %s', async (code, titulo) => {
+    mockRedeem.mockRejectedValue({ response: { status: 409, data: { code } } });
+    const { getByTestId } = renderWithProviders(<Promocoes />);
+    fireEvent.changeText(getByTestId('cupom-campo'), 'x');
+    await act(async () => {
+      fireEvent.press(getByTestId('cupom-usar'));
+    });
+    expect(alerta).toHaveBeenLastCalledWith(titulo, expect.any(String), expect.any(Array), expect.anything());
   });
 });

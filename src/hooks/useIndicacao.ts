@@ -3,6 +3,8 @@ import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 import { INDICACAO_CAMPANHA_KEY, INDICACAO_KEY, campanhaDoCaminho, codigoDoCaminho, descartarDepoisDaRecusa } from '@domain/indicacao';
+import { fimDoErro } from '@domain/campanhas';
+import { avisoDeFimDaCampanha } from '@utils/avisoDeFimDaCampanha';
 import { referralService } from '@services/referralService';
 import { useAuthStore } from '@stores/authStore';
 
@@ -48,6 +50,9 @@ export function useIndicacao(lerCaminho: () => string = caminhoDaWeb) {
         await referralService.claim(codigo, accessToken, campanha);
       } catch (erro) {
         if (!descartarDepoisDaRecusa(erro)) return; // sem rede: tenta no proximo login
+        // DEC-124: o link de campanha encerrada ou esgotada abre o app e avisa.
+        const fim = fimDoErro(erro);
+        if (fim) avisoDeFimDaCampanha(fim);
       }
       await SecureStore.deleteItemAsync(INDICACAO_KEY).catch(() => {});
       await SecureStore.deleteItemAsync(INDICACAO_CAMPANHA_KEY).catch(() => {});
