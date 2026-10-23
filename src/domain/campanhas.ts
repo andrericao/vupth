@@ -56,6 +56,45 @@ export function validadeDoCupom(c: Campanha): string {
   return `Vale até ${dia(c.ends_at)}`;
 }
 
+function horaDoFim(iso?: string | null): string {
+  if (!iso || Number.isNaN(new Date(iso).getTime())) return '';
+  const d = new Date(iso);
+  return `${dia(iso)} às ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+/** campanha-encerrada-esgotada-e-validade (DEC-124): o aviso ao ativar; vazio sem data. */
+export function avisoDeValidade(c: Campanha): string {
+  const fim = horaDoFim(c.ends_at);
+  return fim ? `Cupom válido até ${fim}. Se não usar até lá, perde.` : '';
+}
+
+const DIAS: Record<string, string> = {
+  MONDAY: 'segunda',
+  TUESDAY: 'terça',
+  WEDNESDAY: 'quarta',
+  THURSDAY: 'quinta',
+  FRIDAY: 'sexta',
+  SATURDAY: 'sábado',
+  SUNDAY: 'domingo',
+};
+
+/** Os dias da semana em que vale, ou "todos os dias" (campo vazio). */
+export function diasDoCupom(c: Campanha): string {
+  const dias = (c.weekdays ?? '')
+    .split(',')
+    .map((d) => DIAS[d.trim().toUpperCase()])
+    .filter(Boolean);
+  return dias.length > 0 ? dias.join(', ') : 'todos os dias';
+}
+
+/** O "Saiba mais" do cupom: a regra, os dias e o prazo. */
+export function saibaMaisDoCupom(c: Campanha): string {
+  const linhas = [regraDoCupom(c), `Vale: ${diasDoCupom(c)}.`];
+  const fim = horaDoFim(c.ends_at);
+  if (fim) linhas.push(`Prazo: até ${fim}.`);
+  return linhas.filter(Boolean).join('\n');
+}
+
 /** O rotulo de quem ja nao vale: usado ou vencido. */
 export function situacaoDoCupom(c: Campanha): string {
   return c.status === 'USED' || c.used ? 'Usado' : 'Vencido';

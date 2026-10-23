@@ -10,6 +10,8 @@ export interface Campanha {
   /** REFERRAL_BONUS = campanha de link; as outras sao cupom, desconto ou isencao. */
   type?: string | null;
   benefit?: string | null;
+  /** Dias em que vale, ex.: "TUESDAY,WEDNESDAY"; vazio = todos. */
+  weekdays?: string | null;
   starts_at?: string | null;
   ends_at?: string | null;
   remaining_slots?: number | null;

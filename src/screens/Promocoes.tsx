@@ -10,10 +10,12 @@ import { SeuLinkDeIndicacao } from "@components/SeuLinkDeIndicacao";
 import { useAuthStore } from "@stores/authStore";
 import { campaignService, Campanha } from "@services/campaignService";
 import {
+  avisoDeValidade,
   cupomDigitado,
   mensagemDoCupom,
   nomeDaCampanha,
   regraDoCupom,
+  saibaMaisDoCupom,
   separarCupons,
   situacaoDoCupom,
   validadeDoCupom,
@@ -52,7 +54,18 @@ export function Promocoes() {
     try {
       const { data } = await campaignService.redeem(code, accessToken);
       setCupom("");
-      Alert.alert("Cupom ativado", nomeDaCampanha(data));
+      // campanha-encerrada-esgotada-e-validade (DEC-124): o prazo logo na ativacao, com o Saiba mais.
+      const validade = avisoDeValidade(data);
+      Alert.alert(
+        "Cupom ativado",
+        [nomeDaCampanha(data), validade].filter(Boolean).join("\n"),
+        validade
+          ? [
+              { text: "Saiba mais", onPress: () => Alert.alert(nomeDaCampanha(data), saibaMaisDoCupom(data)) },
+              { text: "Ok" },
+            ]
+          : undefined,
+      );
       carregar();
     } catch (erro) {
       Alert.alert("Cupom", mensagemDoCupom(erro));

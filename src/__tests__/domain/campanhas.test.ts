@@ -4,6 +4,9 @@ import {
   mensagemDoCupom,
   nomeDaCampanha,
   regraDoCupom,
+  avisoDeValidade,
+  diasDoCupom,
+  saibaMaisDoCupom,
   separarCupons,
   situacaoDoCupom,
   validadeDoCupom,
@@ -65,5 +68,25 @@ describe('cupom', () => {
     expect(nomeDaCampanha({ id: '1', name: 'Lançamento', code: 'X' })).toBe('Lançamento');
     expect(nomeDaCampanha({ id: '1', code: 'X' })).toBe('X');
     expect(nomeDaCampanha({ id: '1' })).toBe('Cupom');
+  });
+});
+
+// campanha-encerrada-esgotada-e-validade (DEC-124): o aviso de validade e o Saiba mais.
+describe('validade do cupom', () => {
+  it('avisa o prazo com hora; sem data, nada', () => {
+    expect(avisoDeValidade({ id: 'a', ends_at: '2026-11-05T09:05:00' })).toBe('Cupom válido até 05/11 às 09:05. Se não usar até lá, perde.');
+    expect(avisoDeValidade({ id: 'a' })).toBe('');
+    expect(avisoDeValidade({ id: 'a', ends_at: 'x' })).toBe('');
+  });
+
+  it('os dias saem em português; vazio ou estranho = todos os dias', () => {
+    expect(diasDoCupom({ id: 'a', weekdays: 'SATURDAY, SUNDAY' })).toBe('sábado, domingo');
+    expect(diasDoCupom({ id: 'a', weekdays: null })).toBe('todos os dias');
+    expect(diasDoCupom({ id: 'a', weekdays: 'XYZ' })).toBe('todos os dias');
+  });
+
+  it('o Saiba mais junta regra, dias e prazo (sem prazo, só os dois primeiros)', () => {
+    expect(saibaMaisDoCupom({ id: 'a', value_amount: 5, ends_at: '2026-11-05T21:30:00' })).toBe('R$ 5,00 de desconto\nVale: todos os dias.\nPrazo: até 05/11 às 21:30.');
+    expect(saibaMaisDoCupom({ id: 'a' })).toBe('Vale: todos os dias.');
   });
 });

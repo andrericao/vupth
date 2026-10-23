@@ -52,8 +52,26 @@ describe('Promoções', () => {
       fireEvent.press(getByTestId('cupom-usar'));
     });
     expect(mockRedeem).toHaveBeenCalledWith('vupth10', 'tk');
-    expect(alerta).toHaveBeenCalledWith('Cupom ativado', 'Lançamento');
+    expect(alerta).toHaveBeenCalledWith('Cupom ativado', 'Lançamento', undefined);
     expect(await findByText('Lançamento')).toBeTruthy();
+  });
+
+  // campanha-encerrada-esgotada-e-validade (DEC-124): o prazo na ativacao e o Saiba mais.
+  it('ao ativar, mostra "válido até" e o Saiba mais traz dias e prazo', async () => {
+    mockRedeem.mockResolvedValue({
+      data: { id: 'c1', name: 'Terça', value_percent: 10, weekdays: 'TUESDAY,WEDNESDAY', ends_at: '2026-11-05T21:30:00' },
+    });
+    const { getByTestId } = renderWithProviders(<Promocoes />);
+    fireEvent.changeText(getByTestId('cupom-campo'), 'terca');
+    await act(async () => {
+      fireEvent.press(getByTestId('cupom-usar'));
+    });
+    const [titulo, msg, botoes] = alerta.mock.calls[0];
+    expect(titulo).toBe('Cupom ativado');
+    expect(msg).toBe('Terça\nCupom válido até 05/11 às 21:30. Se não usar até lá, perde.');
+    expect(botoes.map((b: { text: string }) => b.text)).toEqual(['Saiba mais', 'Ok']);
+    botoes[0].onPress();
+    expect(alerta).toHaveBeenLastCalledWith('Terça', '10% de desconto\nVale: terça, quarta.\nPrazo: até 05/11 às 21:30.');
   });
 
   it('lista os ativos com regra e validade, e os usados e vencidos à parte', async () => {
