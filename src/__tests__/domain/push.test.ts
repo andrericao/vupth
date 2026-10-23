@@ -40,10 +40,14 @@ describe('notificationRoute', () => {
       'CUT_ACCEPTED',
       'CUT_REFUSED',
       'CUT_EXPIRED',
-      'NO_SHOW_REMOVED',
     ]) {
       expect(notificationRoute({ type })).toBe('attendances');
     }
+  });
+
+  it('a falta vale como atraso (DEC-86): LATE_MARKED leva à fila; NO_SHOW_REMOVED saiu', () => {
+    expect(notificationRoute({ type: 'LATE_MARKED' })).toBe('fila');
+    expect(notificationRoute({ type: 'NO_SHOW_REMOVED' })).toBeNull();
   });
 
   it('"É quase a sua vez!" (QUEUE_NEXT_IN_LINE) → a própria fila (Andre, 05/10)', () => {
@@ -228,7 +232,7 @@ describe('notificação de ciência (app fechado)', () => {
 
   it('o botão que abre a tela não é o OK: segue navegando', () => {
     expect(tocouNoOk({ actionIdentifier: 'VER_FILA' })).toBe(false);
-    expect(CATEGORIAS_COM_BOTAO.map((c) => c.categoria)).toEqual(['VER_FILA', 'VER_ATENDIMENTO', 'AVALIAR', 'PAGAR_MULTA']);
+    expect(CATEGORIAS_COM_BOTAO.map((c) => c.categoria)).toEqual(['VER_FILA', 'VER_ATENDIMENTO', 'AVALIAR']);
   });
 
   it('ids combinados com o Backend e o Partner', () => {
