@@ -287,7 +287,11 @@ else
     fi
     juntar_para_o_andre "$RODADA/$arquivo"
     DURA=$(( $(date +%s) - INICIO )); DURA="$((DURA / 60))min$(printf '%02d' $((DURA % 60)))s"
-    if [ "$VOLTA" -eq 0 ]; then
+    if [ "$VOLTA" -eq 0 ] && grep -q 'PULADO-CAMPANHA:' "$RODADA/$arquivo/console.txt" 2>/dev/null; then
+      # maestro-campanha-cupom-e-link: sem a campanha no ar a etapa pula (nao e falha nem aprovacao).
+      echo "⏭  $arquivo ($(grep -oP 'PULADO-CAMPANHA: \K.*' "$RODADA/$arquivo/console.txt" | head -1))" >> "$RODADA/relatorio.txt"
+      rm -rf "${RODADA:?}/$arquivo"
+    elif [ "$VOLTA" -eq 0 ]; then
       echo "✅ $arquivo ($DURA)" >> "$RODADA/relatorio.txt"
       aprovar "$n"
       rm -rf "${RODADA:?}/$arquivo"   # verde: a pasta da etapa nao guarda nada
