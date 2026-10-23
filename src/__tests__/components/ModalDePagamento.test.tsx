@@ -200,3 +200,83 @@ describe('ModalDePagamento', () => {
     expect(get).not.toHaveBeenCalled();
   });
 });
+
+// pagamento-pelo-asaas (DEC-119, Backend dea2d00): com `gateway` o Pix e o do Asaas; sem ele, o de hoje.
+describe('ModalDePagamento — pelo Asaas', () => {
+  const ASAAS = {
+    ...PIX,
+    pix_key: 'chave@prof.com',
+    gateway: { provider: 'ASAAS', mode: 'SANDBOX', status: 'PENDING', pix_copy_paste: '000201asaas' },
+  };
+
+  it('com gateway: mostra o Pix do Asaas, sem a chave do profissional nem o "Já paguei", e a confirmação automática', async () => {
+    get.mockResolvedValue({ data: ASAAS });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    expect(await tela.findByTestId('pix-codigo')).toBeTruthy();
+    expect(tela.getByTestId('pix-codigo').props.children).toBe('000201asaas');
+    expect(tela.queryByTestId('pix-chave')).toBeNull();
+    expect(tela.queryByTestId('pix-ja-paguei')).toBeNull();
+    expect(tela.getByText('A confirmação é automática.')).toBeTruthy();
+    expect(tela.getByTestId('pix-ok')).toBeTruthy();
+  });
+
+  it('sandbox: a faixa "Pagamento de teste" e "Sem dinheiro real."; no modo real, nada disso', async () => {
+    get.mockResolvedValue({ data: ASAAS });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const teste = montar();
+    expect(await teste.findByTestId('pagamento-de-teste')).toBeTruthy();
+    expect(teste.getByText('Pagamento de teste')).toBeTruthy();
+    expect(teste.getByText('Sem dinheiro real.')).toBeTruthy();
+    teste.unmount();
+
+    get.mockResolvedValue({ data: { ...ASAAS, gateway: { ...ASAAS.gateway, mode: 'REAL' } } });
+    const real = montar();
+    expect(await real.findByTestId('pix-codigo')).toBeTruthy();
+    expect(real.queryByTestId('pagamento-de-teste')).toBeNull();
+  });
+
+  it('gateway sem o copia-e-cola, só com a imagem do QR: mostra a imagem e o modal não fecha', async () => {
+    get.mockResolvedValue({
+      data: { status: 'PENDING', amount: 45, gateway: { provider: 'ASAAS', mode: 'REAL', pix_qr_image: 'iVBORw0KGgo=' } },
+    });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    const img = await tela.findByTestId('pix-qr-imagem');
+    expect(img.props.source.uri).toBe('data:image/png;base64,iVBORw0KGgo=');
+    expect(tela.queryByTestId('pix-codigo')).toBeNull();
+    expect(usePendenciaStore.getState().pagando).toBe('a1');
+  });
+
+  it('o webhook quita sozinho: o modal confere de 5 em 5 s e mostra "Pago"', async () => {
+    jest.useFakeTimers();
+    try {
+      get.mockResolvedValueOnce({ data: ASAAS }).mockResolvedValue({ data: { ...ASAAS, status: 'PAID' } });
+      act(() => usePendenciaStore.getState().pagar('a1'));
+      const tela = montar();
+      await act(async () => {});
+      expect(tela.getByTestId('pix-status').props.children).toBe('Pagamento pendente');
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+      expect(tela.getByTestId('pix-status').props.children).toBe('Pago');
+      expect(tela.queryByText('A confirmação é automática.')).toBeNull();
+      get.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(15000);
+      });
+      expect(get).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('sem gateway: o fluxo de hoje (chave, "Já paguei"), e profissional sem Pix continua fechando o modal', async () => {
+    get.mockResolvedValue({ data: { ...PIX, pix_key: 'chave@prof.com' } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    expect(await tela.findByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(tela.getByTestId('pix-chave')).toBeTruthy();
+    expect(tela.queryByTestId('pagamento-de-teste')).toBeNull();
+  });
+});

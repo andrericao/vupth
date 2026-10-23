@@ -17,6 +17,20 @@ export type PagamentoPendente = {
   finished_at?: string | null;
 };
 
+/**
+ * pagamento-pelo-asaas (DEC-119, Backend dea2d00): com a conexao ligada, o
+ * pagamento traz `gateway`; sem ele, vale o Pix do profissional e o "Já paguei".
+ */
+export type GatewayDoPagamento = {
+  provider: string;
+  /** SANDBOX = pagamento de teste, sem dinheiro real. */
+  mode?: 'SANDBOX' | 'REAL' | string | null;
+  status?: string | null;
+  pix_copy_paste?: string | null;
+  pix_qr_image?: string | null;
+  invoice_url?: string | null;
+};
+
 /** GET /attendances/{id}/payment. */
 export type Pagamento = {
   status: StatusDoPagamento | null;
@@ -28,6 +42,8 @@ export type Pagamento = {
   key_type?: string | null;
   /** A chave Pix do profissional, em texto (pix-do-profissional-ao-concluir). */
   pix_key?: string | null;
+  /** Presente quando o pagamento sai pelo Asaas (o webhook confirma sozinho). */
+  gateway?: GatewayDoPagamento | null;
   claimed_at?: string | null;
   confirmed_at?: string | null;
 };
@@ -36,6 +52,25 @@ export type Pagamento = {
 export function reais(valor: number | string | null | undefined): string {
   const n = Number(valor);
   return reaisDe(Number.isFinite(n) ? n : 0);
+}
+
+/**
+ * O Pix a mostrar: o do Asaas quando o pagamento vem com `gateway`, senao o do
+ * profissional. `teste` = sandbox (faixa "Pagamento de teste", sem dinheiro real).
+ */
+export function pixDoPagamento(p: Pagamento | null | undefined): {
+  codigo: string | null;
+  qrImagem: string | null;
+  viaAsaas: boolean;
+  teste: boolean;
+} {
+  const g = p?.gateway ?? null;
+  return {
+    codigo: g?.pix_copy_paste || p?.pix_copy_paste || null,
+    qrImagem: g?.pix_qr_image || null,
+    viaAsaas: !!g,
+    teste: g?.mode === 'SANDBOX',
+  };
 }
 
 /** A linha do status, curta. */
