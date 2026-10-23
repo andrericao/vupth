@@ -14,6 +14,11 @@ jest.mock('expo-secure-store');
 jest.mock('@services/intentionsService', () => ({
   intentionsService: { getPublicAgenda: jest.fn(), create: jest.fn() },
 }));
+const mockAdiantado = jest.fn();
+jest.mock('@hooks/usePagamentoAdiantado', () => ({
+  ...jest.requireActual('@hooks/usePagamentoAdiantado'),
+  usePagamentoAdiantado: (...a: unknown[]) => mockAdiantado(...a),
+}));
 jest.mock('@services/establishmentService', () => ({ establishmentService: { getHours: jest.fn() } }));
 jest.setTimeout(90000);
 
@@ -41,6 +46,7 @@ function abrir(over: Partial<React.ComponentProps<typeof ScheduleModal>> = {}) {
 describe('ScheduleModal — barra de encaixe', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAdiantado.mockReturnValue(false);
     useAuthStore.setState({ accessToken: 'tk' });
     (intentionsService.getPublicAgenda as jest.Mock).mockResolvedValue({ data: { frame: null, blocks: [] } });
     // Amanhã aberto das 09:00 às 11:00.
@@ -55,6 +61,27 @@ describe('ScheduleModal — barra de encaixe', () => {
     expect(getAllByText('Agendar')).toHaveLength(2); // o título e o botão
     expect(queryByText('Confirmar')).toBeNull();
     expect(queryByText('Pedir')).toBeNull();
+  });
+
+  // agendar-com-pagamento-adiantado (DEC-105/115): 3 faltas avisam em uma linha; agendar nao e barrado.
+  it('com 3 faltas, mostra o aviso do pagamento adiantado e o Agendar segue livre; sem faltas, nada', async () => {
+    mockAdiantado.mockReturnValue(true);
+    const com = abrir();
+    await act(async () => {});
+    expect(com.getByTestId('pagamento-adiantado')).toBeTruthy();
+    expect(com.getByTestId('confirmar-agendamento')).toBeTruthy();
+    com.unmount();
+    mockAdiantado.mockReturnValue(false);
+    const sem = abrir();
+    await act(async () => {});
+    expect(sem.queryByTestId('pagamento-adiantado')).toBeNull();
+  });
+
+  it('pedir corte não mostra o aviso (o pagamento adiantado é do agendar)', async () => {
+    mockAdiantado.mockReturnValue(true);
+    const { queryByTestId } = abrir({ corte: { onEscolher: jest.fn() } });
+    await act(async () => {});
+    expect(queryByTestId('pagamento-adiantado')).toBeNull();
   });
 
   it('sem horário escolhido, "Agendar" não agenda', async () => {

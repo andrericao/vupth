@@ -17,6 +17,7 @@ import { useTema } from "@hooks/useTema";
 import { avisoDeChegada } from "@domain/queue/avisoDeChegada";
 import { alertaTipado } from "@utils/alertaTipado";
 import { mensagemDoCupom } from "@domain/campanhas";
+import { usePagamentoAdiantado, AVISO_DE_PAGAMENTO_ADIANTADO } from "@hooks/usePagamentoAdiantado";
 
 type Props = {
   visible: boolean;
@@ -51,6 +52,7 @@ export function ScheduleModal({
   visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado, corte, couponCampaignId, onCupomInvalido,
 }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
+  const adiantado = usePagamentoAdiantado(visible && !corte);
   const { cores, veu } = useTema();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [horario, setHorario] = useState<Date | null>(null);
@@ -179,6 +181,12 @@ export function ScheduleModal({
               ? "O profissional responde em 5 min."
               : "Escolha o dia e o horário."}
           </Text>
+          {/* agendar-com-pagamento-adiantado (DEC-105/115): 3 faltas — o motivo em uma linha; agendar segue livre. */}
+          {!corte && adiantado && (
+            <Text size="sm" color="$brandDanger" mt="$2" testID="pagamento-adiantado">
+              {AVISO_DE_PAGAMENTO_ADIANTADO}
+            </Text>
+          )}
 
           {corte && (
             <Button
