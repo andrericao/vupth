@@ -1,0 +1,19 @@
+# Etapa avulsa 25 (maestro-campanha-cupom-e-link): roda num maestro test proprio.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "25"
+      LOJA: "0"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "25.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/25_campanha_cupom.yaml
+    label: "25.E1 · roda 25_campanha_cupom"

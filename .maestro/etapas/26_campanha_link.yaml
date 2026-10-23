@@ -1,0 +1,86 @@
+# Campanha de link (maestro-campanha-cupom-e-link, DEC-124): o André cria no
+# Painel a campanha MAESTRO CLIENT LINK (bônus de indicação, público cliente).
+# O fluxo acha a campanha pelo NOME, participa e confere o link com Copiar e
+# Compartilhar; se ela já tiver acabado ou esgotado, o modal certo.
+# Sem a campanha criada, falha no passo 26.01 (a Home não mostra o nome).
+appId: ${APP_ID}
+---
+- scrollUntilVisible:
+    element:
+      text: "MAESTRO CLIENT LINK"
+    direction: RIGHT
+    timeout: ${20000 * LENTO}
+    label: "26.01 · acha a campanha MAESTRO CLIENT LINK na Home"
+- tapOn:
+    text: "MAESTRO CLIENT LINK"
+    label: "26.02 · toca na campanha"
+- extendedWaitUntil:
+    visible: "(Participar|Promoção encerrada|Promoção esgotada)"
+    timeout: ${10000 * LENTO}
+    label: "26.03 · vê Participar (ou o modal de fim)"
+# Campanha acabada ou esgotada: o modal certo e fim do fluxo.
+- runFlow:
+    when:
+      visible: "Promoção encerrada"
+    commands:
+      - assertVisible: "O prazo desta promoção acabou."
+- runFlow:
+    when:
+      visible: "Promoção esgotada"
+    commands:
+      - assertVisible: "As vagas desta promoção acabaram."
+# Campanha viva: participa e confere o link.
+- runFlow:
+    when:
+      visible: "Participar"
+    commands:
+      - tapOn:
+          text: "Participar"
+          label: "26.04 · toca em Participar"
+      - extendedWaitUntil:
+          visible: "(Você está dentro|Você já participa desta campanha.|Promoção encerrada|Promoção esgotada)"
+          timeout: ${15000 * LENTO}
+          label: "26.05 · vê a resposta ao participar"
+      - tapOn:
+          id: "dialogo-botao-0"
+          label: "26.06 · fecha o aviso"
+      - tapOn:
+          text: "Perfil"
+          label: "26.07 · toca em Perfil"
+      - scrollUntilVisible:
+          element:
+            text: "Cupom"
+          label: "26.08 · rola até Cupom"
+      - tapOn:
+          text: "Cupom"
+          label: "26.09 · toca em Cupom"
+      - scrollUntilVisible:
+          element:
+            text: "Indique e ganhe"
+          label: "26.10 · vê Indique e ganhe"
+      - scrollUntilVisible:
+          element:
+            text: ".* indicados? · \\d+ com ganho"
+          label: "26.11 · vê os contadores"
+      - tapOn:
+          text: "Copiar link"
+          label: "26.12 · toca em Copiar link"
+      - extendedWaitUntil:
+          visible: "(Link copiado|Link)"
+          timeout: ${10000 * LENTO}
+          label: "26.13 · vê o aviso do link"
+      - tapOn:
+          id: "dialogo-botao-0"
+          label: "26.14 · fecha o aviso"
+      - tapOn:
+          text: "Compartilhar"
+          label: "26.15 · toca em Compartilhar"
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - back:
+          label: "26.16 · fecha o compartilhar do sistema"
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: campanha-link
+            O_QUE: "Promoções > Indique e ganhe: o link da MAESTRO CLIENT LINK, o QR e os contadores."

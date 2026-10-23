@@ -27,6 +27,14 @@ só agenda (19), o atraso marcado (21b; a 21a só abre a fila pelo card) e o ate
 (`../vupth-partner/.maestro/conjunta`). Sem esse clone ou sem o APK do Partner,
 elas aparecem como ⏭.
 
+**Campanha de cupom e de link (maestro-campanha-cupom-e-link, 23/10).** As etapas 25 e 26
+usam campanhas que o André cria no Painel, **com o nome exato** e os valores que quiser (público cliente):
+`MAESTRO CLIENT CUPOM` (desconto com cupom) e `MAESTRO CLIENT LINK` (bônus de indicação). O fluxo acha a
+campanha pelo nome na Home e confere o que ela mostra, sem fixar valor. Cupom (25): código no detalhe, ativar
+em Perfil → Cupom, "Cupom válido até dd/MM às HH:mm", Saiba mais; se a campanha já acabou ou esgotou, o
+modal Promoção encerrada ou Promoção esgotada. Link (26): Participar, Perfil → Cupom → Indique e ganhe, contadores,
+Copiar link e Compartilhar. Rodar: `ETAPAS="25 26" bash .maestro/bateria.sh`.
+
 **Pula as aprovadas (bateria-pula-aprovados, 05/10).** A etapa verde grava
 `NN <commit>` em `aprovados.txt` (fora do git); no mesmo commit, a próxima
 rodada a pula. `bash .maestro/bateria.sh --completa` roda tudo de novo.

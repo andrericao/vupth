@@ -1,0 +1,90 @@
+# Campanha de cupom (maestro-campanha-cupom-e-link, DEC-124): o André cria no
+# Painel a campanha MAESTRO CLIENT CUPOM (desconto com cupom, público cliente),
+# com os valores que quiser. O fluxo acha a campanha pelo NOME e confere o que o
+# app mostra, sem fixar valor: a campanha na Home, o código, o "Válido até" ao
+# ativar, o Saiba mais e, se ela já tiver acabado ou esgotado, o modal certo.
+# Sem a campanha criada, falha no passo 25.01 (a Home não mostra o nome).
+appId: ${APP_ID}
+---
+- scrollUntilVisible:
+    element:
+      text: "MAESTRO CLIENT CUPOM"
+    direction: RIGHT
+    timeout: ${20000 * LENTO}
+    label: "25.01 · acha a campanha MAESTRO CLIENT CUPOM na Home"
+- tapOn:
+    text: "MAESTRO CLIENT CUPOM"
+    label: "25.02 · toca na campanha"
+- extendedWaitUntil:
+    visible: "Código: .*"
+    timeout: ${10000 * LENTO}
+    label: "25.03 · vê o código no detalhe"
+- copyTextFrom:
+    text: "Código: .*"
+    label: "25.04 · copia a linha do código"
+- evalScript: ${output.CODIGO = maestro.copiedText.replace(/^Código:\s*/, '').trim()}
+- tapOn:
+    id: "dialogo-botao-0"
+    label: "25.05 · fecha o detalhe"
+- tapOn:
+    text: "Perfil"
+    label: "25.06 · toca em Perfil"
+- scrollUntilVisible:
+    element:
+      text: "Cupom"
+    label: "25.07 · rola até Cupom"
+- tapOn:
+    text: "Cupom"
+    label: "25.08 · toca em Cupom"
+- tapOn:
+    id: "cupom-campo"
+    label: "25.09 · toca no campo do cupom"
+- inputText:
+    text: ${output.CODIGO}
+    label: "25.10 · digita o código da campanha"
+- hideKeyboard:
+    label: "25.11 · fecha o teclado"
+- tapOn:
+    id: "cupom-usar"
+    label: "25.12 · toca em Usar"
+- extendedWaitUntil:
+    visible: "(Cupom ativado|Promoção encerrada|Promoção esgotada|Cupom)"
+    timeout: ${15000 * LENTO}
+    label: "25.13 · vê a resposta ao ativar"
+# Campanha viva: o aviso de validade e o Saiba mais (sem fixar a data nem o valor).
+- runFlow:
+    when:
+      visible: "Cupom ativado"
+    commands:
+      - assertVisible:
+          text: ".*Cupom válido até \\d{2}/\\d{2} às \\d{2}:\\d{2}.*"
+          label: "25.14 · vê 'válido até dd/MM às HH:mm'"
+      - tapOn:
+          text: "Saiba mais"
+          label: "25.15 · toca em Saiba mais"
+      - assertVisible:
+          text: ".*Vale para qualquer serviço.*"
+          label: "25.16 · vê que vale para qualquer serviço"
+      - tapOn:
+          id: "dialogo-botao-0"
+          label: "25.17 · fecha o Saiba mais"
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: campanha-cupom-ativado
+            O_QUE: "Promoções: o cupom da MAESTRO CLIENT CUPOM em Cupons ativos, com a regra e a validade."
+# Campanha que já acabou ou esgotou: o modal certo, em vez do aviso de validade.
+- runFlow:
+    when:
+      visible: "Promoção encerrada"
+    commands:
+      - assertVisible:
+          text: "O prazo desta promoção acabou."
+          label: "25.18 · vê o modal Promoção encerrada"
+- runFlow:
+    when:
+      visible: "Promoção esgotada"
+    commands:
+      - assertVisible:
+          text: "As vagas desta promoção acabaram."
+          label: "25.19 · vê o modal Promoção esgotada"
