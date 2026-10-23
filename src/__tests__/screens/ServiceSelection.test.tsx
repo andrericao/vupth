@@ -22,6 +22,7 @@ const mockRouteParams: Record<string, unknown> = { ...OPEN_PARAMS };
 
 let mockInset = 0;
 jest.mock('@hooks/useMeusCupons', () => ({ useMeusCupons: () => [] }));
+jest.mock('@hooks/usePagamentoAdiantado', () => ({ ...jest.requireActual('@hooks/usePagamentoAdiantado'), usePagamentoAdiantado: () => false }));
 jest.mock('@hooks/useTabBarInset', () => ({ useTabBarInset: () => mockInset }));
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));

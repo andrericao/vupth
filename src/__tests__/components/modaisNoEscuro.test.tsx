@@ -50,6 +50,7 @@ jest.mock('lucide-react-native', () => {
   return new Proxy({}, { get: (_alvo, nome) => (props: object) => React.createElement('Icone', { ...props, nome: String(nome) }) });
 });
 jest.mock('@theme/liberacao', () => ({ ESCURO_LIBERADO: true }));
+jest.mock('@hooks/usePagamentoAdiantado', () => ({ ...jest.requireActual('@hooks/usePagamentoAdiantado'), usePagamentoAdiantado: () => false }));
 jest.mock('@services/paymentService', () => ({ paymentService: { get: jest.fn(), claim: jest.fn() } }));
 jest.mock('@services/swapOfferService', () => ({
   swapOfferService: { listAcceptable: jest.fn(), listMine: jest.fn(), accept: jest.fn(), cancel: jest.fn() },
