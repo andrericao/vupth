@@ -1,4 +1,13 @@
-import { CUPOM_LIGADO, cupomDigitado, mensagemDoCupom, nomeDaCampanha } from '@domain/campanhas';
+import {
+  CUPOM_LIGADO,
+  cupomDigitado,
+  mensagemDoCupom,
+  nomeDaCampanha,
+  regraDoCupom,
+  separarCupons,
+  situacaoDoCupom,
+  validadeDoCupom,
+} from '@domain/campanhas';
 
 // cupom-no-app (15/10, Backend 4a94610): o cupom digitado, as recusas em uma
 // frase curta e o nome na lista.
@@ -6,8 +15,37 @@ import { CUPOM_LIGADO, cupomDigitado, mensagemDoCupom, nomeDaCampanha } from '@d
 const erro = (code?: string) => ({ response: { data: { code } } });
 
 describe('cupom', () => {
-  it('nasce desligado, até o Backend subir', () => {
-    expect(CUPOM_LIGADO).toBe(false);
+  it('está ligado desde o Backend 5de02e0', () => {
+    expect(CUPOM_LIGADO).toBe(true);
+  });
+
+  it('a regra em uma frase: percentual, valor ou o benefício', () => {
+    expect(regraDoCupom({ id: '1', value_percent: 10 })).toBe('10% de desconto');
+    expect(regraDoCupom({ id: '1', value_amount: 5 })).toMatch(/^R\$\s?5,00 de desconto$/);
+    expect(regraDoCupom({ id: '1', benefit: 'Sem taxa' })).toBe('Sem taxa');
+    expect(regraDoCupom({ id: '1' })).toBe('');
+  });
+
+  it('a validade é o fim da campanha; sem data, vazio', () => {
+    expect(validadeDoCupom({ id: '1', ends_at: '2026-11-05T12:00:00' })).toBe('Vale até 05/11');
+    expect(validadeDoCupom({ id: '1', ends_at: 'x' })).toBe('');
+    expect(validadeDoCupom({ id: '1' })).toBe('');
+  });
+
+  it('separa ativos de usados e vencidos; sem status, vale como ativo', () => {
+    const lista = [
+      { id: 'a', status: 'ACTIVE' as const },
+      { id: 'b', status: 'USED' as const },
+      { id: 'c', status: 'EXPIRED' as const },
+      { id: 'd' },
+      { id: 'e', used: true },
+    ];
+    const { ativos, encerrados } = separarCupons(lista);
+    expect(ativos.map((c) => c.id)).toEqual(['a', 'd']);
+    expect(encerrados.map((c) => c.id)).toEqual(['b', 'c', 'e']);
+    expect(situacaoDoCupom(lista[1])).toBe('Usado');
+    expect(situacaoDoCupom(lista[4])).toBe('Usado');
+    expect(situacaoDoCupom(lista[2])).toBe('Vencido');
   });
 
   it('tira os espaços das pontas', () => {

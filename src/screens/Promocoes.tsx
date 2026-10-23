@@ -8,15 +8,25 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 import { campaignService, Campanha } from "@services/campaignService";
-import { cupomDigitado, mensagemDoCupom, nomeDaCampanha } from "@domain/campanhas";
+import {
+  cupomDigitado,
+  mensagemDoCupom,
+  nomeDaCampanha,
+  regraDoCupom,
+  separarCupons,
+  situacaoDoCupom,
+  validadeDoCupom,
+} from "@domain/campanhas";
 
-// Perfil > Promocoes (cupom-no-app): digitar o cupom e ver os aceitos. Texto
-// curto (DEC-63). So aparece com CUPOM_LIGADO.
+// Perfil > Promocoes (cupom-no-app, cupom-em-configuracoes): adicionar o cupom e
+// ver os ativos e os encerrados (usados ou vencidos), cada um com a regra e a
+// validade. Texto curto (DEC-63). So aparece com CUPOM_LIGADO.
 export function Promocoes() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const [cupom, setCupom] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [meus, setMeus] = useState<Campanha[]>([]);
+  const { ativos, encerrados } = separarCupons(meus);
 
   const carregar = useCallback(async () => {
     if (!accessToken) return;
@@ -71,18 +81,36 @@ export function Promocoes() {
             isDisabled={enviando || !cupomDigitado(cupom)}
             testID="cupom-usar"
           />
-          {meus.length > 0 && (
+          {ativos.length > 0 && (
             <VStack gap="$2" mt="$4" testID="cupons-meus">
-              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Seus cupons</Text>
-              {meus.map((c) => (
-                <Box key={c.id} bg="$brandSurface" borderRadius="$card" px={16} py={12}>
-                  <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary">{nomeDaCampanha(c)}</Text>
-                </Box>
+              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Cupons ativos</Text>
+              {ativos.map((c) => (
+                <CartaoDoCupom key={c.id} cupom={c} />
+              ))}
+            </VStack>
+          )}
+          {encerrados.length > 0 && (
+            <VStack gap="$2" mt="$4" testID="cupons-encerrados">
+              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Usados e vencidos</Text>
+              {encerrados.map((c) => (
+                <CartaoDoCupom key={c.id} cupom={c} encerrado />
               ))}
             </VStack>
           )}
         </VStack>
       </VStack>
     </ScrollView>
+  );
+}
+
+function CartaoDoCupom({ cupom, encerrado }: { cupom: Campanha; encerrado?: boolean }) {
+  const detalhes = [regraDoCupom(cupom), encerrado ? situacaoDoCupom(cupom) : validadeDoCupom(cupom)]
+    .filter(Boolean)
+    .join(" · ");
+  return (
+    <Box bg="$brandSurface" borderRadius="$card" px={16} py={12} opacity={encerrado ? 0.6 : 1} testID={`cupom-${cupom.id}`}>
+      <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary">{nomeDaCampanha(cupom)}</Text>
+      {detalhes !== "" && <Text size="xs" color="$brandTextSecondary">{detalhes}</Text>}
+    </Box>
   );
 }

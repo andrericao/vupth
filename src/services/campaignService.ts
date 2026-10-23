@@ -13,6 +13,13 @@ export interface Campanha {
   starts_at?: string | null;
   ends_at?: string | null;
   remaining_slots?: number | null;
+  // Meus cupons (Backend 5de02e0, cupom-ativado-em-configuracoes).
+  status?: 'ACTIVE' | 'USED' | 'EXPIRED' | null;
+  used?: boolean | null;
+  value_amount?: number | null;
+  value_percent?: number | null;
+  /** WITH_FEE = o preco que o cliente ve; WITHOUT_FEE = o que o profissional recebe. */
+  benefit_base?: 'WITH_FEE' | 'WITHOUT_FEE' | null;
 }
 
 export const campaignService = {

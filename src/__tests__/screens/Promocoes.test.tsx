@@ -55,6 +55,23 @@ describe('Promoções', () => {
     expect(await findByText('Lançamento')).toBeTruthy();
   });
 
+  it('lista os ativos com regra e validade, e os usados e vencidos à parte', async () => {
+    mockListMine.mockResolvedValue({
+      data: [
+        { id: 'a', name: 'Lançamento', status: 'ACTIVE', value_percent: 10, ends_at: '2026-11-05T12:00:00' },
+        { id: 'b', name: 'Antigo', status: 'USED', value_amount: 5 },
+        { id: 'c', name: 'Velho', status: 'EXPIRED' },
+      ],
+    });
+    const { findByTestId, getByTestId, getByText, queryByText } = renderWithProviders(<Promocoes />);
+    await findByTestId('cupons-meus');
+    expect(getByTestId('cupom-a')).toBeTruthy();
+    expect(getByText('10% de desconto · Vale até 05/11')).toBeTruthy();
+    expect(getByTestId('cupons-encerrados')).toBeTruthy();
+    expect(getByText(/de desconto · Usado/)).toBeTruthy();
+    expect(queryByText('Velho')).toBeTruthy();
+  });
+
   it('a recusa vem numa frase curta', async () => {
     mockRedeem.mockRejectedValue({ response: { data: { code: 'CAMPAIGN_ALREADY_REDEEMED' } } });
     const { getByTestId } = renderWithProviders(<Promocoes />);
