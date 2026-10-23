@@ -15,6 +15,7 @@ jest.mock('@services/campaignService', () => ({
     listMine: (...a: unknown[]) => mockListMine(...a),
   },
 }));
+jest.mock('@components/SeuLinkDeIndicacao', () => ({ SeuLinkDeIndicacao: () => null }));
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => {

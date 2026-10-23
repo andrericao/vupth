@@ -31,6 +31,14 @@ export const campaignService = {
     });
   },
 
+  // Participar de uma campanha de link (compartilhe-e-ganhe, Backend fcd4fd3):
+  // 201; 404 campanha inexistente ou privada; 403/409 como o redeem.
+  join(id: string, accessToken: string) {
+    return api.post<Campanha>(`/campaigns/${id}/join`, undefined, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
   // Home (carrossel-de-campanhas-na-home, Backend d0d631e): so as publicas, em
   // andamento e do papel de quem esta logado; a que acaba primeiro vem antes.
   listActive(accessToken: string) {

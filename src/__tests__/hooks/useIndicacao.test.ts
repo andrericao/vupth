@@ -43,7 +43,7 @@ describe('useIndicacao', () => {
     await act(async () => {
       useAuthStore.setState({ isAuthenticated: true, accessToken: 'tk' });
     });
-    await waitFor(() => expect(mockClaim).toHaveBeenCalledWith('K7M2QX', 'tk'));
+    await waitFor(() => expect(mockClaim).toHaveBeenCalledWith('K7M2QX', 'tk', null));
     await waitFor(() => expect(guardado[KEY]).toBeUndefined());
   });
 
@@ -51,8 +51,15 @@ describe('useIndicacao', () => {
     guardado[KEY] = 'VELHO';
     useAuthStore.setState({ isAuthenticated: true, accessToken: 'tk' });
     renderHook(() => useIndicacao(() => '/i/NOVO1'));
-    await waitFor(() => expect(mockClaim).toHaveBeenCalledWith('NOVO1', 'tk'));
+    await waitFor(() => expect(mockClaim).toHaveBeenCalledWith('NOVO1', 'tk', null));
     expect(mockClaim).toHaveBeenCalledTimes(1);
+  });
+
+  it('link com ?c=: a campanha vai junto no claim e sai com o código', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tk' });
+    renderHook(() => useIndicacao(() => '/i/K7M2QX?c=camp-1'));
+    await waitFor(() => expect(mockClaim).toHaveBeenCalledWith('K7M2QX', 'tk', 'camp-1'));
+    await waitFor(() => expect(guardado['vupth_indicacao_campanha']).toBeUndefined());
   });
 
   it('sem link e sem código guardado: nada', async () => {

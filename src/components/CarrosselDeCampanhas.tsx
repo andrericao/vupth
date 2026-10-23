@@ -1,8 +1,10 @@
 import { ScrollView, TouchableOpacity, useWindowDimensions } from "react-native";
 import { Box, Text, VStack } from "@gluestack-ui/themed";
 
-import { Campanha } from "@services/campaignService";
+import { Campanha, campaignService } from "@services/campaignService";
 import { detalhesDaCampanha } from "@domain/campanha/detalhes";
+import { ehCampanhaDeLink, mensagemDoParticipar } from "@domain/compartilhe";
+import { useAuthStore } from "@stores/authStore";
 import { alertaTipado } from "@utils/alertaTipado";
 import { fs } from "@stores/fonteStore";
 
@@ -13,6 +15,22 @@ type Props = { campanhas: Campanha[] };
 // os detalhes (cupom e compartilhar ganham destino proprio depois).
 export function CarrosselDeCampanhas({ campanhas }: Props) {
   const { width } = useWindowDimensions();
+  const accessToken = useAuthStore((s) => s.accessToken);
+
+  // compartilhe-e-ganhe (DEC-113): na campanha de link o toque oferece "Participar";
+  // o link pessoal fica em Configuracoes > Promocoes.
+  async function participar(c: Campanha) {
+    if (!accessToken) return;
+    try {
+      await campaignService.join(c.id, accessToken);
+      alertaTipado("Você está dentro", "Seu link para compartilhar está em Configurações > Promoções.", [{ text: "Ok" }], {
+        tipo: "informacao",
+      });
+    } catch (erro) {
+      alertaTipado("Campanha", mensagemDoParticipar(erro), [{ text: "Ok" }], { tipo: "erro" });
+    }
+  }
+
   if (campanhas.length === 0) return null;
   const unica = campanhas.length === 1;
   const largura = unica ? width - 32 : Math.min(width - 64, 320);
@@ -30,9 +48,14 @@ export function CarrosselDeCampanhas({ campanhas }: Props) {
         <TouchableOpacity
           key={c.id}
           onPress={() =>
-            alertaTipado(c.name ?? "Campanha", detalhesDaCampanha(c) || undefined, [{ text: "Fechar" }], {
-              tipo: "informacao",
-            })
+            alertaTipado(
+              c.name ?? "Campanha",
+              detalhesDaCampanha(c) || undefined,
+              ehCampanhaDeLink(c.type)
+                ? [{ text: "Participar", onPress: () => participar(c) }, { text: "Fechar", style: "cancel" }]
+                : [{ text: "Fechar" }],
+              { tipo: "informacao" },
+            )
           }
           style={{ width: largura }}
           accessibilityRole="button"

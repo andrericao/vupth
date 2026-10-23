@@ -1,4 +1,4 @@
-import { codigoDoCaminho, descartarDepoisDaRecusa } from '@domain/indicacao';
+import { campanhaDoCaminho, codigoDoCaminho, descartarDepoisDaRecusa } from '@domain/indicacao';
 
 // entrada-por-link (CLI-34, Backend 3fdcec1).
 
@@ -29,5 +29,18 @@ describe('descartarDepoisDaRecusa', () => {
     expect(descartarDepoisDaRecusa({ response: { status: 503 } })).toBe(false);
     expect(descartarDepoisDaRecusa(new Error('Network Error'))).toBe(false);
     expect(descartarDepoisDaRecusa(null)).toBe(false);
+  });
+});
+
+describe('campanhaDoCaminho', () => {
+  it('lê a campanha de ?c=, também entre outros parâmetros', () => {
+    expect(campanhaDoCaminho('/i/K7M2QX?c=camp-1')).toBe('camp-1');
+    expect(campanhaDoCaminho('/i/K7M2QX?utm=zap&c=abc_9#x')).toBe('abc_9');
+  });
+
+  it('sem ?c= (ou vazio), não há campanha', () => {
+    expect(campanhaDoCaminho('/i/K7M2QX')).toBeNull();
+    expect(campanhaDoCaminho('/i/K7M2QX?c=')).toBeNull();
+    expect(campanhaDoCaminho('/i/K7M2QX?cc=1')).toBeNull();
   });
 });

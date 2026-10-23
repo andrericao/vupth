@@ -6,6 +6,16 @@
 /** Onde o codigo fica guardado ate o cliente entrar na conta. */
 export const INDICACAO_KEY = 'vupth_indicacao';
 
+/** Onde a campanha do link (`?c=<campanha>`) fica guardada junto do codigo. */
+export const INDICACAO_CAMPANHA_KEY = 'vupth_indicacao_campanha';
+
+/** A campanha de `?c=<campanha>` no endereco aberto, ou null. */
+export function campanhaDoCaminho(endereco: string): string | null {
+  const query = endereco.split('#')[0].split('?')[1] ?? '';
+  const achado = /(?:^|&)c=([A-Za-z0-9_-]{1,64})(?:&|$)/.exec(query);
+  return achado ? achado[1] : null;
+}
+
 /** O codigo de `/i/<codigo>` (sem query nem barra no fim), ou null. */
 export function codigoDoCaminho(caminho: string): string | null {
   const semQuery = caminho.split(/[?#]/)[0];

@@ -6,6 +6,7 @@ import { VStack, Text, ScrollView, Box } from "@gluestack-ui/themed";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
+import { SeuLinkDeIndicacao } from "@components/SeuLinkDeIndicacao";
 import { useAuthStore } from "@stores/authStore";
 import { campaignService, Campanha } from "@services/campaignService";
 import {
@@ -81,6 +82,7 @@ export function Promocoes() {
             isDisabled={enviando || !cupomDigitado(cupom)}
             testID="cupom-usar"
           />
+          <SeuLinkDeIndicacao />
           {ativos.length > 0 && (
             <VStack gap="$2" mt="$4" testID="cupons-meus">
               <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Cupons ativos</Text>
