@@ -11,6 +11,10 @@ describe('avisoDeAtraso', () => {
     expect(a.mensagem).toMatch(/No 3º, multa de R\$ 5,00 e você vai para o fim da fila/);
     expect(a.mensagem).toMatch(/trocou de lugar com o próximo/);
     expect(a.mensagem).toMatch(/faltam 2/);
+    // atraso-na-fila-vazia-client (DEC-101): o prazo para chegar.
+    expect(a.mensagem).toMatch(/^Esteja na loja em até 5 minutos\./);
+    expect(avisoDeAtraso({}).mensagem).toMatch(/^Esteja na loja em até 5 minutos\./);
+    expect(avisoDeAtraso({ contagem: 3 }).mensagem).not.toMatch(/Esteja na loja/);
     expect(a.botao).toBe('Entendi');
   });
 

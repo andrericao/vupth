@@ -36,6 +36,9 @@ const ordinal = (n: number): string => `${n}º`;
 const TITULO_POSITIVO = 'Não se atrase — evite a multa';
 const reais = formatarReais;
 
+/** DEC-101: o prazo para chegar depois de chamado (texto do app). */
+const TOLERANCIA_DO_ATRASO_MIN = 5;
+
 export function avisoDeAtraso(s: {
   /** Quantos atrasos o cliente já tem, contando este (`lateCount` do wait-time). */
   contagem?: number | null;
@@ -65,6 +68,7 @@ export function avisoDeAtraso(s: {
     return {
       titulo: TITULO_POSITIVO,
       mensagem:
+        `Esteja na loja em até ${TOLERANCIA_DO_ATRASO_MIN} minutos. ` +
         `Este é o seu ${ordinal(s.contagem!)} atraso — sem multa. Você trocou de lugar com o próximo e continua na fila. ` +
         `No ${ordinal(MULTA_NA_TERCEIRA)}, multa de ${valor} e você vai para o fim da fila` +
         (faltam > 0 ? ` (${faltam === 1 ? 'falta um' : `faltam ${faltam}`}).` : '.') +
@@ -78,6 +82,7 @@ export function avisoDeAtraso(s: {
   return {
     titulo: TITULO_POSITIVO,
     mensagem:
+      `Esteja na loja em até ${TOLERANCIA_DO_ATRASO_MIN} minutos. ` +
       'Você trocou de lugar com o próximo e continua na fila, por enquanto sem multa. Os atrasos se acumulam — ' +
       `no ${ordinal(MULTA_NA_TERCEIRA)}, multa de ${valor} e você vai para o fim da fila. Se não vai dar tempo, adie a sua vez.`,
     botao: 'Entendi',
