@@ -6,6 +6,13 @@ export interface Campanha {
   id: string;
   code?: string | null;
   name?: string | null;
+  description?: string | null;
+  /** REFERRAL_BONUS = campanha de link; as outras sao cupom, desconto ou isencao. */
+  type?: string | null;
+  benefit?: string | null;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  remaining_slots?: number | null;
 }
 
 export const campaignService = {
@@ -13,6 +20,14 @@ export const campaignService = {
   // CAMPAIGN_NOT_AVAILABLE / CAMPAIGN_ALREADY_REDEEMED, 403 CAMPAIGN_NOT_FOR_YOU.
   redeem(code: string, accessToken: string) {
     return api.post<Campanha>('/campaigns/redeem', { code }, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
+  // Home (carrossel-de-campanhas-na-home, Backend d0d631e): so as publicas, em
+  // andamento e do papel de quem esta logado; a que acaba primeiro vem antes.
+  listActive(accessToken: string) {
+    return api.get<Campanha[]>('/campaigns/active', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
   },

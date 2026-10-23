@@ -18,4 +18,13 @@ describe('CampaignService', () => {
     const res = await campaignService.listMine('tok');
     expect(res.data).toHaveLength(1);
   });
+
+  it('listActive envia GET /campaigns/active + Bearer', async () => {
+    mock.onGet('/campaigns/active').reply((config) => {
+      expect(config.headers?.Authorization).toBe('Bearer tok');
+      return [200, [{ id: 'c1', name: 'Compartilhe e ganhe', type: 'REFERRAL_BONUS' }]];
+    });
+    const res = await campaignService.listActive('tok');
+    expect(res.data[0].type).toBe('REFERRAL_BONUS');
+  });
 });
