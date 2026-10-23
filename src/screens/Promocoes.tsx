@@ -94,8 +94,9 @@ export function Promocoes() {
             />
           </VStack>
           <Button
-            title={enviando ? "Enviando..." : "Usar"}
+            title="Usar"
             onPress={usar}
+            isLoading={enviando}
             isDisabled={enviando || !cupomDigitado(cupom)}
             testID="cupom-usar"
           />

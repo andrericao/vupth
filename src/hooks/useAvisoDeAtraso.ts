@@ -38,7 +38,7 @@ export function useAvisoDeAtraso() {
       // Adiar tambem registra a ciencia: o toque, qualquer um, e o "eu soube".
       ...(aviso.oferecerAdiar
         ? [{
-            text: "Adiar minha vez",
+            text: "Adiar",
             onPress: () => {
               registrarCiencia(attendanceId!);
               const f = fila();

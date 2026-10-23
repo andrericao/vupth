@@ -121,7 +121,7 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
           )}
 
           <Button
-            title={submitting ? "Enviando..." : "Enviar avaliação"}
+            title="Enviar avaliação"
             mt="$5"
             isLoading={submitting}
             onPress={handleSubmit}

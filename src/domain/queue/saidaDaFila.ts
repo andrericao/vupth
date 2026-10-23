@@ -18,10 +18,10 @@ import { CANCELLATION_PENALTY_VALUE } from './types';
 // menor — o servidor responde 409 com o valor certo e NAO tira da fila; o app
 // mostra o aviso com esse valor e repete no "Sim" (`avisoDaMultaDoServidor`).
 //
-// sair-da-fila-texto (Andre, 15/10): a faixa e de UMA linha, com o "Saiba
-// mais" ao lado (o artigo do suporte). Sem multa, NAO diz que e de graca: so
-// tenta reter ("Tem certeza? Faltam so X min"). Com multa: "Se sair, voce paga
-// uma multa de R$ X".
+// sair-da-fila-texto (Andre, 15/10) e textos-curtos (guia, 4.1): a faixa e de UMA
+// linha, com o "Saiba mais" ao lado (o artigo do suporte). Sem multa, NAO diz
+// que e de graca: so tenta reter ("Faltam so X min."). Com multa: "Sair agora
+// gera multa de R$ X." Sem "Toque 2 vezes": o primeiro toque ja abre a faixa.
 //
 // Substitui o dialogo do D10 ("Ficar na fila / Trocar de lugar / Sair mesmo
 // assim"): a troca deixou de morar na saida (D16 a leva para um popup).
@@ -41,8 +41,6 @@ export type SaidaDaFila = {
   /** O valor que a confirmacao mostrou — vai na saida como a ciencia do cliente. */
   valorConfirmado: number | null;
 };
-
-const INSTRUCAO = 'Toque 2 vezes para sair.';
 
 const reais = formatarReais;
 
@@ -67,12 +65,12 @@ export function saidaDaFila(s: {
   // "Permanecer na fila" / "Sim, sair"), mas sem falar de multa.
   if (s.isento) {
     return {
-      faixa: `Tem certeza? ${INSTRUCAO}`,
+      faixa: 'Você perde a sua vez.',
       confirmacao: {
-        titulo: 'Sair da fila?',
+        titulo: 'Sair da fila',
         mensagem: 'Você perde a sua vez.',
-        sim: 'Sim, sair',
-        nao: 'Permanecer na fila',
+        sim: 'Sair',
+        nao: 'Cancelar',
       },
       valorConfirmado: null,
     };
@@ -80,12 +78,12 @@ export function saidaDaFila(s: {
 
   if (s.semPrevisao) {
     return {
-      faixa: `Se faltar menos de 1 h, sair gera multa de ${valor}. ${INSTRUCAO}`,
+      faixa: `Sair a menos de 1 h da vez gera multa de ${valor}.`,
       confirmacao: {
-        titulo: 'Sair da fila?',
-        mensagem: `Se faltar menos de 1 hora para a sua vez, a saída gera multa de ${valor} no seu próximo atendimento.`,
-        sim: 'Sim, sair',
-        nao: 'Permanecer na fila',
+        titulo: 'Sair da fila',
+        mensagem: `A menos de 1 h da vez, gera multa de ${valor}.`,
+        sim: 'Sair',
+        nao: 'Cancelar',
       },
       valorConfirmado: s.valor ?? CANCELLATION_PENALTY_VALUE,
     };
@@ -93,19 +91,19 @@ export function saidaDaFila(s: {
 
   if (s.multa) {
     return {
-      faixa: `Se sair, você paga uma multa de ${valor}. ${INSTRUCAO}`,
+      faixa: `Sair agora gera multa de ${valor}.`,
       confirmacao: {
-        titulo: 'Sair da fila?',
-        mensagem: `A multa de ${valor} será cobrada no seu próximo atendimento.`,
-        sim: 'Sim, sair',
-        nao: 'Permanecer na fila',
+        titulo: 'Sair da fila',
+        mensagem: `${valor} de multa no próximo atendimento.`,
+        sim: 'Sair',
+        nao: 'Cancelar',
       },
       valorConfirmado: s.valor ?? CANCELLATION_PENALTY_VALUE,
     };
   }
 
-  const faltam = s.minutos != null && s.minutos > 0 ? ` Faltam só ${Math.ceil(s.minutos)} min.` : '';
-  return { faixa: `Tem certeza?${faltam} ${INSTRUCAO}`, confirmacao: null, valorConfirmado: null };
+  const faixa = s.minutos != null && s.minutos > 0 ? `Faltam só ${Math.ceil(s.minutos)} min.` : 'Você perde a sua vez.';
+  return { faixa, confirmacao: null, valorConfirmado: null };
 }
 
 /**
@@ -114,10 +112,10 @@ export function saidaDaFila(s: {
  */
 export function avisoDaMultaDoServidor(valor: number) {
   return {
-    titulo: 'Sair da fila?',
-    mensagem: `Sair agora gera multa de ${reais(valor)}, cobrada no seu próximo atendimento. Sem o seu "Sim", você continua na fila.`,
-    sim: 'Sim, sair',
-    nao: 'Permanecer na fila',
+    titulo: 'Sair da fila',
+    mensagem: `${reais(valor)} de multa no próximo atendimento.`,
+    sim: 'Sair',
+    nao: 'Cancelar',
   };
 }
 

@@ -221,11 +221,11 @@ export function ModalDePagamento() {
                   <Text selectable numberOfLines={3} testID="pix-codigo" style={{ color: cores.textPrimary, fontSize: fs(12), backgroundColor: cores.sobrePainel, borderRadius: 10, padding: 10 }}>
                     {pagamento.pix_copy_paste}
                   </Text>
-                  <Botao titulo={copiado ? "Copiado" : "Copiar código Pix"} claro feito={copiado} testID="pix-copiar" onPress={copiar} />
+                  <Botao titulo={copiado ? "Copiado" : "Copiar"} claro feito={copiado} testID="pix-copiar" onPress={copiar} />
                 </>
               ) : null}
               {podeAvisarQuePagou(pagamento.status) ? (
-                <Botao titulo={enviando ? "Enviando..." : "Já paguei"} testID="pix-ja-paguei" desligado={enviando} onPress={jaPaguei} />
+                <Botao titulo="Já paguei" testID="pix-ja-paguei" desligado={enviando} onPress={jaPaguei} />
               ) : (
                 <Botao titulo="Fechar" claro testID="pix-ok" onPress={fechar} />
               )}

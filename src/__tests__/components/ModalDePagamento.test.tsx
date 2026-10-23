@@ -151,7 +151,7 @@ describe('ModalDePagamento', () => {
     await act(async () => {
       fireEvent.press(tela.getByTestId('pix-copiar'));
     });
-    expect(tela.getByText('Copiar código Pix')).toBeTruthy();
+    expect(tela.getByText('Copiar')).toBeTruthy();
   });
 
   it('o "Já paguei" sem status na resposta fica aguardando', async () => {

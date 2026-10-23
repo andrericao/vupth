@@ -367,7 +367,7 @@ export function ServiceSelection() {
     swap: {
       key: "swap",
       icon: Repeat2,
-      title: isPublishingSwap ? "Publicando..." : "Entrar por troca",
+      title: "Entrar por troca",
       description: "Alguém que já está na fila pode ceder o lugar para você — sem custo.",
       disabled: isPublishingSwap,
       onPress: handleRequestSwap,

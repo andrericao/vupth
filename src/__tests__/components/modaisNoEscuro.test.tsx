@@ -538,7 +538,7 @@ describe.each(TEMAS)('caixas com dados no tema %s', (tema) => {
       ['Serviço', 'textSecondary', 'painel'],
       ['R$ 40,00', 'textPrimary', 'painel'],
       ['Já paguei', 'onGreen', 'green'],
-      ['Copiar código Pix', 'textPrimary', 'painel'],
+      ['Copiar', 'textPrimary', 'painel'],
     ]);
     // o codigo copia-e-cola e um bloco sobre o painel
     const codigo = pix.getByTestId('pix-codigo');

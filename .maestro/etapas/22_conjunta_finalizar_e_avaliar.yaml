@@ -41,7 +41,7 @@ appId: ${APP_ID}
           label: "22.04c · com o QR em cima"
       - assertVisible:
           id: "pix-copiar"
-          label: "22.04d · e o Copiar código Pix"
+          label: "22.04d · e o Copiar"
       - assertVisible:
           id: "preco-saiba-mais"
           label: "22.04d2 · e o Saiba mais do preço (politica-de-preco-saiba-mais)"

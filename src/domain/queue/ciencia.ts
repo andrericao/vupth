@@ -33,7 +33,7 @@ export const MULTA_POR_ATRASO = 5;
 
 const ordinal = (n: number): string => `${n}º`;
 // Tom positivo antes da multa (Andre, 26/09: "não se atrase / evite multa").
-const TITULO_POSITIVO = 'Não se atrase — evite a multa';
+const TITULO_POSITIVO = 'Você trocou de lugar';
 const reais = formatarReais;
 
 /** DEC-101: o prazo para chegar depois de chamado (texto do app). */
@@ -49,30 +49,23 @@ export function avisoDeAtraso(s: {
   const valor = reais(s.valor ?? MULTA_POR_ATRASO);
   const temContagem = typeof s.contagem === 'number' && s.contagem > 0;
   const multa = s.multa ?? (temContagem ? s.contagem! >= MULTA_NA_TERCEIRA : false);
-  const titulo = 'Você foi chamado e não chegou';
+  // textos-curtos (guia 4.3): 1o e 2o atraso "Você trocou de lugar"; o 3o, "3º atraso".
+  const titulo = multa ? `${ordinal(MULTA_NA_TERCEIRA)} atraso` : TITULO_POSITIVO;
+  const prazo = `Esteja na loja em até ${TOLERANCIA_DO_ATRASO_MIN} minutos.`;
 
   if (multa) {
     return {
       titulo,
-      mensagem:
-        (temContagem ? `Este é o seu ${ordinal(s.contagem!)} atraso: ` : '') +
-        `multa de ${valor} no seu próximo atendimento, e você foi para o fim da fila. ` +
-        'Pode continuar nela ou sair sem nova multa.',
+      mensagem: `Multa de ${valor} e você foi para o fim da fila.`,
       botao: 'Entendi',
       oferecerAdiar: false,
     };
   }
 
   if (temContagem) {
-    const faltam = MULTA_NA_TERCEIRA - s.contagem!;
     return {
-      titulo: TITULO_POSITIVO,
-      mensagem:
-        `Esteja na loja em até ${TOLERANCIA_DO_ATRASO_MIN} minutos. ` +
-        `Este é o seu ${ordinal(s.contagem!)} atraso — sem multa. Você trocou de lugar com o próximo e continua na fila. ` +
-        `No ${ordinal(MULTA_NA_TERCEIRA)}, multa de ${valor} e você vai para o fim da fila` +
-        (faltam > 0 ? ` (${faltam === 1 ? 'falta um' : `faltam ${faltam}`}).` : '.') +
-        ' Se não vai dar tempo, adie a sua vez.',
+      titulo,
+      mensagem: `${prazo} ${ordinal(s.contagem!)} atraso, sem multa. No ${ordinal(MULTA_NA_TERCEIRA)}, ${valor} e fim da fila.`,
       botao: 'Entendi',
       oferecerAdiar: true,
     };
@@ -80,11 +73,8 @@ export function avisoDeAtraso(s: {
 
   // Sem a contagem do servidor: avisa o que SABE, e não inventa ordinal.
   return {
-    titulo: TITULO_POSITIVO,
-    mensagem:
-      `Esteja na loja em até ${TOLERANCIA_DO_ATRASO_MIN} minutos. ` +
-      'Você trocou de lugar com o próximo e continua na fila, por enquanto sem multa. Os atrasos se acumulam — ' +
-      `no ${ordinal(MULTA_NA_TERCEIRA)}, multa de ${valor} e você vai para o fim da fila. Se não vai dar tempo, adie a sua vez.`,
+    titulo,
+    mensagem: `${prazo} Sem multa por enquanto. No ${ordinal(MULTA_NA_TERCEIRA)} atraso, ${valor} e fim da fila.`,
     botao: 'Entendi',
     oferecerAdiar: true,
   };
