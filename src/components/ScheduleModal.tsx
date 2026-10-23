@@ -16,6 +16,7 @@ import { usePendenciaStore } from "@stores/pendenciaStore";
 import { useTema } from "@hooks/useTema";
 import { avisoDeChegada } from "@domain/queue/avisoDeChegada";
 import { alertaTipado } from "@utils/alertaTipado";
+import { mensagemDoCupom } from "@domain/campanhas";
 
 type Props = {
   visible: boolean;
@@ -28,6 +29,9 @@ type Props = {
   /** Visitante: o agendar passa pelo login (a selecao volta com ele). */
   onPrecisaLogin?: () => void;
   onAgendado?: () => void;
+  /** Cupom escolhido (cupom-em-configuracoes) e o aviso quando ele nao vale mais. */
+  couponCampaignId?: string | null;
+  onCupomInvalido?: () => void;
   /**
    * Pedido de corte com dia e horario (S26, Backend 36c4359): a mesma barra de
    * encaixe, mas quem confirma e o dono da tela — o modal so devolve o horario.
@@ -44,7 +48,7 @@ const relogio = () => Date.now();
 // incluir essa funcionalidade"). Os horarios vem da agenda publica do
 // profissional (piso da fila e reservados, anonimos) e do horario da loja.
 export function ScheduleModal({
-  visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado, corte,
+  visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado, corte, couponCampaignId, onCupomInvalido,
 }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
   const { cores, veu } = useTema();
@@ -115,7 +119,12 @@ export function ScheduleModal({
     setEnviando(true);
     try {
       await intentionsService.create(
-        { professionalId, serviceItemIds, desiredTime: horario.toISOString() },
+        {
+          professionalId,
+          serviceItemIds,
+          desiredTime: horario.toISOString(),
+          ...(couponCampaignId ? { coupon_campaign_id: couponCampaignId } : {}),
+        },
         accessToken,
       );
       const quando = `${String(horario.getDate()).padStart(2, "0")}/${String(horario.getMonth() + 1).padStart(2, "0")} às ${formatClockTime(horario)}`;
@@ -128,6 +137,12 @@ export function ScheduleModal({
       if (pendencias) {
         close();
         usePendenciaStore.getState().avisar(pendencias);
+        return;
+      }
+      if (error?.response?.data?.code === "COUPON_NOT_ACTIVE") {
+        close();
+        onCupomInvalido?.();
+        Alert.alert("Cupom", mensagemDoCupom(error));
         return;
       }
       Alert.alert("Não foi possível agendar", mensagemDoAgendamento(error?.response?.status, error?.response?.data?.code));

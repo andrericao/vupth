@@ -8,6 +8,8 @@ export interface CreateAttendanceRequest {
   // Item #40: quando presente, o cliente entra como INTENÇÃO com horário-alvo
   // (cede a vez aos walk-ins até o previsto encostar no alvo). ISO-8601.
   targetTime?: string;
+  // Cupom ativado (Backend 5de02e0): um so por corte. Fora da lista de ativos, 422 COUPON_NOT_ACTIVE.
+  coupon_campaign_id?: string;
 }
 
 export interface AttendanceResponse {

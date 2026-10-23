@@ -87,6 +87,26 @@ describe('ScheduleModal — barra de encaixe', () => {
     alerta.mockRestore();
   });
 
+  // cupom-em-configuracoes: o cupom escolhido vai na intenção; se não vale, o aviso e o cupom sai.
+  it('com cupom, manda o coupon_campaign_id; 422 COUPON_NOT_ACTIVE avisa e solta o cupom', async () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const onCupomInvalido = jest.fn();
+    (intentionsService.create as jest.Mock).mockRejectedValue({ response: { status: 422, data: { code: 'COUPON_NOT_ACTIVE' } } });
+    const { getAllByRole, findByTestId, getByTestId, props } = abrir({ couponCampaignId: 'cp1', onCupomInvalido });
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    await findByTestId('horario-09:00');
+    fireEvent.press(getByTestId('horario-09:30'));
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    expect((intentionsService.create as jest.Mock).mock.calls[0][0]).toHaveProperty('coupon_campaign_id', 'cp1');
+    expect(onCupomInvalido).toHaveBeenCalled();
+    expect(props.onClose).toHaveBeenCalled();
+    expect(alerta).toHaveBeenCalledWith('Cupom', expect.stringMatching(/não está valendo/));
+    alerta.mockRestore();
+  });
+
   // aviso-de-chegada-na-entrada (André, 22/10): faltando menos de 1 h para o horário
   // agendado, o aviso diz até que horas estar na loja; Cancelar não agenda.
   it('faltando menos de 1 h para o horário: avisa; Cancelar não agenda, Confirmar agenda', async () => {

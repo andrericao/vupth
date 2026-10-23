@@ -64,6 +64,7 @@ import { pendenciasDoErro, reais } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { paymentService } from "@services/paymentService";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
+import { mensagemDoCupom } from "@domain/campanhas";
 
 type RouteParams = {
   professionalId: string;
@@ -73,6 +74,8 @@ type RouteParams = {
   estimatedWaitMinutes?: number;
   serviceItemIds?: string[];
   targetTime?: string;
+  // Cupom escolhido na selecao (cupom-em-configuracoes).
+  couponCampaignId?: string;
   // Veio do "Adiar minha vez" do aviso de atraso: abre o "Mudar minha vez".
   abrirMudarVez?: boolean;
 };
@@ -113,6 +116,7 @@ export function QueueStatus() {
     serviceItemIds,
     estimatedWaitMinutes,
     targetTime,
+    couponCampaignId,
     abrirMudarVez,
   } = route.params as RouteParams;
 
@@ -240,9 +244,13 @@ export function QueueStatus() {
         }
 
         const { data } = await attendanceService.create(
-          targetTime
-            ? { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], targetTime }
-            : { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], scheduledTime: new Date().toISOString() },
+          {
+            professionalId,
+            establishmentId,
+            serviceItemIds: serviceItemIds ?? [],
+            ...(targetTime ? { targetTime } : { scheduledTime: new Date().toISOString() }),
+            ...(couponCampaignId ? { coupon_campaign_id: couponCampaignId } : {}),
+          },
           accessToken!,
         );
         if (mountedRef.current) {
@@ -263,6 +271,14 @@ export function QueueStatus() {
           const pendencias = pendenciasDoErro(error);
           if (pendencias) {
             usePendenciaStore.getState().avisar(pendencias);
+            navigation.goBack();
+            return;
+          }
+
+          // Cupom que nao vale mais (422 COUPON_NOT_ACTIVE): nada foi criado; o
+          // aviso diz o que fazer e a pessoa volta a escolha, sem o cupom.
+          if (code === "COUPON_NOT_ACTIVE") {
+            Alert.alert("Cupom", mensagemDoCupom(error));
             navigation.goBack();
             return;
           }
@@ -330,7 +346,7 @@ export function QueueStatus() {
     }
 
     createAttendance();
-  }, [activeQueue?.attendanceId, activeQueue?.status, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, navigation, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime]);
+  }, [activeQueue?.attendanceId, activeQueue?.status, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, navigation, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime, couponCampaignId]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";

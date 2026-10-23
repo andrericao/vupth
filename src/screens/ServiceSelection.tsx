@@ -38,6 +38,8 @@ import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCo
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
+import { useMeusCupons } from "@hooks/useMeusCupons";
+import { EscolhaDeCupom } from "@components/EscolhaDeCupom";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { usePendenciasAoEscolher } from "@hooks/usePendenciasAoEscolher";
@@ -166,6 +168,11 @@ export function ServiceSelection() {
   const multas = pendentes?.penalties ?? [];
   const conta = contaComMultas(totalPrice, multas);
   const [showMultas, setShowMultas] = useState(false);
+  // cupom-em-configuracoes: um cupom ativo por corte, escolhido aqui. O que saiu
+  // da lista (usado, vencido) deixa de valer sem a pessoa ter de desmarcar.
+  const cuponsAtivos = useMeusCupons();
+  const [cupomEscolhido, setCupomEscolhido] = useState<string | null>(null);
+  const cupomId = cuponsAtivos.some((c) => c.id === cupomEscolhido) ? cupomEscolhido : null;
   const totalMinutes = selectedServices.reduce(
     (sum, s) => sum + duracaoDoServico(s),
     0,
@@ -186,6 +193,7 @@ export function ServiceSelection() {
       estimatedWaitMinutes,
       serviceItemIds: selectedIds,
       ...(targetTime ? { targetTime } : {}),
+      ...(cupomId ? { couponCampaignId: cupomId } : {}),
     };
     if (!isAuthenticated) {
       navigation.navigate("login", { redirectTo: "queueStatus", ...payload });
@@ -542,6 +550,7 @@ export function ServiceSelection() {
                     <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">+ {reais(conta.totalMultas)}</Text>
                   </HStack>
                 )}
+                <EscolhaDeCupom cupons={cuponsAtivos} escolhido={cupomId} onEscolher={setCupomEscolhido} />
                 {/* politica-de-preco-saiba-mais (DEC-91, Andre 18/10): o preco que
                     aparece nos botoes ja inclui a taxa de pagamento, que varia por
                     faixa. O "Saiba mais" abre o artigo do Suporte (DEC-96). */}
@@ -638,6 +647,8 @@ export function ServiceSelection() {
         establishmentId={establishmentId}
         serviceItemIds={selectedIds}
         minutosDoServico={totalMinutes}
+        couponCampaignId={cupomId}
+        onCupomInvalido={() => setCupomEscolhido(null)}
         onPrecisaLogin={goToLoginAndComeBack}
         onAgendado={() => navigation.navigate("home", undefined, { pop: true })}
       />

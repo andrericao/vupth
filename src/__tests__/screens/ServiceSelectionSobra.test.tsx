@@ -23,6 +23,7 @@ const ABERTA = {
 };
 const mockRouteParams: Record<string, unknown> = { ...ABERTA };
 
+jest.mock('@hooks/useMeusCupons', () => ({ useMeusCupons: () => [] }));
 jest.mock('expo-secure-store');
 jest.mock('@hooks/useTabBarInset', () => ({ useTabBarInset: () => 0 }));
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));

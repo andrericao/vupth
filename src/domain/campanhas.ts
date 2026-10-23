@@ -24,6 +24,8 @@ export function mensagemDoCupom(erro: unknown): string {
       return 'Este cupom não está valendo agora.';
     case 'CAMPAIGN_ALREADY_REDEEMED':
       return 'Você já usou este cupom.';
+    case 'COUPON_NOT_ACTIVE':
+      return 'Este cupom não está valendo. Escolha outro ou siga sem cupom.';
     case 'CAMPAIGN_NOT_FOR_YOU':
       return 'Este cupom não vale para a sua conta.';
     default:

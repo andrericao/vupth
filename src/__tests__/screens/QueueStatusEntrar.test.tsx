@@ -93,6 +93,28 @@ describe('QueueStatus — entrar na fila', () => {
     expect(mockCreate.mock.calls[0][0]).toHaveProperty('scheduledTime');
   });
 
+  // cupom-em-configuracoes: o cupom escolhido na selecao vai no corpo do atendimento.
+  it('com cupom escolhido, manda o coupon_campaign_id; sem cupom, não manda', async () => {
+    mockParams.couponCampaignId = 'cp1';
+    const { unmount } = renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(mockCreate).toHaveBeenCalled());
+    expect(mockCreate.mock.calls[0][0]).toHaveProperty('coupon_campaign_id', 'cp1');
+    unmount();
+    mockCreate.mockClear();
+    delete mockParams.couponCampaignId;
+    renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(mockCreate).toHaveBeenCalled());
+    expect(mockCreate.mock.calls[0][0]).not.toHaveProperty('coupon_campaign_id');
+  });
+
+  it('cupom que não vale mais (422): avisa em uma frase e volta à escolha', async () => {
+    mockParams.couponCampaignId = 'cp1';
+    mockCreate.mockRejectedValue({ response: { status: 422, data: { code: 'COUPON_NOT_ACTIVE' } } });
+    renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(alertSpy).toHaveBeenCalledWith('Cupom', 'Este cupom não está valendo. Escolha outro ou siga sem cupom.'));
+    expect(mockGoBack).toHaveBeenCalled();
+  });
+
   it('agendar manda o horário pedido', async () => {
     mockParams.targetTime = '2026-10-08T18:00:00.000Z';
     renderWithProviders(<QueueStatus />);
