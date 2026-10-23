@@ -80,4 +80,15 @@ export const profileService = {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
   },
+
+  /**
+   * Desativa a conta (reversivel; desativar-conta, Backend). Senha atual no corpo,
+   * como no apagar: `204` sucesso · `401 CURRENT_PASSWORD_INVALID` (erro de campo) ·
+   * `409 ACCOUNT_DEACTIVATE_NOT_ALLOWED` (compromisso vivo: mostrar a mensagem do servidor).
+   */
+  deactivateAccount(accessToken: string, currentPassword: string) {
+    return api.post('/profile/deactivate/me', { current_password: currentPassword }, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
 };

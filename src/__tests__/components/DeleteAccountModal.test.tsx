@@ -21,6 +21,19 @@ function setup(overrides: Partial<React.ComponentProps<typeof DeleteAccountModal
   return { props, ...renderWithProviders(<DeleteAccountModal {...props} />) };
 }
 
+describe('DeleteAccountModal — desativar conta', () => {
+  it('modo desativar: outro verbo, sem Saiba mais, e confirma com a senha', () => {
+    const { getByText, queryByText, getByTestId, props } = setup({ modo: 'desativar' });
+    expect(getByText('Desativar conta')).toBeTruthy();
+    expect(getByText(/dá para reativar depois/)).toBeTruthy();
+    expect(queryByText('Saiba mais')).toBeNull();
+    expect(queryByText('Seus dados são apagados. Para confirmar, digite a senha.')).toBeNull();
+    fireEvent.changeText(getByTestId('delete-account-password'), 'senha');
+    fireEvent.press(getByText('Desativar'));
+    expect(props.onConfirm).toHaveBeenCalledWith('senha');
+  });
+});
+
 describe('DeleteAccountModal — textos curtos (GUIA_DE_TEXTO.md §4.7)', () => {
   it('Excluir conta · uma linha de corpo · Saiba mais · Excluir / Cancelar, sem "Deletar"', () => {
     const { getByText, queryByText, toJSON } = setup();

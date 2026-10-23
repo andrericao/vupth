@@ -24,7 +24,7 @@ type Secao = { titulo: string; corpo: string };
 export const COMO_EXCLUIR: Secao[] = [
   {
     titulo: "No app do cliente",
-    corpo: "Perfil → Excluir conta. Para confirmar que é você, digite a sua senha atual.",
+    corpo: "Perfil → Dados cadastrais → Excluir conta. Para confirmar que é você, digite a sua senha atual.",
   },
   {
     titulo: "No app do profissional (VUPTH Parceiros)",
@@ -33,7 +33,7 @@ export const COMO_EXCLUIR: Secao[] = [
   {
     titulo: "Pela web, sem o app",
     corpo:
-      "Entre na sua conta em vupth.pages.dev e vá em Perfil → Excluir conta. O botão abaixo leva até lá.",
+      "Entre na sua conta em vupth.pages.dev e vá em Perfil → Dados cadastrais → Excluir conta. O botão abaixo leva até lá.",
   },
   {
     titulo: "Esqueceu a senha",

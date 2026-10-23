@@ -53,7 +53,7 @@ describe('páginas legais', () => {
     expect(getByText('Esqueceu a senha')).toBeTruthy();
     expect(getByText('O que é apagado')).toBeTruthy();
     // Guia de texto 4.7: o caminho escrito usa o nome do link do Perfil (no app e na web).
-    expect(getAllByText(/Perfil → Excluir conta/)).toHaveLength(2);
+    expect(getAllByText(/Perfil → Dados cadastrais → Excluir conta/)).toHaveLength(2);
     expect(getByText(/Conta → Excluir,/)).toBeTruthy();
     expect(queryByText(/Deletar/)).toBeNull();
   });

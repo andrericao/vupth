@@ -1,5 +1,5 @@
 import { Alert, Linking } from 'react-native';
-import { act, fireEvent, waitFor } from '@testing-library/react-native';
+import { act, fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { Settings } from '@screens/Settings';
@@ -11,7 +11,6 @@ const mockNavigate = jest.fn();
 const mockParentNavigate = jest.fn();
 const mockLogout = jest.fn();
 const mockGetMain = jest.fn();
-const mockDelete = jest.fn();
 let mockUser: Record<string, unknown> | null = { first_name: 'Alexia', last_name: 'Souza', email: 'a@b.com' };
 let mockToken: string | null = 'tk';
 
@@ -35,9 +34,6 @@ jest.mock('react-native-safe-area-context', () => ({
 jest.mock('@services/addressService', () => ({
   addressService: { getMain: (...a: unknown[]) => mockGetMain(...a) },
 }));
-jest.mock('@services/profileService', () => ({
-  profileService: { deleteAccount: (...a: unknown[]) => mockDelete(...a) },
-}));
 jest.mock('@stores/authStore', () => ({
   useAuthStore: (sel: (s: unknown) => unknown) =>
     sel({ user: mockUser, accessToken: mockToken, isAuthenticated: !!mockToken, logout: mockLogout }),
@@ -45,19 +41,6 @@ jest.mock('@stores/authStore', () => ({
 jest.mock('@stores/comingSoonStore', () => ({
   useComingSoonStore: (sel: (s: unknown) => unknown) => sel({ counts: {} }),
 }));
-jest.mock('@components/DeleteAccountModal', () => {
-  const { Text, View } = jest.requireActual('react-native');
-  return {
-    DeleteAccountModal: (p: { visible: boolean; error: string | null; onConfirm: (s: string) => void; onClose: () => void }) =>
-      p.visible ? (
-        <View>
-          <Text onPress={() => p.onConfirm('senha')}>confirmar-delete</Text>
-          <Text onPress={p.onClose}>fechar-delete</Text>
-          {p.error ? <Text>{`erro:${p.error}`}</Text> : null}
-        </View>
-      ) : null,
-  };
-});
 
 jest.setTimeout(60000);
 
@@ -69,7 +52,6 @@ beforeEach(() => {
   mockUser = { first_name: 'Alexia', last_name: 'Souza', email: 'a@b.com' };
   mockToken = 'tk';
   mockGetMain.mockResolvedValue({ data: { street: 'Rua A', number: '10', neighborhood: 'Centro' } });
-  mockDelete.mockResolvedValue({});
   mockLogout.mockResolvedValue(undefined);
 });
 
@@ -137,60 +119,13 @@ describe('Perfil — a conta', () => {
   });
 });
 
-describe('Perfil — deletar conta', () => {
-  async function abrir() {
-    const tela = renderWithProviders(<Settings />);
-    fireEvent.press(tela.getByTestId('delete-account'));
-    return tela;
-  }
-
-  it('apaga, sai e volta ao Início', async () => {
-    const { getByText } = await abrir();
-    await act(async () => {
-      fireEvent.press(getByText('confirmar-delete'));
-    });
-    await waitFor(() => expect(mockLogout).toHaveBeenCalled());
-    expect(mockDelete).toHaveBeenCalledWith('tk', 'senha');
-    expect(mockParentNavigate).toHaveBeenCalledWith('homeTab', { screen: 'home', pop: true });
-  });
-
-  it('senha errada', async () => {
-    mockDelete.mockRejectedValue({ response: { data: { code: 'CURRENT_PASSWORD_INVALID' } } });
-    const { getByText, findByText } = await abrir();
-    fireEvent.press(getByText('confirmar-delete'));
-    expect(await findByText('erro:Senha incorreta. Confira e tente de novo.')).toBeTruthy();
-  });
-
-  it('bloqueio temporário mostra a mensagem do servidor, ou a padrão', async () => {
-    mockDelete.mockRejectedValueOnce({ response: { data: { code: 'ACCOUNT_DELETE_NOT_ALLOWED', message: 'Saia da fila' } } });
-    const { getByText, findByText } = await abrir();
-    fireEvent.press(getByText('confirmar-delete'));
-    expect(await findByText('erro:Saia da fila')).toBeTruthy();
-
-    mockDelete.mockRejectedValueOnce({ response: { data: { code: 'ACCOUNT_DELETE_NOT_ALLOWED' } } });
-    fireEvent.press(getByText('confirmar-delete'));
-    expect(await findByText(/erro:Você tem um atendimento em andamento/)).toBeTruthy();
-  });
-
-  it('outro erro: a mensagem do servidor, a do erro, ou a padrão', async () => {
-    mockDelete.mockRejectedValueOnce({ response: { data: { message: 'Falhou' } } });
-    const { getByText, findByText } = await abrir();
-    fireEvent.press(getByText('confirmar-delete'));
-    expect(await findByText('erro:Falhou')).toBeTruthy();
-
-    mockDelete.mockRejectedValueOnce(new Error('Network Error'));
-    fireEvent.press(getByText('confirmar-delete'));
-    expect(await findByText('erro:Sem conexão com o servidor. Confira a sua internet.')).toBeTruthy();
-
-    mockDelete.mockRejectedValueOnce({});
-    fireEvent.press(getByText('confirmar-delete'));
-    expect(await findByText('erro:Erro ao deletar conta')).toBeTruthy();
-  });
-
-  it('fechar o modal', async () => {
-    const { getByText, queryByText } = await abrir();
-    fireEvent.press(getByText('fechar-delete'));
-    expect(queryByText('confirmar-delete')).toBeNull();
+describe('Perfil — conta', () => {
+  it('em Configurações fica só o Sair; Excluir e Desativar conta moram em Dados cadastrais', async () => {
+    const { getByTestId, queryByTestId } = renderWithProviders(<Settings />);
+    expect(getByTestId('logout')).toBeTruthy();
+    expect(queryByTestId('delete-account')).toBeNull();
+    expect(queryByTestId('deactivate-account')).toBeNull();
+    await act(async () => {});
   });
 });
 

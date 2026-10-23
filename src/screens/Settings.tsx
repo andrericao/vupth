@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Alert, Linking, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,19 +17,15 @@ import { Button } from "@components/Button";
 import { MenuItem, Grupo } from "@components/MenuDoPerfil";
 import { VersaoDoApp } from "@components/VersaoDoApp";
 import { LinksLegais } from "@components/LinksLegais";
-import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
-import { profileService } from "@services/profileService";
 import { fs } from "@stores/fonteStore";
 import { SUPORTE_URL } from "@utils/suporte";
 import { CUPOM_LIGADO } from "@domain/campanhas";
-import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 export function Settings() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const user = useAuthStore((s) => s.user);
-  const accessToken = useAuthStore((s) => s.accessToken);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
 
@@ -59,48 +54,6 @@ export function Settings() {
         },
       },
     ]);
-  }
-
-  const [showDelete, setShowDelete] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  function openDeleteAccount() {
-    setDeleteError(null);
-    setShowDelete(true);
-  }
-
-  // Contrato novo do backend (2026-08-07): exige a senha atual no corpo. Antes
-  // mandávamos DELETE sem corpo e tomávamos 400 — o botão estava quebrado.
-  async function handleDeleteAccount(currentPassword: string) {
-    if (!accessToken) return;
-    setIsDeleting(true);
-    setDeleteError(null);
-    try {
-      await profileService.deleteAccount(accessToken, currentPassword);
-      setShowDelete(false);
-      await logout();
-      // Settings vive na aba Config.; volta para a aba Home (pai = tabs).
-      navigation.getParent()?.navigate("homeTab", { screen: "home", pop: true });
-    } catch (error: any) {
-      const code = error.response?.data?.code;
-
-      if (code === "CURRENT_PASSWORD_INVALID") {
-        // 401 de NEGÓCIO: erro de campo, não sessão expirada. O interceptor
-        // global já isenta este código de deslogar (ver `api.ts`).
-        setDeleteError("Senha incorreta. Confira e tente de novo.");
-      } else if (code === "ACCOUNT_DELETE_NOT_ALLOWED") {
-        // Bloqueio TEMPORÁRIO. A mensagem do backend diz o que fazer para
-        // destravar (sair da fila, encerrar o atendimento, esperar a loja
-        // esvaziar) — exibir como veio. Transformar em "não é possível apagar
-        // esta conta" reprovaria na publicação das lojas de app.
-        setDeleteError(mensagemDoErro(error, "Você tem um atendimento em andamento. Conclua antes de apagar a conta."));
-      } else {
-        setDeleteError(mensagemDoErro(error, "Erro ao deletar conta"));
-      }
-    } finally {
-      setIsDeleting(false);
-    }
   }
 
   return (
@@ -278,29 +231,11 @@ export function Settings() {
               existem, e abrir o site tiraria a pessoa do app para ler o mesmo
               texto. Um unico "Termos e Privacidade" nao dizia que eram dois. */}
           <LinksLegais aoAbrir={(pagina) => navigation.navigate(pagina === "termos" ? "terms" : "privacy")} />
-          {/* Excluir conta desce pra ca como LINK: e irreversivel, entao nao
-              disputa atencao com o resto — mas continua alcancavel por quem
-              procura (era um botao de mesmo peso que "sair"). */}
-          {isAuthenticated && (
-            <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
-              <Text size="xs" fontWeight="$semibold" color="$brandDanger">
-                Excluir conta
-              </Text>
-            </TouchableOpacity>
-          )}
           {!isAuthenticated && (
             <VersaoDoApp testID="versao-visitante" />
           )}
         </VStack>
       </VStack>
-
-      <DeleteAccountModal
-        visible={showDelete}
-        isDeleting={isDeleting}
-        error={deleteError}
-        onConfirm={handleDeleteAccount}
-        onClose={() => setShowDelete(false)}
-      />
     </ScrollView>
   );
 }

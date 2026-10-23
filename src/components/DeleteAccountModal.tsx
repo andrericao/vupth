@@ -15,6 +15,8 @@ type Props = {
   error?: string | null;
   onConfirm: (currentPassword: string) => void;
   onClose: () => void;
+  /** desativar-conta: mesma caixa, outro verbo (reversivel). */
+  modo?: "excluir" | "desativar";
 };
 
 /**
@@ -35,7 +37,8 @@ type Props = {
  * pertence também ao profissional e ao estabelecimento. Prometer "todos os seus
  * dados serão perdidos" (o texto antigo) seria mentira.
  */
-export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onClose }: Props) {
+export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onClose, modo = "excluir" }: Props) {
+  const desativar = modo === "desativar";
   const [password, setPassword] = useState("");
   const { veu } = useTema();
 
@@ -56,13 +59,15 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
       <Box flex={1} bg={veu} justifyContent="center" px={24}>
         <VStack bg="$painel" borderRadius="$card" p="$6" gap="$3" style={floatingShadow}>
           <Heading fontFamily="$heading" fontSize="$lg">
-            Excluir conta
+            {desativar ? "Desativar conta" : "Excluir conta"}
           </Heading>
 
           <Text size="sm" color="$brandTextSecondary">
-            Seus dados são apagados. Para confirmar, digite a senha.
+            {desativar
+              ? "Sua conta fica desativada e dá para reativar depois. Para confirmar, digite a senha."
+              : "Seus dados são apagados. Para confirmar, digite a senha."}
           </Text>
-          <SaibaMais artigo="excluirConta" testID="excluir-conta-saiba-mais" />
+          {!desativar && <SaibaMais artigo="excluirConta" testID="excluir-conta-saiba-mais" />}
 
           <Input2
             isPassword
@@ -79,7 +84,7 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
           )}
 
           <Button
-            title="Excluir"
+            title={desativar ? "Desativar" : "Excluir"}
             variant="outline"
             borderColor="$brandDanger"
             $active-bg="$brandDangerTint"
