@@ -31,7 +31,7 @@ describe('a vez adiantou', () => {
     (attendanceService.acceptEarlierTurn as jest.Mock).mockResolvedValue({ data: {} });
     await botoes[1].onPress!();
     expect(attendanceService.acceptEarlierTurn).toHaveBeenCalledWith('a1', 'tk');
-    expect(alerta).toHaveBeenLastCalledWith('Combinado', expect.any(String));
+    expect(alerta).toHaveBeenLastCalledWith('Combinado', expect.any(String), undefined, { tipo: 'informacao' });
   });
 
   it('servidor recusando: avisa que segue o horário de antes', async () => {
@@ -39,7 +39,7 @@ describe('a vez adiantou', () => {
     const [, , botoes] = alerta.mock.calls[0] as [string, string, Botao[]];
     (attendanceService.acceptEarlierTurn as jest.Mock).mockRejectedValue(new Error('409'));
     await botoes[1].onPress!();
-    expect(alerta).toHaveBeenLastCalledWith('Não foi possível confirmar', expect.stringMatching(/horário de antes/));
+    expect(alerta).toHaveBeenLastCalledWith('Não foi possível confirmar', expect.stringMatching(/horário de antes/), undefined, { tipo: 'erro' });
   });
 
   it('WS e push da mesma oferta: pergunta uma vez só (dentro de 1 min)', () => {

@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { act, fireEvent, waitFor } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
@@ -448,6 +448,18 @@ describe('Atendimentos — notificacao-avaliar (CLI-33)', () => {
     const { getByTestId, queryByTestId } = renderWithProviders(<Attendances />);
     expect(getByTestId('sem-avaliar-r1')).toBeTruthy();
     expect(queryByTestId('sem-avaliar-c1')).toBeNull();
+  });
+
+  // dot-do-card-sem-avaliacao (André, 23/10): o ponto fica na bordinha do card, e não ao lado do nome.
+  it('o ponto do corte sem avaliar é o do card: absoluto na borda esquerda, 8 de tamanho, e não está na linha do nome', () => {
+    historico([REALIZADO]);
+    const { getByTestId, getByText } = renderWithProviders(<Attendances />);
+    const ponto = getByTestId('sem-avaliar-r1');
+    const estilo = StyleSheet.flatten(ponto.props.style);
+    expect(estilo).toMatchObject({ position: 'absolute', left: 5, width: 8, height: 8 });
+    // O irmao do nome nao e mais o ponto: o pai do nome nao o contem.
+    const nome = getByText(REALIZADO.professionalName as string);
+    expect(nome.parent?.findAll((n: { props?: { testID?: string } }) => n.props?.testID === 'sem-avaliar-r1').length ?? 0).toBe(0);
   });
 
   it('pelo push de concluído: abre a avaliação do atendimento e limpa o parâmetro', () => {

@@ -1,4 +1,4 @@
-import { Alert } from "react-native";
+import { alertaTipado } from "@utils/alertaTipado";
 
 import { attendanceService } from "@services/attendanceService";
 import { useAuthStore } from "@stores/authStore";
@@ -16,7 +16,7 @@ export function oferecerVezAdiantada(attendanceId: string, mensagem: string, ago
   const chave = `${attendanceId}|${mensagem}`;
   if (ultima && ultima.chave === chave && agora - ultima.em < JANELA_MS) return;
   ultima = { chave, em: agora };
-  Alert.alert("Sua vez adiantou", mensagem, [
+  alertaTipado("Sua vez adiantou", mensagem, [
     { text: "Não, mantenho meu horário", style: "cancel" },
     {
       text: "Topo",
@@ -25,14 +25,16 @@ export function oferecerVezAdiantada(attendanceId: string, mensagem: string, ago
         if (!token) return;
         try {
           await attendanceService.acceptEarlierTurn(attendanceId, token);
-          Alert.alert("Combinado", "Seu horário passou a ser o novo. O atraso conta a partir dele.");
+          alertaTipado("Combinado", "Seu horário passou a ser o novo. O atraso conta a partir dele.", undefined, { tipo: "informacao" });
         } catch {
-          Alert.alert(
+          alertaTipado(
             "Não foi possível confirmar",
             "A vaga pode ter mudado de novo. Você segue com o seu horário de antes.",
+            undefined,
+            { tipo: "erro" },
           );
         }
       },
     },
-  ]);
+  ], { tipo: "atencao" });
 }

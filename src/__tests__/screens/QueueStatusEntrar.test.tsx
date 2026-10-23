@@ -272,7 +272,7 @@ describe('QueueStatus — o que sobra ao entrar (cobertura-98)', () => {
   it('horário que caiu no intervalo: avisa o ajuste', async () => {
     mockCreate.mockResolvedValue({ data: { id: 'a9', placedAfterBreak: true, scheduledTime: null } });
     renderWithProviders(<QueueStatus />);
-    await waitFor(() => expect(alertSpy).toHaveBeenCalledWith('Horário ajustado', expect.stringMatching(/logo depois dele/)));
+    await waitFor(() => expect(alertSpy).toHaveBeenCalledWith('Horário ajustado', expect.stringMatching(/logo depois dele/), undefined, { tipo: 'informacao' }));
     const { isCancelled } = mockWait.mock.calls[0][0] as { isCancelled: () => boolean };
     expect(isCancelled()).toBe(false);
   });

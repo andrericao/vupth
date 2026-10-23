@@ -198,7 +198,7 @@ export function QueueStatus() {
     const atual = useQueueStore.getState().activeQueue;
     if (!serviceItemIds?.length || !atual?.attendanceId || filaEncerrada(atual.status)) return;
     const aviso = avisoDeFilaExistente(atual, professionalId);
-    Alert.alert(aviso.titulo, aviso.mensagem, [{ text: "Ver minha fila" }]);
+    alertaTipado(aviso.titulo, aviso.mensagem, [{ text: "Ver minha fila" }], { tipo: "atencao" });
     // So na abertura, de proposito — ver o comentario acima.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -256,7 +256,7 @@ export function QueueStatus() {
         if (mountedRef.current) {
           await updateQueue({ attendanceId: data.id });
           const aviso = avisoDepoisDoIntervalo(data);
-          if (aviso) Alert.alert(aviso.titulo, aviso.mensagem);
+          if (aviso) alertaTipado(aviso.titulo, aviso.mensagem, undefined, { tipo: "informacao" });
         }
       } catch (error: any) {
         // Limpa a fila otimista para não deixar tarja/banner residual sem atendimento real.

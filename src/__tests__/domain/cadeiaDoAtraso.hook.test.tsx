@@ -57,7 +57,7 @@ describe('a cadeia do aviso de atraso', () => {
         expect.any(String),
         expect.any(String),
         expect.any(Array),
-        { cancelable: false },
+        expect.objectContaining({ cancelable: false }),
       ),
     );
   });
@@ -79,7 +79,7 @@ describe('a cadeia do aviso de atraso', () => {
         expect.any(String),
         expect.stringMatching(/Este é o seu 2º atraso/),
         expect.any(Array),
-        { cancelable: false },
+        expect.objectContaining({ cancelable: false }),
       ),
     );
   });

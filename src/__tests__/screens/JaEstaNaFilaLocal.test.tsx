@@ -68,7 +68,7 @@ describe('Entrar na fila que o aparelho já tem — o aviso (q246)', () => {
     renderWithProviders(<QueueStatus />);
     expect(alerta).toHaveBeenCalledWith('Você já está na fila', expect.stringMatching(/fila de Carlos/), [
       { text: 'Ver minha fila' },
-    ]);
+    ], { tipo: 'atencao' });
     alerta.mockRestore();
   });
 
@@ -76,7 +76,7 @@ describe('Entrar na fila que o aparelho já tem — o aviso (q246)', () => {
     mockAtual = fila({ professionalId: 'p9', professionalName: 'Ana' });
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     renderWithProviders(<QueueStatus />);
-    expect(alerta).toHaveBeenCalledWith('Você já está em outra fila', expect.stringMatching(/saia desta primeiro/), expect.anything());
+    expect(alerta).toHaveBeenCalledWith('Você já está em outra fila', expect.stringMatching(/saia desta primeiro/), expect.anything(), { tipo: 'atencao' });
     alerta.mockRestore();
   });
 

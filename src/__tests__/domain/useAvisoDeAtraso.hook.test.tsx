@@ -53,6 +53,17 @@ describe('useAvisoDeAtraso', () => {
     expect(opcoes.cancelable).toBe(false);
   });
 
+  // modais-de-alerta (CLI-24): antes da multa o aviso e de atencao; no 3o atraso e de dinheiro, com o selo Multa.
+  it('o tipo do modal: atenção antes da multa, dinheiro no 3º atraso', () => {
+    porNaFila('LATE');
+    renderHook(() => useAvisoDeAtraso());
+    expect((alerta.mock.calls[0][3] as { tipo: string }).tipo).toBe('atencao');
+    alerta.mockClear();
+    useQueueStore.setState({ activeQueue: { ...useQueueStore.getState().activeQueue!, attendanceId: 'a9', lateCount: 3 } as never });
+    renderHook(() => useAvisoDeAtraso());
+    expect(alerta.mock.calls[0][3]).toMatchObject({ cancelable: false, tipo: 'dinheiro', selo: 'Multa' });
+  });
+
   it('o toque registra a ciência — e o aviso não volta', async () => {
     porNaFila('LATE');
     const { rerender } = renderHook(() => useAvisoDeAtraso());
