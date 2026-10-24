@@ -1,4 +1,4 @@
-import { Alert, Linking } from 'react-native';
+import { Alert, Linking, StyleSheet } from 'react-native';
 import { act, fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
@@ -112,7 +112,7 @@ describe('Perfil — a conta', () => {
     while (no && !(no.findAll((x) => x.props?.testID === 'link-termos').length > 0)) no = no.parent;
     expect(no).not.toBeNull();
     expect(no!.findAll((x) => x.props?.children === 'Dados cadastrais')).toHaveLength(0);
-    expect(getByText('Sair da conta').props.textAlign).toBe('center');
+    expect(StyleSheet.flatten(getByText('Sair da conta').props.style).textAlign).toBe('center');
     await act(async () => {});
   });
 
