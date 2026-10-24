@@ -42,7 +42,18 @@ beforeEach(() => {
 
 afterEach(() => alerta.mockRestore());
 
+// promocoes-ativas-clicaveis (André, 24/10): o ticket do link abre o QR, o link e os botões.
+async function abrirDetalhe(t: ReturnType<typeof renderWithProviders>) {
+  fireEvent.press(await t.findByTestId('link-c1'));
+}
+
 describe('SeuLinkDeIndicacao', () => {
+  it('com titulo nulo, o bloco não repete o título (vem dentro de Promoções ativas)', async () => {
+    const t = renderWithProviders(<SeuLinkDeIndicacao titulo={null} />);
+    await t.findByTestId('link-c1');
+    expect(t.queryByText('Promoções ativas')).toBeNull();
+  });
+
   it('sem campanha de link, o bloco some', async () => {
     mockMe.mockResolvedValue({ data: { campaigns: [] } });
     const t = renderWithProviders(<SeuLinkDeIndicacao />);
@@ -63,15 +74,20 @@ describe('SeuLinkDeIndicacao', () => {
 
   it('mostra o link, o QR, os contadores e o ganho a liberar', async () => {
     const t = renderWithProviders(<SeuLinkDeIndicacao />);
-    expect(await t.findByText('https://vupth.pages.dev/i/ABC?c=c1')).toBeTruthy();
-    expect(t.getByTestId('link-qr-c1')).toBeTruthy();
+    expect(await t.findByText('Promoções ativas')).toBeTruthy();
     expect(t.getByText('2 indicados · 1 com ganho')).toBeTruthy();
+    expect(t.queryByTestId('link-qr-c1')).toBeNull();
+    await abrirDetalhe(t);
+    expect(t.getByText('https://vupth.pages.dev/i/ABC?c=c1')).toBeTruthy();
+    expect(t.getByTestId('link-qr-c1')).toBeTruthy();
+    fireEvent.press(t.getByTestId('link-fechar'));
+    expect(t.queryByTestId('link-qr-c1')).toBeNull();
     expect(t.getByText('R$ 8,00 a liberar')).toBeTruthy();
   });
 
   it('Copiar avisa; sem o módulo de copiar, mostra o link', async () => {
     const t = renderWithProviders(<SeuLinkDeIndicacao />);
-    await t.findByTestId('link-copiar-c1');
+    await abrirDetalhe(t);
     await act(async () => { fireEvent.press(t.getByTestId('link-copiar-c1')); });
     expect(mockCopiar).toHaveBeenCalledWith('https://vupth.pages.dev/i/ABC?c=c1');
     expect(alerta).toHaveBeenCalledWith('Link copiado', undefined);
@@ -83,7 +99,7 @@ describe('SeuLinkDeIndicacao', () => {
   it('Compartilhar abre o compartilhar do sistema; se falhar, mostra o link', async () => {
     const share = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' } as never);
     const t = renderWithProviders(<SeuLinkDeIndicacao />);
-    await t.findByTestId('link-compartilhar-c1');
+    await abrirDetalhe(t);
     await act(async () => { fireEvent.press(t.getByTestId('link-compartilhar-c1')); });
     expect(share).toHaveBeenCalledWith({ message: expect.stringContaining('https://vupth.pages.dev/i/ABC?c=c1') });
     share.mockRejectedValue(new Error('x'));

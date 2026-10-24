@@ -72,7 +72,7 @@ appId: ${APP_ID}
           file: ../apoio/para_o_andre.yaml
           env:
             NOME: campanha-cupom-ativado
-            O_QUE: "Promoções: o cupom da MAESTRO CLIENT CUPOM em Cupons ativos, com a regra e a validade."
+            O_QUE: "Promoções: o cupom da MAESTRO CLIENT CUPOM em Promoções ativas, com a regra e a validade."
 # Campanha que já acabou ou esgotou: o modal certo, em vez do aviso de validade.
 - runFlow:
     when:

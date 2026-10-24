@@ -62,6 +62,14 @@ appId: ${APP_ID}
           element:
             text: ".* indicados? · \\d+ com ganho"
           label: "26.11 · vê os contadores"
+      # promocoes-ativas-clicaveis (24/10): o ticket é clicável; tocar abre o QR, o link e os botões.
+      - tapOn:
+          text: "Indique e ganhe"
+          label: "26.11a · toca no ticket do link"
+      - extendedWaitUntil:
+          visible: "Copiar link"
+          timeout: ${10000 * LENTO}
+          label: "26.11b · vê o link, o QR e os botões"
       - tapOn:
           text: "Copiar link"
           label: "26.12 · toca em Copiar link"
@@ -79,6 +87,9 @@ appId: ${APP_ID}
           timeout: 3000
       - back:
           label: "26.16 · fecha o compartilhar do sistema"
+      - tapOn:
+          id: "link-fechar"
+          label: "26.16a · fecha o painel do link"
       - runFlow:
           file: ../apoio/para_o_andre.yaml
           env:

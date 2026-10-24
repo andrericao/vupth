@@ -100,6 +100,26 @@ describe('Promoções', () => {
     expect(queryByText('Velho')).toBeTruthy();
   });
 
+  // promocoes-ativas-clicaveis (André, 24/10): "Promoções ativas"; o cupom abre o código.
+  it('o cupom ativo é um card clicável que mostra o código; o usado não abre', async () => {
+    mockListMine.mockResolvedValue({
+      data: [
+        { id: 'a', name: 'Lançamento', code: 'VUPTH10', status: 'ACTIVE', value_percent: 10 },
+        { id: 'b', name: 'Antigo', code: 'VELHO', status: 'USED', value_amount: 5 },
+      ],
+    });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { findByTestId, getByTestId, getByText } = renderWithProviders(<Promocoes />);
+    await findByTestId('cupons-meus');
+    expect(getByText('Promoções ativas')).toBeTruthy();
+    fireEvent.press(getByTestId('cupom-a'));
+    expect(alerta).toHaveBeenLastCalledWith('Lançamento', 'Código: VUPTH10');
+    alerta.mockClear();
+    fireEvent.press(getByTestId('cupom-b'));
+    expect(alerta).not.toHaveBeenCalled();
+    alerta.mockRestore();
+  });
+
   it('a recusa vem numa frase curta', async () => {
     mockRedeem.mockRejectedValue({ response: { data: { code: 'CAMPAIGN_ALREADY_REDEEMED' } } });
     const { getByTestId } = renderWithProviders(<Promocoes />);

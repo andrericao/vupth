@@ -105,15 +105,18 @@ export function Promocoes() {
             isDisabled={enviando || !cupomDigitado(cupom)}
             testID="cupom-usar"
           />
-          <SeuLinkDeIndicacao />
+          {/* promocoes-ativas-clicaveis (André, 24/10): "Promoções ativas"; o cupom abre o código que o
+              valida, o link abre o QR e o link (SeuLinkDeIndicacao). */}
           {ativos.length > 0 && (
-            <VStack gap="$2" mt="$4" testID="cupons-meus">
-              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Cupons ativos</Text>
+            <VStack gap="$3" mt="$4" testID="cupons-meus">
+              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Promoções ativas</Text>
               {ativos.map((c) => (
                 <CartaoDoCupom key={c.id} cupom={c} />
               ))}
+              <SeuLinkDeIndicacao titulo={null} />
             </VStack>
           )}
+          {ativos.length === 0 && <SeuLinkDeIndicacao />}
           {/* cupom-usado-some-da-selecao (André, 24/10): o usado sai da escolha do serviço e mora aqui,
               esmaecido e marcado "Usado"; o vencido, à parte. Sem contagem de ativos. */}
           {usados.length > 0 && (
@@ -149,6 +152,7 @@ function CartaoDoCupom({ cupom, encerrado }: { cupom: Campanha; encerrado?: bool
       nome={nomeDaCampanha(cupom)}
       detalhe={encerrado ? undefined : validadeDoTicket(cupom) || validadeDoCupom(cupom)}
       situacao={encerrado ? situacaoDoCupom(cupom) : undefined}
+      onPress={encerrado ? undefined : () => Alert.alert(nomeDaCampanha(cupom), cupom.code ? `Código: ${cupom.code}` : undefined)}
     />
   );
 }
