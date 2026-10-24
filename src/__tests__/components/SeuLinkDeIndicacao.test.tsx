@@ -26,7 +26,7 @@ jest.mock('@react-navigation/native', () => {
 jest.setTimeout(60000);
 
 const dados = {
-  campaigns: [{ campaign_id: 'c1', name: 'Indique', link: 'https://vupth.pages.dev/i/ABC?c=c1', referred: 2, credited: 1 }],
+  campaigns: [{ campaign_id: 'c1', name: 'Indique', link: 'https://vupth.pages.dev/i/ABC?c=c1', referred_clients: 2, credited_clients: 1 }],
   pending_release: 8,
 };
 

@@ -31,7 +31,7 @@ elas aparecem como ⏭.
 usam campanhas que o André cria no Painel, **com o nome exato** e os valores que quiser (público cliente):
 `MAESTRO CLIENT CUPOM` (desconto com cupom) e `MAESTRO CLIENT LINK` (bônus de indicação). O fluxo acha a
 campanha pelo nome na Home e confere o que ela mostra, sem fixar valor. Cupom (25): código no detalhe, ativar
-em Perfil → Cupom, "Cupom válido até dd/MM às HH:mm", Saiba mais; se a campanha já acabou ou esgotou, o
+em Perfil → Cupom, "Válido até dd/MM às HH:mm", Saiba mais; se a campanha já acabou ou esgotou, o
 modal Promoção encerrada ou Promoção esgotada. Link (26): Participar, Perfil → Cupom → Indique e ganhe, contadores,
 Copiar link e Compartilhar. **Sem a campanha no ar, a etapa pula** (⏭ no relatório, não ❌): ela começa perguntando ao staging (`scripts/campanha_existe.js`, a lista da Home) e a bateria segue para a próxima. Rodar: `ETAPAS="25 26" bash .maestro/bateria.sh`.
 

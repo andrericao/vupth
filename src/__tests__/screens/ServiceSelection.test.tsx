@@ -21,7 +21,8 @@ const OPEN_PARAMS = {
 const mockRouteParams: Record<string, unknown> = { ...OPEN_PARAMS };
 
 let mockInset = 0;
-jest.mock('@hooks/useMeusCupons', () => ({ useMeusCupons: () => [] }));
+let mockCupons: unknown[] = [];
+jest.mock('@hooks/useMeusCupons', () => ({ useMeusCupons: () => mockCupons }));
 jest.mock('@hooks/usePagamentoAdiantado', () => ({ ...jest.requireActual('@hooks/usePagamentoAdiantado'), usePagamentoAdiantado: () => false }));
 jest.mock('@hooks/useTabBarInset', () => ({ useTabBarInset: () => mockInset }));
 jest.mock('expo-secure-store');
@@ -149,13 +150,46 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
   it('com serviço escolhido, o resumo traz o Saiba mais do preço, que abre o artigo do Suporte', async () => {
     useAuthStore.setState({ isAuthenticated: true });
     const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
-    const { queryByTestId, getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    const { queryByTestId, getByTestId, getByText, findByTestId } = renderWithProviders(<ServiceSelection />);
     await findByTestId('service-s1', {}, { timeout: 15000 });
     expect(queryByTestId('preco-saiba-mais')).toBeNull();
     fireEvent.press(getByTestId('service-s1'));
+    // detalhes-do-pagamento (André, 24/10): o rotulo e "Detalhes do pagamento"; o Saiba mais explica
+    // a taxa e que abatimento em multa nao conta em campanha, e dai vai ao artigo.
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    expect(getByText('Detalhes do pagamento')).toBeTruthy();
     fireEvent.press(getByTestId('preco-saiba-mais'));
+    const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, { text: string; onPress?: () => void }[]];
+    expect(titulo).toBe('Detalhes do pagamento');
+    expect(mensagem).toMatch(/taxa de pagamento/);
+    expect(mensagem).toMatch(/Abatimentos em multas não são considerados em campanhas/);
+    botoes.find((b) => b.text === 'Ver artigo')!.onPress!();
     expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/por-que-o-preco-muda.html');
+    alerta.mockRestore();
     abrir.mockRestore();
+  });
+
+  // cupom-abate-no-resumo (André, 24/10): o resumo mostra o total dos servicos sem a multa; o toggle
+  // "usar cupom" fica abaixo do card; ligado, o valor cheio e riscado, "Valor com cupom" aparece e o
+  // botao usa servicos - cupom (+ multa, que nunca entra no desconto).
+  it('o cupom abate no resumo e no botão ao ligar o toggle', async () => {
+    useAuthStore.setState({ isAuthenticated: true });
+    mockCupons = [{ id: 'c1', name: 'Dez', value_amount: 10 }];
+    const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    await findByTestId('service-s1', {}, { timeout: 15000 });
+    fireEvent.press(getByTestId('service-s1'));
+    expect(getByTestId('servicos-valor-cheio')).toBeTruthy();
+    expect(queryByTestId('valor-com-cupom')).toBeNull();
+    expect(getByTestId('primary-queue')).toHaveTextContent('Entrar na fila · R$ 30,00');
+    fireEvent(getByTestId('usar-cupom-c1'), 'valueChange', true);
+    expect(getByTestId('valor-com-cupom')).toBeTruthy();
+    expect(getByTestId('valor-com-cupom')).toHaveTextContent(/Valor com cupom\s*R\$ 20,00/);
+    expect(getByTestId('servicos-valor-cheio')).toHaveTextContent('R$ 30,00');
+    expect(getByTestId('primary-queue')).toHaveTextContent('Entrar na fila · R$ 20,00');
+    fireEvent(getByTestId('usar-cupom-c1'), 'valueChange', false);
+    expect(queryByTestId('valor-com-cupom')).toBeNull();
+    expect(getByTestId('primary-queue')).toHaveTextContent('Entrar na fila · R$ 30,00');
+    mockCupons = [];
   });
 
   it('LOGADO: confirmar vai direto pra queueStatus', async () => {

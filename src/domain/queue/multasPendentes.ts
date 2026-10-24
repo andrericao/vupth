@@ -26,8 +26,12 @@ export function origemDaMulta(m: PendingPenalty): string {
   return [MOTIVO[m.type] ?? 'Multa', quem || null, dataCurta(m.originDate)].filter(Boolean).join(' · ');
 }
 
-/** Servico + multas: o que a pessoa paga no proximo atendimento. */
-export function contaComMultas(servico: number, multas: PendingPenalty[]) {
+/**
+ * Servico + multas: o que a pessoa paga no proximo atendimento. O cupom abate so os
+ * servicos (a multa nunca entra no desconto): total = servicos - cupom + multas.
+ */
+export function contaComMultas(servico: number, multas: PendingPenalty[], desconto = 0) {
   const totalMultas = multas.reduce((t, m) => t + (Number(m.amount) || 0), 0);
-  return { servico, totalMultas, total: servico + totalMultas };
+  const servicoComCupom = Math.max(servico - desconto, 0);
+  return { servico, desconto, servicoComCupom, totalMultas, total: servicoComCupom + totalMultas };
 }

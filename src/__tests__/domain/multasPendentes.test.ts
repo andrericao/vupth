@@ -25,8 +25,15 @@ describe('de onde veio a multa', () => {
 
 describe('a conta do próximo atendimento', () => {
   it('serviço + multas', () => {
-    expect(contaComMultas(30, [multa(), multa({ penaltyId: 'm2', amount: 3 })])).toEqual({ servico: 30, totalMultas: 8, total: 38 });
-    expect(contaComMultas(30, [])).toEqual({ servico: 30, totalMultas: 0, total: 30 });
+    expect(contaComMultas(30, [multa(), multa({ penaltyId: 'm2', amount: 3 })])).toEqual({ servico: 30, desconto: 0, servicoComCupom: 30, totalMultas: 8, total: 38 });
+    expect(contaComMultas(30, [])).toEqual({ servico: 30, desconto: 0, servicoComCupom: 30, totalMultas: 0, total: 30 });
+  });
+
+  // cupom-abate-no-resumo (André, 24/10): o cupom abate so os servicos; a multa nunca entra no desconto.
+  it('com cupom: servicos - cupom + multas (a multa fica inteira)', () => {
+    expect(contaComMultas(75, [multa({ amount: 5 })], 10)).toEqual({ servico: 75, desconto: 10, servicoComCupom: 65, totalMultas: 5, total: 70 });
+    // desconto maior que os servicos nunca deixa o servico negativo
+    expect(contaComMultas(8, [multa({ amount: 5 })], 10).total).toBe(5);
   });
 
   it('valor que veio como texto ainda soma; lixo conta zero', () => {

@@ -8,11 +8,18 @@ export interface CampanhaDeLink {
   /** O link pessoal da pessoa nesta campanha (termina em ?c=<campanha>). */
   link: string;
   ends_at?: string | null;
-  referred: number;
-  credited: number;
+  /** Os campos reais do Backend (ReferralMeResponse.CampaignLink): clientes que chegaram e com credito. */
+  referred_clients?: number | null;
+  credited_clients?: number | null;
 }
 
 export interface MinhasIndicacoes {
+  /** O codigo e o link da pessoa (sem campanha) e os totais dela. */
+  code?: string | null;
+  link?: string | null;
+  referred_clients?: number | null;
+  credited_clients?: number | null;
+  to_receive?: number | null;
   campaigns: CampanhaDeLink[];
   /** Ganho que espera o Andre liberar no Painel (R$). */
   pending_release?: number | null;

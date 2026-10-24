@@ -5,6 +5,7 @@ import {
   nomeDaCampanha,
   regraDoCupom,
   avisoDeValidade,
+  descontoDoCupom,
   fimDaCampanha,
   fimDoErro,
   textoDoFim,
@@ -77,7 +78,7 @@ describe('cupom', () => {
 // campanha-encerrada-esgotada-e-validade (DEC-124): o aviso de validade e o Saiba mais.
 describe('validade do cupom', () => {
   it('avisa o prazo com hora; sem data, nada', () => {
-    expect(avisoDeValidade({ id: 'a', ends_at: '2026-11-05T09:05:00' })).toBe('Cupom válido até 05/11 às 09:05. Se não usar até lá, perde.');
+    expect(avisoDeValidade({ id: 'a', ends_at: '2026-11-05T09:05:00' })).toBe('Válido até 05/11 às 09:05.');
     expect(avisoDeValidade({ id: 'a' })).toBe('');
     expect(avisoDeValidade({ id: 'a', ends_at: 'x' })).toBe('');
   });
@@ -119,5 +120,21 @@ describe('promoção encerrada e esgotada (DEC-124)', () => {
     expect(textoDoFim('ENCERRADA').titulo).toBe('Promoção encerrada');
     expect(textoDoFim('ESGOTADA').titulo).toBe('Promoção esgotada');
     expect(textoDoFim('ENCERRADA').mensagem).not.toBe(textoDoFim('ESGOTADA').mensagem);
+  });
+});
+
+// cupom-abate-no-resumo (André, 24/10): quanto o cupom abate dos serviços.
+describe('descontoDoCupom', () => {
+  it('percentual sobre os serviços, valor fixo até o total, duas casas', () => {
+    expect(descontoDoCupom({ id: 'a', value_percent: 10 }, 75)).toBe(7.5);
+    expect(descontoDoCupom({ id: 'a', value_percent: 33.333 }, 10)).toBe(3.33);
+    expect(descontoDoCupom({ id: 'a', value_amount: 10 }, 75)).toBe(10);
+    expect(descontoDoCupom({ id: 'a', value_amount: 10 }, 8)).toBe(8);
+  });
+
+  it('sem cupom, sem valor ou sem serviço, não abate', () => {
+    expect(descontoDoCupom(undefined, 75)).toBe(0);
+    expect(descontoDoCupom({ id: 'a' }, 75)).toBe(0);
+    expect(descontoDoCupom({ id: 'a', value_amount: 10 }, 0)).toBe(0);
   });
 });

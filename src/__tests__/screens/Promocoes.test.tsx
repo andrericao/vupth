@@ -68,7 +68,7 @@ describe('Promoções', () => {
     });
     const [titulo, msg, botoes] = alerta.mock.calls[0];
     expect(titulo).toBe('Cupom ativado');
-    expect(msg).toBe('Terça\nCupom válido até 05/11 às 21:30. Se não usar até lá, perde.');
+    expect(msg).toBe('Terça\nVálido até 05/11 às 21:30.');
     expect(botoes.map((b: { text: string }) => b.text)).toEqual(['Saiba mais', 'Ok']);
     botoes[0].onPress();
     expect(alerta).toHaveBeenLastCalledWith('Terça', '10% de desconto\nVale para qualquer serviço.\nDias: terça, quarta.\nPrazo: até 05/11 às 21:30.');

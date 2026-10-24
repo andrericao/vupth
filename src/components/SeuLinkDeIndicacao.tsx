@@ -8,7 +8,7 @@ import { Button } from "@components/Button";
 import { useAuthStore } from "@stores/authStore";
 import { referralService, MinhasIndicacoes } from "@services/referralService";
 import { copiarTexto } from "@utils/copiar";
-import { contadorDoLink, ganhoAguardando, mensagemDoLink } from "@domain/compartilhe";
+import { contadorDoLink, ganhoAguardando, linkCompleto, mensagemDoLink } from "@domain/compartilhe";
 
 // Perfil > Promocoes > Indique e ganhe (compartilhe-e-ganhe-no-client, DEC-113):
 // um cartao por campanha de link em que a pessoa participa, com o link, Copiar,
@@ -47,7 +47,7 @@ export function SeuLinkDeIndicacao({ recarregar = 0 }: { recarregar?: number }) 
     try {
       await Share.share({ message: mensagemDoLink(c) });
     } catch {
-      Alert.alert("Link", c.link);
+      Alert.alert("Link", linkCompleto(c.link));
     }
   }
 
@@ -57,12 +57,12 @@ export function SeuLinkDeIndicacao({ recarregar = 0 }: { recarregar?: number }) 
       {dados.campaigns.map((c) => (
         <VStack key={c.campaign_id} bg="$brandSurface" borderRadius="$card" px={16} py={12} gap="$2" testID={`link-${c.campaign_id}`}>
           <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary">{c.name ?? "Campanha"}</Text>
-          <Text size="xs" color="$brandTextSecondary" selectable>{c.link}</Text>
+          <Text size="xs" color="$brandTextSecondary" selectable>{linkCompleto(c.link)}</Text>
           <Box alignItems="center" py="$2" testID={`link-qr-${c.campaign_id}`}>
-            <QRCode value={c.link} size={140} backgroundColor="white" color="black" />
+            <QRCode value={linkCompleto(c.link)} size={140} backgroundColor="white" color="black" />
           </Box>
           <Text size="xs" color="$brandTextSecondary" testID={`link-contador-${c.campaign_id}`}>{contadorDoLink(c)}</Text>
-          <Button title="Copiar link" onPress={() => copiar(c.link)} testID={`link-copiar-${c.campaign_id}`} />
+          <Button title="Copiar link" onPress={() => copiar(linkCompleto(c.link))} testID={`link-copiar-${c.campaign_id}`} />
           <Button title="Compartilhar" onPress={() => compartilhar(c)} testID={`link-compartilhar-${c.campaign_id}`} />
         </VStack>
       ))}

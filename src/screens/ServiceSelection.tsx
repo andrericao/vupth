@@ -37,6 +37,7 @@ import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
+import { descontoDoCupom } from "@domain/campanhas";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
 import { useMeusCupons } from "@hooks/useMeusCupons";
 import { EscolhaDeCupom } from "@components/EscolhaDeCupom";
@@ -166,13 +167,16 @@ export function ServiceSelection() {
     if (semPendencia()) setShowSchedule(true);
   }
   const multas = pendentes?.penalties ?? [];
-  const conta = contaComMultas(totalPrice, multas);
   const [showMultas, setShowMultas] = useState(false);
   // cupom-em-configuracoes: um cupom ativo por corte, escolhido aqui. O que saiu
   // da lista (usado, vencido) deixa de valer sem a pessoa ter de desmarcar.
   const cuponsAtivos = useMeusCupons();
   const [cupomEscolhido, setCupomEscolhido] = useState<string | null>(null);
   const cupomId = cuponsAtivos.some((c) => c.id === cupomEscolhido) ? cupomEscolhido : null;
+  // cupom-abate-no-resumo (André, 24/10): o cupom abate so os servicos; a multa nunca entra
+  // no desconto. O botao usa servicos - cupom + multa.
+  const desconto = descontoDoCupom(cuponsAtivos.find((c) => c.id === cupomId), totalPrice);
+  const conta = contaComMultas(totalPrice, multas, desconto);
   const totalMinutes = selectedServices.reduce(
     (sum, s) => sum + duracaoDoServico(s),
     0,
@@ -536,6 +540,32 @@ export function ServiceSelection() {
                     </Text>
                   </HStack>
                 )}
+                {/* cupom-abate-no-resumo: o total dos servicos SEM a multa; com o cupom ligado, o valor
+                    cheio riscado e, abaixo, "Valor com cupom". */}
+                <HStack justifyContent="space-between" alignItems="center" testID="total-dos-servicos">
+                  <Text size="sm" color="#FFFFFFB3">
+                    Total dos serviços
+                  </Text>
+                  <Text
+                    fontFamily="$heading"
+                    fontSize="$sm"
+                    color="$brandGreen"
+                    textDecorationLine={desconto > 0 ? "line-through" : "none"}
+                    testID="servicos-valor-cheio"
+                  >
+                    {formatarReais(totalPrice)}
+                  </Text>
+                </HStack>
+                {desconto > 0 && (
+                  <HStack justifyContent="space-between" alignItems="center" testID="valor-com-cupom">
+                    <Text size="sm" color="#FFFFFFB3">
+                      Valor com cupom
+                    </Text>
+                    <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
+                      {formatarReais(conta.servicoComCupom)}
+                    </Text>
+                  </HStack>
+                )}
                 {/* DEC-1 (Andre, 01/10): a multa nao aparece na escolha — so no
                     total, numa linha somada ao valor, com o link para a explicacao
                     (cada multa: motivo, quem, quando). Nem a regra da saida
@@ -550,17 +580,20 @@ export function ServiceSelection() {
                     <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">+ {reais(conta.totalMultas)}</Text>
                   </HStack>
                 )}
-                <EscolhaDeCupom cupons={cuponsAtivos} escolhido={cupomId} onEscolher={setCupomEscolhido} />
-                {/* politica-de-preco-saiba-mais (DEC-91, Andre 18/10): o preco que
-                    aparece nos botoes ja inclui a taxa de pagamento, que varia por
-                    faixa. O "Saiba mais" abre o artigo do Suporte (DEC-96). */}
+                {/* detalhes-do-pagamento (André, 24/10): o rotulo e "Detalhes do pagamento"; o
+                    "Saiba mais" explica a taxa e que abatimento em multa nao conta em campanha,
+                    com o artigo do Suporte (DEC-96) a um toque. */}
                 <HStack justifyContent="space-between" alignItems="center" gap="$3" testID="preco-explicacao">
                   <Text size="xs" color="#FFFFFFB3" flex={1}>
-                    O preço inclui a taxa de pagamento.
+                    Detalhes do pagamento
                   </Text>
-                  <SaibaMaisDoPreco color="$brandGreen" />
+                  <SaibaMaisDoPreco color="$brandGreen" detalhado />
                 </HStack>
               </VStack>
+            )}
+            {/* cupom-abate-no-resumo: o toggle "usar cupom" logo abaixo do card verde. */}
+            {selectedIds.length > 0 && (
+              <EscolhaDeCupom cupons={cuponsAtivos} escolhido={cupomId} onEscolher={setCupomEscolhido} />
             )}
           </ScrollView>
 

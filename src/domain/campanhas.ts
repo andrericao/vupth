@@ -66,10 +66,10 @@ function horaDoFim(iso?: string | null): string {
   return `${dia(iso)} às ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
-/** campanha-encerrada-esgotada-e-validade (DEC-124): o aviso ao ativar; vazio sem data. */
+/** campanha-encerrada-esgotada-e-validade (DEC-124) e texto-do-modal-de-cupom (24/10): o aviso ao ativar, so "Válido até dd/MM às HH:mm."; vazio sem data. */
 export function avisoDeValidade(c: Campanha): string {
   const fim = horaDoFim(c.ends_at);
-  return fim ? `Cupom válido até ${fim}. Se não usar até lá, perde.` : '';
+  return fim ? `Válido até ${fim}.` : '';
 }
 
 const DIAS: Record<string, string> = {
@@ -136,4 +136,15 @@ export function textoDoFim(fim: FimDaCampanha): { titulo: string; mensagem: stri
   return fim === 'ENCERRADA'
     ? { titulo: 'Promoção encerrada', mensagem: 'O prazo desta promoção acabou.' }
     : { titulo: 'Promoção esgotada', mensagem: 'As vagas desta promoção acabaram.' };
+}
+
+/**
+ * cupom-abate-no-resumo (André, 24/10): quanto o cupom abate dos SERVIÇOS. A multa
+ * nunca entra no desconto. Percentual sobre o total dos serviços; valor fixo até o
+ * total deles. Duas casas; nunca passa do total. O servidor confirma o valor final.
+ */
+export function descontoDoCupom(c: Campanha | null | undefined, servicos: number): number {
+  if (!c || !(servicos > 0)) return 0;
+  const bruto = c.value_percent ? (servicos * Number(c.value_percent)) / 100 : Number(c.value_amount) || 0;
+  return Math.round(Math.min(Math.max(bruto, 0), servicos) * 100) / 100;
 }

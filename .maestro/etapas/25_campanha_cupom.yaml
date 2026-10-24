@@ -57,8 +57,8 @@ appId: ${APP_ID}
       visible: "Cupom ativado"
     commands:
       - assertVisible:
-          text: ".*Cupom válido até \\d{2}/\\d{2} às \\d{2}:\\d{2}.*"
-          label: "25.14 · vê 'válido até dd/MM às HH:mm'"
+          text: ".*Válido até \\d{2}/\\d{2} às \\d{2}:\\d{2}.*"
+          label: "25.14 · vê 'Válido até dd/MM às HH:mm'"
       - tapOn:
           text: "Saiba mais"
           label: "25.15 · toca em Saiba mais"
