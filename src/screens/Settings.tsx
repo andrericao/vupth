@@ -1,5 +1,6 @@
 import { Alert, Linking, TouchableOpacity } from "react-native";
 import { useState } from "react";
+import { useTema } from "@hooks/useTema";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -32,6 +33,7 @@ export function Settings() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
   const [reportando, setReportando] = useState(false);
+  const { cores } = useTema();
 
   // Mesma regra da Home, numa funcao so — eram duas copias que ja divergiam
   // (aqui caia no e-mail, la caia no texto de visitante).
@@ -200,7 +202,7 @@ export function Settings() {
             {/* sentry-feedback-do-usuario (24/10): so com o Sentry ligado neste binario. */}
             {sentryLigado() && (
               <MenuItem
-                icon={<Bug size={20} color="#163300" />}
+                icon={<Bug size={20} color={cores.textPrimary} />}
                 label="Reportar problema"
                 onPress={() => setReportando(true)}
                 testID="reportar-problema"
