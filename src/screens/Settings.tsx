@@ -1,4 +1,5 @@
 import { Alert, Linking, TouchableOpacity } from "react-native";
+import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -8,7 +9,7 @@ import {
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import { User, Smartphone, Palette, LifeBuoy, Ticket } from "lucide-react-native";
+import { User, Smartphone, Palette, LifeBuoy, Ticket, Bug } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -16,6 +17,8 @@ import { nomeDeExibicao } from "@domain/auth/displayName";
 import { Button } from "@components/Button";
 import { MenuItem, Grupo } from "@components/MenuDoPerfil";
 import { VersaoDoApp } from "@components/VersaoDoApp";
+import { ReportarProblema } from "@components/ReportarProblema";
+import { sentryLigado } from "@utils/sentry";
 import { LinksLegais } from "@components/LinksLegais";
 import { useAuthStore } from "@stores/authStore";
 import { fs } from "@stores/fonteStore";
@@ -28,6 +31,7 @@ export function Settings() {
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
+  const [reportando, setReportando] = useState(false);
 
   // Mesma regra da Home, numa funcao so — eram duas copias que ja divergiam
   // (aqui caia no e-mail, la caia no texto de visitante).
@@ -193,6 +197,15 @@ export function Settings() {
         {isAuthenticated && (
         <VStack mt="$6">
           <Grupo label="Sistema">
+            {/* sentry-feedback-do-usuario (24/10): so com o Sentry ligado neste binario. */}
+            {sentryLigado() && (
+              <MenuItem
+                icon={<Bug size={20} color="#163300" />}
+                label="Reportar problema"
+                onPress={() => setReportando(true)}
+                testID="reportar-problema"
+              />
+            )}
             <MenuItem
               icon={<Smartphone size={20} color="#163300" />}
               label="Versão do app"
@@ -234,6 +247,7 @@ export function Settings() {
           )}
         </VStack>
       </VStack>
+      <ReportarProblema visivel={reportando} onFechar={() => setReportando(false)} />
     </ScrollView>
   );
 }

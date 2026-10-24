@@ -15,6 +15,7 @@ export function MenuItem({
   value,
   onPress,
   last,
+  testID,
 }: {
   icon: ReactNode;
   label: string;
@@ -22,10 +23,11 @@ export function MenuItem({
   onPress: () => void;
   /** Ultima linha do card nao leva divisor. */
   last?: boolean;
+  testID?: string;
 }) {
   const { cores } = useTema();
   return (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity onPress={onPress} testID={testID}>
       <HStack px={16} py={15} gap="$3" alignItems="center">
         {icon}
         <VStack flex={1} gap="$0.5">

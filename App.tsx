@@ -36,6 +36,9 @@ import { Routes } from "@routes/index";
 
 import { PreparingServer } from "@components/PreparingServer";
 import { EntradaDaHome } from "@components/EntradaDaHome";
+import { iniciarSentry } from "@utils/sentry";
+import { API_ENV } from "@services/api";
+import { useContextoDoSentry } from "@hooks/useContextoDoSentry";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -67,6 +70,15 @@ import { devePersistir, persister, VALIDADE_MS } from "@services/queryPersist";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 
 import { instalarAlertWeb } from "./web-shims/alert";
+
+// sentry (Andre, 24/10), no desenho do Partner: erros e crash, so com o DSN do ambiente; sem ele, inerte.
+const commitDoBundle = (Constants.expoConfig?.extra as { commit?: unknown } | undefined)?.commit;
+iniciarSentry({
+  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+  ambiente: API_ENV,
+  commit: typeof commitDoBundle === "string" ? commitDoBundle : null,
+  emTeste: !!process.env.JEST_WORKER_ID,
+});
 
 // Pausa/retoma as queries conforme a conexao real (netinfo). 1x no boot.
 setupOnlineManager();
@@ -192,6 +204,7 @@ export default function App() {
   // surdina", Andre 18/09). Fica aqui, e nao na tela da fila, porque o atraso
   // acontece justamente quando a pessoa nao esta olhando o app.
   useAvisoDeAtraso();
+  useContextoDoSentry();
 
   // Push (background/fechado): registra o device (POST /devices) quando autentica
   // e trata o toque. Best-effort/guardado — inerte ate um build COM o modulo
