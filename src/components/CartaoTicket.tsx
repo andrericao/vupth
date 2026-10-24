@@ -26,7 +26,7 @@ const RECORTE = 16;
 
 /**
  * card-ticket-pontilhado (André, 24/10, mockup 2): o cartão de cupom e de campanha é um ticket:
- * surface, borda tracejada (border) e um picote redondo em cada lado, no meio. Valor em negrito
+ * surface, borda tracejada (border) e um picote redondo só no lado esquerdo, no meio (ticket-picote-so-na-esquerda, 24/10). Valor em negrito
  * (Archivo 800), nome, validade; o botão primário (green + onGreen) na direita. Só tokens (DEC-116),
  * claro e escuro; sem sombra.
  */
@@ -50,30 +50,13 @@ export function CartaoTicket({ rotulo, valor, nome, detalhe, acao, situacao, onP
         opacity: situacao ? 0.6 : 1,
       }}
     >
-      {/* os picotes: o fundo da tela por cima da borda, um de cada lado */}
+      {/* o picote: o fundo da tela por cima da borda, SÓ no lado esquerdo (ticket-picote-so-na-esquerda) */}
       <View
         pointerEvents="none"
         testID={`${testID}-picote-esquerdo`}
         style={{
           position: "absolute",
           left: -RECORTE / 2 - 2,
-          top: "50%",
-          marginTop: -RECORTE / 2,
-          width: RECORTE,
-          height: RECORTE,
-          borderRadius: RECORTE / 2,
-          backgroundColor: cores.background,
-          borderWidth: 2,
-          borderStyle: "dashed",
-          borderColor: cores.border,
-        }}
-      />
-      <View
-        pointerEvents="none"
-        testID={`${testID}-picote-direito`}
-        style={{
-          position: "absolute",
-          right: -RECORTE / 2 - 2,
           top: "50%",
           marginTop: -RECORTE / 2,
           width: RECORTE,

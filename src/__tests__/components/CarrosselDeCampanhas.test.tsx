@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { act, fireEvent, render } from '@testing-library/react-native';
 import { GluestackUIProvider } from '@gluestack-ui/themed';
 
@@ -38,7 +38,7 @@ describe('CarrosselDeCampanhas', () => {
   });
 
   // card-ticket-pontilhado (André, 24/10): o card da Início é o ticket do mockup 2.
-  it('o card é um ticket: valor grande, validade, picotes e Participar só na campanha de link', () => {
+  it('o card é um ticket: valor grande, validade, picote só à esquerda, vão de 12 px e Participar só na campanha de link', () => {
     const spy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const t = wrap(
       <CarrosselDeCampanhas
@@ -52,7 +52,8 @@ describe('CarrosselDeCampanhas', () => {
     expect(t.getByTestId('campanha-l-valor')).toHaveTextContent('R$ 10,00');
     expect(t.getByText('Válido até 05/11 às 21:30')).toBeTruthy();
     expect(t.getByTestId('campanha-d-picote-esquerdo')).toBeTruthy();
-    expect(t.getByTestId('campanha-d-picote-direito')).toBeTruthy();
+    expect(t.queryByTestId('campanha-d-picote-direito')).toBeNull();
+    expect(StyleSheet.flatten(t.getByTestId('campanhas-da-home').props.contentContainerStyle).gap).toBe(12);
     expect(t.queryByTestId('participar-d')).toBeNull();
     expect(t.getByTestId('participar-l')).toBeTruthy();
     spy.mockRestore();

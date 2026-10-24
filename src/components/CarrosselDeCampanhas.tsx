@@ -14,6 +14,9 @@ type Props = { campanhas: Campanha[] };
 // Bloco da Home que so existe quando ha campanha criada no Painel; com mais de
 // uma, rola de lado. O titulo e o nome que o Andre da a campanha. O toque abre
 // os detalhes (cupom e compartilhar ganham destino proprio depois).
+// ticket-picote-so-na-esquerda (André, 24/10): vão de 12 px entre os cards; o picote (só à esquerda) não bate no vizinho.
+const ESPACO_ENTRE_CARDS = 12;
+
 export function CarrosselDeCampanhas({ campanhas }: Props) {
   const { width } = useWindowDimensions();
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -42,9 +45,9 @@ export function CarrosselDeCampanhas({ campanhas }: Props) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      snapToInterval={unica ? undefined : largura + 10}
+      snapToInterval={unica ? undefined : largura + ESPACO_ENTRE_CARDS}
       decelerationRate="fast"
-      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, gap: 10 }}
+      contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, gap: ESPACO_ENTRE_CARDS }}
       testID="campanhas-da-home"
     >
       {campanhas.map((c) => (
