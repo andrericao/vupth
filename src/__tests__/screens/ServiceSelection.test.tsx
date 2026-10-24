@@ -137,6 +137,20 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
     alerta.mockRestore();
   });
 
+  // modal-sem-fila-5-minutos (André, 24/10): fila livre, só "em 5 minutos".
+  it('Entrar numa fila livre: o aviso diz só "Esteja na loja em 5 minutos."', async () => {
+    useAuthStore.setState({ isAuthenticated: true });
+    setRouteParams({ ...OPEN_PARAMS, estimatedWaitMinutes: 0 });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent.press(getByTestId('primary-queue'));
+    const [titulo, mensagem] = alerta.mock.calls[0] as [string, string];
+    expect(titulo).toBe('Esteja na loja');
+    expect(mensagem).toBe('Esteja na loja em 5 minutos.');
+    alerta.mockRestore();
+  });
+
   it('com serviço escolhido, o resumo não fala de multa nem da saída sem custo (DEC-1, Andre 05/10)', async () => {
     useAuthStore.setState({ isAuthenticated: true });
     const { queryByTestId, queryByText, findByTestId } = renderWithProviders(<ServiceSelection />);

@@ -213,7 +213,7 @@ export function ServiceSelection() {
     if (!semPendencia()) return;
     // aviso-de-chegada-na-entrada (André, 22/10): com menos de 1 h de espera, um
     // aviso diz até que horas estar na loja; Cancelar não entra na fila.
-    const aviso = avisoDeChegada(estimatedWaitMinutes, agora());
+    const aviso = avisoDeChegada(estimatedWaitMinutes, agora(), { filaLivre: estimatedWaitMinutes <= 0 });
     if (!aviso) {
       goToQueue();
       return;

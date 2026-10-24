@@ -16,8 +16,22 @@ export type AvisoDeChegada = { titulo: string; mensagem: string; confirmar: stri
  * `minutos` = quanto falta para a vez (espera estimada, ou o tempo até o
  * horário agendado). Sem estimativa, ou 1 hora ou mais: nada a avisar.
  */
-export function avisoDeChegada(minutos: number | null | undefined, agoraMs: number): AvisoDeChegada | null {
+export function avisoDeChegada(
+  minutos: number | null | undefined,
+  agoraMs: number,
+  opcoes: { filaLivre?: boolean } = {},
+): AvisoDeChegada | null {
   if (minutos == null || !Number.isFinite(minutos) || minutos >= LIMITE_DO_AVISO_MINUTOS) return null;
+  // modal-sem-fila-5-minutos (André, 24/10): fila livre, só "em 5 minutos" (simbólico, urgência
+  // sem regra nova). Do 2º da fila em diante vale o horário.
+  if (opcoes.filaLivre) {
+    return {
+      titulo: 'Esteja na loja',
+      mensagem: `Esteja na loja em ${FOLGA_DA_CHEGADA_MINUTOS} minutos.`,
+      confirmar: 'Confirmar',
+      cancelar: 'Cancelar',
+    };
+  }
   const falta = Math.max(0, minutos);
   const ate = new Date(agoraMs + Math.max(0, falta - FOLGA_DA_CHEGADA_MINUTOS) * 60000);
   return {
