@@ -4,6 +4,7 @@
 #   bash .maestro/bateria.sh              # pergunta: completa ou so as que nao passaram
 #   bash .maestro/bateria.sh --completa   # roda todas, sem perguntar
 #   bash .maestro/bateria.sh --falhas     # so as que nao passaram, sem perguntar
+#   bash .maestro/bateria.sh --completa --publicar-ota  # publica o OTA da dev antes (publicar-ota.sh)
 #   bash .maestro/bateria.sh --falhas --device emulator-5554  # num aparelho
 #                                         escolhido (DEC-33, comandos.html#emulador)
 #
@@ -39,9 +40,11 @@ fi
 # Antes so o $1 era lido, e o "--device emulator-5554" virava o modo (10/10).
 MODO=""
 APARELHO=""
+PUBLICAR_OTA=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --completa|--falhas) MODO="$1" ;;
+    --publicar-ota) PUBLICAR_OTA="--publicar-ota" ;;
     --device) APARELHO="$2"; shift ;;
   esac
   shift
@@ -68,7 +71,7 @@ if [ -n "$OUTRA" ]; then
   exit 1
 fi
 
-BATERIA=1 bash "$DIR/setup.sh" || exit 1
+BATERIA=1 bash "$DIR/setup.sh" $PUBLICAR_OTA || exit 1
 trap 'bash "$DIR/restaurar.sh"' EXIT
 
 # A branch da pasta: a dev no vupth, a feat/nativewind na worktree dela.

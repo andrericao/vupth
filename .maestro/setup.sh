@@ -4,6 +4,7 @@
 #
 # Uso:  bash .maestro/bateria.sh (chama este setup, roda e restaura). Sozinho,
 #       bash .maestro/setup.sh so prepara o celular.
+#       bash .maestro/setup.sh --publicar-ota  # publica o OTA da dev antes (publicar-ota.sh)
 #
 # Precisa de: celular com "Depuracao USB" ligada, conectado no cabo, com o APK
 # de PREVIEW instalado (com.vupth.client.preview — aponta para o staging).
@@ -14,6 +15,15 @@ API="https://vupth-backend-ia.onrender.com"
 APP_ID="com.vupth.client.preview"
 
 echo "=== VUPTH Client — bateria Maestro (staging) ==="
+
+# maestro-publica-o-ota (22/10): com --publicar-ota o script publica o EAS Update da dev (canal
+# preview) antes de tocar no celular; se o OTA falhar, diz claramente e PARA — o Andre publica a
+# mao (comando no topo do publicar-ota.sh).
+for ARG in "$@"; do
+  if [ "$ARG" = "--publicar-ota" ]; then
+    bash "$(dirname "$0")/publicar-ota.sh" || { echo "ERRO: OTA nao publicado — a bateria parou."; exit 1; }
+  fi
+done
 
 # 1. Celular conectado
 # Com --device na bateria (DEC-33), o ANDROID_SERIAL diz qual aparelho.
