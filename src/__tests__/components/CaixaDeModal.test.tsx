@@ -33,7 +33,7 @@ describe('CaixaDeModal', () => {
     expect(t.getByTestId('caixa-rodape')).toBeTruthy();
     expect(t.getByText('Cancelar')).toBeTruthy();
     // o Cancelar não está dentro da rolagem: nunca fica abaixo da dobra
-    expect(rolagem.findAll((n) => n.props?.children === 'Cancelar')).toHaveLength(0);
-    expect(rolagem.findAll((n) => n.props?.children === 'frase').length).toBeGreaterThan(0);
+    expect(rolagem.findAll((n: { props?: { children?: unknown } }) => n.props?.children === 'Cancelar')).toHaveLength(0);
+    expect(rolagem.findAll((n: { props?: { children?: unknown } }) => n.props?.children === 'frase').length).toBeGreaterThan(0);
   });
 });
