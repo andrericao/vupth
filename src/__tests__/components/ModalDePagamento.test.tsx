@@ -209,14 +209,14 @@ describe('ModalDePagamento — pelo Asaas', () => {
     gateway: { provider: 'ASAAS', mode: 'SANDBOX', status: 'PENDING', pix_copy_paste: '000201asaas' },
   };
 
-  it('com gateway: mostra o Pix do Asaas, sem a chave do profissional nem o "Já paguei", e a confirmação automática', async () => {
+  it('com gateway: mostra o Pix do Asaas, sem a chave do profissional, com o "Já paguei" (as duas vias quitam) e a confirmação automática', async () => {
     get.mockResolvedValue({ data: ASAAS });
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
     expect(await tela.findByTestId('pix-codigo')).toBeTruthy();
     expect(tela.getByTestId('pix-codigo').props.children).toBe('000201asaas');
     expect(tela.queryByTestId('pix-chave')).toBeNull();
-    expect(tela.queryByTestId('pix-ja-paguei')).toBeNull();
+    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
     expect(tela.getByText('A confirmação é automática.')).toBeTruthy();
     expect(tela.getByTestId('pix-ok')).toBeTruthy();
   });
@@ -261,6 +261,8 @@ describe('ModalDePagamento — pelo Asaas', () => {
       });
       expect(tela.getByTestId('pix-status').props.children).toBe('Pago');
       expect(tela.queryByText('A confirmação é automática.')).toBeNull();
+      // o Asaas quitou: o "Já paguei" some
+      expect(tela.queryByTestId('pix-ja-paguei')).toBeNull();
       get.mockClear();
       await act(async () => {
         jest.advanceTimersByTime(15000);
@@ -269,6 +271,38 @@ describe('ModalDePagamento — pelo Asaas', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it('o profissional recusa o "Já paguei": o modal confere, volta a pendente e avisa para conferir o pagamento', async () => {
+    jest.useFakeTimers();
+    try {
+      get.mockResolvedValueOnce({ data: PIX }).mockResolvedValue({ data: { ...PIX, status: 'PENDING' } });
+      claim.mockResolvedValue({ data: { status: 'AWAITING_CONFIRMATION' } });
+      act(() => usePendenciaStore.getState().pagar('a1'));
+      const tela = montar();
+      await act(async () => {});
+      await act(async () => {
+        fireEvent.press(tela.getByTestId('pix-ja-paguei'));
+      });
+      expect(tela.queryByTestId('pix-ja-paguei')).toBeNull();
+      expect(tela.queryByTestId('pix-recusado')).toBeNull();
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+      expect(tela.getByTestId('pix-recusado')).toBeTruthy();
+      expect(tela.getByText('O profissional não confirmou o pagamento. Confira se ele saiu da sua conta.')).toBeTruthy();
+      expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('aberto pelo push PAYMENT_REFUSED: já mostra o aviso e o "Já paguei"', async () => {
+    get.mockResolvedValue({ data: { ...PIX, status: 'PENDING' } });
+    act(() => usePendenciaStore.getState().pagar('a1', true));
+    const tela = montar();
+    expect(await tela.findByTestId('pix-recusado')).toBeTruthy();
+    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
   });
 
   it('sem gateway: o fluxo de hoje (chave, "Já paguei"), e profissional sem Pix continua fechando o modal', async () => {

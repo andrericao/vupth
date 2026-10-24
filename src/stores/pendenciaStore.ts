@@ -12,15 +12,18 @@ type Estado = {
   aviso: PagamentoPendente[] | null;
   /** O atendimento com o Pix aberto. */
   pagando: string | null;
+  /** O profissional recusou o "Já paguei": o Pix abre com o aviso para conferir o pagamento. */
+  recusado: boolean;
   avisar: (itens: PagamentoPendente[]) => void;
-  pagar: (attendanceId: string) => void;
+  pagar: (attendanceId: string, recusado?: boolean) => void;
   fechar: () => void;
 };
 
 export const usePendenciaStore = create<Estado>((set) => ({
   aviso: null,
   pagando: null,
-  avisar: (itens) => set({ aviso: itens, pagando: null }),
-  pagar: (attendanceId) => set({ aviso: null, pagando: attendanceId }),
-  fechar: () => set({ aviso: null, pagando: null }),
+  recusado: false,
+  avisar: (itens) => set({ aviso: itens, pagando: null, recusado: false }),
+  pagar: (attendanceId, recusado = false) => set({ aviso: null, pagando: attendanceId, recusado }),
+  fechar: () => set({ aviso: null, pagando: null, recusado: false }),
 }));

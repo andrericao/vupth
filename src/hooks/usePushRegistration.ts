@@ -8,6 +8,7 @@ import * as SecureStore from "expo-secure-store";
 import {
   acquireExpoPushToken,
   atendimentoParaAvaliar,
+  atendimentoParaPagarDeNovo,
   avisoDoPush,
   ACAO_OK,
   CANAL_ALERTAS,
@@ -24,6 +25,7 @@ import { confirmarTrocaPeloPush } from "@utils/trocaPeloPush";
 import { ACAO_AGORA_NAO, ACAO_CONFIRMAR, CATEGORIA_TROCA } from "@domain/trocaPeloPush";
 import { abrirAvaliacao, navigateFromNotification } from "@routes/navigationRef";
 import { useAuthStore } from "@stores/authStore";
+import { usePendenciaStore } from "@stores/pendenciaStore";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { PUSH_PERGUNTADO_KEY } from "@hooks/ofertaDePush";
 import { usePushDiagnosticsStore } from "@stores/pushDiagnosticsStore";
@@ -206,6 +208,15 @@ export function usePushRegistration() {
           return;
         }
         const aviso = avisoDoPush(conteudo);
+        // pagamento-ja-paguei: o profissional recusou o "Já paguei"; o aviso leva ao pagamento.
+        const pagarDeNovo = atendimentoParaPagarDeNovo(dados);
+        if (aviso && pagarDeNovo) {
+          Alert.alert(aviso.titulo, aviso.mensagem, [
+            { text: "Agora não", style: "cancel" },
+            { text: "Pagar", onPress: () => usePendenciaStore.getState().pagar(pagarDeNovo, true) },
+          ]);
+          return;
+        }
         if (aviso) Alert.alert(aviso.titulo, aviso.mensagem, [{ text: "OK" }]);
       });
       return () => sub.remove();
@@ -237,6 +248,13 @@ export function usePushRegistration() {
         return;
       }
       // Concluido (notificacao-avaliar): o toque abre a avaliacao dele.
+      // PAYMENT_REFUSED (categoria PAGAR): o toque, no corpo ou no "Pagar", abre o pagamento pendente.
+      const pagarDeNovo = atendimentoParaPagarDeNovo(data);
+      if (pagarDeNovo) {
+        Notifications.dismissNotificationAsync(id).catch(() => {});
+        usePendenciaStore.getState().pagar(pagarDeNovo, true);
+        return;
+      }
       const avaliar = atendimentoParaAvaliar(data);
       if (avaliar) {
         abrirAvaliacao(avaliar);

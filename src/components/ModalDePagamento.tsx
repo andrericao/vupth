@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Animated, Image, Modal, Pressable, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { Check, X } from "lucide-react-native";
@@ -105,6 +105,7 @@ export function ModalDePagamento() {
   const aviso = usePendenciaStore((s) => s.aviso);
   const pagando = usePendenciaStore((s) => s.pagando);
   const pagar = usePendenciaStore((s) => s.pagar);
+  const recusadoPeloPush = usePendenciaStore((s) => s.recusado);
   const fechar = usePendenciaStore((s) => s.fechar);
   const accessToken = useAuthStore((s) => s.accessToken);
   const queryClient = useQueryClient();
@@ -113,6 +114,10 @@ export function ModalDePagamento() {
   const [erro, setErro] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  // pagamento-ja-paguei: o profissional recusou (AWAITING_CONFIRMATION voltou a PENDING).
+  const [recusadoAoVivo, setRecusadoAoVivo] = useState(false);
+  const statusAnterior = useRef<string | null>(null);
+  const recusado = recusadoPeloPush || recusadoAoVivo;
 
   useEffect(() => {
     if (!pagando || !accessToken) return;
@@ -126,6 +131,8 @@ export function ModalDePagamento() {
       setPagamento(null);
       setErro(false);
       setCopiado(false);
+      setRecusadoAoVivo(false);
+      statusAnterior.current = null;
     };
   }, [pagando, accessToken]);
 
@@ -138,14 +145,17 @@ export function ModalDePagamento() {
     if (pagando && semPix) fechar();
   }, [pagando, semPix, fechar]);
 
-  // Pelo Asaas o webhook quita sozinho: o modal confere de tempos em tempos ate o "Pago".
-  const aguardandoWebhook = pix.viaAsaas && pagamento?.status !== "PAID";
+  // pagamento-ja-paguei: o Asaas (webhook) e o profissional ("recebi" ou recusa) mudam o status por
+  // fora; o modal confere de tempos em tempos ate o "Pago". Sem Asaas, so enquanto espera o profissional.
+  const aguardandoWebhook = pagamento != null && pagamento.status !== "PAID" && (pix.viaAsaas || pagamento.status === "AWAITING_CONFIRMATION");
   useEffect(() => {
     if (!pagando || !accessToken || !aguardandoWebhook) return;
     const id = setInterval(() => {
       paymentService
         .get(pagando, accessToken)
         .then((r) => {
+          if (statusAnterior.current === "AWAITING_CONFIRMATION" && r.data?.status === "PENDING") setRecusadoAoVivo(true);
+          statusAnterior.current = r.data?.status ?? null;
           setPagamento(r.data);
           if (r.data?.status === "PAID") queryClient.invalidateQueries({ queryKey: CHAVE_PENDENTES });
         })
@@ -161,6 +171,8 @@ export function ModalDePagamento() {
     setEnviando(true);
     try {
       const { data } = await paymentService.claim(pagando, accessToken);
+      setRecusadoAoVivo(false);
+      statusAnterior.current = data?.status ?? "AWAITING_CONFIRMATION";
       setPagamento((p) => ({ ...(p ?? data), ...data, status: data?.status ?? "AWAITING_CONFIRMATION" }));
       queryClient.invalidateQueries({ queryKey: CHAVE_PENDENTES });
     } catch {
@@ -265,20 +277,24 @@ export function ModalDePagamento() {
                   ) : null}
                 </>
               ) : null}
-              {pix.viaAsaas ? (
-                <>
-                  {pagamento.status !== "PAID" ? (
-                    <Text testID="pix-automatico" style={{ color: cores.textSecondary, fontSize: fs(13) }}>
-                      A confirmação é automática.
-                    </Text>
-                  ) : null}
-                  <Botao titulo="Fechar" claro testID="pix-ok" onPress={fechar} />
-                </>
-              ) : podeAvisarQuePagou(pagamento.status) ? (
+              {/* o profissional nao confirmou: o atendimento segue pendente e o cliente pode tocar de novo */}
+              {recusado && podeAvisarQuePagou(pagamento.status) ? (
+                <Text testID="pix-recusado" style={{ color: cores.danger, fontSize: fs(13), lineHeight: fs(18) }}>
+                  O profissional não confirmou o pagamento. Confira se ele saiu da sua conta.
+                </Text>
+              ) : null}
+              {pix.viaAsaas && pagamento.status !== "PAID" ? (
+                <Text testID="pix-automatico" style={{ color: cores.textSecondary, fontSize: fs(13) }}>
+                  A confirmação é automática.
+                </Text>
+              ) : null}
+              {/* as duas vias quitam o mesmo atendimento: com o Asaas, o "Já paguei" segue valendo e some no PAID */}
+              {podeAvisarQuePagou(pagamento.status) ? (
                 <Botao titulo="Já paguei" testID="pix-ja-paguei" desligado={enviando} onPress={jaPaguei} />
-              ) : (
+              ) : null}
+              {pix.viaAsaas || !podeAvisarQuePagou(pagamento.status) ? (
                 <Botao titulo="Fechar" claro testID="pix-ok" onPress={fechar} />
-              )}
+              ) : null}
             </>
           )}
         </View>

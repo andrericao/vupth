@@ -211,6 +211,8 @@ export const CATEGORIAS_COM_BOTAO: { categoria: string; acao: string; titulo: st
   { categoria: 'VER_ATENDIMENTO', acao: 'VER_ATENDIMENTO', titulo: 'Ver atendimento' },
   // notificacao-avaliar (CLI-33): o push de concluido (ATTENDANCE_FINISHED).
   { categoria: 'AVALIAR', acao: 'AVALIAR', titulo: 'Avaliar' },
+  // pagamento-ja-paguei (24/10): o PAYMENT_REFUSED chega com a categoria PAGAR e abre o pagamento.
+  { categoria: 'PAGAR', acao: 'PAGAR', titulo: 'Pagar' },
 ];
 
 /**
@@ -220,6 +222,17 @@ export const CATEGORIAS_COM_BOTAO: { categoria: string; acao: string; titulo: st
 export function atendimentoParaAvaliar(data: unknown): string | null {
   const d = (data ?? {}) as { type?: unknown; attendanceId?: unknown };
   return d.type === 'ATTENDANCE_FINISHED' && typeof d.attendanceId === 'string' && d.attendanceId
+    ? d.attendanceId
+    : null;
+}
+
+/**
+ * O atendimento a pagar de novo (pagamento-ja-paguei, 24/10): o profissional recusou o "Já paguei"
+ * (push PAYMENT_REFUSED, categoria PAGAR); o toque abre o pagamento, que segue pendente.
+ */
+export function atendimentoParaPagarDeNovo(data: unknown): string | null {
+  const d = (data ?? {}) as { type?: unknown; attendanceId?: unknown };
+  return d.type === 'PAYMENT_REFUSED' && typeof d.attendanceId === 'string' && d.attendanceId
     ? d.attendanceId
     : null;
 }
