@@ -203,29 +203,27 @@ export function Settings() {
         </VStack>
         )}
 
-        {/* botao-sair-igual (CLI-3, Andre 15/10): o Sair e o do Partner — texto
-            vermelho, solto, fora dos grupos, centralizado, sem icone nem caixa.
-            sair-da-conta-embaixo (CLI-1, Andre 18/10): no FIM do Perfil, depois de
-            Sistema e acima de Termos e Privacidade. */}
-        {isAuthenticated && (
-          <TouchableOpacity
-            onPress={handleLogout}
-            testID="logout"
-            accessibilityRole="button"
-            accessibilityLabel="Sair"
-            style={{ paddingVertical: 4, marginTop: 24 }}
-          >
-            <Text size="sm" fontWeight="$semibold" color="$brandDanger" textAlign="center">
-              Sair da conta
-            </Text>
-          </TouchableOpacity>
-        )}
-
         {/* `flex-end` empurra o rodape pro fim: antes ele vinha logo abaixo do
             conteudo e sobrava um vazio grande embaixo, que fazia a tela
             parecer inacabada — principalmente pro VISITANTE, que so tem o
             convite de conta acima. */}
         <VStack flex={1} justifyContent="flex-end" mt="$10" alignItems="center" gap="$3">
+          {/* botao-sair-igual (CLI-3, Andre 15/10) e sair-da-conta-acima-dos-termos (24/10): o Sair e o
+              do Partner: texto vermelho, solto, centralizado, sem icone nem caixa, no FIM do Perfil e
+              logo ACIMA de "Termos de uso · Politica de privacidade" (junto dos links, no rodape). */}
+          {isAuthenticated && (
+            <TouchableOpacity
+              onPress={handleLogout}
+              testID="logout"
+              accessibilityRole="button"
+              accessibilityLabel="Sair"
+              style={{ paddingVertical: 4 }}
+            >
+              <Text size="sm" fontWeight="$semibold" color="$brandDanger" textAlign="center">
+                Sair da conta
+              </Text>
+            </TouchableOpacity>
+          )}
           {/* Os mesmos dois links das telas de entrada (termos-no-rodape), mas
               aqui levam as telas de Termos e Privacidade do proprio app: ja
               existem, e abrir o site tiraria a pessoa do app para ler o mesmo

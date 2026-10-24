@@ -103,6 +103,19 @@ describe('Perfil — a conta', () => {
     await act(async () => {});
   });
 
+  // sair-da-conta-acima-dos-termos (André, 24/10): o Sair fica logo acima dos Termos, no mesmo rodapé, centralizado.
+  it('o Sair da conta fica no rodapé, logo acima de Termos e Política, centralizado', async () => {
+    const { getByTestId, getByText } = renderWithProviders(<Settings />);
+    type No = { parent: No | null; findAll: (f: (x: { props?: { testID?: string; children?: unknown } }) => boolean) => unknown[] };
+    let no = getByTestId('logout').parent as No | null;
+    // o menor ancestral que tem o Sair E os Termos e o rodape: nao pode conter os grupos do Perfil
+    while (no && !(no.findAll((x) => x.props?.testID === 'link-termos').length > 0)) no = no.parent;
+    expect(no).not.toBeNull();
+    expect(no!.findAll((x) => x.props?.children === 'Dados cadastrais')).toHaveLength(0);
+    expect(getByText('Sair da conta').props.textAlign).toBe('center');
+    await act(async () => {});
+  });
+
   it('sair pergunta (só o título "Sair da conta", sem corpo), sai e volta ao Início', async () => {
     const { getByTestId } = renderWithProviders(<Settings />);
     fireEvent.press(getByTestId('logout'));

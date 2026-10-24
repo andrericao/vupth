@@ -451,12 +451,13 @@ describe('Atendimentos — notificacao-avaliar (CLI-33)', () => {
   });
 
   // dot-do-card-sem-avaliacao (André, 23/10): o ponto fica na bordinha do card, e não ao lado do nome.
-  it('o ponto do corte sem avaliar é o do card: absoluto na borda esquerda, 8 de tamanho, e não está na linha do nome', () => {
+  it('o ponto do corte sem avaliar é o do card: absoluto no canto superior direito, 10 de tamanho, e não está na linha do nome', () => {
     historico([REALIZADO]);
     const { getByTestId, getByText } = renderWithProviders(<Attendances />);
     const ponto = getByTestId('sem-avaliar-r1');
     const estilo = StyleSheet.flatten(ponto.props.style);
-    expect(estilo).toMatchObject({ position: 'absolute', left: 5, width: 8, height: 8 });
+    // dot-no-canto-do-card (André, 24/10): canto superior direito, meio dentro e meio fora da borda
+    expect(estilo).toMatchObject({ position: 'absolute', right: -5, top: -5, width: 10, height: 10 });
     // O irmao do nome nao e mais o ponto: o pai do nome nao o contem.
     const nome = getByText(REALIZADO.professionalName as string);
     expect(nome.parent?.findAll((n: { props?: { testID?: string } }) => n.props?.testID === 'sem-avaliar-r1').length ?? 0).toBe(0);
