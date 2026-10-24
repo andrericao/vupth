@@ -79,6 +79,9 @@ type RouteParams = {
 // Fora do corpo do componente: o relogio so e lido no toque, nunca no render.
 const agora = () => Date.now();
 
+// tema-fixo: branco sobre o resumo forest da escolha, nos dois temas
+const BRANCO_SOBRE_O_RESUMO = "#FFFFFFB3";
+
 export function ServiceSelection() {
   const insets = useSafeAreaInsets();
   // mais-opcoes-cortado (André, 22/10): os botões do rodapé sobem acima da barra de abas.
@@ -543,7 +546,7 @@ export function ServiceSelection() {
                 {/* cupom-abate-no-resumo: o total dos servicos SEM a multa; com o cupom ligado, o valor
                     cheio riscado e, abaixo, "Valor com cupom". */}
                 <HStack justifyContent="space-between" alignItems="center" testID="total-dos-servicos">
-                  <Text size="sm" color="#FFFFFFB3">
+                  <Text size="sm" color={BRANCO_SOBRE_O_RESUMO}>
                     Total dos serviços
                   </Text>
                   <Text
@@ -558,7 +561,7 @@ export function ServiceSelection() {
                 </HStack>
                 {desconto > 0 && (
                   <HStack justifyContent="space-between" alignItems="center" testID="valor-com-cupom">
-                    <Text size="sm" color="#FFFFFFB3">
+                    <Text size="sm" color={BRANCO_SOBRE_O_RESUMO}>
                       Valor com cupom
                     </Text>
                     <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
