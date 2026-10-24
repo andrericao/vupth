@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 
-import { confirmarTrocaPeloPush } from '@utils/trocaPeloPush';
+import { confirmarTrocaPeloPush, recusarTrocaPeloPush } from '@utils/trocaPeloPush';
 import { useAuthStore } from '@stores/authStore';
 
 // troca-pela-notificacao (15/10): o aceite pelo CONFIRMAR e o reenvio com a
@@ -9,10 +9,12 @@ import { useAuthStore } from '@stores/authStore';
 const mockAcceptRequest = jest.fn();
 const mockAcceptOffer = jest.fn();
 const mockAcceptEarlier = jest.fn();
+const mockRefuse = jest.fn();
 jest.mock('@services/swapOfferService', () => ({
   swapOfferService: {
     acceptRequest: (...a: unknown[]) => mockAcceptRequest(...a),
     accept: (...a: unknown[]) => mockAcceptOffer(...a),
+    refuseRequest: (...a: unknown[]) => mockRefuse(...a),
   },
 }));
 jest.mock('@services/attendanceService', () => ({
@@ -30,6 +32,7 @@ beforeEach(() => {
   mockAcceptRequest.mockResolvedValue({});
   mockAcceptOffer.mockResolvedValue({});
   mockAcceptEarlier.mockResolvedValue({});
+  mockRefuse.mockResolvedValue({});
 });
 
 afterEach(() => alerta.mockRestore());
@@ -77,5 +80,25 @@ describe('CONFIRMAR da troca', () => {
     const botoes = alerta.mock.calls[0][2] as Botao[];
     await botoes[1].onPress!();
     expect(alerta).toHaveBeenLastCalledWith('Não foi possível trocar', expect.any(String));
+  });
+});
+
+// push-acoes-por-pergunta (24/10): o Recusar do pedido de troca.
+describe('RECUSAR da troca', () => {
+  it('nega o pedido pelo swapRequestId, sem aviso quando dá certo', async () => {
+    await recusarTrocaPeloPush({ type: 'SWAP_REQUESTED', swapRequestId: 'r1' });
+    expect(mockRefuse).toHaveBeenCalledWith('r1', 'tk');
+    expect(alerta).not.toHaveBeenCalled();
+  });
+
+  it('sem login ou sem pedido, não chama nada; se falhar, avisa', async () => {
+    await recusarTrocaPeloPush({ type: 'SWAP_OFFERED', offerId: 'o1' });
+    useAuthStore.setState({ accessToken: null } as never);
+    await recusarTrocaPeloPush({ type: 'SWAP_REQUESTED', swapRequestId: 'r1' });
+    expect(mockRefuse).not.toHaveBeenCalled();
+    useAuthStore.setState({ accessToken: 'tk' } as never);
+    mockRefuse.mockRejectedValue({ response: { status: 422 } });
+    await recusarTrocaPeloPush({ type: 'SWAP_REQUESTED', swapRequestId: 'r1' });
+    expect(alerta).toHaveBeenCalledWith('Não foi possível recusar', expect.any(String));
   });
 });

@@ -213,6 +213,8 @@ export const CATEGORIAS_COM_BOTAO: { categoria: string; acao: string; titulo: st
   { categoria: 'AVALIAR', acao: 'AVALIAR', titulo: 'Avaliar' },
   // pagamento-ja-paguei (24/10): o PAYMENT_REFUSED chega com a categoria PAGAR e abre o pagamento.
   { categoria: 'PAGAR', acao: 'PAGAR', titulo: 'Pagar' },
+  // push-acoes-por-pergunta: a categoria do Backend para NO_SHOW_REMOVED; o tipo segue sem rota (DEC-86, a falta vale como atraso).
+  { categoria: 'PAGAR_MULTA', acao: 'PAGAR_MULTA', titulo: 'Pagar multa' },
 ];
 
 /**
@@ -227,14 +229,16 @@ export function atendimentoParaAvaliar(data: unknown): string | null {
 }
 
 /**
- * O atendimento a pagar de novo (pagamento-ja-paguei, 24/10): o profissional recusou o "Já paguei"
- * (push PAYMENT_REFUSED, categoria PAGAR); o toque abre o pagamento, que segue pendente.
+ * O pagamento que o push abre (pagamento-ja-paguei e push-acoes-por-pergunta, 24/10): PAYMENT_REFUSED
+ * (o profissional não confirmou o "Já paguei"; abre com o aviso para conferir) e PAYMENT_PENDING
+ * (categoria PAGAR). O toque, no corpo ou no "Pagar", abre o Pix do atendimento.
  */
-export function atendimentoParaPagarDeNovo(data: unknown): string | null {
+export function pagamentoDoPush(data: unknown): { attendanceId: string; recusado: boolean } | null {
   const d = (data ?? {}) as { type?: unknown; attendanceId?: unknown };
-  return d.type === 'PAYMENT_REFUSED' && typeof d.attendanceId === 'string' && d.attendanceId
-    ? d.attendanceId
-    : null;
+  if (typeof d.attendanceId !== 'string' || !d.attendanceId) return null;
+  if (d.type === 'PAYMENT_REFUSED') return { attendanceId: d.attendanceId, recusado: true };
+  if (d.type === 'PAYMENT_PENDING') return { attendanceId: d.attendanceId, recusado: false };
+  return null;
 }
 
 /** Canal Android HIGH novo, id "alertas" combinado com o Backend e o Partner (o "default" antigo nao sobe de importancia). */

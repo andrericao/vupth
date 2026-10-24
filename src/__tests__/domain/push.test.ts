@@ -1,6 +1,6 @@
 import {
   atendimentoParaAvaliar,
-  atendimentoParaPagarDeNovo,
+  pagamentoDoPush,
   avisoDoPush,
   tocouNoOk,
   ACAO_OK,
@@ -233,7 +233,7 @@ describe('notificação de ciência (app fechado)', () => {
 
   it('o botão que abre a tela não é o OK: segue navegando', () => {
     expect(tocouNoOk({ actionIdentifier: 'VER_FILA' })).toBe(false);
-    expect(CATEGORIAS_COM_BOTAO.map((c) => c.categoria)).toEqual(['VER_FILA', 'VER_ATENDIMENTO', 'AVALIAR', 'PAGAR']);
+    expect(CATEGORIAS_COM_BOTAO.map((c) => c.categoria)).toEqual(['VER_FILA', 'VER_ATENDIMENTO', 'AVALIAR', 'PAGAR', 'PAGAR_MULTA']);
   });
 
   it('ids combinados com o Backend e o Partner', () => {
@@ -256,12 +256,16 @@ describe('atendimentoParaAvaliar (notificacao-avaliar)', () => {
 });
 
 
-// pagamento-ja-paguei (24/10): o profissional recusou o "Já paguei" (PAYMENT_REFUSED, categoria PAGAR).
-describe('atendimentoParaPagarDeNovo', () => {
-  it('só o PAYMENT_REFUSED com attendanceId devolve o atendimento', () => {
-    expect(atendimentoParaPagarDeNovo({ type: 'PAYMENT_REFUSED', attendanceId: 'a1' })).toBe('a1');
-    expect(atendimentoParaPagarDeNovo({ type: 'PAYMENT_REFUSED' })).toBeNull();
-    expect(atendimentoParaPagarDeNovo({ type: 'ATTENDANCE_FINISHED', attendanceId: 'a1' })).toBeNull();
-    expect(atendimentoParaPagarDeNovo(null)).toBeNull();
+// pagamento-ja-paguei e push-acoes-por-pergunta (24/10): o push que abre o pagamento (categoria PAGAR).
+describe('pagamentoDoPush', () => {
+  it('PAYMENT_REFUSED abre com o aviso; PAYMENT_PENDING abre sem ele', () => {
+    expect(pagamentoDoPush({ type: 'PAYMENT_REFUSED', attendanceId: 'a1' })).toEqual({ attendanceId: 'a1', recusado: true });
+    expect(pagamentoDoPush({ type: 'PAYMENT_PENDING', attendanceId: 'a1' })).toEqual({ attendanceId: 'a1', recusado: false });
+  });
+
+  it('sem attendanceId, ou de outro tipo, não abre nada', () => {
+    expect(pagamentoDoPush({ type: 'PAYMENT_REFUSED' })).toBeNull();
+    expect(pagamentoDoPush({ type: 'ATTENDANCE_FINISHED', attendanceId: 'a1' })).toBeNull();
+    expect(pagamentoDoPush(null)).toBeNull();
   });
 });

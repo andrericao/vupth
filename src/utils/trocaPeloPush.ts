@@ -4,6 +4,7 @@ import {
   aceiteDaTroca,
   avisoDeMenosDeUmaHora,
   precisaConfirmarMenosDeUmaHora,
+  recusaDaTroca,
   type AceiteDaTroca,
 } from "@domain/trocaPeloPush";
 import { attendanceService } from "@services/attendanceService";
@@ -50,5 +51,17 @@ export async function confirmarTrocaPeloPush(data: unknown): Promise<void> {
         },
       },
     ]);
+  }
+}
+
+// O RECUSAR da notificacao do pedido de troca (push-acoes-por-pergunta): nega o pedido dali mesmo.
+export async function recusarTrocaPeloPush(data: unknown): Promise<void> {
+  const id = recusaDaTroca(data);
+  const token = useAuthStore.getState().accessToken;
+  if (!id || !token) return;
+  try {
+    await swapOfferService.refuseRequest(id, token);
+  } catch {
+    Alert.alert("Não foi possível recusar", "O pedido não está mais disponível.");
   }
 }

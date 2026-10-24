@@ -1,3 +1,4 @@
+import { usePendenciaStore } from '@stores/pendenciaStore';
 import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { Alert, Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
@@ -36,7 +37,11 @@ jest.mock('@services/pushService', () => ({
 const mockOferecer = jest.fn();
 jest.mock('@utils/vezAdiantada', () => ({ oferecerVezAdiantada: (...a: unknown[]) => mockOferecer(...a) }));
 const mockConfirmarTroca = jest.fn();
-jest.mock('@utils/trocaPeloPush', () => ({ confirmarTrocaPeloPush: (...a: unknown[]) => mockConfirmarTroca(...a) }));
+const mockRecusarTroca = jest.fn();
+jest.mock('@utils/trocaPeloPush', () => ({
+  confirmarTrocaPeloPush: (...a: unknown[]) => mockConfirmarTroca(...a),
+  recusarTrocaPeloPush: (...a: unknown[]) => mockRecusarTroca(...a),
+}));
 const mockNavigate = jest.fn();
 const mockAbrirAvaliacao = jest.fn();
 jest.mock('@routes/navigationRef', () => ({
@@ -298,6 +303,55 @@ describe('usePushRegistration — toque na notificação', () => {
     expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n5');
     expect(mockNavigate).toHaveBeenCalledWith('fila');
     expect(mockConfirmarTroca).toHaveBeenCalledWith(data);
+  });
+
+  // push-acoes-por-pergunta (24/10, Backend 7584964): a pergunta da tela vira botão.
+  it('as categorias das perguntas: Trocar/Recusar e Aceitar/Manter (só o Manter não abre o app)', () => {
+    renderHook(() => usePushRegistration());
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('TROCAR_RECUSAR', [
+      { identifier: 'TROCAR', buttonTitle: 'Trocar', options: { opensAppToForeground: true } },
+      { identifier: 'RECUSAR', buttonTitle: 'Recusar', options: { opensAppToForeground: true } },
+    ]);
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('ACEITAR_MANTER', [
+      { identifier: 'ACEITAR', buttonTitle: 'Aceitar', options: { opensAppToForeground: true } },
+      { identifier: 'MANTER', buttonTitle: 'Manter', options: { opensAppToForeground: false } },
+    ]);
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('PAGAR_MULTA', [
+      { identifier: 'PAGAR_MULTA', buttonTitle: 'Pagar multa', options: { opensAppToForeground: true } },
+    ]);
+  });
+
+  it('Trocar e Aceitar respondem ali mesmo: aceitam sem navegar', () => {
+    renderHook(() => usePushRegistration());
+    const pedido = { type: 'SWAP_REQUESTED', swapRequestId: 'r1' };
+    tocou?.(resposta('n10', 'TROCAR', pedido));
+    expect(mockConfirmarTroca).toHaveBeenCalledWith(pedido);
+    const adiantada = { type: 'EARLIER_TURN_OFFERED', attendanceId: 'a1' };
+    tocou?.(resposta('n11', 'ACEITAR', adiantada));
+    expect(mockConfirmarTroca).toHaveBeenCalledWith(adiantada);
+    expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n10');
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('Recusar nega o pedido de troca; Manter só fecha, sem chamar nada', () => {
+    renderHook(() => usePushRegistration());
+    const pedido = { type: 'SWAP_REQUESTED', swapRequestId: 'r1' };
+    tocou?.(resposta('n12', 'RECUSAR', pedido));
+    expect(mockRecusarTroca).toHaveBeenCalledWith(pedido);
+    expect(mockConfirmarTroca).not.toHaveBeenCalled();
+    tocou?.(resposta('n13', 'MANTER', { type: 'EARLIER_TURN_OFFERED', attendanceId: 'a1' }));
+    expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n13');
+    expect(mockConfirmarTroca).not.toHaveBeenCalled();
+    expect(mockRecusarTroca).toHaveBeenCalledTimes(1);
+  });
+
+  it('PAYMENT_PENDING e PAYMENT_REFUSED (categoria PAGAR) abrem o pagamento do atendimento', () => {
+    renderHook(() => usePushRegistration());
+    tocou?.(resposta('n14', 'PAGAR', { type: 'PAYMENT_PENDING', attendanceId: 'a9' }));
+    expect(usePendenciaStore.getState()).toMatchObject({ pagando: 'a9', recusado: false });
+    tocou?.(resposta('n15', 'PAGAR', { type: 'PAYMENT_REFUSED', attendanceId: 'a8' }));
+    expect(usePendenciaStore.getState()).toMatchObject({ pagando: 'a8', recusado: true });
+    usePendenciaStore.getState().fechar();
   });
 
   it('AGORA NÃO só fecha a notificação', () => {
