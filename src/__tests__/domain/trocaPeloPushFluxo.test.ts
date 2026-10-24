@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 
-import { confirmarTrocaPeloPush, recusarTrocaPeloPush } from '@utils/trocaPeloPush';
+import { confirmarTrocaPeloPush, recusarTrocaPeloPush, responderPeloPush } from '@utils/trocaPeloPush';
 import { useAuthStore } from '@stores/authStore';
 
 // troca-pela-notificacao (15/10): o aceite pelo CONFIRMAR e o reenvio com a
@@ -10,6 +10,8 @@ const mockAcceptRequest = jest.fn();
 const mockAcceptOffer = jest.fn();
 const mockAcceptEarlier = jest.fn();
 const mockRefuse = jest.fn();
+const mockAgendar = jest.fn();
+jest.mock('expo-notifications', () => ({ scheduleNotificationAsync: (...a: unknown[]) => mockAgendar(...a) }));
 jest.mock('@services/swapOfferService', () => ({
   swapOfferService: {
     acceptRequest: (...a: unknown[]) => mockAcceptRequest(...a),
@@ -100,5 +102,71 @@ describe('RECUSAR da troca', () => {
     mockRefuse.mockRejectedValue({ response: { status: 422 } });
     await recusarTrocaPeloPush({ type: 'SWAP_REQUESTED', swapRequestId: 'r1' });
     expect(alerta).toHaveBeenCalledWith('Não foi possível recusar', expect.any(String));
+  });
+});
+
+// push-resolve-sem-abrir-o-app (24/10): a mesma resposta, com o app fechado (tarefa em segundo plano).
+describe('em segundo plano', () => {
+  const pedido = { type: 'SWAP_REQUESTED', swapRequestId: 'r1' };
+
+  it('responde pela API sem Alert; a falha vira notificação local', async () => {
+    await confirmarTrocaPeloPush(pedido, true);
+    expect(mockAcceptRequest).toHaveBeenCalledWith('r1', 'tk', false);
+    expect(alerta).not.toHaveBeenCalled();
+    mockAcceptRequest.mockRejectedValueOnce({ response: { status: 422 } });
+    await confirmarTrocaPeloPush(pedido, true);
+    expect(mockAgendar).toHaveBeenCalledWith({ content: { title: 'Não foi possível trocar', body: expect.any(String) }, trigger: null });
+    expect(alerta).not.toHaveBeenCalled();
+  });
+
+  it('menos de 1 hora: sem pergunta na tela, a notificação manda abrir o app', async () => {
+    mockAcceptRequest.mockRejectedValueOnce(precisa);
+    await confirmarTrocaPeloPush({ ...pedido, newWaitMinutes: 25 }, true);
+    expect(alerta).not.toHaveBeenCalled();
+    const { content } = mockAgendar.mock.calls[0][0] as { content: { title: string; body: string } };
+    expect(content.title).toBe('Menos de 1 hora');
+    expect(content.body).toMatch(/Abra o app para confirmar/);
+  });
+
+  it('Recusar que falha também vira notificação local', async () => {
+    mockRefuse.mockRejectedValueOnce({ response: { status: 422 } });
+    await recusarTrocaPeloPush(pedido, true);
+    expect(mockAgendar).toHaveBeenCalledWith({ content: { title: 'Não foi possível recusar', body: expect.any(String) }, trigger: null });
+  });
+
+  it('sem o módulo de push, a falha não quebra', async () => {
+    mockAgendar.mockRejectedValueOnce(new Error('sem módulo'));
+    mockAcceptRequest.mockRejectedValueOnce({ response: { status: 422 } });
+    await expect(confirmarTrocaPeloPush(pedido, true)).resolves.toBeUndefined();
+  });
+});
+
+describe('responderPeloPush', () => {
+  const pedido = { type: 'SWAP_REQUESTED', swapRequestId: 'r1' };
+
+  it('Trocar e Aceitar aceitam; Recusar recusa; outro botão não é resposta', async () => {
+    expect(await responderPeloPush('n1', 'TROCAR', pedido)).toBe(true);
+    expect(mockAcceptRequest).toHaveBeenCalledWith('r1', 'tk', false);
+    expect(await responderPeloPush('n2', 'ACEITAR', { type: 'EARLIER_TURN_OFFERED', attendanceId: 'a1' })).toBe(true);
+    expect(mockAcceptEarlier).toHaveBeenCalledWith('a1', 'tk');
+    expect(await responderPeloPush('n3', 'RECUSAR', pedido)).toBe(true);
+    expect(mockRefuse).toHaveBeenCalledWith('r1', 'tk');
+    expect(await responderPeloPush('n4', 'MANTER', pedido)).toBe(false);
+  });
+
+  it('a mesma notificação responde uma vez só (a tarefa e o ouvinte chegam juntos)', async () => {
+    await responderPeloPush('n5', 'TROCAR', pedido, true);
+    await responderPeloPush('n5', 'TROCAR', pedido);
+    expect(mockAcceptRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('em segundo plano o JS sobe sem sessão: restaura antes de chamar a API', async () => {
+    const restore = jest.fn().mockImplementation(async () => {
+      useAuthStore.setState({ accessToken: 'tk2' } as never);
+    });
+    useAuthStore.setState({ accessToken: null, restoreSession: restore } as never);
+    await responderPeloPush('n6', 'TROCAR', pedido, true);
+    expect(restore).toHaveBeenCalled();
+    expect(mockAcceptRequest).toHaveBeenCalledWith('r1', 'tk2', false);
   });
 });

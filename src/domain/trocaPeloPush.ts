@@ -24,6 +24,11 @@ export const ACAO_MANTER = 'MANTER';
 /** Os botões que aceitam a troca (o CONFIRMAR de sempre e os dois novos). */
 export const ACOES_QUE_ACEITAM = [ACAO_CONFIRMAR, ACAO_TROCAR, ACAO_ACEITAR];
 
+/** O botão responde pela API (aceita ou recusa a troca): quem trata a resposta não navega para tela nenhuma. */
+export function ehAcaoQueResponde(acao: string): boolean {
+  return ACOES_QUE_ACEITAM.includes(acao) || acao === ACAO_RECUSAR;
+}
+
 /** O pedido de troca que o Recusar nega, pelo `data` do push. `null` = nada a recusar. */
 export function recusaDaTroca(data: unknown): string | null {
   const d = (data ?? {}) as Dados;

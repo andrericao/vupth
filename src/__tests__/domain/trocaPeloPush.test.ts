@@ -13,6 +13,7 @@ import {
   ACAO_MANTER,
   ACOES_QUE_ACEITAM,
   recusaDaTroca,
+  ehAcaoQueResponde,
 } from '@domain/trocaPeloPush';
 
 // troca-pela-notificacao (15/10, Backend 43efd61): o CONFIRMAR aceita o pedido,
@@ -66,5 +67,12 @@ describe('ações por pergunta', () => {
     expect(recusaDaTroca({ type: 'SWAP_REQUESTED' })).toBeNull();
     expect(recusaDaTroca({ type: 'EARLIER_TURN_OFFERED', attendanceId: 'a1' })).toBeNull();
     expect(recusaDaTroca(null)).toBeNull();
+  });
+});
+
+describe('ehAcaoQueResponde', () => {
+  it('Trocar, Aceitar, Confirmar e Recusar respondem pela API; Manter e Agora não, não', () => {
+    for (const a of ['TROCAR', 'ACEITAR', 'CONFIRMAR', 'RECUSAR']) expect(ehAcaoQueResponde(a)).toBe(true);
+    for (const a of ['MANTER', 'AGORA_NAO', 'OK', 'AVALIAR']) expect(ehAcaoQueResponde(a)).toBe(false);
   });
 });

@@ -20,6 +20,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 // De brinde, importar so os arquivos que usamos derruba o export de 42 fontes
 // (o pacote inteiro do @expo-google-fonts entrava) para 6.
 import { GluestackUIProvider } from "@gluestack-ui/themed";
+import "./src/tasks/notificacaoEmSegundoPlano";
 import { instalarDialogoNativo } from "@utils/alertNativo";
 import { DialogoVupth } from "@components/DialogoVupth";
 import { ConviteDeTroca } from "@components/ConviteDeTroca";

@@ -36,11 +36,9 @@ jest.mock('@services/pushService', () => ({
 }));
 const mockOferecer = jest.fn();
 jest.mock('@utils/vezAdiantada', () => ({ oferecerVezAdiantada: (...a: unknown[]) => mockOferecer(...a) }));
-const mockConfirmarTroca = jest.fn();
-const mockRecusarTroca = jest.fn();
+const mockResponder = jest.fn();
 jest.mock('@utils/trocaPeloPush', () => ({
-  confirmarTrocaPeloPush: (...a: unknown[]) => mockConfirmarTroca(...a),
-  recusarTrocaPeloPush: (...a: unknown[]) => mockRecusarTroca(...a),
+  responderPeloPush: (...a: unknown[]) => mockResponder(...a),
 }));
 const mockNavigate = jest.fn();
 const mockAbrirAvaliacao = jest.fn();
@@ -304,18 +302,18 @@ describe('usePushRegistration — toque na notificação', () => {
     tocou?.(resposta('n5', 'CONFIRMAR', data));
     expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n5');
     expect(mockNavigate).toHaveBeenCalledWith('fila');
-    expect(mockConfirmarTroca).toHaveBeenCalledWith(data);
+    expect(mockResponder).toHaveBeenCalledWith('n5', 'CONFIRMAR', data);
   });
 
   // push-acoes-por-pergunta (24/10, Backend 7584964): a pergunta da tela vira botão.
-  it('as categorias das perguntas: Trocar/Recusar e Aceitar/Manter (só o Manter não abre o app)', () => {
+  it('as categorias das perguntas: Trocar/Recusar e Aceitar/Manter, nenhum abre o app (push-resolve-sem-abrir-o-app)', () => {
     renderHook(() => usePushRegistration());
     expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('TROCAR_RECUSAR', [
-      { identifier: 'TROCAR', buttonTitle: 'Trocar', options: { opensAppToForeground: true } },
-      { identifier: 'RECUSAR', buttonTitle: 'Recusar', options: { opensAppToForeground: true } },
+      { identifier: 'TROCAR', buttonTitle: 'Trocar', options: { opensAppToForeground: false } },
+      { identifier: 'RECUSAR', buttonTitle: 'Recusar', options: { opensAppToForeground: false } },
     ]);
     expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('ACEITAR_MANTER', [
-      { identifier: 'ACEITAR', buttonTitle: 'Aceitar', options: { opensAppToForeground: true } },
+      { identifier: 'ACEITAR', buttonTitle: 'Aceitar', options: { opensAppToForeground: false } },
       { identifier: 'MANTER', buttonTitle: 'Manter', options: { opensAppToForeground: false } },
     ]);
   });
@@ -324,10 +322,10 @@ describe('usePushRegistration — toque na notificação', () => {
     renderHook(() => usePushRegistration());
     const pedido = { type: 'SWAP_REQUESTED', swapRequestId: 'r1' };
     tocou?.(resposta('n10', 'TROCAR', pedido));
-    expect(mockConfirmarTroca).toHaveBeenCalledWith(pedido);
+    expect(mockResponder).toHaveBeenCalledWith('n10', 'TROCAR', pedido);
     const adiantada = { type: 'EARLIER_TURN_OFFERED', attendanceId: 'a1' };
     tocou?.(resposta('n11', 'ACEITAR', adiantada));
-    expect(mockConfirmarTroca).toHaveBeenCalledWith(adiantada);
+    expect(mockResponder).toHaveBeenCalledWith('n11', 'ACEITAR', adiantada);
     expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n10');
     expect(mockNavigate).not.toHaveBeenCalled();
   });
@@ -336,12 +334,10 @@ describe('usePushRegistration — toque na notificação', () => {
     renderHook(() => usePushRegistration());
     const pedido = { type: 'SWAP_REQUESTED', swapRequestId: 'r1' };
     tocou?.(resposta('n12', 'RECUSAR', pedido));
-    expect(mockRecusarTroca).toHaveBeenCalledWith(pedido);
-    expect(mockConfirmarTroca).not.toHaveBeenCalled();
+    expect(mockResponder).toHaveBeenCalledWith('n12', 'RECUSAR', pedido);
     tocou?.(resposta('n13', 'MANTER', { type: 'EARLIER_TURN_OFFERED', attendanceId: 'a1' }));
     expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n13');
-    expect(mockConfirmarTroca).not.toHaveBeenCalled();
-    expect(mockRecusarTroca).toHaveBeenCalledTimes(1);
+    expect(mockResponder).toHaveBeenCalledTimes(1);
   });
 
   it('AGENDA_OPENED: o toque leva ao agendamento do profissional', () => {
@@ -365,7 +361,7 @@ describe('usePushRegistration — toque na notificação', () => {
     tocou?.(resposta('n6', 'AGORA_NAO', { type: 'SWAP_REQUESTED', swapRequestId: 'r1' }));
     expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n6');
     expect(mockNavigate).not.toHaveBeenCalled();
-    expect(mockConfirmarTroca).not.toHaveBeenCalled();
+    expect(mockResponder).not.toHaveBeenCalled();
   });
 
   it('o OK com falha ao fechar não quebra', async () => {

@@ -22,7 +22,7 @@ import {
 } from "@domain/push";
 import { pushService } from "@services/pushService";
 import { oferecerVezAdiantada } from "@utils/vezAdiantada";
-import { confirmarTrocaPeloPush, recusarTrocaPeloPush } from "@utils/trocaPeloPush";
+import { responderPeloPush } from "@utils/trocaPeloPush";
 import {
   ACAO_ACEITAR,
   ACAO_AGORA_NAO,
@@ -30,7 +30,7 @@ import {
   ACAO_MANTER,
   ACAO_RECUSAR,
   ACAO_TROCAR,
-  ACOES_QUE_ACEITAM,
+  ehAcaoQueResponde,
   CATEGORIA_ACEITAR_MANTER,
   CATEGORIA_TROCA,
   CATEGORIA_TROCAR_RECUSAR,
@@ -123,14 +123,14 @@ export function usePushRegistration() {
         { identifier: ACAO_CONFIRMAR, buttonTitle: "CONFIRMAR", options: { opensAppToForeground: true } },
         { identifier: ACAO_AGORA_NAO, buttonTitle: "AGORA NÃO", options: { opensAppToForeground: false } },
       ]).catch(() => {});
-      // push-acoes-por-pergunta: a pergunta da tela vira botao. Trocar/Aceitar e Recusar chamam a API,
-      // entao abrem o app (sem ele o JS nao roda com o app fechado); Manter so fecha.
+      // push-acoes-por-pergunta + push-resolve-sem-abrir-o-app: a pergunta da tela vira botao e responde
+      // SEM abrir o app (a tarefa em segundo plano chama a API; ver tasks/notificacaoEmSegundoPlano).
       Notifications.setNotificationCategoryAsync(CATEGORIA_TROCAR_RECUSAR, [
-        { identifier: ACAO_TROCAR, buttonTitle: "Trocar", options: { opensAppToForeground: true } },
-        { identifier: ACAO_RECUSAR, buttonTitle: "Recusar", options: { opensAppToForeground: true } },
+        { identifier: ACAO_TROCAR, buttonTitle: "Trocar", options: { opensAppToForeground: false } },
+        { identifier: ACAO_RECUSAR, buttonTitle: "Recusar", options: { opensAppToForeground: false } },
       ]).catch(() => {});
       Notifications.setNotificationCategoryAsync(CATEGORIA_ACEITAR_MANTER, [
-        { identifier: ACAO_ACEITAR, buttonTitle: "Aceitar", options: { opensAppToForeground: true } },
+        { identifier: ACAO_ACEITAR, buttonTitle: "Aceitar", options: { opensAppToForeground: false } },
         { identifier: ACAO_MANTER, buttonTitle: "Manter", options: { opensAppToForeground: false } },
       ]).catch(() => {});
       for (const c of CATEGORIAS_COM_BOTAO) {
@@ -263,17 +263,12 @@ export function usePushRegistration() {
       }
       const data = response.notification.request.content.data;
       // CONFIRMAR da troca: abre a fila e aceita dali.
-      if (ACOES_QUE_ACEITAM.includes(response.actionIdentifier)) {
+      // Trocar, Aceitar e Recusar (e o CONFIRMAR antigo da oferta) respondem pela API, sem levar o cliente a outra
+      // tela; so o CONFIRMAR antigo abre a fila. A tarefa em segundo plano pode ter respondido antes: uma vez so.
+      if (ehAcaoQueResponde(response.actionIdentifier)) {
         Notifications.dismissNotificationAsync(id).catch(() => {});
-        // Trocar e Aceitar respondem ali mesmo, sem levar o cliente a outra tela; so o CONFIRMAR antigo abre a fila.
         if (response.actionIdentifier === ACAO_CONFIRMAR) navigateFromNotification("fila");
-        void confirmarTrocaPeloPush(data);
-        return;
-      }
-      // Recusar do pedido de troca (push-acoes-por-pergunta): nega ali mesmo.
-      if (response.actionIdentifier === ACAO_RECUSAR) {
-        Notifications.dismissNotificationAsync(id).catch(() => {});
-        void recusarTrocaPeloPush(data);
+        void responderPeloPush(id, response.actionIdentifier, data);
         return;
       }
       // AGENDA_OPENED (categoria CIENCIA): o profissional abriu o dia; o toque no corpo leva ao agendamento dele.
