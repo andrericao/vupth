@@ -273,7 +273,10 @@ else
     # O emulador some do adb por instantes ("device offline", 21 nas baterias de
     # 11/10 06:06, 07:02 e 09:58, cada vez num passo): nao e o fluxo. Espera o
     # aparelho voltar e roda a etapa de novo, uma vez.
-    if [ "$VOLTA" -ne 0 ] && grep -qE "device offline|UiAutomation not connected" "$RODADA/$arquivo/console.txt" 2>/dev/null; then
+    # Bateria 23/10 23:31 (02.P7): o driver do Maestro (dev.mobile.maestro, a instrumentacao)
+    # crashou no emulador AOSP com o app subindo normal; so aparece no logcat da etapa.
+    if [ "$VOLTA" -ne 0 ] && { grep -qE "device offline|UiAutomation not connected" "$RODADA/$arquivo/console.txt" 2>/dev/null \
+        || grep -q "Crash of app dev.mobile.maestro" "$RODADA/$arquivo/logcat.txt" 2>/dev/null; }; then
       echo "↻ $arquivo: o aparelho saiu do adb ou o driver caiu — de novo, uma vez"
       timeout 120 adb wait-for-device
       sleep 10
