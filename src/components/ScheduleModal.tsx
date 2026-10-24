@@ -7,7 +7,7 @@ import { DaySelector } from "@components/DaySelector";
 import { floatingShadow } from "@utils/styles";
 import { horariosDoDia, mensagemDoAgendamento, AgendaPublica } from "@domain/schedule/encaixe";
 import { formatClockTime } from "@domain/queue/types";
-import { HorariosDaLoja } from "@domain/establishment/horarios";
+import { HorariosDaLoja, horarioDeHoje } from "@domain/establishment/horarios";
 import { intentionsService } from "@services/intentionsService";
 import { establishmentService } from "@services/establishmentService";
 import { useAuthStore } from "@stores/authStore";
@@ -204,6 +204,7 @@ export function ScheduleModal({
           <Box mt="$5">
             <DaySelector
               selectedDate={selectedDate}
+              esconder={(d) => horarioDeHoje(horariosDaLoja, d)?.closed === true}
               onSelect={(d) => {
                 setSelectedDate(d);
                 setHorario(null);

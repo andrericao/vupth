@@ -321,12 +321,13 @@ describe('ScheduleModal — o que sobra (cobertura-98)', () => {
     (intentionsService.getPublicAgenda as jest.Mock).mockResolvedValue({ data: { frame: null, blocks: [] } });
   });
 
-  it('a loja fechada no dia: diz que não abre', async () => {
+  // agendar-esconde-dias-fechados (André, 24/10): o dia fechado nem aparece no seletor.
+  it('a loja fechada no dia: o dia some do seletor', async () => {
     horas({ closed: true, opens: null, closes: null });
-    const { getAllByRole, findByText } = abrir();
+    const { queryByLabelText, getByLabelText } = abrir();
     await act(async () => {});
-    fireEvent.press(getAllByRole('button')[1]);
-    expect(await findByText('A loja não abre neste dia.')).toBeTruthy();
+    expect(queryByLabelText(`Dia ${amanha().getDate()}`)).toBeNull();
+    expect(getByLabelText('Hoje')).toBeTruthy();
   });
 
   it('o serviço não cabe no dia: diz que não há horário livre', async () => {

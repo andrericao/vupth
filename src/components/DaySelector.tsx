@@ -9,14 +9,16 @@ type Props = {
   // Início da faixa (default = hoje) e quantos dias mostrar (default = horizonte).
   from?: Date;
   count?: number;
+  // agendar-esconde-dias-fechados (André, 24/10): o dia sem expediente nem aparece.
+  esconder?: (date: Date) => boolean;
 };
 
 // Seletor de dia do "Agendar" (Item ② — Agendar = INTENÇÃO). Faixa horizontal de
 // pílulas: "Hoje" e depois os números dos dias seguintes (mockup partner
 // design/agendamento-barra.html usa a mesma ideia de faixa). Escolhido o dia, o
 // pai abre a barra de encaixe daquele dia.
-export function DaySelector({ selectedDate, onSelect, from, count = SCHEDULE_HORIZON_DAYS }: Props) {
-  const days = buildDayOptions(from ?? new Date(), count);
+export function DaySelector({ selectedDate, onSelect, from, count = SCHEDULE_HORIZON_DAYS, esconder }: Props) {
+  const days = buildDayOptions(from ?? new Date(), count).filter((d) => !esconder?.(d.date));
 
   return (
     <ScrollView
