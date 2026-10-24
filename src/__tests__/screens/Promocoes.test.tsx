@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import { act, fireEvent, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, waitFor, within } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { Promocoes } from '@screens/Promocoes';
@@ -91,9 +91,12 @@ describe('Promoções', () => {
     expect(getByText('Válido até 05/11 às 12:00')).toBeTruthy();
     expect(getByTestId('cupom-a-picote-esquerdo')).toBeTruthy();
     expect(queryByTestId('cupom-a-picote-direito')).toBeNull();
-    expect(getByTestId('cupons-encerrados')).toBeTruthy();
-    expect(getByText('Usado')).toBeTruthy();
-    expect(getByText('Vencido')).toBeTruthy();
+    // cupom-usado-some-da-selecao: o usado e o vencido em seções próprias, sem contagem
+    expect(getByText('Cupons usados')).toBeTruthy();
+    expect(getByText('Cupons vencidos')).toBeTruthy();
+    expect(within(getByTestId('cupons-usados')).getByText('Usado')).toBeTruthy();
+    expect(within(getByTestId('cupons-vencidos')).getByText('Vencido')).toBeTruthy();
+    expect(queryByText(/\d+ (ativ|dispon)/i)).toBeNull();
     expect(queryByText('Velho')).toBeTruthy();
   });
 

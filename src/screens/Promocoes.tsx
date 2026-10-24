@@ -35,6 +35,8 @@ export function Promocoes() {
   const [enviando, setEnviando] = useState(false);
   const [meus, setMeus] = useState<Campanha[]>([]);
   const { ativos, encerrados } = separarCupons(meus);
+  const usados = encerrados.filter((c) => situacaoDoCupom(c) === "Usado");
+  const vencidos = encerrados.filter((c) => situacaoDoCupom(c) !== "Usado");
 
   const carregar = useCallback(async () => {
     if (!accessToken) return;
@@ -112,10 +114,20 @@ export function Promocoes() {
               ))}
             </VStack>
           )}
-          {encerrados.length > 0 && (
-            <VStack gap="$2" mt="$4" testID="cupons-encerrados">
-              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Usados e vencidos</Text>
-              {encerrados.map((c) => (
+          {/* cupom-usado-some-da-selecao (André, 24/10): o usado sai da escolha do serviço e mora aqui,
+              esmaecido e marcado "Usado"; o vencido, à parte. Sem contagem de ativos. */}
+          {usados.length > 0 && (
+            <VStack gap="$2" mt="$4" testID="cupons-usados">
+              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Cupons usados</Text>
+              {usados.map((c) => (
+                <CartaoDoCupom key={c.id} cupom={c} encerrado />
+              ))}
+            </VStack>
+          )}
+          {vencidos.length > 0 && (
+            <VStack gap="$2" mt="$4" testID="cupons-vencidos">
+              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Cupons vencidos</Text>
+              {vencidos.map((c) => (
                 <CartaoDoCupom key={c.id} cupom={c} encerrado />
               ))}
             </VStack>
