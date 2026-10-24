@@ -1,6 +1,7 @@
 import {
   atendimentoParaAvaliar,
   pagamentoDoPush,
+  agendaAbertaDoPush,
   avisoDoPush,
   tocouNoOk,
   ACAO_OK,
@@ -233,7 +234,7 @@ describe('notificação de ciência (app fechado)', () => {
 
   it('o botão que abre a tela não é o OK: segue navegando', () => {
     expect(tocouNoOk({ actionIdentifier: 'VER_FILA' })).toBe(false);
-    expect(CATEGORIAS_COM_BOTAO.map((c) => c.categoria)).toEqual(['VER_FILA', 'VER_ATENDIMENTO', 'AVALIAR', 'PAGAR', 'PAGAR_MULTA']);
+    expect(CATEGORIAS_COM_BOTAO.map((c) => c.categoria)).toEqual(['VER_FILA', 'VER_ATENDIMENTO', 'AVALIAR', 'PAGAR']);
   });
 
   it('ids combinados com o Backend e o Partner', () => {
@@ -267,5 +268,15 @@ describe('pagamentoDoPush', () => {
     expect(pagamentoDoPush({ type: 'PAYMENT_REFUSED' })).toBeNull();
     expect(pagamentoDoPush({ type: 'ATTENDANCE_FINISHED', attendanceId: 'a1' })).toBeNull();
     expect(pagamentoDoPush(null)).toBeNull();
+  });
+});
+
+// agenda-da-semana-nao-liberada (24/10): o profissional abriu o dia pedido.
+describe('agendaAbertaDoPush', () => {
+  it('AGENDA_OPENED com a loja e o profissional leva ao agendamento dele', () => {
+    expect(agendaAbertaDoPush({ type: 'AGENDA_OPENED', establishmentId: 'e1', professionalId: 'p1' })).toEqual({ establishmentId: 'e1', professionalId: 'p1' });
+    expect(agendaAbertaDoPush({ type: 'AGENDA_OPENED', establishmentId: 'e1' })).toBeNull();
+    expect(agendaAbertaDoPush({ type: 'CUT_ACCEPTED', establishmentId: 'e1', professionalId: 'p1' })).toBeNull();
+    expect(agendaAbertaDoPush(null)).toBeNull();
   });
 });

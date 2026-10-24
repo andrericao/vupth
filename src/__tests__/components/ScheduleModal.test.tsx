@@ -330,6 +330,51 @@ describe('ScheduleModal — o que sobra (cobertura-98)', () => {
     expect(getByLabelText('Hoje')).toBeTruthy();
   });
 
+  // agenda-da-semana-nao-liberada (24/10, Backend 481c56c): store_open e agenda_released decidem o dia.
+  const agendaComDia = (d: object) =>
+    (intentionsService.getPublicAgenda as jest.Mock).mockResolvedValue({
+      data: { frame: null, blocks: [], days: [{ date: dataISO(amanha()), ...d }] },
+    });
+
+  it('store_open=false: o dia some; sem o campo, vale o horário da loja', async () => {
+    horas({ closed: false, opens: '09:00', closes: '11:00' });
+    agendaComDia({ closed: true, store_open: false, agenda_released: false });
+    const t = abrir();
+    await act(async () => {});
+    expect(t.queryByLabelText(`Dia ${amanha().getDate()}`)).toBeNull();
+  });
+
+  it('a loja abre e o profissional não liberou: Solicitar, com o horário, e o pedido sai pelo dono da tela', async () => {
+    horas({ closed: false, opens: '09:00', closes: '11:00' });
+    agendaComDia({ closed: true, store_open: true, agenda_released: false });
+    const onSolicitar = jest.fn();
+    const t = abrir({ onSolicitar });
+    await act(async () => {});
+    fireEvent.press(t.getByLabelText(`Dia ${amanha().getDate()}`));
+    expect(await t.findByTestId('agenda-nao-liberada')).toBeTruthy();
+    expect(t.getByText('Solicitar')).toBeTruthy();
+    expect(t.queryByText('Agendar', { exact: true })).toBeTruthy(); // o título do modal
+    fireEvent.press(await t.findByTestId('horario-09:00'));
+    await act(async () => {
+      fireEvent.press(t.getByTestId('confirmar-agendamento'));
+    });
+    const [horario] = onSolicitar.mock.calls[0] as [Date];
+    expect(horario.getHours()).toBe(9);
+    expect(intentionsService.create).not.toHaveBeenCalled();
+    expect(t.props.onClose).toHaveBeenCalled();
+  });
+
+  it('os dois liberados: agenda direto, sem Solicitar', async () => {
+    horas({ closed: false, opens: '09:00', closes: '11:00' });
+    agendaComDia({ closed: false, store_open: true, agenda_released: true });
+    const t = abrir({ onSolicitar: jest.fn() });
+    await act(async () => {});
+    fireEvent.press(t.getByLabelText(`Dia ${amanha().getDate()}`));
+    expect(await t.findByTestId('horario-09:00')).toBeTruthy();
+    expect(t.queryByTestId('agenda-nao-liberada')).toBeNull();
+    expect(t.queryByText('Solicitar')).toBeNull();
+  });
+
   it('o serviço não cabe no dia: diz que não há horário livre', async () => {
     horas({ closed: false, opens: '09:00', closes: '09:30' });
     const { getAllByRole, findByText } = abrir();

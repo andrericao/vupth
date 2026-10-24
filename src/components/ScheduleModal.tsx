@@ -5,7 +5,7 @@ import { VStack, HStack, Box, Text, Heading, Spinner } from "@gluestack-ui/theme
 import { Button } from "@components/Button";
 import { DaySelector } from "@components/DaySelector";
 import { CaixaDeModal } from "@components/CaixaDeModal";
-import { horariosDoDia, mensagemDoAgendamento, AgendaPublica } from "@domain/schedule/encaixe";
+import { horariosDoDia, mensagemDoAgendamento, situacaoDoDia, AgendaPublica } from "@domain/schedule/encaixe";
 import { formatClockTime } from "@domain/queue/types";
 import { HorariosDaLoja, horarioDeHoje } from "@domain/establishment/horarios";
 import { intentionsService } from "@services/intentionsService";
@@ -39,6 +39,11 @@ type Props = {
    * Com ele, o modal tambem oferece "Assim que abrir" (sem horario).
    */
   corte?: { onEscolher: (horario: Date | null) => void };
+  /**
+   * agenda-da-semana-nao-liberada (24/10): dia em que a loja abre mas o profissional nao liberou a
+   * agenda: em vez de agendar, o cliente SOLICITA (o dono da tela envia o pedido com dia e horario).
+   */
+  onSolicitar?: (horario: Date) => void;
 };
 
 // Relógio fora do componente (regra de pureza do React): o aviso de chegada lê o agora.
@@ -49,7 +54,7 @@ const relogio = () => Date.now();
 // incluir essa funcionalidade"). Os horarios vem da agenda publica do
 // profissional (piso da fila e reservados, anonimos) e do horario da loja.
 export function ScheduleModal({
-  visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado, corte, couponCampaignId, onCupomInvalido,
+  visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado, corte, couponCampaignId, onCupomInvalido, onSolicitar,
 }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
   const adiantado = usePagamentoAdiantado(visible && !corte);
@@ -91,8 +96,21 @@ export function ScheduleModal({
     ? horariosDoDia({ dia: selectedDate, agoraMs: agora, horarios: horariosDaLoja, agenda, minutosDoServico })
     : null;
 
+  // agenda-da-semana-nao-liberada: a loja abre e o profissional nao liberou o dia = Solicitar.
+  const solicitar = !corte && !!onSolicitar && selectedDate != null && situacaoDoDia(agenda, selectedDate) === "solicitar";
+
   async function confirmar() {
     if (!horario || !professionalId) return;
+    if (solicitar) {
+      if (!accessToken) {
+        close();
+        onPrecisaLogin?.();
+        return;
+      }
+      close();
+      onSolicitar?.(horario);
+      return;
+    }
     if (corte) {
       close();
       corte.onEscolher(horario);
@@ -158,7 +176,7 @@ export function ScheduleModal({
       {/* O rotulo nao vira "Agendando..." (guia de texto, regra 6): o botao
           desabilitado com o spinner ja diz que esta enviando. */}
       <Button
-        title={corte ? "Pedir" : "Agendar"}
+        title={corte ? "Pedir" : solicitar ? "Solicitar" : "Agendar"}
         isLoading={enviando}
         isDisabled={horario == null || enviando}
         opacity={horario == null ? 0.5 : 1}
@@ -203,13 +221,23 @@ export function ScheduleModal({
         <Box mt="$5">
           <DaySelector
             selectedDate={selectedDate}
-            esconder={(d) => horarioDeHoje(horariosDaLoja, d)?.closed === true}
+            esconder={(d) => {
+              // Com o campo do Backend (481c56c): store_open=false esconde; sem ele, o horario da loja.
+              const situacao = situacaoDoDia(agenda, d);
+              return situacao != null ? situacao === "fechado" : horarioDeHoje(horariosDaLoja, d)?.closed === true;
+            }}
             onSelect={(d) => {
               setSelectedDate(d);
               setHorario(null);
             }}
           />
         </Box>
+
+        {solicitar && (
+          <Text size="sm" color="$brandTextSecondary" mt="$4" testID="agenda-nao-liberada">
+            O profissional ainda não liberou este dia. Escolha um horário e solicite; ele responde por aqui.
+          </Text>
+        )}
 
         {selectedDate != null && (
           <Box mt="$4" testID="barra-de-encaixe">

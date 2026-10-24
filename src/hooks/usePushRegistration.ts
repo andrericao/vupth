@@ -8,6 +8,7 @@ import * as SecureStore from "expo-secure-store";
 import {
   acquireExpoPushToken,
   atendimentoParaAvaliar,
+  agendaAbertaDoPush,
   pagamentoDoPush,
   avisoDoPush,
   ACAO_OK,
@@ -34,7 +35,7 @@ import {
   CATEGORIA_TROCA,
   CATEGORIA_TROCAR_RECUSAR,
 } from "@domain/trocaPeloPush";
-import { abrirAvaliacao, navigateFromNotification } from "@routes/navigationRef";
+import { abrirAvaliacao, abrirLoja, navigateFromNotification } from "@routes/navigationRef";
 import { useAuthStore } from "@stores/authStore";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { useFirstRunStore } from "@stores/firstRunStore";
@@ -273,6 +274,13 @@ export function usePushRegistration() {
       if (response.actionIdentifier === ACAO_RECUSAR) {
         Notifications.dismissNotificationAsync(id).catch(() => {});
         void recusarTrocaPeloPush(data);
+        return;
+      }
+      // AGENDA_OPENED (categoria CIENCIA): o profissional abriu o dia; o toque no corpo leva ao agendamento dele.
+      const agendaAberta = agendaAbertaDoPush(data);
+      if (agendaAberta) {
+        Notifications.dismissNotificationAsync(id).catch(() => {});
+        abrirLoja(agendaAberta.establishmentId, agendaAberta.professionalId);
         return;
       }
       // PAYMENT_REFUSED e PAYMENT_PENDING (categoria PAGAR): o toque, no corpo ou no "Pagar", abre o pagamento.

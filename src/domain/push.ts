@@ -213,8 +213,6 @@ export const CATEGORIAS_COM_BOTAO: { categoria: string; acao: string; titulo: st
   { categoria: 'AVALIAR', acao: 'AVALIAR', titulo: 'Avaliar' },
   // pagamento-ja-paguei (24/10): o PAYMENT_REFUSED chega com a categoria PAGAR e abre o pagamento.
   { categoria: 'PAGAR', acao: 'PAGAR', titulo: 'Pagar' },
-  // push-acoes-por-pergunta: a categoria do Backend para NO_SHOW_REMOVED; o tipo segue sem rota (DEC-86, a falta vale como atraso).
-  { categoria: 'PAGAR_MULTA', acao: 'PAGAR_MULTA', titulo: 'Pagar multa' },
 ];
 
 /**
@@ -239,6 +237,18 @@ export function pagamentoDoPush(data: unknown): { attendanceId: string; recusado
   if (d.type === 'PAYMENT_REFUSED') return { attendanceId: d.attendanceId, recusado: true };
   if (d.type === 'PAYMENT_PENDING') return { attendanceId: d.attendanceId, recusado: false };
   return null;
+}
+
+/**
+ * AGENDA_OPENED (agenda-da-semana-nao-liberada, 24/10, Backend 651514f): o profissional abriu o dia
+ * pedido; o pedido venceu e o toque leva ao agendamento dele (a loja, no profissional).
+ */
+export function agendaAbertaDoPush(data: unknown): { establishmentId: string; professionalId: string } | null {
+  const d = (data ?? {}) as { type?: unknown; establishmentId?: unknown; professionalId?: unknown };
+  if (d.type !== 'AGENDA_OPENED') return null;
+  return typeof d.establishmentId === 'string' && d.establishmentId && typeof d.professionalId === 'string' && d.professionalId
+    ? { establishmentId: d.establishmentId, professionalId: d.professionalId }
+    : null;
 }
 
 /** Canal Android HIGH novo, id "alertas" combinado com o Backend e o Partner (o "default" antigo nao sobe de importancia). */

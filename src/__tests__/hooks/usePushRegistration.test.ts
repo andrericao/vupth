@@ -44,9 +44,11 @@ jest.mock('@utils/trocaPeloPush', () => ({
 }));
 const mockNavigate = jest.fn();
 const mockAbrirAvaliacao = jest.fn();
+const mockAbrirLoja = jest.fn();
 jest.mock('@routes/navigationRef', () => ({
   navigateFromNotification: (...a: unknown[]) => mockNavigate(...a),
   abrirAvaliacao: (...a: unknown[]) => mockAbrirAvaliacao(...a),
+  abrirLoja: (...a: unknown[]) => mockAbrirLoja(...a),
 }));
 
 // O handler do push em primeiro plano e registrado no import do modulo.
@@ -316,9 +318,6 @@ describe('usePushRegistration — toque na notificação', () => {
       { identifier: 'ACEITAR', buttonTitle: 'Aceitar', options: { opensAppToForeground: true } },
       { identifier: 'MANTER', buttonTitle: 'Manter', options: { opensAppToForeground: false } },
     ]);
-    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('PAGAR_MULTA', [
-      { identifier: 'PAGAR_MULTA', buttonTitle: 'Pagar multa', options: { opensAppToForeground: true } },
-    ]);
   });
 
   it('Trocar e Aceitar respondem ali mesmo: aceitam sem navegar', () => {
@@ -343,6 +342,13 @@ describe('usePushRegistration — toque na notificação', () => {
     expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n13');
     expect(mockConfirmarTroca).not.toHaveBeenCalled();
     expect(mockRecusarTroca).toHaveBeenCalledTimes(1);
+  });
+
+  it('AGENDA_OPENED: o toque leva ao agendamento do profissional', () => {
+    renderHook(() => usePushRegistration());
+    tocou?.(resposta('n16', 'default', { type: 'AGENDA_OPENED', establishmentId: 'e1', professionalId: 'p1' }));
+    expect(mockAbrirLoja).toHaveBeenCalledWith('e1', 'p1');
+    expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n16');
   });
 
   it('PAYMENT_PENDING e PAYMENT_REFUSED (categoria PAGAR) abrem o pagamento do atendimento', () => {

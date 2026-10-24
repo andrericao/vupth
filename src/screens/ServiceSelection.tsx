@@ -686,6 +686,7 @@ export function ServiceSelection() {
         couponCampaignId={cupomId}
         onCupomInvalido={() => setCupomEscolhido(null)}
         onPrecisaLogin={goToLoginAndComeBack}
+        onSolicitar={handleRequestCut}
         onAgendado={() => navigation.navigate("home", undefined, { pop: true })}
       />
       <ScheduleModal
