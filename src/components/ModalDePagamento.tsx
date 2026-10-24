@@ -23,6 +23,9 @@ import { FaixaESelo } from "@components/FaixaESelo";
 import { SaibaMaisDoPreco } from "@components/SaibaMaisDoPreco";
 import { useTema } from "@hooks/useTema";
 
+// tema-fixo: o leitor do banco nao le o codigo invertido; o QR e branco nos dois temas.
+const FUNDO_DO_QR = "#FFFFFF";
+
 function Botao({ titulo, onPress, claro, testID, desligado, feito }: {
   titulo: string; onPress: () => void; claro?: boolean; testID: string; desligado?: boolean; feito?: boolean;
 }) {
@@ -235,12 +238,12 @@ export function ModalDePagamento() {
                   <View style={{ alignItems: "center" }} testID="pix-qr">
                     {/* tema-fixo: QR escuro sobre branco nos dois temas; o leitor do banco nao le o codigo invertido */}
                     {pix.codigo ? (
-                      <QRCode value={pix.codigo} size={180} color={cores.forest} backgroundColor="#FFFFFF" />
+                      <QRCode value={pix.codigo} size={180} color={cores.forest} backgroundColor={FUNDO_DO_QR} />
                     ) : (
                       <Image
                         testID="pix-qr-imagem"
                         source={{ uri: pix.qrImagem!.startsWith("data:") || pix.qrImagem!.startsWith("http") ? pix.qrImagem! : `data:image/png;base64,${pix.qrImagem}` }}
-                        style={{ width: 180, height: 180, backgroundColor: "#FFFFFF" }}
+                        style={{ width: 180, height: 180, backgroundColor: FUNDO_DO_QR }}
                       />
                     )}
                   </View>
