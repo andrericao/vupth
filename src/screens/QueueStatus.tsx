@@ -993,6 +993,15 @@ export function QueueStatus() {
             `key` recomeca a faixa quando o horario muda. */}
         <FaixaDaTolerancia key={activeQueue?.toleranceUntil ?? 0} ate={activeQueue?.toleranceUntil} />
 
+        {/* aviso-de-atraso-e-saida-da-fila (24/10): a contagem "n de 3"; no 3º o cliente já saiu da fila. */}
+        {typeof activeQueue?.lateCount === "number" && activeQueue.lateCount > 0 && activeQueue.lateCount < 3 && (
+          <Box px={16} pb="$2">
+            <Text size="xs" color="$brandTextSecondary" textAlign="center" testID="contagem-de-atrasos">
+              {`Atrasos: ${activeQueue.lateCount} de 3`}
+            </Text>
+          </Box>
+        )}
+
         {mostrarFaixaDeSaida && (
           <Box px={16} pb="$2">
             <Box

@@ -9,7 +9,7 @@ describe('avisoDeAtraso', () => {
   it('sem multa, diz qual atraso é e o que vem no 3º', () => {
     const a = avisoDeAtraso({ contagem: 1 });
     expect(a.titulo).toBe('Você trocou de lugar');
-    expect(a.mensagem).toBe('Esteja na loja em até 5 minutos. 1º atraso, sem multa. No 3º, R$ 5,00 e fim da fila.');
+    expect(a.mensagem).toBe('Esteja na loja em até 5 minutos. Este é o seu 1º atraso (1 de 3). No 3º, multa de R$ 5,00 e você sai da fila.');
     // atraso-na-fila-vazia-client (DEC-101): o prazo para chegar.
     expect(avisoDeAtraso({}).mensagem).toMatch(/^Esteja na loja em até 5 minutos\./);
     expect(avisoDeAtraso({ contagem: 3 }).mensagem).not.toMatch(/Esteja na loja/);
@@ -17,18 +17,18 @@ describe('avisoDeAtraso', () => {
   });
 
   it('na segunda, o ordinal muda', () => {
-    expect(avisoDeAtraso({ contagem: 2 }).mensagem).toMatch(/2º atraso, sem multa/);
+    expect(avisoDeAtraso({ contagem: 2 }).mensagem).toMatch(/Este é o seu 2º atraso \(2 de 3\)/);
   });
 
-  it('na terceira, há multa — e o aviso diz o valor e o fim da fila', () => {
+  it('na terceira, há multa — e o aviso diz o valor e que saiu da fila (a454b4b)', () => {
     const a = avisoDeAtraso({ contagem: 3 });
     expect(a.titulo).toBe('3º atraso');
-    expect(a.mensagem).toBe('Multa de R$ 5,00 e você foi para o fim da fila.');
+    expect(a.mensagem).toBe('Multa de R$ 5,00 e você saiu da fila. Pague a multa para zerar a contagem.');
   });
 
   it('o backend manda quem decide: `multa` vence a contagem', () => {
     expect(avisoDeAtraso({ contagem: 1, multa: true }).mensagem).toMatch(/Multa/);
-    expect(avisoDeAtraso({ contagem: 5, multa: false }).mensagem).toMatch(/sem multa/);
+    expect(avisoDeAtraso({ contagem: 5, multa: false }).mensagem).toMatch(/No 3º, multa de/);
   });
 
   it('multa sem contagem: diz o valor e o fim da fila, sem ordinal', () => {
@@ -49,9 +49,9 @@ describe('avisoDeAtraso', () => {
 
   it('SEM a contagem (o backend ainda não manda), não inventa ordinal', () => {
     const a = avisoDeAtraso({});
-    expect(a.mensagem).not.toMatch(/\dº atraso, sem/);
+    expect(a.mensagem).not.toMatch(/Este é o seu/);
     expect(a.mensagem).toMatch(/Sem multa por enquanto/);
-    expect(a.mensagem).toMatch(/No 3º atraso, R\$ 5,00 e fim da fila/);
+    expect(a.mensagem).toMatch(/No 3º atraso, multa de R\$ 5,00 e você sai da fila/);
   });
 });
 
