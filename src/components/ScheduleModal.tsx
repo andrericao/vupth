@@ -4,7 +4,7 @@ import { VStack, HStack, Box, Text, Heading, Spinner } from "@gluestack-ui/theme
 
 import { Button } from "@components/Button";
 import { DaySelector } from "@components/DaySelector";
-import { floatingShadow } from "@utils/styles";
+import { CaixaDeModal } from "@components/CaixaDeModal";
 import { horariosDoDia, mensagemDoAgendamento, AgendaPublica } from "@domain/schedule/encaixe";
 import { formatClockTime } from "@domain/queue/types";
 import { HorariosDaLoja, horarioDeHoje } from "@domain/establishment/horarios";
@@ -53,7 +53,7 @@ export function ScheduleModal({
 }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
   const adiantado = usePagamentoAdiantado(visible && !corte);
-  const { cores, veu } = useTema();
+  const { cores } = useTema();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [horario, setHorario] = useState<Date | null>(null);
   const [agenda, setAgenda] = useState<AgendaPublica | null>(null);
@@ -153,112 +153,96 @@ export function ScheduleModal({
     }
   }
 
+  const rodape = (
+    <VStack gap="$3" testID="agenda-rodape">
+      {/* O rotulo nao vira "Agendando..." (guia de texto, regra 6): o botao
+          desabilitado com o spinner ja diz que esta enviando. */}
+      <Button
+        title={corte ? "Pedir" : "Agendar"}
+        isLoading={enviando}
+        isDisabled={horario == null || enviando}
+        opacity={horario == null ? 0.5 : 1}
+        onPress={confirmar}
+        testID="confirmar-agendamento"
+      />
+      <Button title="Cancelar" variant="outline" onPress={close} />
+    </VStack>
+  );
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg={veu} justifyContent="center" px={24} py={24}>
-        {/* cancelar-cortado-no-solicitar (CLI, Andre 18/10, o mesmo defeito do
-            cancelar-fora-da-caixa de 11/10 de volta): a rolagem envolvia TUDO,
-            entao com tela pequena ou fonte ampliada o "Cancelar" ficava abaixo da
-            dobra, cortado na borda da caixa, sem nada avisando que dava para
-            rolar. Agora so o miolo (titulo, dias, horarios) rola; os botoes ficam
-            no rodape da caixa e aparecem sempre.
-            A altura maxima e relativa ao espaco que o Modal realmente tem (100% do
-            contêiner), nao a 90% da altura da janela: no Android com barras do
-            sistema o Modal e menor que a janela e a caixa passava da tela. Altura
-            cravada nunca: o app honra o ajuste de fonte do aparelho (DS4). */}
-        <VStack bg="$painel" borderRadius="$card" style={[floatingShadow, { maxHeight: "100%" }]} testID="agenda-caixa">
-          <ScrollView
-            style={{ flexShrink: 1 }}
-            contentContainerStyle={{ padding: 24, paddingBottom: 8 }}
-            showsVerticalScrollIndicator={false}
-            testID="agenda-rolagem"
-          >
-          <Heading fontFamily="$heading" fontSize="$lg">
-            {corte ? "Pedir corte" : "Agendar"}
-          </Heading>
-          <Text size="sm" color="$brandTextSecondary" mt="$1">
-            {corte
-              ? "O profissional responde em 5 min."
-              : "Escolha o dia e o horário."}
+      <CaixaDeModal testID="agenda-caixa" rolagemTestID="agenda-rolagem" rodapeTestID="agenda-rodape-caixa" rodape={rodape}>
+        <Heading fontFamily="$heading" fontSize="$lg">
+          {corte ? "Pedir corte" : "Agendar"}
+        </Heading>
+        <Text size="sm" color="$brandTextSecondary" mt="$1">
+          {corte
+            ? "O profissional responde em 5 min."
+            : "Escolha o dia e o horário."}
+        </Text>
+        {/* agendar-com-pagamento-adiantado (DEC-105/115): 3 faltas — o motivo em uma linha; agendar segue livre. */}
+        {!corte && adiantado && (
+          <Text size="sm" color="$brandDanger" mt="$2" testID="pagamento-adiantado">
+            {AVISO_DE_PAGAMENTO_ADIANTADO}
           </Text>
-          {/* agendar-com-pagamento-adiantado (DEC-105/115): 3 faltas — o motivo em uma linha; agendar segue livre. */}
-          {!corte && adiantado && (
-            <Text size="sm" color="$brandDanger" mt="$2" testID="pagamento-adiantado">
-              {AVISO_DE_PAGAMENTO_ADIANTADO}
-            </Text>
-          )}
+        )}
 
-          {corte && (
-            <Button
-              title="Assim que abrir"
-              variant="outline"
-              mt="$4"
-              onPress={() => {
-                close();
-                corte.onEscolher(null);
-              }}
-              testID="corte-assim-que-abrir"
-            />
-          )}
+        {corte && (
+          <Button
+            title="Assim que abrir"
+            variant="outline"
+            mt="$4"
+            onPress={() => {
+              close();
+              corte.onEscolher(null);
+            }}
+            testID="corte-assim-que-abrir"
+          />
+        )}
 
-          <Box mt="$5">
-            <DaySelector
-              selectedDate={selectedDate}
-              esconder={(d) => horarioDeHoje(horariosDaLoja, d)?.closed === true}
-              onSelect={(d) => {
-                setSelectedDate(d);
-                setHorario(null);
-              }}
-            />
+        <Box mt="$5">
+          <DaySelector
+            selectedDate={selectedDate}
+            esconder={(d) => horarioDeHoje(horariosDaLoja, d)?.closed === true}
+            onSelect={(d) => {
+              setSelectedDate(d);
+              setHorario(null);
+            }}
+          />
+        </Box>
+
+        {selectedDate != null && (
+          <Box mt="$4" testID="barra-de-encaixe">
+            {!doDia ? (
+              <HStack gap="$2" alignItems="center">
+                <Spinner color={cores.textPrimary} />
+                <Text size="sm" color="$brandTextSecondary">Buscando horários...</Text>
+              </HStack>
+            ) : doDia.tipo === "livres" ? (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                {doDia.horarios.map((h) => {
+                  const ativo = horario?.getTime() === h.getTime();
+                  return (
+                    <TouchableOpacity key={h.getTime()} onPress={() => setHorario(h)} testID={`horario-${formatClockTime(h)}`}>
+                      <Box bg={ativo ? "$selecionado" : "$sobrePainel"} borderRadius="$full" px={14} py={8}>
+                        <Text fontWeight="$bold" color={ativo ? "$onSelecionado" : "$brandTextPrimary"}>{formatClockTime(h)}</Text>
+                      </Box>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            ) : (
+              <Text size="sm" color="$brandTextSecondary" testID="sem-horario">
+                {doDia.tipo === "fechada"
+                  ? "A loja não abre neste dia."
+                  : doDia.tipo === "cheio"
+                    ? "Não há horário livre para este serviço neste dia."
+                    : "A loja ainda não informou o horário deste dia."}
+              </Text>
+            )}
           </Box>
-
-          {selectedDate != null && (
-            <Box mt="$4" testID="barra-de-encaixe">
-              {!doDia ? (
-                <HStack gap="$2" alignItems="center">
-                  <Spinner color={cores.textPrimary} />
-                  <Text size="sm" color="$brandTextSecondary">Buscando horários...</Text>
-                </HStack>
-              ) : doDia.tipo === "livres" ? (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-                  {doDia.horarios.map((h) => {
-                    const ativo = horario?.getTime() === h.getTime();
-                    return (
-                      <TouchableOpacity key={h.getTime()} onPress={() => setHorario(h)} testID={`horario-${formatClockTime(h)}`}>
-                        <Box bg={ativo ? "$selecionado" : "$sobrePainel"} borderRadius="$full" px={14} py={8}>
-                          <Text fontWeight="$bold" color={ativo ? "$onSelecionado" : "$brandTextPrimary"}>{formatClockTime(h)}</Text>
-                        </Box>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              ) : (
-                <Text size="sm" color="$brandTextSecondary" testID="sem-horario">
-                  {doDia.tipo === "fechada"
-                    ? "A loja não abre neste dia."
-                    : doDia.tipo === "cheio"
-                      ? "Não há horário livre para este serviço neste dia."
-                      : "A loja ainda não informou o horário deste dia."}
-                </Text>
-              )}
-            </Box>
-          )}
-          </ScrollView>
-          <VStack px={24} pt="$3" pb={24} gap="$3" testID="agenda-rodape">
-            {/* O rotulo nao vira "Agendando..." (guia de texto, regra 6): o botao
-                desabilitado com o spinner ja diz que esta enviando. */}
-            <Button
-              title={corte ? "Pedir" : "Agendar"}
-              isLoading={enviando}
-              isDisabled={horario == null || enviando}
-              opacity={horario == null ? 0.5 : 1}
-              onPress={confirmar}
-              testID="confirmar-agendamento"
-            />
-            <Button title="Cancelar" variant="outline" onPress={close} />
-          </VStack>
-        </VStack>
-      </Box>
+        )}
+      </CaixaDeModal>
     </Modal>
   );
 }

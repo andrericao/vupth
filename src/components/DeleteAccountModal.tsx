@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Modal } from "react-native";
-import { VStack, Box, Text, Heading } from "@gluestack-ui/themed";
+import { VStack, Text, Heading } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
 import { Input2 } from "@components/Input2";
 import { SaibaMais } from "@components/SaibaMais";
-import { floatingShadow } from "@utils/styles";
-import { useTema } from "@hooks/useTema";
+import { CaixaDeModal } from "@components/CaixaDeModal";
 
 type Props = {
   visible: boolean;
@@ -40,7 +39,6 @@ type Props = {
 export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onClose, modo = "excluir" }: Props) {
   const desativar = modo === "desativar";
   const [password, setPassword] = useState("");
-  const { veu } = useTema();
 
   function close() {
     setPassword("");
@@ -54,48 +52,50 @@ export function DeleteAccountModal({ visible, isDeleting, error, onConfirm, onCl
     onConfirm(password);
   }
 
+  const rodape = (
+    <VStack gap="$3">
+      <Button
+        title={desativar ? "Desativar" : "Excluir"}
+        variant="outline"
+        borderColor="$brandDanger"
+        $active-bg="$brandDangerTint"
+        isLoading={isDeleting}
+        isDisabled={password.length === 0 || isDeleting}
+        testID="delete-account-confirm"
+        onPress={confirm}
+      />
+      <Button title="Cancelar" onPress={close} isDisabled={isDeleting} />
+    </VStack>
+  );
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg={veu} justifyContent="center" px={24}>
-        <VStack bg="$painel" borderRadius="$card" p="$6" gap="$3" style={floatingShadow}>
-          <Heading fontFamily="$heading" fontSize="$lg">
-            {desativar ? "Desativar conta" : "Excluir conta"}
-          </Heading>
+      <CaixaDeModal raio="card" gap={12} rodape={rodape}>
+        <Heading fontFamily="$heading" fontSize="$lg">
+          {desativar ? "Desativar conta" : "Excluir conta"}
+        </Heading>
 
-          <Text size="sm" color="$brandTextSecondary">
-            {desativar
-              ? "Sua conta fica desativada e dá para reativar depois. Para confirmar, digite a senha."
-              : "Seus dados são apagados. Para confirmar, digite a senha."}
+        <Text size="sm" color="$brandTextSecondary">
+          {desativar
+            ? "Sua conta fica desativada e dá para reativar depois. Para confirmar, digite a senha."
+            : "Seus dados são apagados. Para confirmar, digite a senha."}
+        </Text>
+        {!desativar && <SaibaMais artigo="excluirConta" testID="excluir-conta-saiba-mais" />}
+
+        <Input2
+          isPassword
+          placeholder="Senha atual"
+          value={password}
+          onChangeText={setPassword}
+          testID="delete-account-password"
+        />
+
+        {error && (
+          <Text size="xs" color="$brandDanger" testID="delete-account-error">
+            {error}
           </Text>
-          {!desativar && <SaibaMais artigo="excluirConta" testID="excluir-conta-saiba-mais" />}
-
-          <Input2
-            isPassword
-            placeholder="Senha atual"
-            value={password}
-            onChangeText={setPassword}
-            testID="delete-account-password"
-          />
-
-          {error && (
-            <Text size="xs" color="$brandDanger" testID="delete-account-error">
-              {error}
-            </Text>
-          )}
-
-          <Button
-            title={desativar ? "Desativar" : "Excluir"}
-            variant="outline"
-            borderColor="$brandDanger"
-            $active-bg="$brandDangerTint"
-            isLoading={isDeleting}
-            isDisabled={password.length === 0 || isDeleting}
-            testID="delete-account-confirm"
-            onPress={confirm}
-          />
-          <Button title="Cancelar" mt="$1" onPress={close} isDisabled={isDeleting} />
-        </VStack>
-      </Box>
+        )}
+      </CaixaDeModal>
     </Modal>
   );
 }

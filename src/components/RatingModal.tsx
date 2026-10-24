@@ -4,7 +4,7 @@ import { VStack, HStack, Box, Text, Heading } from "@gluestack-ui/themed";
 import { Star } from "lucide-react-native";
 
 import { Button } from "@components/Button";
-import { floatingShadow } from "@utils/styles";
+import { CaixaDeModal } from "@components/CaixaDeModal";
 import { ratingService } from "@services/ratingService";
 import { useAuthStore } from "@stores/authStore";
 import { useFeedbackStore } from "@stores/feedbackStore";
@@ -28,7 +28,7 @@ const SHOW_COMMENT = false;
 // POST /attendances/{id}/rating. Trata 409 (já avaliado) como concluído.
 export function RatingModal({ visible, attendanceId, professionalName, onClose }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
-  const { cores, veu } = useTema();
+  const { cores } = useTema();
   const [score, setScore] = useState(0);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -76,59 +76,61 @@ export function RatingModal({ visible, attendanceId, professionalName, onClose }
     }
   }
 
+  const rodape = (
+    <VStack gap="$3">
+      <Button
+        title="Enviar avaliação"
+       
+        isLoading={submitting}
+        onPress={handleSubmit}
+      />
+      <Button title="Agora não" variant="outline" onPress={() => onClose(false)} />
+    </VStack>
+  );
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={() => onClose(false)}>
-      <Box flex={1} bg={veu} justifyContent="center" px={24}>
-        <VStack bg="$painel" borderRadius="$card" p="$6" style={floatingShadow}>
-          <Heading fontFamily="$heading" fontSize="$lg">
-            Como foi seu atendimento?
-          </Heading>
-          {professionalName ? (
-            <Text size="sm" color="$brandTextSecondary" mt="$1">
-              {professionalName}
-            </Text>
-          ) : null}
+      <CaixaDeModal raio="card" rodape={rodape}>
+        <Heading fontFamily="$heading" fontSize="$lg">
+          Como foi seu atendimento?
+        </Heading>
+        {professionalName ? (
+          <Text size="sm" color="$brandTextSecondary" mt="$1">
+            {professionalName}
+          </Text>
+        ) : null}
 
-          <HStack justifyContent="center" gap="$2" mt="$5" mb="$2">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <TouchableOpacity key={n} testID={`star-${n}`} onPress={() => setScore(n)} hitSlop={6}>
-                {/* [marca-vupth] A marca nao tem dourado, e o pessego
-                    ($brandWarning) so existe como FUNDO — sobre branco da
-                    1,59:1. A estrela CHEIA carrega a nota, entao vai no texto
-                    do tema (forest no claro, 13,93:1); a vazia e so o contorno
-                    do que falta escolher e fica no border. */}
-                <Star
-                  size={36}
-                  color={n <= score ? cores.textPrimary : cores.border}
-                  fill={n <= score ? cores.textPrimary : "none"}
-                />
-              </TouchableOpacity>
-            ))}
-          </HStack>
-
-          {SHOW_COMMENT && (
-            <Box borderWidth="$1" borderColor="$brandBorder" borderRadius="$xl" px="$3" py="$2" mt="$4">
-              <TextInput
-                placeholder="Comentário (opcional)"
-                placeholderTextColor={cores.textPlaceholder}
-                value={comment}
-                onChangeText={setComment}
-                multiline
-                maxLength={300}
-                style={{ minHeight: 60, textAlignVertical: "top", color: cores.textPrimary }}
+        <HStack justifyContent="center" gap="$2" mt="$5" mb="$2">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <TouchableOpacity key={n} testID={`star-${n}`} onPress={() => setScore(n)} hitSlop={6}>
+              {/* [marca-vupth] A marca nao tem dourado, e o pessego
+                  ($brandWarning) so existe como FUNDO — sobre branco da
+                  1,59:1. A estrela CHEIA carrega a nota, entao vai no texto
+                  do tema (forest no claro, 13,93:1); a vazia e so o contorno
+                  do que falta escolher e fica no border. */}
+              <Star
+                size={36}
+                color={n <= score ? cores.textPrimary : cores.border}
+                fill={n <= score ? cores.textPrimary : "none"}
               />
-            </Box>
-          )}
+            </TouchableOpacity>
+          ))}
+        </HStack>
 
-          <Button
-            title="Enviar avaliação"
-            mt="$5"
-            isLoading={submitting}
-            onPress={handleSubmit}
-          />
-          <Button title="Agora não" variant="outline" mt="$3" onPress={() => onClose(false)} />
-        </VStack>
-      </Box>
+        {SHOW_COMMENT && (
+          <Box borderWidth="$1" borderColor="$brandBorder" borderRadius="$xl" px="$3" py="$2" mt="$4">
+            <TextInput
+              placeholder="Comentário (opcional)"
+              placeholderTextColor={cores.textPlaceholder}
+              value={comment}
+              onChangeText={setComment}
+              multiline
+              maxLength={300}
+              style={{ minHeight: 60, textAlignVertical: "top", color: cores.textPrimary }}
+            />
+          </Box>
+        )}
+      </CaixaDeModal>
     </Modal>
   );
 }
