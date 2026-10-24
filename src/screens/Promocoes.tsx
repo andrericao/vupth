@@ -1,12 +1,13 @@
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { VStack, Text, ScrollView, Box } from "@gluestack-ui/themed";
+import { VStack, Text, ScrollView } from "@gluestack-ui/themed";
 
 import { ScreenHeader } from "@components/ScreenHeader";
 import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { SeuLinkDeIndicacao } from "@components/SeuLinkDeIndicacao";
+import { CartaoTicket } from "@components/CartaoTicket";
 import { useAuthStore } from "@stores/authStore";
 import { avisoDeFimDaCampanha } from "@utils/avisoDeFimDaCampanha";
 import { campaignService, Campanha } from "@services/campaignService";
@@ -21,6 +22,8 @@ import {
   separarCupons,
   situacaoDoCupom,
   validadeDoCupom,
+  validadeDoTicket,
+  valorDoTicket,
 } from "@domain/campanhas";
 
 // Perfil > Promocoes (cupom-no-app, cupom-em-configuracoes): adicionar o cupom e
@@ -123,14 +126,17 @@ export function Promocoes() {
   );
 }
 
+// card-ticket-pontilhado (André, 24/10): o cupom é um ticket, com o valor grande e a validade;
+// usado e vencido ficam esmaecidos, com o estado no lugar do botão.
 function CartaoDoCupom({ cupom, encerrado }: { cupom: Campanha; encerrado?: boolean }) {
-  const detalhes = [regraDoCupom(cupom), encerrado ? situacaoDoCupom(cupom) : validadeDoCupom(cupom)]
-    .filter(Boolean)
-    .join(" · ");
   return (
-    <Box bg="$brandSurface" borderRadius="$card" px={16} py={12} opacity={encerrado ? 0.6 : 1} testID={`cupom-${cupom.id}`}>
-      <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary">{nomeDaCampanha(cupom)}</Text>
-      {detalhes !== "" && <Text size="xs" color="$brandTextSecondary">{detalhes}</Text>}
-    </Box>
+    <CartaoTicket
+      testID={`cupom-${cupom.id}`}
+      rotulo={regraDoCupom(cupom) || undefined}
+      valor={valorDoTicket(cupom)}
+      nome={nomeDaCampanha(cupom)}
+      detalhe={encerrado ? undefined : validadeDoTicket(cupom) || validadeDoCupom(cupom)}
+      situacao={encerrado ? situacaoDoCupom(cupom) : undefined}
+    />
   );
 }

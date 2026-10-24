@@ -1,14 +1,13 @@
-import { ScrollView, TouchableOpacity, useWindowDimensions } from "react-native";
-import { Box, Text, VStack } from "@gluestack-ui/themed";
+import { ScrollView, useWindowDimensions } from "react-native";
 
 import { Campanha, campaignService } from "@services/campaignService";
 import { detalhesDaCampanha } from "@domain/campanha/detalhes";
 import { ehCampanhaDeLink, mensagemDoParticipar } from "@domain/compartilhe";
-import { fimDaCampanha, fimDoErro } from "@domain/campanhas";
+import { beneficioEmPortugues, fimDaCampanha, fimDoErro, validadeDoTicket, valorDoTicket } from "@domain/campanhas";
+import { CartaoTicket } from "@components/CartaoTicket";
 import { avisoDeFimDaCampanha } from "@utils/avisoDeFimDaCampanha";
 import { useAuthStore } from "@stores/authStore";
 import { alertaTipado } from "@utils/alertaTipado";
-import { fs } from "@stores/fonteStore";
 
 type Props = { campanhas: Campanha[] };
 
@@ -49,8 +48,15 @@ export function CarrosselDeCampanhas({ campanhas }: Props) {
       testID="campanhas-da-home"
     >
       {campanhas.map((c) => (
-        <TouchableOpacity
+        <CartaoTicket
           key={c.id}
+          testID={`campanha-${c.id}`}
+          largura={largura}
+          rotulo={beneficioEmPortugues(c.benefit)}
+          valor={valorDoTicket(c)}
+          nome={c.name ?? "Campanha"}
+          detalhe={validadeDoTicket(c)}
+          acao={ehCampanhaDeLink(c.type) && !fimDaCampanha(c) ? { titulo: "Participar", onPress: () => participar(c), testID: `participar-${c.id}` } : undefined}
           onPress={() => {
             const fim = fimDaCampanha(c);
             if (fim) return avisoDeFimDaCampanha(fim);
@@ -63,23 +69,7 @@ export function CarrosselDeCampanhas({ campanhas }: Props) {
               { tipo: "informacao" },
             );
           }}
-          style={{ width: largura }}
-          accessibilityRole="button"
-          testID={`campanha-${c.id}`}
-        >
-          <VStack bg="$brandSurface" borderRadius={18} p={14} gap={4}>
-            <Text fontFamily="$display" fontSize={fs(15)} fontWeight="$bold" color="$brandTextPrimary">
-              {c.name}
-            </Text>
-            {c.benefit ? (
-              <Text fontFamily="$body" fontSize={fs(13)} color="$brandTextSecondary" numberOfLines={2}>
-                {c.benefit}
-              </Text>
-            ) : (
-              <Box />
-            )}
-          </VStack>
-        </TouchableOpacity>
+        />
       ))}
     </ScrollView>
   );

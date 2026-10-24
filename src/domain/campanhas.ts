@@ -51,7 +51,7 @@ function dia(iso: string): string {
 export function regraDoCupom(c: Campanha): string {
   if (c.value_percent) return `${c.value_percent}% de desconto`;
   if (c.value_amount) return `${formatarReais(c.value_amount)} de desconto`;
-  return c.benefit || '';
+  return beneficioEmPortugues(c.benefit);
 }
 
 /** A validade (o fim da campanha), ou vazio sem data. */
@@ -147,4 +147,48 @@ export function descontoDoCupom(c: Campanha | null | undefined, servicos: number
   if (!c || !(servicos > 0)) return 0;
   const bruto = c.value_percent ? (servicos * Number(c.value_percent)) / 100 : Number(c.value_amount) || 0;
   return Math.round(Math.min(Math.max(bruto, 0), servicos) * 100) / 100;
+}
+
+// cards-de-promocao-em-portugues (André, 24/10): nenhuma palavra em inglês na tela. O Backend manda o
+// tipo (REFERRAL_BONUS, FEE_WAIVER, DISCOUNT) e o benefício (CASH, DISCOUNT) como código; o app mostra o
+// português. Código que o mapa não conhece não aparece cru: sai vazio.
+const BENEFICIOS: Record<string, string> = {
+  CASH: 'Ganho em dinheiro',
+  DISCOUNT: 'Desconto',
+};
+const TIPOS: Record<string, string> = {
+  REFERRAL_BONUS: 'Indique e ganhe',
+  FEE_WAIVER: 'Isenção da taxa',
+  DISCOUNT: 'Desconto',
+};
+
+/** O benefício em português ("Ganho em dinheiro", "Desconto"); texto livre passa, código desconhecido some. */
+export function beneficioEmPortugues(benefit: string | null | undefined): string {
+  const b = (benefit ?? '').trim();
+  if (!b) return '';
+  if (BENEFICIOS[b]) return BENEFICIOS[b];
+  return /^[A-Z][A-Z0-9_]*$/.test(b) ? '' : b;
+}
+
+/** O tipo da campanha em português; código desconhecido some. */
+export function tipoEmPortugues(type: string | null | undefined): string {
+  const t = (type ?? '').trim();
+  if (!t) return '';
+  if (TIPOS[t]) return TIPOS[t];
+  return /^[A-Z][A-Z0-9_]*$/.test(t) ? '' : t;
+}
+
+/**
+ * card-ticket-pontilhado (André, 24/10): o valor grande do cartão. Percentual ("10%") ou valor em reais
+ * ("R$ 10,00"); sem nenhum dos dois, vazio (o cartão mostra só o nome).
+ */
+export function valorDoTicket(c: Campanha): string {
+  if (c.value_percent) return `${Number(c.value_percent)}%`;
+  if (c.value_amount) return formatarReais(Number(c.value_amount));
+  return '';
+}
+
+/** "Válido até dd/MM às HH:mm" (sem o ponto final do aviso), ou vazio sem data. */
+export function validadeDoTicket(c: Campanha): string {
+  return avisoDeValidade(c).replace(/\.$/, '');
 }

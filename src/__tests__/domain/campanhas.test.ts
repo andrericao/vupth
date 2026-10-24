@@ -5,6 +5,10 @@ import {
   nomeDaCampanha,
   regraDoCupom,
   avisoDeValidade,
+  validadeDoTicket,
+  valorDoTicket,
+  beneficioEmPortugues,
+  tipoEmPortugues,
   descontoDoCupom,
   fimDaCampanha,
   fimDoErro,
@@ -136,5 +140,42 @@ describe('descontoDoCupom', () => {
     expect(descontoDoCupom(undefined, 75)).toBe(0);
     expect(descontoDoCupom({ id: 'a' }, 75)).toBe(0);
     expect(descontoDoCupom({ id: 'a', value_amount: 10 }, 0)).toBe(0);
+  });
+});
+
+// cards-de-promocao-em-portugues (André, 24/10): "DISCOUNT" e "CASH" não aparecem na tela.
+describe('português nos cards de promoção', () => {
+  it('benefício e tipo do servidor viram português', () => {
+    expect(beneficioEmPortugues('CASH')).toBe('Ganho em dinheiro');
+    expect(beneficioEmPortugues('DISCOUNT')).toBe('Desconto');
+    expect(tipoEmPortugues('REFERRAL_BONUS')).toBe('Indique e ganhe');
+    expect(tipoEmPortugues('FEE_WAIVER')).toBe('Isenção da taxa');
+    expect(tipoEmPortugues('DISCOUNT')).toBe('Desconto');
+  });
+
+  it('texto livre passa; código que o mapa não conhece não vai cru para a tela', () => {
+    expect(beneficioEmPortugues('Corte grátis')).toBe('Corte grátis');
+    expect(beneficioEmPortugues('NOVO_CODIGO')).toBe('');
+    expect(tipoEmPortugues('NOVO_TIPO')).toBe('');
+    expect(beneficioEmPortugues(null)).toBe('');
+    expect(tipoEmPortugues(undefined)).toBe('');
+  });
+
+  it('a regra do cupom sem valor também sai em português', () => {
+    expect(regraDoCupom({ id: '1', benefit: 'DISCOUNT' })).toBe('Desconto');
+  });
+});
+
+// card-ticket-pontilhado (André, 24/10): o valor grande e a validade do ticket.
+describe('ticket do cupom', () => {
+  it('o valor é o percentual ou o valor em reais; sem nenhum, vazio', () => {
+    expect(valorDoTicket({ id: 'a', value_percent: 10 })).toBe('10%');
+    expect(valorDoTicket({ id: 'a', value_amount: 10 })).toBe('R$ 10,00');
+    expect(valorDoTicket({ id: 'a' })).toBe('');
+  });
+
+  it('a validade sai sem o ponto final; sem data, vazia', () => {
+    expect(validadeDoTicket({ id: 'a', ends_at: '2026-11-05T09:05:00' })).toBe('Válido até 05/11 às 09:05');
+    expect(validadeDoTicket({ id: 'a' })).toBe('');
   });
 });

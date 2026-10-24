@@ -85,9 +85,15 @@ describe('Promoções', () => {
     const { findByTestId, getByTestId, getByText, queryByText } = renderWithProviders(<Promocoes />);
     await findByTestId('cupons-meus');
     expect(getByTestId('cupom-a')).toBeTruthy();
-    expect(getByText('10% de desconto · Vale até 05/11')).toBeTruthy();
+    // card-ticket-pontilhado (André, 24/10): o valor grande, o nome e a validade no ticket
+    expect(getByTestId('cupom-a-valor')).toHaveTextContent('10%');
+    expect(getByText('10% de desconto')).toBeTruthy();
+    expect(getByText('Válido até 05/11 às 12:00')).toBeTruthy();
+    expect(getByTestId('cupom-a-picote-esquerdo')).toBeTruthy();
+    expect(getByTestId('cupom-a-picote-direito')).toBeTruthy();
     expect(getByTestId('cupons-encerrados')).toBeTruthy();
-    expect(getByText(/de desconto · Usado/)).toBeTruthy();
+    expect(getByText('Usado')).toBeTruthy();
+    expect(getByText('Vencido')).toBeTruthy();
     expect(queryByText('Velho')).toBeTruthy();
   });
 

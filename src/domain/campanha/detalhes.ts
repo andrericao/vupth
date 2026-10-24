@@ -1,4 +1,5 @@
 import type { Campanha } from "@services/campaignService";
+import { beneficioEmPortugues } from "@domain/campanhas";
 
 function dia(iso: string): string {
   const d = new Date(iso);
@@ -9,7 +10,7 @@ function dia(iso: string): string {
 export function detalhesDaCampanha(c: Campanha): string {
   const linhas: string[] = [];
   if (c.description) linhas.push(c.description);
-  else if (c.benefit) linhas.push(c.benefit);
+  else if (beneficioEmPortugues(c.benefit)) linhas.push(beneficioEmPortugues(c.benefit));
   if (c.code) linhas.push(`Código: ${c.code}`);
   if (c.ends_at && !Number.isNaN(new Date(c.ends_at).getTime())) linhas.push(`Vale até ${dia(c.ends_at)}.`);
   if (typeof c.remaining_slots === "number") {

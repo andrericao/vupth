@@ -37,6 +37,53 @@ describe('CarrosselDeCampanhas', () => {
     spy.mockRestore();
   });
 
+  // card-ticket-pontilhado (André, 24/10): o card da Início é o ticket do mockup 2.
+  it('o card é um ticket: valor grande, validade, picotes e Participar só na campanha de link', () => {
+    const spy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const t = wrap(
+      <CarrosselDeCampanhas
+        campanhas={[
+          { id: 'd', name: 'Desconto de lançamento', benefit: 'DISCOUNT', type: 'DISCOUNT', value_percent: 10, ends_at: '2099-11-05T21:30:00' },
+          { id: 'l', name: 'Indique', benefit: 'CASH', type: 'REFERRAL_BONUS', value_amount: 10 },
+        ]}
+      />
+    );
+    expect(t.getByTestId('campanha-d-valor')).toHaveTextContent('10%');
+    expect(t.getByTestId('campanha-l-valor')).toHaveTextContent('R$ 10,00');
+    expect(t.getByText('Válido até 05/11 às 21:30')).toBeTruthy();
+    expect(t.getByTestId('campanha-d-picote-esquerdo')).toBeTruthy();
+    expect(t.getByTestId('campanha-d-picote-direito')).toBeTruthy();
+    expect(t.queryByTestId('participar-d')).toBeNull();
+    expect(t.getByTestId('participar-l')).toBeTruthy();
+    spy.mockRestore();
+  });
+
+  it('o botão Participar do card chama o join direto', async () => {
+    useAuthStore.setState({ accessToken: 'tk' } as never);
+    mockJoin.mockResolvedValue({ data: {} });
+    const spy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const t = wrap(<CarrosselDeCampanhas campanhas={[{ id: 'l', name: 'Indique', type: 'REFERRAL_BONUS' }]} />);
+    await act(async () => { fireEvent.press(t.getByTestId('participar-l')); });
+    expect(mockJoin).toHaveBeenCalledWith('l', 'tk');
+    spy.mockRestore();
+  });
+
+  // cards-de-promocao-em-portugues (André, 24/10): o código do servidor nunca aparece cru no card.
+  it('o card traz o benefício em português, nunca DISCOUNT nem CASH', () => {
+    const t = wrap(
+      <CarrosselDeCampanhas
+        campanhas={[
+          { id: 'd', name: 'Desconto de lançamento', benefit: 'DISCOUNT', type: 'DISCOUNT' },
+          { id: 'c', name: 'Indique', benefit: 'CASH', type: 'REFERRAL_BONUS' },
+        ]}
+      />
+    );
+    expect(t.getByText('Desconto')).toBeTruthy();
+    expect(t.getByText('Ganho em dinheiro')).toBeTruthy();
+    expect(t.queryByText('DISCOUNT')).toBeNull();
+    expect(t.queryByText('CASH')).toBeNull();
+  });
+
   // compartilhe-e-ganhe (CLI-30, DEC-113): a campanha de link oferece "Participar".
   it('campanha de link: o toque oferece Participar; participar avisa onde fica o link', async () => {
     useAuthStore.setState({ accessToken: 'tk' } as never);
