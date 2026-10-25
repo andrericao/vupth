@@ -18,6 +18,11 @@ describe("Maestro 22 — o modal de pagar", () => {
     expect(yaml).toContain("Sem Pix cadastrado. O pagamento é combinado com o profissional (dinheiro).");
   });
 
+  it("a chave do profissional em destaque é conferida quando existe (Copiar chave), sem exigir o gateway", () => {
+    expect(yaml).toMatch(/when:\n\s+visible:\n\s+id: "pix-profissional"/);
+    expect(yaml).toContain('id: "pix-copiar-chave"');
+  });
+
   it("não exige o QR em todos os casos: ele só existe com código ou imagem do Pix", () => {
     expect(yaml).not.toMatch(/- assertVisible:\n\s+id: "pix-qr"/);
   });

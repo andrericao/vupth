@@ -42,6 +42,17 @@ appId: ${APP_ID}
           label: "22.04b2 · o Já paguei e o Fechar a vista, com o Pix recolhido"
       # pagar-sempre-disponivel (25/10): a opcao de pagar nunca some. Com Pix (gateway ou chave do profissional) o
       # drop down abre; sem nenhum, o modal diz que o pagamento e combinado e mantem o Ja paguei.
+      # pagar-pix-do-profissional-e-do-gateway (25/10): o Pix do profissional (a chave) em destaque, sempre a vista
+      # quando existe; o do gateway, recolhido no drop down.
+      - runFlow:
+          when:
+            visible:
+              id: "pix-profissional"
+          commands:
+            - assertVisible:
+                id: "pix-copiar-chave"
+                label: "22.04b3a · o Pix do profissional em destaque, com o Copiar chave"
+          label: "22.04b3b · com a chave do profissional"
       - runFlow:
           when:
             visible:
