@@ -37,7 +37,7 @@ import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
-import { descontoDoCupom } from "@domain/campanhas";
+import { descontoDoCupom, mensagemDoCupom } from "@domain/campanhas";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
 import { useMeusCupons } from "@hooks/useMeusCupons";
 import { EscolhaDeCupom } from "@components/EscolhaDeCupom";
@@ -311,6 +311,9 @@ export function ServiceSelection() {
           establishmentId,
           serviceItemIds: selectedIds,
           ...(horario ? { desiredTime: comFuso(horario) } : {}),
+          // cupom-ativado-nao-computado (24/10): o pedido de corte tambem leva o cupom do toggle; antes so a
+          // fila e o agendar o enviavam e o corte saia sem desconto.
+          ...(cupomId ? { coupon_campaign_id: cupomId } : {}),
         },
         accessToken,
       );
@@ -331,6 +334,12 @@ export function ServiceSelection() {
         return;
       }
       const code = error.response?.data?.code;
+      // Cupom que nao vale mais (422 COUPON_NOT_ACTIVE): o pedido nao saiu; o cupom sai da escolha e o aviso diz por que.
+      if (code === "COUPON_NOT_ACTIVE") {
+        setCupomEscolhido(null);
+        Alert.alert("Cupom", mensagemDoCupom(error));
+        return;
+      }
       const msg = error.response?.data?.fieldErrors?.desiredTime
         ? "Esse horário já passou. Escolha outro."
         : code === "PROFESSIONAL_AGENDA_ONLY"

@@ -12,6 +12,8 @@ export interface CreateCutRequest {
   serviceItemIds: string[];
   /** Dia e horario desejados (S26), ISO-8601 com fuso. Ausente = "assim que abrir"; no passado = 422. */
   desiredTime?: string;
+  /** O cupom ativado escolhido para este corte (cupom-ativado-nao-computado, 24/10): um so, opcional; vale quando o profissional aceita. */
+  coupon_campaign_id?: string;
 }
 
 export interface CutRequestResponse {

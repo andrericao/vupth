@@ -321,6 +321,46 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     );
   });
 
+  // cupom-ativado-nao-computado (André, 24/10): o pedido de corte leva o cupom do toggle.
+  it('LOJA FECHADA: o pedido de corte leva o cupom ligado no toggle; sem o toggle, sai sem ele', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    setRouteParams({ ...OPEN_PARAMS, establishmentOpen: false });
+    mockCreateCut.mockResolvedValue({ data: { id: 'cut-1' } });
+    mockCupons = [{ id: 'c1', name: 'Dez', value_amount: 10 }];
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent(getByTestId('usar-cupom-c1'), 'valueChange', true);
+    fireEvent.press(getByTestId('more-options'));
+    fireEvent.press(getByTestId('more-option-cut'));
+    fireEvent.press(await findByTestId('corte-assim-que-abrir'));
+    await waitFor(() =>
+      expect(mockCreateCut).toHaveBeenCalledWith(
+        { professionalId: 'p1', establishmentId: 'e1', serviceItemIds: ['s1'], coupon_campaign_id: 'c1' },
+        'tok',
+      ),
+    );
+    mockCupons = [];
+  });
+
+  it('LOJA FECHADA: cupom recusado no pedido de corte (COUPON_NOT_ACTIVE) avisa e tira o cupom da escolha', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    setRouteParams({ ...OPEN_PARAMS, establishmentOpen: false });
+    mockCreateCut.mockRejectedValue({ response: { status: 422, data: { code: 'COUPON_NOT_ACTIVE' } } });
+    mockCupons = [{ id: 'c1', name: 'Dez', value_amount: 10 }];
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent(getByTestId('usar-cupom-c1'), 'valueChange', true);
+    expect(queryByTestId('valor-com-cupom')).toBeTruthy();
+    fireEvent.press(getByTestId('more-options'));
+    fireEvent.press(getByTestId('more-option-cut'));
+    fireEvent.press(await findByTestId('corte-assim-que-abrir'));
+    await waitFor(() => expect(alerta).toHaveBeenCalledWith('Cupom', expect.any(String)));
+    expect(queryByTestId('valor-com-cupom')).toBeNull();
+    alerta.mockRestore();
+    mockCupons = [];
+  });
+
   it('fila aberta: as duas portas na tela — entrar agora e agendar; o menu fica só com a troca (C20)', async () => {
     const { getByTestId, queryByTestId } = await selectServiceAndOpenMenu();
 
