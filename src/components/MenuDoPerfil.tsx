@@ -16,6 +16,7 @@ export function MenuItem({
   onPress,
   last,
   testID,
+  comAviso,
 }: {
   icon: ReactNode;
   label: string;
@@ -24,6 +25,8 @@ export function MenuItem({
   /** Ultima linha do card nao leva divisor. */
   last?: boolean;
   testID?: string;
+  /** Dot de pendencia: em menu empilhado (titulo e subtitulo) fica AO LADO do titulo, nunca solto no canto (André, 24/10). */
+  comAviso?: boolean;
 }) {
   const { cores } = useTema();
   return (
@@ -31,9 +34,12 @@ export function MenuItem({
       <HStack px={16} py={15} gap="$3" alignItems="center">
         {icon}
         <VStack flex={1} gap="$0.5">
-          <Text size="xs" color="$brandTextSecondary">
-            {label}
-          </Text>
+          <HStack alignItems="center" gap="$1.5">
+            <Text size="xs" color="$brandTextSecondary">
+              {label}
+            </Text>
+            {comAviso && <Box w={8} h={8} borderRadius={4} bg="$brandDanger" testID={testID ? `${testID}-aviso` : "menu-aviso"} />}
+          </HStack>
           {value && (
             <Text size="sm" fontWeight="$semibold" color="$brandTextPrimary" numberOfLines={1}>
               {value}
