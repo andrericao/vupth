@@ -29,8 +29,10 @@ elas aparecem como ⏭.
 
 **Campanha de cupom e de link (maestro-campanha-cupom-e-link, 23/10).** As etapas 25 e 26
 usam campanhas que o André cria no Painel, **com o nome exato** e os valores que quiser (público cliente):
-`MAESTRO CLIENT CUPOM` (desconto com cupom) e `MAESTRO CLIENT LINK` (bônus de indicação). O fluxo acha a
-campanha pelo nome na Home e confere o que ela mostra, sem fixar valor. Cupom (25): código no detalhe, ativar
+`MAESTRO CLIENT CUPOM` (desconto com cupom) e `MAESTRO CLIENT LINK` (bônus de indicação). Desde 25/10 o André
+criou as de teste com tudo 10: desconto de R$ 10,00, bonificação de 10% e duração de 6 meses; o cupom do Client
+tem o código `CMAESTRO10` (o do Partner, `PMAESTRO10`). O fluxo acha a
+campanha pelo nome na Home e confere o que ela mostra, **sem fixar valor nem código** (o código vem da tela). Cupom (25): código no detalhe, ativar
 em Perfil → Cupom, "Válido até dd/MM às HH:mm", Saiba mais; se a campanha já acabou ou esgotou, o
 modal Promoção encerrada ou Promoção esgotada. Link (26): Participar, Perfil → Cupom → Indique e ganhe, contadores,
 Copiar link e Compartilhar. **Sem a campanha no ar, a etapa pula** (⏭ no relatório, não ❌): ela começa perguntando ao staging (`scripts/campanha_existe.js`, a lista da Home) e a bateria segue para a próxima. Rodar: `ETAPAS="25 26" bash .maestro/bateria.sh`.
