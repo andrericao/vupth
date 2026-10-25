@@ -7,9 +7,9 @@ const yaml = fs.readFileSync(path.resolve(__dirname, "../../../.maestro/etapas/1
 
 describe("Maestro 11 — o aviso da estimativa", () => {
   it("espera o aviso chegar, fecha se veio, e só então confere que ele saiu", () => {
-    const espera = yaml.indexOf("11.09b");
-    const fecha = yaml.indexOf("11.09c");
-    const confere = yaml.indexOf("11.10");
+    const espera = yaml.indexOf('label: "11.09b');
+    const fecha = yaml.indexOf('label: "11.09c');
+    const confere = yaml.indexOf('label: "11.10');
     expect(espera).toBeGreaterThan(-1);
     expect(fecha).toBeGreaterThan(espera);
     expect(confere).toBeGreaterThan(fecha);
