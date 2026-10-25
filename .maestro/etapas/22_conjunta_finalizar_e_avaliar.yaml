@@ -40,15 +40,27 @@ appId: ${APP_ID}
       - assertVisible:
           id: "pix-ja-paguei"
           label: "22.04b2 · o Já paguei e o Fechar a vista, com o Pix recolhido"
-      - tapOn:
-          id: "pix-dropdown"
-          label: "22.04b3 · abre o Pix e QR Code"
-      - assertVisible:
-          id: "pix-qr"
-          label: "22.04c · com o QR em cima"
-      - assertVisible:
-          id: "pix-copiar"
-          label: "22.04d · e o Copiar"
+      # pagar-sempre-disponivel (25/10): a opcao de pagar nunca some. Com Pix (gateway ou chave do profissional) o
+      # drop down abre; sem nenhum, o modal diz que o pagamento e combinado e mantem o Ja paguei.
+      - runFlow:
+          when:
+            visible:
+              id: "pix-dropdown"
+          commands:
+            - tapOn:
+                id: "pix-dropdown"
+                label: "22.04b3 · abre o Pix e QR Code"
+            - assertVisible:
+                id: "pix-copiar"
+                label: "22.04d · e o Copiar (o código ou a chave)"
+          label: "22.04b4 · com Pix: abre o drop down"
+      - runFlow:
+          when:
+            visible:
+              id: "pix-combinado"
+          commands:
+            - assertVisible: "Sem Pix cadastrado. O pagamento é combinado com o profissional (dinheiro)."
+          label: "22.04b5 · sem Pix: o pagamento é combinado"
       - assertVisible:
           id: "preco-saiba-mais"
           label: "22.04d2 · e o Saiba mais do preço (politica-de-preco-saiba-mais)"
