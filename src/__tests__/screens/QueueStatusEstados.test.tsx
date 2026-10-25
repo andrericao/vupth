@@ -193,7 +193,7 @@ describe('QueueStatus — pagamento-no-concluido (CLI-34)', () => {
     jest.useFakeTimers();
     try {
       mockPagamento
-        .mockResolvedValueOnce({ data: { status: 'PENDING', amount: 30, pix_copy_paste: null } })
+        .mockRejectedValueOnce({ response: { status: 404 } }) // o pagamento ainda nao nasceu
         .mockResolvedValue({ data: { status: 'PENDING', amount: 30, pix_copy_paste: '000201pix' } });
       estado({ isFinished: true });
       renderWithProviders(<QueueStatus />);
@@ -209,13 +209,12 @@ describe('QueueStatus — pagamento-no-concluido (CLI-34)', () => {
     }
   });
 
-  // pix-do-profissional-ao-concluir (André, 22/10): sem Pix do profissional, sem modal.
-  it('pendente mas o profissional não tem Pix: não abre; só ele confirma que recebeu', async () => {
+  // pagar-sempre-disponivel (André, 25/10): a opcao de pagar nunca some; sem Pix o modal abre e diz que o pagamento e combinado.
+  it('pendente mas o profissional não tem Pix: o modal abre mesmo assim (pagamento combinado, Já paguei)', async () => {
     mockPagamento.mockResolvedValue({ data: { status: 'PENDING', amount: 30, pix_copy_paste: null } });
     estado({ isFinished: true });
     renderWithProviders(<QueueStatus />);
-    await waitFor(() => expect(mockPagamento).toHaveBeenCalled());
-    expect(usePendenciaStore.getState().pagando).toBeNull();
+    await waitFor(() => expect(usePendenciaStore.getState().pagando).toBe('a1'));
   });
 
   it('já pago, ou sem conseguir ler: não abre', async () => {

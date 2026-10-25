@@ -141,11 +141,43 @@ describe('ModalDePagamento', () => {
     expect(tela.getByTestId('pix-copiar')).toBeTruthy();
   });
 
-  it('profissional sem Pix cadastrado: o modal não fica (só ele confirma que recebeu)', async () => {
+  // pagar-sempre-disponivel (André, 25/10): a opcao de pagar nunca some.
+  it('sem nenhum Pix (gateway fora e profissional sem chave): o modal FICA, diz que o pagamento é combinado e mantém o Já paguei', async () => {
     get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, pix_copy_paste: null } });
     act(() => usePendenciaStore.getState().pagar('a1'));
-    montar();
-    await waitFor(() => expect(usePendenciaStore.getState().pagando).toBeNull());
+    const tela = montar();
+    expect(await tela.findByTestId('pix-combinado')).toBeTruthy();
+    expect(tela.getByText('Sem Pix cadastrado. O pagamento é combinado com o profissional (dinheiro).')).toBeTruthy();
+    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(tela.getByTestId('pix-ok')).toBeTruthy();
+    expect(tela.queryByTestId('pix-dropdown')).toBeNull();
+    expect(usePendenciaStore.getState().pagando).toBe('a1');
+  });
+
+  it('só a chave Pix do profissional (sem copia-e-cola): mostra a chave e copia a chave', async () => {
+    get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, pix_key: 'carlos@barbearia.com', pix_copy_paste: null } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    expect(await tela.findByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(tela.queryByTestId('pix-combinado')).toBeNull();
+    expect(tela.getByText('Chave Pix')).toBeTruthy(); // o drop down, sem QR
+    fireEvent.press(tela.getByTestId('pix-dropdown'));
+    expect(tela.getByTestId('pix-chave')).toBeTruthy();
+    expect(tela.queryByTestId('pix-qr')).toBeNull();
+    await act(async () => {
+      fireEvent.press(tela.getByTestId('pix-copiar'));
+    });
+    expect(mockCopiar).toHaveBeenCalledWith('carlos@barbearia.com');
+    expect(tela.getByText('Copiado')).toBeTruthy();
+  });
+
+  it('com o gateway, o Pix dele; a chave do profissional não aparece junto', async () => {
+    get.mockResolvedValue({ data: { ...PIX, pix_key: 'chave@prof.com', gateway: { provider: 'ASAAS', mode: 'REAL', pix_copy_paste: '000201asaas' } } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    fireEvent.press(await tela.findByTestId('pix-dropdown'));
+    expect(tela.getByTestId('pix-codigo').props.children).toBe('000201asaas');
+    expect(tela.queryByTestId('pix-chave')).toBeNull();
   });
 
   it('sem serviço/multa/quem/código; copiar falhando não marca', async () => {
@@ -316,7 +348,7 @@ describe('ModalDePagamento — pelo Asaas', () => {
     expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
   });
 
-  it('sem gateway: o fluxo de hoje (chave, "Já paguei"), e profissional sem Pix continua fechando o modal', async () => {
+  it('sem gateway: o fluxo de hoje (chave, "Já paguei")', async () => {
     get.mockResolvedValue({ data: { ...PIX, pix_key: 'chave@prof.com' } });
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();

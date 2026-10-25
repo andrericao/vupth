@@ -139,14 +139,14 @@ export function ModalDePagamento() {
     };
   }, [pagando, accessToken]);
 
-  // pix-do-profissional-ao-concluir (André, 22/10): profissional sem Pix cadastrado
-  // = sem modal de pagamento; só ele confirma que recebeu. Nunca a chave do dono.
-  // pagamento-pelo-asaas (DEC-119): com `gateway`, o Pix e o do Asaas e o modal fica.
+  // pagar-sempre-disponivel (André, 25/10): a opcao de pagar NUNCA some. O gateway pode cair e o
+  // profissional pode receber em dinheiro ou no Pix pessoal. Com o Pix do gateway, ele; sem ele, a chave Pix
+  // do profissional (nunca a do dono); e sempre o "Já paguei". Sem nenhum Pix, o texto diz que o pagamento e
+  // combinado com o profissional. (Antes, sem Pix cadastrado o modal se fechava sozinho.)
+  // pagamento-pelo-asaas (DEC-119): com `gateway`, o Pix e o do Asaas.
   const pix = pixDoPagamento(pagamento);
-  const semPix = !!pagamento && !pix.viaAsaas && !pagamento.pix_copy_paste && podeAvisarQuePagou(pagamento.status);
-  useEffect(() => {
-    if (pagando && semPix) fechar();
-  }, [pagando, semPix, fechar]);
+  const chave = !pix.viaAsaas ? pagamento?.pix_key || null : null;
+  const temPix = !!(pix.codigo || pix.qrImagem || chave);
 
   // pagamento-ja-paguei: o Asaas (webhook) e o profissional ("recebi" ou recusa) mudam o status por
   // fora; o modal confere de tempos em tempos ate o "Pago". Sem Asaas, so enquanto espera o profissional.
@@ -186,7 +186,9 @@ export function ModalDePagamento() {
   }
 
   async function copiar() {
-    if (pix.codigo && (await copiarTexto(pix.codigo))) setCopiado(true);
+    // o copia-e-cola do Pix; sem ele (so a chave do profissional), copia a chave
+    const texto = pix.codigo || chave;
+    if (texto && (await copiarTexto(texto))) setCopiado(true);
   }
 
   const texto = aviso ? avisoDaPendencia(aviso) : null;
@@ -247,7 +249,7 @@ export function ModalDePagamento() {
               {pagamento.holder_name ? (
                 <Text style={{ color: cores.textSecondary, fontSize: fs(13) }}>Para: {pagamento.holder_name}</Text>
               ) : null}
-              {(pix.codigo || pix.qrImagem) && podeAvisarQuePagou(pagamento.status) ? (
+              {temPix && podeAvisarQuePagou(pagamento.status) ? (
                 <>
                   <Pressable
                     onPress={() => setPixAberto((v) => !v)}
@@ -256,12 +258,13 @@ export function ModalDePagamento() {
                     testID="pix-dropdown"
                     style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8 }}
                   >
-                    <Text style={{ color: cores.textPrimary, fontFamily: "Inter_600SemiBold", fontSize: fs(14) }}>Pix e QR Code</Text>
+                    <Text style={{ color: cores.textPrimary, fontFamily: "Inter_600SemiBold", fontSize: fs(14) }}>{pix.codigo || pix.qrImagem ? "Pix e QR Code" : "Chave Pix"}</Text>
                     {pixAberto ? <ChevronUp size={18} color={cores.textPrimary} /> : <ChevronDown size={18} color={cores.textPrimary} />}
                   </Pressable>
                   {pixAberto ? (
                 <>
-                  {/* pagamento-no-concluido (DEC-78): o QR em cima do copiar. */}
+                  {/* pagamento-no-concluido (DEC-78): o QR em cima do copiar (so quando ha codigo ou imagem). */}
+                  {pix.codigo || pix.qrImagem ? (
                   <View style={{ alignItems: "center" }} testID="pix-qr">
                     {/* tema-fixo: QR escuro sobre branco nos dois temas; o leitor do banco nao le o codigo invertido */}
                     {pix.codigo ? (
@@ -274,11 +277,12 @@ export function ModalDePagamento() {
                       />
                     )}
                   </View>
-                  {pagamento.pix_key && !pix.viaAsaas ? (
+                  ) : null}
+                  {chave ? (
                     <View testID="pix-chave" style={{ gap: 2 }}>
                       <Text style={{ color: cores.textSecondary, fontSize: fs(12) }}>Chave Pix</Text>
                       <Text selectable style={{ color: cores.textPrimary, fontSize: fs(15), fontWeight: "600" }}>
-                        {pagamento.pix_key}
+                        {chave}
                       </Text>
                     </View>
                   ) : null}
@@ -289,10 +293,18 @@ export function ModalDePagamento() {
                       </Text>
                       <Botao titulo={copiado ? "Copiado" : "Copiar"} claro feito={copiado} testID="pix-copiar" onPress={copiar} />
                     </>
-                  ) : null}
+                  ) : (
+                    <Botao titulo={copiado ? "Copiado" : "Copiar chave"} claro feito={copiado} testID="pix-copiar" onPress={copiar} />
+                  )}
                 </>
               ) : null}
                 </>
+              ) : null}
+              {/* pagar-sempre-disponivel: sem nenhum Pix (gateway fora e profissional sem chave), o pagamento e combinado. */}
+              {!temPix && podeAvisarQuePagou(pagamento.status) ? (
+                <Text testID="pix-combinado" style={{ color: cores.textSecondary, fontSize: fs(13), lineHeight: fs(18) }}>
+                  Sem Pix cadastrado. O pagamento é combinado com o profissional (dinheiro).
+                </Text>
               ) : null}
               {/* o profissional nao confirmou: o atendimento segue pendente e o cliente pode tocar de novo */}
               {recusado && podeAvisarQuePagou(pagamento.status) ? (

@@ -60,7 +60,7 @@ import { NumeroComSalto } from "@components/NumeroComSalto";
 import { alertaTipado } from "@utils/alertaTipado";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
-import { pendenciasDoErro, pixDoPagamento, podeAvisarQuePagou, reais } from "@domain/pagamento/pendencia";
+import { pendenciasDoErro, podeAvisarQuePagou, reais } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { paymentService } from "@services/paymentService";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
@@ -481,9 +481,9 @@ export function QueueStatus() {
         .get(attendanceId, accessToken)
         .then(({ data }) => {
           if (!vivo) return;
-          const pix = pixDoPagamento(data);
-          // Sem Pix do profissional nao ha modal: so ele confirma que recebeu.
-          if (podeAvisarQuePagou(data.status) && (pix.codigo || pix.qrImagem)) {
+          // pagar-sempre-disponivel (André, 25/10): a opcao de pagar nunca some; pendente = o modal abre, com Pix
+          // do gateway, chave do profissional ou o texto de pagamento combinado (dinheiro), e sempre o Ja paguei.
+          if (podeAvisarQuePagou(data.status)) {
             usePendenciaStore.getState().pagar(attendanceId);
           } else if (tentativa === 0 && data.status !== "PAID") {
             nova = setTimeout(() => void abrir(1), 4000);
