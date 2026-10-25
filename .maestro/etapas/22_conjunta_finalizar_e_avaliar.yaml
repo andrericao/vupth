@@ -36,6 +36,13 @@ appId: ${APP_ID}
       visible:
         id: "pix-do-atendimento"
     commands:
+      # pagar-ao-finalizar-corte (24/10): o Pix e o QR ficam recolhidos num drop down; "Já paguei" e "Fechar" a vista.
+      - assertVisible:
+          id: "pix-ja-paguei"
+          label: "22.04b2 · o Já paguei e o Fechar a vista, com o Pix recolhido"
+      - tapOn:
+          id: "pix-dropdown"
+          label: "22.04b3 · abre o Pix e QR Code"
       - assertVisible:
           id: "pix-qr"
           label: "22.04c · com o QR em cima"

@@ -532,6 +532,8 @@ describe.each(TEMAS)('caixas com dados no tema %s', (tema) => {
     act(() => usePendenciaStore.getState().pagar('a1'));
     const pix = montar(tema, <QueryClientProvider client={client}><ModalDePagamento /></QueryClientProvider>);
     await pix.findByText('R$ 40,00', {}, { timeout: 30000 });
+    // pagar-ao-finalizar-corte: o Pix e o QR ficam recolhidos; abre o drop down para conferir o codigo e o Copiar
+    fireEvent.press(pix.getByTestId('pix-dropdown'));
     conferirPainelEVeu(pix, tema);
     conferir(pix, tema, [
       ['Pagar por Pix', 'textPrimary', 'painel'],

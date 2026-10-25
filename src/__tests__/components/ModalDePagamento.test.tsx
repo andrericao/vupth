@@ -97,6 +97,12 @@ describe('ModalDePagamento', () => {
     expect(await tela.findByText('R$ 40,00')).toBeTruthy();
     expect(tela.getByText('R$ 5,00')).toBeTruthy();
     expect(tela.getByText('Para: Carlos Lima')).toBeTruthy();
+    // pagar-ao-finalizar-corte (André, 24/10): o Pix e o QR ficam recolhidos; "Já paguei" e "Fechar" a vista
+    expect(tela.queryByTestId('pix-codigo')).toBeNull();
+    expect(tela.queryByTestId('pix-qr')).toBeNull();
+    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(tela.getByTestId('pix-ok')).toBeTruthy();
+    fireEvent.press(tela.getByTestId('pix-dropdown'));
     expect(tela.getByTestId('pix-codigo').props.children).toBe('000201pix');
     expect(tela.getByTestId('pix-qr')).toBeTruthy();
     // politica-de-preco-saiba-mais (DEC-91): o total leva ao artigo do Suporte.
@@ -128,6 +134,7 @@ describe('ModalDePagamento', () => {
     get.mockResolvedValue({ data: { ...PIX, pix_key: 'carlos@barbearia.com' } });
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
+    fireEvent.press(await tela.findByTestId('pix-dropdown'));
     expect(await tela.findByText('carlos@barbearia.com')).toBeTruthy();
     expect(tela.getByTestId('pix-chave')).toBeTruthy();
     expect(tela.getByTestId('pix-qr')).toBeTruthy();
@@ -148,6 +155,7 @@ describe('ModalDePagamento', () => {
     const tela = montar();
     expect(await tela.findByText('R$ 10,00')).toBeTruthy();
     expect(tela.queryByText(/^Para:/)).toBeNull();
+    fireEvent.press(tela.getByTestId('pix-dropdown'));
     await act(async () => {
       fireEvent.press(tela.getByTestId('pix-copiar'));
     });
@@ -213,6 +221,7 @@ describe('ModalDePagamento — pelo Asaas', () => {
     get.mockResolvedValue({ data: ASAAS });
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
+    fireEvent.press(await tela.findByTestId('pix-dropdown'));
     expect(await tela.findByTestId('pix-codigo')).toBeTruthy();
     expect(tela.getByTestId('pix-codigo').props.children).toBe('000201asaas');
     expect(tela.queryByTestId('pix-chave')).toBeNull();
@@ -232,6 +241,7 @@ describe('ModalDePagamento — pelo Asaas', () => {
 
     get.mockResolvedValue({ data: { ...ASAAS, gateway: { ...ASAAS.gateway, mode: 'REAL' } } });
     const real = montar();
+    fireEvent.press(await real.findByTestId('pix-dropdown'));
     expect(await real.findByTestId('pix-codigo')).toBeTruthy();
     expect(real.queryByTestId('pagamento-de-teste')).toBeNull();
   });
@@ -242,6 +252,7 @@ describe('ModalDePagamento — pelo Asaas', () => {
     });
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
+    fireEvent.press(await tela.findByTestId('pix-dropdown'));
     const img = await tela.findByTestId('pix-qr-imagem');
     expect(img.props.source.uri).toBe('data:image/png;base64,iVBORw0KGgo=');
     expect(tela.queryByTestId('pix-codigo')).toBeNull();
@@ -310,6 +321,7 @@ describe('ModalDePagamento — pelo Asaas', () => {
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
     expect(await tela.findByTestId('pix-ja-paguei')).toBeTruthy();
+    fireEvent.press(tela.getByTestId('pix-dropdown'));
     expect(tela.getByTestId('pix-chave')).toBeTruthy();
     expect(tela.queryByTestId('pagamento-de-teste')).toBeNull();
   });

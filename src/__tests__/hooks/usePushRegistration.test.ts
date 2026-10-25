@@ -252,6 +252,16 @@ describe('usePushRegistration — com o app aberto', () => {
     expect(alerta).not.toHaveBeenCalled();
   });
 
+  // pagar-ao-finalizar-corte (24/10): o corte finalizado com pagamento pendente abre o modal de pagar, sem aviso.
+  it('PAYMENT_PENDING com o app aberto abre o modal de pagar, sem Alert', () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    renderHook(() => usePushRegistration());
+    recebido?.({ request: { content: { title: 'Pagamento pendente', body: 'R$ 30,00', data: { type: 'PAYMENT_PENDING', attendanceId: 'a9' } } } });
+    expect(usePendenciaStore.getState()).toMatchObject({ pagando: 'a9', recusado: false });
+    expect(alerta).not.toHaveBeenCalled();
+    usePendenciaStore.getState().fechar();
+  });
+
   it('a vez adiantada sem corpo manda texto vazio', () => {
     renderHook(() => usePushRegistration());
     recebido?.({ request: { content: { data: { type: 'EARLIER_TURN_OFFERED', attendanceId: 'a1' } } } });

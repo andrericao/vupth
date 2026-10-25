@@ -1,4 +1,4 @@
-import { fireEvent, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, waitFor } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
@@ -177,6 +177,36 @@ describe('QueueStatus — pagamento-no-concluido (CLI-34)', () => {
     usePendenciaStore.getState().fechar();
     rerender(<QueueStatus />);
     await waitFor(() => expect(usePendenciaStore.getState().pagando).toBeNull());
+  });
+
+  // pagar-ao-finalizar-corte (André, 24/10): com o Asaas o Pix vem no `gateway`, nao no topo; o modal abre igual.
+  it('concluído com o Pix do Asaas (no gateway): abre o Pix', async () => {
+    mockPagamento.mockResolvedValue({
+      data: { status: 'PENDING', amount: 30, gateway: { provider: 'ASAAS', mode: 'REAL', pix_copy_paste: '000201asaas' } },
+    });
+    estado({ isFinished: true });
+    renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(usePendenciaStore.getState().pagando).toBe('a1'));
+  });
+
+  it('o pagamento ainda não nasceu no FINISHED: tenta de novo uma vez e abre', async () => {
+    jest.useFakeTimers();
+    try {
+      mockPagamento
+        .mockResolvedValueOnce({ data: { status: 'PENDING', amount: 30, pix_copy_paste: null } })
+        .mockResolvedValue({ data: { status: 'PENDING', amount: 30, pix_copy_paste: '000201pix' } });
+      estado({ isFinished: true });
+      renderWithProviders(<QueueStatus />);
+      await act(async () => {});
+      expect(usePendenciaStore.getState().pagando).toBeNull();
+      await act(async () => {
+        jest.advanceTimersByTime(4000);
+      });
+      expect(usePendenciaStore.getState().pagando).toBe('a1');
+      expect(mockPagamento).toHaveBeenCalledTimes(2);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   // pix-do-profissional-ao-concluir (André, 22/10): sem Pix do profissional, sem modal.

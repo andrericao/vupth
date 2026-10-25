@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Image, Modal, Pressable, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, X } from "lucide-react-native";
+import { Check, ChevronDown, ChevronUp, X } from "lucide-react-native";
 import QRCode from "react-native-qrcode-svg";
 
 import {
@@ -114,6 +114,8 @@ export function ModalDePagamento() {
   const [erro, setErro] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  // pagar-ao-finalizar-corte (André, 24/10): o Pix e o QR Code ficam recolhidos num drop down; "Já paguei" e "Fechar" ficam a vista.
+  const [pixAberto, setPixAberto] = useState(false);
   // pagamento-ja-paguei: o profissional recusou (AWAITING_CONFIRMATION voltou a PENDING).
   const [recusadoAoVivo, setRecusadoAoVivo] = useState(false);
   const statusAnterior = useRef<string | null>(null);
@@ -131,6 +133,7 @@ export function ModalDePagamento() {
       setPagamento(null);
       setErro(false);
       setCopiado(false);
+      setPixAberto(false);
       setRecusadoAoVivo(false);
       statusAnterior.current = null;
     };
@@ -246,6 +249,18 @@ export function ModalDePagamento() {
               ) : null}
               {(pix.codigo || pix.qrImagem) && podeAvisarQuePagou(pagamento.status) ? (
                 <>
+                  <Pressable
+                    onPress={() => setPixAberto((v) => !v)}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: pixAberto }}
+                    testID="pix-dropdown"
+                    style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8 }}
+                  >
+                    <Text style={{ color: cores.textPrimary, fontFamily: "Inter_600SemiBold", fontSize: fs(14) }}>Pix e QR Code</Text>
+                    {pixAberto ? <ChevronUp size={18} color={cores.textPrimary} /> : <ChevronDown size={18} color={cores.textPrimary} />}
+                  </Pressable>
+                  {pixAberto ? (
+                <>
                   {/* pagamento-no-concluido (DEC-78): o QR em cima do copiar. */}
                   <View style={{ alignItems: "center" }} testID="pix-qr">
                     {/* tema-fixo: QR escuro sobre branco nos dois temas; o leitor do banco nao le o codigo invertido */}
@@ -277,6 +292,8 @@ export function ModalDePagamento() {
                   ) : null}
                 </>
               ) : null}
+                </>
+              ) : null}
               {/* o profissional nao confirmou: o atendimento segue pendente e o cliente pode tocar de novo */}
               {recusado && podeAvisarQuePagou(pagamento.status) ? (
                 <Text testID="pix-recusado" style={{ color: cores.danger, fontSize: fs(13), lineHeight: fs(18) }}>
@@ -292,9 +309,8 @@ export function ModalDePagamento() {
               {podeAvisarQuePagou(pagamento.status) ? (
                 <Botao titulo="Já paguei" testID="pix-ja-paguei" desligado={enviando} onPress={jaPaguei} />
               ) : null}
-              {pix.viaAsaas || !podeAvisarQuePagou(pagamento.status) ? (
-                <Botao titulo="Fechar" claro testID="pix-ok" onPress={fechar} />
-              ) : null}
+              {/* "Fechar" sempre a vista (antes so sem "Já paguei" ou com o Asaas) */}
+              <Botao titulo="Fechar" claro testID="pix-ok" onPress={fechar} />
             </>
           )}
         </View>

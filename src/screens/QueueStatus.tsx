@@ -60,7 +60,7 @@ import { NumeroComSalto } from "@components/NumeroComSalto";
 import { alertaTipado } from "@utils/alertaTipado";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
-import { pendenciasDoErro, reais } from "@domain/pagamento/pendencia";
+import { pendenciasDoErro, pixDoPagamento, podeAvisarQuePagou, reais } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { paymentService } from "@services/paymentService";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
@@ -471,13 +471,32 @@ export function QueueStatus() {
   useEffect(() => {
     if (!isFinished || !attendanceId || !accessToken || pagamentoAberto.current === attendanceId) return;
     pagamentoAberto.current = attendanceId;
-    paymentService
-      .get(attendanceId, accessToken)
-      .then(({ data }) => {
-        // Sem Pix do profissional não há modal: só ele confirma que recebeu.
-        if (data.status === "PENDING" && data.pix_copy_paste) usePendenciaStore.getState().pagar(attendanceId);
-      })
-      .catch(() => {});
+    // pagar-ao-finalizar-corte (André, 24/10): o modal abre SOZINHO quando o corte e finalizado (antes so
+    // aparecia depois de sair da tela). O Pix pode estar no `gateway` (Asaas), nao so no topo; e o pagamento
+    // pode nascer um instante depois do FINISHED, entao tenta de novo uma vez.
+    let vivo = true;
+    let nova: ReturnType<typeof setTimeout> | undefined;
+    const abrir = (tentativa: number) =>
+      paymentService
+        .get(attendanceId, accessToken)
+        .then(({ data }) => {
+          if (!vivo) return;
+          const pix = pixDoPagamento(data);
+          // Sem Pix do profissional nao ha modal: so ele confirma que recebeu.
+          if (podeAvisarQuePagou(data.status) && (pix.codigo || pix.qrImagem)) {
+            usePendenciaStore.getState().pagar(attendanceId);
+          } else if (tentativa === 0 && data.status !== "PAID") {
+            nova = setTimeout(() => void abrir(1), 4000);
+          }
+        })
+        .catch(() => {
+          if (vivo && tentativa === 0) nova = setTimeout(() => void abrir(1), 4000);
+        });
+    void abrir(0);
+    return () => {
+      vivo = false;
+      if (nova) clearTimeout(nova);
+    };
   }, [isFinished, attendanceId, accessToken]);
 
   // D15 (Andre, 24/09): "Sair da fila" pede DOIS toques seguidos. O primeiro so

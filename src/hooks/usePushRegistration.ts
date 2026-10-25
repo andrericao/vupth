@@ -232,6 +232,12 @@ export function usePushRegistration() {
         const aviso = avisoDoPush(conteudo);
         // pagamento-ja-paguei: o profissional recusou o "Já paguei"; o aviso leva ao pagamento.
         const pagamento = pagamentoDoPush(dados);
+        // pagar-ao-finalizar-corte: o corte foi finalizado com pagamento pendente (PAYMENT_PENDING, categoria
+        // PAGAR) e o app esta aberto: o modal de pagar abre sozinho, sem aviso com OK.
+        if (pagamento && !pagamento.recusado) {
+          usePendenciaStore.getState().pagar(pagamento.attendanceId);
+          return;
+        }
         if (aviso && pagamento?.recusado) {
           Alert.alert(aviso.titulo, aviso.mensagem, [
             { text: "Agora não", style: "cancel" },
