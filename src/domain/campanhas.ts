@@ -23,7 +23,7 @@ export function mensagemDoCupom(erro: unknown): string {
     case 'CAMPAIGN_NOT_AVAILABLE':
       return 'Este cupom não está valendo agora.';
     case 'CAMPAIGN_ALREADY_REDEEMED':
-      return 'Você já usou este cupom.';
+      return 'Este cupom já está ativado.';
     case 'COUPON_NOT_ACTIVE':
       return 'Este cupom não está valendo. Escolha outro ou siga sem cupom.';
     case 'CAMPAIGN_ENDED':
@@ -33,7 +33,7 @@ export function mensagemDoCupom(erro: unknown): string {
     case 'CAMPAIGN_NOT_FOR_YOU':
       return 'Este cupom não vale para a sua conta.';
     default:
-      return 'Não foi possível usar o cupom. Tente de novo.';
+      return 'Não foi possível ativar o cupom. Tente de novo.';
   }
 }
 

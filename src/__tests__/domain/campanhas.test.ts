@@ -66,7 +66,7 @@ describe('cupom', () => {
   it('cada recusa do Backend vira uma frase curta', () => {
     expect(mensagemDoCupom(erro('CAMPAIGN_NOT_FOUND'))).toBe('Cupom não encontrado.');
     expect(mensagemDoCupom(erro('CAMPAIGN_NOT_AVAILABLE'))).toBe('Este cupom não está valendo agora.');
-    expect(mensagemDoCupom(erro('CAMPAIGN_ALREADY_REDEEMED'))).toBe('Você já usou este cupom.');
+    expect(mensagemDoCupom(erro('CAMPAIGN_ALREADY_REDEEMED'))).toBe('Este cupom já está ativado.');
     expect(mensagemDoCupom(erro('CAMPAIGN_NOT_FOR_YOU'))).toBe('Este cupom não vale para a sua conta.');
     expect(mensagemDoCupom(erro())).toMatch(/Tente de novo/);
     expect(mensagemDoCupom(null)).toMatch(/Tente de novo/);

@@ -99,7 +99,7 @@ export function Promocoes() {
             />
           </VStack>
           <Button
-            title="Usar"
+            title="Ativar"
             onPress={usar}
             isLoading={enviando}
             isDisabled={enviando || !cupomDigitado(cupom)}
@@ -151,6 +151,7 @@ function CartaoDoCupom({ cupom, encerrado }: { cupom: Campanha; encerrado?: bool
       valor={valorDoTicket(cupom)}
       nome={nomeDaCampanha(cupom)}
       detalhe={encerrado ? undefined : validadeDoTicket(cupom) || validadeDoCupom(cupom)}
+      codigo={cupom.code}
       situacao={encerrado ? situacaoDoCupom(cupom) : undefined}
       onPress={encerrado ? undefined : () => Alert.alert(nomeDaCampanha(cupom), cupom.code ? `Código: ${cupom.code}` : undefined)}
     />

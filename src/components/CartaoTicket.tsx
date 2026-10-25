@@ -13,6 +13,8 @@ type Props = {
   nome: string;
   /** A linha de baixo: "Válido até dd/MM às HH:mm". */
   detalhe?: string;
+  /** O codigo do cupom (promocoes-ativar-e-codigo, 24/10): mostrado no ticket da tela de ativar. */
+  codigo?: string | null;
   /** O botão da direita (Participar). Sem ele, o cartão só informa. */
   acao?: { titulo: string; onPress: () => void; testID: string };
   /** Cupom já usado ou vencido: esmaecido, com o estado no lugar do botão. */
@@ -30,7 +32,7 @@ const RECORTE = 16;
  * (Archivo 800), nome, validade; o botão primário (green + onGreen) na direita. Só tokens (DEC-116),
  * claro e escuro; sem sombra.
  */
-export function CartaoTicket({ rotulo, valor, nome, detalhe, acao, situacao, onPress, testID, largura }: Props) {
+export function CartaoTicket({ rotulo, valor, nome, detalhe, codigo, acao, situacao, onPress, testID, largura }: Props) {
   const { cores } = useTema();
   const corpo = (
     <View
@@ -85,6 +87,11 @@ export function CartaoTicket({ rotulo, valor, nome, detalhe, acao, situacao, onP
         {detalhe ? (
           <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$semibold" color="$brandTextSecondary">
             {detalhe}
+          </Text>
+        ) : null}
+        {codigo ? (
+          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$bold" color="$brandTextPrimary" testID={`${testID}-codigo`} selectable>
+            {`Código: ${codigo}`}
           </Text>
         ) : null}
       </View>

@@ -46,7 +46,9 @@ afterEach(() => alerta.mockRestore());
 describe('Promoções', () => {
   it('usa o cupom digitado e mostra a lista de novo', async () => {
     mockListMine.mockResolvedValueOnce({ data: [] }).mockResolvedValueOnce({ data: [{ id: 'c1', name: 'Lançamento' }] });
-    const { getByTestId, findByText } = renderWithProviders(<Promocoes />);
+    const { getByTestId, getByText, findByText } = renderWithProviders(<Promocoes />);
+    // promocoes-ativar-e-codigo (24/10): o botão é "Ativar", não "Usar"
+    expect(getByText('Ativar')).toBeTruthy();
     fireEvent.changeText(getByTestId('cupom-campo'), ' vupth10 ');
     await act(async () => {
       fireEvent.press(getByTestId('cupom-usar'));
@@ -112,6 +114,8 @@ describe('Promoções', () => {
     const { findByTestId, getByTestId, getByText } = renderWithProviders(<Promocoes />);
     await findByTestId('cupons-meus');
     expect(getByText('Promoções ativas')).toBeTruthy();
+    // promocoes-ativar-e-codigo: cada ticket mostra o código do cupom
+    expect(getByTestId('cupom-a-codigo')).toHaveTextContent('Código: VUPTH10');
     fireEvent.press(getByTestId('cupom-a'));
     expect(alerta).toHaveBeenLastCalledWith('Lançamento', 'Código: VUPTH10');
     alerta.mockClear();
@@ -127,7 +131,7 @@ describe('Promoções', () => {
     await act(async () => {
       fireEvent.press(getByTestId('cupom-usar'));
     });
-    expect(alerta).toHaveBeenCalledWith('Cupom', 'Você já usou este cupom.');
+    expect(alerta).toHaveBeenCalledWith('Cupom', 'Este cupom já está ativado.');
   });
 
   it('sem cupom digitado, ou sem login, não envia', async () => {

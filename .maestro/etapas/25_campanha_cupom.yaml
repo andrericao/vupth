@@ -46,7 +46,7 @@ appId: ${APP_ID}
     label: "25.11 · fecha o teclado"
 - tapOn:
     id: "cupom-usar"
-    label: "25.12 · toca em Usar"
+    label: "25.12 · toca em Ativar"
 - extendedWaitUntil:
     visible: "(Cupom ativado|Promoção encerrada|Promoção esgotada|Cupom)"
     timeout: ${15000 * LENTO}
