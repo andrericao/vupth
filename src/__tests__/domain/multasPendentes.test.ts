@@ -1,4 +1,4 @@
-import { origemDaMulta, contaComMultas, reais } from '@domain/queue/multasPendentes';
+import { origemDaMulta, contaComMultas, lembreteDaMulta, reais } from '@domain/queue/multasPendentes';
 import type { PendingPenalty } from '@services/penaltyService';
 
 // Andre, 25/09: as multas pendentes entram na conta, separadas do serviço, e
@@ -42,5 +42,21 @@ describe('a conta do próximo atendimento', () => {
 
   it('em reais', () => {
     expect(reais(38)).toBe('R$ 38,00');
+  });
+});
+
+// lembrar-multa-pendente-ao-entrar-na-fila (André, 24/10)
+describe('o lembrete da multa ao entrar na fila', () => {
+  const multa = (amount: number | string, id = 'm1'): PendingPenalty => ({ penaltyId: id, type: 'LATE_CANCEL', amount, originProfessionalName: 'Carlos' } as PendingPenalty);
+
+  it('sem multa pendente, não há lembrete', () => {
+    expect(lembreteDaMulta([])).toBeNull();
+  });
+
+  it('com multa, diz o valor somado e que ela entra neste corte', () => {
+    const l = lembreteDaMulta([multa(5), multa(5, 'm2')])!;
+    expect(l.titulo).toBe('Multa pendente');
+    expect(l.mensagem).toBe('Você tem R$ 10,00 em multa. Ela entra no valor deste corte.');
+    expect([l.cancelar, l.continuar]).toEqual(['Cancelar', 'Continuar']);
   });
 });

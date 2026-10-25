@@ -36,7 +36,7 @@ import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
-import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
+import { contaComMultas, lembreteDaMulta, origemDaMulta, reais } from "@domain/queue/multasPendentes";
 import { descontoDoCupom, fimDoErro, mensagemDoCupom } from "@domain/campanhas";
 import { avisoDeFimDaCampanha } from "@utils/avisoDeFimDaCampanha";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
@@ -212,6 +212,20 @@ export function ServiceSelection() {
 
   function handleConfirm() {
     if (!semPendencia()) return;
+    // lembrar-multa-pendente-ao-entrar-na-fila (André, 24/10): a cada tentativa, quem tem multa pendente e lembrado
+    // da fatura antes de seguir; Cancelar nao entra. A multa e cobrada no corte novo pelo Backend.
+    const lembrete = lembreteDaMulta(multas);
+    if (lembrete) {
+      alertaTipado(lembrete.titulo, lembrete.mensagem, [
+        { text: lembrete.cancelar, style: "cancel" },
+        { text: lembrete.continuar, onPress: () => avisarChegadaEEntrar() },
+      ], { tipo: "dinheiro", selo: "Multa", cancelable: false });
+      return;
+    }
+    avisarChegadaEEntrar();
+  }
+
+  function avisarChegadaEEntrar() {
     // aviso-de-chegada-na-entrada (André, 22/10): com menos de 1 h de espera, um
     // aviso diz até que horas estar na loja; Cancelar não entra na fila.
     const aviso = avisoDeChegada(estimatedWaitMinutes, agora(), { filaLivre: estimatedWaitMinutes <= 0 });
