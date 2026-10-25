@@ -1,8 +1,8 @@
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
-import { ReportarProblema } from '@components/ReportarProblema';
+import { ReportarProblema, ALTURA_MINIMA_DO_CAMPO } from '@components/ReportarProblema';
 import { reportarProblema } from '@utils/sentry';
 
 jest.mock('@utils/sentry', () => ({ reportarProblema: jest.fn() }));
@@ -46,5 +46,20 @@ describe('ReportarProblema', () => {
     fireEvent.press(t.getByTestId('reportar-cancelar'));
     expect(onFechar).toHaveBeenCalled();
     expect(reportarProblema).not.toHaveBeenCalled();
+  });
+
+  // reportar-problema-cancelar-cortado (André, 24/10): o campo da mensagem nao fica espremido e os dois
+  // botoes moram no rodape fixo, fora da rolagem.
+  it('o campo da mensagem tem altura mínima e o Enviar e o Cancelar ficam no rodapé, fora da rolagem', () => {
+    const t = renderWithProviders(<ReportarProblema visivel onFechar={jest.fn()} />);
+    expect(StyleSheet.flatten(t.getByTestId('reportar-mensagem').props.style).minHeight).toBe(ALTURA_MINIMA_DO_CAMPO);
+    expect(ALTURA_MINIMA_DO_CAMPO).toBeGreaterThanOrEqual(96);
+    type No = { findAll: (f: (n: { props?: { testID?: string } }) => boolean) => unknown[] };
+    const rolagem = t.getByTestId('caixa-de-modal-rolagem') as unknown as No;
+    const dentro = (id: string) => rolagem.findAll((n) => n.props?.testID === id).length;
+    expect(dentro('reportar-mensagem')).toBeGreaterThan(0);
+    expect(dentro('reportar-enviar')).toBe(0);
+    expect(dentro('reportar-cancelar')).toBe(0);
+    expect(t.getByTestId('caixa-de-modal-rodape')).toBeTruthy();
   });
 });

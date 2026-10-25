@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Alert, Modal } from "react-native";
+import { Alert, Modal, TextInput } from "react-native";
 
 import { Button } from "@components/Button";
 import { CaixaDeModal } from "@components/CaixaDeModal";
 import { Input2 } from "@components/Input2";
 import { reportarProblema } from "@utils/sentry";
-import { Heading, VStack } from "@gluestack-ui/themed";
+import { Box, Heading, VStack } from "@gluestack-ui/themed";
+import { useTema } from "@hooks/useTema";
+
+export const ALTURA_MINIMA_DO_CAMPO = 96;
 
 // sentry-feedback-do-usuario (Andre, 24/10), como no Partner: "Reportar problema" em Configuracoes.
 // Nome opcional e a mensagem; vai ao Sentry com o ultimo erro e a tela. Complementa o Suporte,
@@ -13,6 +16,7 @@ import { Heading, VStack } from "@gluestack-ui/themed";
 export function ReportarProblema({ visivel, onFechar }: { visivel: boolean; onFechar: () => void }) {
   const [nome, setNome] = useState("");
   const [mensagem, setMensagem] = useState("");
+  const { cores } = useTema();
 
   const fechar = () => {
     setNome("");
@@ -42,14 +46,20 @@ export function ReportarProblema({ visivel, onFechar }: { visivel: boolean; onFe
           Reportar problema
         </Heading>
         <Input2 placeholder="Seu nome (opcional)" value={nome} onChangeText={setNome} testID="reportar-nome" />
-        <Input2
-          placeholder="O que aconteceu?"
-          value={mensagem}
-          onChangeText={setMensagem}
-          multiline
-          autoCapitalize="sentences"
-          testID="reportar-mensagem"
-        />
+        {/* O campo da mensagem tem altura minima propria: o Input2 multilinha tem altura fixa e ficava espremido. */}
+        <Box borderWidth="$1" borderColor="$brandBorder" borderRadius="$xl" px="$3" py="$2">
+          <TextInput
+            placeholder="O que aconteceu?"
+            placeholderTextColor={cores.textPlaceholder}
+            value={mensagem}
+            onChangeText={setMensagem}
+            multiline
+            maxLength={1000}
+            autoCapitalize="sentences"
+            style={{ minHeight: ALTURA_MINIMA_DO_CAMPO, textAlignVertical: "top", color: cores.textPrimary }}
+            testID="reportar-mensagem"
+          />
+        </Box>
       </CaixaDeModal>
     </Modal>
   );

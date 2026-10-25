@@ -1,4 +1,5 @@
-import { StyleSheet, Text as RNText } from 'react-native';
+import { Keyboard, StyleSheet, Text as RNText } from 'react-native';
+import { act } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { CaixaDeModal } from '@components/CaixaDeModal';
@@ -35,5 +36,32 @@ describe('CaixaDeModal', () => {
     // o Cancelar não está dentro da rolagem: nunca fica abaixo da dobra
     expect(rolagem.findAll((n: { props?: { children?: unknown } }) => n.props?.children === 'Cancelar')).toHaveLength(0);
     expect(rolagem.findAll((n: { props?: { children?: unknown } }) => n.props?.children === 'frase').length).toBeGreaterThan(0);
+  });
+
+  // reportar-problema-cancelar-cortado (André, 24/10): com o teclado aberto o layout fica compacto,
+  // para o rodape (Enviar e Cancelar) nao tomar o lugar do campo.
+  it('com o teclado aberto: a caixa sobe para o topo e o padding encolhe; fechado, volta ao centro', () => {
+    const ouvintes: Record<string, () => void> = {};
+    const espia = jest.spyOn(Keyboard, 'addListener').mockImplementation(((evento: string, fn: () => void) => {
+      ouvintes[evento] = fn;
+      return { remove: jest.fn() };
+    }) as never);
+    const t = renderWithProviders(
+      <CaixaDeModal rodape={<RNText>Cancelar</RNText>} testID="cx">
+        <RNText>campo</RNText>
+      </CaixaDeModal>,
+    );
+    const veu = () => StyleSheet.flatten(t.getByTestId('cx-veu').props.style);
+    const miolo = () => StyleSheet.flatten(t.getByTestId('cx-rolagem').props.contentContainerStyle);
+    expect(veu().justifyContent).toBe('center');
+    expect(miolo().padding).toBe(24);
+    act(() => ouvintes.keyboardDidShow());
+    expect(veu().justifyContent).toBe('flex-start');
+    expect(miolo().padding).toBe(16);
+    expect(t.getByTestId('cx-rolagem').props.keyboardShouldPersistTaps).toBe('handled');
+    act(() => ouvintes.keyboardDidHide());
+    expect(veu().justifyContent).toBe('center');
+    expect(miolo().padding).toBe(24);
+    espia.mockRestore();
   });
 });
