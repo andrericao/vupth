@@ -110,6 +110,28 @@ describe('QueueStatus — sair da fila (D15)', () => {
     alerta.mockRestore();
   });
 
+  // aviso-dois-toques-para-sair-da-fila (André, 25/10): a faixa pede o segundo toque e ele vale enquanto ela esta na tela.
+  it('o primeiro toque pede o segundo, a vista; o segundo, depois de ler a faixa, sai (ou pergunta)', () => {
+    jest.useFakeTimers();
+    try {
+      const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+      const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
+      tocar(getByTestId);
+      expect(getByText('Toque de novo para sair da fila.')).toBeTruthy();
+      expect(alerta).not.toHaveBeenCalled();
+      // o tempo de ler a faixa: bem mais que os 1,5 s antigos
+      act(() => {
+        jest.advanceTimersByTime(4000);
+      });
+      expect(getByTestId('faixa-de-saida')).toBeTruthy();
+      tocar(getByTestId);
+      expect(alerta).toHaveBeenCalled();
+      alerta.mockRestore();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('com menos de 1h, a faixa diz o valor em uma linha — e só a multa, sem convite de troca', () => {
     const { getByTestId, getByText, queryByText } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);

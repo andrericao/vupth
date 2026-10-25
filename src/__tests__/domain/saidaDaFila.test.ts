@@ -1,4 +1,4 @@
-import { saidaDaFila, ehToqueDuplo, JANELA_DO_TOQUE_DUPLO_MS, regraDaMulta } from '@domain/queue/saidaDaFila';
+import { saidaDaFila, ehToqueDuplo, JANELA_DO_TOQUE_DUPLO_MS, AVISO_DO_SEGUNDO_TOQUE, regraDaMulta } from '@domain/queue/saidaDaFila';
 
 // D15 (Andre, 24/09): dois toques seguidos para sair; com multa, confirmação
 // "Sim / Não"; sem multa, sai direto.
@@ -61,5 +61,17 @@ describe('a regra da multa dita antes de entrar (CDC)', () => {
     expect(t).toMatch(/R\$ 3,00/);
     expect(t).toMatch(/próximo atendimento/);
     expect(t).toMatch(/Trocar de lugar .* não tem custo/);
+  });
+});
+
+// aviso-dois-toques-para-sair-da-fila (André, 25/10)
+describe('o segundo toque', () => {
+  it('a janela é o tempo da faixa (8 s): quem lê a faixa ainda dá o segundo toque', () => {
+    expect(JANELA_DO_TOQUE_DUPLO_MS).toBe(8000);
+    expect(ehToqueDuplo(1000, 1000 + 4000)).toBe(true);
+  });
+
+  it('o aviso é curto e pede o toque de novo', () => {
+    expect(AVISO_DO_SEGUNDO_TOQUE).toBe('Toque de novo para sair da fila.');
   });
 });

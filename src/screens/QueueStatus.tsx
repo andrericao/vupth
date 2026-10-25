@@ -15,7 +15,7 @@ import {
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
-import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor } from "@domain/queue/saidaDaFila";
+import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor, AVISO_DO_SEGUNDO_TOQUE, JANELA_DO_TOQUE_DUPLO_MS } from "@domain/queue/saidaDaFila";
 import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
@@ -418,7 +418,7 @@ export function QueueStatus() {
   const saidaAtual = saidaDaFila(regraDaSaida());
   useEffect(() => {
     if (!mostrarFaixaDeSaida) return;
-    const t = setTimeout(() => setMostrarFaixaDeSaida(false), 8000);
+    const t = setTimeout(() => setMostrarFaixaDeSaida(false), JANELA_DO_TOQUE_DUPLO_MS);
     return () => clearTimeout(t);
   }, [mostrarFaixaDeSaida]);
 
@@ -1032,6 +1032,10 @@ export function QueueStatus() {
               py="$2.5"
               testID="faixa-de-saida"
             >
+              {/* aviso-dois-toques-para-sair-da-fila (André, 25/10): o pedido do segundo toque, a vista. */}
+              <Text size="xs" fontWeight="$bold" color="$forest" mb="$1" testID="aviso-segundo-toque">
+                {AVISO_DO_SEGUNDO_TOQUE}
+              </Text>
               <HStack alignItems="center" gap="$2">
                 <Info size={16} color="#163300" />
                 <Text size="xs" color="$forest" flex={1}>

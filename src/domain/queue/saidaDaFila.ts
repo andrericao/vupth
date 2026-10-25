@@ -26,8 +26,16 @@ import { CANCELLATION_PENALTY_VALUE } from './types';
 // Substitui o dialogo do D10 ("Ficar na fila / Trocar de lugar / Sair mesmo
 // assim"): a troca deixou de morar na saida (D16 a leva para um popup).
 
-/** Quanto tempo entre os dois toques ainda conta como "seguidos". */
-export const JANELA_DO_TOQUE_DUPLO_MS = 1500;
+/**
+ * Quanto tempo entre os dois toques ainda conta como "seguidos": o tempo que a faixa fica na tela.
+ * aviso-dois-toques-para-sair-da-fila (André, 25/10): o cliente nao sabia que sair da fila pede dois toques,
+ * e com a janela de 1,5 s o segundo toque, dado depois de ler a faixa, so reabria a faixa. Agora a faixa pede
+ * o segundo toque ("Toque de novo para sair da fila") e ele vale enquanto ela esta visivel.
+ */
+export const JANELA_DO_TOQUE_DUPLO_MS = 8000;
+
+/** O aviso curto e visivel que pede o segundo toque (aparece na faixa do primeiro toque). */
+export const AVISO_DO_SEGUNDO_TOQUE = 'Toque de novo para sair da fila.';
 
 export function ehToqueDuplo(toqueAnterior: number | null, agora: number): boolean {
   return toqueAnterior != null && agora - toqueAnterior <= JANELA_DO_TOQUE_DUPLO_MS;
