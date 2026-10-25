@@ -62,6 +62,9 @@ jest.mock('@services/cutRequestService', () => ({
   cutRequestService: { create: jest.fn() },
 }));
 
+const mockAvisoFim = jest.fn();
+jest.mock('@utils/avisoDeFimDaCampanha', () => ({ avisoDeFimDaCampanha: (...a: unknown[]) => mockAvisoFim(...a) }));
+
 const mockGetServices = establishmentService.getServiceItemsByProfessional as jest.Mock;
 const mockCreateOffer = swapOfferService.create as jest.Mock;
 const mockCreateCut = cutRequestService.create as jest.Mock;
@@ -358,6 +361,22 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     await waitFor(() => expect(alerta).toHaveBeenCalledWith('Cupom', expect.any(String)));
     expect(queryByTestId('valor-com-cupom')).toBeNull();
     alerta.mockRestore();
+    mockCupons = [];
+  });
+
+  it('LOJA FECHADA: promoção encerrada no pedido de corte (409 CAMPAIGN_ENDED) tira o cupom e mostra o aviso de fim', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    setRouteParams({ ...OPEN_PARAMS, establishmentOpen: false });
+    mockCreateCut.mockRejectedValue({ response: { status: 409, data: { code: 'CAMPAIGN_ENDED' } } });
+    mockCupons = [{ id: 'c1', name: 'Dez', value_amount: 10 }];
+    const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent(getByTestId('usar-cupom-c1'), 'valueChange', true);
+    fireEvent.press(getByTestId('more-options'));
+    fireEvent.press(getByTestId('more-option-cut'));
+    fireEvent.press(await findByTestId('corte-assim-que-abrir'));
+    await waitFor(() => expect(mockAvisoFim).toHaveBeenCalledWith('ENCERRADA'));
+    await waitFor(() => expect(queryByTestId('valor-com-cupom')).toBeNull());
     mockCupons = [];
   });
 

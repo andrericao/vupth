@@ -37,7 +37,8 @@ import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
 import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
-import { descontoDoCupom, mensagemDoCupom } from "@domain/campanhas";
+import { descontoDoCupom, fimDoErro, mensagemDoCupom } from "@domain/campanhas";
+import { avisoDeFimDaCampanha } from "@utils/avisoDeFimDaCampanha";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
 import { useMeusCupons } from "@hooks/useMeusCupons";
 import { EscolhaDeCupom } from "@components/EscolhaDeCupom";
@@ -338,6 +339,13 @@ export function ServiceSelection() {
       if (code === "COUPON_NOT_ACTIVE") {
         setCupomEscolhido(null);
         Alert.alert("Cupom", mensagemDoCupom(error));
+        return;
+      }
+      // Promocao que acabou (409 CAMPAIGN_ENDED / CAMPAIGN_SOLD_OUT): o modal certo e o cupom sai da escolha.
+      const fim = fimDoErro(error);
+      if (fim) {
+        setCupomEscolhido(null);
+        avisoDeFimDaCampanha(fim);
         return;
       }
       const msg = error.response?.data?.fieldErrors?.desiredTime
