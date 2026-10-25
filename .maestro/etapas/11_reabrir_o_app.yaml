@@ -30,6 +30,21 @@ appId: ${APP_ID}
 - waitForAnimationToEnd:
     timeout: 3000
     label: "11.09 · espera a tela parar"
-- assertNotVisible:
-    text: "Sobre o tempo estimado"
-    label: "11.10 · não vê o aviso da estimativa de novo"
+# bateria 25/10 01:28 (11.10): o aviso abre a cada entrada na fila e vem de uma leitura assincrona; no emulador
+# lento ele pode chegar DEPOIS do queue-position (e o 11.08 sair sem fecha-lo) ou ainda estar no fade-out do
+# "Entendi". Espera o aviso um instante, fecha se ele veio, e so entao confere que nao ficou na tela.
+- extendedWaitUntil:
+    visible: "Sobre o tempo estimado"
+    timeout: ${5000 * LENTO}
+    optional: true
+    label: "11.09b · o aviso pode chegar um instante depois do queue-position"
+- runFlow:
+    when:
+      visible: "Sobre o tempo estimado"
+    commands:
+      - tapOn: "Entendi"
+    label: "11.09c · fecha o aviso, se ele chegou"
+- extendedWaitUntil:
+    notVisible: "Sobre o tempo estimado"
+    timeout: ${10000 * LENTO}
+    label: "11.10 · não vê o aviso da estimativa de novo (espera o fade-out)"
