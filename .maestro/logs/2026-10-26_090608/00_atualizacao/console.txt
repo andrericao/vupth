@@ -74,76 +74,39 @@ Running on vupth_aosp
       Tap on "Já tenho conta"... COMPLETED
       Tap on "E-mail"... COMPLETED
       Set Maestro clipboard to ${EMAIL_CLIENTE}... COMPLETED
-      Paste text... COMPLETED
-      Tap on "Senha"... COMPLETED
-      Set Maestro clipboard to ${SENHA}... COMPLETED
-      Paste text... COMPLETED
-      Hide Keyboard... COMPLETED
-      Tap on id: primary-login... COMPLETED
-      Assert that (Optional) id: (dialogo-botao-0|busca-home) is visible... COMPLETED
-      Run fechar_aviso.yaml...
-        Run esperar_o_sistema.yaml...
-          Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-          Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
-        Run esperar_o_sistema.yaml... COMPLETED
-        Wait for animation to end within 3000 ms... COMPLETED
-        Run flow when id: dialogo-botao-0 is visible...
-        Run flow when id: dialogo-botao-0 is visible... SKIPPED
-        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
-        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
-        Run flow when id: push-skip is visible...
-        Run flow when id: push-skip is visible... SKIPPED
-      Run fechar_aviso.yaml... COMPLETED
-      Run flow when id: primary-login is visible...
-      Run flow when id: primary-login is visible... SKIPPED
-      Repeat while id: grupo-.* is not visible (up to 4 times)...
-        Tap on "Perfil"... COMPLETED
-        Assert that (Optional) id: grupo-.* is visible... WARNED
-      Repeat while id: grupo-.* is not visible (up to 4 times)... COMPLETED
-      Scrolling DOWN until "Sair da conta" is visible with speed 40, visibility percentage 100%, timeout 30000 ms, with centering disabled... COMPLETED
-      Run fechar_aviso.yaml...
-        Run esperar_o_sistema.yaml...
-          Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-          Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
-        Run esperar_o_sistema.yaml... COMPLETED
-        Wait for animation to end within 3000 ms... COMPLETED
-        Run flow when id: dialogo-botao-0 is visible...
-        Run flow when id: dialogo-botao-0 is visible... SKIPPED
-        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
-        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
-        Run flow when id: push-skip is visible...
-        Run flow when id: push-skip is visible... SKIPPED
-      Run fechar_aviso.yaml... COMPLETED
-    Run entrar.yaml... COMPLETED
-  00.PA · entra com o cliente... COMPLETED
-  ${ETAPA}.PB · atualiza o app e confere a versão...
-    Run atualizar.yaml...
-      Repeat while id: grupo-.* is not visible (up to 4 times)...
-      Repeat while id: grupo-.* is not visible (up to 4 times)... SKIPPED
-      Scrolling DOWN until "Versão do app" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... COMPLETED
-      o menu Suporte esta no Perfil... COMPLETED
-      Tap on "Versão do app"... COMPLETED
-      Tap on id: check-update... COMPLETED
-      Assert that "(Atualização baixada|Tudo certo|Não foi possível verificar)" is visible... COMPLETED
-      Run flow when "Atualização baixada" is visible...
-      Run flow when "Atualização baixada" is visible... SKIPPED
-      Repeat while ".*${COMMIT}.*" is not visible (up to 14 times)...
-        Run fechar_aviso.yaml...
-          Run esperar_o_sistema.yaml...
-            Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-            Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
-          Run esperar_o_sistema.yaml... COMPLETED
-          Wait for animation to end within 3000 ms... COMPLETED
-          Run flow when id: dialogo-botao-0 is visible...
-            Tap on id: dialogo-botao-0... COMPLETED
-          Run flow when id: dialogo-botao-0 is visible... COMPLETED
-          Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
-          Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
-          Run flow when id: push-skip is visible...
-          Run flow when id: push-skip is visible... SKIPPED
-        Run fechar_aviso.yaml... COMPLETED
-        Assert that (Optional) "ESPERA_DO_OTA_NUNCA_APARECE" is visible... WARNED
-        Tap on id: check-update... COMPLETED
-        Assert that (Optional) "(Atualização baixada|Tudo certo|Não foi possível verificar)" is visible... COMPLETED
-        Run flow when "Atualização baixada" is visible...
-        Run flow when "Atualização baixada" is visible... SKIPPED
+      Paste text...io.grpc.StatusRuntimeException: DEADLINE_EXCEEDED: deadline exceeded after 119.984682116s. [closed=[], open=[[remote_addr=/127.0.0.1:7001]]]
+	at io.grpc.stub.ClientCalls.toStatusRuntimeException(ClientCalls.java:275)
+	at io.grpc.stub.ClientCalls.getUnchecked(ClientCalls.java:256)
+	at io.grpc.stub.ClientCalls.blockingUnaryCall(ClientCalls.java:169)
+	at maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub.inputText(MaestroDriverGrpc.java:768)
+	at maestro.drivers.AndroidDriver.inputText$lambda$35$lambda$34(AndroidDriver.kt:568)
+	at maestro.drivers.AndroidDriver.runDeviceCall(AndroidDriver.kt:1273)
+	at maestro.drivers.AndroidDriver.inputText$lambda$35(AndroidDriver.kt:567)
+	at maestro.utils.Metrics.measured(Metrics.kt:48)
+	at maestro.drivers.AndroidDriver.inputText(AndroidDriver.kt:566)
+	at maestro.Maestro.inputText$lambda$34(Maestro.kt:483)
+	at kotlinx.coroutines.InterruptibleKt.runInterruptibleInExpectedContext(Interruptible.kt:48)
+	at kotlinx.coroutines.InterruptibleKt.access$runInterruptibleInExpectedContext(Interruptible.kt:1)
+	at kotlinx.coroutines.InterruptibleKt$runInterruptible$2.invokeSuspend(Interruptible.kt:40)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
+	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
+	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
+
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-10-26_090608/00_atualizacao
+╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                │
+│   Debug tests faster by easy access to test recordings, maestro logs, screenshots, and more.   │
+│                                                                                                │
+│   Run your flows on Maestro Cloud:                                                             │
+│   maestro cloud app_file flows_folder/                                                         │
+│                                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+
