@@ -1,0 +1,14 @@
+10:49:23.772 [ INFO] maestro.cli.report.TestDebugReporter.logSystemInfo: Debug output path: /home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-10-26_104820/00_atualizacao
+10:49:23.780 [ INFO] MAESTRO.logSystemInfo: ---- System Info ----
+10:49:23.780 [ INFO] MAESTRO.logSystemInfo: Maestro Version: 2.5.1
+10:49:23.784 [ INFO] MAESTRO.logSystemInfo: CI: Undefined
+10:49:23.785 [ INFO] MAESTRO.logSystemInfo: OS Name: Linux
+10:49:23.786 [ INFO] MAESTRO.logSystemInfo: OS Version: 7.0.0-38-generic
+10:49:23.787 [ INFO] MAESTRO.logSystemInfo: Architecture: amd64
+10:49:23.791 [ INFO] MAESTRO.logSystemInfo: Java Version: 21
+10:49:23.795 [ INFO] MAESTRO.logSystemInfo: Xcode Version: null
+10:49:23.798 [ INFO] MAESTRO.logSystemInfo: Flutter Version: Undefined
+10:49:23.802 [ INFO] MAESTRO.logSystemInfo: Flutter Channel: Undefined
+10:49:23.802 [ INFO] MAESTRO.logSystemInfo: ---------------------
+10:49:27.050 [ INFO] maestro.cli.command.TestCommand.runShardSuite: [shard 1] Selected device ZF524LC5HC using port 7001 with execution plan ExecutionPlan(flowsToRun=[/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/avulsas/00_atualizacao.yaml], sequence=FlowSequence(flows=[], continueOnFailure=true), workspaceConfig=WorkspaceConfig(flows=null, includeTags=null, excludeTags=null, executionOrder=null, baselineBranch=null, notifications=null, disableRetries=false, platform=PlatformConfiguration(android=AndroidConfiguration(disableAnimations=false), ios=IOSConfiguration(disableAnimations=false, snapshotKeyHonorModalViews=null)), testOutputDir=null))
+10:49:27.362 [DEBUG] io.micrometer.common.util.internal.logging.InternalLoggerFactory.newDefaultFactory: Using SLF4J as the default logging framework
