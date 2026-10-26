@@ -1,4 +1,0 @@
---------- beginning of main
-10-26 10:49:20.959 E/WifiDataStall( 1863): Ignore this poll. newStats: null txLinkSpeedMbps: 433 rxLinkSpeedMbps: 6 rssi: -34 connectionCapabilities: com.android.server.wifi.WifiNative$ConnectionCapabilities@26e1618
-10-26 10:49:23.981 E/WifiDataStall( 1863): Ignore this poll. newStats: null txLinkSpeedMbps: 433 rxLinkSpeedMbps: 6 rssi: -34 connectionCapabilities: com.android.server.wifi.WifiNative$ConnectionCapabilities@26e1618
-10-26 10:49:27.002 E/WifiDataStall( 1863): Ignore this poll. newStats: null txLinkSpeedMbps: 433 rxLinkSpeedMbps: 6 rssi: -34 connectionCapabilities: com.android.server.wifi.WifiNative$ConnectionCapabilities@26e1618
