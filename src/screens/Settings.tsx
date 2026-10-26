@@ -1,5 +1,6 @@
-import { useState } from "react";
 import { Alert, Linking, TouchableOpacity } from "react-native";
+import { useState } from "react";
+import { useTema } from "@hooks/useTema";
 import { useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
@@ -9,7 +10,7 @@ import {
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import { User, Smartphone, Palette, LifeBuoy, Ticket } from "lucide-react-native";
+import { User, Smartphone, Palette, LifeBuoy, Ticket, Bug } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -17,22 +18,22 @@ import { nomeDeExibicao } from "@domain/auth/displayName";
 import { Button } from "@components/Button";
 import { MenuItem, Grupo } from "@components/MenuDoPerfil";
 import { VersaoDoApp } from "@components/VersaoDoApp";
+import { ReportarProblema } from "@components/ReportarProblema";
+import { sentryLigado } from "@utils/sentry";
 import { LinksLegais } from "@components/LinksLegais";
-import { DeleteAccountModal } from "@components/DeleteAccountModal";
 import { useAuthStore } from "@stores/authStore";
-import { profileService } from "@services/profileService";
 import { fs } from "@stores/fonteStore";
 import { SUPORTE_URL } from "@utils/suporte";
 import { CUPOM_LIGADO } from "@domain/campanhas";
-import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 export function Settings() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const user = useAuthStore((s) => s.user);
-  const accessToken = useAuthStore((s) => s.accessToken);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
+  const [reportando, setReportando] = useState(false);
+  const { cores } = useTema();
 
   // Mesma regra da Home, numa funcao so — eram duas copias que ja divergiam
   // (aqui caia no e-mail, la caia no texto de visitante).
@@ -59,48 +60,6 @@ export function Settings() {
         },
       },
     ]);
-  }
-
-  const [showDelete, setShowDelete] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  function openDeleteAccount() {
-    setDeleteError(null);
-    setShowDelete(true);
-  }
-
-  // Contrato novo do backend (2026-08-07): exige a senha atual no corpo. Antes
-  // mandávamos DELETE sem corpo e tomávamos 400 — o botão estava quebrado.
-  async function handleDeleteAccount(currentPassword: string) {
-    if (!accessToken) return;
-    setIsDeleting(true);
-    setDeleteError(null);
-    try {
-      await profileService.deleteAccount(accessToken, currentPassword);
-      setShowDelete(false);
-      await logout();
-      // Settings vive na aba Config.; volta para a aba Home (pai = tabs).
-      navigation.getParent()?.navigate("homeTab", { screen: "home", pop: true });
-    } catch (error: any) {
-      const code = error.response?.data?.code;
-
-      if (code === "CURRENT_PASSWORD_INVALID") {
-        // 401 de NEGÓCIO: erro de campo, não sessão expirada. O interceptor
-        // global já isenta este código de deslogar (ver `api.ts`).
-        setDeleteError("Senha incorreta. Confira e tente de novo.");
-      } else if (code === "ACCOUNT_DELETE_NOT_ALLOWED") {
-        // Bloqueio TEMPORÁRIO. A mensagem do backend diz o que fazer para
-        // destravar (sair da fila, encerrar o atendimento, esperar a loja
-        // esvaziar) — exibir como veio. Transformar em "não é possível apagar
-        // esta conta" reprovaria na publicação das lojas de app.
-        setDeleteError(mensagemDoErro(error, "Você tem um atendimento em andamento. Conclua antes de apagar a conta."));
-      } else {
-        setDeleteError(mensagemDoErro(error, "Erro ao deletar conta"));
-      }
-    } finally {
-      setIsDeleting(false);
-    }
   }
 
   return (
@@ -240,6 +199,15 @@ export function Settings() {
         {isAuthenticated && (
         <VStack mt="$6">
           <Grupo label="Sistema">
+            {/* sentry-feedback-do-usuario (24/10): so com o Sentry ligado neste binario. */}
+            {sentryLigado() && (
+              <MenuItem
+                icon={<Bug size={20} color={cores.textPrimary} />}
+                label="Reportar problema"
+                onPress={() => setReportando(true)}
+                testID="reportar-problema"
+              />
+            )}
             <MenuItem
               icon={<Smartphone size={20} color="#163300" />}
               label="Versão do app"
@@ -250,57 +218,38 @@ export function Settings() {
         </VStack>
         )}
 
-        {/* botao-sair-igual (CLI-3, Andre 15/10): o Sair e o do Partner — texto
-            vermelho, solto, fora dos grupos, centralizado, sem icone nem caixa.
-            sair-da-conta-embaixo (CLI-1, Andre 18/10): no FIM do Perfil, depois de
-            Sistema e acima de Termos e Privacidade. */}
-        {isAuthenticated && (
-          <TouchableOpacity
-            onPress={handleLogout}
-            testID="logout"
-            accessibilityRole="button"
-            accessibilityLabel="Sair"
-            style={{ paddingVertical: 4, marginTop: 24 }}
-          >
-            <Text size="sm" fontWeight="$semibold" color="$brandDanger" textAlign="center">
-              Sair da conta
-            </Text>
-          </TouchableOpacity>
-        )}
-
         {/* `flex-end` empurra o rodape pro fim: antes ele vinha logo abaixo do
             conteudo e sobrava um vazio grande embaixo, que fazia a tela
             parecer inacabada — principalmente pro VISITANTE, que so tem o
             convite de conta acima. */}
         <VStack flex={1} justifyContent="flex-end" mt="$10" alignItems="center" gap="$3">
+          {/* botao-sair-igual (CLI-3, Andre 15/10) e sair-da-conta-acima-dos-termos (24/10): o Sair e o
+              do Partner: texto vermelho, solto, centralizado, sem icone nem caixa, no FIM do Perfil e
+              logo ACIMA de "Termos de uso · Politica de privacidade" (junto dos links, no rodape). */}
+          {isAuthenticated && (
+            <TouchableOpacity
+              onPress={handleLogout}
+              testID="logout"
+              accessibilityRole="button"
+              accessibilityLabel="Sair"
+              style={{ paddingVertical: 4 }}
+            >
+              <Text size="sm" fontWeight="$semibold" color="$brandDanger" textAlign="center">
+                Sair da conta
+              </Text>
+            </TouchableOpacity>
+          )}
           {/* Os mesmos dois links das telas de entrada (termos-no-rodape), mas
               aqui levam as telas de Termos e Privacidade do proprio app: ja
               existem, e abrir o site tiraria a pessoa do app para ler o mesmo
               texto. Um unico "Termos e Privacidade" nao dizia que eram dois. */}
           <LinksLegais aoAbrir={(pagina) => navigation.navigate(pagina === "termos" ? "terms" : "privacy")} />
-          {/* Excluir conta desce pra ca como LINK: e irreversivel, entao nao
-              disputa atencao com o resto — mas continua alcancavel por quem
-              procura (era um botao de mesmo peso que "sair"). */}
-          {isAuthenticated && (
-            <TouchableOpacity onPress={openDeleteAccount} testID="delete-account">
-              <Text size="xs" fontWeight="$semibold" color="$brandDanger">
-                Excluir conta
-              </Text>
-            </TouchableOpacity>
-          )}
           {!isAuthenticated && (
             <VersaoDoApp testID="versao-visitante" />
           )}
         </VStack>
       </VStack>
-
-      <DeleteAccountModal
-        visible={showDelete}
-        isDeleting={isDeleting}
-        error={deleteError}
-        onConfirm={handleDeleteAccount}
-        onClose={() => setShowDelete(false)}
-      />
+      <ReportarProblema visivel={reportando} onFechar={() => setReportando(false)} />
     </ScrollView>
   );
 }

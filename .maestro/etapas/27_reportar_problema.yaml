@@ -1,0 +1,55 @@
+# Reportar problema (sentry-feedback-do-usuario + reportar-problema-cancelar-cortado, André, 24/10):
+# Perfil → Sistema → Reportar problema. O item so existe com o Sentry ligado neste build (DSN no EAS);
+# sem ele, PULA (⏭, nao falha). Com ele: com o TECLADO aberto, o Enviar e o Cancelar continuam a vista
+# (a regressao era o Cancelar cortado e o campo espremido) e o Cancelar fecha sem enviar.
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Perfil"
+    label: "27.01 · toca em Perfil"
+- scrollUntilVisible:
+    element:
+      text: "Reportar problema"
+    optional: true
+    timeout: ${15000 * LENTO}
+    label: "27.02 · rola até Reportar problema (só existe com o Sentry ligado)"
+- runFlow:
+    when:
+      notVisible: "Reportar problema"
+    commands:
+      - evalScript: "${console.log('PULADO-CAMPANHA: o Sentry está desligado neste build (sem EXPO_PUBLIC_SENTRY_DSN)')}"
+    label: "27.03 · sem Sentry: pula"
+- runFlow:
+    when:
+      visible: "Reportar problema"
+    commands:
+      - tapOn:
+          text: "Reportar problema"
+          label: "27.04 · abre o Reportar problema"
+      - assertVisible:
+          id: "reportar-mensagem"
+          label: "27.05 · vê o campo O que aconteceu?"
+      - tapOn:
+          id: "reportar-mensagem"
+          label: "27.06 · toca no campo (abre o teclado)"
+      - inputText:
+          text: "teste da bateria Maestro"
+          label: "27.07 · digita a mensagem"
+      - assertVisible:
+          id: "reportar-cancelar"
+          label: "27.08 · com o teclado aberto, o Cancelar continua a vista"
+      - assertVisible:
+          id: "reportar-enviar"
+          label: "27.09 · e o Enviar também"
+      - tapOn:
+          id: "reportar-cancelar"
+          label: "27.10 · Cancelar fecha sem enviar"
+      - assertNotVisible:
+          id: "reportar-enviar"
+          label: "27.11 · o modal fechou"
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: reportar-problema
+            O_QUE: "Perfil > Sistema > Reportar problema: o campo com altura e, com o teclado aberto, o Enviar e o Cancelar inteiros."
+    label: "27.12 · com Sentry: confere o modal"

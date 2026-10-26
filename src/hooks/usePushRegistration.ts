@@ -8,6 +8,8 @@ import * as SecureStore from "expo-secure-store";
 import {
   acquireExpoPushToken,
   atendimentoParaAvaliar,
+  agendaAbertaDoPush,
+  pagamentoDoPush,
   avisoDoPush,
   ACAO_OK,
   CANAL_ALERTAS,
@@ -20,10 +22,22 @@ import {
 } from "@domain/push";
 import { pushService } from "@services/pushService";
 import { oferecerVezAdiantada } from "@utils/vezAdiantada";
-import { confirmarTrocaPeloPush } from "@utils/trocaPeloPush";
-import { ACAO_AGORA_NAO, ACAO_CONFIRMAR, CATEGORIA_TROCA } from "@domain/trocaPeloPush";
-import { abrirAvaliacao, navigateFromNotification } from "@routes/navigationRef";
+import { responderPeloPush } from "@utils/trocaPeloPush";
+import {
+  ACAO_ACEITAR,
+  ACAO_AGORA_NAO,
+  ACAO_CONFIRMAR,
+  ACAO_MANTER,
+  ACAO_RECUSAR,
+  ACAO_TROCAR,
+  ehAcaoQueResponde,
+  CATEGORIA_ACEITAR_MANTER,
+  CATEGORIA_TROCA,
+  CATEGORIA_TROCAR_RECUSAR,
+} from "@domain/trocaPeloPush";
+import { abrirAvaliacao, abrirLoja, navigateFromNotification } from "@routes/navigationRef";
 import { useAuthStore } from "@stores/authStore";
+import { usePendenciaStore } from "@stores/pendenciaStore";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { PUSH_PERGUNTADO_KEY } from "@hooks/ofertaDePush";
 import { usePushDiagnosticsStore } from "@stores/pushDiagnosticsStore";
@@ -108,6 +122,16 @@ export function usePushRegistration() {
       Notifications.setNotificationCategoryAsync(CATEGORIA_TROCA, [
         { identifier: ACAO_CONFIRMAR, buttonTitle: "CONFIRMAR", options: { opensAppToForeground: true } },
         { identifier: ACAO_AGORA_NAO, buttonTitle: "AGORA NÃO", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+      // push-acoes-por-pergunta + push-resolve-sem-abrir-o-app: a pergunta da tela vira botao e responde
+      // SEM abrir o app (a tarefa em segundo plano chama a API; ver tasks/notificacaoEmSegundoPlano).
+      Notifications.setNotificationCategoryAsync(CATEGORIA_TROCAR_RECUSAR, [
+        { identifier: ACAO_TROCAR, buttonTitle: "Trocar", options: { opensAppToForeground: false } },
+        { identifier: ACAO_RECUSAR, buttonTitle: "Recusar", options: { opensAppToForeground: false } },
+      ]).catch(() => {});
+      Notifications.setNotificationCategoryAsync(CATEGORIA_ACEITAR_MANTER, [
+        { identifier: ACAO_ACEITAR, buttonTitle: "Aceitar", options: { opensAppToForeground: false } },
+        { identifier: ACAO_MANTER, buttonTitle: "Manter", options: { opensAppToForeground: false } },
       ]).catch(() => {});
       for (const c of CATEGORIAS_COM_BOTAO) {
         Notifications.setNotificationCategoryAsync(c.categoria, [
@@ -206,6 +230,21 @@ export function usePushRegistration() {
           return;
         }
         const aviso = avisoDoPush(conteudo);
+        // pagamento-ja-paguei: o profissional recusou o "Já paguei"; o aviso leva ao pagamento.
+        const pagamento = pagamentoDoPush(dados);
+        // pagar-ao-finalizar-corte: o corte foi finalizado com pagamento pendente (PAYMENT_PENDING, categoria
+        // PAGAR) e o app esta aberto: o modal de pagar abre sozinho, sem aviso com OK.
+        if (pagamento && !pagamento.recusado) {
+          usePendenciaStore.getState().pagar(pagamento.attendanceId);
+          return;
+        }
+        if (aviso && pagamento?.recusado) {
+          Alert.alert(aviso.titulo, aviso.mensagem, [
+            { text: "Agora não", style: "cancel" },
+            { text: "Pagar", onPress: () => usePendenciaStore.getState().pagar(pagamento.attendanceId, true) },
+          ]);
+          return;
+        }
         if (aviso) Alert.alert(aviso.titulo, aviso.mensagem, [{ text: "OK" }]);
       });
       return () => sub.remove();
@@ -224,16 +263,32 @@ export function usePushRegistration() {
       if (tratadas.has(id)) return;
       tratadas.add(id);
       // "OK" e "AGORA NÃO" só fecham a notificação — não navegam.
-      if (tocouNoOk(response) || response.actionIdentifier === ACAO_AGORA_NAO) {
+      if (tocouNoOk(response) || response.actionIdentifier === ACAO_AGORA_NAO || response.actionIdentifier === ACAO_MANTER) {
         Notifications.dismissNotificationAsync(id).catch(() => {});
         return;
       }
       const data = response.notification.request.content.data;
       // CONFIRMAR da troca: abre a fila e aceita dali.
-      if (response.actionIdentifier === ACAO_CONFIRMAR) {
+      // Trocar, Aceitar e Recusar (e o CONFIRMAR antigo da oferta) respondem pela API, sem levar o cliente a outra
+      // tela; so o CONFIRMAR antigo abre a fila. A tarefa em segundo plano pode ter respondido antes: uma vez so.
+      if (ehAcaoQueResponde(response.actionIdentifier)) {
         Notifications.dismissNotificationAsync(id).catch(() => {});
-        navigateFromNotification("fila");
-        void confirmarTrocaPeloPush(data);
+        if (response.actionIdentifier === ACAO_CONFIRMAR) navigateFromNotification("fila");
+        void responderPeloPush(id, response.actionIdentifier, data);
+        return;
+      }
+      // AGENDA_OPENED (categoria CIENCIA): o profissional abriu o dia; o toque no corpo leva ao agendamento dele.
+      const agendaAberta = agendaAbertaDoPush(data);
+      if (agendaAberta) {
+        Notifications.dismissNotificationAsync(id).catch(() => {});
+        abrirLoja(agendaAberta.establishmentId, agendaAberta.professionalId);
+        return;
+      }
+      // PAYMENT_REFUSED e PAYMENT_PENDING (categoria PAGAR): o toque, no corpo ou no "Pagar", abre o pagamento.
+      const pagamento = pagamentoDoPush(data);
+      if (pagamento) {
+        Notifications.dismissNotificationAsync(id).catch(() => {});
+        usePendenciaStore.getState().pagar(pagamento.attendanceId, pagamento.recusado);
         return;
       }
       // Concluido (notificacao-avaliar): o toque abre a avaliacao dele.

@@ -4,6 +4,7 @@
 #
 # Uso:  bash .maestro/bateria.sh (chama este setup, roda e restaura). Sozinho,
 #       bash .maestro/setup.sh so prepara o celular.
+#       bash .maestro/setup.sh --publicar-ota  # publica o OTA da dev antes (publicar-ota.sh)
 #
 # Precisa de: celular com "Depuracao USB" ligada, conectado no cabo, com o APK
 # de PREVIEW instalado (com.vupth.client.preview — aponta para o staging).
@@ -14,6 +15,15 @@ API="https://vupth-backend-ia.onrender.com"
 APP_ID="com.vupth.client.preview"
 
 echo "=== VUPTH Client — bateria Maestro (staging) ==="
+
+# maestro-publica-o-ota (22/10): com --publicar-ota o script publica o EAS Update da dev (canal
+# preview) antes de tocar no celular; se o OTA falhar, diz claramente e PARA — o Andre publica a
+# mao (comando no topo do publicar-ota.sh).
+for ARG in "$@"; do
+  if [ "$ARG" = "--publicar-ota" ]; then
+    bash "$(dirname "$0")/publicar-ota.sh" || { echo "ERRO: OTA nao publicado — a bateria parou."; exit 1; }
+  fi
+done
 
 # 1. Celular conectado
 # Com --device na bateria (DEC-33), o ANDROID_SERIAL diz qual aparelho.
@@ -58,7 +68,17 @@ case "${ANDROID_SERIAL:-$DEVICE}" in
       adb shell settings put global "$CHAVE" 0
     done
     adb shell pm disable-user --user 0 com.google.android.googlequicksearchbox >/dev/null 2>&1
-    echo "Emulador: sem animacoes e sem o app Google: OK"
+    # Bateria 25/10 01:28: 10 etapas cairam em "prepara a etapa" (Paste text, DEADLINE_EXCEEDED em 120 s). O
+    # logcat mostra "Unable to freeze binder for <pid>: -11" e "Sending oneway calls to frozen process"
+    # logo antes de "Crash of app dev.mobile.maestro": o congelador de apps do Android (cached apps
+    # freezer) congela o driver do Maestro enquanto o app testado fica na frente, e a instrumentacao cai
+    # (a 2a tentativa cai igual, porque o aparelho segue igual). Desliga o congelador e o modo soneca.
+    # A chave do congelador so vale depois de reiniciar o emulador: se ainda cair, reinicie-o uma vez.
+    adb shell settings put global cached_apps_freezer disabled >/dev/null 2>&1
+    adb shell device_config put activity_manager_native_boot use_freezer false >/dev/null 2>&1
+    adb shell dumpsys deviceidle disable >/dev/null 2>&1
+    adb shell settings put global app_standby_enabled 0 >/dev/null 2>&1
+    echo "Emulador: sem animacoes, sem o app Google e sem o congelador de apps: OK"
     ;;
 esac
 

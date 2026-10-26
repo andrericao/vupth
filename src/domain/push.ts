@@ -33,7 +33,9 @@ export function notificationRoute(data: unknown): RotaDaNotificacao | null {
     type === 'SWAP_OFFERED' ||
     type === 'EARLIER_TURN_OFFERED' ||
     type === 'SWAP_ACCEPTED' ||
-    type === 'SWAP_OFFER_ACCEPTED'
+    type === 'SWAP_OFFER_ACCEPTED' ||
+    // aviso-de-falta-como-atraso (DEC-86): a falta vale como atraso; o cliente segue na fila.
+    type === 'LATE_MARKED'
   ) {
     return 'fila';
   }
@@ -42,8 +44,6 @@ export function notificationRoute(data: unknown): RotaDaNotificacao | null {
     type === 'ATTENDANCE_FINISHED' ||
     type === 'ATTENDANCE_PROMOTED' ||
     type === 'ATTENDANCE_CANCELLED' ||
-    // aviso-de-falta (DEC-83): removido da fila por nao comparecer, com multa.
-    type === 'NO_SHOW_REMOVED' ||
     type.startsWith('CUT_');
   return known ? 'attendances' : null;
 }
@@ -211,9 +211,8 @@ export const CATEGORIAS_COM_BOTAO: { categoria: string; acao: string; titulo: st
   { categoria: 'VER_ATENDIMENTO', acao: 'VER_ATENDIMENTO', titulo: 'Ver atendimento' },
   // notificacao-avaliar (CLI-33): o push de concluido (ATTENDANCE_FINISHED).
   { categoria: 'AVALIAR', acao: 'AVALIAR', titulo: 'Avaliar' },
-  // aviso-de-falta (DEC-83): o push NO_SHOW_REMOVED. Hoje o botao abre a aba
-  // Atendimentos; o Pix da multa vem com o pagar-multa-avulso (contrato do Backend).
-  { categoria: 'PAGAR_MULTA', acao: 'PAGAR_MULTA', titulo: 'Pagar multa' },
+  // pagamento-ja-paguei (24/10): o PAYMENT_REFUSED chega com a categoria PAGAR e abre o pagamento.
+  { categoria: 'PAGAR', acao: 'PAGAR', titulo: 'Pagar' },
 ];
 
 /**
@@ -224,6 +223,31 @@ export function atendimentoParaAvaliar(data: unknown): string | null {
   const d = (data ?? {}) as { type?: unknown; attendanceId?: unknown };
   return d.type === 'ATTENDANCE_FINISHED' && typeof d.attendanceId === 'string' && d.attendanceId
     ? d.attendanceId
+    : null;
+}
+
+/**
+ * O pagamento que o push abre (pagamento-ja-paguei e push-acoes-por-pergunta, 24/10): PAYMENT_REFUSED
+ * (o profissional não confirmou o "Já paguei"; abre com o aviso para conferir) e PAYMENT_PENDING
+ * (categoria PAGAR). O toque, no corpo ou no "Pagar", abre o Pix do atendimento.
+ */
+export function pagamentoDoPush(data: unknown): { attendanceId: string; recusado: boolean } | null {
+  const d = (data ?? {}) as { type?: unknown; attendanceId?: unknown };
+  if (typeof d.attendanceId !== 'string' || !d.attendanceId) return null;
+  if (d.type === 'PAYMENT_REFUSED') return { attendanceId: d.attendanceId, recusado: true };
+  if (d.type === 'PAYMENT_PENDING') return { attendanceId: d.attendanceId, recusado: false };
+  return null;
+}
+
+/**
+ * AGENDA_OPENED (agenda-da-semana-nao-liberada, 24/10, Backend 651514f): o profissional abriu o dia
+ * pedido; o pedido venceu e o toque leva ao agendamento dele (a loja, no profissional).
+ */
+export function agendaAbertaDoPush(data: unknown): { establishmentId: string; professionalId: string } | null {
+  const d = (data ?? {}) as { type?: unknown; establishmentId?: unknown; professionalId?: unknown };
+  if (d.type !== 'AGENDA_OPENED') return null;
+  return typeof d.establishmentId === 'string' && d.establishmentId && typeof d.professionalId === 'string' && d.professionalId
+    ? { establishmentId: d.establishmentId, professionalId: d.professionalId }
     : null;
 }
 

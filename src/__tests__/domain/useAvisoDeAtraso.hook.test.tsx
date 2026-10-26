@@ -46,11 +46,22 @@ describe('useAvisoDeAtraso', () => {
     const [titulo, mensagem, botoes, opcoes] = alerta.mock.calls[0] as [
       string, string, { text: string; onPress?: () => void }[], { cancelable?: boolean },
     ];
-    // Esboço de 26/09: tom positivo e "Adiar minha vez" no mesmo aviso.
-    expect(titulo).toBe('Não se atrase — evite a multa');
-    expect(mensagem).toMatch(/continua na fila/);
-    expect(botoes.map((b) => b.text)).toEqual(['Adiar minha vez', 'Entendi']);
+    // Esboço de 26/09: tom positivo e "Adiar" no mesmo aviso.
+    expect(titulo).toBe('Você trocou de lugar');
+    expect(mensagem).toMatch(/Esteja na loja em até 5 minutos/);
+    expect(botoes.map((b) => b.text)).toEqual(['Adiar', 'Entendi']);
     expect(opcoes.cancelable).toBe(false);
+  });
+
+  // modais-de-alerta (CLI-24): antes da multa o aviso e de atencao; no 3o atraso e de dinheiro, com o selo Multa.
+  it('o tipo do modal: atenção antes da multa, dinheiro no 3º atraso', () => {
+    porNaFila('LATE');
+    renderHook(() => useAvisoDeAtraso());
+    expect((alerta.mock.calls[0][3] as { tipo: string }).tipo).toBe('atencao');
+    alerta.mockClear();
+    useQueueStore.setState({ activeQueue: { ...useQueueStore.getState().activeQueue!, attendanceId: 'a9', lateCount: 3 } as never });
+    renderHook(() => useAvisoDeAtraso());
+    expect(alerta.mock.calls[0][3]).toMatchObject({ cancelable: false, tipo: 'dinheiro', selo: 'Multa' });
   });
 
   it('o toque registra a ciência — e o aviso não volta', async () => {
@@ -88,12 +99,12 @@ describe('useAvisoDeAtraso', () => {
     expect(alerta).toHaveBeenCalledTimes(1);
   });
 
-  it('"Adiar minha vez" registra a ciência e abre o Mudar minha vez da fila', async () => {
+  it('"Adiar" registra a ciência e abre o Mudar minha vez da fila', async () => {
     porNaFila('LATE');
     renderHook(() => useAvisoDeAtraso());
     const [, , botoes] = alerta.mock.calls[0] as [string, string, { text: string; onPress?: () => void }[]];
     await act(async () => {
-      botoes.find((b) => b.text === 'Adiar minha vez')!.onPress!();
+      botoes.find((b) => b.text === 'Adiar')!.onPress!();
     });
     expect(useCienciaStore.getState().ids).toEqual(['a1']);
     expect(mockAbrir).toHaveBeenCalledWith(expect.objectContaining({ professionalId: 'p1', establishmentId: 'e1' }));

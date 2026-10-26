@@ -13,6 +13,8 @@ export interface CreateIntentionRequest {
   // Horário pretendido (ISO-8601). Deve estar no futuro, dentro do expediente e
   // não antes do fim projetado da fila (o backend valida).
   desiredTime: string;
+  // Cupom ativado (Backend 5de02e0): um so por corte; 422 COUPON_NOT_ACTIVE se nao vale.
+  coupon_campaign_id?: string;
 }
 
 export interface UpdateIntentionRequest {

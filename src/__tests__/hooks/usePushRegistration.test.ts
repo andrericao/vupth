@@ -1,3 +1,4 @@
+import { usePendenciaStore } from '@stores/pendenciaStore';
 import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { Alert, Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
@@ -35,13 +36,17 @@ jest.mock('@services/pushService', () => ({
 }));
 const mockOferecer = jest.fn();
 jest.mock('@utils/vezAdiantada', () => ({ oferecerVezAdiantada: (...a: unknown[]) => mockOferecer(...a) }));
-const mockConfirmarTroca = jest.fn();
-jest.mock('@utils/trocaPeloPush', () => ({ confirmarTrocaPeloPush: (...a: unknown[]) => mockConfirmarTroca(...a) }));
+const mockResponder = jest.fn();
+jest.mock('@utils/trocaPeloPush', () => ({
+  responderPeloPush: (...a: unknown[]) => mockResponder(...a),
+}));
 const mockNavigate = jest.fn();
 const mockAbrirAvaliacao = jest.fn();
+const mockAbrirLoja = jest.fn();
 jest.mock('@routes/navigationRef', () => ({
   navigateFromNotification: (...a: unknown[]) => mockNavigate(...a),
   abrirAvaliacao: (...a: unknown[]) => mockAbrirAvaliacao(...a),
+  abrirLoja: (...a: unknown[]) => mockAbrirLoja(...a),
 }));
 
 // O handler do push em primeiro plano e registrado no import do modulo.
@@ -247,6 +252,16 @@ describe('usePushRegistration — com o app aberto', () => {
     expect(alerta).not.toHaveBeenCalled();
   });
 
+  // pagar-ao-finalizar-corte (24/10): o corte finalizado com pagamento pendente abre o modal de pagar, sem aviso.
+  it('PAYMENT_PENDING com o app aberto abre o modal de pagar, sem Alert', () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    renderHook(() => usePushRegistration());
+    recebido?.({ request: { content: { title: 'Pagamento pendente', body: 'R$ 30,00', data: { type: 'PAYMENT_PENDING', attendanceId: 'a9' } } } });
+    expect(usePendenciaStore.getState()).toMatchObject({ pagando: 'a9', recusado: false });
+    expect(alerta).not.toHaveBeenCalled();
+    usePendenciaStore.getState().fechar();
+  });
+
   it('a vez adiantada sem corpo manda texto vazio', () => {
     renderHook(() => usePushRegistration());
     recebido?.({ request: { content: { data: { type: 'EARLIER_TURN_OFFERED', attendanceId: 'a1' } } } });
@@ -297,7 +312,58 @@ describe('usePushRegistration — toque na notificação', () => {
     tocou?.(resposta('n5', 'CONFIRMAR', data));
     expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n5');
     expect(mockNavigate).toHaveBeenCalledWith('fila');
-    expect(mockConfirmarTroca).toHaveBeenCalledWith(data);
+    expect(mockResponder).toHaveBeenCalledWith('n5', 'CONFIRMAR', data);
+  });
+
+  // push-acoes-por-pergunta (24/10, Backend 7584964): a pergunta da tela vira botão.
+  it('as categorias das perguntas: Trocar/Recusar e Aceitar/Manter, nenhum abre o app (push-resolve-sem-abrir-o-app)', () => {
+    renderHook(() => usePushRegistration());
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('TROCAR_RECUSAR', [
+      { identifier: 'TROCAR', buttonTitle: 'Trocar', options: { opensAppToForeground: false } },
+      { identifier: 'RECUSAR', buttonTitle: 'Recusar', options: { opensAppToForeground: false } },
+    ]);
+    expect(n.setNotificationCategoryAsync).toHaveBeenCalledWith('ACEITAR_MANTER', [
+      { identifier: 'ACEITAR', buttonTitle: 'Aceitar', options: { opensAppToForeground: false } },
+      { identifier: 'MANTER', buttonTitle: 'Manter', options: { opensAppToForeground: false } },
+    ]);
+  });
+
+  it('Trocar e Aceitar respondem ali mesmo: aceitam sem navegar', () => {
+    renderHook(() => usePushRegistration());
+    const pedido = { type: 'SWAP_REQUESTED', swapRequestId: 'r1' };
+    tocou?.(resposta('n10', 'TROCAR', pedido));
+    expect(mockResponder).toHaveBeenCalledWith('n10', 'TROCAR', pedido);
+    const adiantada = { type: 'EARLIER_TURN_OFFERED', attendanceId: 'a1' };
+    tocou?.(resposta('n11', 'ACEITAR', adiantada));
+    expect(mockResponder).toHaveBeenCalledWith('n11', 'ACEITAR', adiantada);
+    expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n10');
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('Recusar nega o pedido de troca; Manter só fecha, sem chamar nada', () => {
+    renderHook(() => usePushRegistration());
+    const pedido = { type: 'SWAP_REQUESTED', swapRequestId: 'r1' };
+    tocou?.(resposta('n12', 'RECUSAR', pedido));
+    expect(mockResponder).toHaveBeenCalledWith('n12', 'RECUSAR', pedido);
+    tocou?.(resposta('n13', 'MANTER', { type: 'EARLIER_TURN_OFFERED', attendanceId: 'a1' }));
+    expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n13');
+    expect(mockResponder).toHaveBeenCalledTimes(1);
+  });
+
+  it('AGENDA_OPENED: o toque leva ao agendamento do profissional', () => {
+    renderHook(() => usePushRegistration());
+    tocou?.(resposta('n16', 'default', { type: 'AGENDA_OPENED', establishmentId: 'e1', professionalId: 'p1' }));
+    expect(mockAbrirLoja).toHaveBeenCalledWith('e1', 'p1');
+    expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n16');
+  });
+
+  it('PAYMENT_PENDING e PAYMENT_REFUSED (categoria PAGAR) abrem o pagamento do atendimento', () => {
+    renderHook(() => usePushRegistration());
+    tocou?.(resposta('n14', 'PAGAR', { type: 'PAYMENT_PENDING', attendanceId: 'a9' }));
+    expect(usePendenciaStore.getState()).toMatchObject({ pagando: 'a9', recusado: false });
+    tocou?.(resposta('n15', 'PAGAR', { type: 'PAYMENT_REFUSED', attendanceId: 'a8' }));
+    expect(usePendenciaStore.getState()).toMatchObject({ pagando: 'a8', recusado: true });
+    usePendenciaStore.getState().fechar();
   });
 
   it('AGORA NÃO só fecha a notificação', () => {
@@ -305,7 +371,7 @@ describe('usePushRegistration — toque na notificação', () => {
     tocou?.(resposta('n6', 'AGORA_NAO', { type: 'SWAP_REQUESTED', swapRequestId: 'r1' }));
     expect(n.dismissNotificationAsync).toHaveBeenCalledWith('n6');
     expect(mockNavigate).not.toHaveBeenCalled();
-    expect(mockConfirmarTroca).not.toHaveBeenCalled();
+    expect(mockResponder).not.toHaveBeenCalled();
   });
 
   it('o OK com falha ao fechar não quebra', async () => {

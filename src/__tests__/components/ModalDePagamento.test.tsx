@@ -97,6 +97,12 @@ describe('ModalDePagamento', () => {
     expect(await tela.findByText('R$ 40,00')).toBeTruthy();
     expect(tela.getByText('R$ 5,00')).toBeTruthy();
     expect(tela.getByText('Para: Carlos Lima')).toBeTruthy();
+    // pagar-ao-finalizar-corte (André, 24/10): o Pix e o QR ficam recolhidos; "Já paguei" e "Fechar" a vista
+    expect(tela.queryByTestId('pix-codigo')).toBeNull();
+    expect(tela.queryByTestId('pix-qr')).toBeNull();
+    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(tela.getByTestId('pix-ok')).toBeTruthy();
+    fireEvent.press(tela.getByTestId('pix-dropdown'));
     expect(tela.getByTestId('pix-codigo').props.children).toBe('000201pix');
     expect(tela.getByTestId('pix-qr')).toBeTruthy();
     // politica-de-preco-saiba-mais (DEC-91): o total leva ao artigo do Suporte.
@@ -128,17 +134,75 @@ describe('ModalDePagamento', () => {
     get.mockResolvedValue({ data: { ...PIX, pix_key: 'carlos@barbearia.com' } });
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
+    fireEvent.press(await tela.findByTestId('pix-dropdown'));
     expect(await tela.findByText('carlos@barbearia.com')).toBeTruthy();
     expect(tela.getByTestId('pix-chave')).toBeTruthy();
     expect(tela.getByTestId('pix-qr')).toBeTruthy();
     expect(tela.getByTestId('pix-copiar')).toBeTruthy();
   });
 
-  it('profissional sem Pix cadastrado: o modal não fica (só ele confirma que recebeu)', async () => {
+  // pagar-sempre-disponivel (André, 25/10): a opcao de pagar nunca some.
+  it('sem nenhum Pix (gateway fora e profissional sem chave): o modal FICA, diz que o pagamento é combinado e mantém o Já paguei', async () => {
     get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, pix_copy_paste: null } });
     act(() => usePendenciaStore.getState().pagar('a1'));
-    montar();
-    await waitFor(() => expect(usePendenciaStore.getState().pagando).toBeNull());
+    const tela = montar();
+    expect(await tela.findByTestId('pix-combinado')).toBeTruthy();
+    expect(tela.getByText('Sem Pix cadastrado. O pagamento é combinado com o profissional (dinheiro).')).toBeTruthy();
+    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(tela.getByTestId('pix-ok')).toBeTruthy();
+    expect(tela.queryByTestId('pix-dropdown')).toBeNull();
+    expect(usePendenciaStore.getState().pagando).toBe('a1');
+  });
+
+  // pagar-pix-do-profissional-e-do-gateway (André, 25/10): os DOIS Pix; o do profissional em destaque.
+  it('só a chave Pix do profissional (sem copia-e-cola): a chave fica em destaque, sem drop down, e o Copiar chave copia a chave', async () => {
+    get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, pix_key: 'carlos@barbearia.com', pix_copy_paste: null } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    expect(await tela.findByTestId('pix-profissional')).toBeTruthy();
+    expect(tela.getByTestId('pix-chave').props.children).toBe('carlos@barbearia.com');
+    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(tela.getByTestId('pix-ok')).toBeTruthy();
+    expect(tela.queryByTestId('pix-combinado')).toBeNull();
+    expect(tela.queryByTestId('pix-dropdown')).toBeNull(); // sem gateway nem copia-e-cola, nada a recolher
+    await act(async () => {
+      fireEvent.press(tela.getByTestId('pix-copiar-chave'));
+    });
+    expect(mockCopiar).toHaveBeenCalledWith('carlos@barbearia.com');
+    expect(tela.getByText('Copiada')).toBeTruthy();
+  });
+
+  it('com o gateway E a chave do profissional: os dois; a chave em destaque, o do gateway recolhido no drop down', async () => {
+    get.mockResolvedValue({ data: { ...PIX, pix_key: 'chave@prof.com', gateway: { provider: 'ASAAS', mode: 'REAL', pix_copy_paste: '000201asaas' } } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    // a chave do profissional ja esta a vista; o do gateway, recolhido
+    expect(await tela.findByTestId('pix-chave')).toBeTruthy();
+    expect(tela.getByText('Pix do profissional')).toBeTruthy();
+    expect(tela.queryByTestId('pix-codigo')).toBeNull();
+    expect(tela.getByText('Pix do app (QR e copia e cola)')).toBeTruthy();
+    fireEvent.press(tela.getByTestId('pix-dropdown'));
+    expect(tela.getByTestId('pix-codigo').props.children).toBe('000201asaas');
+    // o Copiar do drop down copia o codigo do gateway; o Copiar chave, a chave
+    await act(async () => {
+      fireEvent.press(tela.getByTestId('pix-copiar'));
+    });
+    expect(mockCopiar).toHaveBeenLastCalledWith('000201asaas');
+    await act(async () => {
+      fireEvent.press(tela.getByTestId('pix-copiar-chave'));
+    });
+    expect(mockCopiar).toHaveBeenLastCalledWith('chave@prof.com');
+    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(tela.getByTestId('pix-ok')).toBeTruthy();
+  });
+
+  it('só o gateway (profissional sem chave): so o drop down, sem o bloco do profissional', async () => {
+    get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, gateway: { provider: 'ASAAS', mode: 'REAL', pix_copy_paste: '000201asaas' } } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    expect(await tela.findByTestId('pix-dropdown')).toBeTruthy();
+    expect(tela.queryByTestId('pix-profissional')).toBeNull();
+    expect(tela.queryByTestId('pix-combinado')).toBeNull();
   });
 
   it('sem serviço/multa/quem/código; copiar falhando não marca', async () => {
@@ -148,10 +212,11 @@ describe('ModalDePagamento', () => {
     const tela = montar();
     expect(await tela.findByText('R$ 10,00')).toBeTruthy();
     expect(tela.queryByText(/^Para:/)).toBeNull();
+    fireEvent.press(tela.getByTestId('pix-dropdown'));
     await act(async () => {
       fireEvent.press(tela.getByTestId('pix-copiar'));
     });
-    expect(tela.getByText('Copiar código Pix')).toBeTruthy();
+    expect(tela.getByText('Copiar')).toBeTruthy();
   });
 
   it('o "Já paguei" sem status na resposta fica aguardando', async () => {
@@ -198,5 +263,123 @@ describe('ModalDePagamento', () => {
     act(() => usePendenciaStore.getState().pagar('a2'));
     montar();
     expect(get).not.toHaveBeenCalled();
+  });
+});
+
+// pagamento-pelo-asaas (DEC-119, Backend dea2d00): com `gateway` o Pix e o do Asaas; sem ele, o de hoje.
+describe('ModalDePagamento — pelo Asaas', () => {
+  const ASAAS = {
+    ...PIX,
+    pix_key: 'chave@prof.com',
+    gateway: { provider: 'ASAAS', mode: 'SANDBOX', status: 'PENDING', pix_copy_paste: '000201asaas' },
+  };
+
+  it('com gateway: mostra o Pix do Asaas (recolhido) e a chave do profissional em destaque, com o "Já paguei" (as duas vias quitam) e a confirmação automática', async () => {
+    get.mockResolvedValue({ data: ASAAS });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    fireEvent.press(await tela.findByTestId('pix-dropdown'));
+    expect(await tela.findByTestId('pix-codigo')).toBeTruthy();
+    expect(tela.getByTestId('pix-codigo').props.children).toBe('000201asaas');
+    expect(tela.getByTestId('pix-chave')).toBeTruthy();
+    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(tela.getByText('A confirmação é automática.')).toBeTruthy();
+    expect(tela.getByTestId('pix-ok')).toBeTruthy();
+  });
+
+  it('sandbox: a faixa "Pagamento de teste" e "Sem dinheiro real."; no modo real, nada disso', async () => {
+    get.mockResolvedValue({ data: ASAAS });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const teste = montar();
+    expect(await teste.findByTestId('pagamento-de-teste')).toBeTruthy();
+    expect(teste.getByText('Pagamento de teste')).toBeTruthy();
+    expect(teste.getByText('Sem dinheiro real.')).toBeTruthy();
+    teste.unmount();
+
+    get.mockResolvedValue({ data: { ...ASAAS, gateway: { ...ASAAS.gateway, mode: 'REAL' } } });
+    const real = montar();
+    fireEvent.press(await real.findByTestId('pix-dropdown'));
+    expect(await real.findByTestId('pix-codigo')).toBeTruthy();
+    expect(real.queryByTestId('pagamento-de-teste')).toBeNull();
+  });
+
+  it('gateway sem o copia-e-cola, só com a imagem do QR: mostra a imagem e o modal não fecha', async () => {
+    get.mockResolvedValue({
+      data: { status: 'PENDING', amount: 45, gateway: { provider: 'ASAAS', mode: 'REAL', pix_qr_image: 'iVBORw0KGgo=' } },
+    });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    fireEvent.press(await tela.findByTestId('pix-dropdown'));
+    const img = await tela.findByTestId('pix-qr-imagem');
+    expect(img.props.source.uri).toBe('data:image/png;base64,iVBORw0KGgo=');
+    expect(tela.queryByTestId('pix-codigo')).toBeNull();
+    expect(usePendenciaStore.getState().pagando).toBe('a1');
+  });
+
+  it('o webhook quita sozinho: o modal confere de 5 em 5 s e mostra "Pago"', async () => {
+    jest.useFakeTimers();
+    try {
+      get.mockResolvedValueOnce({ data: ASAAS }).mockResolvedValue({ data: { ...ASAAS, status: 'PAID' } });
+      act(() => usePendenciaStore.getState().pagar('a1'));
+      const tela = montar();
+      await act(async () => {});
+      expect(tela.getByTestId('pix-status').props.children).toBe('Pagamento pendente');
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+      expect(tela.getByTestId('pix-status').props.children).toBe('Pago');
+      expect(tela.queryByText('A confirmação é automática.')).toBeNull();
+      // o Asaas quitou: o "Já paguei" some
+      expect(tela.queryByTestId('pix-ja-paguei')).toBeNull();
+      get.mockClear();
+      await act(async () => {
+        jest.advanceTimersByTime(15000);
+      });
+      expect(get).not.toHaveBeenCalled();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('o profissional recusa o "Já paguei": o modal confere, volta a pendente e avisa para conferir o pagamento', async () => {
+    jest.useFakeTimers();
+    try {
+      get.mockResolvedValueOnce({ data: PIX }).mockResolvedValue({ data: { ...PIX, status: 'PENDING' } });
+      claim.mockResolvedValue({ data: { status: 'AWAITING_CONFIRMATION' } });
+      act(() => usePendenciaStore.getState().pagar('a1'));
+      const tela = montar();
+      await act(async () => {});
+      await act(async () => {
+        fireEvent.press(tela.getByTestId('pix-ja-paguei'));
+      });
+      expect(tela.queryByTestId('pix-ja-paguei')).toBeNull();
+      expect(tela.queryByTestId('pix-recusado')).toBeNull();
+      await act(async () => {
+        jest.advanceTimersByTime(5000);
+      });
+      expect(tela.getByTestId('pix-recusado')).toBeTruthy();
+      expect(tela.getByText('O profissional não confirmou o pagamento. Confira se ele saiu da sua conta.')).toBeTruthy();
+      expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('aberto pelo push PAYMENT_REFUSED: já mostra o aviso e o "Já paguei"', async () => {
+    get.mockResolvedValue({ data: { ...PIX, status: 'PENDING' } });
+    act(() => usePendenciaStore.getState().pagar('a1', true));
+    const tela = montar();
+    expect(await tela.findByTestId('pix-recusado')).toBeTruthy();
+    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+  });
+
+  it('sem gateway: o fluxo de hoje (chave, "Já paguei")', async () => {
+    get.mockResolvedValue({ data: { ...PIX, pix_key: 'chave@prof.com' } });
+    act(() => usePendenciaStore.getState().pagar('a1'));
+    const tela = montar();
+    expect(await tela.findByTestId('pix-ja-paguei')).toBeTruthy();
+    fireEvent.press(tela.getByTestId('pix-dropdown'));
+    expect(tela.getByTestId('pix-chave')).toBeTruthy();
+    expect(tela.queryByTestId('pagamento-de-teste')).toBeNull();
   });
 });

@@ -1,0 +1,20 @@
+# Etapa avulsa 27 (reportar-problema-cancelar-cortado, 24/10): roda num maestro test proprio.
+# Sem o Sentry neste build o fluxo PULA (a linha PULADO-CAMPANHA faz a bateria escrever ⏭).
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "27"
+      LOJA: "0"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "27.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/27_reportar_problema.yaml
+    label: "27.E1 · roda 27_reportar_problema"

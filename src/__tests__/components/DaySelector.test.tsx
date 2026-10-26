@@ -15,6 +15,14 @@ describe('DaySelector', () => {
     expect(getByText('17')).toBeTruthy();
   });
 
+  it('esconde os dias que o pai manda esconder (agendar-esconde-dias-fechados)', () => {
+    const { queryByText, getByText } = renderWithProviders(
+      <DaySelector selectedDate={null} onSelect={jest.fn()} from={from} count={3} esconder={(d) => d.getDate() === 16} />,
+    );
+    expect(queryByText('16')).toBeNull();
+    expect(getByText('17')).toBeTruthy();
+  });
+
   it('chama onSelect com a data do dia tocado', () => {
     const onSelect = jest.fn();
     const { getByText } = renderWithProviders(

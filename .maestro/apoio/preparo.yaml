@@ -76,13 +76,16 @@ appId: ${APP_ID}
 - runFlow:
     file: fechar_cortina.yaml
     label: "${ETAPA}.P5c · confere que a cortina de notificações está fechada"
-# Mesma abertura da bateria completa (00.05–00.07): sem permissoes, e a caixa
-# do sistema negada enquanto espera.
+# Mesma abertura da bateria completa (00.05–00.07). Localizacao "allow" (bateria
+# 23/10, emulador AOSP Android 36): com "deny" o Maestro nao concede e o sistema
+# abre a caixa Precise/Approximate, que nao fechava (02 a 09 pararam no P0, ~8 min
+# cada). Concedida antes, a caixa nem aparece; nenhuma etapa depende de a
+# localizacao estar negada. pm grant em setup.sh nao vale: o clearState zera.
 - launchApp:
     clearState: true
     # NOTIFICACOES "allow" so na etapa do push (push-na-bateria); as outras negam.
     permissions:
-      location: deny
+      location: allow
       notifications: "${typeof NOTIFICACOES !== 'undefined' && NOTIFICACOES ? NOTIFICACOES : 'deny'}"
     label: "${ETAPA}.P6 · abre o app limpo"
 - runFlow:

@@ -1,4 +1,4 @@
-import { fireEvent, within } from '@testing-library/react-native';
+import { fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { Settings } from '@screens/Settings';
@@ -90,17 +90,16 @@ describe('Perfil — menu em grupos, como o do partner', () => {
     expect(queryByText('Excluir conta')).toBeNull();
   });
 
-  // Guia de texto 4.7: "Deletar" sai do app. O link do Perfil e a página
-  // /excluir-conta (que a loja de apps exige e que ensina o caminho) têm de dizer
-  // a MESMA palavra: quem segue "Perfil → Excluir conta" e acha "Deletar minha
-  // conta" não sabe se chegou no lugar certo.
-  it('LOGADO: o link do fim do Perfil diz "Excluir conta", o nome que a página /excluir-conta cita', () => {
-    const { getByTestId, queryByText } = renderWithProviders(<Settings />);
-    expect(within(getByTestId('delete-account')).getByText('Excluir conta')).toBeTruthy();
+  // Guia de texto 4.7: "Deletar" sai do app. A página /excluir-conta (que a loja de apps
+  // exige e que ensina o caminho) diz o caminho certo: Excluir conta mora em Dados
+  // cadastrais (Andre, 23/10), não mais no fim do Perfil.
+  it('LOGADO: o Perfil só tem o Sair; a página /excluir-conta ensina o caminho por Dados cadastrais', () => {
+    const { queryByTestId, queryByText } = renderWithProviders(<Settings />);
+    expect(queryByTestId('delete-account')).toBeNull();
     expect(queryByText('Deletar minha conta')).toBeNull();
     const doPerfil = COMO_EXCLUIR.filter((s) => s.corpo.includes('Perfil →'));
     expect(doPerfil.length).toBeGreaterThan(0);
-    for (const secao of doPerfil) expect(secao.corpo).toContain('Perfil → Excluir conta');
+    for (const secao of doPerfil) expect(secao.corpo).toContain('Perfil → Dados cadastrais → Excluir conta');
   });
 
   it('mostra os grupos Conta e Sistema', () => {

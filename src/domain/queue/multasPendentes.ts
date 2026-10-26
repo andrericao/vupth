@@ -26,8 +26,28 @@ export function origemDaMulta(m: PendingPenalty): string {
   return [MOTIVO[m.type] ?? 'Multa', quem || null, dataCurta(m.originDate)].filter(Boolean).join(' · ');
 }
 
-/** Servico + multas: o que a pessoa paga no proximo atendimento. */
-export function contaComMultas(servico: number, multas: PendingPenalty[]) {
+/**
+ * Servico + multas: o que a pessoa paga no proximo atendimento. O cupom abate so os
+ * servicos (a multa nunca entra no desconto): total = servicos - cupom + multas.
+ */
+export function contaComMultas(servico: number, multas: PendingPenalty[], desconto = 0) {
   const totalMultas = multas.reduce((t, m) => t + (Number(m.amount) || 0), 0);
-  return { servico, totalMultas, total: servico + totalMultas };
+  const servicoComCupom = Math.max(servico - desconto, 0);
+  return { servico, desconto, servicoComCupom, totalMultas, total: servicoComCupom + totalMultas };
+}
+
+/**
+ * lembrar-multa-pendente-ao-entrar-na-fila (André, 24/10): a cada tentativa de entrar na fila, quem tem
+ * multa pendente (3 atrasos) e lembrado da fatura; ao entrar, o Backend ja cobra a multa no corte novo
+ * (POST /attendances), entao o aviso diz o valor e que ela entra neste corte. Sem multa, nada.
+ */
+export function lembreteDaMulta(multas: PendingPenalty[]): { titulo: string; mensagem: string; continuar: string; cancelar: string } | null {
+  if (multas.length === 0) return null;
+  const { totalMultas } = contaComMultas(0, multas);
+  return {
+    titulo: 'Multa pendente',
+    mensagem: `Você tem ${reais(totalMultas)} em multa. Ela entra no valor deste corte.`,
+    continuar: 'Continuar',
+    cancelar: 'Cancelar',
+  };
 }

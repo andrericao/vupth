@@ -36,8 +36,12 @@ import { usePendingSwapStore } from "@stores/pendingSwapStore";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
-import { contaComMultas, origemDaMulta, reais } from "@domain/queue/multasPendentes";
+import { contaComMultas, lembreteDaMulta, origemDaMulta, reais } from "@domain/queue/multasPendentes";
+import { descontoDoCupom, fimDoErro, mensagemDoCupom } from "@domain/campanhas";
+import { avisoDeFimDaCampanha } from "@utils/avisoDeFimDaCampanha";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
+import { useMeusCupons } from "@hooks/useMeusCupons";
+import { EscolhaDeCupom } from "@components/EscolhaDeCupom";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { usePendenciasAoEscolher } from "@hooks/usePendenciasAoEscolher";
@@ -75,6 +79,9 @@ type RouteParams = {
 
 // Fora do corpo do componente: o relogio so e lido no toque, nunca no render.
 const agora = () => Date.now();
+
+// tema-fixo: branco sobre o resumo forest da escolha, nos dois temas
+const BRANCO_SOBRE_O_RESUMO = "#FFFFFFB3";
 
 export function ServiceSelection() {
   const insets = useSafeAreaInsets();
@@ -164,8 +171,16 @@ export function ServiceSelection() {
     if (semPendencia()) setShowSchedule(true);
   }
   const multas = pendentes?.penalties ?? [];
-  const conta = contaComMultas(totalPrice, multas);
   const [showMultas, setShowMultas] = useState(false);
+  // cupom-em-configuracoes: um cupom ativo por corte, escolhido aqui. O que saiu
+  // da lista (usado, vencido) deixa de valer sem a pessoa ter de desmarcar.
+  const cuponsAtivos = useMeusCupons();
+  const [cupomEscolhido, setCupomEscolhido] = useState<string | null>(null);
+  const cupomId = cuponsAtivos.some((c) => c.id === cupomEscolhido) ? cupomEscolhido : null;
+  // cupom-abate-no-resumo (André, 24/10): o cupom abate so os servicos; a multa nunca entra
+  // no desconto. O botao usa servicos - cupom + multa.
+  const desconto = descontoDoCupom(cuponsAtivos.find((c) => c.id === cupomId), totalPrice);
+  const conta = contaComMultas(totalPrice, multas, desconto);
   const totalMinutes = selectedServices.reduce(
     (sum, s) => sum + duracaoDoServico(s),
     0,
@@ -186,6 +201,7 @@ export function ServiceSelection() {
       estimatedWaitMinutes,
       serviceItemIds: selectedIds,
       ...(targetTime ? { targetTime } : {}),
+      ...(cupomId ? { couponCampaignId: cupomId } : {}),
     };
     if (!isAuthenticated) {
       navigation.navigate("login", { redirectTo: "queueStatus", ...payload });
@@ -196,9 +212,23 @@ export function ServiceSelection() {
 
   function handleConfirm() {
     if (!semPendencia()) return;
+    // lembrar-multa-pendente-ao-entrar-na-fila (André, 24/10): a cada tentativa, quem tem multa pendente e lembrado
+    // da fatura antes de seguir; Cancelar nao entra. A multa e cobrada no corte novo pelo Backend.
+    const lembrete = lembreteDaMulta(multas);
+    if (lembrete) {
+      alertaTipado(lembrete.titulo, lembrete.mensagem, [
+        { text: lembrete.cancelar, style: "cancel" },
+        { text: lembrete.continuar, onPress: () => avisarChegadaEEntrar() },
+      ], { tipo: "dinheiro", selo: "Multa", cancelable: false });
+      return;
+    }
+    avisarChegadaEEntrar();
+  }
+
+  function avisarChegadaEEntrar() {
     // aviso-de-chegada-na-entrada (André, 22/10): com menos de 1 h de espera, um
     // aviso diz até que horas estar na loja; Cancelar não entra na fila.
-    const aviso = avisoDeChegada(estimatedWaitMinutes, agora());
+    const aviso = avisoDeChegada(estimatedWaitMinutes, agora(), { filaLivre: estimatedWaitMinutes <= 0 });
     if (!aviso) {
       goToQueue();
       return;
@@ -296,6 +326,9 @@ export function ServiceSelection() {
           establishmentId,
           serviceItemIds: selectedIds,
           ...(horario ? { desiredTime: comFuso(horario) } : {}),
+          // cupom-ativado-nao-computado (24/10): o pedido de corte tambem leva o cupom do toggle; antes so a
+          // fila e o agendar o enviavam e o corte saia sem desconto.
+          ...(cupomId ? { coupon_campaign_id: cupomId } : {}),
         },
         accessToken,
       );
@@ -316,6 +349,19 @@ export function ServiceSelection() {
         return;
       }
       const code = error.response?.data?.code;
+      // Cupom que nao vale mais (422 COUPON_NOT_ACTIVE): o pedido nao saiu; o cupom sai da escolha e o aviso diz por que.
+      if (code === "COUPON_NOT_ACTIVE") {
+        setCupomEscolhido(null);
+        Alert.alert("Cupom", mensagemDoCupom(error));
+        return;
+      }
+      // Promocao que acabou (409 CAMPAIGN_ENDED / CAMPAIGN_SOLD_OUT): o modal certo e o cupom sai da escolha.
+      const fim = fimDoErro(error);
+      if (fim) {
+        setCupomEscolhido(null);
+        avisoDeFimDaCampanha(fim);
+        return;
+      }
       const msg = error.response?.data?.fieldErrors?.desiredTime
         ? "Esse horário já passou. Escolha outro."
         : code === "PROFESSIONAL_AGENDA_ONLY"
@@ -359,7 +405,7 @@ export function ServiceSelection() {
     swap: {
       key: "swap",
       icon: Repeat2,
-      title: isPublishingSwap ? "Publicando..." : "Entrar por troca",
+      title: "Entrar por troca",
       description: "Alguém que já está na fila pode ceder o lugar para você — sem custo.",
       disabled: isPublishingSwap,
       onPress: handleRequestSwap,
@@ -528,6 +574,32 @@ export function ServiceSelection() {
                     </Text>
                   </HStack>
                 )}
+                {/* cupom-abate-no-resumo: o total dos servicos SEM a multa; com o cupom ligado, o valor
+                    cheio riscado e, abaixo, "Valor com cupom". */}
+                <HStack justifyContent="space-between" alignItems="center" testID="total-dos-servicos">
+                  <Text size="sm" color={BRANCO_SOBRE_O_RESUMO}>
+                    Total dos serviços
+                  </Text>
+                  <Text
+                    fontFamily="$heading"
+                    fontSize="$sm"
+                    color="$brandGreen"
+                    textDecorationLine={desconto > 0 ? "line-through" : "none"}
+                    testID="servicos-valor-cheio"
+                  >
+                    {formatarReais(totalPrice)}
+                  </Text>
+                </HStack>
+                {desconto > 0 && (
+                  <HStack justifyContent="space-between" alignItems="center" testID="valor-com-cupom">
+                    <Text size="sm" color={BRANCO_SOBRE_O_RESUMO}>
+                      Valor com cupom
+                    </Text>
+                    <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">
+                      {formatarReais(conta.servicoComCupom)}
+                    </Text>
+                  </HStack>
+                )}
                 {/* DEC-1 (Andre, 01/10): a multa nao aparece na escolha — so no
                     total, numa linha somada ao valor, com o link para a explicacao
                     (cada multa: motivo, quem, quando). Nem a regra da saida
@@ -542,16 +614,20 @@ export function ServiceSelection() {
                     <Text fontFamily="$heading" fontSize="$sm" color="$brandGreen">+ {reais(conta.totalMultas)}</Text>
                   </HStack>
                 )}
-                {/* politica-de-preco-saiba-mais (DEC-91, Andre 18/10): o preco que
-                    aparece nos botoes ja inclui a taxa de pagamento, que varia por
-                    faixa. O "Saiba mais" abre o artigo do Suporte (DEC-96). */}
+                {/* detalhes-do-pagamento (André, 24/10): o rotulo e "Detalhes do pagamento"; o
+                    "Saiba mais" explica a taxa e que abatimento em multa nao conta em campanha,
+                    com o artigo do Suporte (DEC-96) a um toque. */}
                 <HStack justifyContent="space-between" alignItems="center" gap="$3" testID="preco-explicacao">
                   <Text size="xs" color="#FFFFFFB3" flex={1}>
-                    O preço inclui a taxa de pagamento.
+                    Detalhes do pagamento
                   </Text>
-                  <SaibaMaisDoPreco color="$brandGreen" />
+                  <SaibaMaisDoPreco color="$brandGreen" detalhado />
                 </HStack>
               </VStack>
+            )}
+            {/* cupom-abate-no-resumo: o toggle "usar cupom" logo abaixo do card verde. */}
+            {selectedIds.length > 0 && (
+              <EscolhaDeCupom cupons={cuponsAtivos} escolhido={cupomId} onEscolher={setCupomEscolhido} />
             )}
           </ScrollView>
 
@@ -638,7 +714,10 @@ export function ServiceSelection() {
         establishmentId={establishmentId}
         serviceItemIds={selectedIds}
         minutosDoServico={totalMinutes}
+        couponCampaignId={cupomId}
+        onCupomInvalido={() => setCupomEscolhido(null)}
         onPrecisaLogin={goToLoginAndComeBack}
+        onSolicitar={handleRequestCut}
         onAgendado={() => navigation.navigate("home", undefined, { pop: true })}
       />
       <ScheduleModal

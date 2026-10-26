@@ -4,10 +4,10 @@ import { VStack, HStack, Box, Text, Heading, Spinner } from "@gluestack-ui/theme
 
 import { Button } from "@components/Button";
 import { DaySelector } from "@components/DaySelector";
-import { floatingShadow } from "@utils/styles";
-import { horariosDoDia, mensagemDoAgendamento, AgendaPublica } from "@domain/schedule/encaixe";
+import { CaixaDeModal } from "@components/CaixaDeModal";
+import { horariosDoDia, mensagemDoAgendamento, situacaoDoDia, AgendaPublica } from "@domain/schedule/encaixe";
 import { formatClockTime } from "@domain/queue/types";
-import { HorariosDaLoja } from "@domain/establishment/horarios";
+import { HorariosDaLoja, horarioDeHoje } from "@domain/establishment/horarios";
 import { intentionsService } from "@services/intentionsService";
 import { establishmentService } from "@services/establishmentService";
 import { useAuthStore } from "@stores/authStore";
@@ -16,6 +16,8 @@ import { usePendenciaStore } from "@stores/pendenciaStore";
 import { useTema } from "@hooks/useTema";
 import { avisoDeChegada } from "@domain/queue/avisoDeChegada";
 import { alertaTipado } from "@utils/alertaTipado";
+import { mensagemDoCupom } from "@domain/campanhas";
+import { usePagamentoAdiantado, AVISO_DE_PAGAMENTO_ADIANTADO } from "@hooks/usePagamentoAdiantado";
 
 type Props = {
   visible: boolean;
@@ -28,12 +30,20 @@ type Props = {
   /** Visitante: o agendar passa pelo login (a selecao volta com ele). */
   onPrecisaLogin?: () => void;
   onAgendado?: () => void;
+  /** Cupom escolhido (cupom-em-configuracoes) e o aviso quando ele nao vale mais. */
+  couponCampaignId?: string | null;
+  onCupomInvalido?: () => void;
   /**
    * Pedido de corte com dia e horario (S26, Backend 36c4359): a mesma barra de
    * encaixe, mas quem confirma e o dono da tela — o modal so devolve o horario.
    * Com ele, o modal tambem oferece "Assim que abrir" (sem horario).
    */
   corte?: { onEscolher: (horario: Date | null) => void };
+  /**
+   * agenda-da-semana-nao-liberada (24/10): dia em que a loja abre mas o profissional nao liberou a
+   * agenda: em vez de agendar, o cliente SOLICITA (o dono da tela envia o pedido com dia e horario).
+   */
+  onSolicitar?: (horario: Date) => void;
 };
 
 // Relógio fora do componente (regra de pureza do React): o aviso de chegada lê o agora.
@@ -44,10 +54,11 @@ const relogio = () => Date.now();
 // incluir essa funcionalidade"). Os horarios vem da agenda publica do
 // profissional (piso da fila e reservados, anonimos) e do horario da loja.
 export function ScheduleModal({
-  visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado, corte,
+  visible, onClose, professionalId, establishmentId, serviceItemIds = [], minutosDoServico = 30, onPrecisaLogin, onAgendado, corte, couponCampaignId, onCupomInvalido, onSolicitar,
 }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
-  const { cores, veu } = useTema();
+  const adiantado = usePagamentoAdiantado(visible && !corte);
+  const { cores } = useTema();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [horario, setHorario] = useState<Date | null>(null);
   const [agenda, setAgenda] = useState<AgendaPublica | null>(null);
@@ -85,8 +96,21 @@ export function ScheduleModal({
     ? horariosDoDia({ dia: selectedDate, agoraMs: agora, horarios: horariosDaLoja, agenda, minutosDoServico })
     : null;
 
+  // agenda-da-semana-nao-liberada: a loja abre e o profissional nao liberou o dia = Solicitar.
+  const solicitar = !corte && !!onSolicitar && selectedDate != null && situacaoDoDia(agenda, selectedDate) === "solicitar";
+
   async function confirmar() {
     if (!horario || !professionalId) return;
+    if (solicitar) {
+      if (!accessToken) {
+        close();
+        onPrecisaLogin?.();
+        return;
+      }
+      close();
+      onSolicitar?.(horario);
+      return;
+    }
     if (corte) {
       close();
       corte.onEscolher(horario);
@@ -115,7 +139,12 @@ export function ScheduleModal({
     setEnviando(true);
     try {
       await intentionsService.create(
-        { professionalId, serviceItemIds, desiredTime: horario.toISOString() },
+        {
+          professionalId,
+          serviceItemIds,
+          desiredTime: horario.toISOString(),
+          ...(couponCampaignId ? { coupon_campaign_id: couponCampaignId } : {}),
+        },
         accessToken,
       );
       const quando = `${String(horario.getDate()).padStart(2, "0")}/${String(horario.getMonth() + 1).padStart(2, "0")} às ${formatClockTime(horario)}`;
@@ -130,111 +159,118 @@ export function ScheduleModal({
         usePendenciaStore.getState().avisar(pendencias);
         return;
       }
+      if (error?.response?.data?.code === "COUPON_NOT_ACTIVE") {
+        close();
+        onCupomInvalido?.();
+        Alert.alert("Cupom", mensagemDoCupom(error));
+        return;
+      }
       Alert.alert("Não foi possível agendar", mensagemDoAgendamento(error?.response?.status, error?.response?.data?.code));
     } finally {
       setEnviando(false);
     }
   }
 
+  const rodape = (
+    <VStack gap="$3" testID="agenda-rodape">
+      {/* O rotulo nao vira "Agendando..." (guia de texto, regra 6): o botao
+          desabilitado com o spinner ja diz que esta enviando. */}
+      <Button
+        title={corte ? "Pedir" : solicitar ? "Solicitar" : "Agendar"}
+        isLoading={enviando}
+        isDisabled={horario == null || enviando}
+        opacity={horario == null ? 0.5 : 1}
+        onPress={confirmar}
+        testID="confirmar-agendamento"
+      />
+      <Button title="Cancelar" variant="outline" onPress={close} />
+    </VStack>
+  );
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg={veu} justifyContent="center" px={24} py={24}>
-        {/* cancelar-cortado-no-solicitar (CLI, Andre 18/10, o mesmo defeito do
-            cancelar-fora-da-caixa de 11/10 de volta): a rolagem envolvia TUDO,
-            entao com tela pequena ou fonte ampliada o "Cancelar" ficava abaixo da
-            dobra, cortado na borda da caixa, sem nada avisando que dava para
-            rolar. Agora so o miolo (titulo, dias, horarios) rola; os botoes ficam
-            no rodape da caixa e aparecem sempre.
-            A altura maxima e relativa ao espaco que o Modal realmente tem (100% do
-            contêiner), nao a 90% da altura da janela: no Android com barras do
-            sistema o Modal e menor que a janela e a caixa passava da tela. Altura
-            cravada nunca: o app honra o ajuste de fonte do aparelho (DS4). */}
-        <VStack bg="$painel" borderRadius="$card" style={[floatingShadow, { maxHeight: "100%" }]} testID="agenda-caixa">
-          <ScrollView
-            style={{ flexShrink: 1 }}
-            contentContainerStyle={{ padding: 24, paddingBottom: 8 }}
-            showsVerticalScrollIndicator={false}
-            testID="agenda-rolagem"
-          >
-          <Heading fontFamily="$heading" fontSize="$lg">
-            {corte ? "Pedir corte" : "Agendar"}
-          </Heading>
-          <Text size="sm" color="$brandTextSecondary" mt="$1">
-            {corte
-              ? "O profissional responde em 5 min."
-              : "Escolha o dia e o horário."}
+      <CaixaDeModal testID="agenda-caixa" rolagemTestID="agenda-rolagem" rodapeTestID="agenda-rodape-caixa" rodape={rodape}>
+        <Heading fontFamily="$heading" fontSize="$lg">
+          {corte ? "Pedir corte" : "Agendar"}
+        </Heading>
+        <Text size="sm" color="$brandTextSecondary" mt="$1">
+          {corte
+            ? "O profissional responde em 5 min."
+            : "Escolha o dia e o horário."}
+        </Text>
+        {/* agendar-com-pagamento-adiantado (DEC-105/115): 3 faltas — o motivo em uma linha; agendar segue livre. */}
+        {!corte && adiantado && (
+          <Text size="sm" color="$brandDanger" mt="$2" testID="pagamento-adiantado">
+            {AVISO_DE_PAGAMENTO_ADIANTADO}
           </Text>
+        )}
 
-          {corte && (
-            <Button
-              title="Assim que abrir"
-              variant="outline"
-              mt="$4"
-              onPress={() => {
-                close();
-                corte.onEscolher(null);
-              }}
-              testID="corte-assim-que-abrir"
-            />
-          )}
+        {corte && (
+          <Button
+            title="Assim que abrir"
+            variant="outline"
+            mt="$4"
+            onPress={() => {
+              close();
+              corte.onEscolher(null);
+            }}
+            testID="corte-assim-que-abrir"
+          />
+        )}
 
-          <Box mt="$5">
-            <DaySelector
-              selectedDate={selectedDate}
-              onSelect={(d) => {
-                setSelectedDate(d);
-                setHorario(null);
-              }}
-            />
+        <Box mt="$5">
+          <DaySelector
+            selectedDate={selectedDate}
+            esconder={(d) => {
+              // Com o campo do Backend (481c56c): store_open=false esconde; sem ele, o horario da loja.
+              const situacao = situacaoDoDia(agenda, d);
+              return situacao != null ? situacao === "fechado" : horarioDeHoje(horariosDaLoja, d)?.closed === true;
+            }}
+            onSelect={(d) => {
+              setSelectedDate(d);
+              setHorario(null);
+            }}
+          />
+        </Box>
+
+        {solicitar && (
+          <Text size="sm" color="$brandTextSecondary" mt="$4" testID="agenda-nao-liberada">
+            O profissional ainda não liberou este dia. Escolha um horário e solicite; ele responde por aqui.
+          </Text>
+        )}
+
+        {selectedDate != null && (
+          <Box mt="$4" testID="barra-de-encaixe">
+            {!doDia ? (
+              <HStack gap="$2" alignItems="center">
+                <Spinner color={cores.textPrimary} />
+                <Text size="sm" color="$brandTextSecondary">Buscando horários...</Text>
+              </HStack>
+            ) : doDia.tipo === "livres" ? (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                {doDia.horarios.map((h) => {
+                  const ativo = horario?.getTime() === h.getTime();
+                  return (
+                    <TouchableOpacity key={h.getTime()} onPress={() => setHorario(h)} testID={`horario-${formatClockTime(h)}`}>
+                      <Box bg={ativo ? "$selecionado" : "$sobrePainel"} borderRadius="$full" px={14} py={8}>
+                        <Text fontWeight="$bold" color={ativo ? "$onSelecionado" : "$brandTextPrimary"}>{formatClockTime(h)}</Text>
+                      </Box>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            ) : (
+              <Text size="sm" color="$brandTextSecondary" testID="sem-horario">
+                {doDia.tipo === "fechada"
+                  ? "A loja não abre neste dia."
+                  : doDia.tipo === "cheio"
+                    ? "Não há horário livre para este serviço neste dia."
+                    : "A loja ainda não informou o horário deste dia."}
+              </Text>
+            )}
           </Box>
-
-          {selectedDate != null && (
-            <Box mt="$4" testID="barra-de-encaixe">
-              {!doDia ? (
-                <HStack gap="$2" alignItems="center">
-                  <Spinner color={cores.textPrimary} />
-                  <Text size="sm" color="$brandTextSecondary">Buscando horários...</Text>
-                </HStack>
-              ) : doDia.tipo === "livres" ? (
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-                  {doDia.horarios.map((h) => {
-                    const ativo = horario?.getTime() === h.getTime();
-                    return (
-                      <TouchableOpacity key={h.getTime()} onPress={() => setHorario(h)} testID={`horario-${formatClockTime(h)}`}>
-                        <Box bg={ativo ? "$selecionado" : "$sobrePainel"} borderRadius="$full" px={14} py={8}>
-                          <Text fontWeight="$bold" color={ativo ? "$onSelecionado" : "$brandTextPrimary"}>{formatClockTime(h)}</Text>
-                        </Box>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              ) : (
-                <Text size="sm" color="$brandTextSecondary" testID="sem-horario">
-                  {doDia.tipo === "fechada"
-                    ? "A loja não abre neste dia."
-                    : doDia.tipo === "cheio"
-                      ? "Não há horário livre para este serviço neste dia."
-                      : "A loja ainda não informou o horário deste dia."}
-                </Text>
-              )}
-            </Box>
-          )}
-          </ScrollView>
-          <VStack px={24} pt="$3" pb={24} gap="$3" testID="agenda-rodape">
-            {/* O rotulo nao vira "Agendando..." (guia de texto, regra 6): o botao
-                desabilitado com o spinner ja diz que esta enviando. */}
-            <Button
-              title={corte ? "Pedir" : "Agendar"}
-              isLoading={enviando}
-              isDisabled={horario == null || enviando}
-              opacity={horario == null ? 0.5 : 1}
-              onPress={confirmar}
-              testID="confirmar-agendamento"
-            />
-            <Button title="Cancelar" variant="outline" onPress={close} />
-          </VStack>
-        </VStack>
-      </Box>
+        )}
+      </CaixaDeModal>
     </Modal>
   );
 }

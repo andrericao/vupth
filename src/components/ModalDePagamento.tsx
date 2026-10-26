@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
-import { Animated, Modal, Pressable, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Image, Modal, Pressable, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, X } from "lucide-react-native";
+import { Check, ChevronDown, ChevronUp, X } from "lucide-react-native";
 import QRCode from "react-native-qrcode-svg";
 
 import {
   Pagamento,
   avisoDaPendencia,
+  pixDoPagamento,
   podeAvisarQuePagou,
   reais,
   textoDoStatus,
@@ -21,6 +22,9 @@ import { movimentoReduzido } from "@utils/motion";
 import { FaixaESelo } from "@components/FaixaESelo";
 import { SaibaMaisDoPreco } from "@components/SaibaMaisDoPreco";
 import { useTema } from "@hooks/useTema";
+
+// tema-fixo: o leitor do banco nao le o codigo invertido; o QR e branco nos dois temas.
+const FUNDO_DO_QR = "#FFFFFF";
 
 function Botao({ titulo, onPress, claro, testID, desligado, feito }: {
   titulo: string; onPress: () => void; claro?: boolean; testID: string; desligado?: boolean; feito?: boolean;
@@ -101,6 +105,7 @@ export function ModalDePagamento() {
   const aviso = usePendenciaStore((s) => s.aviso);
   const pagando = usePendenciaStore((s) => s.pagando);
   const pagar = usePendenciaStore((s) => s.pagar);
+  const recusadoPeloPush = usePendenciaStore((s) => s.recusado);
   const fechar = usePendenciaStore((s) => s.fechar);
   const accessToken = useAuthStore((s) => s.accessToken);
   const queryClient = useQueryClient();
@@ -109,6 +114,13 @@ export function ModalDePagamento() {
   const [erro, setErro] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  const [chaveCopiada, setChaveCopiada] = useState(false);
+  // pagar-ao-finalizar-corte (André, 24/10): o Pix e o QR Code ficam recolhidos num drop down; "Já paguei" e "Fechar" ficam a vista.
+  const [pixAberto, setPixAberto] = useState(false);
+  // pagamento-ja-paguei: o profissional recusou (AWAITING_CONFIRMATION voltou a PENDING).
+  const [recusadoAoVivo, setRecusadoAoVivo] = useState(false);
+  const statusAnterior = useRef<string | null>(null);
+  const recusado = recusadoPeloPush || recusadoAoVivo;
 
   useEffect(() => {
     if (!pagando || !accessToken) return;
@@ -122,15 +134,41 @@ export function ModalDePagamento() {
       setPagamento(null);
       setErro(false);
       setCopiado(false);
+      setChaveCopiada(false);
+      setPixAberto(false);
+      setRecusadoAoVivo(false);
+      statusAnterior.current = null;
     };
   }, [pagando, accessToken]);
 
-  // pix-do-profissional-ao-concluir (André, 22/10): profissional sem Pix cadastrado
-  // = sem modal de pagamento; só ele confirma que recebeu. Nunca a chave do dono.
-  const semPix = !!pagamento && !pagamento.pix_copy_paste && podeAvisarQuePagou(pagamento.status);
+  // pagar-sempre-disponivel (André, 25/10): a opcao de pagar NUNCA some. O gateway pode cair e o profissional
+  // pode receber em dinheiro ou no Pix pessoal. E pagar-pix-do-profissional-e-do-gateway (André, 25/10): os DOIS
+  // Pix, quando existirem: o do profissional (a chave, com "Copiar chave", nunca a do dono) em DESTAQUE; o do
+  // gateway (QR e copia e cola) com menos destaque, num drop down recolhido. "Já paguei" e "Fechar" sempre a
+  // vista. Sem nenhum Pix, o texto diz que o pagamento e combinado com o profissional.
+  // pagamento-pelo-asaas (DEC-119): com `gateway`, o QR e o copia e cola sao os do Asaas.
+  const pix = pixDoPagamento(pagamento);
+  const chave = pagamento?.pix_key || null;
+  const temPix = !!(pix.codigo || pix.qrImagem || chave);
+
+  // pagamento-ja-paguei: o Asaas (webhook) e o profissional ("recebi" ou recusa) mudam o status por
+  // fora; o modal confere de tempos em tempos ate o "Pago". Sem Asaas, so enquanto espera o profissional.
+  const aguardandoWebhook = pagamento != null && pagamento.status !== "PAID" && (pix.viaAsaas || pagamento.status === "AWAITING_CONFIRMATION");
   useEffect(() => {
-    if (pagando && semPix) fechar();
-  }, [pagando, semPix, fechar]);
+    if (!pagando || !accessToken || !aguardandoWebhook) return;
+    const id = setInterval(() => {
+      paymentService
+        .get(pagando, accessToken)
+        .then((r) => {
+          if (statusAnterior.current === "AWAITING_CONFIRMATION" && r.data?.status === "PENDING") setRecusadoAoVivo(true);
+          statusAnterior.current = r.data?.status ?? null;
+          setPagamento(r.data);
+          if (r.data?.status === "PAID") queryClient.invalidateQueries({ queryKey: CHAVE_PENDENTES });
+        })
+        .catch(() => {});
+    }, 5000);
+    return () => clearInterval(id);
+  }, [pagando, accessToken, aguardandoWebhook, queryClient]);
 
   if (!aviso && !pagando) return null;
 
@@ -139,6 +177,8 @@ export function ModalDePagamento() {
     setEnviando(true);
     try {
       const { data } = await paymentService.claim(pagando, accessToken);
+      setRecusadoAoVivo(false);
+      statusAnterior.current = data?.status ?? "AWAITING_CONFIRMATION";
       setPagamento((p) => ({ ...(p ?? data), ...data, status: data?.status ?? "AWAITING_CONFIRMATION" }));
       queryClient.invalidateQueries({ queryKey: CHAVE_PENDENTES });
     } catch {
@@ -149,7 +189,11 @@ export function ModalDePagamento() {
   }
 
   async function copiar() {
-    if (pagamento?.pix_copy_paste && (await copiarTexto(pagamento.pix_copy_paste))) setCopiado(true);
+    if (pix.codigo && (await copiarTexto(pix.codigo))) setCopiado(true);
+  }
+
+  async function copiarChave() {
+    if (chave && (await copiarTexto(chave))) setChaveCopiada(true);
   }
 
   const texto = aviso ? avisoDaPendencia(aviso) : null;
@@ -190,6 +234,13 @@ export function ModalDePagamento() {
             <Text style={{ color: cores.textSecondary, fontSize: fs(14) }}>Carregando...</Text>
           ) : (
             <>
+              {/* pagamento-pelo-asaas: no sandbox nao ha dinheiro real, e a faixa diz isso antes do resto. */}
+              {pix.teste ? (
+                <View testID="pagamento-de-teste" style={{ gap: 6 }}>
+                  <FaixaESelo tipo="atencao" selo="Pagamento de teste" />
+                  <Text style={{ color: cores.textSecondary, fontSize: fs(13) }}>Sem dinheiro real.</Text>
+                </View>
+              ) : null}
               <Text testID="pix-status" style={{ color: cores.textPrimary, fontSize: fs(14), fontWeight: "600" }}>
                 {textoDoStatus(pagamento.status)}
               </Text>
@@ -203,32 +254,84 @@ export function ModalDePagamento() {
               {pagamento.holder_name ? (
                 <Text style={{ color: cores.textSecondary, fontSize: fs(13) }}>Para: {pagamento.holder_name}</Text>
               ) : null}
-              {pagamento.pix_copy_paste && podeAvisarQuePagou(pagamento.status) ? (
-                <>
-                  {/* pagamento-no-concluido (DEC-78): o QR em cima do copiar. */}
-                  <View style={{ alignItems: "center" }} testID="pix-qr">
-                    {/* tema-fixo: QR escuro sobre branco nos dois temas; o leitor do banco nao le o codigo invertido */}
-                    <QRCode value={pagamento.pix_copy_paste} size={180} color={cores.forest} backgroundColor="#FFFFFF" />
-                  </View>
-                  {pagamento.pix_key ? (
-                    <View testID="pix-chave" style={{ gap: 2 }}>
-                      <Text style={{ color: cores.textSecondary, fontSize: fs(12) }}>Chave Pix</Text>
-                      <Text selectable style={{ color: cores.textPrimary, fontSize: fs(15), fontWeight: "600" }}>
-                        {pagamento.pix_key}
-                      </Text>
-                    </View>
-                  ) : null}
-                  <Text selectable numberOfLines={3} testID="pix-codigo" style={{ color: cores.textPrimary, fontSize: fs(12), backgroundColor: cores.sobrePainel, borderRadius: 10, padding: 10 }}>
-                    {pagamento.pix_copy_paste}
+              {/* O Pix do profissional, em destaque: a chave em texto e o Copiar chave. */}
+              {chave && podeAvisarQuePagou(pagamento.status) ? (
+                <View
+                  testID="pix-profissional"
+                  style={{ gap: 8, backgroundColor: cores.sobrePainel, borderRadius: 14, padding: 14 }}
+                >
+                  <Text style={{ color: cores.textSecondary, fontSize: fs(12) }}>Pix do profissional</Text>
+                  <Text selectable testID="pix-chave" style={{ color: cores.textPrimary, fontSize: fs(16), fontWeight: "700" }}>
+                    {chave}
                   </Text>
-                  <Botao titulo={copiado ? "Copiado" : "Copiar código Pix"} claro feito={copiado} testID="pix-copiar" onPress={copiar} />
+                  <Botao titulo={chaveCopiada ? "Copiada" : "Copiar chave"} feito={chaveCopiada} testID="pix-copiar-chave" onPress={copiarChave} />
+                </View>
+              ) : null}
+              {/* O Pix do gateway (ou o copia e cola), com menos destaque: recolhido num drop down. */}
+              {(pix.codigo || pix.qrImagem) && podeAvisarQuePagou(pagamento.status) ? (
+                <>
+                  <Pressable
+                    onPress={() => setPixAberto((v) => !v)}
+                    accessibilityRole="button"
+                    accessibilityState={{ expanded: pixAberto }}
+                    testID="pix-dropdown"
+                    style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8 }}
+                  >
+                    <Text style={{ color: cores.textPrimary, fontFamily: "Inter_600SemiBold", fontSize: fs(14) }}>
+                      {pix.viaAsaas ? "Pix do app (QR e copia e cola)" : "Pix e QR Code"}
+                    </Text>
+                    {pixAberto ? <ChevronUp size={18} color={cores.textPrimary} /> : <ChevronDown size={18} color={cores.textPrimary} />}
+                  </Pressable>
+                  {pixAberto ? (
+                    <>
+                      {/* pagamento-no-concluido (DEC-78): o QR em cima do copiar. */}
+                      <View style={{ alignItems: "center" }} testID="pix-qr">
+                        {/* tema-fixo: QR escuro sobre branco nos dois temas; o leitor do banco nao le o codigo invertido */}
+                        {pix.codigo ? (
+                          <QRCode value={pix.codigo} size={180} color={cores.forest} backgroundColor={FUNDO_DO_QR} />
+                        ) : (
+                          <Image
+                            testID="pix-qr-imagem"
+                            source={{ uri: pix.qrImagem!.startsWith("data:") || pix.qrImagem!.startsWith("http") ? pix.qrImagem! : `data:image/png;base64,${pix.qrImagem}` }}
+                            style={{ width: 180, height: 180, backgroundColor: FUNDO_DO_QR }}
+                          />
+                        )}
+                      </View>
+                      {pix.codigo ? (
+                        <>
+                          <Text selectable numberOfLines={3} testID="pix-codigo" style={{ color: cores.textPrimary, fontSize: fs(12), backgroundColor: cores.sobrePainel, borderRadius: 10, padding: 10 }}>
+                            {pix.codigo}
+                          </Text>
+                          <Botao titulo={copiado ? "Copiado" : "Copiar"} claro feito={copiado} testID="pix-copiar" onPress={copiar} />
+                        </>
+                      ) : null}
+                    </>
+                  ) : null}
                 </>
               ) : null}
+              {/* pagar-sempre-disponivel: sem nenhum Pix (gateway fora e profissional sem chave), o pagamento e combinado. */}
+              {!temPix && podeAvisarQuePagou(pagamento.status) ? (
+                <Text testID="pix-combinado" style={{ color: cores.textSecondary, fontSize: fs(13), lineHeight: fs(18) }}>
+                  Sem Pix cadastrado. O pagamento é combinado com o profissional (dinheiro).
+                </Text>
+              ) : null}
+              {/* o profissional nao confirmou: o atendimento segue pendente e o cliente pode tocar de novo */}
+              {recusado && podeAvisarQuePagou(pagamento.status) ? (
+                <Text testID="pix-recusado" style={{ color: cores.danger, fontSize: fs(13), lineHeight: fs(18) }}>
+                  O profissional não confirmou o pagamento. Confira se ele saiu da sua conta.
+                </Text>
+              ) : null}
+              {pix.viaAsaas && pagamento.status !== "PAID" ? (
+                <Text testID="pix-automatico" style={{ color: cores.textSecondary, fontSize: fs(13) }}>
+                  A confirmação é automática.
+                </Text>
+              ) : null}
+              {/* as duas vias quitam o mesmo atendimento: com o Asaas, o "Já paguei" segue valendo e some no PAID */}
               {podeAvisarQuePagou(pagamento.status) ? (
-                <Botao titulo={enviando ? "Enviando..." : "Já paguei"} testID="pix-ja-paguei" desligado={enviando} onPress={jaPaguei} />
-              ) : (
-                <Botao titulo="Fechar" claro testID="pix-ok" onPress={fechar} />
-              )}
+                <Botao titulo="Já paguei" testID="pix-ja-paguei" desligado={enviando} onPress={jaPaguei} />
+              ) : null}
+              {/* "Fechar" sempre a vista (antes so sem "Já paguei" ou com o Asaas) */}
+              <Botao titulo="Fechar" claro testID="pix-ok" onPress={fechar} />
             </>
           )}
         </View>

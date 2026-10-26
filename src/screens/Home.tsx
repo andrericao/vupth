@@ -16,6 +16,8 @@ import { ordenarPraOntem, rotuloPraOntem } from "@domain/establishment/praOntem"
 import { ScreenHeader } from "@components/ScreenHeader";
 import { useClientAttendances } from "@hooks/useAttendances";
 import { useCardFechado } from "@hooks/useCardFechado";
+import { useCampanhasAtivas } from "@hooks/useCampanhasAtivas";
+import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { useTema } from "@hooks/useTema";
 import { useAuthStore } from "@stores/authStore";
 import { useLocationStore } from "@stores/locationStore";
@@ -153,6 +155,7 @@ export function Home() {
   const { data: history = [] } = useClientAttendances({ status: "FINISHED" });
   const lastVisit = history[0];
   const { cores } = useTema();
+  const campanhas = useCampanhasAtivas();
   const repetirFechado = useCardFechado(lastVisit ? `repetir_${lastVisit.id}` : null);
 
   // Home é a raiz do stack: evita que um único "voltar" do Android feche o app.
@@ -404,6 +407,8 @@ export function Home() {
           />
         ))}
       </ScrollView>
+
+      <CarrosselDeCampanhas campanhas={campanhas} />
 
       {/* Fila ativa. O atrasado (LATE) tambem: ele segue na fila — sem o card,
           o Inicio dizia que nao havia nada, e o teste de 25/09 leu "acabou". */}

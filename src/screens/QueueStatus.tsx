@@ -15,7 +15,7 @@ import {
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
-import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor } from "@domain/queue/saidaDaFila";
+import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor, AVISO_DO_SEGUNDO_TOQUE, JANELA_DO_TOQUE_DUPLO_MS } from "@domain/queue/saidaDaFila";
 import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
@@ -60,10 +60,11 @@ import { NumeroComSalto } from "@components/NumeroComSalto";
 import { alertaTipado } from "@utils/alertaTipado";
 import { posicaoVisivel } from "@domain/queue/posicao";
 import { fs } from "@stores/fonteStore";
-import { pendenciasDoErro, reais } from "@domain/pagamento/pendencia";
+import { pendenciasDoErro, podeAvisarQuePagou, reais } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { paymentService } from "@services/paymentService";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
+import { mensagemDoCupom } from "@domain/campanhas";
 
 type RouteParams = {
   professionalId: string;
@@ -73,6 +74,8 @@ type RouteParams = {
   estimatedWaitMinutes?: number;
   serviceItemIds?: string[];
   targetTime?: string;
+  // Cupom escolhido na selecao (cupom-em-configuracoes).
+  couponCampaignId?: string;
   // Veio do "Adiar minha vez" do aviso de atraso: abre o "Mudar minha vez".
   abrirMudarVez?: boolean;
 };
@@ -113,6 +116,7 @@ export function QueueStatus() {
     serviceItemIds,
     estimatedWaitMinutes,
     targetTime,
+    couponCampaignId,
     abrirMudarVez,
   } = route.params as RouteParams;
 
@@ -194,7 +198,7 @@ export function QueueStatus() {
     const atual = useQueueStore.getState().activeQueue;
     if (!serviceItemIds?.length || !atual?.attendanceId || filaEncerrada(atual.status)) return;
     const aviso = avisoDeFilaExistente(atual, professionalId);
-    Alert.alert(aviso.titulo, aviso.mensagem, [{ text: "Ver minha fila" }]);
+    alertaTipado(aviso.titulo, aviso.mensagem, [{ text: "Ver minha fila" }], { tipo: "atencao" });
     // So na abertura, de proposito — ver o comentario acima.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -240,15 +244,19 @@ export function QueueStatus() {
         }
 
         const { data } = await attendanceService.create(
-          targetTime
-            ? { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], targetTime }
-            : { professionalId, establishmentId, serviceItemIds: serviceItemIds ?? [], scheduledTime: new Date().toISOString() },
+          {
+            professionalId,
+            establishmentId,
+            serviceItemIds: serviceItemIds ?? [],
+            ...(targetTime ? { targetTime } : { scheduledTime: new Date().toISOString() }),
+            ...(couponCampaignId ? { coupon_campaign_id: couponCampaignId } : {}),
+          },
           accessToken!,
         );
         if (mountedRef.current) {
           await updateQueue({ attendanceId: data.id });
           const aviso = avisoDepoisDoIntervalo(data);
-          if (aviso) Alert.alert(aviso.titulo, aviso.mensagem);
+          if (aviso) alertaTipado(aviso.titulo, aviso.mensagem, undefined, { tipo: "informacao" });
         }
       } catch (error: any) {
         // Limpa a fila otimista para não deixar tarja/banner residual sem atendimento real.
@@ -263,6 +271,14 @@ export function QueueStatus() {
           const pendencias = pendenciasDoErro(error);
           if (pendencias) {
             usePendenciaStore.getState().avisar(pendencias);
+            navigation.goBack();
+            return;
+          }
+
+          // Cupom que nao vale mais (422 COUPON_NOT_ACTIVE): nada foi criado; o
+          // aviso diz o que fazer e a pessoa volta a escolha, sem o cupom.
+          if (code === "COUPON_NOT_ACTIVE") {
+            Alert.alert("Cupom", mensagemDoCupom(error));
             navigation.goBack();
             return;
           }
@@ -330,7 +346,7 @@ export function QueueStatus() {
     }
 
     createAttendance();
-  }, [activeQueue?.attendanceId, activeQueue?.status, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, navigation, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime]);
+  }, [activeQueue?.attendanceId, activeQueue?.status, accessToken, professionalId, establishmentId, updateQueue, leaveQueue, navigation, paramProfName, paramEstName, serviceItemIds, estimatedWaitMinutes, targetTime, couponCampaignId]);
 
   const attendanceId = activeQueue?.attendanceId ?? null;
   const status = activeQueue?.status ?? "SCHEDULED";
@@ -402,7 +418,7 @@ export function QueueStatus() {
   const saidaAtual = saidaDaFila(regraDaSaida());
   useEffect(() => {
     if (!mostrarFaixaDeSaida) return;
-    const t = setTimeout(() => setMostrarFaixaDeSaida(false), 8000);
+    const t = setTimeout(() => setMostrarFaixaDeSaida(false), JANELA_DO_TOQUE_DUPLO_MS);
     return () => clearTimeout(t);
   }, [mostrarFaixaDeSaida]);
 
@@ -441,7 +457,7 @@ export function QueueStatus() {
       // cancelou antes): o objetivo do usuario esta cumprido. Segue pra
       // limpeza, senao ele fica preso numa tela de fila que nao existe.
       if (!jaSaiuDaFila(error)) {
-        Alert.alert("Nao foi possivel sair da fila", mensagemDeFalhaAoSair(error));
+        Alert.alert("Não deu para sair", mensagemDeFalhaAoSair(error));
         return;
       }
     }
@@ -455,13 +471,32 @@ export function QueueStatus() {
   useEffect(() => {
     if (!isFinished || !attendanceId || !accessToken || pagamentoAberto.current === attendanceId) return;
     pagamentoAberto.current = attendanceId;
-    paymentService
-      .get(attendanceId, accessToken)
-      .then(({ data }) => {
-        // Sem Pix do profissional não há modal: só ele confirma que recebeu.
-        if (data.status === "PENDING" && data.pix_copy_paste) usePendenciaStore.getState().pagar(attendanceId);
-      })
-      .catch(() => {});
+    // pagar-ao-finalizar-corte (André, 24/10): o modal abre SOZINHO quando o corte e finalizado (antes so
+    // aparecia depois de sair da tela). O Pix pode estar no `gateway` (Asaas), nao so no topo; e o pagamento
+    // pode nascer um instante depois do FINISHED, entao tenta de novo uma vez.
+    let vivo = true;
+    let nova: ReturnType<typeof setTimeout> | undefined;
+    const abrir = (tentativa: number) =>
+      paymentService
+        .get(attendanceId, accessToken)
+        .then(({ data }) => {
+          if (!vivo) return;
+          // pagar-sempre-disponivel (André, 25/10): a opcao de pagar nunca some; pendente = o modal abre, com Pix
+          // do gateway, chave do profissional ou o texto de pagamento combinado (dinheiro), e sempre o Ja paguei.
+          if (podeAvisarQuePagou(data.status)) {
+            usePendenciaStore.getState().pagar(attendanceId);
+          } else if (tentativa === 0 && data.status !== "PAID") {
+            nova = setTimeout(() => void abrir(1), 4000);
+          }
+        })
+        .catch(() => {
+          if (vivo && tentativa === 0) nova = setTimeout(() => void abrir(1), 4000);
+        });
+    void abrir(0);
+    return () => {
+      vivo = false;
+      if (nova) clearTimeout(nova);
+    };
   }, [isFinished, attendanceId, accessToken]);
 
   // D15 (Andre, 24/09): "Sair da fila" pede DOIS toques seguidos. O primeiro so
@@ -977,6 +1012,15 @@ export function QueueStatus() {
             `key` recomeca a faixa quando o horario muda. */}
         <FaixaDaTolerancia key={activeQueue?.toleranceUntil ?? 0} ate={activeQueue?.toleranceUntil} />
 
+        {/* aviso-de-atraso-e-saida-da-fila (24/10): a contagem "n de 3"; no 3º o cliente já saiu da fila. */}
+        {typeof activeQueue?.lateCount === "number" && activeQueue.lateCount > 0 && activeQueue.lateCount < 3 && (
+          <Box px={16} pb="$2">
+            <Text size="xs" color="$brandTextSecondary" textAlign="center" testID="contagem-de-atrasos">
+              {`Atrasos: ${activeQueue.lateCount} de 3`}
+            </Text>
+          </Box>
+        )}
+
         {mostrarFaixaDeSaida && (
           <Box px={16} pb="$2">
             <Box
@@ -988,9 +1032,13 @@ export function QueueStatus() {
               py="$2.5"
               testID="faixa-de-saida"
             >
+              {/* aviso-dois-toques-para-sair-da-fila (André, 25/10): o pedido do segundo toque, a vista. */}
+              <Text size="xs" fontWeight="$bold" color="$brandTextPrimary" mb="$1" testID="aviso-segundo-toque">
+                {AVISO_DO_SEGUNDO_TOQUE}
+              </Text>
               <HStack alignItems="center" gap="$2">
                 <Info size={16} color="#163300" />
-                <Text size="xs" color="$forest" flex={1}>
+                <Text size="xs" color="$brandTextPrimary" flex={1}>
                   {saidaAtual.faixa}
                 </Text>
                 {/* sair-da-fila-texto (Andre, 15/10): o artigo do suporte. */}

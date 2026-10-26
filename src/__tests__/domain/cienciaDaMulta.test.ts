@@ -45,11 +45,11 @@ describe('o "Sim" leva o valor que a confirmação mostrou', () => {
 });
 
 describe('o aviso quando o servidor pede a ciência', () => {
-  it('mostra o valor do servidor e diz que sem o Sim a pessoa continua na fila', () => {
+  it('mostra o valor do servidor, no formato curto', () => {
     const aviso = avisoDaMultaDoServidor(5);
     expect(aviso.mensagem).toContain('R$ 5,00');
-    expect(aviso.mensagem).toContain('continua na fila');
-    expect(aviso.sim).toBe('Sim, sair');
-    expect(aviso.nao).toBe('Permanecer na fila');
+    expect(aviso.mensagem).toBe('R$ 5,00 de multa no próximo atendimento.');
+    expect(aviso.sim).toBe('Sair');
+    expect(aviso.nao).toBe('Cancelar');
   });
 });

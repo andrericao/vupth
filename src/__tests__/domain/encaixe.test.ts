@@ -1,4 +1,4 @@
-import { horariosDoDia, mensagemDoAgendamento } from '@domain/schedule/encaixe';
+import { horariosDoDia, mensagemDoAgendamento, situacaoDoDia } from '@domain/schedule/encaixe';
 import { formatClockTime } from '@domain/queue/types';
 import { HorariosDaLoja } from '@domain/establishment/horarios';
 
@@ -99,5 +99,29 @@ describe('a recusa do servidor ao agendar', () => {
     expect(mensagemDoAgendamento(409, 'PROFESSIONAL_AGENDA_FULL')).toMatch(/ocupado/);
     expect(mensagemDoAgendamento(400)).toMatch(/já passou/);
     expect(mensagemDoAgendamento(500)).toMatch(/Tente de novo/);
+  });
+});
+
+// agenda-da-semana-nao-liberada (24/10, Backend 481c56c): store_open e agenda_released por dia.
+describe('situacaoDoDia', () => {
+  const dia = new Date(2026, 9, 26);
+  const agenda = (d: object) => ({ frame: null, blocks: [], days: [{ date: '2026-10-26', ...d }] });
+
+  it('a loja nunca abre: fechado (o dia some)', () => {
+    expect(situacaoDoDia(agenda({ closed: true, store_open: false, agenda_released: false }), dia)).toBe('fechado');
+  });
+
+  it('a loja abre e o profissional não liberou: solicitar', () => {
+    expect(situacaoDoDia(agenda({ closed: true, store_open: true, agenda_released: false }), dia)).toBe('solicitar');
+  });
+
+  it('os dois liberados: agenda direto', () => {
+    expect(situacaoDoDia(agenda({ closed: false, store_open: true, agenda_released: true }), dia)).toBe('livre');
+  });
+
+  it('sem o item do dia ou sem agenda (Backend anterior): null, e o app decide pelo horário da loja', () => {
+    expect(situacaoDoDia(agenda({}), new Date(2026, 9, 27))).toBeNull();
+    expect(situacaoDoDia({ frame: null, blocks: [] }, dia)).toBeNull();
+    expect(situacaoDoDia(null, dia)).toBeNull();
   });
 });

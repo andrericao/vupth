@@ -17,6 +17,14 @@ describe('avisoDeChegada', () => {
     expect(avisoDeChegada(-10, AGORA)!.mensagem).toBe('Esteja na loja às 14:00.');
   });
 
+  it('fila livre: só "Esteja na loja em 5 minutos", sem horário (modal-sem-fila-5-minutos)', () => {
+    const a = avisoDeChegada(0, AGORA, { filaLivre: true })!;
+    expect(a.mensagem).toBe('Esteja na loja em 5 minutos.');
+    expect(a.titulo).toBe('Esteja na loja');
+    expect(avisoDeChegada(0, AGORA, { filaLivre: false })!.mensagem).toBe('Esteja na loja às 14:00.');
+    expect(avisoDeChegada(null, AGORA, { filaLivre: true })).toBeNull();
+  });
+
   it('1 hora ou mais, sem estimativa ou valor inválido: sem aviso', () => {
     expect(avisoDeChegada(60, AGORA)).toBeNull();
     expect(avisoDeChegada(120, AGORA)).toBeNull();

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Alert } from "react-native";
+import { alertaTipado } from "@utils/alertaTipado";
 
 import { avisoDeAtraso, precisaAvisarAtraso } from "@domain/queue/ciencia";
 import { useCienciaStore } from "@stores/cienciaStore";
@@ -34,11 +34,11 @@ export function useAvisoDeAtraso() {
     const aviso = avisoDeAtraso({ contagem: activeQueue?.lateCount });
     // Lida na hora do toque: a fila mais recente, sem fazer o aviso reabrir a cada poll.
     const fila = () => useQueueStore.getState().activeQueue;
-    Alert.alert(aviso.titulo, aviso.mensagem, [
+    alertaTipado(aviso.titulo, aviso.mensagem, [
       // Adiar tambem registra a ciencia: o toque, qualquer um, e o "eu soube".
       ...(aviso.oferecerAdiar
         ? [{
-            text: "Adiar minha vez",
+            text: "Adiar",
             onPress: () => {
               registrarCiencia(attendanceId!);
               const f = fila();
@@ -49,6 +49,7 @@ export function useAvisoDeAtraso() {
       // O toque E o registro. Sem `cancelable`, tambem nao da pra sair por fora
       // no Android — clicar ao lado nao pode valer por "eu soube".
       { text: aviso.botao, onPress: () => registrarCiencia(attendanceId!) },
-    ], { cancelable: false });
+    // modais-de-alerta (CLI-24): o 3o atraso gera multa (dinheiro, selo Multa); antes dele e atencao.
+    ], aviso.oferecerAdiar ? { cancelable: false, tipo: "atencao" } : { cancelable: false, tipo: "dinheiro", selo: "Multa" });
   }, [activeQueue?.attendanceId, activeQueue?.status, activeQueue?.lateCount, jaAvisados, registrarCiencia]);
 }

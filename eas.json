@@ -12,7 +12,8 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_ENV": "staging"
+        "EXPO_PUBLIC_API_ENV": "staging",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
     "preview": {

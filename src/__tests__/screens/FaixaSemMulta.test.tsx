@@ -8,6 +8,7 @@ import { QueueStatus } from '@screens/QueueStatus';
 let mockRemaining: number | null = 90;
 let mockEstimated: number | null = 90;
 let mockEmAtendimento = false;
+let mockLateCount: number | null = null;
 
 // Entrou às 12:00 (relógio local do teste). O prefixo `mock` NÃO é estilo: a
 // fábrica do `jest.mock` é içada para antes dos imports, e o babel só deixa
@@ -48,6 +49,7 @@ jest.mock('@hooks/useQueueCountdown', () => ({
       enteredAt: mockEntrou,
       estimatedMinutes: mockEstimated,
       status: mockEmAtendimento ? 'IN_PROGRESS' : 'SCHEDULED',
+      lateCount: mockLateCount,
     },
   }),
 }));
@@ -81,6 +83,21 @@ describe('QueueStatus — nenhuma faixa enquanto a pessoa só espera (D15)', () 
     mockRemaining = 90;
     mockEstimated = 90;
     mockEmAtendimento = false;
+    mockLateCount = null;
+  });
+
+  // aviso-de-atraso-e-saida-da-fila (24/10): a contagem "n de 3"; no 3º o cliente já saiu da fila.
+  it('com atrasos, mostra "Atrasos: n de 3"; sem atraso ou no 3º, nada', () => {
+    mockLateCount = 1;
+    const um = renderWithProviders(<QueueStatus />);
+    expect(um.getByTestId('contagem-de-atrasos')).toHaveTextContent('Atrasos: 1 de 3');
+    um.unmount();
+    for (const n of [0, 3]) {
+      mockLateCount = n;
+      const t = renderWithProviders(<QueueStatus />);
+      expect(t.queryByTestId('contagem-de-atrasos')).toBeNull();
+      t.unmount();
+    }
   });
 
   it('com espera longa, não há faixa nem valor na tela', () => {

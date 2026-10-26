@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { Alert, TouchableOpacity, RefreshControl } from "react-native";
+import { alertaTipado } from "@utils/alertaTipado";
+import { PontoDoCard } from "@components/PontoDoCard";
 import { useNavigation, useFocusEffect, useRoute, useScrollToTop } from "@react-navigation/native";
 import {
   VStack,
@@ -153,7 +155,7 @@ export function Attendances() {
 
   // Cancela uma intenção (meus agendamentos) com confirmação.
   function handleCancelIntention(id: string, professionalName: string) {
-    Alert.alert(
+    alertaTipado(
       "Cancelar agendamento",
       `Cancelar o agendamento com ${professionalName}?`,
       [
@@ -180,13 +182,14 @@ export function Attendances() {
           },
         },
       ],
+      { tipo: "atencao" },
     );
   }
 
   // Cancela o pedido de troca publicado de fora da fila. 422 = já não está mais
   // aberto (alguém aceitou ou expirou) — some da lista do mesmo jeito.
   function handleCancelSwap(offerId: string, professionalName: string) {
-    Alert.alert(
+    alertaTipado(
       "Cancelar pedido de troca",
       `Cancelar o pedido para entrar na fila de ${professionalName}?`,
       [
@@ -213,6 +216,7 @@ export function Attendances() {
           },
         },
       ],
+      { tipo: "atencao" },
     );
   }
 
@@ -261,7 +265,7 @@ export function Attendances() {
             {pendentes.map((p) => (
               <TouchableOpacity key={p.attendance_id} onPress={() => pagar(p.attendance_id)} testID={`pagar-${p.attendance_id}`}>
                 <HStack bg="$brandSurface" borderRadius="$card" p="$4" gap="$3" alignItems="center">
-                  <Box w={8} h={8} borderRadius={4} bg="$brandDanger" testID={`pendente-${p.attendance_id}`} />
+                  <PontoDoCard testID={`pendente-${p.attendance_id}`} />
                   <VStack flex={1}>
                     <Text fontFamily="$heading" size="sm">
                       {textoDoStatus(p.status)} · {reais(p.amount)}
@@ -560,17 +564,13 @@ export function Attendances() {
                 return (
                   <TouchableOpacity key={a.id} activeOpacity={0.7} onPress={() => setDetailFor(a)}>
                     <Box bg="$brandSurface" p="$4" borderRadius="$card">
+                      {/* Sem avaliar (notificacao-avaliar, CLI-33): o ponto na bordinha do card (dot-do-card-sem-avaliacao). */}
+                      {canRate ? <PontoDoCard testID={`sem-avaliar-${a.id}`} /> : null}
                       <HStack justifyContent="space-between" alignItems="flex-start">
                         <VStack flex={1} pr="$2">
-                          <HStack alignItems="center" gap="$1.5">
-                            <Text fontFamily="$heading" size="sm">
-                              {a.professionalName}
-                            </Text>
-                            {/* Sem avaliar (notificacao-avaliar, CLI-33): o ponto. */}
-                            {canRate ? (
-                              <Box w={8} h={8} borderRadius={4} bg="$brandDanger" testID={`sem-avaliar-${a.id}`} />
-                            ) : null}
-                          </HStack>
+                          <Text fontFamily="$heading" size="sm">
+                            {a.professionalName}
+                          </Text>
                           {a.establishmentName ? (
                             <Text size="xs" color="$brandTextSecondary" testID={`historico-loja-${a.id}`}>
                               {a.establishmentName}

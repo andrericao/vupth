@@ -8,9 +8,35 @@ import { HorariosDaLoja, horarioDeHoje } from '@domain/establishment/horarios';
 // Os blocos sao o mesmo "reservado" que o servidor considera ao aceitar a
 // intencao — o que a barra mostra livre e o que ele aceita.
 
+export interface DiaDaAgenda {
+  /** YYYY-MM-DD (data local). */
+  date: string;
+  closed?: boolean;
+  /** A loja abre neste dia (ou não configurou o horário). false = a loja nunca abre. */
+  store_open?: boolean;
+  /** A agenda do próprio profissional não fecha o dia. false com a loja aberta = pede Solicitar. */
+  agenda_released?: boolean;
+}
+
 export interface AgendaPublica {
   frame: { projectedQueueEnd?: string | null } | null;
   blocks: { start: string; durationMinutes: number }[];
+  /** agenda-publica-dias-liberados (Backend 481c56c): um item por dia, com os dois booleanos. */
+  days?: DiaDaAgenda[];
+}
+
+/**
+ * agenda-da-semana-nao-liberada (24/10): o que o dia pede. `fechado` = a loja nunca abre (o dia some);
+ * `solicitar` = a loja abre e o profissional não liberou (o cliente solicita); `livre` = agenda direto.
+ * Sem o item do dia (Backend anterior), `null`: o app decide pelo horário da loja, como antes.
+ */
+export function situacaoDoDia(agenda: AgendaPublica | null | undefined, dia: Date): 'fechado' | 'solicitar' | 'livre' | null {
+  const iso = `${dia.getFullYear()}-${String(dia.getMonth() + 1).padStart(2, '0')}-${String(dia.getDate()).padStart(2, '0')}`;
+  const d = agenda?.days?.find((x) => x.date === iso);
+  if (!d) return null;
+  if (d.store_open === false) return 'fechado';
+  if (d.agenda_released === false) return 'solicitar';
+  return 'livre';
 }
 
 /** "08:30" no dia de `dia` (ou `diasDepois` dias adiante), no relogio do aparelho. */

@@ -90,6 +90,14 @@ export const swapOfferService = {
     });
   },
 
+  // Recusar o pedido de troca pelo push (push-acoes-por-pergunta): o mesmo PATCH com accept=false.
+  refuseRequest(swapRequestId: string, accessToken: string) {
+    return api.patch<void>(`/swap-requests/${swapRequestId}`, null, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      params: { accept: false },
+    });
+  },
+
   // Solicitante cancela a própria oferta (OPEN → CANCELLED). 204.
   cancel(offerId: string, accessToken: string) {
     return api.delete<void>(`/swap-offers/${offerId}`, {

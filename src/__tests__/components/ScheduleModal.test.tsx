@@ -14,6 +14,11 @@ jest.mock('expo-secure-store');
 jest.mock('@services/intentionsService', () => ({
   intentionsService: { getPublicAgenda: jest.fn(), create: jest.fn() },
 }));
+const mockAdiantado = jest.fn();
+jest.mock('@hooks/usePagamentoAdiantado', () => ({
+  ...jest.requireActual('@hooks/usePagamentoAdiantado'),
+  usePagamentoAdiantado: (...a: unknown[]) => mockAdiantado(...a),
+}));
 jest.mock('@services/establishmentService', () => ({ establishmentService: { getHours: jest.fn() } }));
 jest.setTimeout(90000);
 
@@ -41,6 +46,7 @@ function abrir(over: Partial<React.ComponentProps<typeof ScheduleModal>> = {}) {
 describe('ScheduleModal — barra de encaixe', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAdiantado.mockReturnValue(false);
     useAuthStore.setState({ accessToken: 'tk' });
     (intentionsService.getPublicAgenda as jest.Mock).mockResolvedValue({ data: { frame: null, blocks: [] } });
     // Amanhã aberto das 09:00 às 11:00.
@@ -55,6 +61,27 @@ describe('ScheduleModal — barra de encaixe', () => {
     expect(getAllByText('Agendar')).toHaveLength(2); // o título e o botão
     expect(queryByText('Confirmar')).toBeNull();
     expect(queryByText('Pedir')).toBeNull();
+  });
+
+  // agendar-com-pagamento-adiantado (DEC-105/115): 3 faltas avisam em uma linha; agendar nao e barrado.
+  it('com 3 faltas, mostra o aviso do pagamento adiantado e o Agendar segue livre; sem faltas, nada', async () => {
+    mockAdiantado.mockReturnValue(true);
+    const com = abrir();
+    await act(async () => {});
+    expect(com.getByTestId('pagamento-adiantado')).toBeTruthy();
+    expect(com.getByTestId('confirmar-agendamento')).toBeTruthy();
+    com.unmount();
+    mockAdiantado.mockReturnValue(false);
+    const sem = abrir();
+    await act(async () => {});
+    expect(sem.queryByTestId('pagamento-adiantado')).toBeNull();
+  });
+
+  it('pedir corte não mostra o aviso (o pagamento adiantado é do agendar)', async () => {
+    mockAdiantado.mockReturnValue(true);
+    const { queryByTestId } = abrir({ corte: { onEscolher: jest.fn() } });
+    await act(async () => {});
+    expect(queryByTestId('pagamento-adiantado')).toBeNull();
   });
 
   it('sem horário escolhido, "Agendar" não agenda', async () => {
@@ -84,6 +111,26 @@ describe('ScheduleModal — barra de encaixe', () => {
     expect(new Date(dados.desiredTime).getHours()).toBe(9);
     expect(alerta).toHaveBeenCalledWith('Agendado', expect.stringMatching(/às 09:30/));
     expect(props.onAgendado).toHaveBeenCalled();
+    alerta.mockRestore();
+  });
+
+  // cupom-em-configuracoes: o cupom escolhido vai na intenção; se não vale, o aviso e o cupom sai.
+  it('com cupom, manda o coupon_campaign_id; 422 COUPON_NOT_ACTIVE avisa e solta o cupom', async () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const onCupomInvalido = jest.fn();
+    (intentionsService.create as jest.Mock).mockRejectedValue({ response: { status: 422, data: { code: 'COUPON_NOT_ACTIVE' } } });
+    const { getAllByRole, findByTestId, getByTestId, props } = abrir({ couponCampaignId: 'cp1', onCupomInvalido });
+    await act(async () => {});
+    fireEvent.press(getAllByRole('button')[1]);
+    await findByTestId('horario-09:00');
+    fireEvent.press(getByTestId('horario-09:30'));
+    await act(async () => {
+      fireEvent.press(getByTestId('confirmar-agendamento'));
+    });
+    expect((intentionsService.create as jest.Mock).mock.calls[0][0]).toHaveProperty('coupon_campaign_id', 'cp1');
+    expect(onCupomInvalido).toHaveBeenCalled();
+    expect(props.onClose).toHaveBeenCalled();
+    expect(alerta).toHaveBeenCalledWith('Cupom', expect.stringMatching(/não está valendo/));
     alerta.mockRestore();
   });
 
@@ -274,12 +321,58 @@ describe('ScheduleModal — o que sobra (cobertura-98)', () => {
     (intentionsService.getPublicAgenda as jest.Mock).mockResolvedValue({ data: { frame: null, blocks: [] } });
   });
 
-  it('a loja fechada no dia: diz que não abre', async () => {
+  // agendar-esconde-dias-fechados (André, 24/10): o dia fechado nem aparece no seletor.
+  it('a loja fechada no dia: o dia some do seletor', async () => {
     horas({ closed: true, opens: null, closes: null });
-    const { getAllByRole, findByText } = abrir();
+    const { queryByLabelText, getByLabelText } = abrir();
     await act(async () => {});
-    fireEvent.press(getAllByRole('button')[1]);
-    expect(await findByText('A loja não abre neste dia.')).toBeTruthy();
+    expect(queryByLabelText(`Dia ${amanha().getDate()}`)).toBeNull();
+    expect(getByLabelText('Hoje')).toBeTruthy();
+  });
+
+  // agenda-da-semana-nao-liberada (24/10, Backend 481c56c): store_open e agenda_released decidem o dia.
+  const agendaComDia = (d: object) =>
+    (intentionsService.getPublicAgenda as jest.Mock).mockResolvedValue({
+      data: { frame: null, blocks: [], days: [{ date: dataISO(amanha()), ...d }] },
+    });
+
+  it('store_open=false: o dia some; sem o campo, vale o horário da loja', async () => {
+    horas({ closed: false, opens: '09:00', closes: '11:00' });
+    agendaComDia({ closed: true, store_open: false, agenda_released: false });
+    const t = abrir();
+    await act(async () => {});
+    expect(t.queryByLabelText(`Dia ${amanha().getDate()}`)).toBeNull();
+  });
+
+  it('a loja abre e o profissional não liberou: Solicitar, com o horário, e o pedido sai pelo dono da tela', async () => {
+    horas({ closed: false, opens: '09:00', closes: '11:00' });
+    agendaComDia({ closed: true, store_open: true, agenda_released: false });
+    const onSolicitar = jest.fn();
+    const t = abrir({ onSolicitar });
+    await act(async () => {});
+    fireEvent.press(t.getByLabelText(`Dia ${amanha().getDate()}`));
+    expect(await t.findByTestId('agenda-nao-liberada')).toBeTruthy();
+    expect(t.getByText('Solicitar')).toBeTruthy();
+    expect(t.queryByText('Agendar', { exact: true })).toBeTruthy(); // o título do modal
+    fireEvent.press(await t.findByTestId('horario-09:00'));
+    await act(async () => {
+      fireEvent.press(t.getByTestId('confirmar-agendamento'));
+    });
+    const [horario] = onSolicitar.mock.calls[0] as [Date];
+    expect(horario.getHours()).toBe(9);
+    expect(intentionsService.create).not.toHaveBeenCalled();
+    expect(t.props.onClose).toHaveBeenCalled();
+  });
+
+  it('os dois liberados: agenda direto, sem Solicitar', async () => {
+    horas({ closed: false, opens: '09:00', closes: '11:00' });
+    agendaComDia({ closed: false, store_open: true, agenda_released: true });
+    const t = abrir({ onSolicitar: jest.fn() });
+    await act(async () => {});
+    fireEvent.press(t.getByLabelText(`Dia ${amanha().getDate()}`));
+    expect(await t.findByTestId('horario-09:00')).toBeTruthy();
+    expect(t.queryByTestId('agenda-nao-liberada')).toBeNull();
+    expect(t.queryByText('Solicitar')).toBeNull();
   });
 
   it('o serviço não cabe no dia: diz que não há horário livre', async () => {

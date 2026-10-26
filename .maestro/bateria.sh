@@ -4,6 +4,7 @@
 #   bash .maestro/bateria.sh              # pergunta: completa ou so as que nao passaram
 #   bash .maestro/bateria.sh --completa   # roda todas, sem perguntar
 #   bash .maestro/bateria.sh --falhas     # so as que nao passaram, sem perguntar
+#   bash .maestro/bateria.sh --completa --publicar-ota  # publica o OTA da dev antes (publicar-ota.sh)
 #   bash .maestro/bateria.sh --falhas --device emulator-5554  # num aparelho
 #                                         escolhido (DEC-33, comandos.html#emulador)
 #
@@ -39,9 +40,11 @@ fi
 # Antes so o $1 era lido, e o "--device emulator-5554" virava o modo (10/10).
 MODO=""
 APARELHO=""
+PUBLICAR_OTA=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --completa|--falhas) MODO="$1" ;;
+    --publicar-ota) PUBLICAR_OTA="--publicar-ota" ;;
     --device) APARELHO="$2"; shift ;;
   esac
   shift
@@ -68,7 +71,7 @@ if [ -n "$OUTRA" ]; then
   exit 1
 fi
 
-BATERIA=1 bash "$DIR/setup.sh" || exit 1
+BATERIA=1 bash "$DIR/setup.sh" $PUBLICAR_OTA || exit 1
 trap 'bash "$DIR/restaurar.sh"' EXIT
 
 # A branch da pasta: a dev no vupth, a feat/nativewind na worktree dela.
@@ -122,7 +125,7 @@ echo ""
 # commit errado no aparelho, nenhuma etapa diz nada.
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
-ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24"}
+ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27"}
 
 # bateria-conjunta: as etapas que abrem o Partner no mesmo celular. Precisam do
 # APK do Partner instalado e do vupth-partner clonado ao lado do vupth (os
@@ -273,7 +276,10 @@ else
     # O emulador some do adb por instantes ("device offline", 21 nas baterias de
     # 11/10 06:06, 07:02 e 09:58, cada vez num passo): nao e o fluxo. Espera o
     # aparelho voltar e roda a etapa de novo, uma vez.
-    if [ "$VOLTA" -ne 0 ] && grep -qE "device offline|UiAutomation not connected" "$RODADA/$arquivo/console.txt" 2>/dev/null; then
+    # Bateria 23/10 23:31 (02.P7): o driver do Maestro (dev.mobile.maestro, a instrumentacao)
+    # crashou no emulador AOSP com o app subindo normal; so aparece no logcat da etapa.
+    if [ "$VOLTA" -ne 0 ] && { grep -qE "device offline|UiAutomation not connected" "$RODADA/$arquivo/console.txt" 2>/dev/null \
+        || grep -q "Crash of app dev.mobile.maestro" "$RODADA/$arquivo/logcat.txt" 2>/dev/null; }; then
       echo "↻ $arquivo: o aparelho saiu do adb ou o driver caiu — de novo, uma vez"
       timeout 120 adb wait-for-device
       sleep 10
@@ -287,7 +293,11 @@ else
     fi
     juntar_para_o_andre "$RODADA/$arquivo"
     DURA=$(( $(date +%s) - INICIO )); DURA="$((DURA / 60))min$(printf '%02d' $((DURA % 60)))s"
-    if [ "$VOLTA" -eq 0 ]; then
+    if [ "$VOLTA" -eq 0 ] && grep -q 'PULADO-CAMPANHA:' "$RODADA/$arquivo/console.txt" 2>/dev/null; then
+      # maestro-campanha-cupom-e-link: sem a campanha no ar a etapa pula (nao e falha nem aprovacao).
+      echo "⏭  $arquivo ($(grep -oP 'PULADO-CAMPANHA: \K.*' "$RODADA/$arquivo/console.txt" | head -1))" >> "$RODADA/relatorio.txt"
+      rm -rf "${RODADA:?}/$arquivo"
+    elif [ "$VOLTA" -eq 0 ]; then
       echo "✅ $arquivo ($DURA)" >> "$RODADA/relatorio.txt"
       aprovar "$n"
       rm -rf "${RODADA:?}/$arquivo"   # verde: a pasta da etapa nao guarda nada

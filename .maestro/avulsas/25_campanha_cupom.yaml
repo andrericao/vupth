@@ -1,0 +1,43 @@
+# Etapa avulsa 25 (maestro-campanha-cupom-e-link): roda num maestro test proprio.
+# Começa perguntando ao staging se existe, no ar, a campanha "MAESTRO CLIENT CUPOM" (o André a cria
+# no Painel). Sem ela, PULA: a linha PULADO-CAMPANHA no console faz a bateria.sh
+# escrever ⏭ no relatório (não ❌) e seguir para a próxima etapa.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+  NOME_CAMPANHA: "MAESTRO CLIENT CUPOM"
+---
+- evalScript:
+    script: "${output.EMAIL_CONSULTA = 'campanha_c' + (typeof TAG !== 'undefined' && TAG ? String(TAG) : String(Date.now()).slice(-6)) + '25' + '@teste.com'}"
+    label: "25.C0 · e-mail da consulta"
+- runScript:
+    file: ../scripts/campanha_existe.js
+    env:
+      API: ${API}
+      SENHA: ${SENHA}
+      EMAIL_CLIENTE: ${output.EMAIL_CONSULTA}
+      NOME_CAMPANHA: ${NOME_CAMPANHA}
+    label: "25.C1 · consulta se a campanha existe no ar"
+- runFlow:
+    when:
+      true: ${output.EXISTE != '1'}
+    commands:
+      - evalScript: "${console.log('PULADO-CAMPANHA: não há campanha ativa com o nome ' + NOME_CAMPANHA)}"
+    label: "25.C2 · sem campanha: pula"
+- runFlow:
+    when:
+      true: ${output.EXISTE == '1'}
+    commands:
+      - runFlow:
+          file: ../apoio/preparo.yaml
+          env:
+            ETAPA: "25"
+            LOJA: "0"
+            CONTA: "1"
+            ABERTURA: "1"
+            FILA_FECHADA: "0"
+      - runFlow:
+          file: ../etapas/25_campanha_cupom.yaml
+    label: "25.E1 · campanha no ar: roda 25_campanha_cupom"

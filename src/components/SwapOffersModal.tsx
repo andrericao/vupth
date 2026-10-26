@@ -3,7 +3,7 @@ import { Modal, Alert } from "react-native";
 import { VStack, HStack, Box, Text, Heading, Divider, Spinner } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
-import { floatingShadow } from "@utils/styles";
+import { CaixaDeModal } from "@components/CaixaDeModal";
 import { acceptOfferErrorMessage, acceptOfferText, myOfferText, vagaNaFila } from "@domain/queue/swap";
 import { formatClockTime } from "@domain/queue/types";
 import { queueService, QueueResponse } from "@services/queueService";
@@ -24,7 +24,7 @@ type Props = {
 // cancelar). Abre pelo botão "Trocar" da fila. Busca fresco ao abrir.
 export function SwapOffersModal({ visible, professionalId, establishmentId, onClose, onChanged }: Props) {
   const accessToken = useAuthStore((s) => s.accessToken);
-  const { cores, veu } = useTema();
+  const { cores } = useTema();
   const [acceptable, setAcceptable] = useState<SwapOfferResponse[]>([]);
   const [mine, setMine] = useState<SwapOfferResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -95,74 +95,74 @@ export function SwapOffersModal({ visible, professionalId, establishmentId, onCl
 
   const empty = !loading && acceptable.length === 0 && mine.length === 0;
 
+  const rodape = (
+    <Button title="Fechar" variant="outline" onPress={onClose} />
+  );
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Box flex={1} bg={veu} justifyContent="center" px={24}>
-        <VStack bg="$painel" borderRadius="$card" p="$6" style={floatingShadow}>
-          <Heading fontFamily="$heading" fontSize="$lg">
-            Trocar de lugar
-          </Heading>
+      <CaixaDeModal raio="card" rodape={rodape}>
+        <Heading fontFamily="$heading" fontSize="$lg">
+          Trocar de lugar
+        </Heading>
 
-          {loading && (
-            <HStack alignItems="center" gap="$2" mt="$4">
-              <Spinner color={cores.textPrimary} />
-              <Text size="sm" color="$brandTextSecondary">Carregando ofertas...</Text>
-            </HStack>
-          )}
+        {loading && (
+          <HStack alignItems="center" gap="$2" mt="$4">
+            <Spinner color={cores.textPrimary} />
+            <Text size="sm" color="$brandTextSecondary">Carregando ofertas...</Text>
+          </HStack>
+        )}
 
-          {empty && (
-            <Text size="sm" color="$brandTextSecondary" mt="$3">
-              Nenhuma oferta de troca no momento. Publique a sua tocando em Mudar
-              minha vez.
-            </Text>
-          )}
+        {empty && (
+          <Text size="sm" color="$brandTextSecondary" mt="$3">
+            Nenhuma oferta de troca no momento. Publique a sua tocando em Mudar
+            minha vez.
+          </Text>
+        )}
 
-          {acceptable.length > 0 && (
-            <VStack gap="$3" mt="$4">
-              <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">PODE ACEITAR</Text>
-              {acceptable.map((o) => (
-                <Box key={o.id} bg="$sobrePainel" borderRadius="$card" p="$3">
-                  <Text size="sm" color="$brandTextPrimary">{acceptOfferText(o.direction)}</Text>
-                  {(() => {
-                    const vaga = fila ? vagaNaFila(fila, o.requesterAttendanceId, lidoEm) : null;
-                    return vaga ? (
-                      <Text size="sm" fontFamily="$heading" color="$brandTextPrimary" mt="$1" testID={`vaga-${o.id}`}>
-                        Você vai para o {vaga.posicao}º lugar, por volta de {formatClockTime(new Date(vaga.horarioMs))}
-                      </Text>
-                    ) : null;
-                  })()}
-                  <Button
-                    title={busyId === o.id ? "Aceitando..." : "Aceitar troca"}
-                    mt="$2"
-                    isDisabled={!!busyId}
-                    onPress={() => accept(o.id)}
-                  />
-                </Box>
-              ))}
-            </VStack>
-          )}
+        {acceptable.length > 0 && (
+          <VStack gap="$3" mt="$4">
+            <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">PODE ACEITAR</Text>
+            {acceptable.map((o) => (
+              <Box key={o.id} bg="$sobrePainel" borderRadius="$card" p="$3">
+                <Text size="sm" color="$brandTextPrimary">{acceptOfferText(o.direction)}</Text>
+                {(() => {
+                  const vaga = fila ? vagaNaFila(fila, o.requesterAttendanceId, lidoEm) : null;
+                  return vaga ? (
+                    <Text size="sm" fontFamily="$heading" color="$brandTextPrimary" mt="$1" testID={`vaga-${o.id}`}>
+                      Você vai para o {vaga.posicao}º lugar, por volta de {formatClockTime(new Date(vaga.horarioMs))}
+                    </Text>
+                  ) : null;
+                })()}
+                <Button
+                  title={busyId === o.id ? "Aceitando..." : "Aceitar troca"}
+                  mt="$2"
+                  isDisabled={!!busyId}
+                  onPress={() => accept(o.id)}
+                />
+              </Box>
+            ))}
+          </VStack>
+        )}
 
-          {mine.length > 0 && (
-            <VStack gap="$3" mt="$4">
-              <Divider bg="$brandBorder" />
-              <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">MEUS PEDIDOS</Text>
-              {mine.map((o) => (
-                <HStack key={o.id} alignItems="center" justifyContent="space-between">
-                  <Text size="sm" color="$brandTextPrimary" flex={1}>{myOfferText(o.direction)}</Text>
-                  <Button
-                    title={busyId === o.id ? "..." : "Cancelar"}
-                    variant="outline"
-                    isDisabled={!!busyId}
-                    onPress={() => cancel(o.id)}
-                  />
-                </HStack>
-              ))}
-            </VStack>
-          )}
-
-          <Button title="Fechar" variant="outline" mt="$5" onPress={onClose} />
-        </VStack>
-      </Box>
+        {mine.length > 0 && (
+          <VStack gap="$3" mt="$4">
+            <Divider bg="$brandBorder" />
+            <Text size="xs" color="$brandTextSecondary" fontFamily="$heading">MEUS PEDIDOS</Text>
+            {mine.map((o) => (
+              <HStack key={o.id} alignItems="center" justifyContent="space-between">
+                <Text size="sm" color="$brandTextPrimary" flex={1}>{myOfferText(o.direction)}</Text>
+                <Button
+                  title={busyId === o.id ? "..." : "Cancelar"}
+                  variant="outline"
+                  isDisabled={!!busyId}
+                  onPress={() => cancel(o.id)}
+                />
+              </HStack>
+            ))}
+          </VStack>
+        )}
+      </CaixaDeModal>
     </Modal>
   );
 }

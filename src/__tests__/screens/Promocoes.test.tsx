@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-import { act, fireEvent, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, waitFor, within } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { Promocoes } from '@screens/Promocoes';
@@ -15,6 +15,7 @@ jest.mock('@services/campaignService', () => ({
     listMine: (...a: unknown[]) => mockListMine(...a),
   },
 }));
+jest.mock('@components/SeuLinkDeIndicacao', () => ({ SeuLinkDeIndicacao: () => null }));
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => {
@@ -45,14 +46,82 @@ afterEach(() => alerta.mockRestore());
 describe('Promoções', () => {
   it('usa o cupom digitado e mostra a lista de novo', async () => {
     mockListMine.mockResolvedValueOnce({ data: [] }).mockResolvedValueOnce({ data: [{ id: 'c1', name: 'Lançamento' }] });
-    const { getByTestId, findByText } = renderWithProviders(<Promocoes />);
+    const { getByTestId, getByText, findByText } = renderWithProviders(<Promocoes />);
+    // promocoes-ativar-e-codigo (24/10): o botão é "Ativar", não "Usar"
+    expect(getByText('Ativar')).toBeTruthy();
     fireEvent.changeText(getByTestId('cupom-campo'), ' vupth10 ');
     await act(async () => {
       fireEvent.press(getByTestId('cupom-usar'));
     });
     expect(mockRedeem).toHaveBeenCalledWith('vupth10', 'tk');
-    expect(alerta).toHaveBeenCalledWith('Cupom ativado', 'Lançamento');
+    expect(alerta).toHaveBeenCalledWith('Cupom ativado', 'Lançamento', undefined);
     expect(await findByText('Lançamento')).toBeTruthy();
+  });
+
+  // campanha-encerrada-esgotada-e-validade (DEC-124): o prazo na ativacao e o Saiba mais.
+  it('ao ativar, mostra "válido até" e o Saiba mais traz dias e prazo', async () => {
+    mockRedeem.mockResolvedValue({
+      data: { id: 'c1', name: 'Terça', value_percent: 10, weekdays: 'TUESDAY,WEDNESDAY', ends_at: '2026-11-05T21:30:00' },
+    });
+    const { getByTestId } = renderWithProviders(<Promocoes />);
+    fireEvent.changeText(getByTestId('cupom-campo'), 'terca');
+    await act(async () => {
+      fireEvent.press(getByTestId('cupom-usar'));
+    });
+    const [titulo, msg, botoes] = alerta.mock.calls[0];
+    expect(titulo).toBe('Cupom ativado');
+    expect(msg).toBe('Terça\nVálido até 05/11 às 21:30.');
+    expect(botoes.map((b: { text: string }) => b.text)).toEqual(['Saiba mais', 'Ok']);
+    botoes[0].onPress();
+    expect(alerta).toHaveBeenLastCalledWith('Terça', '10% de desconto\nVale para qualquer serviço.\nDias: terça, quarta.\nPrazo: até 05/11 às 21:30.');
+  });
+
+  it('lista os ativos com regra e validade, e os usados e vencidos à parte', async () => {
+    mockListMine.mockResolvedValue({
+      data: [
+        { id: 'a', name: 'Lançamento', status: 'ACTIVE', value_percent: 10, ends_at: '2026-11-05T12:00:00' },
+        { id: 'b', name: 'Antigo', status: 'USED', value_amount: 5 },
+        { id: 'c', name: 'Velho', status: 'EXPIRED' },
+      ],
+    });
+    const { findByTestId, getByTestId, getByText, queryByText, queryByTestId } = renderWithProviders(<Promocoes />);
+    await findByTestId('cupons-meus');
+    expect(getByTestId('cupom-a')).toBeTruthy();
+    // card-ticket-pontilhado (André, 24/10): o valor grande, o nome e a validade no ticket
+    expect(getByTestId('cupom-a-valor')).toHaveTextContent('10%');
+    expect(getByText('10% de desconto')).toBeTruthy();
+    expect(getByText('Válido até 05/11 às 12:00')).toBeTruthy();
+    expect(getByTestId('cupom-a-picote-esquerdo')).toBeTruthy();
+    expect(queryByTestId('cupom-a-picote-direito')).toBeNull();
+    // cupom-usado-some-da-selecao: o usado e o vencido em seções próprias, sem contagem
+    expect(getByText('Cupons usados')).toBeTruthy();
+    expect(getByText('Cupons vencidos')).toBeTruthy();
+    expect(within(getByTestId('cupons-usados')).getByText('Usado')).toBeTruthy();
+    expect(within(getByTestId('cupons-vencidos')).getByText('Vencido')).toBeTruthy();
+    expect(queryByText(/\d+ (ativ|dispon)/i)).toBeNull();
+    expect(queryByText('Velho')).toBeTruthy();
+  });
+
+  // promocoes-ativas-clicaveis (André, 24/10): "Promoções ativas"; o cupom abre o código.
+  it('o cupom ativo é um card clicável que mostra o código; o usado não abre', async () => {
+    mockListMine.mockResolvedValue({
+      data: [
+        { id: 'a', name: 'Lançamento', code: 'VUPTH10', status: 'ACTIVE', value_percent: 10 },
+        { id: 'b', name: 'Antigo', code: 'VELHO', status: 'USED', value_amount: 5 },
+      ],
+    });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { findByTestId, getByTestId, getByText } = renderWithProviders(<Promocoes />);
+    await findByTestId('cupons-meus');
+    expect(getByText('Promoções ativas')).toBeTruthy();
+    // promocoes-ativar-e-codigo: cada ticket mostra o código do cupom
+    expect(getByTestId('cupom-a-codigo')).toHaveTextContent('Código: VUPTH10');
+    fireEvent.press(getByTestId('cupom-a'));
+    expect(alerta).toHaveBeenLastCalledWith('Lançamento', 'Código: VUPTH10');
+    alerta.mockClear();
+    fireEvent.press(getByTestId('cupom-b'));
+    expect(alerta).not.toHaveBeenCalled();
+    alerta.mockRestore();
   });
 
   it('a recusa vem numa frase curta', async () => {
@@ -62,7 +131,7 @@ describe('Promoções', () => {
     await act(async () => {
       fireEvent.press(getByTestId('cupom-usar'));
     });
-    expect(alerta).toHaveBeenCalledWith('Cupom', 'Você já usou este cupom.');
+    expect(alerta).toHaveBeenCalledWith('Cupom', 'Este cupom já está ativado.');
   });
 
   it('sem cupom digitado, ou sem login, não envia', async () => {
@@ -88,5 +157,19 @@ describe('Promoções', () => {
     const outra = renderWithProviders(<Promocoes />);
     await waitFor(() => expect(mockListMine).toHaveBeenCalledTimes(2));
     expect(outra.queryByTestId('cupons-meus')).toBeNull();
+  });
+
+  // DEC-124: cupom encerrado ou esgotado abre o modal certo (formato dos alertas do app).
+  it.each([
+    ['CAMPAIGN_ENDED', 'Promoção encerrada'],
+    ['CAMPAIGN_SOLD_OUT', 'Promoção esgotada'],
+  ])('recusa %s mostra o modal %s', async (code, titulo) => {
+    mockRedeem.mockRejectedValue({ response: { status: 409, data: { code } } });
+    const { getByTestId } = renderWithProviders(<Promocoes />);
+    fireEvent.changeText(getByTestId('cupom-campo'), 'x');
+    await act(async () => {
+      fireEvent.press(getByTestId('cupom-usar'));
+    });
+    expect(alerta).toHaveBeenLastCalledWith(titulo, expect.any(String), expect.any(Array), expect.anything());
   });
 });

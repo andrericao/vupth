@@ -10,6 +10,31 @@ export const CATEGORIA_TROCA = 'TROCA';
 export const ACAO_CONFIRMAR = 'CONFIRMAR';
 export const ACAO_AGORA_NAO = 'AGORA_NAO';
 
+// push-acoes-por-pergunta (24/10, Backend 7584964): ação no push só onde a tela pergunta a mesma coisa.
+// SWAP_REQUESTED chega com TROCAR_RECUSAR (Trocar = PATCH /swap-requests/{id}?accept=true; Recusar =
+// accept=false); EARLIER_TURN_OFFERED, com ACEITAR_MANTER (Aceitar = accept-earlier-turn; Manter não
+// chama nada, vale o horário prometido). A categoria TROCA segue para a oferta (SWAP_OFFERED).
+export const CATEGORIA_TROCAR_RECUSAR = 'TROCAR_RECUSAR';
+export const ACAO_TROCAR = 'TROCAR';
+export const ACAO_RECUSAR = 'RECUSAR';
+export const CATEGORIA_ACEITAR_MANTER = 'ACEITAR_MANTER';
+export const ACAO_ACEITAR = 'ACEITAR';
+export const ACAO_MANTER = 'MANTER';
+
+/** Os botões que aceitam a troca (o CONFIRMAR de sempre e os dois novos). */
+export const ACOES_QUE_ACEITAM = [ACAO_CONFIRMAR, ACAO_TROCAR, ACAO_ACEITAR];
+
+/** O botão responde pela API (aceita ou recusa a troca): quem trata a resposta não navega para tela nenhuma. */
+export function ehAcaoQueResponde(acao: string): boolean {
+  return ACOES_QUE_ACEITAM.includes(acao) || acao === ACAO_RECUSAR;
+}
+
+/** O pedido de troca que o Recusar nega, pelo `data` do push. `null` = nada a recusar. */
+export function recusaDaTroca(data: unknown): string | null {
+  const d = (data ?? {}) as Dados;
+  return d.type === 'SWAP_REQUESTED' ? texto(d.swapRequestId) : null;
+}
+
 export type AceiteDaTroca =
   | { tipo: 'pedido'; id: string }
   | { tipo: 'oferta'; id: string }

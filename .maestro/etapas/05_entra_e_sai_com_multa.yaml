@@ -62,11 +62,13 @@ appId: ${APP_ID}
 # relogio, e uma espera longa e continua derrubava o adb no emulador ("device
 # offline" na 06, baterias 11/10 23:57 e 12/10 02:09). 40 voltas cobrem os
 # 15 min da tolerancia com folga.
+# bateria 25/10 01:28 (05.1D): o `while: visible` saiu cedo — o log mostra UMA volta em 05.11 e uma em
+# 05.1C, e a faixa "sem custo ate 04:01" seguia na tela com o relogio do aparelho em 03:59. A checagem do
+# `while` e instantanea e erra no emulador lento. Agora o laco NAO tem `while`: roda as 40 voltas e cada uma
+# espera a faixa sumir (30 s); com ela ja fora, o extendedWaitUntil volta na hora e as voltas que sobram
+# custam quase nada.
 - repeat:
     times: 40
-    while:
-      visible:
-        text: ".*sem custo até.*"
     commands:
       - extendedWaitUntil:
           notVisible:
@@ -75,7 +77,8 @@ appId: ${APP_ID}
           optional: true
       - runFlow:
           file: ../apoio/esperar_o_sistema.yaml
-      # A pausa de 5 s antes de conferir de novo: espera a faixa voltar.
+      # A pausa de 5 s antes da proxima volta: se a faixa so sumiu por um instante (re-render), ela volta e a
+      # volta seguinte espera de novo. Sumiu de vez: as voltas que sobram custam 5 s cada.
       - extendedWaitUntil:
           visible:
             text: ".*sem custo até.*"
@@ -98,9 +101,6 @@ appId: ${APP_ID}
     label: "05.1B · a tela da fila está livre"
 - repeat:
     times: 30
-    while:
-      visible:
-        text: ".*sem custo até.*"
     commands:
       - extendedWaitUntil:
           notVisible:
@@ -122,7 +122,7 @@ appId: ${APP_ID}
     id: "leave-queue"
     label: "05.1E · um toque em leave-queue"
 - assertVisible:
-    text: "Se sair, você paga uma multa de R\\$.*"
+    text: "Sair agora gera multa de R\\$.*"
     label: "05.1F · a faixa diz a multa em uma linha"
 - assertVisible:
     id: "saida-saiba-mais"
@@ -135,23 +135,23 @@ appId: ${APP_ID}
 - doubleTapOn:
     id: "leave-queue"
     label: "05.12 · toque duplo em leave-queue"
-# O "?" escapado: o texto e um regex, e "Sair da fila?" casava com o proprio
-# botao "Sair da fila" (o ? deixava o "a" opcional) — passava sem a caixa.
+# textos-curtos (guia 4.1): o titulo da caixa e "Sair da fila", igual ao botao da
+# tela; por isso espera a LINHA da multa, que so a caixa tem.
 - extendedWaitUntil:
-    visible: "Sair da fila\\?"
+    visible: ".*de multa no próximo atendimento.*"
     timeout: ${10000 * LENTO}
-    label: "05.13 · espera Sair da fila?"
+    label: "05.13 · espera a caixa Sair da fila (a linha da multa)"
 - assertVisible:
-    text: "Permanecer na fila"
-    label: "05.13b · a caixa oferece Permanecer na fila"
+    text: "Cancelar"
+    label: "05.13b · a caixa oferece Cancelar"
 - assertNotVisible:
-    text: "Adiar minha vez"
-    label: "05.13c · sem o botao Adiar minha vez"
-# A caixa so tem dois botoes (entrada-e-saida-da-fila, 22/10): "Permanecer na
-# fila" e "Sim, sair". Pelo id do destrutivo.
+    text: "Adiar"
+    label: "05.13c · sem o botao Adiar"
+# A caixa so tem dois botoes (entrada-e-saida-da-fila, 22/10; textos-curtos):
+# "Cancelar" e "Sair". Pelo id do destrutivo.
 - tapOn:
     id: "dialogo-botao-destrutivo"
-    label: "05.14 · toca em Sim, sair"
+    label: "05.14 · toca em Sair"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "05.15 · roda fechar_aviso"

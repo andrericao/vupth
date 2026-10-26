@@ -21,6 +21,9 @@ const OPEN_PARAMS = {
 const mockRouteParams: Record<string, unknown> = { ...OPEN_PARAMS };
 
 let mockInset = 0;
+let mockCupons: unknown[] = [];
+jest.mock('@hooks/useMeusCupons', () => ({ useMeusCupons: () => mockCupons }));
+jest.mock('@hooks/usePagamentoAdiantado', () => ({ ...jest.requireActual('@hooks/usePagamentoAdiantado'), usePagamentoAdiantado: () => false }));
 jest.mock('@hooks/useTabBarInset', () => ({ useTabBarInset: () => mockInset }));
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
@@ -58,6 +61,9 @@ jest.mock('@services/paymentService', () => ({
 jest.mock('@services/cutRequestService', () => ({
   cutRequestService: { create: jest.fn() },
 }));
+
+const mockAvisoFim = jest.fn();
+jest.mock('@utils/avisoDeFimDaCampanha', () => ({ avisoDeFimDaCampanha: (...a: unknown[]) => mockAvisoFim(...a) }));
 
 const mockGetServices = establishmentService.getServiceItemsByProfessional as jest.Mock;
 const mockCreateOffer = swapOfferService.create as jest.Mock;
@@ -134,6 +140,20 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
     alerta.mockRestore();
   });
 
+  // modal-sem-fila-5-minutos (André, 24/10): fila livre, só "em 5 minutos".
+  it('Entrar numa fila livre: o aviso diz só "Esteja na loja em 5 minutos."', async () => {
+    useAuthStore.setState({ isAuthenticated: true });
+    setRouteParams({ ...OPEN_PARAMS, estimatedWaitMinutes: 0 });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent.press(getByTestId('primary-queue'));
+    const [titulo, mensagem] = alerta.mock.calls[0] as [string, string];
+    expect(titulo).toBe('Esteja na loja');
+    expect(mensagem).toBe('Esteja na loja em 5 minutos.');
+    alerta.mockRestore();
+  });
+
   it('com serviço escolhido, o resumo não fala de multa nem da saída sem custo (DEC-1, Andre 05/10)', async () => {
     useAuthStore.setState({ isAuthenticated: true });
     const { queryByTestId, queryByText, findByTestId } = renderWithProviders(<ServiceSelection />);
@@ -147,13 +167,46 @@ describe('ServiceSelection — portão de auth (modo visitante)', () => {
   it('com serviço escolhido, o resumo traz o Saiba mais do preço, que abre o artigo do Suporte', async () => {
     useAuthStore.setState({ isAuthenticated: true });
     const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
-    const { queryByTestId, getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    const { queryByTestId, getByTestId, getByText, findByTestId } = renderWithProviders(<ServiceSelection />);
     await findByTestId('service-s1', {}, { timeout: 15000 });
     expect(queryByTestId('preco-saiba-mais')).toBeNull();
     fireEvent.press(getByTestId('service-s1'));
+    // detalhes-do-pagamento (André, 24/10): o rotulo e "Detalhes do pagamento"; o Saiba mais explica
+    // a taxa e que abatimento em multa nao conta em campanha, e dai vai ao artigo.
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    expect(getByText('Detalhes do pagamento')).toBeTruthy();
     fireEvent.press(getByTestId('preco-saiba-mais'));
+    const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, { text: string; onPress?: () => void }[]];
+    expect(titulo).toBe('Detalhes do pagamento');
+    expect(mensagem).toMatch(/taxa de pagamento/);
+    expect(mensagem).toMatch(/Abatimentos em multas não são considerados em campanhas/);
+    botoes.find((b) => b.text === 'Ver artigo')!.onPress!();
     expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/por-que-o-preco-muda.html');
+    alerta.mockRestore();
     abrir.mockRestore();
+  });
+
+  // cupom-abate-no-resumo (André, 24/10): o resumo mostra o total dos servicos sem a multa; o toggle
+  // "usar cupom" fica abaixo do card; ligado, o valor cheio e riscado, "Valor com cupom" aparece e o
+  // botao usa servicos - cupom (+ multa, que nunca entra no desconto).
+  it('o cupom abate no resumo e no botão ao ligar o toggle', async () => {
+    useAuthStore.setState({ isAuthenticated: true });
+    mockCupons = [{ id: 'c1', name: 'Dez', value_amount: 10 }];
+    const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    await findByTestId('service-s1', {}, { timeout: 15000 });
+    fireEvent.press(getByTestId('service-s1'));
+    expect(getByTestId('servicos-valor-cheio')).toBeTruthy();
+    expect(queryByTestId('valor-com-cupom')).toBeNull();
+    expect(getByTestId('primary-queue')).toHaveTextContent('Entrar na fila · R$ 30,00');
+    fireEvent(getByTestId('usar-cupom-c1'), 'valueChange', true);
+    expect(getByTestId('valor-com-cupom')).toBeTruthy();
+    expect(getByTestId('valor-com-cupom')).toHaveTextContent(/Valor com cupom\s*R\$ 20,00/);
+    expect(getByTestId('servicos-valor-cheio')).toHaveTextContent('R$ 30,00');
+    expect(getByTestId('primary-queue')).toHaveTextContent('Entrar na fila · R$ 20,00');
+    fireEvent(getByTestId('usar-cupom-c1'), 'valueChange', false);
+    expect(queryByTestId('valor-com-cupom')).toBeNull();
+    expect(getByTestId('primary-queue')).toHaveTextContent('Entrar na fila · R$ 30,00');
+    mockCupons = [];
   });
 
   it('LOGADO: confirmar vai direto pra queueStatus', async () => {
@@ -269,6 +322,62 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
         'tok',
       ),
     );
+  });
+
+  // cupom-ativado-nao-computado (André, 24/10): o pedido de corte leva o cupom do toggle.
+  it('LOJA FECHADA: o pedido de corte leva o cupom ligado no toggle; sem o toggle, sai sem ele', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    setRouteParams({ ...OPEN_PARAMS, establishmentOpen: false });
+    mockCreateCut.mockResolvedValue({ data: { id: 'cut-1' } });
+    mockCupons = [{ id: 'c1', name: 'Dez', value_amount: 10 }];
+    const { getByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent(getByTestId('usar-cupom-c1'), 'valueChange', true);
+    fireEvent.press(getByTestId('more-options'));
+    fireEvent.press(getByTestId('more-option-cut'));
+    fireEvent.press(await findByTestId('corte-assim-que-abrir'));
+    await waitFor(() =>
+      expect(mockCreateCut).toHaveBeenCalledWith(
+        { professionalId: 'p1', establishmentId: 'e1', serviceItemIds: ['s1'], coupon_campaign_id: 'c1' },
+        'tok',
+      ),
+    );
+    mockCupons = [];
+  });
+
+  it('LOJA FECHADA: cupom recusado no pedido de corte (COUPON_NOT_ACTIVE) avisa e tira o cupom da escolha', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    setRouteParams({ ...OPEN_PARAMS, establishmentOpen: false });
+    mockCreateCut.mockRejectedValue({ response: { status: 422, data: { code: 'COUPON_NOT_ACTIVE' } } });
+    mockCupons = [{ id: 'c1', name: 'Dez', value_amount: 10 }];
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent(getByTestId('usar-cupom-c1'), 'valueChange', true);
+    expect(queryByTestId('valor-com-cupom')).toBeTruthy();
+    fireEvent.press(getByTestId('more-options'));
+    fireEvent.press(getByTestId('more-option-cut'));
+    fireEvent.press(await findByTestId('corte-assim-que-abrir'));
+    await waitFor(() => expect(alerta).toHaveBeenCalledWith('Cupom', expect.any(String)));
+    expect(queryByTestId('valor-com-cupom')).toBeNull();
+    alerta.mockRestore();
+    mockCupons = [];
+  });
+
+  it('LOJA FECHADA: promoção encerrada no pedido de corte (409 CAMPAIGN_ENDED) tira o cupom e mostra o aviso de fim', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tok' });
+    setRouteParams({ ...OPEN_PARAMS, establishmentOpen: false });
+    mockCreateCut.mockRejectedValue({ response: { status: 409, data: { code: 'CAMPAIGN_ENDED' } } });
+    mockCupons = [{ id: 'c1', name: 'Dez', value_amount: 10 }];
+    const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    fireEvent.press(await findByTestId('service-s1', {}, { timeout: 15000 }));
+    fireEvent(getByTestId('usar-cupom-c1'), 'valueChange', true);
+    fireEvent.press(getByTestId('more-options'));
+    fireEvent.press(getByTestId('more-option-cut'));
+    fireEvent.press(await findByTestId('corte-assim-que-abrir'));
+    await waitFor(() => expect(mockAvisoFim).toHaveBeenCalledWith('ENCERRADA'));
+    await waitFor(() => expect(queryByTestId('valor-com-cupom')).toBeNull());
+    mockCupons = [];
   });
 
   it('fila aberta: as duas portas na tela — entrar agora e agendar; o menu fica só com a troca (C20)', async () => {

@@ -1,10 +1,13 @@
 import type { Campanha } from '@services/campaignService';
 
+import { formatarReais } from '@utils/formatarReais';
+
 // Cupom no app (cupom-no-app, Andre 15/10): Perfil > Promocoes, digitar o
 // cupom e ver os aceitos. Texto curto (DEC-63).
 //
-// DESLIGADO ate o Backend (4a94610) subir: com false, o menu nao aparece.
-export const CUPOM_LIGADO = false;
+// LIGADO com o Backend 5de02e0 (cupom-ativado-em-configuracoes, DEC-110): ativar,
+// Meus cupons (ativos e encerrados) e, no passo seguinte, usar no corte.
+export const CUPOM_LIGADO = true;
 
 /** O que digitar: sem espacos nas pontas (o Backend nao diferencia maiuscula). */
 export function cupomDigitado(texto: string): string {
@@ -20,15 +23,172 @@ export function mensagemDoCupom(erro: unknown): string {
     case 'CAMPAIGN_NOT_AVAILABLE':
       return 'Este cupom não está valendo agora.';
     case 'CAMPAIGN_ALREADY_REDEEMED':
-      return 'Você já usou este cupom.';
+      return 'Este cupom já está ativado.';
+    case 'COUPON_NOT_ACTIVE':
+      return 'Este cupom não está valendo. Escolha outro ou siga sem cupom.';
+    case 'CAMPAIGN_ENDED':
+      return 'Esta promoção foi encerrada.';
+    case 'CAMPAIGN_SOLD_OUT':
+      return 'Esta promoção esgotou.';
     case 'CAMPAIGN_NOT_FOR_YOU':
       return 'Este cupom não vale para a sua conta.';
     default:
-      return 'Não foi possível usar o cupom. Tente de novo.';
+      return 'Não foi possível ativar o cupom. Tente de novo.';
   }
 }
 
 /** O nome que a lista mostra. */
 export function nomeDaCampanha(c: Campanha): string {
   return c.name || c.code || 'Cupom';
+}
+
+function dia(iso: string): string {
+  const d = new Date(iso);
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+/** A regra em uma frase: "R$ 5,00 de desconto" ou "10% de desconto". */
+export function regraDoCupom(c: Campanha): string {
+  if (c.value_percent) return `${c.value_percent}% de desconto`;
+  if (c.value_amount) return `${formatarReais(c.value_amount)} de desconto`;
+  return beneficioEmPortugues(c.benefit);
+}
+
+/** A validade (o fim da campanha), ou vazio sem data. */
+export function validadeDoCupom(c: Campanha): string {
+  if (!c.ends_at || Number.isNaN(new Date(c.ends_at).getTime())) return '';
+  return `Vale até ${dia(c.ends_at)}`;
+}
+
+function horaDoFim(iso?: string | null): string {
+  if (!iso || Number.isNaN(new Date(iso).getTime())) return '';
+  const d = new Date(iso);
+  return `${dia(iso)} às ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+/** campanha-encerrada-esgotada-e-validade (DEC-124) e texto-do-modal-de-cupom (24/10): o aviso ao ativar, so "Válido até dd/MM às HH:mm."; vazio sem data. */
+export function avisoDeValidade(c: Campanha): string {
+  const fim = horaDoFim(c.ends_at);
+  return fim ? `Válido até ${fim}.` : '';
+}
+
+const DIAS: Record<string, string> = {
+  MONDAY: 'segunda',
+  TUESDAY: 'terça',
+  WEDNESDAY: 'quarta',
+  THURSDAY: 'quinta',
+  FRIDAY: 'sexta',
+  SATURDAY: 'sábado',
+  SUNDAY: 'domingo',
+};
+
+/** Os dias da semana em que vale, ou "todos os dias" (campo vazio). */
+export function diasDoCupom(c: Campanha): string {
+  const dias = (c.weekdays ?? '')
+    .split(',')
+    .map((d) => DIAS[d.trim().toUpperCase()])
+    .filter(Boolean);
+  return dias.length > 0 ? dias.join(', ') : 'todos os dias';
+}
+
+/** O "Saiba mais" do cupom: descrição, regra, serviços (hoje qualquer um), dias e prazo. */
+export function saibaMaisDoCupom(c: Campanha): string {
+  const linhas = [c.description ?? '', regraDoCupom(c), 'Vale para qualquer serviço.', `Dias: ${diasDoCupom(c)}.`];
+  const fim = horaDoFim(c.ends_at);
+  if (fim) linhas.push(`Prazo: até ${fim}.`);
+  return linhas.filter(Boolean).join('\n');
+}
+
+/** O rotulo de quem ja nao vale: usado ou vencido. */
+export function situacaoDoCupom(c: Campanha): string {
+  return c.status === 'USED' || c.used ? 'Usado' : 'Vencido';
+}
+
+/**
+ * Ativos (para usar) e encerrados (usados ou vencidos). Sem `status` (Backend
+ * anterior) todo cupom da lista vale como ativo.
+ */
+export function separarCupons(lista: Campanha[]): { ativos: Campanha[]; encerrados: Campanha[] } {
+  const encerrado = (c: Campanha) => c.status === 'USED' || c.status === 'EXPIRED' || c.used === true;
+  return { ativos: lista.filter((c) => !encerrado(c)), encerrados: lista.filter(encerrado) };
+}
+
+// campanha-encerrada-esgotada-e-validade (DEC-124): os dois modais, no cupom e no link.
+export type FimDaCampanha = 'ENCERRADA' | 'ESGOTADA';
+
+/** Passou do prazo = encerrada; no prazo e sem vaga = esgotada; senão, null. */
+export function fimDaCampanha(c: Campanha, agora: Date = new Date()): FimDaCampanha | null {
+  if (c.ends_at && new Date(c.ends_at).getTime() <= agora.getTime()) return 'ENCERRADA';
+  if (c.remaining_slots === 0) return 'ESGOTADA';
+  return null;
+}
+
+/** O fim que o Backend recusou (409 CAMPAIGN_ENDED / CAMPAIGN_SOLD_OUT), ou null. */
+export function fimDoErro(erro: unknown): FimDaCampanha | null {
+  const code = (erro as { response?: { data?: { code?: string } } } | null)?.response?.data?.code;
+  if (code === 'CAMPAIGN_ENDED') return 'ENCERRADA';
+  if (code === 'CAMPAIGN_SOLD_OUT') return 'ESGOTADA';
+  return null;
+}
+
+/** O texto do modal: título e uma frase. */
+export function textoDoFim(fim: FimDaCampanha): { titulo: string; mensagem: string } {
+  return fim === 'ENCERRADA'
+    ? { titulo: 'Promoção encerrada', mensagem: 'O prazo desta promoção acabou.' }
+    : { titulo: 'Promoção esgotada', mensagem: 'As vagas desta promoção acabaram.' };
+}
+
+/**
+ * cupom-abate-no-resumo (André, 24/10): quanto o cupom abate dos SERVIÇOS. A multa
+ * nunca entra no desconto. Percentual sobre o total dos serviços; valor fixo até o
+ * total deles. Duas casas; nunca passa do total. O servidor confirma o valor final.
+ */
+export function descontoDoCupom(c: Campanha | null | undefined, servicos: number): number {
+  if (!c || !(servicos > 0)) return 0;
+  const bruto = c.value_percent ? (servicos * Number(c.value_percent)) / 100 : Number(c.value_amount) || 0;
+  return Math.round(Math.min(Math.max(bruto, 0), servicos) * 100) / 100;
+}
+
+// cards-de-promocao-em-portugues (André, 24/10): nenhuma palavra em inglês na tela. O Backend manda o
+// tipo (REFERRAL_BONUS, FEE_WAIVER, DISCOUNT) e o benefício (CASH, DISCOUNT) como código; o app mostra o
+// português. Código que o mapa não conhece não aparece cru: sai vazio.
+const BENEFICIOS: Record<string, string> = {
+  CASH: 'Ganho em dinheiro',
+  DISCOUNT: 'Desconto',
+};
+const TIPOS: Record<string, string> = {
+  REFERRAL_BONUS: 'Indique e ganhe',
+  FEE_WAIVER: 'Isenção da taxa',
+  DISCOUNT: 'Desconto',
+};
+
+/** O benefício em português ("Ganho em dinheiro", "Desconto"); texto livre passa, código desconhecido some. */
+export function beneficioEmPortugues(benefit: string | null | undefined): string {
+  const b = (benefit ?? '').trim();
+  if (!b) return '';
+  if (BENEFICIOS[b]) return BENEFICIOS[b];
+  return /^[A-Z][A-Z0-9_]*$/.test(b) ? '' : b;
+}
+
+/** O tipo da campanha em português; código desconhecido some. */
+export function tipoEmPortugues(type: string | null | undefined): string {
+  const t = (type ?? '').trim();
+  if (!t) return '';
+  if (TIPOS[t]) return TIPOS[t];
+  return /^[A-Z][A-Z0-9_]*$/.test(t) ? '' : t;
+}
+
+/**
+ * card-ticket-pontilhado (André, 24/10): o valor grande do cartão. Percentual ("10%") ou valor em reais
+ * ("R$ 10,00"); sem nenhum dos dois, vazio (o cartão mostra só o nome).
+ */
+export function valorDoTicket(c: Campanha): string {
+  if (c.value_percent) return `${Number(c.value_percent)}%`;
+  if (c.value_amount) return formatarReais(Number(c.value_amount));
+  return '';
+}
+
+/** "Válido até dd/MM às HH:mm" (sem o ponto final do aviso), ou vazio sem data. */
+export function validadeDoTicket(c: Campanha): string {
+  return avisoDeValidade(c).replace(/\.$/, '');
 }

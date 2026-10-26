@@ -23,6 +23,8 @@ const ABERTA = {
 };
 const mockRouteParams: Record<string, unknown> = { ...ABERTA };
 
+jest.mock('@hooks/useMeusCupons', () => ({ useMeusCupons: () => [] }));
+jest.mock('@hooks/usePagamentoAdiantado', () => ({ ...jest.requireActual('@hooks/usePagamentoAdiantado'), usePagamentoAdiantado: () => false }));
 jest.mock('expo-secure-store');
 jest.mock('@hooks/useTabBarInset', () => ({ useTabBarInset: () => 0 }));
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
@@ -114,6 +116,27 @@ describe('ServiceSelection — escolher', () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     fireEvent.press(tela.getByTestId('primary-queue'));
     const botoes = alerta.mock.calls[0][2] as { text: string; onPress?: () => void }[];
+    botoes.find((b) => b.text === 'Confirmar')!.onPress!();
+    alerta.mockRestore();
+    expect(mockNavigate).toHaveBeenCalledWith('queueStatus', expect.objectContaining({ serviceItemIds: ['s1'] }));
+  });
+
+  // lembrar-multa-pendente-ao-entrar-na-fila (André, 24/10): a cada tentativa, o lembrete da fatura antes de entrar.
+  it('com multa pendente, entrar na fila lembra a fatura: Cancelar não entra; Continuar segue para o aviso de chegada', async () => {
+    mockMultas = [{ penaltyId: 'm1', type: 'LATE_CANCEL', amount: 5, originProfessionalName: 'Carlos' }];
+    const tela = await escolher();
+    await tela.findByTestId('ver-multas', {}, { timeout: 15000 });
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    fireEvent.press(tela.getByTestId('primary-queue'));
+    expect(alerta.mock.calls[0][0]).toBe('Multa pendente');
+    expect(alerta.mock.calls[0][1]).toBe('Você tem R$ 5,00 em multa. Ela entra no valor deste corte.');
+    let botoes = alerta.mock.calls[0][2] as { text: string; onPress?: () => void }[];
+    expect(botoes.map((b) => b.text)).toEqual(['Cancelar', 'Continuar']);
+    expect(mockNavigate).not.toHaveBeenCalledWith('queueStatus', expect.anything());
+    // Continuar: segue para o aviso de chegada (espera curta) e so entao entra
+    botoes.find((b) => b.text === 'Continuar')!.onPress!();
+    expect(alerta.mock.calls[1][0]).toBe('Esteja na loja');
+    botoes = alerta.mock.calls[1][2] as { text: string; onPress?: () => void }[];
     botoes.find((b) => b.text === 'Confirmar')!.onPress!();
     alerta.mockRestore();
     expect(mockNavigate).toHaveBeenCalledWith('queueStatus', expect.objectContaining({ serviceItemIds: ['s1'] }));

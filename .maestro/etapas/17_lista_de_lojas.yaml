@@ -13,6 +13,18 @@ appId: ${APP_ID}
     visible: "Ligue o GPS"
     timeout: ${30000 * LENTO}
     label: "17.0G · o card do Início diz Ligue o GPS no lugar da distância"
+# carrossel-de-campanhas-na-home (23/10): o bloco so existe com campanha criada
+# no Painel; se existir, o toque abre os detalhes e o Fechar volta ao Inicio.
+- runFlow:
+    when:
+      visible:
+        id: "campanhas-da-home"
+    commands:
+      - tapOn:
+          id: "campanhas-da-home"
+      - tapOn:
+          text: "Fechar"
+    label: "17.0H · campanha da Home: toque abre os detalhes, Fechar volta"
 - runFlow:
     when:
       notVisible:

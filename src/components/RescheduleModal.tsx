@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Modal, TextInput, TouchableOpacity } from "react-native";
-import { VStack, HStack, Box, Text, Center } from "@gluestack-ui/themed";
+import { VStack, HStack, Text, Center } from "@gluestack-ui/themed";
 import { Clock, TriangleAlert } from "lucide-react-native";
 
 import { Button } from "@components/Button";
-import { floatingShadow } from "@utils/styles";
+import { CaixaDeModal } from "@components/CaixaDeModal";
 import {
   buildTargetFromTime,
   validateRescheduleTime,
@@ -76,7 +76,7 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
   const [hour, setHour] = useState("");
   const [minute, setMinute] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const { cores, veu } = useTema();
+  const { cores } = useTema();
 
   function reset() {
     setHour("");
@@ -100,82 +100,82 @@ export function RescheduleModal({ visible, baseMs, tailEtaMs, penalty, loading, 
     onConfirm(new Date(target).toISOString());
   }
 
+  const rodape = (
+    <VStack gap="$3" alignItems="center">
+      <Button title="Agendar" isLoading={loading} onPress={handleConfirm} />
+      {/* Cancelar vira LINK: era um botao contornado do mesmo tamanho do
+          "Agendar", e dois pesos iguais fazem hesitar na saida errada. */}
+      <TouchableOpacity onPress={close} disabled={loading} testID="reschedule-cancel">
+        <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
+          Cancelar
+        </Text>
+      </TouchableOpacity>
+    </VStack>
+  );
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg={veu} justifyContent="center" px={24}>
-        <VStack bg="$painel" borderRadius="$hero" p="$6" gap="$4" style={floatingShadow}>
-          <VStack gap="$1.5">
-            <Text
-              fontFamily="$display"
-              fontSize={fs(22)}
-              lineHeight={fs(26)}
-              letterSpacing={-0.6}
-              color="$brandTextPrimary"
-            >
-              Agendar minha vez
-            </Text>
+      <CaixaDeModal raio="hero" gap={16} rodape={rodape}>
+        <VStack gap="$1.5">
+          <Text
+            fontFamily="$display"
+            fontSize={fs(22)}
+            lineHeight={fs(26)}
+            letterSpacing={-0.6}
+            color="$brandTextPrimary"
+          >
+            Agendar minha vez
+          </Text>
 
-            {tailEtaMs != null && (
-              <HStack alignItems="center" gap="$1.5">
-                <Clock size={15} color={cores.textSecondary} />
-                <Text size="sm" color="$brandTextSecondary">
-                  A fila hoje deve ir até {formatClockTime(new Date(tailEtaMs))}
-                </Text>
-              </HStack>
-            )}
-
-            {/* Quatro linhas viraram uma. O que saiu: "e uma estimativa e pode
-                variar" (a linha do relogio acima ja diz "deve ir ate") e o
-                caso do intervalo, que so importa quando acontece — e ai quem
-                avisa e a mensagem de erro, com o horario real. */}
-            <Text size="sm" lineHeight={fs(20)} color="$brandTextSecondary">
-              Escolha o horário — precisa estar dentro do funcionamento da loja.
-            </Text>
-          </VStack>
-
-          {penalty && (
-            <HStack
-              alignItems="center"
-              gap="$2"
-              bg="$brandDangerTint"
-              borderRadius="$card"
-              px="$3.5"
-              py="$2.5"
-            >
-              <TriangleAlert size={16} color={cores.danger} />
-              <Text fontFamily="$heading" fontSize={fs(13)} lineHeight={fs(18)} color="$brandDanger" flex={1}>
-                Perto de ser atendido: reagendar agora gera multa de R${" "}
-                {CANCELLATION_PENALTY_VALUE},00.
+          {tailEtaMs != null && (
+            <HStack alignItems="center" gap="$1.5">
+              <Clock size={15} color={cores.textSecondary} />
+              <Text size="sm" color="$brandTextSecondary">
+                A fila hoje deve ir até {formatClockTime(new Date(tailEtaMs))}
               </Text>
             </HStack>
           )}
 
-          <HStack alignItems="center" justifyContent="center" gap="$2">
-            <CampoHora placeholder="HH" value={hour} onChangeText={(t) => setHour(onlyDigits(t))} />
-            <Text fontFamily="$display" fontSize={fs(22)} color="$brandTextPrimary">
-              :
-            </Text>
-            <CampoHora placeholder="MM" value={minute} onChangeText={(t) => setMinute(onlyDigits(t))} />
-          </HStack>
-
-          {error && (
-            <Text size="xs" color="$brandDanger" textAlign="center" mt={-8}>
-              {error}
-            </Text>
-          )}
-
-          <VStack gap="$3" alignItems="center">
-            <Button title="Agendar" isLoading={loading} onPress={handleConfirm} />
-            {/* Cancelar vira LINK: era um botao contornado do mesmo tamanho do
-                "Agendar", e dois pesos iguais fazem hesitar na saida errada. */}
-            <TouchableOpacity onPress={close} disabled={loading} testID="reschedule-cancel">
-              <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
-                Cancelar
-              </Text>
-            </TouchableOpacity>
-          </VStack>
+          {/* Quatro linhas viraram uma. O que saiu: "e uma estimativa e pode
+              variar" (a linha do relogio acima ja diz "deve ir ate") e o
+              caso do intervalo, que so importa quando acontece — e ai quem
+              avisa e a mensagem de erro, com o horario real. */}
+          <Text size="sm" lineHeight={fs(20)} color="$brandTextSecondary">
+            Escolha o horário — precisa estar dentro do funcionamento da loja.
+          </Text>
         </VStack>
-      </Box>
+
+        {penalty && (
+          <HStack
+            alignItems="center"
+            gap="$2"
+            bg="$brandDangerTint"
+            borderRadius="$card"
+            px="$3.5"
+            py="$2.5"
+          >
+            <TriangleAlert size={16} color={cores.danger} />
+            <Text fontFamily="$heading" fontSize={fs(13)} lineHeight={fs(18)} color="$brandDanger" flex={1}>
+              Perto de ser atendido: reagendar agora gera multa de R${" "}
+              {CANCELLATION_PENALTY_VALUE},00.
+            </Text>
+          </HStack>
+        )}
+
+        <HStack alignItems="center" justifyContent="center" gap="$2">
+          <CampoHora placeholder="HH" value={hour} onChangeText={(t) => setHour(onlyDigits(t))} />
+          <Text fontFamily="$display" fontSize={fs(22)} color="$brandTextPrimary">
+            :
+          </Text>
+          <CampoHora placeholder="MM" value={minute} onChangeText={(t) => setMinute(onlyDigits(t))} />
+        </HStack>
+
+        {error && (
+          <Text size="xs" color="$brandDanger" textAlign="center" mt={-8}>
+            {error}
+          </Text>
+        )}
+      </CaixaDeModal>
     </Modal>
   );
 }

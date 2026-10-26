@@ -50,6 +50,7 @@ jest.mock('lucide-react-native', () => {
   return new Proxy({}, { get: (_alvo, nome) => (props: object) => React.createElement('Icone', { ...props, nome: String(nome) }) });
 });
 jest.mock('@theme/liberacao', () => ({ ESCURO_LIBERADO: true }));
+jest.mock('@hooks/usePagamentoAdiantado', () => ({ ...jest.requireActual('@hooks/usePagamentoAdiantado'), usePagamentoAdiantado: () => false }));
 jest.mock('@services/paymentService', () => ({ paymentService: { get: jest.fn(), claim: jest.fn() } }));
 jest.mock('@services/swapOfferService', () => ({
   swapOfferService: { listAcceptable: jest.fn(), listMine: jest.fn(), accept: jest.fn(), cancel: jest.fn() },
@@ -531,13 +532,15 @@ describe.each(TEMAS)('caixas com dados no tema %s', (tema) => {
     act(() => usePendenciaStore.getState().pagar('a1'));
     const pix = montar(tema, <QueryClientProvider client={client}><ModalDePagamento /></QueryClientProvider>);
     await pix.findByText('R$ 40,00', {}, { timeout: 30000 });
+    // pagar-ao-finalizar-corte: o Pix e o QR ficam recolhidos; abre o drop down para conferir o codigo e o Copiar
+    fireEvent.press(pix.getByTestId('pix-dropdown'));
     conferirPainelEVeu(pix, tema);
     conferir(pix, tema, [
       ['Pagar por Pix', 'textPrimary', 'painel'],
       ['Serviço', 'textSecondary', 'painel'],
       ['R$ 40,00', 'textPrimary', 'painel'],
       ['Já paguei', 'onGreen', 'green'],
-      ['Copiar código Pix', 'textPrimary', 'painel'],
+      ['Copiar', 'textPrimary', 'painel'],
     ]);
     // o codigo copia-e-cola e um bloco sobre o painel
     const codigo = pix.getByTestId('pix-codigo');

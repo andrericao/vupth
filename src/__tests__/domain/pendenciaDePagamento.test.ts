@@ -2,6 +2,7 @@ import {
   avisoDaPendencia,
   pendenciasDoErro,
   podeAvisarQuePagou,
+  pixDoPagamento,
   reais,
   textoDoStatus,
 } from '@domain/pagamento/pendencia';
@@ -49,5 +50,26 @@ describe('pendência de pagamento — domínio', () => {
       ]).mensagem,
     ).toBe('R$ 10,00.');
     expect(avisoDaPendencia([]).mensagem).toBe('Há um pagamento pendente. Pague para marcar de novo.');
+  });
+});
+
+// pagamento-pelo-asaas (DEC-119): o Pix vem do gateway quando ele existe.
+describe('pixDoPagamento', () => {
+  it('sem gateway: o Pix do profissional, nada de teste', () => {
+    expect(pixDoPagamento({ status: 'PENDING', amount: 10, pix_copy_paste: 'p' })).toEqual({
+      codigo: 'p', qrImagem: null, viaAsaas: false, teste: false,
+    });
+  });
+
+  it('com gateway: o do Asaas vence; sandbox é teste, real não', () => {
+    const base = { status: 'PENDING' as const, amount: 10, pix_copy_paste: 'prof' };
+    expect(pixDoPagamento({ ...base, gateway: { provider: 'ASAAS', mode: 'SANDBOX', pix_copy_paste: 'asaas', pix_qr_image: 'img' } })).toEqual({
+      codigo: 'asaas', qrImagem: 'img', viaAsaas: true, teste: true,
+    });
+    expect(pixDoPagamento({ ...base, gateway: { provider: 'ASAAS', mode: 'REAL' } })).toMatchObject({ codigo: 'prof', teste: false, viaAsaas: true });
+  });
+
+  it('sem pagamento: vazio', () => {
+    expect(pixDoPagamento(null)).toEqual({ codigo: null, qrImagem: null, viaAsaas: false, teste: false });
   });
 });

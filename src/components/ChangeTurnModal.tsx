@@ -3,10 +3,9 @@ import { Modal, TouchableOpacity } from "react-native";
 import { VStack, HStack, Box, Text, Center } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
-import { floatingShadow } from "@utils/styles";
+import { CaixaDeModal } from "@components/CaixaDeModal";
 import { formatClockTime } from "@domain/queue/types";
 import { SwapOfferDirection } from "@services/swapOfferService";
-import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 type Props = {
@@ -102,7 +101,6 @@ function Radio({ selected, disabled }: { selected: boolean; disabled?: boolean }
 // confirma. Troca = /swap-offers (backend fatia 1), nunca gera multa.
 export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveToEnd, onReschedule, onCreateSwapOffer, onClose }: Props) {
   const [selected, setSelected] = useState<TurnOption | null>(null);
-  const { veu } = useTema();
 
   function close() {
     setSelected(null);
@@ -125,110 +123,110 @@ export function ChangeTurnModal({ visible, tailEtaMs, isLast, swapBusy, onMoveTo
     else onReschedule();
   }
 
+  const rodape = (
+    <VStack gap="$3" alignItems="center">
+      {/* "Publicando..." saiu do rotulo (guia de texto, regra 6): o botao
+          desabilitado com o spinner ja diz que esta publicando. */}
+      <Button
+        title="Confirmar"
+        isLoading={swapBusy}
+        isDisabled={!selected || swapBusy}
+        testID="change-turn-confirm"
+        onPress={handleConfirm}
+      />
+      {/* Cancelar vira LINK: era um botão contornado do mesmo tamanho do
+          Confirmar, e dois pesos iguais fazem hesitar na saída errada. */}
+      <TouchableOpacity onPress={close} testID="change-turn-cancel">
+        <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
+          Cancelar
+        </Text>
+      </TouchableOpacity>
+    </VStack>
+  );
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
-      <Box flex={1} bg={veu} justifyContent="center" px={24}>
-        <VStack bg="$painel" borderRadius="$hero" p="$6" gap="$4" style={floatingShadow}>
-          <VStack gap="$1">
-            <Text
-              fontFamily="$display"
-              fontSize={fs(22)}
-              lineHeight={fs(26)}
-              letterSpacing={-0.6}
-              color="$brandTextPrimary"
-            >
-              Mudar minha vez
-            </Text>
-            <Text size="sm" color="$brandTextSecondary">
-              Escolha o que você quer fazer:
-            </Text>
-          </VStack>
-
-          {GRUPOS.map((grupo) => (
-            <VStack key={grupo.id} gap="$2">
-              <Text
-                fontFamily="$body"
-                fontSize={fs(12)}
-                fontWeight="$bold"
-                color="$brandTextSecondary"
-              >
-                {grupo.titulo}
-              </Text>
-
-              {/* O fim da fila de hoje só importa para quem quer ADIAR — era
-                  uma caixa amarela do tamanho de meio modal, na paleta
-                  anterior, acima de tudo. Vira a legenda do grupo a que ela
-                  se refere. */}
-              {grupo.id === "tarde" && tailEtaMs != null && (
-                <Text size="xs" color="$brandTextSecondary" mt={-4}>
-                  A fila de hoje termina às {formatClockTime(new Date(tailEtaMs))}.
-                </Text>
-              )}
-
-              {grupo.opcoes.map((option) => {
-                const disabled = isDisabled(option.value);
-                const isSelected = selected === option.value;
-                return (
-                  <TouchableOpacity
-                    key={option.value}
-                    testID={`change-turn-${option.value}`}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected: isSelected, disabled }}
-                    disabled={disabled}
-                    onPress={() => setSelected(option.value)}
-                  >
-                    {/* A borda existe SEMPRE: no desenho a opção é um cartão,
-                        e cartão que só ganha contorno ao ser marcado faz a
-                        lista inteira pular. Marcado muda o FUNDO. */}
-                    <HStack
-                      alignItems="center"
-                      gap="$3"
-                      py="$3"
-                      px="$3.5"
-                      borderRadius="$card"
-                      borderWidth="$1"
-                      borderColor={isSelected ? "$selecionado" : "$brandBorder"}
-                      bg={isSelected ? "$greenTint" : "$painel"}
-                      opacity={disabled ? 0.45 : 1}
-                    >
-                      <Radio selected={isSelected} disabled={disabled} />
-                      <VStack flex={1} gap="$0.5">
-                        <Text fontFamily="$heading" fontSize={fs(14)} color={isSelected ? "$onGreenTint" : "$brandTextPrimary"}>
-                          {option.title}
-                        </Text>
-                        <Text size="xs" color="$brandTextSecondary">
-                          {disabled && option.value === "end"
-                            ? "Você já é o último da fila."
-                            : option.description}
-                        </Text>
-                      </VStack>
-                    </HStack>
-                  </TouchableOpacity>
-                );
-              })}
-            </VStack>
-          ))}
-
-          <VStack gap="$3" alignItems="center">
-            {/* "Publicando..." saiu do rotulo (guia de texto, regra 6): o botao
-                desabilitado com o spinner ja diz que esta publicando. */}
-            <Button
-              title="Confirmar"
-              isLoading={swapBusy}
-              isDisabled={!selected || swapBusy}
-              testID="change-turn-confirm"
-              onPress={handleConfirm}
-            />
-            {/* Cancelar vira LINK: era um botão contornado do mesmo tamanho do
-                Confirmar, e dois pesos iguais fazem hesitar na saída errada. */}
-            <TouchableOpacity onPress={close} testID="change-turn-cancel">
-              <Text size="sm" fontWeight="$semibold" color="$brandTextSecondary">
-                Cancelar
-              </Text>
-            </TouchableOpacity>
-          </VStack>
+      <CaixaDeModal raio="hero" gap={16} rodape={rodape}>
+        <VStack gap="$1">
+          <Text
+            fontFamily="$display"
+            fontSize={fs(22)}
+            lineHeight={fs(26)}
+            letterSpacing={-0.6}
+            color="$brandTextPrimary"
+          >
+            Mudar minha vez
+          </Text>
+          <Text size="sm" color="$brandTextSecondary">
+            Escolha o que você quer fazer:
+          </Text>
         </VStack>
-      </Box>
+
+        {GRUPOS.map((grupo) => (
+          <VStack key={grupo.id} gap="$2">
+            <Text
+              fontFamily="$body"
+              fontSize={fs(12)}
+              fontWeight="$bold"
+              color="$brandTextSecondary"
+            >
+              {grupo.titulo}
+            </Text>
+
+            {/* O fim da fila de hoje só importa para quem quer ADIAR — era
+                uma caixa amarela do tamanho de meio modal, na paleta
+                anterior, acima de tudo. Vira a legenda do grupo a que ela
+                se refere. */}
+            {grupo.id === "tarde" && tailEtaMs != null && (
+              <Text size="xs" color="$brandTextSecondary" mt={-4}>
+                A fila de hoje termina às {formatClockTime(new Date(tailEtaMs))}.
+              </Text>
+            )}
+
+            {grupo.opcoes.map((option) => {
+              const disabled = isDisabled(option.value);
+              const isSelected = selected === option.value;
+              return (
+                <TouchableOpacity
+                  key={option.value}
+                  testID={`change-turn-${option.value}`}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: isSelected, disabled }}
+                  disabled={disabled}
+                  onPress={() => setSelected(option.value)}
+                >
+                  {/* A borda existe SEMPRE: no desenho a opção é um cartão,
+                      e cartão que só ganha contorno ao ser marcado faz a
+                      lista inteira pular. Marcado muda o FUNDO. */}
+                  <HStack
+                    alignItems="center"
+                    gap="$3"
+                    py="$3"
+                    px="$3.5"
+                    borderRadius="$card"
+                    borderWidth="$1"
+                    borderColor={isSelected ? "$selecionado" : "$brandBorder"}
+                    bg={isSelected ? "$greenTint" : "$painel"}
+                    opacity={disabled ? 0.45 : 1}
+                  >
+                    <Radio selected={isSelected} disabled={disabled} />
+                    <VStack flex={1} gap="$0.5">
+                      <Text fontFamily="$heading" fontSize={fs(14)} color={isSelected ? "$onGreenTint" : "$brandTextPrimary"}>
+                        {option.title}
+                      </Text>
+                      <Text size="xs" color="$brandTextSecondary">
+                        {disabled && option.value === "end"
+                          ? "Você já é o último da fila."
+                          : option.description}
+                      </Text>
+                    </VStack>
+                  </HStack>
+                </TouchableOpacity>
+              );
+            })}
+          </VStack>
+        ))}
+      </CaixaDeModal>
     </Modal>
   );
 }

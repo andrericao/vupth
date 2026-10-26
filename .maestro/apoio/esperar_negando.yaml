@@ -23,6 +23,14 @@ appId: ${APP_ID}
           commands:
             - tapOn:
                 id: "com.android.permissioncontroller:id/permission_deny_button"
+      # Bateria 23/10 18:56 (02.P7): a caixa de localizacao do Android 14+ (Precise/Approximate)
+      # ficou 6 min na tela e o toque pelo id nao a fechou. Pelo texto do botao, em qualquer idioma.
+      - runFlow:
+          when:
+            visible: "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)"
+          commands:
+            - tapOn:
+                text: "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)"
       - extendedWaitUntil:
           visible:
             id: ${ALVO}

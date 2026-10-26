@@ -79,3 +79,19 @@ appId: ${APP_ID}
 # cabecalho sai da tela (bateria 11/10 18:44, 15.0G).
 - back:
     label: "15.0G · volta ao Perfil"
+# cupom-em-configuracoes (CLI-2): Perfil > Cupom abre o campo para adicionar o
+# cupom (os ativos e os encerrados aparecem abaixo, quando houver).
+- scrollUntilVisible:
+    element:
+      text: "Cupom"
+    label: "15.0K · rola até Cupom"
+- tapOn:
+    text: "Cupom"
+    label: "15.0L · toca em Cupom"
+- extendedWaitUntil:
+    visible:
+      id: "cupom-campo"
+    timeout: ${10000 * LENTO}
+    label: "15.0M · vê o campo do cupom"
+- back:
+    label: "15.0N · volta ao Perfil"

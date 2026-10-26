@@ -57,7 +57,7 @@ describe('a cadeia do aviso de atraso', () => {
         expect.any(String),
         expect.any(String),
         expect.any(Array),
-        { cancelable: false },
+        expect.objectContaining({ cancelable: false }),
       ),
     );
   });
@@ -77,9 +77,9 @@ describe('a cadeia do aviso de atraso', () => {
     await waitFor(() =>
       expect(Alert.alert).toHaveBeenCalledWith(
         expect.any(String),
-        expect.stringMatching(/Este é o seu 2º atraso/),
+        expect.stringMatching(/Este é o seu 2º atraso \(2 de 3\)/),
         expect.any(Array),
-        { cancelable: false },
+        expect.objectContaining({ cancelable: false }),
       ),
     );
   });
