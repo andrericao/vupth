@@ -1033,12 +1033,12 @@ export function QueueStatus() {
               testID="faixa-de-saida"
             >
               {/* aviso-dois-toques-para-sair-da-fila (André, 25/10): o pedido do segundo toque, a vista. */}
-              <Text size="xs" fontWeight="$bold" color="$forest" mb="$1" testID="aviso-segundo-toque">
+              <Text size="xs" fontWeight="$bold" color="$brandTextPrimary" mb="$1" testID="aviso-segundo-toque">
                 {AVISO_DO_SEGUNDO_TOQUE}
               </Text>
               <HStack alignItems="center" gap="$2">
                 <Info size={16} color="#163300" />
-                <Text size="xs" color="$forest" flex={1}>
+                <Text size="xs" color="$brandTextPrimary" flex={1}>
                   {saidaAtual.faixa}
                 </Text>
                 {/* sair-da-fila-texto (Andre, 15/10): o artigo do suporte. */}

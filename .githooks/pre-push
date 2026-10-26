@@ -31,7 +31,7 @@ CODIGO=$(mktemp)
 TRAVA=""
 [ -z "$VUPTH_TRAVA" ] && command -v flock >/dev/null && TRAVA="flock /tmp/vupth-maestro.lock"
 { $TRAVA npm test -- --ci --coverage 2>&1; echo $? > "$CODIGO"; } | tee "$SAIDA"
-RC=$(cat "$CODIGO")
+RC=$(cat "$CODIGO" 2>/dev/null); RC=${RC:-1}
 rm -f "$CODIGO"
 if [ "$RC" != "0" ]; then
   LOG="$LOGS/$(date +%Y-%m-%d_%H%M%S)_jest_FALHA.txt"
