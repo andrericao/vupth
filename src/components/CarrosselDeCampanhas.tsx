@@ -39,7 +39,7 @@ export function CarrosselDeCampanhas({ campanhas }: Props) {
 
   if (campanhas.length === 0) return null;
   const unica = campanhas.length === 1;
-  const largura = unica ? width - 32 : Math.min(width - 64, 320);
+  const largura = unica ? width - 32 : Math.max(width - 64, 220);
 
   return (
     <ScrollView

@@ -5,7 +5,7 @@ import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
 type Props = {
-  /** O pequeno de cima: o que é a campanha ("Desconto", "Ganho em dinheiro"). */
+  /** Não aparece mais: o card padrão (o do Partner, 108 dp) é valor, nome e detalhe, sem rótulo. */
   rotulo?: string;
   /** O valor, grande e em negrito ("10%", "R$ 10,00"). */
   valor?: string;
@@ -30,11 +30,13 @@ const RECORTE = 16;
  * card-ticket-pontilhado (André, 24/10, mockup 2): o cartão de cupom e de campanha é um ticket:
  * borda tracejada e um picote redondo só no lado esquerdo, no meio (ticket-picote-so-na-esquerda, 24/10).
  * cards-de-promocao-verde-tracejado-em-todo-o-app (André, 29/10): a cor é o verde de identidade, o par
- * greenTint + onGreenTint (borda e texto), igual em todos os cards de promoção. Valor em negrito
+ * greenTint + onGreenTint (borda e texto), igual em todos os cards de promoção.
+ * medida padrão (André, 29/10): a do CardDeCampanha do Partner, 108 dp de altura: padding 20 x 16, valor 28,
+ * nome 14, detalhe 12, sem rótulo. Valor em negrito
  * (Archivo 800), nome, validade; o botão primário (green + onGreen) na direita. Só tokens (DEC-116),
  * claro e escuro; sem sombra.
  */
-export function CartaoTicket({ rotulo, valor, nome, detalhe, codigo, acao, situacao, onPress, testID, largura }: Props) {
+export function CartaoTicket({ valor, nome, detalhe, codigo, acao, situacao, onPress, testID, largura }: Props) {
   const { cores } = useTema();
   const corpo = (
     <View
@@ -45,9 +47,8 @@ export function CartaoTicket({ rotulo, valor, nome, detalhe, codigo, acao, situa
         borderStyle: "dashed",
         borderColor: cores.onGreenTint,
         borderRadius: 20,
-        paddingVertical: 14,
-        paddingLeft: 20,
-        paddingRight: 16,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
@@ -72,27 +73,22 @@ export function CartaoTicket({ rotulo, valor, nome, detalhe, codigo, acao, situa
           borderColor: cores.onGreenTint,
         }}
       />
-      <View style={{ flex: 1, gap: 2 }}>
-        {rotulo ? (
-          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$semibold" color={cores.onGreenTint}>
-            {rotulo}
-          </Text>
-        ) : null}
+      <View style={{ flex: 1 }}>
         {valor ? (
           <Text fontFamily="$display" fontSize={fs(28)} fontWeight="$bold" color={cores.onGreenTint} testID={`${testID}-valor`}>
             {valor}
           </Text>
         ) : null}
-        <Text fontFamily="$heading" fontSize={fs(13)} fontWeight="$bold" color={cores.onGreenTint} numberOfLines={2}>
+        <Text fontFamily="$heading" fontSize={fs(14)} fontWeight="$bold" color={cores.onGreenTint} numberOfLines={2}>
           {nome}
         </Text>
         {detalhe ? (
-          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$semibold" color={cores.onGreenTint}>
+          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$semibold" color={cores.onGreenTint} mt="$1">
             {detalhe}
           </Text>
         ) : null}
         {codigo ? (
-          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$bold" color={cores.onGreenTint} testID={`${testID}-codigo`} selectable>
+          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$bold" color={cores.onGreenTint} mt="$1" testID={`${testID}-codigo`} selectable>
             {`Código: ${codigo}`}
           </Text>
         ) : null}

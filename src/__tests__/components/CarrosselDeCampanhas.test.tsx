@@ -81,7 +81,8 @@ describe('CarrosselDeCampanhas', () => {
   });
 
   // cards-de-promocao-em-portugues (André, 24/10): o código do servidor nunca aparece cru no card.
-  it('o card traz o benefício em português, nunca DISCOUNT nem CASH', () => {
+  // cards-de-promocao-verde-tracejado-em-todo-o-app (André, 29/10): o card padrão e o do Partner, sem rotulo.
+  it('o card não mostra o código cru do benefício (nunca DISCOUNT nem CASH) e não tem rótulo', () => {
     const t = wrap(
       <CarrosselDeCampanhas
         campanhas={[
@@ -90,8 +91,8 @@ describe('CarrosselDeCampanhas', () => {
         ]}
       />
     );
-    expect(t.getByText('Desconto')).toBeTruthy();
-    expect(t.getByText('Ganho em dinheiro')).toBeTruthy();
+    expect(t.getByText('Desconto de lançamento')).toBeTruthy();
+    expect(t.queryByText('Ganho em dinheiro')).toBeNull();
     expect(t.queryByText('DISCOUNT')).toBeNull();
     expect(t.queryByText('CASH')).toBeNull();
   });
