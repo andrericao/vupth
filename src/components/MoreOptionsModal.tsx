@@ -2,6 +2,7 @@ import { Modal, TouchableOpacity, Pressable } from "react-native";
 import { VStack, HStack, Box, Text } from "@gluestack-ui/themed";
 import { ChevronRight } from "lucide-react-native";
 import type { ComponentType } from "react";
+import { Button } from "@components/Button";
 import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
@@ -104,18 +105,9 @@ export function MoreOptionsModal({ visible, title, subtitle, options, onClose }:
             })}
           </VStack>
 
-          {/* Descartar não é ação: é link discreto, não um terceiro botão de
-              mesmo peso das opções acima. */}
-          <TouchableOpacity onPress={onClose} testID="more-options-close">
-            <Text
-              size="sm"
-              fontWeight="$semibold"
-              color="$brandTextSecondary"
-              textAlign="center"
-            >
-              Fechar
-            </Text>
-          </TouchableOpacity>
+          {/* mais-opcoes-fechar-sem-formatacao (CLI-29): o Fechar é botão de
+              verdade (outline, igual aos outros modais), não texto solto. */}
+          <Button title="Fechar" variant="outline" testID="more-options-close" onPress={onClose} />
         </VStack>
       </Box>
     </Modal>
