@@ -946,7 +946,7 @@ export function QueueStatus() {
                 </VStack>
                 <Box width={1} height={72} bg="#16330040" />
                 <VStack flex={1} alignItems="center">
-                  <Text fontFamily="$display" fontSize={fs(48)} lineHeight={fs(54)} letterSpacing={-2} color={cores.onGreen} testID="queue-time">
+                  <Text fontFamily="$display" fontSize={fs(48)} lineHeight={fs(54)} letterSpacing={-2} color={cores.onGreen} testID="queue-time-coluna">
                     {timeLabel}
                   </Text>
                   <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">
