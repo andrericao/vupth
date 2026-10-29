@@ -39,6 +39,7 @@ import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { comFuso, quandoDoPedido } from "@domain/queue/horarioDoCorte";
 import { contaComMultas, lembreteDaMulta, origemDaMulta, reais } from "@domain/queue/multasPendentes";
+import { usePreviaDoDesconto } from "@hooks/usePreviaDoDesconto";
 import { descontoDoCupom, fimDoErro, mensagemDoCupom } from "@domain/campanhas";
 import { avisoDeFimDaCampanha } from "@utils/avisoDeFimDaCampanha";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
@@ -181,7 +182,9 @@ export function ServiceSelection() {
   const cupomId = cuponsAtivos.some((c) => c.id === cupomEscolhido) ? cupomEscolhido : null;
   // cupom-abate-no-resumo (André, 24/10): o cupom abate so os servicos; a multa nunca entra
   // no desconto. O botao usa servicos - cupom + multa.
-  const desconto = descontoDoCupom(cuponsAtivos.find((c) => c.id === cupomId), totalPrice);
+  // desconto-para-novo-cliente-no-link: o visitante que veio de um link ve o desconto da previa publica.
+  const descontoDaPrevia = usePreviaDoDesconto(selectedIds, !isAuthenticated);
+  const desconto = isAuthenticated ? descontoDoCupom(cuponsAtivos.find((c) => c.id === cupomId), totalPrice) : Math.min(descontoDaPrevia, totalPrice);
   const conta = contaComMultas(totalPrice, multas, desconto);
   const totalMinutes = selectedServices.reduce(
     (sum, s) => sum + duracaoDoServico(s),
