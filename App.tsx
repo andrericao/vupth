@@ -58,6 +58,7 @@ import { useIndicacao } from "@hooks/useIndicacao";
 import { FaixaAvaliar } from "@components/FaixaAvaliar";
 import { ModalDePagamento } from "@components/ModalDePagamento";
 import { ModalDeFeedback } from "@components/ModalDeFeedback";
+import { ModalDeQuedaBrusca } from "@components/ModalDeQuedaBrusca";
 import { useFeedbackStore } from "@stores/feedbackStore";
 import { useLembreteDePendencia } from "@hooks/useLembreteDePendencia";
 import { setupOnlineManager } from "@hooks/useNetwork";
@@ -264,6 +265,8 @@ export default function App() {
         <ModalDePagamento />
         {/* pedido-de-feedback (CLI-34): depois de avaliar, uma vez a cada 30 dias. */}
         <ModalDeFeedback />
+        {/* queda-brusca-aviso-popup-e-opcoes (CLI-33, DEC-128): o popup do horário e as 4 opções. */}
+        <ModalDeQuedaBrusca />
         {/* notificacao-avaliar (CLI-33): uma vez, no topo, depois do corte. */}
         {pronto ? (
           <ErrorBoundary>

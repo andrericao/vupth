@@ -38,6 +38,8 @@ import {
 import { abrirAvaliacao, abrirLoja, navigateFromNotification } from "@routes/navigationRef";
 import { useAuthStore } from "@stores/authStore";
 import { usePendenciaStore } from "@stores/pendenciaStore";
+import { useQuedaBruscaStore } from "@stores/quedaBruscaStore";
+import { quedaBruscaDoPush } from "@domain/queda/quedaBrusca";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { PUSH_PERGUNTADO_KEY } from "@hooks/ofertaDePush";
 import { usePushDiagnosticsStore } from "@stores/pushDiagnosticsStore";
@@ -229,6 +231,12 @@ export function usePushRegistration() {
           oferecerVezAdiantada(dados.attendanceId, conteudo.body ?? "");
           return;
         }
+        // queda-brusca-aviso-popup-e-opcoes (DEC-128): o aviso "sua vez adiantou" abre o popup do horário, sem aviso com OK.
+        const queda = quedaBruscaDoPush(dados);
+        if (queda) {
+          useQuedaBruscaStore.getState().abrir(queda);
+          return;
+        }
         const aviso = avisoDoPush(conteudo);
         // pagamento-ja-paguei: o profissional recusou o "Já paguei"; o aviso leva ao pagamento.
         const pagamento = pagamentoDoPush(dados);
@@ -282,6 +290,13 @@ export function usePushRegistration() {
       if (agendaAberta) {
         Notifications.dismissNotificationAsync(id).catch(() => {});
         abrirLoja(agendaAberta.establishmentId, agendaAberta.professionalId);
+        return;
+      }
+      // SUDDEN_DROP (categoria OK_MAIS_TEMPO): o toque no corpo abre o popup do horário (DEC-128).
+      const queda = quedaBruscaDoPush(data);
+      if (queda) {
+        Notifications.dismissNotificationAsync(id).catch(() => {});
+        useQuedaBruscaStore.getState().abrir(queda);
         return;
       }
       // PAYMENT_REFUSED e PAYMENT_PENDING (categoria PAGAR): o toque, no corpo ou no "Pagar", abre o pagamento.
