@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, Linking, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
+import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
@@ -45,7 +45,6 @@ import {
   filaEncerrada,
 } from "@domain/queue/types";
 import { jaSaiuDaFila, mensagemDeFalhaAoSair, multaSemCiencia } from "@domain/queue/leave";
-import { SUPORTE_SAIR_DA_FILA_URL } from "@utils/suporte";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -1032,25 +1031,10 @@ export function QueueStatus() {
               py="$2.5"
               testID="faixa-de-saida"
             >
-              {/* aviso-dois-toques-para-sair-da-fila (André, 25/10): o pedido do segundo toque, a vista. */}
-              <Text size="xs" fontWeight="$bold" color="$brandTextPrimary" mb="$1" testID="aviso-segundo-toque">
+              {/* sair-da-fila-so-toque-duplo (André, 28/10): o primeiro toque mostra só o pedido do segundo. */}
+              <Text size="xs" fontWeight="$bold" color="$brandTextPrimary" textAlign="center" testID="aviso-segundo-toque">
                 {AVISO_DO_SEGUNDO_TOQUE}
               </Text>
-              <HStack alignItems="center" gap="$2">
-                <Info size={16} color="#163300" />
-                <Text size="xs" color="$brandTextPrimary" flex={1}>
-                  {saidaAtual.faixa}
-                </Text>
-                {/* sair-da-fila-texto (Andre, 15/10): o artigo do suporte. */}
-                <TouchableOpacity
-                  onPress={() => Linking.openURL(SUPORTE_SAIR_DA_FILA_URL)}
-                  testID="saida-saiba-mais"
-                >
-                  <Text size="xs" fontWeight="$semibold" color="$forest" underline>
-                    Saiba mais
-                  </Text>
-                </TouchableOpacity>
-              </HStack>
             </Box>
           </Box>
         )}

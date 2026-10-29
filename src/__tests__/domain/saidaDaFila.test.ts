@@ -72,6 +72,6 @@ describe('o segundo toque', () => {
   });
 
   it('o aviso é curto e pede o toque de novo', () => {
-    expect(AVISO_DO_SEGUNDO_TOQUE).toBe('Toque de novo para sair da fila.');
+    expect(AVISO_DO_SEGUNDO_TOQUE).toBe('Toque duas vezes seguidas para sair.');
   });
 });

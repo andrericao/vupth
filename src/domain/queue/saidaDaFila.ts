@@ -35,7 +35,7 @@ import { CANCELLATION_PENALTY_VALUE } from './types';
 export const JANELA_DO_TOQUE_DUPLO_MS = 8000;
 
 /** O aviso curto e visivel que pede o segundo toque (aparece na faixa do primeiro toque). */
-export const AVISO_DO_SEGUNDO_TOQUE = 'Toque de novo para sair da fila.';
+export const AVISO_DO_SEGUNDO_TOQUE = 'Toque duas vezes seguidas para sair.';
 
 export function ehToqueDuplo(toqueAnterior: number | null, agora: number): boolean {
   return toqueAnterior != null && agora - toqueAnterior <= JANELA_DO_TOQUE_DUPLO_MS;

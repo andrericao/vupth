@@ -1,4 +1,4 @@
-import { Alert, Linking } from 'react-native';
+import { Alert } from 'react-native';
 import { act, fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
@@ -117,7 +117,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
       const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
       const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
       tocar(getByTestId);
-      expect(getByText('Toque de novo para sair da fila.')).toBeTruthy();
+      expect(getByText('Toque duas vezes seguidas para sair.')).toBeTruthy();
       expect(alerta).not.toHaveBeenCalled();
       // o tempo de ler a faixa: bem mais que os 1,5 s antigos
       act(() => {
@@ -132,20 +132,13 @@ describe('QueueStatus — sair da fila (D15)', () => {
     }
   });
 
-  it('com menos de 1h, a faixa diz o valor em uma linha — e só a multa, sem convite de troca', () => {
-    const { getByTestId, getByText, queryByText } = renderWithProviders(<QueueStatus />);
+  // sair-da-fila-so-toque-duplo (André, 28/10): o primeiro toque mostra só o pedido do segundo.
+  it('o primeiro toque mostra só "toque duas vezes seguidas": sem faixa de multa, sem "Saiba mais"', () => {
+    const { getByTestId, queryByText, queryByTestId } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
-    expect(getByText(/Sair agora gera multa de R\$ 3,00/)).toBeTruthy();
-    expect(queryByText(/Trocar de lugar/)).toBeNull();
-  });
-
-  it('o "Saiba mais" da faixa abre o artigo do suporte', () => {
-    const abrir = jest.spyOn(Linking, 'openURL').mockResolvedValue(true);
-    const { getByTestId } = renderWithProviders(<QueueStatus />);
-    tocar(getByTestId);
-    fireEvent.press(getByTestId('saida-saiba-mais'));
-    expect(abrir).toHaveBeenCalledWith('https://vupth-support.pages.dev/artigos/cliente/sair-da-fila.html');
-    abrir.mockRestore();
+    expect(getByTestId('aviso-segundo-toque')).toBeTruthy();
+    expect(queryByText(/Sair agora gera multa/)).toBeNull();
+    expect(queryByTestId('saida-saiba-mais')).toBeNull();
   });
 
   it('dois toques seguidos com multa abrem "Sair / Cancelar" — e "Permanecer" deixa na fila', () => {
@@ -189,11 +182,15 @@ describe('QueueStatus — sair da fila (D15)', () => {
     alerta.mockRestore();
   });
 
-  it('com o valor do servidor (D4), é ele que aparece — R$ 5 com 30 min ou menos', () => {
+  it('com o valor do servidor (D4), é ele que aparece na confirmação — R$ 5 com 30 min ou menos', () => {
     mockValor = 5;
-    const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
-    expect(getByText(/multa de R\$ 5,00/)).toBeTruthy();
+    tocar(getByTestId);
+    const [, mensagem] = alerta.mock.calls[0] as [string, string];
+    expect(mensagem).toMatch(/R\$ 5,00/);
+    alerta.mockRestore();
   });
 
   it('servidor dizendo zero (tolerância) manda sobre a regra local: sai sem confirmação', async () => {
@@ -216,7 +213,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId, getByText, queryByText } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
-    expect(getByText('Você perde a sua vez.')).toBeTruthy();
+    expect(getByText('Toque duas vezes seguidas para sair.')).toBeTruthy();
     expect(queryByText(/multa/i)).toBeNull();
     tocar(getByTestId);
     const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];
