@@ -27,3 +27,13 @@ describe("Maestro 05 — a espera da tolerância", () => {
     expect(yaml).toMatch(/- assertNotVisible:\n\s+text: "\.\*\(sem\|em\)\.\*custo\.\*"\n\s+label: "05\.1D/);
   });
 });
+
+// fila-aguardando-do-mockup (CLI-32): "Sair da fila" mora em Opções; o primeiro toque só pede o segundo.
+describe("Maestro 05 — Sair da fila em Opções", () => {
+  it("abre Opções e toca em more-option-leave-queue (um toque e o duplo); não usa mais o leave-queue solto", () => {
+    expect(yaml).not.toMatch(/id: "leave-queue"/);
+    expect(yaml).toMatch(/id: "queue-options"/);
+    expect(yaml).toMatch(/doubleTapOn:\n\s+id: "more-option-leave-queue"/);
+    expect(yaml).toContain("Toque duas vezes seguidas para sair.");
+  });
+});

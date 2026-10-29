@@ -123,7 +123,7 @@ appId: ${APP_ID}
     label: "05.1A · fecha o push da vez, se cobriu a faixa"
 - extendedWaitUntil:
     visible:
-      id: "leave-queue"
+      id: "queue-options"
     timeout: ${10000 * LENTO}
     label: "05.1B · a tela da fila está livre"
 - repeat:
@@ -141,27 +141,24 @@ appId: ${APP_ID}
     text: ".*(sem|em).*custo.*"
     label: "05.1D · confere que a faixa saiu"
 
-# sair-da-fila-texto (15/10): um toque so mostra a faixa de uma linha, com o
-# valor e o "Saiba mais" (o toque no link abre o navegador, fora do app — so
-# confere que esta la). Os asserts levam mais que a janela de 1,5 s: o toque
-# duplo abaixo comeca do zero.
+# sair-da-fila-so-toque-duplo (28/10) e fila-aguardando-do-mockup (CLI-32): "Sair da fila"
+# mora em Opcoes. Um toque so mostra o pedido do segundo ("Toque duas vezes seguidas
+# para sair.", sem valor nem Saiba mais) e o menu fica aberto. O doubleTapOn toca duas
+# vezes dentro da janela de 1,5 s (JANELA_DO_TOQUE_DUPLO_MS): dois tapOn saem ~2 s um
+# do outro e a confirmacao nunca abria.
 - tapOn:
-    id: "leave-queue"
-    label: "05.1E · um toque em leave-queue"
+    id: "queue-options"
+    label: "05.1E · abre Opções"
+- tapOn:
+    id: "more-option-leave-queue"
+    label: "05.1F · um toque em Sair da fila"
 - assertVisible:
-    text: "Sair agora gera multa de R\\$.*"
-    label: "05.1F · a faixa diz a multa em uma linha"
-- assertVisible:
-    id: "saida-saiba-mais"
-    label: "05.1G · o Saiba mais está na faixa"
+    text: "Toque duas vezes seguidas para sair."
+    label: "05.1G · o aviso pede o segundo toque"
 
-# Sair da fila: dois toques seguidos (D15) e a confirmacao com o valor. Dois
-# tapOn saem ~2 s um do outro, fora da janela de 1,5 s (JANELA_DO_TOQUE_DUPLO_MS):
-# cada um so mostrava a faixa e a confirmacao nunca abria. O doubleTapOn toca
-# duas vezes dentro da janela.
 - doubleTapOn:
-    id: "leave-queue"
-    label: "05.12 · toque duplo em leave-queue"
+    id: "more-option-leave-queue"
+    label: "05.12 · toque duplo em Sair da fila"
 # textos-curtos (guia 4.1): o titulo da caixa e "Sair da fila", igual ao botao da
 # tela; por isso espera a LINHA da multa, que so a caixa tem.
 - extendedWaitUntil:
