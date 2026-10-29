@@ -86,10 +86,11 @@ jest.mock('@components/QueueDisclaimerModal', () => {
 
 type BotaoDoAlert = { text: string; onPress?: () => unknown };
 
-// D15 (Andre, 24/09): "Sair da fila" pede DOIS toques seguidos. O teste usa o
-// testID do link — o texto "Sair da fila" também aparece dentro da faixa.
+// D15 (Andre, 24/09): "Sair da fila" pede DOIS toques seguidos. Desde a fila-aguardando-do-mockup (CLI-32) o
+// "Sair da fila" mora no menu Opções: abre o menu e toca na opção (o menu fica aberto até o 2º toque).
 function tocar(getByTestId: (id: string) => unknown) {
-  fireEvent.press(getByTestId('leave-queue') as never);
+  fireEvent.press(getByTestId('queue-options') as never);
+  fireEvent.press(getByTestId('more-option-leave-queue') as never);
 }
 
 describe('QueueStatus — sair da fila (D15)', () => {
@@ -115,9 +116,9 @@ describe('QueueStatus — sair da fila (D15)', () => {
     jest.useFakeTimers();
     try {
       const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-      const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
+      const { getByTestId, getAllByText } = renderWithProviders(<QueueStatus />);
       tocar(getByTestId);
-      expect(getByText('Toque duas vezes seguidas para sair.')).toBeTruthy();
+      expect(getAllByText('Toque duas vezes seguidas para sair.')[0]).toBeTruthy();
       expect(alerta).not.toHaveBeenCalled();
       // o tempo de ler a faixa: bem mais que os 1,5 s antigos
       act(() => {
@@ -211,9 +212,9 @@ describe('QueueStatus — sair da fila (D15)', () => {
     mockIsento = true;
     mockValor = 0;
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const { getByTestId, getByText, queryByText } = renderWithProviders(<QueueStatus />);
+    const { getByTestId, getAllByText, queryByText } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
-    expect(getByText('Toque duas vezes seguidas para sair.')).toBeTruthy();
+    expect(getAllByText('Toque duas vezes seguidas para sair.')[0]).toBeTruthy();
     expect(queryByText(/multa/i)).toBeNull();
     tocar(getByTestId);
     const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];

@@ -119,9 +119,22 @@ describe('QueueStatus — aguardando, o topo', () => {
     expect(queryByText('aviso-da-estimativa')).toBeNull();
   });
 
+  // fila-aguardando-do-mockup (CLI-32, mockup 2 aprovado em 29/10): o aviso e um slide do carrossel; trocar, ir para o
+  // final e sair moram no menu Opcoes.
+  it('o aviso "clique em Opções" é um slide do carrossel e o menu Opções traz trocar, ir para o final e sair', () => {
+    const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
+    expect(getByTestId('aviso-opcoes')).toBeTruthy();
+    expect(getByText('Clique em Opções caso não consiga chegar no horário')).toBeTruthy();
+    fireEvent.press(getByTestId('queue-options'));
+    expect(getByTestId('more-option-change-turn')).toBeTruthy();
+    expect(getByTestId('more-option-move-to-end')).toBeTruthy();
+    expect(getByTestId('more-option-leave-queue')).toBeTruthy();
+  });
+
   it('as trocas abrem pelo botão', () => {
     const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
-    fireEvent.press(getByTestId('ver-trocas'));
+    fireEvent.press(getByTestId('queue-options'));
+    fireEvent.press(getByTestId('more-option-ver-trocas'));
     expect(getByText('trocas-abertas')).toBeTruthy();
   });
 });

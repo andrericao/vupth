@@ -125,7 +125,8 @@ describe('QueueStatus — puxar para atualizar e a faixa da saída (cobertura-98
     try {
       estado({});
       const tela = renderWithProviders(<QueueStatus />);
-      fireEvent.press(tela.getByTestId('leave-queue'));
+      fireEvent.press(tela.getByTestId('queue-options'));
+      fireEvent.press(tela.getByTestId('more-option-leave-queue'));
       expect(tela.getByTestId('faixa-de-saida')).toBeTruthy();
       act(() => {
         jest.advanceTimersByTime(8000);
