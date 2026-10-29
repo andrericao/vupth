@@ -28,7 +28,9 @@ const RECORTE = 16;
 
 /**
  * card-ticket-pontilhado (André, 24/10, mockup 2): o cartão de cupom e de campanha é um ticket:
- * surface, borda tracejada (border) e um picote redondo só no lado esquerdo, no meio (ticket-picote-so-na-esquerda, 24/10). Valor em negrito
+ * borda tracejada e um picote redondo só no lado esquerdo, no meio (ticket-picote-so-na-esquerda, 24/10).
+ * cards-de-promocao-verde-tracejado-em-todo-o-app (André, 29/10): a cor é o verde de identidade, o par
+ * greenTint + onGreenTint (borda e texto), igual em todos os cards de promoção. Valor em negrito
  * (Archivo 800), nome, validade; o botão primário (green + onGreen) na direita. Só tokens (DEC-116),
  * claro e escuro; sem sombra.
  */
@@ -38,10 +40,10 @@ export function CartaoTicket({ rotulo, valor, nome, detalhe, codigo, acao, situa
     <View
       style={{
         width: largura,
-        backgroundColor: cores.surface,
+        backgroundColor: cores.greenTint,
         borderWidth: 2,
         borderStyle: "dashed",
-        borderColor: cores.border,
+        borderColor: cores.onGreenTint,
         borderRadius: 20,
         paddingVertical: 14,
         paddingLeft: 20,
@@ -67,30 +69,30 @@ export function CartaoTicket({ rotulo, valor, nome, detalhe, codigo, acao, situa
           backgroundColor: cores.background,
           borderWidth: 2,
           borderStyle: "dashed",
-          borderColor: cores.border,
+          borderColor: cores.onGreenTint,
         }}
       />
       <View style={{ flex: 1, gap: 2 }}>
         {rotulo ? (
-          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$semibold" color="$brandTextSecondary">
+          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$semibold" color={cores.onGreenTint}>
             {rotulo}
           </Text>
         ) : null}
         {valor ? (
-          <Text fontFamily="$display" fontSize={fs(28)} fontWeight="$bold" color="$brandTextPrimary" testID={`${testID}-valor`}>
+          <Text fontFamily="$display" fontSize={fs(28)} fontWeight="$bold" color={cores.onGreenTint} testID={`${testID}-valor`}>
             {valor}
           </Text>
         ) : null}
-        <Text fontFamily="$heading" fontSize={fs(13)} fontWeight="$bold" color="$brandTextSecondary" numberOfLines={2}>
+        <Text fontFamily="$heading" fontSize={fs(13)} fontWeight="$bold" color={cores.onGreenTint} numberOfLines={2}>
           {nome}
         </Text>
         {detalhe ? (
-          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$semibold" color="$brandTextSecondary">
+          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$semibold" color={cores.onGreenTint}>
             {detalhe}
           </Text>
         ) : null}
         {codigo ? (
-          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$bold" color="$brandTextPrimary" testID={`${testID}-codigo`} selectable>
+          <Text fontFamily="$body" fontSize={fs(12)} fontWeight="$bold" color={cores.onGreenTint} testID={`${testID}-codigo`} selectable>
             {`Código: ${codigo}`}
           </Text>
         ) : null}
@@ -107,7 +109,7 @@ export function CartaoTicket({ rotulo, valor, nome, detalhe, codigo, acao, situa
           </Text>
         </TouchableOpacity>
       ) : situacao ? (
-        <Text fontFamily="$heading" fontSize={fs(12)} fontWeight="$bold" color="$brandTextSecondary">
+        <Text fontFamily="$heading" fontSize={fs(12)} fontWeight="$bold" color={cores.onGreenTint}>
           {situacao}
         </Text>
       ) : null}

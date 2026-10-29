@@ -5,6 +5,7 @@ import { GluestackUIProvider } from '@gluestack-ui/themed';
 import { CarrosselDeCampanhas } from '@components/CarrosselDeCampanhas';
 import { useAuthStore } from '@stores/authStore';
 import { config } from '../../../config/gluestack-ui.config';
+import { coresDoTema } from '@domain/tema';
 
 const mockJoin = jest.fn();
 jest.mock('@services/campaignService', () => ({
@@ -35,6 +36,16 @@ describe('CarrosselDeCampanhas', () => {
     fireEvent.press(t.getByTestId('campanha-b'));
     expect(spy).toHaveBeenCalledWith('Acesse os cupons', 'Código: VUPTH10', expect.any(Array), expect.anything());
     spy.mockRestore();
+  });
+
+  // cards-de-promocao-verde-tracejado-em-todo-o-app (André, 29/10): verde de identidade, borda tracejada de 2 px.
+  it('o card é verde de identidade (greenTint) com borda tracejada de 2 px na cor onGreenTint', () => {
+    const t = wrap(<CarrosselDeCampanhas campanhas={[{ id: 'd', name: 'Desconto', benefit: 'DISCOUNT', type: 'DISCOUNT', value_percent: 10 }]} />);
+    const c = coresDoTema('claro');
+    const picote = StyleSheet.flatten(t.getByTestId('campanha-d-picote-esquerdo').props.style);
+    expect(picote.borderColor).toBe(c.onGreenTint);
+    expect(picote.borderStyle).toBe('dashed');
+    expect(StyleSheet.flatten(t.getByTestId('campanha-d-valor').props.style).color).toBe(c.onGreenTint);
   });
 
   // card-ticket-pontilhado (André, 24/10): o card da Início é o ticket do mockup 2.
