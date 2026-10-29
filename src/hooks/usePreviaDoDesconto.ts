@@ -4,6 +4,15 @@ import * as SecureStore from 'expo-secure-store';
 import { INDICACAO_CAMPANHA_KEY, INDICACAO_KEY } from '@domain/indicacao';
 import { campaignService } from '@services/campaignService';
 
+// O cofre pode falhar (ou, no jest, nao responder): sem valor, sem previa.
+async function lerGuardado(chave: string): Promise<string | null> {
+  try {
+    return (await SecureStore.getItemAsync(chave)) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * desconto-para-novo-cliente-no-link (André, 24/10): quem chega por um link de campanha e ainda
  * nao tem conta ve o "Valor com cupom" na escolha dos servicos, sem cadastrar. O link guardou a
@@ -17,9 +26,9 @@ export function usePreviaDoDesconto(serviceItemIds: string[], ativo: boolean): n
     if (!ativo || !chave) return;
     let vivo = true;
     (async () => {
-      const campanha = await SecureStore.getItemAsync(INDICACAO_CAMPANHA_KEY).catch(() => null);
+      const campanha = await lerGuardado(INDICACAO_CAMPANHA_KEY);
       if (!campanha) return;
-      const ref = await SecureStore.getItemAsync(INDICACAO_KEY).catch(() => null);
+      const ref = await lerGuardado(INDICACAO_KEY);
       const partes = await Promise.all(
         chave.split(',').map((id) =>
           campaignService
