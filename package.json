@@ -86,7 +86,7 @@
     "@tanstack/react-query-persist-client": "^5.104.2",
     "axios": "^1.17.1",
     "babel-plugin-module-resolver": "^5.0.3",
-    "expo": "~54.0.37",
+    "expo": "~58.0.21",
     "expo-clipboard": "~8.0.8",
     "expo-constants": "~18.0.13",
     "expo-dev-client": "~6.0.21",
