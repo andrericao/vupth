@@ -26,7 +26,31 @@ export interface FaltasDoCliente {
   prepay_required: boolean;
 }
 
+// Pagar a multa avulso (pagar-multa-avulso, DEC-83; Backend 322c917): o Pix do app com todas as multas pendentes.
+export interface PagamentoDaMulta {
+  id: string;
+  amount: number | string;
+  status: 'PENDING' | 'PAID' | 'EXPIRED' | string;
+  pix_copy_paste?: string | null;
+  holder_name?: string | null;
+  expires_at?: string | null;
+  paid_at?: string | null;
+}
+
 export const penaltyService = {
+  /** 201 com o pagamento (o vigente, se ja houver um); 409 PENALTY_NOTHING_TO_PAY; 503 PENALTY_PIX_NOT_CONFIGURED. */
+  pay(accessToken: string) {
+    return api.post<PagamentoDaMulta>('/clients/me/penalties/pay', undefined, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
+  payment(paymentId: string, accessToken: string) {
+    return api.get<PagamentoDaMulta>(`/clients/me/penalties/payments/${paymentId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  },
+
   absences(accessToken: string) {
     return api.get<FaltasDoCliente>('/clients/me/absences', {
       headers: { Authorization: `Bearer ${accessToken}` },

@@ -1,3 +1,4 @@
+import { avisarLimiteDeMultas } from "@utils/limiteDeMultas";
 import { useEffect, useState } from "react";
 import { Alert, Modal, ScrollView, TouchableOpacity } from "react-native";
 import { VStack, HStack, Box, Text, Heading, Spinner } from "@gluestack-ui/themed";
@@ -157,6 +158,11 @@ export function ScheduleModal({
       if (pendencias) {
         close();
         usePendenciaStore.getState().avisar(pendencias);
+        return;
+      }
+      // multa-bloqueia-entrada (DEC-83): com duas multas pendentes, o aviso com o "Pagar multa".
+      if (avisarLimiteDeMultas(error)) {
+        close();
         return;
       }
       if (error?.response?.data?.code === "COUPON_NOT_ACTIVE") {

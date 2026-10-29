@@ -1,3 +1,5 @@
+import { avisarLimiteDeMultas } from "@utils/limiteDeMultas";
+import { useMultaStore } from "@stores/multaStore";
 import { useState, useEffect } from "react";
 import { Alert, TouchableOpacity, ScrollView, Modal } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -348,6 +350,8 @@ export function ServiceSelection() {
         usePendenciaStore.getState().avisar(pendencias);
         return;
       }
+      // multa-bloqueia-entrada (DEC-83): com duas multas pendentes, o aviso com o "Pagar multa".
+      if (avisarLimiteDeMultas(error)) return;
       const code = error.response?.data?.code;
       // Cupom que nao vale mais (422 COUPON_NOT_ACTIVE): o pedido nao saiu; o cupom sai da escolha e o aviso diz por que.
       if (code === "COUPON_NOT_ACTIVE") {
@@ -703,7 +707,17 @@ export function ServiceSelection() {
                 <Text fontFamily="$heading" fontSize="$sm" color="$forest">{reais(Number(m.amount) || 0)}</Text>
               </HStack>
             ))}
-            <Button title="Entendi" mt="$2" onPress={() => setShowMultas(false)} />
+            {/* pagar-multa-avulso (DEC-83): pagar a multa a qualquer momento. */}
+            <Button
+              title="Pagar multa"
+              mt="$2"
+              testID="pagar-multa-abrir"
+              onPress={() => {
+                setShowMultas(false);
+                useMultaStore.getState().abrir();
+              }}
+            />
+            <Button title="Entendi" variant="outline" onPress={() => setShowMultas(false)} />
           </VStack>
         </Box>
       </Modal>

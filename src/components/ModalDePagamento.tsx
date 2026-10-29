@@ -24,7 +24,7 @@ import { SaibaMaisDoPreco } from "@components/SaibaMaisDoPreco";
 import { useTema } from "@hooks/useTema";
 
 // tema-fixo: o leitor do banco nao le o codigo invertido; o QR e branco nos dois temas.
-const FUNDO_DO_QR = "#FFFFFF";
+export const FUNDO_DO_QR = "#FFFFFF";
 
 function Botao({ titulo, onPress, claro, testID, desligado, feito }: {
   titulo: string; onPress: () => void; claro?: boolean; testID: string; desligado?: boolean; feito?: boolean;

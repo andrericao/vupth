@@ -16,6 +16,7 @@ import {
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { MoreOptionsModal } from "@components/MoreOptionsModal";
+import { avisarLimiteDeMultas } from "@utils/limiteDeMultas";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { useCampanhasAtivas } from "@hooks/useCampanhasAtivas";
 import { useTema } from "@hooks/useTema";
@@ -278,6 +279,11 @@ export function QueueStatus() {
           const pendencias = pendenciasDoErro(error);
           if (pendencias) {
             usePendenciaStore.getState().avisar(pendencias);
+            navigation.goBack();
+            return;
+          }
+          // multa-bloqueia-entrada (DEC-83): com duas multas pendentes, o aviso com o "Pagar multa".
+          if (avisarLimiteDeMultas(error)) {
             navigation.goBack();
             return;
           }
