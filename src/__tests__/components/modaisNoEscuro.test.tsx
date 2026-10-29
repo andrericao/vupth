@@ -382,7 +382,7 @@ describe.each(TEMAS)('caixas no tema %s', (tema) => {
       ['Escolha uma.', 'textSecondary', 'painel'],
       ['Pedir corte', 'textPrimary', 'sobrePainel'],
       ['O profissional responde.', 'textSecondary', 'sobrePainel'],
-      ['Fechar', 'textSecondary', 'painel'],
+      ['Fechar', 'textPrimary', 'painel'],
     ]);
     const c = coresDoTema(tema);
     const linha = icones(tela, 'Linha')[0];

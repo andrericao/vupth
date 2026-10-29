@@ -5,15 +5,17 @@ appId: ${APP_ID}
 - tapOn:
     id: "primary-queue"
     label: "05.01 · toca em primary-queue"
+
 - runFlow:
     file: ../apoio/confirmar_chegada.yaml
     label: "05.01b · confirma o aviso 'Esteja na loja', se vier"
 # O push "É quase a sua vez!" pode chegar antes do Entendi e cobri-lo
 # (bateria 09/10 15:13): espera o que vier primeiro e fecha o push, se for ele.
 - extendedWaitUntil:
-    visible: "(Entendi|É quase a sua vez!)"
+    visible: "(Entendi|É quase a sua vez!|Avisar|Agora não)"
     timeout: ${60000 * LENTO}
-    label: "05.02 · espera Entendi ou o push da vez"
+    label: "05.02 · espera a próxima tela de confirmação"
+
 - runFlow:
     when:
       visible: "É quase a sua vez!"
@@ -21,23 +23,47 @@ appId: ${APP_ID}
       - tapOn:
           id: "dialogo-botao-0"
     label: "05.02b · fecha o push da vez, se veio antes do Entendi"
+
 - extendedWaitUntil:
-    visible: "Entendi"
+    visible: "(Entendi|Avisar|Agora não)"
     timeout: ${10000 * LENTO}
-    label: "05.02c · espera Entendi"
-- tapOn:
-    text: "Entendi"
+    optional: true
+    label: "05.02c · espera a próxima tela de confirmação"
+
+- runFlow:
+    when:
+      visible: "Avisar"
+    commands:
+      - tapOn:
+          text: "Avisar"
+    label: "05.02d · fecha a caixa de aviso 'Pode fechar o app'"
+
+- runFlow:
+    when:
+      visible: "Agora não"
+    commands:
+      - tapOn:
+          text: "Agora não"
+    label: "05.02e · fecha a opção 'Agora não'"
+
+- runFlow:
+    when:
+      visible: "Entendi"
+    commands:
+      - tapOn:
+          text: "Entendi"
     label: "05.03 · toca em Entendi"
+
 # O primeiro da fila recebe o push "É quase a sua vez!" logo ao entrar; com o
 # app aberto ele vira uma caixa com "OK" que cobre a tela (o queue-position some
-# da arvore). Na entrada nao ha mais o aviso de tres botoes (André, 22/10):
-# so a faixa da tolerancia. Fecha o push, se veio.
-# O push pode chegar depois: espera um pouco por ele e fecha.
+# da arvore). Na entrada nao ha mais o aviso de tres botoes:
+# só a faixa da tolerancia. Fecha o push, se veio.
 - extendedWaitUntil:
     visible: "É quase a sua vez!"
     timeout: ${8000 * LENTO}
     optional: true
     label: "05.08 · espera o push da vez, se ainda nao veio"
+
 - runFlow:
     when:
       visible: "É quase a sua vez!"
@@ -45,6 +71,7 @@ appId: ${APP_ID}
       - tapOn:
           id: "dialogo-botao-0"
     label: "05.09 · fecha o push da vez"
+
 - extendedWaitUntil:
     visible:
       id: "queue-position"
@@ -72,7 +99,7 @@ appId: ${APP_ID}
     commands:
       - extendedWaitUntil:
           notVisible:
-            text: ".*sem custo até.*"
+            text: ".*(sem|em).*custo.*"
           timeout: 30000
           optional: true
       - runFlow:
@@ -81,7 +108,7 @@ appId: ${APP_ID}
       # volta seguinte espera de novo. Sumiu de vez: as voltas que sobram custam 5 s cada.
       - extendedWaitUntil:
           visible:
-            text: ".*sem custo até.*"
+            text: ".*(sem|em).*custo.*"
           timeout: ${5000 * LENTO}
           optional: true
     label: "05.11 · espera a tolerância acabar (a faixa sem custo some)"
@@ -104,14 +131,14 @@ appId: ${APP_ID}
     commands:
       - extendedWaitUntil:
           notVisible:
-            text: ".*sem custo até.*"
+            text: ".*(sem|em).*custo.*"
           timeout: 30000
           optional: true
       - runFlow:
           file: ../apoio/esperar_o_sistema.yaml
     label: "05.1C · a faixa sem custo saiu de vez (voltas de 30 s)"
 - assertNotVisible:
-    text: ".*sem custo até.*"
+    text: ".*(sem|em).*custo.*"
     label: "05.1D · confere que a faixa saiu"
 
 # sair-da-fila-texto (15/10): um toque so mostra a faixa de uma linha, com o

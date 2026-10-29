@@ -7,7 +7,7 @@ const yaml = fs.readFileSync(path.resolve(__dirname, "../../../.maestro/etapas/0
 
 describe("Maestro 05 — a espera da tolerância", () => {
   const lacos = [...yaml.matchAll(/^- repeat:\n((?:    .*\n|\n)+?)(?=^\S)/gm)].map((m) => m[1]);
-  const daFaixa = lacos.filter((l) => l.includes("sem custo até"));
+  const daFaixa = lacos.filter((l) => l.includes("custo"));
 
   it("os dois laços de espera da faixa existem, com as voltas de 30 s", () => {
     expect(daFaixa).toHaveLength(2);
@@ -20,10 +20,10 @@ describe("Maestro 05 — a espera da tolerância", () => {
   });
 
   it("o primeiro laço confere a volta da faixa (re-render) antes da próxima volta", () => {
-    expect(daFaixa[0]).toMatch(/visible:\s*\n\s+text: "\.\*sem custo até\.\*"/);
+    expect(daFaixa[0]).toMatch(/visible:\s*\n\s+text: "\.\*\(sem\|em\)\.\*custo\.\*"/);
   });
 
   it("depois dos laços, a etapa confere que a faixa saiu", () => {
-    expect(yaml).toMatch(/- assertNotVisible:\n\s+text: "\.\*sem custo até\.\*"\n\s+label: "05\.1D/);
+    expect(yaml).toMatch(/- assertNotVisible:\n\s+text: "\.\*\(sem\|em\)\.\*custo\.\*"\n\s+label: "05\.1D/);
   });
 });
