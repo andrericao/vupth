@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Image, Modal, Pressable, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronDown, ChevronUp, X } from "lucide-react-native";
+import { Check, ChevronDown, Copy, ChevronUp, X } from "lucide-react-native";
 import QRCode from "react-native-qrcode-svg";
 
 import {
@@ -260,11 +260,23 @@ export function ModalDePagamento() {
                   testID="pix-profissional"
                   style={{ gap: 8, backgroundColor: cores.sobrePainel, borderRadius: 14, padding: 14 }}
                 >
-                  <Text style={{ color: cores.textSecondary, fontSize: fs(12) }}>Pix do profissional</Text>
-                  <Text selectable testID="pix-chave" style={{ color: cores.textPrimary, fontSize: fs(16), fontWeight: "700" }}>
-                    {chave}
-                  </Text>
-                  <Botao titulo={chaveCopiada ? "Copiada" : "Copiar chave"} feito={chaveCopiada} testID="pix-copiar-chave" onPress={copiarChave} />
+                  <Text style={{ color: cores.textSecondary, fontSize: fs(12) }}>Chave Pix</Text>
+                  {/* chave-pix-icone-copiar (CLI-38): o ícone de copiar fica ao lado da chave. */}
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <Text selectable testID="pix-chave" style={{ flex: 1, color: cores.textPrimary, fontSize: fs(16), fontWeight: "700" }}>
+                      {chave}
+                    </Text>
+                    <Pressable
+                      testID="pix-copiar-chave"
+                      onPress={copiarChave}
+                      hitSlop={10}
+                      accessibilityRole="button"
+                      accessibilityLabel="Copiar chave Pix"
+                    >
+                      {chaveCopiada ? <Check size={20} color={cores.textPrimary} /> : <Copy size={20} color={cores.textPrimary} />}
+                    </Pressable>
+                  </View>
+                  {chaveCopiada ? <Text style={{ color: cores.textSecondary, fontSize: fs(12) }}>Copiada</Text> : null}
                 </View>
               ) : null}
               {/* O Pix do gateway (ou o copia e cola), com menos destaque: recolhido num drop down. */}

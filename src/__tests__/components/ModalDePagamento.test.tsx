@@ -178,7 +178,7 @@ describe('ModalDePagamento', () => {
     const tela = montar();
     // a chave do profissional ja esta a vista; o do gateway, recolhido
     expect(await tela.findByTestId('pix-chave')).toBeTruthy();
-    expect(tela.getByText('Pix do profissional')).toBeTruthy();
+    expect(tela.getByText('Chave Pix')).toBeTruthy();
     expect(tela.queryByTestId('pix-codigo')).toBeNull();
     expect(tela.getByText('Pix do app (QR e copia e cola)')).toBeTruthy();
     fireEvent.press(tela.getByTestId('pix-dropdown'));
