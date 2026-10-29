@@ -185,8 +185,11 @@ export function Login() {
               </Text>
             </TouchableOpacity>
           </HStack>
-          <LinksLegais />
-          <VersaoDoApp testID="versao-login" />
+          {/* termos-e-politica-nas-telas-de-entrada (CLI-34): bloco próprio, separado dos botões. */}
+          <VStack mt="$4" pt="$4" gap="$2" borderTopWidth={1} borderColor="$brandBorder" testID="bloco-legal">
+            <LinksLegais />
+            <VersaoDoApp testID="versao-login" />
+          </VStack>
         </VStack>
       </VStack>
     </ScrollView>

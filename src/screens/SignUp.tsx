@@ -228,15 +228,6 @@ export function SignUp() {
             onPress={handleSignUp}
             testID="primary-signup"
           />
-          <Text
-            size="2xs"
-            color="$brandTextSecondary"
-            textAlign="center"
-            lineHeight={fs(15)}
-          >
-            Ao continuar você concorda com os Termos de Uso e a Política de Privacidade.
-          </Text>
-          <LinksLegais />
           <HStack justifyContent="center" gap="$1.5" alignItems="center">
             <Text size="sm" color="$brandTextSecondary">
               Já tem conta?
@@ -247,6 +238,18 @@ export function SignUp() {
               </Text>
             </TouchableOpacity>
           </HStack>
+          {/* termos-e-politica-nas-telas-de-entrada (CLI-34): bloco próprio, separado dos botões e do formulário. */}
+          <VStack mt="$4" pt="$4" gap="$2" borderTopWidth={1} borderColor="$brandBorder" testID="bloco-legal">
+            <Text
+              size="2xs"
+              color="$brandTextSecondary"
+              textAlign="center"
+              lineHeight={fs(15)}
+            >
+              Ao continuar você concorda com os Termos de Uso e a Política de Privacidade.
+            </Text>
+            <LinksLegais />
+          </VStack>
         </VStack>
       </VStack>
     </ScrollView>
