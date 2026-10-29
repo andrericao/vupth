@@ -14,6 +14,7 @@ import { postAuthRoute } from "@domain/auth/postAuthRoute";
 import { AVISO_SEM_CONTA, erroDeAcesso } from "@domain/auth/errosDeAcesso";
 import { useAuthStore } from "@stores/authStore";
 import { useTabBarInset } from "@hooks/useTabBarInset";
+import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { fs } from "@stores/fonteStore";
 
 type RouteParams = {
@@ -33,6 +34,12 @@ export function Login() {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // cache-nas-telas-de-requisitos (CLI-30): a tela fica montada ao navegar; a senha e os erros de uma
+  // sessao anterior nao podem voltar.
+  useLimparAoSair(() => {
+    setPassword("");
+    setErrors({});
+  });
 
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const route = useRoute();

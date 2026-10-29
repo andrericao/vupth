@@ -13,6 +13,7 @@ import { validateSignUp, getPasswordRules } from "@domain/auth/validateAuth";
 import { erroDeAcesso } from "@domain/auth/errosDeAcesso";
 import { useAuthStore } from "@stores/authStore";
 import { useTabBarInset } from "@hooks/useTabBarInset";
+import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { LinksLegais } from "@components/LinksLegais";
 import { fs } from "@stores/fonteStore";
 
@@ -40,6 +41,13 @@ export function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // cache-nas-telas-de-requisitos (CLI-30): a tela fica montada ao navegar; as senhas e a lista de
+  // requisitos de uma sessao anterior nao podem voltar.
+  useLimparAoSair(() => {
+    setPassword("");
+    setConfirmPassword("");
+    setErrors({});
+  });
   const register = useAuthStore((s) => s.register);
   const login = useAuthStore((s) => s.login);
 

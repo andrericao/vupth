@@ -13,6 +13,7 @@ import { AVISO_SEM_CONTA, erroDeAcesso } from "@domain/auth/errosDeAcesso";
 import { authService } from "@services/authService";
 import { waitForBackend } from "@services/healthService";
 import { useTabBarInset } from "@hooks/useTabBarInset";
+import { useLimparAoSair } from "@hooks/useLimparAoSair";
 import { fs } from "@stores/fonteStore";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
@@ -33,6 +34,14 @@ export function ForgotPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // cache-nas-telas-de-requisitos (CLI-30): ao sair, o codigo e as senhas (e a lista de requisitos) somem
+  // e o fluxo volta ao passo do e-mail.
+  useLimparAoSair(() => {
+    setStep("email");
+    setCode("");
+    setPassword("");
+    setConfirmPassword("");
+  });
   // Fases do envio, separadas porque cada uma espera por uma coisa diferente:
   // "waking" = portao de readiness (o Render Free hiberna e a 1a cutucada leva
   // ~50s); "sending" = o POST em si. Sem separar, o botao ficava "Enviando..."
