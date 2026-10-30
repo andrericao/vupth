@@ -29,15 +29,13 @@ Running on vupth_aosp
     Repeat while id: ${ALVO} is not visible (up to 40 times)...
       Run esperar_o_sistema.yaml...
         Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-          Tap on id: android:id/aerr_wait... COMPLETED
-          Wait for animation to end within 2000 ms... COMPLETED
-        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... COMPLETED
+        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
       Run esperar_o_sistema.yaml... COMPLETED
       Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible...
       Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... SKIPPED
       Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible...
       Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible... SKIPPED
-      Assert that (Optional) id: ${ALVO} is visible... COMPLETED
+      Assert that (Optional) id: ${ALVO} is visible... WARNED
     Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
     Assert that id: ${ALVO} is visible... COMPLETED
   00.P7 · espera onboarding-start (negando a caixa do sistema)... COMPLETED
@@ -188,13 +186,4 @@ Caused by: java.io.IOException: Command failed (tcp:7001): closed
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-10-30_091531/00_atualizacao
-╭────────────────────────────────────────────────────────────────────────────────────────────────╮
-│                                                                                                │
-│   Debug tests faster by easy access to test recordings, maestro logs, screenshots, and more.   │
-│                                                                                                │
-│   Run your flows on Maestro Cloud:                                                             │
-│   maestro cloud app_file flows_folder/                                                         │
-│                                                                                                │
-╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-
+/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-10-30_111922/00_atualizacao
