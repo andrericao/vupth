@@ -1,8 +1,9 @@
-import { Alert } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { act, fireEvent } from '@testing-library/react-native';
 
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
+import { coresDoTema } from '@domain/tema';
 import { attendanceService } from '@services/attendanceService';
 
 // D10 (Andre, 17/09): ao tocar em "Sair da fila" com menos de 1h, o aviso
@@ -101,43 +102,47 @@ describe('QueueStatus — sair da fila (D15)', () => {
     mockIsento = false;
   });
 
-  it('um toque só mostra a faixa — não sai, não pergunta nada', () => {
+  it('um toque só não sai e não pergunta nada', () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
-    expect(getByTestId('faixa-de-saida')).toBeTruthy();
     expect(alerta).not.toHaveBeenCalled();
     expect(attendanceService.cancel).not.toHaveBeenCalled();
     alerta.mockRestore();
   });
 
-  // aviso-dois-toques-para-sair-da-fila (André, 25/10): a faixa pede o segundo toque e ele vale enquanto ela esta na tela.
-  it('o primeiro toque pede o segundo, a vista; o segundo, depois de ler a faixa, sai (ou pergunta)', () => {
-    jest.useFakeTimers();
-    try {
-      const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-      const { getByTestId, getAllByText } = renderWithProviders(<QueueStatus />);
-      tocar(getByTestId);
-      expect(getAllByText('Toque duas vezes seguidas para sair.')[0]).toBeTruthy();
-      expect(alerta).not.toHaveBeenCalled();
-      // o tempo de ler a faixa: bem mais que os 1,5 s antigos
-      act(() => {
-        jest.advanceTimersByTime(4000);
-      });
-      expect(getByTestId('faixa-de-saida')).toBeTruthy();
-      tocar(getByTestId);
-      expect(alerta).toHaveBeenCalled();
-      alerta.mockRestore();
-    } finally {
-      jest.useRealTimers();
-    }
+  // sair-da-fila-toque-duplo-vermelho (André, 30/10): o pedido mora na descrição da opção, em vermelho, uma vez só;
+  // a saída exige dois toques RÁPIDOS (500 ms): um toque, uma pausa e outro toque não sai.
+  it('o pedido do duplo toque está só na descrição da opção, em vermelho, e uma vez', () => {
+    const { getByTestId, getAllByText } = renderWithProviders(<QueueStatus />);
+    fireEvent.press(getByTestId('queue-options'));
+    expect(getAllByText('Toque duas vezes seguidas para sair.')).toHaveLength(1);
+    const cor = StyleSheet.flatten(getByTestId('more-option-leave-queue-descricao').props.style).color;
+    expect(cor).toBe(coresDoTema('claro').danger);
+    fireEvent.press(getByTestId('more-option-leave-queue'));
+    expect(getAllByText('Toque duas vezes seguidas para sair.')).toHaveLength(1);
+  });
+
+  it('um toque, uma pausa de mais de 500 ms e outro toque não saem; dois toques rápidos sim', () => {
+    const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const agora = jest.spyOn(Date, 'now');
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    agora.mockReturnValue(1_000_000);
+    tocar(getByTestId);
+    agora.mockReturnValue(1_000_000 + 700);
+    tocar(getByTestId);
+    expect(alerta).not.toHaveBeenCalled();
+    agora.mockReturnValue(1_000_000 + 700 + 300);
+    tocar(getByTestId);
+    expect(alerta).toHaveBeenCalled();
+    agora.mockRestore();
+    alerta.mockRestore();
   });
 
   // sair-da-fila-so-toque-duplo (André, 28/10): o primeiro toque mostra só o pedido do segundo.
-  it('o primeiro toque mostra só "toque duas vezes seguidas": sem faixa de multa, sem "Saiba mais"', () => {
+  it('o primeiro toque não mostra faixa de multa nem "Saiba mais"', () => {
     const { getByTestId, queryByText, queryByTestId } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
-    expect(getByTestId('aviso-segundo-toque')).toBeTruthy();
     expect(queryByText(/Sair agora gera multa/)).toBeNull();
     expect(queryByTestId('saida-saiba-mais')).toBeNull();
   });
@@ -214,7 +219,7 @@ describe('QueueStatus — sair da fila (D15)', () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { getByTestId, getAllByText, queryByText } = renderWithProviders(<QueueStatus />);
     tocar(getByTestId);
-    expect(getAllByText('Toque duas vezes seguidas para sair.')[0]).toBeTruthy();
+    expect(getAllByText('Toque duas vezes seguidas para sair.')).toHaveLength(1);
     expect(queryByText(/multa/i)).toBeNull();
     tocar(getByTestId);
     const [titulo, mensagem, botoes] = alerta.mock.calls[0] as [string, string, BotaoDoAlert[]];

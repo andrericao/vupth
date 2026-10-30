@@ -11,6 +11,8 @@ export type MoreOption = {
   title: string;
   // Linha curta explicando o que acontece ao tocar (opcional).
   description?: string;
+  /** A descrição em vermelho (aviso que a ação pede cuidado). */
+  perigo?: boolean;
   /** Icone lucide opcional — ajuda a distinguir acoes de natureza diferente. */
   icon?: ComponentType<{ size?: number; color?: string }>;
   disabled?: boolean;
@@ -93,7 +95,7 @@ export function MoreOptionsModal({ visible, title, subtitle, options, onClose }:
                         {option.title}
                       </Text>
                       {option.description && (
-                        <Text size="xs" color="$brandTextSecondary">
+                        <Text size="xs" color={option.perigo ? "$brandDanger" : "$brandTextSecondary"} testID={`more-option-${option.key}-descricao`}>
                           {option.description}
                         </Text>
                       )}

@@ -120,29 +120,13 @@ describe('QueueStatus — puxar para atualizar e a faixa da saída (cobertura-98
     }
   });
 
-  it('o primeiro toque em "Sair da fila" mostra a faixa, que some em 8 s', () => {
-    jest.useFakeTimers();
-    try {
-      estado({});
-      const tela = renderWithProviders(<QueueStatus />);
-      fireEvent.press(tela.getByTestId('queue-options'));
-      fireEvent.press(tela.getByTestId('more-option-leave-queue'));
-      expect(tela.getByTestId('faixa-de-saida')).toBeTruthy();
-      act(() => {
-        jest.advanceTimersByTime(8000);
-      });
-      expect(tela.queryByTestId('faixa-de-saida')).toBeNull();
-    } finally {
-      jest.useRealTimers();
-    }
-  });
-});
-
-describe('QueueStatus — os rótulos do tempo (cobertura-98)', () => {
-  it('em atendimento: o tempo corrido e o término previsto', () => {
-    estado({ isInQueue: false, isBeingAttended: true, elapsedSeconds: 125, activeQueue: { ...FILA, status: 'IN_PROGRESS', startedAt: Date.now() - 125000 } });
+  it('o primeiro toque em "Sair da fila" não mostra faixa: o pedido está só na descrição da opção', () => {
+    estado({});
     const tela = renderWithProviders(<QueueStatus />);
-    expect(tela.toJSON()).toBeTruthy();
+    fireEvent.press(tela.getByTestId('queue-options'));
+    fireEvent.press(tela.getByTestId('more-option-leave-queue'));
+    expect(tela.queryByTestId('faixa-de-saida')).toBeNull();
+    expect(tela.getByTestId('more-option-leave-queue-descricao')).toBeTruthy();
   });
 
   // valor-no-em-atendimento (André, 22/10): em atendimento, o cliente vê o valor do serviço.

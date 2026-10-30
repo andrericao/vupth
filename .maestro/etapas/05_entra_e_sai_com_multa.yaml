@@ -141,20 +141,29 @@ appId: ${APP_ID}
     text: ".*(sem|em).*custo.*"
     label: "05.1D · confere que a faixa saiu"
 
-# sair-da-fila-so-toque-duplo (28/10) e fila-aguardando-do-mockup (CLI-32): "Sair da fila"
-# mora em Opcoes. Um toque so mostra o pedido do segundo ("Toque duas vezes seguidas
-# para sair.", sem valor nem Saiba mais) e o menu fica aberto. O doubleTapOn toca duas
-# vezes dentro da janela de 1,5 s (JANELA_DO_TOQUE_DUPLO_MS): dois tapOn saem ~2 s um
-# do outro e a confirmacao nunca abria.
+# sair-da-fila-toque-duplo-vermelho (30/10) e fila-aguardando-do-mockup (CLI-32): "Sair da fila"
+# mora em Opcoes. O pedido ("Toque duas vezes seguidas para sair.", em vermelho) esta sempre na
+# descricao da opcao, uma vez so. A saida exige dois toques RAPIDOS (500 ms, JANELA_DO_TOQUE_DUPLO_MS):
+# um toque, uma pausa e outro toque nao sai; o doubleTapOn sai.
 - tapOn:
     id: "queue-options"
     label: "05.1E · abre Opções"
-- tapOn:
-    id: "more-option-leave-queue"
-    label: "05.1F · um toque em Sair da fila"
 - assertVisible:
     text: "Toque duas vezes seguidas para sair."
-    label: "05.1G · o aviso pede o segundo toque"
+    label: "05.1F · o pedido do duplo toque já está na opção"
+- tapOn:
+    id: "more-option-leave-queue"
+    label: "05.1G · um toque em Sair da fila"
+- extendedWaitUntil:
+    visible: "Toque duas vezes seguidas para sair."
+    timeout: 3000
+    label: "05.1H · um toque só não sai (o menu segue aberto)"
+- tapOn:
+    id: "more-option-leave-queue"
+    label: "05.1I · outro toque, depois da pausa"
+- assertNotVisible:
+    text: ".*de multa no próximo atendimento.*"
+    label: "05.1J · um toque, pausa e outro toque não abrem a caixa de saída"
 
 - doubleTapOn:
     id: "more-option-leave-queue"

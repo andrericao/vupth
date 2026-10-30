@@ -20,7 +20,7 @@ import { avisarLimiteDeMultas } from "@utils/limiteDeMultas";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { useCampanhasAtivas } from "@hooks/useCampanhasAtivas";
 import { useTema } from "@hooks/useTema";
-import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor, AVISO_DO_SEGUNDO_TOQUE, JANELA_DO_TOQUE_DUPLO_MS } from "@domain/queue/saidaDaFila";
+import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor, AVISO_DO_SEGUNDO_TOQUE } from "@domain/queue/saidaDaFila";
 import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
@@ -410,7 +410,6 @@ export function QueueStatus() {
   const penalty = remaining != null && incursLatePenalty(remaining);
   // A faixa da saida (D15): so depois do primeiro toque em "Sair da fila", e
   // some sozinha. O texto e sempre o da regra de AGORA — nao o do momento do toque.
-  const [mostrarFaixaDeSaida, setMostrarFaixaDeSaida] = useState(false);
   const ultimoToqueEmSair = useRef<number | null>(null);
   // Quanto sair custa AGORA. Com o valor do servidor (D4: R$ 3 / R$ 5, zero na
   // tolerancia), ele manda — inclusive para dizer que nao ha multa. Sem ele, a
@@ -428,16 +427,9 @@ export function QueueStatus() {
     }
     return { multa: penalty && !naTolerancia, semPrevisao: semPrevisao && !naTolerancia, minutos };
   }
-  const saidaAtual = saidaDaFila(regraDaSaida());
-  useEffect(() => {
-    if (!mostrarFaixaDeSaida) return;
-    const t = setTimeout(() => setMostrarFaixaDeSaida(false), JANELA_DO_TOQUE_DUPLO_MS);
-    return () => clearTimeout(t);
-  }, [mostrarFaixaDeSaida]);
 
   // Tira da fila. `valorConfirmado` e a ciencia da multa (null = sem multa).
   const sair = async (valorConfirmado: number | null) => {
-    setMostrarFaixaDeSaida(false);
     // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
     // de 2026-09-07 ("sai da fila e o app fecha sozinho").
     //
@@ -522,7 +514,6 @@ export function QueueStatus() {
     const agora = Date.now();
     if (!ehToqueDuplo(ultimoToqueEmSair.current, agora)) {
       ultimoToqueEmSair.current = agora;
-      setMostrarFaixaDeSaida(true);
       return;
     }
     ultimoToqueEmSair.current = null;
@@ -1005,25 +996,6 @@ export function QueueStatus() {
           </Box>
         )}
 
-        {mostrarFaixaDeSaida && (
-          <Box px={16} pb="$2">
-            <Box
-              // Com multa, ambar: e o estado que pede atencao. Sem multa, branco:
-              // o forest translucido sumia sobre a tela verde (mesma cor do fundo).
-              bg={saidaAtual.confirmacao ? "$brandWarning" : "$brandBackground"}
-              borderRadius="$card"
-              px="$3.5"
-              py="$2.5"
-              testID="faixa-de-saida"
-            >
-              {/* sair-da-fila-so-toque-duplo (André, 28/10): o primeiro toque mostra só o pedido do segundo. */}
-              <Text size="xs" fontWeight="$bold" color="$brandTextPrimary" textAlign="center" testID="aviso-segundo-toque">
-                {AVISO_DO_SEGUNDO_TOQUE}
-              </Text>
-            </Box>
-          </Box>
-        )}
-
         <VStack px={16} style={{ paddingBottom: Math.max(28, insets.bottom + 16) }} gap="$3.5" alignItems="center">
           {/* fila-aguardando-do-mockup (CLI-32): um botão só; trocar de lugar, ir para o final e sair moram em Opções. */}
           {(canReshuffle || canCancel) && (
@@ -1081,11 +1053,13 @@ export function QueueStatus() {
                   {
                     key: "leave-queue",
                     title: "Sair da fila",
-                    // o 1º toque pede o 2º, aqui mesmo (sair-da-fila-so-toque-duplo): o menu fica aberto até o 2º.
-                    description: mostrarFaixaDeSaida ? AVISO_DO_SEGUNDO_TOQUE : "Você perde a sua vez",
+                    // sair-da-fila-toque-duplo-vermelho (30/10): o pedido do duplo toque mora só aqui, em vermelho;
+                    // o 1º toque não mostra nada e o menu fica aberto até o 2º, que precisa vir em 500 ms.
+                    description: AVISO_DO_SEGUNDO_TOQUE,
+                    perigo: true,
                     icon: LogOut,
                     onPress: () => {
-                      if (mostrarFaixaDeSaida) setShowOpcoes(false);
+                      if (ehToqueDuplo(ultimoToqueEmSair.current, Date.now())) setShowOpcoes(false);
                       handleCancel();
                     },
                   },

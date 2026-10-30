@@ -27,14 +27,13 @@ import { CANCELLATION_PENALTY_VALUE } from './types';
 // assim"): a troca deixou de morar na saida (D16 a leva para um popup).
 
 /**
- * Quanto tempo entre os dois toques ainda conta como "seguidos": o tempo que a faixa fica na tela.
- * aviso-dois-toques-para-sair-da-fila (André, 25/10): o cliente nao sabia que sair da fila pede dois toques,
- * e com a janela de 1,5 s o segundo toque, dado depois de ler a faixa, so reabria a faixa. Agora a faixa pede
- * o segundo toque ("Toque de novo para sair da fila") e ele vale enquanto ela esta visivel.
+ * Quanto tempo entre os dois toques ainda conta como "seguidos".
+ * sair-da-fila-toque-duplo-vermelho (André, 30/10): a saída exige DOIS TOQUES RÁPIDOS (duplo toque, 500 ms);
+ * um toque, uma pausa e outro toque não sai. O pedido fica sempre visível na descrição da opção, em vermelho.
  */
-export const JANELA_DO_TOQUE_DUPLO_MS = 8000;
+export const JANELA_DO_TOQUE_DUPLO_MS = 500;
 
-/** O aviso curto e visivel que pede o segundo toque (aparece na faixa do primeiro toque). */
+/** O aviso curto, em vermelho, na descrição de "Sair da fila" (uma vez só, dentro do menu Opções). */
 export const AVISO_DO_SEGUNDO_TOQUE = 'Toque duas vezes seguidas para sair.';
 
 export function ehToqueDuplo(toqueAnterior: number | null, agora: number): boolean {
