@@ -910,7 +910,8 @@ export function QueueStatus() {
             avisos={[{ id: "opcoes", valor: "Opções", nome: "Clique em Opções caso não consiga chegar no horário" }]}
           />
 
-          <VStack px={20} pt="$5" gap="$4">
+          {/* nome-e-informacoes-sobem-como-no-mockup (André, 30/10): o nome e a loja logo abaixo do carrossel, o vão do mockup (14 px). */}
+          <VStack px={16} pt="$3.5" gap="$3.5">
             <VStack>
               <Text fontFamily="$display" fontSize={fs(20)} letterSpacing={-0.5} color={cores.onGreen} testID="queue-professional">
                 {activeQueue?.professionalName ?? paramProfName ?? "Atendimento"}
@@ -924,7 +925,7 @@ export function QueueStatus() {
             {/* O número de pessoas e o tempo: duas colunas. Com o número oculto pelo profissional, só o tempo, ao
                 centro. O tempo aparece sempre, sem o "~" (André, 29/10). */}
             {peopleAhead != null ? (
-              <HStack alignItems="center" justifyContent="space-around" gap="$3" py="$2">
+              <HStack alignItems="center" justifyContent="space-around" gap="$3" py="$1.5">
                 <VStack flex={1} alignItems="center">
                   <NumeroComSalto valor={peopleAhead}>
                     <Text fontFamily="$display" fontSize={fs(72)} lineHeight={fs(76)} letterSpacing={-3} color={cores.onGreen} testID="queue-position">
@@ -946,7 +947,7 @@ export function QueueStatus() {
                 </VStack>
               </HStack>
             ) : (
-              <VStack alignItems="center" py="$2">
+              <VStack alignItems="center" py="$1.5">
                 <Text fontFamily="$display" fontSize={fs(72)} lineHeight={fs(78)} letterSpacing={-3} color={cores.onGreen} testID="queue-time">
                   {timeLabel}
                 </Text>
@@ -970,7 +971,7 @@ export function QueueStatus() {
               </HStack>
             )}
           </VStack>
-          <Box mt="$5" alignItems="center">
+          <Box mt="$3.5" alignItems="center">
             <AtualizarNoNavegador atualizando={refreshing} onPress={handleRefresh} />
           </Box>
         </ScrollView>
