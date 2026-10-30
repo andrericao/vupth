@@ -11,6 +11,7 @@ import {
   agendaAbertaDoPush,
   pagamentoDoPush,
   avisoDoPush,
+  avisaQuaseASuaVez,
   ACAO_OK,
   CANAL_ALERTAS,
   CATEGORIA_CIENCIA,
@@ -38,6 +39,7 @@ import {
 import { abrirAvaliacao, abrirLoja, navigateFromNotification } from "@routes/navigationRef";
 import { useAuthStore } from "@stores/authStore";
 import { usePendenciaStore } from "@stores/pendenciaStore";
+import { useQueueStore } from "@stores/queueStore";
 import { useQuedaBruscaStore } from "@stores/quedaBruscaStore";
 import { quedaBruscaDoPush } from "@domain/queda/quedaBrusca";
 import { useFirstRunStore } from "@stores/firstRunStore";
@@ -237,6 +239,8 @@ export function usePushRegistration() {
           useQuedaBruscaStore.getState().abrir(queda);
           return;
         }
+        // quase-a-sua-vez-so-em-1h-e-30min: sozinho na fila e a poucos minutos da vez, o aviso nao abre.
+        if (dados.type === "QUEUE_NEXT_IN_LINE" && !avisaQuaseASuaVez(useQueueStore.getState().activeQueue?.estimatedMinutes)) return;
         const aviso = avisoDoPush(conteudo);
         // pagamento-ja-paguei: o profissional recusou o "Já paguei"; o aviso leva ao pagamento.
         const pagamento = pagamentoDoPush(dados);

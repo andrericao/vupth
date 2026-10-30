@@ -192,6 +192,18 @@ export function avisoDoPush(conteudo: { title?: string | null; body?: string | n
   return { titulo: titulo || 'VUPTH', mensagem };
 }
 
+// quase-a-sua-vez-so-em-1h-e-30min (Andre, 30/10): o aviso "E quase a sua vez" so vale quando faltam
+// 1 hora ou 30 minutos, com 15 min de oscilacao (de 15 a 75 min). Quem esta sozinho na fila e a poucos
+// minutos da vez nao o recebe. Espera ainda desconhecida (`null`): o aviso passa, o servidor decidiu.
+export const OSCILACAO_DO_AVISO_MINUTOS = 15;
+export const AVISO_QUASE_A_VEZ_MIN = 30 - OSCILACAO_DO_AVISO_MINUTOS;
+export const AVISO_QUASE_A_VEZ_MAX = 60 + OSCILACAO_DO_AVISO_MINUTOS;
+
+export function avisaQuaseASuaVez(minutos: number | null | undefined): boolean {
+  if (minutos == null || !Number.isFinite(minutos)) return true;
+  return minutos >= AVISO_QUASE_A_VEZ_MIN && minutos <= AVISO_QUASE_A_VEZ_MAX;
+}
+
 /**
  * Notificacao de ciencia com o app FECHADO (Andre, 02/10): a que so informa
  * ganha o botao "OK" na propria notificacao, que so a fecha. Aparece quando o
