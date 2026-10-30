@@ -81,8 +81,11 @@ BRANCH_PASTA="$BRANCH"  # para onde vao os logs (DEC-28)
 # cloud->dev do Andre — o commit na linha da versao e o do merge.
 [ "$BRANCH" = "cloud" ] && BRANCH=dev
 git -C "$REPO" fetch -q origin "$BRANCH" 2>/dev/null
-COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
-echo "Commit esperado no app: $COMMIT (origin/$BRANCH)"
+# O commit do OTA e o ultimo que nao seja chore(logs): o commit dos logs da propria bateria nao vai ao OTA
+# e reprovaria a versao certa (de37ba25).
+COMMIT=$(git -C "$REPO" log -1 --format=%H --invert-grep --grep='^chore(logs)' "origin/$BRANCH" | cut -c1-8)
+[ -n "$COMMIT" ] || COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
+echo "Commit esperado no app: $COMMIT (origin/$BRANCH, sem chore(logs))"
 
 # Supervisao (bateria-supervisionada, DEC-15) — o mesmo formato do Partner.
 # Sem resposta em 1 min, segue sem supervisao.
