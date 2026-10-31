@@ -23,6 +23,11 @@ appId: ${APP_ID}
 - tapOn:
     id: "confirmar-agendamento"
     label: "07.04 · toca em confirmar-agendamento"
+# Agendando para daqui a menos de 1 hora, o app pede "Esteja na loja às HH:MM" antes de agendar
+# (aviso-de-chegada-na-entrada); o primeiro horario da barra cai nessa janela (bateria 131517).
+- runFlow:
+    file: ../apoio/confirmar_chegada.yaml
+    label: "07.04b · confirma o aviso 'Esteja na loja', se vier"
 - extendedWaitUntil:
     visible: "Agendado"
     timeout: ${30000 * LENTO}
