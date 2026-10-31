@@ -1,3 +1,4 @@
+import { fireEvent } from '@testing-library/react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
 
@@ -113,8 +114,9 @@ describe('QueueStatus — nenhuma faixa enquanto a pessoa só espera (D15)', () 
     expect(queryByText(/R\$/)).toBeNull();
   });
 
-  it('"Sair da fila" continua na tela', () => {
+  it('"Sair da fila" continua ao alcance: dentro do menu Opções', () => {
     const { getByTestId } = renderWithProviders(<QueueStatus />);
-    expect(getByTestId('leave-queue')).toBeTruthy();
+    fireEvent.press(getByTestId('queue-options'));
+    expect(getByTestId('more-option-leave-queue')).toBeTruthy();
   });
 });

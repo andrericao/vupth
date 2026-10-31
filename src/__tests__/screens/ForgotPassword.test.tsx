@@ -24,6 +24,7 @@ jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }))
 // `(0, _native.createNavigatorFactory) is not a function`.
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
+  useFocusEffect: (efeito: () => void) => jest.requireActual('react').useEffect(efeito, []),
   useNavigation: () => ({ navigate: mockNavigate, goBack: jest.fn() }),
   useRoute: () => ({ params: {} }),
 }));

@@ -579,7 +579,18 @@ export function EstablishmentDetail() {
 
       <VStack px={16} pb={32}>
         {isOpen && recebem.length > 0 && (
-          <Button title="Entrar com menor espera" onPress={handleSelectShortestQueue} />
+          <VStack gap="$2">
+            <Button title="Entrar com menor espera" onPress={handleSelectShortestQueue} />
+            {/* agendar-some-com-loja-aberta (CLI-31): com a loja aberta o Agendar
+                também aparece, embaixo do botão de entrar. Leva ao mesmo
+                profissional; a tela de serviços abre o agendar. */}
+            <Button
+              title="Agendar um horário"
+              variant="outline"
+              testID="agendar-loja-aberta"
+              onPress={handleSelectShortestQueue}
+            />
+          </VStack>
         )}
 
         {/* Loja fechada agora (inclui OPEN fora do horário): no lugar do botão de

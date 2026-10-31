@@ -120,10 +120,12 @@ appId: ${APP_ID}
           env:
             EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
     label: "${ETAPA}.PA · entra com o cliente"
-# Logado: a fatia de atualizacao (Verificar atualizacao, sem reabrir o app).
+# Logado: a fatia de atualizacao (Verificar atualizacao, sem reabrir o app). So a
+# etapa 00 a faz: a bateria passa VERSAO_VERIFICADA=1 as demais (o commit ja foi
+# conferido, maestro-atualizacao-por-commit).
 - runFlow:
     when:
-      true: ${CONTA == '1'}
+      true: ${CONTA == '1' && !(typeof VERSAO_VERIFICADA !== 'undefined' && VERSAO_VERIFICADA == '1')}
     commands:
       - runFlow:
           file: atualizar.yaml
@@ -131,7 +133,7 @@ appId: ${APP_ID}
 # Visitante (sem o menu Versao do app): fecha e abre ate o OTA valer.
 - runFlow:
     when:
-      true: ${CONTA != '1' && ABERTURA == '1'}
+      true: ${CONTA != '1' && ABERTURA == '1' && !(typeof VERSAO_VERIFICADA !== 'undefined' && VERSAO_VERIFICADA == '1')}
     commands:
       - tapOn:
           text: "Perfil"

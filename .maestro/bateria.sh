@@ -81,8 +81,11 @@ BRANCH_PASTA="$BRANCH"  # para onde vao os logs (DEC-28)
 # cloud->dev do Andre — o commit na linha da versao e o do merge.
 [ "$BRANCH" = "cloud" ] && BRANCH=dev
 git -C "$REPO" fetch -q origin "$BRANCH" 2>/dev/null
-COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
-echo "Commit esperado no app: $COMMIT (origin/$BRANCH)"
+# O commit do OTA e o ultimo que nao seja chore(logs): o commit dos logs da propria bateria nao vai ao OTA
+# e reprovaria a versao certa (de37ba25).
+COMMIT=$(git -C "$REPO" log -1 --format=%H --invert-grep --grep='^chore(logs)' "origin/$BRANCH" | cut -c1-8)
+[ -n "$COMMIT" ] || COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
+echo "Commit esperado no app: $COMMIT (origin/$BRANCH, sem chore(logs))"
 
 # Supervisao (bateria-supervisionada, DEC-15) — o mesmo formato do Partner.
 # Sem resposta em 1 min, segue sem supervisao.
@@ -188,6 +191,11 @@ juntar_para_o_andre() {
 passos() { grep -oP 'runCommands\$lambda\$\d+: \K\d\d\.[\dA-Z]{2} · .*(?= ('"$2"')$)' "$1/maestro.log" 2>/dev/null; }
 falhou_em() { passos "$1" RUNNING | grep -vxFf <(passos "$1" 'COMPLETED|SKIPPED') | tail -1; }
 
+# Prazo por etapa, em segundos (maestro-trava-na-atualizacao): passou, a etapa reprova
+# com "TEMPO ESGOTADO" no relatorio. Sobrescreva por ambiente se uma etapa pedir mais.
+ETAPA_PRAZO="${ETAPA_PRAZO:-1500}"
+ATUALIZACAO_PRAZO="${ATUALIZACAO_PRAZO:-1200}"
+
 # Roda uma etapa na pasta dela; devolve o status do maestro.
 rodar() {
   local nome="$1" pasta="$RODADA/$1"
@@ -199,9 +207,13 @@ rodar() {
   adb logcat -c 2>/dev/null
   adb logcat -v time '*:W' > "$pasta/logcat.txt" 2>/dev/null &
   local logcat=$!
-  maestro "${MAESTRO_APARELHO[@]}" test \
+  # maestro-trava-na-atualizacao (Andre, 28/10): etapa que passa do prazo REPROVA
+  # (124), em vez de a bateria ficar parada para sempre. A 00 (versao) tem prazo proprio.
+  local prazo="$ETAPA_PRAZO" verificada=1
+  [ "$nome" = "00_atualizacao" ] && { prazo="$ATUALIZACAO_PRAZO"; verificada=0; }
+  timeout -k 30 "$prazo" maestro "${MAESTRO_APARELHO[@]}" test \
     -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
-    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" \
+    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" -e VERSAO_VERIFICADA="$verificada" \
     --debug-output "$pasta" --flatten-debug-output \
     --test-output-dir "$pasta" \
     "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"
@@ -235,16 +247,39 @@ longe_da_meia_noite() {
   sleep "$espera"
 }
 
+# maestro-atualizacao-por-commit (Andre, 28/10): o commit ja verificado fica em
+# versao-verificada.txt (no .gitignore), junto da hora da instalacao do APK no
+# aparelho — reinstalar o APK volta ao bundle de fabrica e invalida a marca. Mesmo
+# commit, mesmo aparelho: a 00 nao roda; commit novo: roda e grava o novo valor.
+VERIFICADA="$DIR/versao-verificada.txt"
+INSTALACAO=$(adb shell dumpsys package "$APP_ID" 2>/dev/null | grep -m1 lastUpdateTime | tr -d '[:space:]')
+MARCA="${APARELHO:-celular} $COMMIT $INSTALACAO"
+if [ "$MODO" != "--completa" ] && [ -n "$INSTALACAO" ] && [ "$(cat "$VERIFICADA" 2>/dev/null)" = "$MARCA" ]; then
+  VERSAO_OK=1
+  echo "⏭ 00 · versão $COMMIT já verificada neste aparelho"
+else
+  VERSAO_OK=0
+  rm -f "$VERIFICADA"
+fi
+
 STATUS=0
 : > "$RODADA/relatorio.txt"
-if ! rodar 00_atualizacao; then
+VOLTA_00=0
+[ "$VERSAO_OK" = 0 ] && { rodar 00_atualizacao; VOLTA_00=$?; }
+if [ "$VOLTA_00" -ne 0 ]; then
+  [ "$VOLTA_00" -eq 124 ] && echo "⏱ 00 · TEMPO ESGOTADO (${ATUALIZACAO_PRAZO}s)" | tee -a "$RODADA/relatorio.txt"
   PASSO=$(falhou_em "$RODADA/00_atualizacao")
   echo "❌ 00 · versão — ${PASSO:-antes do primeiro passo}" | tee -a "$RODADA/relatorio.txt"
   print_da_falha "$RODADA/00_atualizacao" "$PASSO"
   echo "A versão no aparelho não é a $COMMIT: nenhuma etapa rodou."
   STATUS=1
 else
-  echo "✅ 00 · versão" >> "$RODADA/relatorio.txt"
+  if [ "$VERSAO_OK" = 1 ]; then
+    echo "⏭ 00 · versão (commit $COMMIT já verificado)" >> "$RODADA/relatorio.txt"
+  else
+    echo "✅ 00 · versão" >> "$RODADA/relatorio.txt"
+    [ -n "$INSTALACAO" ] && echo "$MARCA" > "$VERIFICADA"
+  fi
   for n in $ETAPAS; do
     arquivo=$(basename "$(ls "$DIR"/avulsas/"$n"_*.yaml 2>/dev/null | head -1)" .yaml)
     if [ -z "$arquivo" ]; then
@@ -304,7 +339,8 @@ else
     else
       STATUS=1
       PASSO=$(falhou_em "$RODADA/$arquivo")
-      echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo} ($DURA)" >> "$RODADA/relatorio.txt"
+      MOTIVO=""; [ "$VOLTA" -eq 124 ] && MOTIVO=" — TEMPO ESGOTADO (${ETAPA_PRAZO}s)"
+      echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo} ($DURA)$MOTIVO" >> "$RODADA/relatorio.txt"
       echo "${PASSO:-}" > "$RODADA/$arquivo/falhou_em"
       print_da_falha "$RODADA/$arquivo" "$PASSO"
     fi

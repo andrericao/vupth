@@ -44,5 +44,6 @@ coverage/
 # As etapas aprovadas por commit (bateria-pula-aprovados)
 .maestro/aprovados.txt
 .maestro/aprovados.txt.tmp
+.maestro/versao-verificada.txt
 # Falhas dos testes do pre-push (DEC-22, fora do repositorio — DEC-28 ajustada: so o log do Maestro sobe)
 .logs-teste/

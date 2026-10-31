@@ -9,7 +9,10 @@ import { avisoDeFimDaCampanha } from "@utils/avisoDeFimDaCampanha";
 import { useAuthStore } from "@stores/authStore";
 import { alertaTipado } from "@utils/alertaTipado";
 
-type Props = { campanhas: Campanha[] };
+/** Um slide que não é campanha: um aviso no mesmo card (ex.: "Opções · clique em Opções caso não consiga chegar"). */
+export type SlideDeAviso = { id: string; valor: string; nome: string; detalhe?: string };
+
+type Props = { campanhas: Campanha[]; avisos?: SlideDeAviso[] };
 
 // Bloco da Home que so existe quando ha campanha criada no Painel; com mais de
 // uma, rola de lado. O titulo e o nome que o Andre da a campanha. O toque abre
@@ -17,7 +20,7 @@ type Props = { campanhas: Campanha[] };
 // ticket-picote-so-na-esquerda (André, 24/10): vão de 12 px entre os cards; o picote (só à esquerda) não bate no vizinho.
 const ESPACO_ENTRE_CARDS = 12;
 
-export function CarrosselDeCampanhas({ campanhas }: Props) {
+export function CarrosselDeCampanhas({ campanhas, avisos = [] }: Props) {
   const { width } = useWindowDimensions();
   const accessToken = useAuthStore((s) => s.accessToken);
 
@@ -37,9 +40,10 @@ export function CarrosselDeCampanhas({ campanhas }: Props) {
     }
   }
 
-  if (campanhas.length === 0) return null;
-  const unica = campanhas.length === 1;
-  const largura = unica ? width - 32 : Math.min(width - 64, 320);
+  const total = campanhas.length + avisos.length;
+  if (total === 0) return null;
+  const unica = total === 1;
+  const largura = unica ? width - 32 : Math.max(width - 64, 220);
 
   return (
     <ScrollView
@@ -73,6 +77,9 @@ export function CarrosselDeCampanhas({ campanhas }: Props) {
             );
           }}
         />
+      ))}
+      {avisos.map((a) => (
+        <CartaoTicket key={a.id} testID={`aviso-${a.id}`} largura={largura} valor={a.valor} nome={a.nome} detalhe={a.detalhe} />
       ))}
     </ScrollView>
   );

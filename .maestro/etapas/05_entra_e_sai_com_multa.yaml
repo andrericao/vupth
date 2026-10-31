@@ -5,15 +5,17 @@ appId: ${APP_ID}
 - tapOn:
     id: "primary-queue"
     label: "05.01 · toca em primary-queue"
+
 - runFlow:
     file: ../apoio/confirmar_chegada.yaml
     label: "05.01b · confirma o aviso 'Esteja na loja', se vier"
 # O push "É quase a sua vez!" pode chegar antes do Entendi e cobri-lo
 # (bateria 09/10 15:13): espera o que vier primeiro e fecha o push, se for ele.
 - extendedWaitUntil:
-    visible: "(Entendi|É quase a sua vez!)"
+    visible: "(Entendi|É quase a sua vez!|Avisar|Agora não)"
     timeout: ${60000 * LENTO}
-    label: "05.02 · espera Entendi ou o push da vez"
+    label: "05.02 · espera a próxima tela de confirmação"
+
 - runFlow:
     when:
       visible: "É quase a sua vez!"
@@ -21,23 +23,47 @@ appId: ${APP_ID}
       - tapOn:
           id: "dialogo-botao-0"
     label: "05.02b · fecha o push da vez, se veio antes do Entendi"
+
 - extendedWaitUntil:
-    visible: "Entendi"
+    visible: "(Entendi|Avisar|Agora não)"
     timeout: ${10000 * LENTO}
-    label: "05.02c · espera Entendi"
-- tapOn:
-    text: "Entendi"
+    optional: true
+    label: "05.02c · espera a próxima tela de confirmação"
+
+- runFlow:
+    when:
+      visible: "Avisar"
+    commands:
+      - tapOn:
+          text: "Avisar"
+    label: "05.02d · fecha a caixa de aviso 'Pode fechar o app'"
+
+- runFlow:
+    when:
+      visible: "Agora não"
+    commands:
+      - tapOn:
+          text: "Agora não"
+    label: "05.02e · fecha a opção 'Agora não'"
+
+- runFlow:
+    when:
+      visible: "Entendi"
+    commands:
+      - tapOn:
+          text: "Entendi"
     label: "05.03 · toca em Entendi"
+
 # O primeiro da fila recebe o push "É quase a sua vez!" logo ao entrar; com o
 # app aberto ele vira uma caixa com "OK" que cobre a tela (o queue-position some
-# da arvore). Na entrada nao ha mais o aviso de tres botoes (André, 22/10):
-# so a faixa da tolerancia. Fecha o push, se veio.
-# O push pode chegar depois: espera um pouco por ele e fecha.
+# da arvore). Na entrada nao ha mais o aviso de tres botoes:
+# só a faixa da tolerancia. Fecha o push, se veio.
 - extendedWaitUntil:
     visible: "É quase a sua vez!"
     timeout: ${8000 * LENTO}
     optional: true
     label: "05.08 · espera o push da vez, se ainda nao veio"
+
 - runFlow:
     when:
       visible: "É quase a sua vez!"
@@ -45,6 +71,7 @@ appId: ${APP_ID}
       - tapOn:
           id: "dialogo-botao-0"
     label: "05.09 · fecha o push da vez"
+
 - extendedWaitUntil:
     visible:
       id: "queue-position"
@@ -72,7 +99,7 @@ appId: ${APP_ID}
     commands:
       - extendedWaitUntil:
           notVisible:
-            text: ".*sem custo até.*"
+            text: ".*(sem|em).*custo.*"
           timeout: 30000
           optional: true
       - runFlow:
@@ -81,7 +108,7 @@ appId: ${APP_ID}
       # volta seguinte espera de novo. Sumiu de vez: as voltas que sobram custam 5 s cada.
       - extendedWaitUntil:
           visible:
-            text: ".*sem custo até.*"
+            text: ".*(sem|em).*custo.*"
           timeout: ${5000 * LENTO}
           optional: true
     label: "05.11 · espera a tolerância acabar (a faixa sem custo some)"
@@ -96,7 +123,7 @@ appId: ${APP_ID}
     label: "05.1A · fecha o push da vez, se cobriu a faixa"
 - extendedWaitUntil:
     visible:
-      id: "leave-queue"
+      id: "queue-options"
     timeout: ${10000 * LENTO}
     label: "05.1B · a tela da fila está livre"
 - repeat:
@@ -104,37 +131,43 @@ appId: ${APP_ID}
     commands:
       - extendedWaitUntil:
           notVisible:
-            text: ".*sem custo até.*"
+            text: ".*(sem|em).*custo.*"
           timeout: 30000
           optional: true
       - runFlow:
           file: ../apoio/esperar_o_sistema.yaml
     label: "05.1C · a faixa sem custo saiu de vez (voltas de 30 s)"
 - assertNotVisible:
-    text: ".*sem custo até.*"
+    text: ".*(sem|em).*custo.*"
     label: "05.1D · confere que a faixa saiu"
 
-# sair-da-fila-texto (15/10): um toque so mostra a faixa de uma linha, com o
-# valor e o "Saiba mais" (o toque no link abre o navegador, fora do app — so
-# confere que esta la). Os asserts levam mais que a janela de 1,5 s: o toque
-# duplo abaixo comeca do zero.
+# sair-da-fila-toque-duplo-vermelho (30/10) e fila-aguardando-do-mockup (CLI-32): "Sair da fila"
+# mora em Opcoes. O pedido ("Toque duas vezes seguidas para sair.", em vermelho) esta sempre na
+# descricao da opcao, uma vez so. A saida exige dois toques RAPIDOS (500 ms, JANELA_DO_TOQUE_DUPLO_MS):
+# um toque, uma pausa e outro toque nao sai; o doubleTapOn sai.
 - tapOn:
-    id: "leave-queue"
-    label: "05.1E · um toque em leave-queue"
+    id: "queue-options"
+    label: "05.1E · abre Opções"
 - assertVisible:
-    text: "Sair agora gera multa de R\\$.*"
-    label: "05.1F · a faixa diz a multa em uma linha"
-- assertVisible:
-    id: "saida-saiba-mais"
-    label: "05.1G · o Saiba mais está na faixa"
+    text: "Toque duas vezes seguidas para sair."
+    label: "05.1F · o pedido do duplo toque já está na opção"
+- tapOn:
+    id: "more-option-leave-queue"
+    label: "05.1G · um toque em Sair da fila"
+- extendedWaitUntil:
+    visible: "Toque duas vezes seguidas para sair."
+    timeout: 3000
+    label: "05.1H · um toque só não sai (o menu segue aberto)"
+- tapOn:
+    id: "more-option-leave-queue"
+    label: "05.1I · outro toque, depois da pausa"
+- assertNotVisible:
+    text: ".*de multa no próximo atendimento.*"
+    label: "05.1J · um toque, pausa e outro toque não abrem a caixa de saída"
 
-# Sair da fila: dois toques seguidos (D15) e a confirmacao com o valor. Dois
-# tapOn saem ~2 s um do outro, fora da janela de 1,5 s (JANELA_DO_TOQUE_DUPLO_MS):
-# cada um so mostrava a faixa e a confirmacao nunca abria. O doubleTapOn toca
-# duas vezes dentro da janela.
 - doubleTapOn:
-    id: "leave-queue"
-    label: "05.12 · toque duplo em leave-queue"
+    id: "more-option-leave-queue"
+    label: "05.12 · toque duplo em Sair da fila"
 # textos-curtos (guia 4.1): o titulo da caixa e "Sair da fila", igual ao botao da
 # tela; por isso espera a LINHA da multa, que so a caixa tem.
 - extendedWaitUntil:
