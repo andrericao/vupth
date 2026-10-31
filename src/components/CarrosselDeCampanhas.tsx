@@ -48,6 +48,9 @@ export function CarrosselDeCampanhas({ campanhas, avisos = [] }: Props) {
   return (
     <ScrollView
       horizontal
+      // O ScrollView horizontal vem com flexGrow 1: dentro de uma tela que cresce na vertical (Aguardando) ele
+      // esticava e empurrava os dados para o rodape, deixando meia tela de vao (prints do André, 31/10).
+      style={{ flexGrow: 0 }}
       showsHorizontalScrollIndicator={false}
       snapToInterval={unica ? undefined : largura + ESPACO_ENTRE_CARDS}
       decelerationRate="fast"

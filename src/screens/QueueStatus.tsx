@@ -874,6 +874,9 @@ export function QueueStatus() {
     );
   }
 
+  // "Aguardando" (sem espera calculada) e uma PALAVRA, nao um tempo: numa fonte de numero ela quebra no meio ao lado do
+  // contador (prints do André, 31/10). O adjustsFontSizeToFit nao existe na web, entao a palavra ja nasce menor.
+  const textoDoTempo = !/\d/.test(String(timeLabel));
   if (waitingInQueue) {
     return (
       <VStack flex={1} bg="$brandGreen">
@@ -938,7 +941,7 @@ export function QueueStatus() {
                 </VStack>
                 <Box width={1} height={72} bg="#16330040" />
                 <VStack flex={1} alignItems="center">
-                  <Text fontFamily="$display" fontSize={fs(48)} lineHeight={fs(54)} letterSpacing={-2} color={cores.onGreen} testID="queue-time-coluna">
+                  <Text fontFamily="$display" fontSize={fs(textoDoTempo ? 30 : 48)} lineHeight={fs(textoDoTempo ? 34 : 54)} letterSpacing={-2} color={cores.onGreen} testID="queue-time-coluna" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
                     {timeLabel}
                   </Text>
                   <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">
@@ -948,7 +951,7 @@ export function QueueStatus() {
               </HStack>
             ) : (
               <VStack alignItems="center" py="$1.5">
-                <Text fontFamily="$display" fontSize={fs(72)} lineHeight={fs(78)} letterSpacing={-3} color={cores.onGreen} testID="queue-time">
+                <Text fontFamily="$display" fontSize={fs(textoDoTempo ? 44 : 72)} lineHeight={fs(textoDoTempo ? 50 : 78)} letterSpacing={-3} color={cores.onGreen} testID="queue-time" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
                   {timeLabel}
                 </Text>
                 <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">

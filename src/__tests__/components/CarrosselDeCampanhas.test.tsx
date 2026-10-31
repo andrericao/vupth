@@ -16,6 +16,13 @@ jest.mock('expo-secure-store');
 const wrap = (ui: React.ReactElement) => render(<GluestackUIProvider config={config}>{ui}</GluestackUIProvider>);
 
 describe('CarrosselDeCampanhas', () => {
+  // aguardando-dados-junto-das-campanhas (prints do André, 31/10): o ScrollView horizontal vem com flexGrow 1 e, dentro
+  // da tela Aguardando (que cresce na vertical), esticava e empurrava os dados para o rodape.
+  it('o carrossel nao estica na vertical (flexGrow 0): os dados seguem o card sem vao', () => {
+    const t = wrap(<CarrosselDeCampanhas campanhas={[]} avisos={[{ id: 'opcoes', valor: 'Opções', nome: 'Clique em Opções' }]} />);
+    expect(StyleSheet.flatten(t.getByTestId('campanhas-da-home').props.style).flexGrow).toBe(0);
+  });
+
   it('sem campanha o bloco some', () => {
     const t = wrap(<CarrosselDeCampanhas campanhas={[]} />);
     expect(t.queryByTestId('campanhas-da-home')).toBeNull();
