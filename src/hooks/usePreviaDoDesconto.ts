@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 
-import { INDICACAO_CAMPANHA_KEY, INDICACAO_KEY } from '@domain/indicacao';
+import { INDICACAO_CAMPANHA_KEY, INDICACAO_CUPOM_KEY, INDICACAO_KEY } from '@domain/indicacao';
 import { campaignService } from '@services/campaignService';
 
 // O cofre pode falhar (ou, no jest, nao responder): sem valor, sem previa.
@@ -33,7 +33,11 @@ export function usePreviaDoDesconto(serviceItemIds: string[], ativo: boolean): n
         chave.split(',').map((id) =>
           campaignService
             .preview(campanha, id, ref)
-            .then((r) => Number(r.data?.discount) || 0)
+            .then((r) => {
+              // o code da campanha (so com o ref valido) fica guardado para o redeem depois do cadastro
+              if (r.data?.code) SecureStore.setItemAsync(INDICACAO_CUPOM_KEY, r.data.code).catch(() => {});
+              return Number(r.data?.discount) || 0;
+            })
             .catch(() => 0),
         ),
       );

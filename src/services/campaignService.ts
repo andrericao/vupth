@@ -30,6 +30,8 @@ export interface PreviaDoDesconto {
   discount: number;
   price_with_coupon: number;
   benefit_base?: 'WITH_FEE' | 'WITHOUT_FEE' | null;
+  /** So com o ref do link valido (Backend, DEC-131): o codigo da campanha para o POST /campaigns/redeem. */
+  code?: string | null;
 }
 
 export const campaignService = {

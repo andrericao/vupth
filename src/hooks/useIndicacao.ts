@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
-import { INDICACAO_CAMPANHA_KEY, INDICACAO_KEY, campanhaDoCaminho, codigoDoCaminho, descartarDepoisDaRecusa } from '@domain/indicacao';
+import { INDICACAO_CAMPANHA_KEY, INDICACAO_CUPOM_KEY, INDICACAO_KEY, campanhaDoCaminho, codigoDoCaminho, descartarDepoisDaRecusa } from '@domain/indicacao';
 import { fimDoErro } from '@domain/campanhas';
 import { avisoDeFimDaCampanha } from '@utils/avisoDeFimDaCampanha';
 import { campaignService } from '@services/campaignService';
@@ -22,8 +22,12 @@ function caminhoDaWeb(): string {
  */
 async function resgatarCupomDoLink(campanhaId: string, accessToken: string) {
   try {
-    const { data } = await campaignService.listActive(accessToken);
-    const codigo = (data ?? []).find((c) => c.id === campanhaId)?.code;
+    // 1o o code que a previa publica devolveu com o ref do link (resolve a campanha privada); senao, as ativas
+    let codigo = await SecureStore.getItemAsync(INDICACAO_CUPOM_KEY).catch(() => null);
+    if (!codigo) {
+      const { data } = await campaignService.listActive(accessToken);
+      codigo = (data ?? []).find((c) => c.id === campanhaId)?.code ?? null;
+    }
     if (codigo) await campaignService.redeem(codigo, accessToken);
   } catch {
     // o desconto e um extra: o claim ja valeu
@@ -46,7 +50,7 @@ export function useIndicacao(lerCaminho: () => string = caminhoDaWeb) {
     const codigo = codigoDoCaminho(lerCaminho());
     const campanha = campanhaDoCaminho(lerCaminho());
     (codigo
-      ? SecureStore.setItemAsync(INDICACAO_KEY, codigo).then(() =>
+      ? SecureStore.setItemAsync(INDICACAO_KEY, codigo).then(() => SecureStore.deleteItemAsync(INDICACAO_CUPOM_KEY)).then(() =>
           campanha
             ? SecureStore.setItemAsync(INDICACAO_CAMPANHA_KEY, campanha)
             : SecureStore.deleteItemAsync(INDICACAO_CAMPANHA_KEY),
@@ -74,6 +78,7 @@ export function useIndicacao(lerCaminho: () => string = caminhoDaWeb) {
       }
       await SecureStore.deleteItemAsync(INDICACAO_KEY).catch(() => {});
       await SecureStore.deleteItemAsync(INDICACAO_CAMPANHA_KEY).catch(() => {});
+      await SecureStore.deleteItemAsync(INDICACAO_CUPOM_KEY).catch(() => {});
     })();
   }, [lido, isAuthenticated, accessToken]);
 }

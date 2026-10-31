@@ -78,6 +78,17 @@ describe('useIndicacao', () => {
     expect(mockRedeem).not.toHaveBeenCalledWith('K7M2QX', expect.anything());
   });
 
+  it('com o code guardado pela previa (campanha privada): resgata com ele, sem consultar as ativas, e o apaga', async () => {
+    guardado[KEY] = 'PRIV99';
+    guardado.vupth_indicacao_campanha = 'camp-9';
+    guardado.vupth_indicacao_cupom = 'PRIV99';
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tk' });
+    renderHook(() => useIndicacao(() => ''));
+    await waitFor(() => expect(mockRedeem).toHaveBeenCalledWith('PRIV99', 'tk'));
+    expect(mockListActive).not.toHaveBeenCalled();
+    await waitFor(() => expect(guardado.vupth_indicacao_cupom).toBeUndefined());
+  });
+
   it('link sem ?c=, ou campanha fora da lista (privada), ou resgate falhando: nada quebra e o código sai', async () => {
     useAuthStore.setState({ isAuthenticated: true, accessToken: 'tk' });
     renderHook(() => useIndicacao(() => '/i/K7M2QX'));

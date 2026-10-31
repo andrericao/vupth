@@ -19,6 +19,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   Object.keys(guardado).forEach((k) => delete guardado[k]);
   get.mockImplementation((k: string) => Promise.resolve(guardado[k] ?? null));
+  (SecureStore.setItemAsync as jest.Mock).mockResolvedValue(undefined);
 });
 
 describe('usePreviaDoDesconto', () => {
@@ -32,6 +33,24 @@ describe('usePreviaDoDesconto', () => {
     await waitFor(() => expect(result.current).toBe(6.5));
     expect(mockPreview).toHaveBeenCalledWith('camp-1', 's1', 'ABC123');
     expect(mockPreview).toHaveBeenCalledWith('camp-1', 's2', 'ABC123');
+  });
+
+  // desconto-no-link-cliente (DEC-131): o code que a previa devolve (so com o ref valido) fica guardado para o redeem.
+  it('guarda o code da campanha que a previa devolveu, para o resgate depois do cadastro', async () => {
+    guardado.vupth_indicacao_campanha = 'camp-1';
+    guardado.vupth_indicacao = 'DESC10';
+    mockPreview.mockResolvedValue({ data: { discount: 4, code: 'DESC10' } });
+    const { result } = renderHook(() => usePreviaDoDesconto(['s1'], true));
+    await waitFor(() => expect(result.current).toBe(4));
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('vupth_indicacao_cupom', 'DESC10');
+  });
+
+  it('previa sem code (campanha publica aberta sem ref): nada guardado', async () => {
+    guardado.vupth_indicacao_campanha = 'camp-1';
+    mockPreview.mockResolvedValue({ data: { discount: 4 } });
+    const { result } = renderHook(() => usePreviaDoDesconto(['s1'], true));
+    await waitFor(() => expect(result.current).toBe(4));
+    expect(SecureStore.setItemAsync).not.toHaveBeenCalled();
   });
 
   it('sem link guardado, logado ou sem servico, nao consulta e o desconto e 0', async () => {
