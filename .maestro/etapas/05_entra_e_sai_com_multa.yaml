@@ -137,6 +137,15 @@ appId: ${APP_ID}
       - runFlow:
           file: ../apoio/esperar_o_sistema.yaml
     label: "05.1C · a faixa sem custo saiu de vez (voltas de 30 s)"
+# A tela "Pode fechar o app" (Avisar / Agora não) pode subir depois da tolerancia e cobrir a fila: o texto da
+# faixa segue na arvore por baixo dela e o assertNotVisible reprovava (bateria 131517, 05.1D). Fecha e confere.
+- runFlow:
+    when:
+      visible: "Agora não"
+    commands:
+      - tapOn:
+          text: "Agora não"
+    label: "05.1C2 · fecha o 'Pode fechar o app', se subiu depois da tolerância"
 - assertNotVisible:
     text: ".*(sem|em).*custo.*"
     label: "05.1D · confere que a faixa saiu"
