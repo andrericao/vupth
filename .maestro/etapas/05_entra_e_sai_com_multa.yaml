@@ -97,6 +97,16 @@ appId: ${APP_ID}
 - repeat:
     times: 40
     commands:
+      # A tela "Pode fechar o app" (Avisar / Agora não) sobe no meio da espera e COBRE a faixa: com ela por cima o
+      # notVisible passa na hora e o laco acabava em ~2 min, ate a tolerancia terminar so 1 min depois (bateria 191016:
+      # faixa "ate 19:31" com o relogio em 19:30). Fecha a cada volta, para a espera valer de fato.
+      - runFlow:
+          when:
+            visible: "Agora não"
+          commands:
+            - tapOn:
+                text: "Agora não"
+          label: "05.1Ca · fecha o 'Pode fechar o app', se cobriu a faixa"
       - extendedWaitUntil:
           notVisible:
             text: ".*(sem|em).*custo.*"
@@ -129,6 +139,16 @@ appId: ${APP_ID}
 - repeat:
     times: 30
     commands:
+      # A tela "Pode fechar o app" (Avisar / Agora não) sobe no meio da espera e COBRE a faixa: com ela por cima o
+      # notVisible passa na hora e o laco acabava em ~2 min, ate a tolerancia terminar so 1 min depois (bateria 191016:
+      # faixa "ate 19:31" com o relogio em 19:30). Fecha a cada volta, para a espera valer de fato.
+      - runFlow:
+          when:
+            visible: "Agora não"
+          commands:
+            - tapOn:
+                text: "Agora não"
+          label: "05.1Ca · fecha o 'Pode fechar o app', se cobriu a faixa"
       - extendedWaitUntil:
           notVisible:
             text: ".*(sem|em).*custo.*"
