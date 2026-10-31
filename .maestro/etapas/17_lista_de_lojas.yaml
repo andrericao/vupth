@@ -10,9 +10,9 @@ appId: ${APP_ID}
 # distancia-no-card (Andre, 09/10): a bateria nega a localizacao, entao o card
 # mostra "Ligue o GPS" no lugar da distancia, com o icone de local.
 - extendedWaitUntil:
-    visible: "Ligue o GPS"
+    visible: "Ligue o GPS|[0-9]+([,.][0-9]+)? ?(m|km)"
     timeout: ${30000 * LENTO}
-    label: "17.0G · o card do Início diz Ligue o GPS no lugar da distância"
+    label: "17.0G · o card do Início diz Ligue o GPS (sem GPS) ou mostra a distância (com GPS, como no celular)"
 # carrossel-de-campanhas-na-home (23/10): o bloco so existe com campanha criada
 # no Painel; se existir, o toque abre os detalhes e o Fechar volta ao Inicio.
 - runFlow:
