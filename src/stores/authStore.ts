@@ -4,6 +4,7 @@ import { authService } from '../services/authService';
 import { pushService } from '../services/pushService';
 import { registerAuthStore, renovarSessao } from '../services/api';
 import { useQueueStore } from './queueStore';
+import { limparCacheSalvo } from '../services/queryPersist';
 
 interface AuthUser {
   id: string;
@@ -88,6 +89,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await SecureStore.deleteItemAsync(REFRESH_KEY);
     await SecureStore.deleteItemAsync(USER_KEY);
     await useQueueStore.getState().leaveQueue();
+    await limparCacheSalvo();
 
     set({
       user: null,

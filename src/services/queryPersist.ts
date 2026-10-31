@@ -24,7 +24,9 @@ export const VALIDADE_MS = 24 * 60 * 60 * 1000;
 // "voce e o proximo" de uma fila que ja andou, ou um atendimento que ja
 // terminou, faz o cliente sair de casa na hora errada — e a estimativa E o
 // produto. Esses ficam de fora de proposito, e so entram aqui com decisao.
-export const PERSISTIVEIS = new Set<string>(["establishments"]);
+// estudo-desempenho (DEC-145/146, proposta 6): tambem a loja (dados e horario) e os servicos do profissional, que
+// mudam pouco e sao publicos (nada do cliente). Abrir a loja pinta do disco e revalida atras (staleTime de 60 s).
+export const PERSISTIVEIS = new Set<string>(["establishments", "establishment", "service-items"]);
 
 export function devePersistir(query: Query): boolean {
   const raiz = query.queryKey[0];
@@ -38,3 +40,12 @@ export const persister = createAsyncStoragePersister({
   storage: AsyncStorage,
   key: "vupth_query_cache",
 });
+
+/** Sair da conta apaga o cache salvo (estudo-desempenho, proposta 6): o proximo login parte limpo. */
+export async function limparCacheSalvo(): Promise<void> {
+  try {
+    await persister.removeClient();
+  } catch {
+    // sem cache salvo ou sem disco: nada a apagar
+  }
+}

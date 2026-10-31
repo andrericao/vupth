@@ -1,6 +1,6 @@
 import type { Query } from '@tanstack/react-query';
 
-import { devePersistir, PERSISTIVEIS, VALIDADE_MS } from '@services/queryPersist';
+import { devePersistir, limparCacheSalvo, persister, PERSISTIVEIS, VALIDADE_MS } from '@services/queryPersist';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   getItem: jest.fn(),
@@ -26,6 +26,22 @@ describe('o que pode sobreviver ao fechamento do app', () => {
     expect(devePersistir(q(['establishments', null, null]))).toBe(true);
   });
 
+  it('a loja e os servicos do profissional persistem (publicos, mudam pouco); a fila da loja nao', () => {
+    expect(devePersistir(q(['establishment', 'e1']))).toBe(true);
+    expect(devePersistir(q(['service-items', 'p1']))).toBe(true);
+    expect(devePersistir(q(['professionals-with-queue', 'e1']))).toBe(false);
+    expect(devePersistir(q(['queue-info', 'p1', 'e1']))).toBe(false);
+  });
+
+  it('sair da conta apaga o cache salvo, e falhar ao apagar nao quebra', async () => {
+    const remover = jest.spyOn(persister, 'removeClient').mockResolvedValue(undefined);
+    await limparCacheSalvo();
+    expect(remover).toHaveBeenCalledTimes(1);
+    remover.mockRejectedValue(new Error('disco'));
+    await expect(limparCacheSalvo()).resolves.toBeUndefined();
+    remover.mockRestore();
+  });
+
   it('o que diz respeito a FILA nao persiste — dado velho aqui engana o cliente', () => {
     // Estas chaves existem no app. Nenhuma delas pode abrir mostrando o valor de
     // ontem.
@@ -44,7 +60,7 @@ describe('o que pode sobreviver ao fechamento do app', () => {
     // Crescer esta lista e decisao, nao ajuste: cada entrada nova e um dado que
     // pode aparecer velho na cara do cliente. Se este teste quebrar, alguem
     // precisa ter pensado nisso.
-    expect([...PERSISTIVEIS]).toEqual(['establishments']);
+    expect([...PERSISTIVEIS]).toEqual(['establishments', 'establishment', 'service-items']);
   });
 
   it('chave que nao e texto nao quebra', () => {
