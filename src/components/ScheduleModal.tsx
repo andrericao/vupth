@@ -182,7 +182,7 @@ export function ScheduleModal({
       {/* O rotulo nao vira "Agendando..." (guia de texto, regra 6): o botao
           desabilitado com o spinner ja diz que esta enviando. */}
       <Button
-        title={corte ? "Pedir" : solicitar ? "Solicitar" : "Agendar"}
+        title={corte ? "Pedir" : solicitar ? "Solicitar agendamento" : "Agendar"}
         isLoading={enviando}
         isDisabled={horario == null || enviando}
         opacity={horario == null ? 0.5 : 1}
@@ -197,7 +197,7 @@ export function ScheduleModal({
     <Modal visible={visible} transparent animationType="fade" onRequestClose={close}>
       <CaixaDeModal testID="agenda-caixa" rolagemTestID="agenda-rolagem" rodapeTestID="agenda-rodape-caixa" rodape={rodape}>
         <Heading fontFamily="$heading" fontSize="$lg">
-          {corte ? "Pedir corte" : "Agendar"}
+          {corte ? "Pedir corte" : solicitar ? "Solicitar agendamento" : "Agendar"}
         </Heading>
         <Text size="sm" color="$brandTextSecondary" mt="$1">
           {corte

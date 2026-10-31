@@ -352,8 +352,8 @@ describe('ScheduleModal — o que sobra (cobertura-98)', () => {
     await act(async () => {});
     fireEvent.press(t.getByLabelText(`Dia ${amanha().getDate()}`));
     expect(await t.findByTestId('agenda-nao-liberada')).toBeTruthy();
-    expect(t.getByText('Solicitar')).toBeTruthy();
-    expect(t.queryByText('Agendar', { exact: true })).toBeTruthy(); // o título do modal
+    expect(t.getAllByText('Solicitar agendamento').length).toBe(2); // o título e o botão (DEC-130)
+    expect(t.queryByText('Agendar', { exact: true })).toBeNull(); // nem o título nem o botão dizem Agendar
     fireEvent.press(await t.findByTestId('horario-09:00'));
     await act(async () => {
       fireEvent.press(t.getByTestId('confirmar-agendamento'));
@@ -372,7 +372,7 @@ describe('ScheduleModal — o que sobra (cobertura-98)', () => {
     fireEvent.press(t.getByLabelText(`Dia ${amanha().getDate()}`));
     expect(await t.findByTestId('horario-09:00')).toBeTruthy();
     expect(t.queryByTestId('agenda-nao-liberada')).toBeNull();
-    expect(t.queryByText('Solicitar')).toBeNull();
+    expect(t.queryByText('Solicitar agendamento')).toBeNull();
   });
 
   it('o serviço não cabe no dia: diz que não há horário livre', async () => {
