@@ -50,8 +50,17 @@ appId: ${APP_ID}
       - tapOn:
           id: "sort-toggle"
     label: "17.05 · troca a ordem, se houver distância"
-- scrollUntilVisible:
-    element:
+# O staging tem centenas de lojas abertas (344 em 31/10, bateria 155718): rolar ate a de teste estoura o tempo.
+# Busca pelo nome, que o preparo devolveu em LOJA.
+- tapOn:
+    text: "Buscar pelo nome"
+    label: "17.05b · toca na busca"
+- inputText:
+    text: ${LOJA}
+    label: "17.05c · digita o nome da loja de teste"
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
       id: "establishment-${LOJA_ID}"
     timeout: ${60000 * LENTO}
     label: "17.06 · acha a loja de teste na lista"

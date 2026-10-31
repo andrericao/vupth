@@ -218,7 +218,9 @@ falhou_em() { passos "$1" RUNNING | grep -vxFf <(passos "$1" 'COMPLETED|SKIPPED'
 # O celular e rapido: prazo menor (reprova antes); o emulador mantem os de sempre.
 case "$PERFIL" in
   emulador) ETAPA_PRAZO="${ETAPA_PRAZO:-1500}"; ATUALIZACAO_PRAZO="${ATUALIZACAO_PRAZO:-1200}" ;;
-  *) ETAPA_PRAZO="${ETAPA_PRAZO:-900}"; ATUALIZACAO_PRAZO="${ATUALIZACAO_PRAZO:-600}" ;;
+  # A tolerancia da fila (05 e 06) e tempo de RELOGIO, ate 15 min: um prazo de 900 s no celular reprovava a 05.1D por
+  # tempo (bateria 155718, 15min27s). So a atualizacao (00) encurta no celular.
+  *) ETAPA_PRAZO="${ETAPA_PRAZO:-1500}"; ATUALIZACAO_PRAZO="${ATUALIZACAO_PRAZO:-600}" ;;
 esac
 
 # Roda uma etapa na pasta dela; devolve o status do maestro.
