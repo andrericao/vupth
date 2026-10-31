@@ -78,3 +78,34 @@ describe('setupOnlineManager', () => {
     });
   });
 });
+
+// estudo-desempenho (DEC-145/146): o foco do React Query segue o AppState — segundo plano pausa o polling e
+// a volta ao primeiro plano refaz o que passou do staleTime.
+describe('setupFocusManager', () => {
+  it('liga o foco ao AppState uma vez so: background tira o foco, active devolve, e a query velha refaz ao voltar', async () => {
+    jest.isolateModules(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { AppState } = require('react-native');
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { focusManager, QueryClient } = require('@tanstack/react-query');
+      let ouvinte: ((e: string) => void) | undefined;
+      const remover = jest.fn();
+      const spy = jest.spyOn(AppState, 'addEventListener').mockImplementation(((_t: string, fn: (e: string) => void) => {
+        ouvinte = fn;
+        return { remove: remover };
+      }) as never);
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { setupFocusManager } = require('@hooks/useNetwork');
+      setupFocusManager();
+      setupFocusManager();
+      focusManager.setFocused(undefined); // forca o ouvinte a ser ligado
+      expect(spy).toHaveBeenCalledTimes(1);
+      ouvinte?.('background');
+      expect(focusManager.isFocused()).toBe(false);
+      ouvinte?.('active');
+      expect(focusManager.isFocused()).toBe(true);
+      expect(new QueryClient()).toBeTruthy();
+      spy.mockRestore();
+    });
+  });
+});

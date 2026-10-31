@@ -62,7 +62,7 @@ import { ModalDeQuedaBrusca } from "@components/ModalDeQuedaBrusca";
 import { ModalDePagarMulta } from "@components/ModalDePagarMulta";
 import { useFeedbackStore } from "@stores/feedbackStore";
 import { useLembreteDePendencia } from "@hooks/useLembreteDePendencia";
-import { setupOnlineManager } from "@hooks/useNetwork";
+import { setupFocusManager, setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
 import { aplicarOtaNaAbertura } from "@services/otaNaAbertura";
 
@@ -84,6 +84,7 @@ iniciarSentry({
 
 // Pausa/retoma as queries conforme a conexao real (netinfo). 1x no boot.
 setupOnlineManager();
+setupFocusManager();
 
 // O React Native Web nao implementa `Alert`: a chamada nao falha, nao loga e
 // nao pinta NADA. Eram 60 avisos mudos no navegador — inclusive o motivo de uma
