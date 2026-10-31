@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Animated, Image, Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronDown, Copy, ChevronUp, X } from "lucide-react-native";
-import QRCode from "react-native-qrcode-svg";
+import { X } from "lucide-react-native";
 
 import {
   Pagamento,
@@ -17,8 +16,6 @@ import { paymentService } from "@services/paymentService";
 import { useAuthStore } from "@stores/authStore";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { fs } from "@stores/fonteStore";
-import { copiarTexto } from "@utils/copiar";
-import { movimentoReduzido } from "@utils/motion";
 import { FaixaESelo } from "@components/FaixaESelo";
 import { SaibaMaisDoPreco } from "@components/SaibaMaisDoPreco";
 import { useTema } from "@hooks/useTema";
@@ -26,8 +23,8 @@ import { useTema } from "@hooks/useTema";
 // tema-fixo: o leitor do banco nao le o codigo invertido; o QR e branco nos dois temas.
 export const FUNDO_DO_QR = "#FFFFFF";
 
-function Botao({ titulo, onPress, claro, testID, desligado, feito }: {
-  titulo: string; onPress: () => void; claro?: boolean; testID: string; desligado?: boolean; feito?: boolean;
+function Botao({ titulo, onPress, claro, testID, desligado }: {
+  titulo: string; onPress: () => void; claro?: boolean; testID: string; desligado?: boolean;
 }) {
   const { cores } = useTema();
   // O primario e green + onGreen nos dois temas; o "claro" (vazado) e painel + o texto do tema.
@@ -51,38 +48,9 @@ function Botao({ titulo, onPress, claro, testID, desligado, feito }: {
       })}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-        {feito ? <ChecagemQueSurge cor={rotulo} /> : null}
         <Text style={{ color: rotulo, fontFamily: "Inter_600SemiBold", fontSize: fs(15) }}>{titulo}</Text>
       </View>
     </Pressable>
-  );
-}
-
-// "Copiado" so trocava o texto, e quem copia um codigo Pix precisa ter certeza de que
-// copiou. O check surge com um salto (0 a 1, passando de 1 por um instante).
-function ChecagemQueSurge({ cor }: { cor: string }) {
-  const [escala] = useState(() => new Animated.Value(0));
-  useEffect(() => {
-    let vivo = true;
-    let anim: Animated.CompositeAnimation | null = null;
-    movimentoReduzido().then((reduzido) => {
-      if (!vivo) return;
-      if (reduzido) {
-        escala.setValue(1);
-        return;
-      }
-      anim = Animated.spring(escala, { toValue: 1, friction: 5, tension: 200, useNativeDriver: true });
-      anim.start();
-    });
-    return () => {
-      vivo = false;
-      anim?.stop();
-    };
-  }, [escala]);
-  return (
-    <Animated.View testID="pix-copiado-check" style={{ transform: [{ scale: escala }] }}>
-      <Check size={16} color={cor} />
-    </Animated.View>
   );
 }
 
@@ -113,10 +81,6 @@ export function ModalDePagamento() {
   const [pagamento, setPagamento] = useState<Pagamento | null>(null);
   const [erro, setErro] = useState(false);
   const [enviando, setEnviando] = useState(false);
-  const [copiado, setCopiado] = useState(false);
-  const [chaveCopiada, setChaveCopiada] = useState(false);
-  // pagar-ao-finalizar-corte (André, 24/10): o Pix e o QR Code ficam recolhidos num drop down; "Já paguei" e "Fechar" ficam a vista.
-  const [pixAberto, setPixAberto] = useState(false);
   // pagamento-ja-paguei: o profissional recusou (AWAITING_CONFIRMATION voltou a PENDING).
   const [recusadoAoVivo, setRecusadoAoVivo] = useState(false);
   const statusAnterior = useRef<string | null>(null);
@@ -133,23 +97,15 @@ export function ModalDePagamento() {
       vivo = false;
       setPagamento(null);
       setErro(false);
-      setCopiado(false);
-      setChaveCopiada(false);
-      setPixAberto(false);
       setRecusadoAoVivo(false);
       statusAnterior.current = null;
     };
   }, [pagando, accessToken]);
 
-  // pagar-sempre-disponivel (André, 25/10): a opcao de pagar NUNCA some. O gateway pode cair e o profissional
-  // pode receber em dinheiro ou no Pix pessoal. E pagar-pix-do-profissional-e-do-gateway (André, 25/10): os DOIS
-  // Pix, quando existirem: o do profissional (a chave, com "Copiar chave", nunca a do dono) em DESTAQUE; o do
-  // gateway (QR e copia e cola) com menos destaque, num drop down recolhido. "Já paguei" e "Fechar" sempre a
-  // vista. Sem nenhum Pix, o texto diz que o pagamento e combinado com o profissional.
-  // pagamento-pelo-asaas (DEC-119): com `gateway`, o QR e o copia e cola sao os do Asaas.
+  // pix-do-profissional-ao-concluir (André, 31/10, DEC-129): o modal existe, mas SEM informação de Pix (nem
+  // chave nem QR nem copia e cola): so a confirmacao "ja pagou ou nao". "Já paguei" e "Fechar" sempre a vista.
+  // pagamento-pelo-asaas (DEC-119): com `gateway`, a confirmacao e automatica (webhook).
   const pix = pixDoPagamento(pagamento);
-  const chave = pagamento?.pix_key || null;
-  const temPix = !!(pix.codigo || pix.qrImagem || chave);
 
   // pagamento-ja-paguei: o Asaas (webhook) e o profissional ("recebi" ou recusa) mudam o status por
   // fora; o modal confere de tempos em tempos ate o "Pago". Sem Asaas, so enquanto espera o profissional.
@@ -188,14 +144,6 @@ export function ModalDePagamento() {
     }
   }
 
-  async function copiar() {
-    if (pix.codigo && (await copiarTexto(pix.codigo))) setCopiado(true);
-  }
-
-  async function copiarChave() {
-    if (chave && (await copiarTexto(chave))) setChaveCopiada(true);
-  }
-
   const texto = aviso ? avisoDaPendencia(aviso) : null;
   const servicos = Number(pagamento?.services_value) || 0;
   const multas = Number(pagamento?.penalties_value) || 0;
@@ -213,7 +161,7 @@ export function ModalDePagamento() {
           {texto ? <FaixaESelo tipo="dinheiro" selo="Pagamento" /> : null}
           <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
             <Text style={{ flex: 1, fontFamily: "Archivo_800ExtraBold", fontSize: fs(18), color: cores.textPrimary }}>
-              {texto ? texto.titulo : "Pagar por Pix"}
+              {texto ? texto.titulo : "Pagamento"}
             </Text>
             <Pressable onPress={fechar} hitSlop={12} accessibilityRole="button" accessibilityLabel="Fechar" testID="pagamento-fechar">
               <X size={20} color={cores.textPrimary} />
@@ -253,79 +201,6 @@ export function ModalDePagamento() {
               </View>
               {pagamento.holder_name ? (
                 <Text style={{ color: cores.textSecondary, fontSize: fs(13) }}>Para: {pagamento.holder_name}</Text>
-              ) : null}
-              {/* O Pix do profissional, em destaque: a chave em texto e o Copiar chave. */}
-              {chave && podeAvisarQuePagou(pagamento.status) ? (
-                <View
-                  testID="pix-profissional"
-                  style={{ gap: 8, backgroundColor: cores.sobrePainel, borderRadius: 14, padding: 14 }}
-                >
-                  <Text style={{ color: cores.textSecondary, fontSize: fs(12) }}>Chave Pix</Text>
-                  {/* chave-pix-icone-copiar (CLI-38): o ícone de copiar fica ao lado da chave. */}
-                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                    <Text selectable testID="pix-chave" style={{ flex: 1, color: cores.textPrimary, fontSize: fs(16), fontWeight: "700" }}>
-                      {chave}
-                    </Text>
-                    <Pressable
-                      testID="pix-copiar-chave"
-                      onPress={copiarChave}
-                      hitSlop={10}
-                      accessibilityRole="button"
-                      accessibilityLabel="Copiar chave Pix"
-                    >
-                      {chaveCopiada ? <Check size={20} color={cores.textPrimary} /> : <Copy size={20} color={cores.textPrimary} />}
-                    </Pressable>
-                  </View>
-                  {chaveCopiada ? <Text style={{ color: cores.textSecondary, fontSize: fs(12) }}>Copiada</Text> : null}
-                </View>
-              ) : null}
-              {/* O Pix do gateway (ou o copia e cola), com menos destaque: recolhido num drop down. */}
-              {(pix.codigo || pix.qrImagem) && podeAvisarQuePagou(pagamento.status) ? (
-                <>
-                  <Pressable
-                    onPress={() => setPixAberto((v) => !v)}
-                    accessibilityRole="button"
-                    accessibilityState={{ expanded: pixAberto }}
-                    testID="pix-dropdown"
-                    style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8 }}
-                  >
-                    <Text style={{ color: cores.textPrimary, fontFamily: "Inter_600SemiBold", fontSize: fs(14) }}>
-                      {pix.viaAsaas ? "Pix do app (QR e copia e cola)" : "Pix e QR Code"}
-                    </Text>
-                    {pixAberto ? <ChevronUp size={18} color={cores.textPrimary} /> : <ChevronDown size={18} color={cores.textPrimary} />}
-                  </Pressable>
-                  {pixAberto ? (
-                    <>
-                      {/* pagamento-no-concluido (DEC-78): o QR em cima do copiar. */}
-                      <View style={{ alignItems: "center" }} testID="pix-qr">
-                        {/* tema-fixo: QR escuro sobre branco nos dois temas; o leitor do banco nao le o codigo invertido */}
-                        {pix.codigo ? (
-                          <QRCode value={pix.codigo} size={180} color={cores.forest} backgroundColor={FUNDO_DO_QR} />
-                        ) : (
-                          <Image
-                            testID="pix-qr-imagem"
-                            source={{ uri: pix.qrImagem!.startsWith("data:") || pix.qrImagem!.startsWith("http") ? pix.qrImagem! : `data:image/png;base64,${pix.qrImagem}` }}
-                            style={{ width: 180, height: 180, backgroundColor: FUNDO_DO_QR }}
-                          />
-                        )}
-                      </View>
-                      {pix.codigo ? (
-                        <>
-                          <Text selectable numberOfLines={3} testID="pix-codigo" style={{ color: cores.textPrimary, fontSize: fs(12), backgroundColor: cores.sobrePainel, borderRadius: 10, padding: 10 }}>
-                            {pix.codigo}
-                          </Text>
-                          <Botao titulo={copiado ? "Copiado" : "Copiar"} claro feito={copiado} testID="pix-copiar" onPress={copiar} />
-                        </>
-                      ) : null}
-                    </>
-                  ) : null}
-                </>
-              ) : null}
-              {/* pagar-sempre-disponivel: sem nenhum Pix (gateway fora e profissional sem chave), o pagamento e combinado. */}
-              {!temPix && podeAvisarQuePagou(pagamento.status) ? (
-                <Text testID="pix-combinado" style={{ color: cores.textSecondary, fontSize: fs(13), lineHeight: fs(18) }}>
-                  Sem Pix cadastrado. O pagamento é combinado com o profissional (dinheiro).
-                </Text>
               ) : null}
               {/* o profissional nao confirmou: o atendimento segue pendente e o cliente pode tocar de novo */}
               {recusado && podeAvisarQuePagou(pagamento.status) ? (
