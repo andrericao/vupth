@@ -1,6 +1,8 @@
 import { Platform } from "react-native";
 import * as Updates from "expo-updates";
 
+import { comPrazo } from "@utils/comPrazo";
+
 // card-oscila (Andre, 10/10: "ora vejo a avaliacao no card somado a distancia,
 // ora esses dois dados somem"): o expo-updates abre no bundle que ja tem e so
 // aplica o OTA baixado na abertura SEGUINTE. Depois de instalar o APK ou de
@@ -15,9 +17,9 @@ export async function aplicarOtaNaAbertura(): Promise<boolean> {
   if (Platform.OS === "web" || __DEV__) return false;
   if (!Updates.isEnabled || !Updates.isEmbeddedLaunch) return false;
   try {
-    const { isAvailable } = await Updates.checkForUpdateAsync();
+    const { isAvailable } = await comPrazo(Updates.checkForUpdateAsync(), 30000);
     if (!isAvailable) return false;
-    const { isNew } = await Updates.fetchUpdateAsync();
+    const { isNew } = await comPrazo(Updates.fetchUpdateAsync(), 120000);
     if (!isNew) return false;
     await Updates.reloadAsync();
     return true;
