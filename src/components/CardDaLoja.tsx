@@ -12,6 +12,7 @@ import { NotaDaLoja } from "@components/NotaDaLoja";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LiveDot } from "@components/LiveDot";
 import { BadgeAgendar } from "@components/BadgeAgendar";
+import { SkeletonPilula } from "@components/Skeleton";
 import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
 
@@ -73,9 +74,13 @@ export const CardDaLoja = memo(function CardDaLoja({
   distanceKm,
   semGps = false,
   destaque,
+  volatilPendente = false,
   onPress,
 }: {
   establishment: Establishment;
+  // abrir-com-lista-salva (DEC-148): a lista veio do disco e o Backend ainda nao confirmou — aberta/fechada,
+  // fila, espera e preco mostram skeleton (nunca o valor guardado); nome, foto, nota e distancia ficam.
+  volatilPendente?: boolean;
   // "Pra ontem": em quanto tempo a pessoa senta na cadeira, contando o caminho.
   destaque?: string | null;
   // Distancia real (GPS). null = device sem coordenada ou loja ainda nao
@@ -99,7 +104,7 @@ export const CardDaLoja = memo(function CardDaLoja({
   // distancia, em vez de imprimir "undefined".
   const tag = statusTag(establishment);
 
-  const meta: string[] = destaque ? [destaque] : [];
+  const meta: string[] = destaque && !volatilPendente ? [destaque] : [];
   if (establishment.serviceType) meta.push(serviceTypeLabel(establishment.serviceType));
   // A distancia sai da meta: tem icone proprio (distancia-no-card, Andre 09/10:
   // "quero o icone de distancia tambem").
@@ -160,7 +165,7 @@ export const CardDaLoja = memo(function CardDaLoja({
           </HStack>
         </VStack>
         {/* Fechada nao e beco sem saida: ainda da pra agendar (Andre 2026-07-23). */}
-        <StatusPill {...tag} />
+        {volatilPendente ? <SkeletonPilula testID={`skeleton-status-${establishment.id}`} /> : <StatusPill {...tag} />}
       </HStack>
     </TouchableOpacity>
   );

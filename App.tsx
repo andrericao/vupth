@@ -204,7 +204,10 @@ export default function App() {
   // Aberto pela lista salva: quando o servidor responde, a lista se atualiza na hora (a busca feita enquanto
   // ele acordava pode ter falhado, e o proximo ciclo so viria em 60 s).
   useEffect(() => {
-    if (backendReady && listaSalva) queryClient.invalidateQueries({ queryKey: ["establishments"] });
+    if (backendReady && listaSalva) {
+      queryClient.invalidateQueries({ queryKey: ["establishments"] });
+      queryClient.invalidateQueries({ queryKey: ["establishments-paginas"] });
+    }
   }, [backendReady, listaSalva]);
 
   // Notificacao pessoal "é a sua vez" (WebSocket) app-wide: vale em qualquer
@@ -252,7 +255,10 @@ export default function App() {
       }}
       onSuccess={() => {
         // O cache voltou do disco: com a lista de lojas nele e o servidor ainda sem responder, abre ja.
-        const temLista = queryClient.getQueriesData({ queryKey: ["establishments"] }).some(([, dados]) => dados != null);
+        const temLista = queryClient
+          .getQueryCache()
+          .findAll({ predicate: (q) => ["establishments", "establishments-paginas"].includes(String(q.queryKey[0])) && q.state.data != null })
+          .length > 0;
         if (temLista && !backendProntoRef.current) {
           exigirServidor();
           setListaSalva(true);

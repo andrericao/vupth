@@ -26,9 +26,13 @@ describe('o que pode sobreviver ao fechamento do app', () => {
     expect(devePersistir(q(['establishments', null, null]))).toBe(true);
   });
 
-  it('a loja e os servicos do profissional persistem (publicos, mudam pouco); a fila da loja nao', () => {
-    expect(devePersistir(q(['establishment', 'e1']))).toBe(true);
-    expect(devePersistir(q(['service-items', 'p1']))).toBe(true);
+  it('a vitrine paginada da Home persiste (a Home abre por ela)', () => {
+    expect(devePersistir(q(['establishments-paginas', null, null]))).toBe(true);
+  });
+
+  it('a loja e os servicos do profissional NAO persistem (horario, aberta/fechada e preco nunca vem do cache); a fila da loja tambem nao', () => {
+    expect(devePersistir(q(['establishment', 'e1']))).toBe(false);
+    expect(devePersistir(q(['service-items', 'p1']))).toBe(false);
     expect(devePersistir(q(['professionals-with-queue', 'e1']))).toBe(false);
     expect(devePersistir(q(['queue-info', 'p1', 'e1']))).toBe(false);
   });
@@ -60,7 +64,7 @@ describe('o que pode sobreviver ao fechamento do app', () => {
     // Crescer esta lista e decisao, nao ajuste: cada entrada nova e um dado que
     // pode aparecer velho na cara do cliente. Se este teste quebrar, alguem
     // precisa ter pensado nisso.
-    expect([...PERSISTIVEIS]).toEqual(['establishments', 'establishment', 'service-items']);
+    expect([...PERSISTIVEIS]).toEqual(['establishments', 'establishments-paginas']);
   });
 
   it('chave que nao e texto nao quebra', () => {

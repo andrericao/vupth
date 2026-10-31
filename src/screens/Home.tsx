@@ -140,6 +140,8 @@ export function Home() {
     : paginada
       ? vitrine
       : todas;
+  // DEC-148: a lista aberta do disco ainda nao foi confirmada pelo Backend nesta abertura (o "Pra ontem" nunca vem do disco).
+  const frescos = praOntem ? true : paginada ? vitrine.frescos : todas.frescos;
   const carregarMais = useCallback(() => {
     if (paginada && vitrine.hasNextPage && !vitrine.isFetchingNextPage) vitrine.fetchNextPage();
   }, [paginada, vitrine]);
@@ -225,11 +227,12 @@ export function Home() {
           distanceKm={item.distance_km ?? null}
           semGps={coords == null}
           destaque={praOntem ? rotuloPraOntem(item) : null}
+          volatilPendente={!frescos}
           onPress={handleEstablishmentPress}
         />
       </Box>
     ),
-    [handleEstablishmentPress, praOntem, coords],
+    [handleEstablishmentPress, praOntem, coords, frescos],
   );
 
   // Sem nome cadastrado, cai no apelido do e-mail — NUNCA no texto de

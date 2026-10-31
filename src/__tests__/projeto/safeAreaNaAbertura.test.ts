@@ -28,8 +28,8 @@ describe('App.tsx: o que usa safe area fica dentro do SafeAreaProvider', () => {
 // da fonte (o V nao usa texto).
 describe('App.tsx: a abertura e continua', () => {
   it('a espera da fonte mostra o mesmo V pulsando, sem Loading/spinner', () => {
-    // "pronto" so abre com fonte E backend: ate la a unica tela e o V.
-    expect(app).toMatch(/const pronto = fontGateOpen && backendReady/);
+    // "pronto" so abre com fonte E (backend OU a lista salva, DEC-148): ate la a unica tela e o V.
+    expect(app).toMatch(/const pronto = fontGateOpen && \(backendReady \|\| listaSalva\)/);
     expect(app).toMatch(/<PreparingServer pronto=\{pronto\}/);
     expect(app).not.toMatch(/<Loading/);
   });

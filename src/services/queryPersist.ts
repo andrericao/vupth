@@ -24,9 +24,11 @@ export const VALIDADE_MS = 24 * 60 * 60 * 1000;
 // "voce e o proximo" de uma fila que ja andou, ou um atendimento que ja
 // terminou, faz o cliente sair de casa na hora errada — e a estimativa E o
 // produto. Esses ficam de fora de proposito, e so entram aqui com decisao.
-// estudo-desempenho (DEC-145/146, proposta 6): tambem a loja (dados e horario) e os servicos do profissional, que
-// mudam pouco e sao publicos (nada do cliente). Abrir a loja pinta do disco e revalida atras (staleTime de 60 s).
-export const PERSISTIVEIS = new Set<string>(["establishments", "establishment", "service-items"]);
+// DEC-148 (ajuste do André, 31/10): so a lista de lojas e a vitrine paginada da Home (a Home abre por ela). A loja e os
+// servicos do profissional carregam horario, aberta/fechada e preco, que nunca aparecem do cache: a proposta 6 do
+// estudo (salvar `establishment` e `service-items`) saiu por isso. O que muda com o tempo DENTRO da lista mostra
+// skeleton ate o Backend confirmar (`domain/establishment/frescor`).
+export const PERSISTIVEIS = new Set<string>(["establishments", "establishments-paginas"]);
 
 export function devePersistir(query: Query): boolean {
   const raiz = query.queryKey[0];

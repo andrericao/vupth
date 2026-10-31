@@ -57,7 +57,7 @@ describe("fontes da marca sobrevivem ao deploy web", () => {
     // abertura sem piscar o portao e o `pronto`, que alimenta a saida do V e a
     // montagem das rotas: se ele lesse `fontsLoaded`, a falha de fonte prenderia
     // o V na tela para sempre.
-    expect(APP).toMatch(/const pronto = fontGateOpen && backendReady/);
+    expect(APP).toMatch(/const pronto = fontGateOpen && \(backendReady \|\| listaSalva\)/);
     expect(APP).not.toMatch(/const pronto = fontsLoaded/);
     expect(APP).not.toContain("{!fontsLoaded ?");
   });

@@ -14,7 +14,7 @@ import { NotaDaLoja } from "@components/NotaDaLoja";
 import { useEstablishments } from "@hooks/useEstablishments";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { statusTag } from "@domain/establishment/statusTag";
-import { SkeletonList } from "@components/Skeleton";
+import { SkeletonList, SkeletonPilula } from "@components/Skeleton";
 import { PlaceAvatar } from "@components/PlaceAvatar";
 import { LinhaDaLojaFechada } from "@components/LinhaDaLojaFechada";
 import { formatWaitTime } from "@domain/queue/types";
@@ -32,9 +32,12 @@ function waitLabel(e: Establishment): string {
 const OpenRow = memo(function OpenRow({
   establishment,
   onPress,
+  volatilPendente = false,
 }: {
   establishment: Establishment;
   onPress: () => void;
+  // DEC-148: lista do disco ainda nao confirmada pelo Backend — a tag (aberta/fila/espera) vira skeleton.
+  volatilPendente?: boolean;
 }) {
   const r = resolveRating(
     establishment.rating_best ?? establishment.rating_average,
@@ -69,16 +72,20 @@ const OpenRow = memo(function OpenRow({
           {/* Mesma tag da Home — uma regra so pras duas telas. Aqui so chega
               loja ABERTA (a fechada tem linha propria), entao ela sai "Livre"
               ou com o tempo. */}
-          <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
-            <Text size="2xs" fontFamily="$heading" color="$forest">
-              {statusTag(establishment).label}
-            </Text>
-          </Box>
+          {volatilPendente ? (
+            <SkeletonPilula testID={`skeleton-status-${establishment.id}`} />
+          ) : (
+            <Box bg="$brandGreen" borderRadius="$full" px="$3" py="$1.5">
+              <Text size="2xs" fontFamily="$heading" color="$forest">
+                {statusTag(establishment).label}
+              </Text>
+            </Box>
+          )}
         </HStack>
       </Box>
     </TouchableOpacity>
   );
-}, (a, b) => a.establishment === b.establishment);
+}, (a, b) => a.establishment === b.establishment && a.volatilPendente === b.volatilPendente);
 
 export function EstablishmentList() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
@@ -88,7 +95,7 @@ export function EstablishmentList() {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortBy>("wait");
 
-  const { data: establishments = [], isLoading, isError, refetch, isRefetching } =
+  const { data: establishments = [], isLoading, isError, refetch, isRefetching, frescos } =
     useEstablishments();
 
   const matching = filterEstablishments(establishments, search, filter);
@@ -108,7 +115,8 @@ export function EstablishmentList() {
   });
 
   // Atalho: a loja aberta com a menor espera. Some quando nao ha loja aberta.
-  const best = open.length > 0
+  // (DEC-148: com a lista ainda do disco, o atalho da menor espera nao aparece — a espera seria a de ontem.)
+  const best = open.length > 0 && frescos
     ? open.reduce((prev, curr) =>
         (curr.estimated_wait_minutes ?? 0) < (prev.estimated_wait_minutes ?? 0) ? curr : prev,
       )
@@ -230,8 +238,10 @@ export function EstablishmentList() {
               />
             }
             renderItem={({ item }) =>
-              isEffectivelyOpen(item) ? (
-                <OpenRow establishment={item} onPress={() => goToDetail(item.id)} />
+              // DEC-148: com a lista do disco, aberta/fechada e dado velho: todas entram como linha neutra, com
+              // a tag em skeleton, ate o Backend confirmar.
+              !frescos || isEffectivelyOpen(item) ? (
+                <OpenRow establishment={item} onPress={() => goToDetail(item.id)} volatilPendente={!frescos} />
               ) : (
                 <LinhaDaLojaFechada establishment={item} onPress={() => goToDetail(item.id)} />
               )

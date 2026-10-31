@@ -128,4 +128,32 @@ describe('o card da loja na Home', () => {
       timeout: 15000,
     });
   });
+
+  // abrir-com-lista-salva (DEC-148, ajuste do André): a lista veio do disco e o Backend ainda nao confirmou.
+  it('lista ainda do disco: nome, nota e distância ficam; aberta/fila/espera e o "Pra ontem" viram skeleton', async () => {
+    const { findByText, getByTestId, queryByText, queryByTestId } = renderWithProviders(
+      <CardDaLoja
+        establishment={loja({ rating_best: 4.8, estimated_wait_minutes: 25 })}
+        distanceKm={1.25}
+        destaque="Pra ontem · 20 min"
+        volatilPendente
+        onPress={jest.fn()}
+      />,
+    );
+    expect(await findByText('Barbearia do Zé', {}, { timeout: 15000 })).toBeTruthy();
+    expect(getByTestId('nota-e1')).toBeTruthy();
+    expect(getByTestId('distancia-e1')).toBeTruthy();
+    expect(getByTestId('skeleton-status-e1')).toBeTruthy();
+    expect(queryByTestId('status-agendar')).toBeNull();
+    expect(queryByText(/25 min|Sem fila|Agora/)).toBeNull();
+    expect(queryByText(/Pra ontem/)).toBeNull();
+  });
+
+  it('com o dado confirmado: a pilula de status volta no lugar do skeleton', async () => {
+    const { findByText, queryByTestId } = renderWithProviders(
+      <CardDaLoja establishment={loja({ estimated_wait_minutes: 25 })} distanceKm={null} volatilPendente={false} onPress={jest.fn()} />,
+    );
+    expect(await findByText('Barbearia do Zé', {}, { timeout: 15000 })).toBeTruthy();
+    expect(queryByTestId('skeleton-status-e1')).toBeNull();
+  });
 });

@@ -70,10 +70,10 @@ function cacheComLista() {
       mutations: [],
       queries: [
         {
-          queryKey: ['establishments', null, null],
-          queryHash: JSON.stringify(['establishments', null, null]),
+          queryKey: ['establishments-paginas', null, null],
+          queryHash: JSON.stringify(['establishments-paginas', null, null]),
           state: {
-            data: [{ id: 'e1', name: 'Barbearia do Ricardo' }],
+            data: { pages: [{ items: [{ id: 'e1', name: 'Barbearia do Ricardo' }], page: 0, hasNext: false }], pageParams: [0] },
             dataUpdateCount: 1,
             dataUpdatedAt: agora,
             error: null,
