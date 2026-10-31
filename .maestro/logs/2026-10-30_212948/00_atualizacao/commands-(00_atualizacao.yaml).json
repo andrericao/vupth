@@ -1,28 +1,5 @@
 [ {
   "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370014473,
-    "duration" : 18,
-    "sequenceNumber" : 27,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
     "defineVariablesCommand" : {
       "env" : {
         "ETAPA" : "00",
@@ -36,8 +13,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793369985239,
-    "duration" : 11,
+    "timestamp" : 1793406611951,
+    "duration" : 8,
     "sequenceNumber" : 4,
     "evaluatedCommand" : {
       "defineVariablesCommand" : {
@@ -213,9 +190,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370051042,
-    "duration" : 24025,
-    "sequenceNumber" : 42,
+    "timestamp" : 1793406656571,
+    "duration" : 26541,
+    "sequenceNumber" : 48,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -423,9 +400,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370038064,
-    "duration" : 381,
-    "sequenceNumber" : 35,
+    "timestamp" : 1793406645717,
+    "duration" : 261,
+    "sequenceNumber" : 41,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -474,6 +451,29 @@
   }
 }, {
   "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406642736,
+    "duration" : 14,
+    "sequenceNumber" : 33,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "runFlowCommand" : {
       "commands" : [ {
         "tapOnElement" : {
@@ -498,8 +498,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370214311,
-    "sequenceNumber" : 90,
+    "timestamp" : 1793406811635,
+    "sequenceNumber" : 96,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -550,8 +550,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370015061,
-    "sequenceNumber" : 29,
+    "timestamp" : 1793406644248,
+    "sequenceNumber" : 35,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -608,8 +608,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370165015,
-    "sequenceNumber" : 72,
+    "timestamp" : 1793406759424,
+    "sequenceNumber" : 78,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -651,9 +651,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370013711,
+    "timestamp" : 1793406623363,
     "duration" : 19,
-    "sequenceNumber" : 24,
+    "sequenceNumber" : 19,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -711,9 +711,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370014454,
-    "duration" : 605,
-    "sequenceNumber" : 26,
+    "timestamp" : 1793406642713,
+    "duration" : 1534,
+    "sequenceNumber" : 32,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -786,7 +786,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370006117,
+    "timestamp" : 1793406623389,
     "sequenceNumber" : 20,
     "evaluatedCommand" : {
       "repeatCommand" : {
@@ -821,9 +821,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370204872,
-    "duration" : 1559,
-    "sequenceNumber" : 87,
+    "timestamp" : 1793406802709,
+    "duration" : 1346,
+    "sequenceNumber" : 93,
     "evaluatedCommand" : {
       "waitForAnimationToEndCommand" : {
         "timeout" : "3000",
@@ -879,9 +879,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370164989,
-    "duration" : 2123,
-    "sequenceNumber" : 70,
+    "timestamp" : 1793406759396,
+    "duration" : 1471,
+    "sequenceNumber" : 76,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -930,29 +930,6 @@
   }
 }, {
   "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370214865,
-    "duration" : 5,
-    "sequenceNumber" : 93,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
     "runScriptCommand" : {
       "script" : "// Cria, pela API do staging, a conta do cliente de uma etapa avulsa\n// (bateria-nao-para): cada etapa roda sozinha e nao herda o cadastro da 02.\n// Ja com o nome, para o login nao parar na tela \"Como podemos te chamar?\".\n//\n// Entradas (env do runScript): API, SENHA, EMAIL_CLIENTE, NOME_CLIENTE\n\nfunction pedir(metodo, url, corpo, token) {\n  var headers = { \"Content-Type\": \"application/json\" };\n  if (token) headers[\"Authorization\"] = \"Bearer \" + token;\n  // 429 do staging (limite de logins, baterias seguidas — Partner, 11/10): espera\n  // o tempo que ele pede (\"try again in N s\") e tenta de novo, ate 3 vezes.\n  var r = null;\n  for (var vez = 0; vez < 4; vez++) {\n    r = http.request(API + url, { method: metodo, headers: headers, body: corpo ? JSON.stringify(corpo) : undefined });\n    if (r.status !== 429 || vez === 3) break;\n    var n = /in (\\d+) s/.exec(r.body || \"\");\n    var ate = Date.now() + ((n ? parseInt(n[1], 10) : 30) + 2) * 1000;\n    while (Date.now() < ate) {}\n  }\n  if (r.status >= 300) throw new Error(metodo + \" \" + url + \" -> \" + r.status + \" \" + r.body);\n  return r.body ? json(r.body) : null;\n}\n\npedir(\"POST\", \"/auth/register\", { email: EMAIL_CLIENTE, password: SENHA });\nvar token = pedir(\"POST\", \"/auth/login\", { email: EMAIL_CLIENTE, password: SENHA }).tokens.access_token;\npedir(\"PATCH\", \"/profile/general-infos\", { first_name: NOME_CLIENTE }, token);\n",
       "env" : {
@@ -967,8 +944,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793369985506,
-    "duration" : 2868,
+    "timestamp" : 1793406612232,
+    "duration" : 2369,
     "sequenceNumber" : 12,
     "evaluatedCommand" : {
       "runScriptCommand" : {
@@ -976,8 +953,8 @@
         "env" : {
           "API" : "https://vupth-backend-ia.onrender.com",
           "SENHA" : "Teste@123",
-          "EMAIL_CLIENTE" : "client_c36996200@teste.com",
-          "NOME_CLIENTE" : "Cliente36996200"
+          "EMAIL_CLIENTE" : "client_c40658800@teste.com",
+          "NOME_CLIENTE" : "Cliente40658800"
         },
         "sourceDescription" : "/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/scripts/cliente.js",
         "optional" : false
@@ -1016,8 +993,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370038090,
-    "sequenceNumber" : 37,
+    "timestamp" : 1793406645728,
+    "sequenceNumber" : 43,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -1676,9 +1653,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370075068,
-    "duration" : 139772,
-    "sequenceNumber" : 53,
+    "timestamp" : 1793406683112,
+    "duration" : 128764,
+    "sequenceNumber" : 59,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -2420,8 +2397,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370013734,
-    "duration" : 22066,
+    "timestamp" : 1793406631433,
+    "duration" : 14125,
     "sequenceNumber" : 25,
     "evaluatedCommand" : {
       "repeatCommand" : {
@@ -2551,9 +2528,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370081960,
-    "duration" : 9993,
-    "sequenceNumber" : 59,
+    "timestamp" : 1793406689207,
+    "duration" : 7813,
+    "sequenceNumber" : 65,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -2593,8 +2570,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370177123,
-    "sequenceNumber" : 76,
+    "timestamp" : 1793406772436,
+    "sequenceNumber" : 82,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -2849,8 +2826,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370236116,
-    "sequenceNumber" : 100,
+    "timestamp" : 1793406830957,
+    "sequenceNumber" : 106,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -3491,101 +3468,9 @@
   },
   "metadata" : {
     "status" : "FAILED",
-    "timestamp" : 1793370239578,
-    "duration" : 923431,
+    "timestamp" : 1793406837807,
+    "duration" : 461852,
     "error" : {
-      "cause" : {
-        "stackTrace" : [ {
-          "classLoaderName" : "app",
-          "methodName" : "send$dadb",
-          "fileName" : "AdbServer.kt",
-          "lineNumber" : 103,
-          "className" : "dadb.adbserver.AdbServer",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "open",
-          "fileName" : "AdbServer.kt",
-          "lineNumber" : 149,
-          "className" : "dadb.adbserver.AdbServerDadb",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "channel$lambda$0",
-          "fileName" : "AndroidDriver.kt",
-          "lineNumber" : 81,
-          "className" : "maestro.drivers.AndroidDriver",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "connect",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 40,
-          "className" : "maestro.android.AdbSocket",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "connect",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 44,
-          "className" : "maestro.android.AdbSocket",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "createSocket",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 19,
-          "className" : "maestro.android.AdbSocketFactory",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "createSocket",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 25,
-          "className" : "maestro.android.AdbSocketFactory",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "run",
-          "fileName" : "OkHttpClientTransport.java",
-          "lineNumber" : 535,
-          "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "run",
-          "fileName" : "SerializingExecutor.java",
-          "lineNumber" : 133,
-          "className" : "io.grpc.internal.SerializingExecutor",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "runWorker",
-          "fileName" : "ThreadPoolExecutor.java",
-          "lineNumber" : 1144,
-          "className" : "java.util.concurrent.ThreadPoolExecutor",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "run",
-          "fileName" : "ThreadPoolExecutor.java",
-          "lineNumber" : 642,
-          "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "run",
-          "fileName" : "Thread.java",
-          "lineNumber" : 1583,
-          "className" : "java.lang.Thread",
-          "nativeMethod" : false
-        } ],
-        "message" : "Command failed (tcp:7001): closed",
-        "localizedMessage" : "Command failed (tcp:7001): closed"
-      },
       "stackTrace" : [ {
         "classLoaderName" : "app",
         "methodName" : "toStatusRuntimeException",
@@ -3609,37 +3494,58 @@
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo",
+        "methodName" : "viewHierarchy",
         "fileName" : "MaestroDriverGrpc.java",
-        "lineNumber" : 740,
+        "lineNumber" : 747,
         "className" : "maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo$lambda$5",
+        "methodName" : "callViewHierarchy",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 201,
+        "lineNumber" : 366,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "runDeviceCall",
+        "methodName" : "callViewHierarchy",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 1273,
+        "lineNumber" : 392,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo",
+        "methodName" : "callViewHierarchy$default",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 200,
+        "lineNumber" : 364,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "contentDescriptor$lambda$17",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 326,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "measured",
+        "fileName" : "Metrics.kt",
+        "lineNumber" : 48,
+        "className" : "maestro.utils.Metrics",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "contentDescriptor",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 325,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
         "methodName" : "from-8JJjmZI",
         "fileName" : "ViewHierarchy.kt",
-        "lineNumber" : 28,
+        "lineNumber" : 29,
         "className" : "maestro.ViewHierarchy$Companion",
         "nativeMethod" : false
       }, {
@@ -3735,105 +3641,14 @@
         "nativeMethod" : false
       } ],
       "status" : {
-        "code" : "UNAVAILABLE",
-        "cause" : {
-          "stackTrace" : [ {
-            "classLoaderName" : "app",
-            "methodName" : "send$dadb",
-            "fileName" : "AdbServer.kt",
-            "lineNumber" : 103,
-            "className" : "dadb.adbserver.AdbServer",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "open",
-            "fileName" : "AdbServer.kt",
-            "lineNumber" : 149,
-            "className" : "dadb.adbserver.AdbServerDadb",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "channel$lambda$0",
-            "fileName" : "AndroidDriver.kt",
-            "lineNumber" : 81,
-            "className" : "maestro.drivers.AndroidDriver",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "connect",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 40,
-            "className" : "maestro.android.AdbSocket",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "connect",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 44,
-            "className" : "maestro.android.AdbSocket",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "createSocket",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 19,
-            "className" : "maestro.android.AdbSocketFactory",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "createSocket",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 25,
-            "className" : "maestro.android.AdbSocketFactory",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "run",
-            "fileName" : "OkHttpClientTransport.java",
-            "lineNumber" : 535,
-            "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "run",
-            "fileName" : "SerializingExecutor.java",
-            "lineNumber" : 133,
-            "className" : "io.grpc.internal.SerializingExecutor",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "runWorker",
-            "fileName" : "ThreadPoolExecutor.java",
-            "lineNumber" : 1144,
-            "className" : "java.util.concurrent.ThreadPoolExecutor",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "run",
-            "fileName" : "ThreadPoolExecutor.java",
-            "lineNumber" : 642,
-            "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "run",
-            "fileName" : "Thread.java",
-            "lineNumber" : 1583,
-            "className" : "java.lang.Thread",
-            "nativeMethod" : false
-          } ],
-          "message" : "Command failed (tcp:7001): closed",
-          "localizedMessage" : "Command failed (tcp:7001): closed"
-        },
+        "code" : "INTERNAL",
+        "description" : "UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]",
         "ok" : false
       },
-      "message" : "UNAVAILABLE",
-      "localizedMessage" : "UNAVAILABLE"
+      "message" : "INTERNAL: UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]",
+      "localizedMessage" : "INTERNAL: UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]"
     },
-    "sequenceNumber" : 101,
+    "sequenceNumber" : 107,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "14",
@@ -4246,6 +4061,29 @@
   }
 }, {
   "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406645710,
+    "duration" : 6,
+    "sequenceNumber" : 40,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "waitForAnimationToEndCommand" : {
       "timeout" : "3000",
       "optional" : false
@@ -4253,9 +4091,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370167115,
-    "duration" : 1711,
-    "sequenceNumber" : 73,
+    "timestamp" : 1793406760870,
+    "duration" : 3693,
+    "sequenceNumber" : 79,
     "evaluatedCommand" : {
       "waitForAnimationToEndCommand" : {
         "timeout" : "3000",
@@ -4295,8 +4133,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370176436,
-    "sequenceNumber" : 75,
+    "timestamp" : 1793406771838,
+    "sequenceNumber" : 81,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -4468,9 +4306,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793371132896,
-    "duration" : 13124,
-    "sequenceNumber" : 242,
+    "timestamp" : 1793407271761,
+    "duration" : 11432,
+    "sequenceNumber" : 178,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -4606,81 +4444,6 @@
         "config" : {
           "appId" : "com.vupth.client.preview"
         },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370053599,
-    "duration" : 17,
-    "sequenceNumber" : 47,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "repeatCommand" : {
-      "times" : "3",
-      "condition" : {
-        "visible" : {
-          "textRegex" : "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)",
-          "optional" : false
-        }
-      },
-      "commands" : [ {
-        "pressKeyCommand" : {
-          "code" : "BACK",
-          "optional" : false
-        }
-      }, {
-        "waitForAnimationToEndCommand" : {
-          "timeout" : "2000",
-          "optional" : false
-        }
-      } ],
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "SKIPPED",
-    "timestamp" : 1793369988437,
-    "sequenceNumber" : 15,
-    "evaluatedCommand" : {
-      "repeatCommand" : {
-        "times" : "3",
-        "condition" : {
-          "visible" : {
-            "textRegex" : "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)",
-            "optional" : false
-          }
-        },
-        "commands" : [ {
-          "pressKeyCommand" : {
-            "code" : "BACK",
-            "optional" : false
-          }
-        }, {
-          "waitForAnimationToEndCommand" : {
-            "timeout" : "2000",
-            "optional" : false
-          }
-        } ],
         "optional" : false
       }
     }
@@ -4826,9 +4589,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370164949,
-    "duration" : 12806,
-    "sequenceNumber" : 68,
+    "timestamp" : 1793406759376,
+    "duration" : 13502,
+    "sequenceNumber" : 74,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -4970,23 +4733,110 @@
   }
 }, {
   "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
+    "repeatCommand" : {
+      "times" : "3",
+      "condition" : {
+        "visible" : {
+          "textRegex" : "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)",
+          "optional" : false
+        }
       },
+      "commands" : [ {
+        "pressKeyCommand" : {
+          "code" : "BACK",
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "2000",
+          "optional" : false
+        }
+      } ],
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1793406614670,
+    "sequenceNumber" : 15,
+    "evaluatedCommand" : {
+      "repeatCommand" : {
+        "times" : "3",
+        "condition" : {
+          "visible" : {
+            "textRegex" : "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)",
+            "optional" : false
+          }
+        },
+        "commands" : [ {
+          "pressKeyCommand" : {
+            "code" : "BACK",
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "2000",
+            "optional" : false
+          }
+        } ],
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "scrollUntilVisible" : {
+      "selector" : {
+        "textRegex" : "Versão do app",
+        "optional" : false
+      },
+      "direction" : "DOWN",
+      "scrollDuration" : "40",
+      "visibilityPercentage" : 100,
+      "timeout" : "20000",
+      "centerElement" : false,
+      "originalSpeedValue" : "40",
+      "optional" : false,
+      "visibilityPercentageNormalized" : 1.0
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406818995,
+    "duration" : 125,
+    "sequenceNumber" : 101,
+    "evaluatedCommand" : {
+      "scrollUntilVisible" : {
+        "selector" : {
+          "textRegex" : "Versão do app",
+          "optional" : false
+        },
+        "direction" : "DOWN",
+        "scrollDuration" : "601",
+        "visibilityPercentage" : 100,
+        "timeout" : "20000",
+        "centerElement" : false,
+        "originalSpeedValue" : "40",
+        "optional" : false,
+        "visibilityPercentageNormalized" : 1.0
+      }
+    }
+  }
+}, {
+  "command" : {
+    "waitForAnimationToEndCommand" : {
+      "timeout" : "3000",
       "optional" : false
     }
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370075115,
-    "duration" : 4,
-    "sequenceNumber" : 56,
+    "timestamp" : 1793407272054,
+    "duration" : 1280,
+    "sequenceNumber" : 183,
     "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
+      "waitForAnimationToEndCommand" : {
+        "timeout" : "3000",
         "optional" : false
       }
     }
@@ -5176,8 +5026,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370177756,
-    "sequenceNumber" : 77,
+    "timestamp" : 1793406772879,
+    "sequenceNumber" : 83,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -5363,95 +5213,6 @@
   }
 }, {
   "command" : {
-    "scrollUntilVisible" : {
-      "selector" : {
-        "textRegex" : "Versão do app",
-        "optional" : false
-      },
-      "direction" : "DOWN",
-      "scrollDuration" : "40",
-      "visibilityPercentage" : 100,
-      "timeout" : "20000",
-      "centerElement" : false,
-      "originalSpeedValue" : "40",
-      "optional" : false,
-      "visibilityPercentageNormalized" : 1.0
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370222081,
-    "duration" : 220,
-    "sequenceNumber" : 95,
-    "evaluatedCommand" : {
-      "scrollUntilVisible" : {
-        "selector" : {
-          "textRegex" : "Versão do app",
-          "optional" : false
-        },
-        "direction" : "DOWN",
-        "scrollDuration" : "601",
-        "visibilityPercentage" : 100,
-        "timeout" : "20000",
-        "centerElement" : false,
-        "originalSpeedValue" : "40",
-        "optional" : false,
-        "visibilityPercentageNormalized" : 1.0
-      }
-    }
-  }
-}, {
-  "command" : {
-    "waitForAnimationToEndCommand" : {
-      "timeout" : "3000",
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793371133104,
-    "duration" : 1478,
-    "sequenceNumber" : 247,
-    "evaluatedCommand" : {
-      "waitForAnimationToEndCommand" : {
-        "timeout" : "3000",
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "assertConditionCommand" : {
-      "condition" : {
-        "visible" : {
-          "textRegex" : "Suporte",
-          "optional" : false
-        }
-      },
-      "label" : "o menu Suporte esta no Perfil",
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370222302,
-    "duration" : 250,
-    "sequenceNumber" : 96,
-    "evaluatedCommand" : {
-      "assertConditionCommand" : {
-        "condition" : {
-          "visible" : {
-            "textRegex" : "Suporte",
-            "optional" : false
-          }
-        },
-        "label" : "o menu Suporte esta no Perfil",
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
     "runFlowCommand" : {
       "commands" : [ {
         "tapOnElement" : {
@@ -5476,9 +5237,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793371134583,
-    "duration" : 3954,
-    "sequenceNumber" : 248,
+    "timestamp" : 1793407273335,
+    "duration" : 2511,
+    "sequenceNumber" : 184,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -5505,6 +5266,37 @@
   }
 }, {
   "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Suporte",
+          "optional" : false
+        }
+      },
+      "label" : "o menu Suporte esta no Perfil",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406819121,
+    "duration" : 115,
+    "sequenceNumber" : 102,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Suporte",
+            "optional" : false
+          }
+        },
+        "label" : "o menu Suporte esta no Perfil",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "scrollUntilVisible" : {
       "selector" : {
         "textRegex" : "Sair da conta",
@@ -5522,9 +5314,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370197022,
-    "duration" : 246,
-    "sequenceNumber" : 81,
+    "timestamp" : 1793406791501,
+    "duration" : 4039,
+    "sequenceNumber" : 87,
     "evaluatedCommand" : {
       "scrollUntilVisible" : {
         "selector" : {
@@ -5574,8 +5366,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370213843,
-    "sequenceNumber" : 89,
+    "timestamp" : 1793406811292,
+    "sequenceNumber" : 95,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -5615,9 +5407,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370038448,
-    "duration" : 4944,
-    "sequenceNumber" : 38,
+    "timestamp" : 1793406645979,
+    "duration" : 2923,
+    "sequenceNumber" : 44,
     "evaluatedCommand" : {
       "waitForAnimationToEndCommand" : {
         "timeout" : "3000",
@@ -5855,8 +5647,8 @@
   },
   "metadata" : {
     "status" : "PENDING",
-    "timestamp" : 1793371125188,
-    "sequenceNumber" : 241,
+    "timestamp" : 1793407263919,
+    "sequenceNumber" : 177,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -6100,9 +5892,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370154792,
-    "duration" : 10156,
-    "sequenceNumber" : 67,
+    "timestamp" : 1793406753028,
+    "duration" : 6346,
+    "sequenceNumber" : 73,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -6113,29 +5905,6 @@
         },
         "timeout" : "180000",
         "optional" : true
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793369988418,
-    "duration" : 15,
-    "sequenceNumber" : 14,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
       }
     }
   }
@@ -6177,9 +5946,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370185371,
-    "duration" : 11650,
-    "sequenceNumber" : 78,
+    "timestamp" : 1793406780875,
+    "duration" : 10625,
+    "sequenceNumber" : 84,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "4",
@@ -6227,9 +5996,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370038075,
-    "duration" : 14,
-    "sequenceNumber" : 36,
+    "timestamp" : 1793406795550,
+    "duration" : 5,
+    "sequenceNumber" : 89,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -6241,31 +6010,23 @@
   }
 }, {
   "command" : {
-    "tapOnElement" : {
-      "selector" : {
-        "idRegex" : "check-update",
-        "optional" : false
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
       },
-      "retryIfNoChange" : false,
-      "waitUntilVisible" : false,
-      "longPress" : false,
       "optional" : false
     }
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370228174,
-    "duration" : 4244,
-    "sequenceNumber" : 98,
+    "timestamp" : 1793406811901,
+    "duration" : 4,
+    "sequenceNumber" : 99,
     "evaluatedCommand" : {
-      "tapOnElement" : {
-        "selector" : {
-          "idRegex" : "check-update",
-          "optional" : false
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
         },
-        "retryIfNoChange" : false,
-        "waitUntilVisible" : false,
-        "longPress" : false,
         "optional" : false
       }
     }
@@ -6302,8 +6063,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370050613,
-    "sequenceNumber" : 40,
+    "timestamp" : 1793406656121,
+    "sequenceNumber" : 46,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -6336,6 +6097,83 @@
   }
 }, {
   "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406665435,
+    "duration" : 13,
+    "sequenceNumber" : 53,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "idRegex" : "check-update",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406822257,
+    "duration" : 8379,
+    "sequenceNumber" : 104,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "idRegex" : "check-update",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406608160,
+    "duration" : 3675,
+    "sequenceNumber" : 2,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "tapOnElement" : {
       "selector" : {
         "textRegex" : "Senha",
@@ -6349,9 +6187,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370125161,
-    "duration" : 6869,
-    "sequenceNumber" : 62,
+    "timestamp" : 1793406725069,
+    "duration" : 7299,
+    "sequenceNumber" : 68,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -6373,9 +6211,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370144699,
-    "duration" : 4956,
-    "sequenceNumber" : 65,
+    "timestamp" : 1793406743017,
+    "duration" : 4912,
+    "sequenceNumber" : 71,
     "evaluatedCommand" : {
       "hideKeyboardCommand" : {
         "optional" : false
@@ -6408,8 +6246,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370015494,
-    "sequenceNumber" : 30,
+    "timestamp" : 1793406645043,
+    "sequenceNumber" : 36,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -6429,29 +6267,6 @@
             "textRegex" : "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)",
             "optional" : false
           }
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370164973,
-    "duration" : 12,
-    "sequenceNumber" : 69,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
         },
         "optional" : false
       }
@@ -6482,8 +6297,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793369985468,
-    "duration" : 2910,
+    "timestamp" : 1793406612203,
+    "duration" : 2400,
     "sequenceNumber" : 11,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -7127,9 +6942,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370075092,
-    "duration" : 139747,
-    "sequenceNumber" : 54,
+    "timestamp" : 1793406683139,
+    "duration" : 128736,
+    "sequenceNumber" : 60,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -7762,9 +7577,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370079384,
-    "duration" : 2574,
-    "sequenceNumber" : 58,
+    "timestamp" : 1793406686296,
+    "duration" : 2910,
+    "sequenceNumber" : 64,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -7774,6 +7589,29 @@
         "retryIfNoChange" : false,
         "waitUntilVisible" : false,
         "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793407271771,
+    "duration" : 7,
+    "sequenceNumber" : 179,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
         "optional" : false
       }
     }
@@ -7792,9 +7630,10 @@
     }
   },
   "metadata" : {
-    "status" : "WARNED",
-    "timestamp" : 1793370021300,
-    "sequenceNumber" : 31,
+    "status" : "COMPLETED",
+    "timestamp" : 1793406645246,
+    "duration" : 141,
+    "sequenceNumber" : 37,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -7840,8 +7679,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793371132918,
-    "sequenceNumber" : 246,
+    "timestamp" : 1793407271789,
+    "sequenceNumber" : 182,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -7937,8 +7776,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370006047,
-    "duration" : 7614,
+    "timestamp" : 1793406623315,
+    "duration" : 8026,
     "sequenceNumber" : 18,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -8005,29 +7844,6 @@
   }
 }, {
   "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370197278,
-    "duration" : 5,
-    "sequenceNumber" : 83,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
     "tapOnElement" : {
       "selector" : {
         "idRegex" : "dialogo-botao-0",
@@ -8041,9 +7857,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793371134692,
-    "duration" : 3844,
-    "sequenceNumber" : 249,
+    "timestamp" : 1793407273414,
+    "duration" : 2431,
+    "sequenceNumber" : 185,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -8081,7 +7897,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793369985436,
+    "timestamp" : 1793406612163,
     "sequenceNumber" : 10,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -10614,101 +10430,9 @@
   },
   "metadata" : {
     "status" : "FAILED",
-    "timestamp" : 1793369985092,
-    "duration" : 1177924,
+    "timestamp" : 1793406611840,
+    "duration" : 687851,
     "error" : {
-      "cause" : {
-        "stackTrace" : [ {
-          "classLoaderName" : "app",
-          "methodName" : "send$dadb",
-          "fileName" : "AdbServer.kt",
-          "lineNumber" : 103,
-          "className" : "dadb.adbserver.AdbServer",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "open",
-          "fileName" : "AdbServer.kt",
-          "lineNumber" : 149,
-          "className" : "dadb.adbserver.AdbServerDadb",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "channel$lambda$0",
-          "fileName" : "AndroidDriver.kt",
-          "lineNumber" : 81,
-          "className" : "maestro.drivers.AndroidDriver",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "connect",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 40,
-          "className" : "maestro.android.AdbSocket",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "connect",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 44,
-          "className" : "maestro.android.AdbSocket",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "createSocket",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 19,
-          "className" : "maestro.android.AdbSocketFactory",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "createSocket",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 25,
-          "className" : "maestro.android.AdbSocketFactory",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "run",
-          "fileName" : "OkHttpClientTransport.java",
-          "lineNumber" : 535,
-          "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "run",
-          "fileName" : "SerializingExecutor.java",
-          "lineNumber" : 133,
-          "className" : "io.grpc.internal.SerializingExecutor",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "runWorker",
-          "fileName" : "ThreadPoolExecutor.java",
-          "lineNumber" : 1144,
-          "className" : "java.util.concurrent.ThreadPoolExecutor",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "run",
-          "fileName" : "ThreadPoolExecutor.java",
-          "lineNumber" : 642,
-          "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "run",
-          "fileName" : "Thread.java",
-          "lineNumber" : 1583,
-          "className" : "java.lang.Thread",
-          "nativeMethod" : false
-        } ],
-        "message" : "Command failed (tcp:7001): closed",
-        "localizedMessage" : "Command failed (tcp:7001): closed"
-      },
       "stackTrace" : [ {
         "classLoaderName" : "app",
         "methodName" : "toStatusRuntimeException",
@@ -10732,37 +10456,58 @@
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo",
+        "methodName" : "viewHierarchy",
         "fileName" : "MaestroDriverGrpc.java",
-        "lineNumber" : 740,
+        "lineNumber" : 747,
         "className" : "maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo$lambda$5",
+        "methodName" : "callViewHierarchy",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 201,
+        "lineNumber" : 366,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "runDeviceCall",
+        "methodName" : "callViewHierarchy",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 1273,
+        "lineNumber" : 392,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo",
+        "methodName" : "callViewHierarchy$default",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 200,
+        "lineNumber" : 364,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "contentDescriptor$lambda$17",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 326,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "measured",
+        "fileName" : "Metrics.kt",
+        "lineNumber" : 48,
+        "className" : "maestro.utils.Metrics",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "contentDescriptor",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 325,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
         "methodName" : "from-8JJjmZI",
         "fileName" : "ViewHierarchy.kt",
-        "lineNumber" : 28,
+        "lineNumber" : 29,
         "className" : "maestro.ViewHierarchy$Companion",
         "nativeMethod" : false
       }, {
@@ -10858,103 +10603,12 @@
         "nativeMethod" : false
       } ],
       "status" : {
-        "code" : "UNAVAILABLE",
-        "cause" : {
-          "stackTrace" : [ {
-            "classLoaderName" : "app",
-            "methodName" : "send$dadb",
-            "fileName" : "AdbServer.kt",
-            "lineNumber" : 103,
-            "className" : "dadb.adbserver.AdbServer",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "open",
-            "fileName" : "AdbServer.kt",
-            "lineNumber" : 149,
-            "className" : "dadb.adbserver.AdbServerDadb",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "channel$lambda$0",
-            "fileName" : "AndroidDriver.kt",
-            "lineNumber" : 81,
-            "className" : "maestro.drivers.AndroidDriver",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "connect",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 40,
-            "className" : "maestro.android.AdbSocket",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "connect",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 44,
-            "className" : "maestro.android.AdbSocket",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "createSocket",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 19,
-            "className" : "maestro.android.AdbSocketFactory",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "createSocket",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 25,
-            "className" : "maestro.android.AdbSocketFactory",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "run",
-            "fileName" : "OkHttpClientTransport.java",
-            "lineNumber" : 535,
-            "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "run",
-            "fileName" : "SerializingExecutor.java",
-            "lineNumber" : 133,
-            "className" : "io.grpc.internal.SerializingExecutor",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "runWorker",
-            "fileName" : "ThreadPoolExecutor.java",
-            "lineNumber" : 1144,
-            "className" : "java.util.concurrent.ThreadPoolExecutor",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "run",
-            "fileName" : "ThreadPoolExecutor.java",
-            "lineNumber" : 642,
-            "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "run",
-            "fileName" : "Thread.java",
-            "lineNumber" : 1583,
-            "className" : "java.lang.Thread",
-            "nativeMethod" : false
-          } ],
-          "message" : "Command failed (tcp:7001): closed",
-          "localizedMessage" : "Command failed (tcp:7001): closed"
-        },
+        "code" : "INTERNAL",
+        "description" : "UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]",
         "ok" : false
       },
-      "message" : "UNAVAILABLE",
-      "localizedMessage" : "UNAVAILABLE"
+      "message" : "INTERNAL: UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]",
+      "localizedMessage" : "INTERNAL: UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]"
     },
     "sequenceNumber" : 3,
     "evaluatedCommand" : {
@@ -13471,8 +13125,8 @@
         "APP_ID" : "com.vupth.client.preview",
         "API" : "https://vupth-backend-ia.onrender.com",
         "SENHA" : "Teste@123",
-        "COMMIT" : "45494ceb",
-        "TAG" : "369962",
+        "COMMIT" : "f5c34c64",
+        "TAG" : "406588",
         "SUPERVISAO" : "0",
         "LENTO" : "2",
         "VERSAO_VERIFICADA" : "0",
@@ -13486,8 +13140,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793369981333,
-    "duration" : 26,
+    "timestamp" : 1793406608101,
+    "duration" : 40,
     "sequenceNumber" : 0,
     "evaluatedCommand" : {
       "defineVariablesCommand" : {
@@ -13495,8 +13149,8 @@
           "APP_ID" : "com.vupth.client.preview",
           "API" : "https://vupth-backend-ia.onrender.com",
           "SENHA" : "Teste@123",
-          "COMMIT" : "45494ceb",
-          "TAG" : "369962",
+          "COMMIT" : "f5c34c64",
+          "TAG" : "406588",
           "SUPERVISAO" : "0",
           "LENTO" : "2",
           "VERSAO_VERIFICADA" : "0",
@@ -13533,7 +13187,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793369985373,
+    "timestamp" : 1793406612089,
     "sequenceNumber" : 8,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -13559,23 +13213,64 @@
   }
 }, {
   "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
+    "repeatCommand" : {
+      "times" : "3",
+      "condition" : {
+        "visible" : {
+          "idRegex" : "android:id/aerr_wait",
+          "optional" : false
+        }
       },
+      "commands" : [ {
+        "tapOnElement" : {
+          "selector" : {
+            "idRegex" : "android:id/aerr_wait",
+            "optional" : false
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : false
+        }
+      }, {
+        "waitForAnimationToEndCommand" : {
+          "timeout" : "2000",
+          "optional" : false
+        }
+      } ],
       "optional" : false
     }
   },
   "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370006097,
-    "duration" : 19,
-    "sequenceNumber" : 19,
+    "status" : "SKIPPED",
+    "timestamp" : 1793406665449,
+    "sequenceNumber" : 54,
     "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
+      "repeatCommand" : {
+        "times" : "3",
+        "condition" : {
+          "visible" : {
+            "idRegex" : "android:id/aerr_wait",
+            "optional" : false
+          }
         },
+        "commands" : [ {
+          "tapOnElement" : {
+            "selector" : {
+              "idRegex" : "android:id/aerr_wait",
+              "optional" : false
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : false
+          }
+        }, {
+          "waitForAnimationToEndCommand" : {
+            "timeout" : "2000",
+            "optional" : false
+          }
+        } ],
         "optional" : false
       }
     }
@@ -13645,8 +13340,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793369988381,
-    "duration" : 7603,
+    "timestamp" : 1793406614604,
+    "duration" : 7648,
     "sequenceNumber" : 13,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -13713,70 +13408,6 @@
   }
 }, {
   "command" : {
-    "repeatCommand" : {
-      "times" : "3",
-      "condition" : {
-        "visible" : {
-          "idRegex" : "android:id/aerr_wait",
-          "optional" : false
-        }
-      },
-      "commands" : [ {
-        "tapOnElement" : {
-          "selector" : {
-            "idRegex" : "android:id/aerr_wait",
-            "optional" : false
-          },
-          "retryIfNoChange" : false,
-          "waitUntilVisible" : false,
-          "longPress" : false,
-          "optional" : false
-        }
-      }, {
-        "waitForAnimationToEndCommand" : {
-          "timeout" : "2000",
-          "optional" : false
-        }
-      } ],
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "SKIPPED",
-    "timestamp" : 1793370053621,
-    "sequenceNumber" : 48,
-    "evaluatedCommand" : {
-      "repeatCommand" : {
-        "times" : "3",
-        "condition" : {
-          "visible" : {
-            "idRegex" : "android:id/aerr_wait",
-            "optional" : false
-          }
-        },
-        "commands" : [ {
-          "tapOnElement" : {
-            "selector" : {
-              "idRegex" : "android:id/aerr_wait",
-              "optional" : false
-            },
-            "retryIfNoChange" : false,
-            "waitUntilVisible" : false,
-            "longPress" : false,
-            "optional" : false
-          }
-        }, {
-          "waitForAnimationToEndCommand" : {
-            "timeout" : "2000",
-            "optional" : false
-          }
-        } ],
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
     "waitForAnimationToEndCommand" : {
       "timeout" : "3000",
       "optional" : false
@@ -13784,9 +13415,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370062264,
-    "duration" : 3554,
-    "sequenceNumber" : 49,
+    "timestamp" : 1793406672866,
+    "duration" : 1959,
+    "sequenceNumber" : 55,
     "evaluatedCommand" : {
       "waitForAnimationToEndCommand" : {
         "timeout" : "3000",
@@ -13809,9 +13440,9 @@
   },
   "metadata" : {
     "status" : "PENDING",
-    "timestamp" : 1793371125075,
-    "duration" : 112,
-    "sequenceNumber" : 240,
+    "timestamp" : 1793407263863,
+    "duration" : 55,
+    "sequenceNumber" : 176,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -13873,9 +13504,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370053583,
-    "duration" : 8678,
-    "sequenceNumber" : 46,
+    "timestamp" : 1793406665421,
+    "duration" : 7442,
+    "sequenceNumber" : 52,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -13933,9 +13564,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370038052,
-    "duration" : 11,
-    "sequenceNumber" : 34,
+    "timestamp" : 1793406645723,
+    "duration" : 5,
+    "sequenceNumber" : 42,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -14094,8 +13725,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370013662,
-    "duration" : 24366,
+    "timestamp" : 1793406631344,
+    "duration" : 14351,
     "sequenceNumber" : 22,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -14254,8 +13885,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793369985283,
-    "duration" : 69,
+    "timestamp" : 1793406611979,
+    "duration" : 71,
     "sequenceNumber" : 6,
     "evaluatedCommand" : {
       "evalScriptCommand" : {
@@ -14303,8 +13934,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370214871,
-    "sequenceNumber" : 94,
+    "timestamp" : 1793406811906,
+    "sequenceNumber" : 100,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "4",
@@ -15239,101 +14870,9 @@
   },
   "metadata" : {
     "status" : "FAILED",
-    "timestamp" : 1793370214857,
-    "duration" : 948156,
+    "timestamp" : 1793406811893,
+    "duration" : 487778,
     "error" : {
-      "cause" : {
-        "stackTrace" : [ {
-          "classLoaderName" : "app",
-          "methodName" : "send$dadb",
-          "fileName" : "AdbServer.kt",
-          "lineNumber" : 103,
-          "className" : "dadb.adbserver.AdbServer",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "open",
-          "fileName" : "AdbServer.kt",
-          "lineNumber" : 149,
-          "className" : "dadb.adbserver.AdbServerDadb",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "channel$lambda$0",
-          "fileName" : "AndroidDriver.kt",
-          "lineNumber" : 81,
-          "className" : "maestro.drivers.AndroidDriver",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "connect",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 40,
-          "className" : "maestro.android.AdbSocket",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "connect",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 44,
-          "className" : "maestro.android.AdbSocket",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "createSocket",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 19,
-          "className" : "maestro.android.AdbSocketFactory",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "createSocket",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 25,
-          "className" : "maestro.android.AdbSocketFactory",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "run",
-          "fileName" : "OkHttpClientTransport.java",
-          "lineNumber" : 535,
-          "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "run",
-          "fileName" : "SerializingExecutor.java",
-          "lineNumber" : 133,
-          "className" : "io.grpc.internal.SerializingExecutor",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "runWorker",
-          "fileName" : "ThreadPoolExecutor.java",
-          "lineNumber" : 1144,
-          "className" : "java.util.concurrent.ThreadPoolExecutor",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "run",
-          "fileName" : "ThreadPoolExecutor.java",
-          "lineNumber" : 642,
-          "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "run",
-          "fileName" : "Thread.java",
-          "lineNumber" : 1583,
-          "className" : "java.lang.Thread",
-          "nativeMethod" : false
-        } ],
-        "message" : "Command failed (tcp:7001): closed",
-        "localizedMessage" : "Command failed (tcp:7001): closed"
-      },
       "stackTrace" : [ {
         "classLoaderName" : "app",
         "methodName" : "toStatusRuntimeException",
@@ -15357,37 +14896,58 @@
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo",
+        "methodName" : "viewHierarchy",
         "fileName" : "MaestroDriverGrpc.java",
-        "lineNumber" : 740,
+        "lineNumber" : 747,
         "className" : "maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo$lambda$5",
+        "methodName" : "callViewHierarchy",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 201,
+        "lineNumber" : 366,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "runDeviceCall",
+        "methodName" : "callViewHierarchy",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 1273,
+        "lineNumber" : 392,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo",
+        "methodName" : "callViewHierarchy$default",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 200,
+        "lineNumber" : 364,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "contentDescriptor$lambda$17",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 326,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "measured",
+        "fileName" : "Metrics.kt",
+        "lineNumber" : 48,
+        "className" : "maestro.utils.Metrics",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "contentDescriptor",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 325,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
         "methodName" : "from-8JJjmZI",
         "fileName" : "ViewHierarchy.kt",
-        "lineNumber" : 28,
+        "lineNumber" : 29,
         "className" : "maestro.ViewHierarchy$Companion",
         "nativeMethod" : false
       }, {
@@ -15483,105 +15043,14 @@
         "nativeMethod" : false
       } ],
       "status" : {
-        "code" : "UNAVAILABLE",
-        "cause" : {
-          "stackTrace" : [ {
-            "classLoaderName" : "app",
-            "methodName" : "send$dadb",
-            "fileName" : "AdbServer.kt",
-            "lineNumber" : 103,
-            "className" : "dadb.adbserver.AdbServer",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "open",
-            "fileName" : "AdbServer.kt",
-            "lineNumber" : 149,
-            "className" : "dadb.adbserver.AdbServerDadb",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "channel$lambda$0",
-            "fileName" : "AndroidDriver.kt",
-            "lineNumber" : 81,
-            "className" : "maestro.drivers.AndroidDriver",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "connect",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 40,
-            "className" : "maestro.android.AdbSocket",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "connect",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 44,
-            "className" : "maestro.android.AdbSocket",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "createSocket",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 19,
-            "className" : "maestro.android.AdbSocketFactory",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "createSocket",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 25,
-            "className" : "maestro.android.AdbSocketFactory",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "run",
-            "fileName" : "OkHttpClientTransport.java",
-            "lineNumber" : 535,
-            "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "run",
-            "fileName" : "SerializingExecutor.java",
-            "lineNumber" : 133,
-            "className" : "io.grpc.internal.SerializingExecutor",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "runWorker",
-            "fileName" : "ThreadPoolExecutor.java",
-            "lineNumber" : 1144,
-            "className" : "java.util.concurrent.ThreadPoolExecutor",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "run",
-            "fileName" : "ThreadPoolExecutor.java",
-            "lineNumber" : 642,
-            "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "run",
-            "fileName" : "Thread.java",
-            "lineNumber" : 1583,
-            "className" : "java.lang.Thread",
-            "nativeMethod" : false
-          } ],
-          "message" : "Command failed (tcp:7001): closed",
-          "localizedMessage" : "Command failed (tcp:7001): closed"
-        },
+        "code" : "INTERNAL",
+        "description" : "UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]",
         "ok" : false
       },
-      "message" : "UNAVAILABLE",
-      "localizedMessage" : "UNAVAILABLE"
+      "message" : "INTERNAL: UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]",
+      "localizedMessage" : "INTERNAL: UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]"
     },
-    "sequenceNumber" : 92,
+    "sequenceNumber" : 98,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -16526,9 +15995,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793371132910,
-    "duration" : 193,
-    "sequenceNumber" : 244,
+    "timestamp" : 1793407271779,
+    "duration" : 274,
+    "sequenceNumber" : 180,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -16586,9 +16055,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793371132906,
-    "duration" : 3,
-    "sequenceNumber" : 243,
+    "timestamp" : 1793406759408,
+    "duration" : 13,
+    "sequenceNumber" : 77,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -16609,8 +16078,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370013703,
-    "duration" : 5,
+    "timestamp" : 1793406631395,
+    "duration" : 6,
     "sequenceNumber" : 23,
     "evaluatedCommand" : {
       "defineVariablesCommand" : {
@@ -16762,9 +16231,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370197269,
-    "duration" : 17570,
-    "sequenceNumber" : 82,
+    "timestamp" : 1793406795542,
+    "duration" : 16332,
+    "sequenceNumber" : 88,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -16919,101 +16388,9 @@
   },
   "metadata" : {
     "status" : "FAILED",
-    "timestamp" : 1793371146020,
-    "duration" : 16986,
+    "timestamp" : 1793407283194,
+    "duration" : 16411,
     "error" : {
-      "cause" : {
-        "stackTrace" : [ {
-          "classLoaderName" : "app",
-          "methodName" : "send$dadb",
-          "fileName" : "AdbServer.kt",
-          "lineNumber" : 103,
-          "className" : "dadb.adbserver.AdbServer",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "open",
-          "fileName" : "AdbServer.kt",
-          "lineNumber" : 149,
-          "className" : "dadb.adbserver.AdbServerDadb",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "channel$lambda$0",
-          "fileName" : "AndroidDriver.kt",
-          "lineNumber" : 81,
-          "className" : "maestro.drivers.AndroidDriver",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "connect",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 40,
-          "className" : "maestro.android.AdbSocket",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "connect",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 44,
-          "className" : "maestro.android.AdbSocket",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "createSocket",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 19,
-          "className" : "maestro.android.AdbSocketFactory",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "createSocket",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 25,
-          "className" : "maestro.android.AdbSocketFactory",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "run",
-          "fileName" : "OkHttpClientTransport.java",
-          "lineNumber" : 535,
-          "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "run",
-          "fileName" : "SerializingExecutor.java",
-          "lineNumber" : 133,
-          "className" : "io.grpc.internal.SerializingExecutor",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "runWorker",
-          "fileName" : "ThreadPoolExecutor.java",
-          "lineNumber" : 1144,
-          "className" : "java.util.concurrent.ThreadPoolExecutor",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "run",
-          "fileName" : "ThreadPoolExecutor.java",
-          "lineNumber" : 642,
-          "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "run",
-          "fileName" : "Thread.java",
-          "lineNumber" : 1583,
-          "className" : "java.lang.Thread",
-          "nativeMethod" : false
-        } ],
-        "message" : "Command failed (tcp:7001): closed",
-        "localizedMessage" : "Command failed (tcp:7001): closed"
-      },
       "stackTrace" : [ {
         "classLoaderName" : "app",
         "methodName" : "toStatusRuntimeException",
@@ -17037,37 +16414,58 @@
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo",
+        "methodName" : "viewHierarchy",
         "fileName" : "MaestroDriverGrpc.java",
-        "lineNumber" : 740,
+        "lineNumber" : 747,
         "className" : "maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo$lambda$5",
+        "methodName" : "callViewHierarchy",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 201,
+        "lineNumber" : 366,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "runDeviceCall",
+        "methodName" : "callViewHierarchy",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 1273,
+        "lineNumber" : 392,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo",
+        "methodName" : "callViewHierarchy$default",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 200,
+        "lineNumber" : 364,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "contentDescriptor$lambda$17",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 326,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "measured",
+        "fileName" : "Metrics.kt",
+        "lineNumber" : 48,
+        "className" : "maestro.utils.Metrics",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "contentDescriptor",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 325,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
         "methodName" : "from-8JJjmZI",
         "fileName" : "ViewHierarchy.kt",
-        "lineNumber" : 28,
+        "lineNumber" : 29,
         "className" : "maestro.ViewHierarchy$Companion",
         "nativeMethod" : false
       }, {
@@ -17163,105 +16561,14 @@
         "nativeMethod" : false
       } ],
       "status" : {
-        "code" : "UNAVAILABLE",
-        "cause" : {
-          "stackTrace" : [ {
-            "classLoaderName" : "app",
-            "methodName" : "send$dadb",
-            "fileName" : "AdbServer.kt",
-            "lineNumber" : 103,
-            "className" : "dadb.adbserver.AdbServer",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "open",
-            "fileName" : "AdbServer.kt",
-            "lineNumber" : 149,
-            "className" : "dadb.adbserver.AdbServerDadb",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "channel$lambda$0",
-            "fileName" : "AndroidDriver.kt",
-            "lineNumber" : 81,
-            "className" : "maestro.drivers.AndroidDriver",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "connect",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 40,
-            "className" : "maestro.android.AdbSocket",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "connect",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 44,
-            "className" : "maestro.android.AdbSocket",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "createSocket",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 19,
-            "className" : "maestro.android.AdbSocketFactory",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "createSocket",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 25,
-            "className" : "maestro.android.AdbSocketFactory",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "run",
-            "fileName" : "OkHttpClientTransport.java",
-            "lineNumber" : 535,
-            "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "run",
-            "fileName" : "SerializingExecutor.java",
-            "lineNumber" : 133,
-            "className" : "io.grpc.internal.SerializingExecutor",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "runWorker",
-            "fileName" : "ThreadPoolExecutor.java",
-            "lineNumber" : 1144,
-            "className" : "java.util.concurrent.ThreadPoolExecutor",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "run",
-            "fileName" : "ThreadPoolExecutor.java",
-            "lineNumber" : 642,
-            "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "run",
-            "fileName" : "Thread.java",
-            "lineNumber" : 1583,
-            "className" : "java.lang.Thread",
-            "nativeMethod" : false
-          } ],
-          "message" : "Command failed (tcp:7001): closed",
-          "localizedMessage" : "Command failed (tcp:7001): closed"
-        },
+        "code" : "INTERNAL",
+        "description" : "UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]",
         "ok" : false
       },
-      "message" : "UNAVAILABLE",
-      "localizedMessage" : "UNAVAILABLE"
+      "message" : "INTERNAL: UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]",
+      "localizedMessage" : "INTERNAL: UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]"
     },
-    "sequenceNumber" : 252,
+    "sequenceNumber" : 188,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -17301,8 +16608,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370050773,
-    "sequenceNumber" : 41,
+    "timestamp" : 1793406656347,
+    "sequenceNumber" : 47,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -17340,8 +16647,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793369981366,
-    "duration" : 18,
+    "timestamp" : 1793406608148,
+    "duration" : 8,
     "sequenceNumber" : 1,
     "evaluatedCommand" : {
       "defineVariablesCommand" : {
@@ -17386,8 +16693,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793371138537,
-    "sequenceNumber" : 250,
+    "timestamp" : 1793407275846,
+    "sequenceNumber" : 186,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -17444,8 +16751,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370043394,
-    "sequenceNumber" : 39,
+    "timestamp" : 1793406648904,
+    "sequenceNumber" : 45,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -17465,6 +16772,29 @@
             "idRegex" : "dialogo-botao-0",
             "optional" : false
           }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406795561,
+    "duration" : 5,
+    "sequenceNumber" : 91,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
         },
         "optional" : false
       }
@@ -17518,9 +16848,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370197284,
-    "duration" : 7587,
-    "sequenceNumber" : 84,
+    "timestamp" : 1793406795556,
+    "duration" : 7151,
+    "sequenceNumber" : 90,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -17582,9 +16912,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370232419,
-    "duration" : 3695,
-    "sequenceNumber" : 99,
+    "timestamp" : 1793406830637,
+    "duration" : 318,
+    "sequenceNumber" : 105,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -17594,6 +16924,29 @@
           }
         },
         "timeout" : "120000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406683169,
+    "duration" : 11,
+    "sequenceNumber" : 62,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
         "optional" : false
       }
     }
@@ -17624,8 +16977,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370074439,
-    "sequenceNumber" : 52,
+    "timestamp" : 1793406682574,
+    "sequenceNumber" : 58,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -17661,9 +17014,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793369985255,
-    "duration" : 26,
-    "sequenceNumber" : 5,
+    "timestamp" : 1793406759388,
+    "duration" : 7,
+    "sequenceNumber" : 75,
     "evaluatedCommand" : {
       "applyConfigurationCommand" : {
         "config" : {
@@ -17688,9 +17041,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370222553,
-    "duration" : 5619,
-    "sequenceNumber" : 97,
+    "timestamp" : 1793406819237,
+    "duration" : 3018,
+    "sequenceNumber" : 103,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -17730,8 +17083,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793371145736,
-    "sequenceNumber" : 251,
+    "timestamp" : 1793407283009,
+    "sequenceNumber" : 187,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -17751,29 +17104,6 @@
             "idRegex" : "push-skip",
             "optional" : false
           }
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370197288,
-    "duration" : 5,
-    "sequenceNumber" : 85,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
         },
         "optional" : false
       }
@@ -17805,8 +17135,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370206433,
-    "sequenceNumber" : 88,
+    "timestamp" : 1793406804056,
+    "sequenceNumber" : 94,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -18738,101 +18068,9 @@
   },
   "metadata" : {
     "status" : "FAILED",
-    "timestamp" : 1793370214841,
-    "duration" : 948174,
+    "timestamp" : 1793406811877,
+    "duration" : 487804,
     "error" : {
-      "cause" : {
-        "stackTrace" : [ {
-          "classLoaderName" : "app",
-          "methodName" : "send$dadb",
-          "fileName" : "AdbServer.kt",
-          "lineNumber" : 103,
-          "className" : "dadb.adbserver.AdbServer",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "open",
-          "fileName" : "AdbServer.kt",
-          "lineNumber" : 149,
-          "className" : "dadb.adbserver.AdbServerDadb",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "channel$lambda$0",
-          "fileName" : "AndroidDriver.kt",
-          "lineNumber" : 81,
-          "className" : "maestro.drivers.AndroidDriver",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "connect",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 40,
-          "className" : "maestro.android.AdbSocket",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "connect",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 44,
-          "className" : "maestro.android.AdbSocket",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "createSocket",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 19,
-          "className" : "maestro.android.AdbSocketFactory",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "createSocket",
-          "fileName" : "AdbSocketFactory.kt",
-          "lineNumber" : 25,
-          "className" : "maestro.android.AdbSocketFactory",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "run",
-          "fileName" : "OkHttpClientTransport.java",
-          "lineNumber" : 535,
-          "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
-          "nativeMethod" : false
-        }, {
-          "classLoaderName" : "app",
-          "methodName" : "run",
-          "fileName" : "SerializingExecutor.java",
-          "lineNumber" : 133,
-          "className" : "io.grpc.internal.SerializingExecutor",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "runWorker",
-          "fileName" : "ThreadPoolExecutor.java",
-          "lineNumber" : 1144,
-          "className" : "java.util.concurrent.ThreadPoolExecutor",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "run",
-          "fileName" : "ThreadPoolExecutor.java",
-          "lineNumber" : 642,
-          "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
-          "nativeMethod" : false
-        }, {
-          "moduleName" : "java.base",
-          "moduleVersion" : "21.0.5",
-          "methodName" : "run",
-          "fileName" : "Thread.java",
-          "lineNumber" : 1583,
-          "className" : "java.lang.Thread",
-          "nativeMethod" : false
-        } ],
-        "message" : "Command failed (tcp:7001): closed",
-        "localizedMessage" : "Command failed (tcp:7001): closed"
-      },
       "stackTrace" : [ {
         "classLoaderName" : "app",
         "methodName" : "toStatusRuntimeException",
@@ -18856,37 +18094,58 @@
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo",
+        "methodName" : "viewHierarchy",
         "fileName" : "MaestroDriverGrpc.java",
-        "lineNumber" : 740,
+        "lineNumber" : 747,
         "className" : "maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo$lambda$5",
+        "methodName" : "callViewHierarchy",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 201,
+        "lineNumber" : 366,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "runDeviceCall",
+        "methodName" : "callViewHierarchy",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 1273,
+        "lineNumber" : 392,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
-        "methodName" : "deviceInfo",
+        "methodName" : "callViewHierarchy$default",
         "fileName" : "AndroidDriver.kt",
-        "lineNumber" : 200,
+        "lineNumber" : 364,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "contentDescriptor$lambda$17",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 326,
+        "className" : "maestro.drivers.AndroidDriver",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "measured",
+        "fileName" : "Metrics.kt",
+        "lineNumber" : 48,
+        "className" : "maestro.utils.Metrics",
+        "nativeMethod" : false
+      }, {
+        "classLoaderName" : "app",
+        "methodName" : "contentDescriptor",
+        "fileName" : "AndroidDriver.kt",
+        "lineNumber" : 325,
         "className" : "maestro.drivers.AndroidDriver",
         "nativeMethod" : false
       }, {
         "classLoaderName" : "app",
         "methodName" : "from-8JJjmZI",
         "fileName" : "ViewHierarchy.kt",
-        "lineNumber" : 28,
+        "lineNumber" : 29,
         "className" : "maestro.ViewHierarchy$Companion",
         "nativeMethod" : false
       }, {
@@ -18982,105 +18241,14 @@
         "nativeMethod" : false
       } ],
       "status" : {
-        "code" : "UNAVAILABLE",
-        "cause" : {
-          "stackTrace" : [ {
-            "classLoaderName" : "app",
-            "methodName" : "send$dadb",
-            "fileName" : "AdbServer.kt",
-            "lineNumber" : 103,
-            "className" : "dadb.adbserver.AdbServer",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "open",
-            "fileName" : "AdbServer.kt",
-            "lineNumber" : 149,
-            "className" : "dadb.adbserver.AdbServerDadb",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "channel$lambda$0",
-            "fileName" : "AndroidDriver.kt",
-            "lineNumber" : 81,
-            "className" : "maestro.drivers.AndroidDriver",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "connect",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 40,
-            "className" : "maestro.android.AdbSocket",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "connect",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 44,
-            "className" : "maestro.android.AdbSocket",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "createSocket",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 19,
-            "className" : "maestro.android.AdbSocketFactory",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "createSocket",
-            "fileName" : "AdbSocketFactory.kt",
-            "lineNumber" : 25,
-            "className" : "maestro.android.AdbSocketFactory",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "run",
-            "fileName" : "OkHttpClientTransport.java",
-            "lineNumber" : 535,
-            "className" : "io.grpc.okhttp.OkHttpClientTransport$3",
-            "nativeMethod" : false
-          }, {
-            "classLoaderName" : "app",
-            "methodName" : "run",
-            "fileName" : "SerializingExecutor.java",
-            "lineNumber" : 133,
-            "className" : "io.grpc.internal.SerializingExecutor",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "runWorker",
-            "fileName" : "ThreadPoolExecutor.java",
-            "lineNumber" : 1144,
-            "className" : "java.util.concurrent.ThreadPoolExecutor",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "run",
-            "fileName" : "ThreadPoolExecutor.java",
-            "lineNumber" : 642,
-            "className" : "java.util.concurrent.ThreadPoolExecutor$Worker",
-            "nativeMethod" : false
-          }, {
-            "moduleName" : "java.base",
-            "moduleVersion" : "21.0.5",
-            "methodName" : "run",
-            "fileName" : "Thread.java",
-            "lineNumber" : 1583,
-            "className" : "java.lang.Thread",
-            "nativeMethod" : false
-          } ],
-          "message" : "Command failed (tcp:7001): closed",
-          "localizedMessage" : "Command failed (tcp:7001): closed"
-        },
+        "code" : "INTERNAL",
+        "description" : "UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]",
         "ok" : false
       },
-      "message" : "UNAVAILABLE",
-      "localizedMessage" : "UNAVAILABLE"
+      "message" : "INTERNAL: UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]",
+      "localizedMessage" : "INTERNAL: UiAutomation not connected, UiAutomation@4efecab[id=-1, flags=0]"
     },
-    "sequenceNumber" : 91,
+    "sequenceNumber" : 97,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -20018,8 +19186,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370073757,
-    "sequenceNumber" : 51,
+    "timestamp" : 1793406682092,
+    "sequenceNumber" : 57,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -20078,7 +19246,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793369985402,
+    "timestamp" : 1793406612130,
     "sequenceNumber" : 9,
     "evaluatedCommand" : {
       "runFlowCommand" : {
@@ -20102,29 +19270,6 @@
           "scriptCondition" : "false"
         },
         "label" : "00.P4 · fecha a fila pela API (um cliente entra antes)",
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370053572,
-    "duration" : 10,
-    "sequenceNumber" : 45,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
         "optional" : false
       }
     }
@@ -20270,9 +19415,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370053560,
-    "duration" : 21506,
-    "sequenceNumber" : 44,
+    "timestamp" : 1793406665380,
+    "duration" : 17731,
+    "sequenceNumber" : 50,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -20405,6 +19550,29 @@
           }
         } ],
         "sourceDescription" : "fechar_aviso.yaml",
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406614619,
+    "duration" : 48,
+    "sequenceNumber" : 14,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
         "config" : {
           "appId" : "com.vupth.client.preview"
         },
@@ -20554,9 +19722,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370038029,
-    "duration" : 13010,
-    "sequenceNumber" : 33,
+    "timestamp" : 1793406645696,
+    "duration" : 10873,
+    "sequenceNumber" : 39,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -20723,7 +19891,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793369995669,
+    "timestamp" : 1793406621888,
     "sequenceNumber" : 16,
     "evaluatedCommand" : {
       "repeatCommand" : {
@@ -20751,6 +19919,29 @@
   }
 }, {
   "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793407271785,
+    "duration" : 3,
+    "sequenceNumber" : 181,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "setClipboardCommand" : {
       "text" : "${EMAIL_CLIENTE}",
       "optional" : false
@@ -20758,12 +19949,12 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370091957,
-    "duration" : 26,
-    "sequenceNumber" : 60,
+    "timestamp" : 1793406697021,
+    "duration" : 15,
+    "sequenceNumber" : 66,
     "evaluatedCommand" : {
       "setClipboardCommand" : {
-        "text" : "client_c36996200@teste.com",
+        "text" : "client_c40658800@teste.com",
         "optional" : false
       }
     }
@@ -20794,7 +19985,7 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370013267,
+    "timestamp" : 1793406630998,
     "sequenceNumber" : 21,
     "evaluatedCommand" : {
       "repeatCommand" : {
@@ -20835,9 +20026,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370051069,
-    "duration" : 2490,
-    "sequenceNumber" : 43,
+    "timestamp" : 1793406656589,
+    "duration" : 8789,
+    "sequenceNumber" : 49,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -20877,8 +20068,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370065819,
-    "sequenceNumber" : 50,
+    "timestamp" : 1793406674826,
+    "sequenceNumber" : 56,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -20911,57 +20102,11 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370132040,
-    "duration" : 12658,
-    "sequenceNumber" : 64,
+    "timestamp" : 1793406732386,
+    "duration" : 10629,
+    "sequenceNumber" : 70,
     "evaluatedCommand" : {
       "pasteTextCommand" : {
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793369981394,
-    "duration" : 3693,
-    "sequenceNumber" : 2,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793370165001,
-    "duration" : 12,
-    "sequenceNumber" : 71,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
         "optional" : false
       }
     }
@@ -20981,9 +20126,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370149657,
-    "duration" : 5133,
-    "sequenceNumber" : 66,
+    "timestamp" : 1793406747930,
+    "duration" : 5097,
+    "sequenceNumber" : 72,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -21029,8 +20174,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370197293,
-    "sequenceNumber" : 86,
+    "timestamp" : 1793406795567,
+    "sequenceNumber" : 92,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -21087,8 +20232,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370168827,
-    "sequenceNumber" : 74,
+    "timestamp" : 1793406764567,
+    "sequenceNumber" : 80,
     "evaluatedCommand" : {
       "runFlowCommand" : {
         "commands" : [ {
@@ -21128,9 +20273,9 @@
   },
   "metadata" : {
     "status" : "PENDING",
-    "timestamp" : 1793371117541,
-    "duration" : 7533,
-    "sequenceNumber" : 239,
+    "timestamp" : 1793407257153,
+    "duration" : 6710,
+    "sequenceNumber" : 175,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -21159,9 +20304,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370075120,
-    "duration" : 4262,
-    "sequenceNumber" : 57,
+    "timestamp" : 1793406683184,
+    "duration" : 3110,
+    "sequenceNumber" : 63,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -21177,15 +20322,38 @@
   }
 }, {
   "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406611962,
+    "duration" : 15,
+    "sequenceNumber" : 5,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
     "pasteTextCommand" : {
       "optional" : false
     }
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370091985,
-    "duration" : 33174,
-    "sequenceNumber" : 61,
+    "timestamp" : 1793406697037,
+    "duration" : 28031,
+    "sequenceNumber" : 67,
     "evaluatedCommand" : {
       "pasteTextCommand" : {
         "optional" : false
@@ -21207,8 +20375,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793369995986,
-    "duration" : 10057,
+    "timestamp" : 1793406622253,
+    "duration" : 1058,
     "sequenceNumber" : 17,
     "evaluatedCommand" : {
       "launchAppCommand" : {
@@ -21255,8 +20423,8 @@
   },
   "metadata" : {
     "status" : "SKIPPED",
-    "timestamp" : 1793370014492,
-    "sequenceNumber" : 28,
+    "timestamp" : 1793406642754,
+    "sequenceNumber" : 34,
     "evaluatedCommand" : {
       "repeatCommand" : {
         "times" : "3",
@@ -21296,9 +20464,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370132032,
-    "duration" : 6,
-    "sequenceNumber" : 63,
+    "timestamp" : 1793406732372,
+    "duration" : 13,
+    "sequenceNumber" : 69,
     "evaluatedCommand" : {
       "setClipboardCommand" : {
         "text" : "Teste@123",
@@ -21321,9 +20489,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370186432,
-    "duration" : 3443,
-    "sequenceNumber" : 79,
+    "timestamp" : 1793406781614,
+    "duration" : 2818,
+    "sequenceNumber" : 85,
     "evaluatedCommand" : {
       "tapOnElement" : {
         "selector" : {
@@ -21333,6 +20501,29 @@
         "retryIfNoChange" : false,
         "waitUntilVisible" : false,
         "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406665402,
+    "duration" : 18,
+    "sequenceNumber" : 51,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
+        },
         "optional" : false
       }
     }
@@ -21352,9 +20543,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370189876,
-    "duration" : 245,
-    "sequenceNumber" : 80,
+    "timestamp" : 1793406784433,
+    "duration" : 169,
+    "sequenceNumber" : 86,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
@@ -21370,29 +20561,6 @@
   }
 }, {
   "command" : {
-    "applyConfigurationCommand" : {
-      "config" : {
-        "appId" : "${APP_ID}"
-      },
-      "optional" : false
-    }
-  },
-  "metadata" : {
-    "status" : "COMPLETED",
-    "timestamp" : 1793371132913,
-    "duration" : 4,
-    "sequenceNumber" : 245,
-    "evaluatedCommand" : {
-      "applyConfigurationCommand" : {
-        "config" : {
-          "appId" : "com.vupth.client.preview"
-        },
-        "optional" : false
-      }
-    }
-  }
-}, {
-  "command" : {
     "evalScriptCommand" : {
       "scriptString" : "${output.EMAIL_CLIENTE = 'client_c' + output.TAG + '@teste.com'; output.NOME_CLIENTE = 'Cliente' + output.TAG}",
       "label" : "${ETAPA}.P2 · calcula o cliente",
@@ -21401,8 +20569,8 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793369985355,
-    "duration" : 16,
+    "timestamp" : 1793406612053,
+    "duration" : 33,
     "sequenceNumber" : 7,
     "evaluatedCommand" : {
       "evalScriptCommand" : {
@@ -21423,13 +20591,36 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370075108,
-    "duration" : 6,
-    "sequenceNumber" : 55,
+    "timestamp" : 1793406683155,
+    "duration" : 11,
+    "sequenceNumber" : 61,
     "evaluatedCommand" : {
       "defineVariablesCommand" : {
         "env" : {
-          "EMAIL_CLIENTE" : "client_c36996200@teste.com"
+          "EMAIL_CLIENTE" : "client_c40658800@teste.com"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1793406631406,
+    "duration" : 22,
+    "sequenceNumber" : 24,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "com.vupth.client.preview"
         },
         "optional" : false
       }
@@ -21449,9 +20640,9 @@
   },
   "metadata" : {
     "status" : "COMPLETED",
-    "timestamp" : 1793370035807,
-    "duration" : 2220,
-    "sequenceNumber" : 32,
+    "timestamp" : 1793406645559,
+    "duration" : 135,
+    "sequenceNumber" : 38,
     "evaluatedCommand" : {
       "assertConditionCommand" : {
         "condition" : {
