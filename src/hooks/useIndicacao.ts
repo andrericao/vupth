@@ -5,12 +5,29 @@ import * as SecureStore from 'expo-secure-store';
 import { INDICACAO_CAMPANHA_KEY, INDICACAO_KEY, campanhaDoCaminho, codigoDoCaminho, descartarDepoisDaRecusa } from '@domain/indicacao';
 import { fimDoErro } from '@domain/campanhas';
 import { avisoDeFimDaCampanha } from '@utils/avisoDeFimDaCampanha';
+import { campaignService } from '@services/campaignService';
 import { referralService } from '@services/referralService';
 import { useAuthStore } from '@stores/authStore';
 
 /** O endereco aberto no navegador; no aparelho nao ha (o link abre o site). */
 function caminhoDaWeb(): string {
   return Platform.OS === 'web' && typeof window !== 'undefined' ? window.location.pathname + (window.location.search ?? '') : '';
+}
+
+/**
+ * desconto-no-link-cliente (DEC-131, Backend 5a74f65): o claim so liga o convidado ao indicador e nao
+ * ativa cupom. Para o desconto do 1o corte, o app resgata a campanha do link (POST /campaigns/redeem)
+ * com o CODIGO DA CAMPANHA (nunca o de indicacao: da 404), achado na lista das ativas pelo id do `?c=`.
+ * Best-effort: campanha fora da lista (privada), ja resgatada ou fora do ar nao travam nada.
+ */
+async function resgatarCupomDoLink(campanhaId: string, accessToken: string) {
+  try {
+    const { data } = await campaignService.listActive(accessToken);
+    const codigo = (data ?? []).find((c) => c.id === campanhaId)?.code;
+    if (codigo) await campaignService.redeem(codigo, accessToken);
+  } catch {
+    // o desconto e um extra: o claim ja valeu
+  }
 }
 
 /**
@@ -48,6 +65,7 @@ export function useIndicacao(lerCaminho: () => string = caminhoDaWeb) {
       const campanha = await SecureStore.getItemAsync(INDICACAO_CAMPANHA_KEY).catch(() => null);
       try {
         await referralService.claim(codigo, accessToken, campanha);
+        if (campanha) await resgatarCupomDoLink(campanha, accessToken);
       } catch (erro) {
         if (!descartarDepoisDaRecusa(erro)) return; // sem rede: tenta no proximo login
         // DEC-124: o link de campanha encerrada ou esgotada abre o app e avisa.

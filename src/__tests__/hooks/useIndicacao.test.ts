@@ -14,6 +14,12 @@ jest.mock('@services/referralService', () => ({
   referralService: { claim: (...a: unknown[]) => mockClaim(...a) },
 }));
 
+const mockListActive = jest.fn();
+const mockRedeem = jest.fn();
+jest.mock('@services/campaignService', () => ({
+  campaignService: { listActive: (...a: unknown[]) => mockListActive(...a), redeem: (...a: unknown[]) => mockRedeem(...a) },
+}));
+
 const guardado: Record<string, string> = {};
 const get = SecureStore.getItemAsync as jest.Mock;
 const set = SecureStore.setItemAsync as jest.Mock;
@@ -31,6 +37,8 @@ beforeEach(() => {
     delete guardado[k];
   });
   mockClaim.mockResolvedValue({ data: { code: 'K7M2QX', referred_at: 'x' } });
+  mockListActive.mockResolvedValue({ data: [{ id: 'camp-1', code: 'DESC10' }] });
+  mockRedeem.mockResolvedValue({ data: {} });
   useAuthStore.setState({ isAuthenticated: false, accessToken: null });
 });
 
@@ -60,6 +68,30 @@ describe('useIndicacao', () => {
     renderHook(() => useIndicacao(() => '/i/K7M2QX?c=camp-1'));
     await waitFor(() => expect(mockClaim).toHaveBeenCalledWith('K7M2QX', 'tk', 'camp-1'));
     await waitFor(() => expect(guardado['vupth_indicacao_campanha']).toBeUndefined());
+  });
+
+  // desconto-no-link-cliente (DEC-131): depois do claim, resgata a campanha do link pelo codigo DELA.
+  it('link com ?c=: depois do claim, resgata o cupom com o código da campanha (não o de indicação)', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tk' });
+    renderHook(() => useIndicacao(() => '/i/K7M2QX?c=camp-1'));
+    await waitFor(() => expect(mockRedeem).toHaveBeenCalledWith('DESC10', 'tk'));
+    expect(mockRedeem).not.toHaveBeenCalledWith('K7M2QX', expect.anything());
+  });
+
+  it('link sem ?c=, ou campanha fora da lista (privada), ou resgate falhando: nada quebra e o código sai', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tk' });
+    renderHook(() => useIndicacao(() => '/i/K7M2QX'));
+    await waitFor(() => expect(mockClaim).toHaveBeenCalled());
+    expect(mockListActive).not.toHaveBeenCalled();
+
+    mockListActive.mockResolvedValue({ data: [{ id: 'outra', code: 'X' }] });
+    renderHook(() => useIndicacao(() => '/i/K7M2QX?c=camp-1'));
+    await waitFor(() => expect(mockListActive).toHaveBeenCalled());
+    expect(mockRedeem).not.toHaveBeenCalled();
+
+    mockListActive.mockRejectedValue(new Error('rede'));
+    renderHook(() => useIndicacao(() => '/i/K7M2QX?c=camp-1'));
+    await waitFor(() => expect(guardado[KEY]).toBeUndefined());
   });
 
   it('link de campanha encerrada: avisa Promoção encerrada e apaga o código (DEC-124)', async () => {
