@@ -2,6 +2,15 @@
 # env: EMAIL_CLIENTE, NOME_CLIENTE
 appId: ${APP_ID}
 ---
+# A 02 roda numa etapa avulsa com a versao ja verificada: o preparo nao passa pelo Perfil (02.PC pula) e
+# o app fica no Inicio. Abre o Perfil do visitante antes de procurar o convite (31/10, bateria 131517).
+- runFlow:
+    when:
+      notVisible: "Criar conta grátis"
+    commands:
+      - tapOn:
+          text: "Perfil"
+    label: "02.00 · abre o Perfil, onde está o convite"
 - tapOn:
     text: "Criar conta grátis"
     label: "02.01 · toca em Criar conta grátis"
