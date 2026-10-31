@@ -12,7 +12,7 @@ describe("Maestro 05 — a espera da tolerância", () => {
   it("os dois laços de espera da faixa existem, com as voltas de 30 s", () => {
     expect(daFaixa).toHaveLength(2);
     expect(daFaixa.map((l) => /times: (\d+)/.exec(l)![1])).toEqual(["40", "30"]);
-    for (const l of daFaixa) expect(l).toMatch(/timeout: 30000/);
+    for (const l of daFaixa) expect(l).toMatch(/timeout: \$\{30000 \* LENTO\}/);
   });
 
   it("nenhum laço da faixa usa `while`: a checagem instantânea errava no emulador lento", () => {
