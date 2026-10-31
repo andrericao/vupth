@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FlatList, TouchableOpacity, RefreshControl, TextInput } from "react-native";
+import { memo, useState } from "react";
+import { FlatList, Platform, TouchableOpacity, RefreshControl, TextInput } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { VStack, Box, Text, HStack, Center } from "@gluestack-ui/themed";
 import { Search, ChevronRight, Zap, ArrowUpDown } from "lucide-react-native";
@@ -28,7 +28,8 @@ function waitLabel(e: Establishment): string {
   return w == null || w === 0 ? "Sem fila" : `~${formatWaitTime(w)}`;
 }
 
-function OpenRow({
+// estudo-desempenho (DEC-145): `memo` — o `onPress` novo a cada render so depende da loja.
+const OpenRow = memo(function OpenRow({
   establishment,
   onPress,
 }: {
@@ -77,7 +78,7 @@ function OpenRow({
       </Box>
     </TouchableOpacity>
   );
-}
+}, (a, b) => a.establishment === b.establishment);
 
 export function EstablishmentList() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
@@ -212,6 +213,12 @@ export function EstablishmentList() {
           <FlatList
             data={[...sortedOpen, ...closed]}
             keyExtractor={(item) => item.id}
+            // estudo-desempenho (DEC-145): a mesma janela da Home — primeira dobra ja e o resto em lotes.
+            initialNumToRender={8}
+            maxToRenderPerBatch={6}
+            updateCellsBatchingPeriod={50}
+            windowSize={7}
+            removeClippedSubviews={Platform.OS === "android"}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 24 }}
             refreshControl={
