@@ -42,7 +42,10 @@ appId: ${APP_ID}
     when:
       visible: "Sobre o tempo estimado"
     commands:
-      - tapOn: "Entendi"
+      # O aviso pode sumir sozinho entre o `when` e o toque (bateria 131517, 11.09c): sem ele, nao e falha.
+      - tapOn:
+          text: "Entendi"
+          optional: true
     label: "11.09c · fecha o aviso, se ele chegou"
 - extendedWaitUntil:
     notVisible: "Sobre o tempo estimado"
