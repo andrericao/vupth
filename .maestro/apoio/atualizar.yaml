@@ -74,7 +74,7 @@ appId: ${APP_ID}
     times: 14
     while:
       notVisible:
-        text: ".*${COMMIT}.*"
+        text: ".*(${COMMIT}).*"
     commands:
       - runFlow:
           file: fechar_aviso.yaml

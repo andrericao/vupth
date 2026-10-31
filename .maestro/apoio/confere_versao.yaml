@@ -12,7 +12,7 @@ appId: ${APP_ID}
 ---
 - copyTextFrom:
     id: "versao-visitante"
-- evalScript: ${output.VERSAO_OK = typeof COMMIT !== 'undefined' && !!COMMIT && maestro.copiedText.toLowerCase().indexOf(String(COMMIT).trim().toLowerCase().slice(0, 8)) >= 0}
+- evalScript: ${output.VERSAO_OK = typeof COMMIT !== 'undefined' && !!COMMIT && new RegExp(String(COMMIT).trim().toLowerCase()).test(maestro.copiedText.toLowerCase())}
 - repeat:
     times: 3
     while:
@@ -45,6 +45,6 @@ appId: ${APP_ID}
           text: "Perfil"
       - copyTextFrom:
           id: "versao-visitante"
-      - evalScript: ${output.VERSAO_OK = maestro.copiedText.toLowerCase().indexOf(String(COMMIT).trim().toLowerCase().slice(0, 8)) >= 0}
+      - evalScript: ${output.VERSAO_OK = new RegExp(String(COMMIT).trim().toLowerCase()).test(maestro.copiedText.toLowerCase())}
 - runScript:
     file: ../scripts/confere_versao.js

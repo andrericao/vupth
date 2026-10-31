@@ -19,7 +19,7 @@ appId: ${APP_ID}
       true: ${typeof COMMIT !== 'undefined' && !!COMMIT}
       notVisible:
         id: "versao-entrada"
-        text: ".*${typeof COMMIT !== 'undefined' ? COMMIT : ''}.*"
+        text: ".*(${typeof COMMIT !== 'undefined' ? COMMIT : ''}).*"
     commands:
       - stopApp
       - launchApp

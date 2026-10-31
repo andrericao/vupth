@@ -101,6 +101,13 @@ git -C "$REPO" fetch -q origin "$BRANCH" 2>/dev/null
 COMMIT=$(git -C "$REPO" log -1 --format=%H --invert-grep --grep='^chore(logs)' "origin/$BRANCH" | cut -c1-8)
 [ -n "$COMMIT" ] || COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
 echo "Commit esperado no app: $COMMIT (origin/$BRANCH, sem chore(logs))"
+# A 00 aceita o commit esperado OU um chore(logs) filho dele (o OTA publicado do HEAD
+# carrega o hash do commit de log, e reprovava a versao certa: 77024f82, 31/10). Os
+# fluxos recebem a lista como regex "a|b" em COMMIT_ACEITOS.
+COMMIT_ACEITOS="$COMMIT"
+for h in $(git -C "$REPO" log --format='%h %s' --abbrev=8 "$COMMIT..origin/$BRANCH" 2>/dev/null | awk '$2 ~ /^chore\(logs\)/ {print $1}'); do
+  COMMIT_ACEITOS="$COMMIT_ACEITOS|$h"
+done
 
 # Supervisao (bateria-supervisionada, DEC-15) — o mesmo formato do Partner.
 # Sem resposta em 1 min, segue sem supervisao.
@@ -230,7 +237,7 @@ rodar() {
   local prazo="$ETAPA_PRAZO" verificada=1
   [ "$nome" = "00_atualizacao" ] && { prazo="$ATUALIZACAO_PRAZO"; verificada=0; }
   timeout -k 30 "$prazo" maestro "${MAESTRO_APARELHO[@]}" test \
-    -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
+    -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT_ACEITOS" \
     -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" -e PERFIL="$PERFIL" -e VERSAO_VERIFICADA="$verificada" \
     --debug-output "$pasta" --flatten-debug-output \
     --test-output-dir "$pasta" \
