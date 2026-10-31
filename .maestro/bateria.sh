@@ -6,6 +6,7 @@
 #   bash .maestro/bateria.sh --falhas     # so as que nao passaram, sem perguntar
 #   bash .maestro/bateria.sh --completa --publicar-ota  # publica o OTA da dev antes (publicar-ota.sh)
 #   bash .maestro/bateria.sh --falhas --device emulator-5554  # num aparelho
+#   bash .maestro/bateria.sh --completa --perfil celular|emulador  # forca o perfil
 #                                         escolhido (DEC-33, comandos.html#emulador)
 #
 # Prepara o celular (setup.sh), acha sozinha o commit esperado (o ultimo da
@@ -40,12 +41,14 @@ fi
 # Antes so o $1 era lido, e o "--device emulator-5554" virava o modo (10/10).
 MODO=""
 APARELHO=""
+PERFIL=""
 PUBLICAR_OTA=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --completa|--falhas) MODO="$1" ;;
     --publicar-ota) PUBLICAR_OTA="--publicar-ota" ;;
     --device) APARELHO="$2"; shift ;;
+    --perfil) PERFIL="$2"; shift ;;
   esac
   shift
 done
@@ -55,8 +58,20 @@ done
 MAESTRO_APARELHO=()
 # LENTO (Andre, 11/10: "o emulador e mais lento mesmo, entao compense"):
 # multiplica o timeout de todo extendedWaitUntil dos fluxos — 2 no emulador.
-LENTO=1
-case "$APARELHO" in emulator-*) LENTO=2 ;; esac
+# PERFIL (maestro-perfil-celular-e-emulador, Andre, 31/10): um so conjunto de
+# fluxos; o perfil sai de --perfil ou do serial do adb (emulator-* = emulador, o
+# resto = celular; sem --device, do unico aparelho conectado). Ele escolhe o
+# LENTO dos fluxos e os prazos por etapa abaixo.
+if [ -z "$PERFIL" ]; then
+  SERIAL="${APARELHO:-$(adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {print $1}' | head -1)}"
+  case "$SERIAL" in emulator-*) PERFIL=emulador ;; *) PERFIL=celular ;; esac
+fi
+case "$PERFIL" in
+  emulador) LENTO=2 ;;
+  celular) LENTO=1 ;;
+  *) echo "ERRO: --perfil aceita celular ou emulador (veio '$PERFIL')"; exit 2 ;;
+esac
+echo "Perfil: $PERFIL (LENTO=$LENTO)"
 if [ -n "$APARELHO" ]; then
   export ANDROID_SERIAL="$APARELHO"
   MAESTRO_APARELHO=(--device "$APARELHO")
@@ -193,8 +208,11 @@ falhou_em() { passos "$1" RUNNING | grep -vxFf <(passos "$1" 'COMPLETED|SKIPPED'
 
 # Prazo por etapa, em segundos (maestro-trava-na-atualizacao): passou, a etapa reprova
 # com "TEMPO ESGOTADO" no relatorio. Sobrescreva por ambiente se uma etapa pedir mais.
-ETAPA_PRAZO="${ETAPA_PRAZO:-1500}"
-ATUALIZACAO_PRAZO="${ATUALIZACAO_PRAZO:-1200}"
+# O celular e rapido: prazo menor (reprova antes); o emulador mantem os de sempre.
+case "$PERFIL" in
+  emulador) ETAPA_PRAZO="${ETAPA_PRAZO:-1500}"; ATUALIZACAO_PRAZO="${ATUALIZACAO_PRAZO:-1200}" ;;
+  *) ETAPA_PRAZO="${ETAPA_PRAZO:-900}"; ATUALIZACAO_PRAZO="${ATUALIZACAO_PRAZO:-600}" ;;
+esac
 
 # Roda uma etapa na pasta dela; devolve o status do maestro.
 rodar() {
@@ -213,7 +231,7 @@ rodar() {
   [ "$nome" = "00_atualizacao" ] && { prazo="$ATUALIZACAO_PRAZO"; verificada=0; }
   timeout -k 30 "$prazo" maestro "${MAESTRO_APARELHO[@]}" test \
     -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
-    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" -e VERSAO_VERIFICADA="$verificada" \
+    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" -e PERFIL="$PERFIL" -e VERSAO_VERIFICADA="$verificada" \
     --debug-output "$pasta" --flatten-debug-output \
     --test-output-dir "$pasta" \
     "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"

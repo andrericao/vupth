@@ -100,7 +100,7 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           notVisible:
             text: ".*(sem|em).*custo.*"
-          timeout: 30000
+          timeout: ${30000 * LENTO}
           optional: true
       - runFlow:
           file: ../apoio/esperar_o_sistema.yaml
@@ -132,7 +132,7 @@ appId: ${APP_ID}
       - extendedWaitUntil:
           notVisible:
             text: ".*(sem|em).*custo.*"
-          timeout: 30000
+          timeout: ${30000 * LENTO}
           optional: true
       - runFlow:
           file: ../apoio/esperar_o_sistema.yaml
