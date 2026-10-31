@@ -13,6 +13,7 @@ import { useFirstRunStore } from "@stores/firstRunStore";
 
 import { Box } from "@gluestack-ui/themed";
 import { OfflineBanner } from "@components/OfflineBanner";
+import { AvisoPreparandoServidor } from "@components/AvisoPreparandoServidor";
 import { FaixaBaixarApp } from "@components/FaixaBaixarApp";
 import { useTema } from "@hooks/useTema";
 import { temaDeNavegacao } from "@utils/temaDeNavegacao";
@@ -74,6 +75,7 @@ export function Routes(){
 			</Box>
 		)}
 		<OfflineBanner />
+		<AvisoPreparandoServidor />
 		</Box>
 		</SafeAreaProvider>
 	);

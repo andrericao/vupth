@@ -2,6 +2,7 @@ import type { AxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { mock } from './setup';
 import { api, registerAuthStore, renovarSessao } from '../../services/api';
+import { exigirServidor, marcarServidorPronto, useProntidaoStore } from '../../services/prontidaoDoServidor';
 
 jest.mock('expo-secure-store');
 const ss = SecureStore as jest.Mocked<typeof SecureStore>;
@@ -39,6 +40,45 @@ describe('api — interceptors', () => {
   });
 
   describe('request interceptor', () => {
+    // abrir-com-lista-salva (DEC-148): com o servidor ainda acordando, so o que grava espera.
+    describe('portao do servidor (app aberto pela lista salva)', () => {
+      afterEach(() => marcarServidorPronto());
+
+      it('POST espera o servidor ficar pronto; GET e /actuator seguem', async () => {
+        mock.onGet(PROTECTED).reply(200, {});
+        mock.onGet('/actuator/health/readiness').reply(200, {});
+        mock.onPost('/attendances').reply(201, {});
+        exigirServidor();
+
+        await expect(api.get(PROTECTED)).resolves.toMatchObject({ status: 200 });
+        await expect(api.get('/actuator/health/readiness')).resolves.toMatchObject({ status: 200 });
+
+        let terminou = false;
+        const post = api.post('/attendances', {}).then((r) => {
+          terminou = true;
+          return r;
+        });
+        await new Promise((r) => setTimeout(r, 20));
+        expect(terminou).toBe(false);
+
+        marcarServidorPronto();
+        await expect(post).resolves.toMatchObject({ status: 201 });
+      });
+
+      it('PUT, PATCH e DELETE tambem esperam; com o servidor pronto, nenhum espera', async () => {
+        mock.onPut('/x').reply(200, {});
+        mock.onPatch('/x').reply(200, {});
+        mock.onDelete('/x').reply(200, {});
+        exigirServidor();
+        const esperando = [api.put('/x', {}), api.patch('/x', {}), api.delete('/x')];
+        await new Promise((r) => setTimeout(r, 20));
+        expect(useProntidaoStore.getState().esperando).toBe(3);
+        marcarServidorPronto();
+        await Promise.all(esperando);
+        expect(useProntidaoStore.getState().esperando).toBe(0);
+      });
+    });
+
     it('anexa Bearer token em rota protegida', async () => {
       withTokens('tok-123', null);
       let received: string | undefined;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
@@ -64,6 +64,7 @@ import { useFeedbackStore } from "@stores/feedbackStore";
 import { useLembreteDePendencia } from "@hooks/useLembreteDePendencia";
 import { setupFocusManager, setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
+import { exigirServidor, marcarServidorPronto } from "@services/prontidaoDoServidor";
 import { aplicarOtaNaAbertura } from "@services/otaNaAbertura";
 
 import { useReconciliarFila } from "@hooks/useReconciliarFila";
@@ -151,7 +152,12 @@ export default function App() {
   // A abertura continua montada por cima da Home até o V terminar de sair: a
   // troca seca de <PreparingServer /> por <Routes /> cortava a saída no meio.
   const [aberturaFechada, setAberturaFechada] = useState(false);
-  const pronto = fontGateOpen && backendReady;
+  // abrir-com-lista-salva (DEC-148): com a lista de lojas salva em disco, a Home abre sem esperar o portao de
+  // readiness (so dados publicos); login, cadastro e tudo que grava seguem esperando o servidor (api.ts).
+  // Sem cache (instalacao nova, ou depois de sair da conta), o portao segura a abertura como sempre.
+  const [listaSalva, setListaSalva] = useState(false);
+  const backendProntoRef = useRef(false);
+  const pronto = fontGateOpen && (backendReady || listaSalva);
 
   useEffect(() => {
     restoreSession();
@@ -173,6 +179,8 @@ export default function App() {
     // estourar o teto (chamadas seguintes ja pegam a instancia quente). CLAUDE.md 18c.
     let active = true;
     waitForBackend().finally(() => {
+      backendProntoRef.current = true;
+      marcarServidorPronto();
       if (active) setBackendReady(true);
     });
     return () => {
@@ -192,6 +200,12 @@ export default function App() {
     restoreFirstRun,
     restoreFeedback,
   ]);
+
+  // Aberto pela lista salva: quando o servidor responde, a lista se atualiza na hora (a busca feita enquanto
+  // ele acordava pode ter falhado, e o proximo ciclo so viria em 60 s).
+  useEffect(() => {
+    if (backendReady && listaSalva) queryClient.invalidateQueries({ queryKey: ["establishments"] });
+  }, [backendReady, listaSalva]);
 
   // Notificacao pessoal "é a sua vez" (WebSocket) app-wide: vale em qualquer
   // tela enquanto houver fila ativa, nao so na QueueStatus (item #5, fatia 2).
@@ -235,6 +249,14 @@ export default function App() {
         // reconhece.
         buster: Constants.expoConfig?.version ?? "",
         dehydrateOptions: { shouldDehydrateQuery: devePersistir },
+      }}
+      onSuccess={() => {
+        // O cache voltou do disco: com a lista de lojas nele e o servidor ainda sem responder, abre ja.
+        const temLista = queryClient.getQueriesData({ queryKey: ["establishments"] }).some(([, dados]) => dados != null);
+        if (temLista && !backendProntoRef.current) {
+          exigirServidor();
+          setListaSalva(true);
+        }
       }}
     >
       <GluestackUIProvider config={configDoTema} key={passoDaFonte}>
