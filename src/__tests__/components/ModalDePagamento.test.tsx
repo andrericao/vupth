@@ -16,8 +16,6 @@ import { usePendenciaStore } from '@stores/pendenciaStore';
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@services/paymentService', () => ({ paymentService: { get: jest.fn(), claim: jest.fn() } }));
-const mockCopiar = jest.fn();
-jest.mock('@utils/copiar', () => ({ copiarTexto: (...a: unknown[]) => mockCopiar(...a) }));
 
 const get = paymentService.get as jest.Mock;
 const claim = paymentService.claim as jest.Mock;
@@ -48,7 +46,6 @@ beforeEach(() => {
   usePendenciaStore.getState().fechar();
   get.mockResolvedValue({ data: PIX });
   claim.mockResolvedValue({ data: { status: 'AWAITING_CONFIRMATION' } });
-  mockCopiar.mockResolvedValue(true);
 });
 
 describe('ModalDePagamento', () => {
@@ -90,32 +87,24 @@ describe('ModalDePagamento', () => {
     expect(usePendenciaStore.getState().aviso).toBeNull();
   });
 
-  it('o Pix: serviço, multa, total, para quem, copiar e "Já paguei"', async () => {
+  // pix-do-profissional-ao-concluir (André, 31/10, DEC-129): o modal existe, mas SEM Pix (nem chave, nem QR,
+  // nem copia e cola): so "ja pagou ou nao".
+  it('o pagamento: serviço, multa, total, para quem, e só "Já paguei" e "Fechar" — sem chave, QR ou copia e cola', async () => {
+    get.mockResolvedValue({ data: { ...PIX, pix_key: 'carlos@barbearia.com' } });
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
     expect(tela.getByText('Carregando...')).toBeTruthy();
     expect(await tela.findByText('R$ 40,00')).toBeTruthy();
     expect(tela.getByText('R$ 5,00')).toBeTruthy();
     expect(tela.getByText('Para: Carlos Lima')).toBeTruthy();
-    // pagar-ao-finalizar-corte (André, 24/10): o Pix e o QR ficam recolhidos; "Já paguei" e "Fechar" a vista
-    expect(tela.queryByTestId('pix-codigo')).toBeNull();
-    expect(tela.queryByTestId('pix-qr')).toBeNull();
     expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
     expect(tela.getByTestId('pix-ok')).toBeTruthy();
-    fireEvent.press(tela.getByTestId('pix-dropdown'));
-    expect(tela.getByTestId('pix-codigo').props.children).toBe('000201pix');
-    expect(tela.getByTestId('pix-qr')).toBeTruthy();
+    for (const id of ['pix-dropdown', 'pix-codigo', 'pix-qr', 'pix-chave', 'pix-copiar', 'pix-copiar-chave', 'pix-profissional', 'pix-combinado']) {
+      expect(tela.queryByTestId(id)).toBeNull();
+    }
+    expect(tela.queryByText('carlos@barbearia.com')).toBeNull();
     // politica-de-preco-saiba-mais (DEC-91): o total leva ao artigo do Suporte.
     expect(tela.getByTestId('preco-saiba-mais')).toBeTruthy();
-
-    expect(tela.queryByTestId('pix-copiado-check')).toBeNull();
-    await act(async () => {
-      fireEvent.press(tela.getByTestId('pix-copiar'));
-    });
-    expect(mockCopiar).toHaveBeenCalledWith('000201pix');
-    expect(tela.getByText('Copiado')).toBeTruthy();
-    // Quem copia um codigo Pix precisa ter certeza de que copiou: alem do texto, o check.
-    expect(tela.getByTestId('pix-copiado-check')).toBeTruthy();
 
     const invalidar = jest.spyOn(client, 'invalidateQueries');
     await act(async () => {
@@ -129,94 +118,23 @@ describe('ModalDePagamento', () => {
     expect(usePendenciaStore.getState().pagando).toBeNull();
   });
 
-  // pix-do-profissional-ao-concluir (André, 22/10): a chave em texto junto do QR e do Copiar.
-  it('com a chave Pix do profissional: mostra em texto, junto do QR', async () => {
-    get.mockResolvedValue({ data: { ...PIX, pix_key: 'carlos@barbearia.com' } });
-    act(() => usePendenciaStore.getState().pagar('a1'));
-    const tela = montar();
-    fireEvent.press(await tela.findByTestId('pix-dropdown'));
-    expect(await tela.findByText('carlos@barbearia.com')).toBeTruthy();
-    expect(tela.getByTestId('pix-chave')).toBeTruthy();
-    expect(tela.getByTestId('pix-qr')).toBeTruthy();
-    expect(tela.getByTestId('pix-copiar')).toBeTruthy();
-  });
-
-  // pagar-sempre-disponivel (André, 25/10): a opcao de pagar nunca some.
-  it('sem nenhum Pix (gateway fora e profissional sem chave): o modal FICA, diz que o pagamento é combinado e mantém o Já paguei', async () => {
+  it('sem nenhum Pix (gateway fora e profissional sem chave): o modal FICA e mantém o Já paguei', async () => {
     get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, pix_copy_paste: null } });
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
-    expect(await tela.findByTestId('pix-combinado')).toBeTruthy();
-    expect(tela.getByText('Sem Pix cadastrado. O pagamento é combinado com o profissional (dinheiro).')).toBeTruthy();
-    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(await tela.findByTestId('pix-ja-paguei')).toBeTruthy();
     expect(tela.getByTestId('pix-ok')).toBeTruthy();
-    expect(tela.queryByTestId('pix-dropdown')).toBeNull();
+    expect(tela.queryByTestId('pix-combinado')).toBeNull();
     expect(usePendenciaStore.getState().pagando).toBe('a1');
   });
 
-  // pagar-pix-do-profissional-e-do-gateway (André, 25/10): os DOIS Pix; o do profissional em destaque.
-  it('só a chave Pix do profissional (sem copia-e-cola): a chave fica em destaque, sem drop down, e o Copiar chave copia a chave', async () => {
-    get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, pix_key: 'carlos@barbearia.com', pix_copy_paste: null } });
-    act(() => usePendenciaStore.getState().pagar('a1'));
-    const tela = montar();
-    expect(await tela.findByTestId('pix-profissional')).toBeTruthy();
-    expect(tela.getByTestId('pix-chave').props.children).toBe('carlos@barbearia.com');
-    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
-    expect(tela.getByTestId('pix-ok')).toBeTruthy();
-    expect(tela.queryByTestId('pix-combinado')).toBeNull();
-    expect(tela.queryByTestId('pix-dropdown')).toBeNull(); // sem gateway nem copia-e-cola, nada a recolher
-    await act(async () => {
-      fireEvent.press(tela.getByTestId('pix-copiar-chave'));
-    });
-    expect(mockCopiar).toHaveBeenCalledWith('carlos@barbearia.com');
-    expect(tela.getByText('Copiada')).toBeTruthy();
-  });
-
-  it('com o gateway E a chave do profissional: os dois; a chave em destaque, o do gateway recolhido no drop down', async () => {
-    get.mockResolvedValue({ data: { ...PIX, pix_key: 'chave@prof.com', gateway: { provider: 'ASAAS', mode: 'REAL', pix_copy_paste: '000201asaas' } } });
-    act(() => usePendenciaStore.getState().pagar('a1'));
-    const tela = montar();
-    // a chave do profissional ja esta a vista; o do gateway, recolhido
-    expect(await tela.findByTestId('pix-chave')).toBeTruthy();
-    expect(tela.getByText('Pix do profissional')).toBeTruthy();
-    expect(tela.queryByTestId('pix-codigo')).toBeNull();
-    expect(tela.getByText('Pix do app (QR e copia e cola)')).toBeTruthy();
-    fireEvent.press(tela.getByTestId('pix-dropdown'));
-    expect(tela.getByTestId('pix-codigo').props.children).toBe('000201asaas');
-    // o Copiar do drop down copia o codigo do gateway; o Copiar chave, a chave
-    await act(async () => {
-      fireEvent.press(tela.getByTestId('pix-copiar'));
-    });
-    expect(mockCopiar).toHaveBeenLastCalledWith('000201asaas');
-    await act(async () => {
-      fireEvent.press(tela.getByTestId('pix-copiar-chave'));
-    });
-    expect(mockCopiar).toHaveBeenLastCalledWith('chave@prof.com');
-    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
-    expect(tela.getByTestId('pix-ok')).toBeTruthy();
-  });
-
-  it('só o gateway (profissional sem chave): so o drop down, sem o bloco do profissional', async () => {
-    get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, gateway: { provider: 'ASAAS', mode: 'REAL', pix_copy_paste: '000201asaas' } } });
-    act(() => usePendenciaStore.getState().pagar('a1'));
-    const tela = montar();
-    expect(await tela.findByTestId('pix-dropdown')).toBeTruthy();
-    expect(tela.queryByTestId('pix-profissional')).toBeNull();
-    expect(tela.queryByTestId('pix-combinado')).toBeNull();
-  });
-
-  it('sem serviço/multa/quem/código; copiar falhando não marca', async () => {
+  it('sem serviço, multa e quem: só o total', async () => {
     get.mockResolvedValue({ data: { status: 'PENDING', amount: 10, pix_copy_paste: 'p' } });
-    mockCopiar.mockResolvedValue(false);
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
     expect(await tela.findByText('R$ 10,00')).toBeTruthy();
     expect(tela.queryByText(/^Para:/)).toBeNull();
-    fireEvent.press(tela.getByTestId('pix-dropdown'));
-    await act(async () => {
-      fireEvent.press(tela.getByTestId('pix-copiar'));
-    });
-    expect(tela.getByText('Copiar')).toBeTruthy();
+    expect(tela.queryByTestId('pix-dropdown')).toBeNull();
   });
 
   it('o "Já paguei" sem status na resposta fica aguardando', async () => {
@@ -274,15 +192,14 @@ describe('ModalDePagamento — pelo Asaas', () => {
     gateway: { provider: 'ASAAS', mode: 'SANDBOX', status: 'PENDING', pix_copy_paste: '000201asaas' },
   };
 
-  it('com gateway: mostra o Pix do Asaas (recolhido) e a chave do profissional em destaque, com o "Já paguei" (as duas vias quitam) e a confirmação automática', async () => {
+  it('com gateway: sem QR nem copia e cola, com o "Já paguei" (as duas vias quitam) e a confirmação automática', async () => {
     get.mockResolvedValue({ data: ASAAS });
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
-    fireEvent.press(await tela.findByTestId('pix-dropdown'));
-    expect(await tela.findByTestId('pix-codigo')).toBeTruthy();
-    expect(tela.getByTestId('pix-codigo').props.children).toBe('000201asaas');
-    expect(tela.getByTestId('pix-chave')).toBeTruthy();
-    expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(await tela.findByTestId('pix-ja-paguei')).toBeTruthy();
+    expect(tela.queryByTestId('pix-dropdown')).toBeNull();
+    expect(tela.queryByTestId('pix-codigo')).toBeNull();
+    expect(tela.queryByTestId('pix-chave')).toBeNull();
     expect(tela.getByText('A confirmação é automática.')).toBeTruthy();
     expect(tela.getByTestId('pix-ok')).toBeTruthy();
   });
@@ -298,22 +215,8 @@ describe('ModalDePagamento — pelo Asaas', () => {
 
     get.mockResolvedValue({ data: { ...ASAAS, gateway: { ...ASAAS.gateway, mode: 'REAL' } } });
     const real = montar();
-    fireEvent.press(await real.findByTestId('pix-dropdown'));
-    expect(await real.findByTestId('pix-codigo')).toBeTruthy();
+    expect(await real.findByTestId('pix-ja-paguei')).toBeTruthy();
     expect(real.queryByTestId('pagamento-de-teste')).toBeNull();
-  });
-
-  it('gateway sem o copia-e-cola, só com a imagem do QR: mostra a imagem e o modal não fecha', async () => {
-    get.mockResolvedValue({
-      data: { status: 'PENDING', amount: 45, gateway: { provider: 'ASAAS', mode: 'REAL', pix_qr_image: 'iVBORw0KGgo=' } },
-    });
-    act(() => usePendenciaStore.getState().pagar('a1'));
-    const tela = montar();
-    fireEvent.press(await tela.findByTestId('pix-dropdown'));
-    const img = await tela.findByTestId('pix-qr-imagem');
-    expect(img.props.source.uri).toBe('data:image/png;base64,iVBORw0KGgo=');
-    expect(tela.queryByTestId('pix-codigo')).toBeNull();
-    expect(usePendenciaStore.getState().pagando).toBe('a1');
   });
 
   it('o webhook quita sozinho: o modal confere de 5 em 5 s e mostra "Pago"', async () => {
@@ -373,13 +276,13 @@ describe('ModalDePagamento — pelo Asaas', () => {
     expect(tela.getByTestId('pix-ja-paguei')).toBeTruthy();
   });
 
-  it('sem gateway: o fluxo de hoje (chave, "Já paguei")', async () => {
+  it('sem gateway: o "Já paguei", sem chave nem drop down', async () => {
     get.mockResolvedValue({ data: { ...PIX, pix_key: 'chave@prof.com' } });
     act(() => usePendenciaStore.getState().pagar('a1'));
     const tela = montar();
     expect(await tela.findByTestId('pix-ja-paguei')).toBeTruthy();
-    fireEvent.press(tela.getByTestId('pix-dropdown'));
-    expect(tela.getByTestId('pix-chave')).toBeTruthy();
+    expect(tela.queryByTestId('pix-dropdown')).toBeNull();
+    expect(tela.queryByTestId('pix-chave')).toBeNull();
     expect(tela.queryByTestId('pagamento-de-teste')).toBeNull();
   });
 });

@@ -3,7 +3,8 @@
 //
 // Entrada (env da bateria): COMMIT
 
-var esperado = (typeof COMMIT === "undefined" || COMMIT == null ? "" : String(COMMIT)).trim().toLowerCase().slice(0, 8);
+// COMMIT pode ser uma lista "a|b" (o esperado e os chore(logs) filhos dele): vale qualquer um.
+var esperado = (typeof COMMIT === "undefined" || COMMIT == null ? "" : String(COMMIT)).trim().toLowerCase();
 var instalado = String(maestro.copiedText || "");
 
 // Sem COMMIT (rodada fora da bateria.sh, 03/10): nao trava a bateria — avisa
@@ -13,7 +14,7 @@ if (!esperado) {
     "AVISO: versao NAO conferida (sem COMMIT). Instalado: \"" + instalado +
       "\". Para conferir, rode pela bateria.sh: bash .maestro/bateria.sh"
   );
-} else if (instalado.toLowerCase().indexOf(esperado) < 0) {
+} else if (!esperado.split("|").some(function (h) { return h && instalado.toLowerCase().indexOf(h) >= 0; })) {
   throw new Error(
     "Versao errada no aparelho. Instalado: \"" + instalado + "\". Esperado: o commit " + esperado +
       ". Instale o APK certo ou espere o OTA da dev e rode de novo."

@@ -6,6 +6,7 @@
 #   bash .maestro/bateria.sh --falhas     # so as que nao passaram, sem perguntar
 #   bash .maestro/bateria.sh --completa --publicar-ota  # publica o OTA da dev antes (publicar-ota.sh)
 #   bash .maestro/bateria.sh --falhas --device emulator-5554  # num aparelho
+#   bash .maestro/bateria.sh --completa --perfil celular|emulador  # forca o perfil
 #                                         escolhido (DEC-33, comandos.html#emulador)
 #
 # Prepara o celular (setup.sh), acha sozinha o commit esperado (o ultimo da
@@ -40,12 +41,14 @@ fi
 # Antes so o $1 era lido, e o "--device emulator-5554" virava o modo (10/10).
 MODO=""
 APARELHO=""
+PERFIL=""
 PUBLICAR_OTA=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --completa|--falhas) MODO="$1" ;;
     --publicar-ota) PUBLICAR_OTA="--publicar-ota" ;;
     --device) APARELHO="$2"; shift ;;
+    --perfil) PERFIL="$2"; shift ;;
   esac
   shift
 done
@@ -55,8 +58,20 @@ done
 MAESTRO_APARELHO=()
 # LENTO (Andre, 11/10: "o emulador e mais lento mesmo, entao compense"):
 # multiplica o timeout de todo extendedWaitUntil dos fluxos — 2 no emulador.
-LENTO=1
-case "$APARELHO" in emulator-*) LENTO=2 ;; esac
+# PERFIL (maestro-perfil-celular-e-emulador, Andre, 31/10): um so conjunto de
+# fluxos; o perfil sai de --perfil ou do serial do adb (emulator-* = emulador, o
+# resto = celular; sem --device, do unico aparelho conectado). Ele escolhe o
+# LENTO dos fluxos e os prazos por etapa abaixo.
+if [ -z "$PERFIL" ]; then
+  SERIAL="${APARELHO:-$(adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {print $1}' | head -1)}"
+  case "$SERIAL" in emulator-*) PERFIL=emulador ;; *) PERFIL=celular ;; esac
+fi
+case "$PERFIL" in
+  emulador) LENTO=2 ;;
+  celular) LENTO=1 ;;
+  *) echo "ERRO: --perfil aceita celular ou emulador (veio '$PERFIL')"; exit 2 ;;
+esac
+echo "Perfil: $PERFIL (LENTO=$LENTO)"
 if [ -n "$APARELHO" ]; then
   export ANDROID_SERIAL="$APARELHO"
   MAESTRO_APARELHO=(--device "$APARELHO")
@@ -81,8 +96,18 @@ BRANCH_PASTA="$BRANCH"  # para onde vao os logs (DEC-28)
 # cloud->dev do Andre — o commit na linha da versao e o do merge.
 [ "$BRANCH" = "cloud" ] && BRANCH=dev
 git -C "$REPO" fetch -q origin "$BRANCH" 2>/dev/null
-COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
-echo "Commit esperado no app: $COMMIT (origin/$BRANCH)"
+# O commit do OTA e o ultimo que nao seja chore(logs): o commit dos logs da propria bateria nao vai ao OTA
+# e reprovaria a versao certa (de37ba25).
+COMMIT=$(git -C "$REPO" log -1 --format=%H --invert-grep --grep='^chore(logs)' "origin/$BRANCH" | cut -c1-8)
+[ -n "$COMMIT" ] || COMMIT=$(git -C "$REPO" rev-parse --short=8 "origin/$BRANCH")
+echo "Commit esperado no app: $COMMIT (origin/$BRANCH, sem chore(logs))"
+# A 00 aceita o commit esperado OU um chore(logs) filho dele (o OTA publicado do HEAD
+# carrega o hash do commit de log, e reprovava a versao certa: 77024f82, 31/10). Os
+# fluxos recebem a lista como regex "a|b" em COMMIT_ACEITOS.
+COMMIT_ACEITOS="$COMMIT"
+for h in $(git -C "$REPO" log --format='%h %s' --abbrev=8 "$COMMIT..origin/$BRANCH" 2>/dev/null | awk '$2 ~ /^chore\(logs\)/ {print $1}'); do
+  COMMIT_ACEITOS="$COMMIT_ACEITOS|$h"
+done
 
 # Supervisao (bateria-supervisionada, DEC-15) — o mesmo formato do Partner.
 # Sem resposta em 1 min, segue sem supervisao.
@@ -188,6 +213,16 @@ juntar_para_o_andre() {
 passos() { grep -oP 'runCommands\$lambda\$\d+: \K\d\d\.[\dA-Z]{2} · .*(?= ('"$2"')$)' "$1/maestro.log" 2>/dev/null; }
 falhou_em() { passos "$1" RUNNING | grep -vxFf <(passos "$1" 'COMPLETED|SKIPPED') | tail -1; }
 
+# Prazo por etapa, em segundos (maestro-trava-na-atualizacao): passou, a etapa reprova
+# com "TEMPO ESGOTADO" no relatorio. Sobrescreva por ambiente se uma etapa pedir mais.
+# O celular e rapido: prazo menor (reprova antes); o emulador mantem os de sempre.
+case "$PERFIL" in
+  emulador) ETAPA_PRAZO="${ETAPA_PRAZO:-1500}"; ATUALIZACAO_PRAZO="${ATUALIZACAO_PRAZO:-1200}" ;;
+  # A tolerancia da fila (05 e 06) e tempo de RELOGIO, ate 15 min: um prazo de 900 s no celular reprovava a 05.1D por
+  # tempo (bateria 155718, 15min27s). So a atualizacao (00) encurta no celular.
+  *) ETAPA_PRAZO="${ETAPA_PRAZO:-1500}"; ATUALIZACAO_PRAZO="${ATUALIZACAO_PRAZO:-600}" ;;
+esac
+
 # Roda uma etapa na pasta dela; devolve o status do maestro.
 rodar() {
   local nome="$1" pasta="$RODADA/$1"
@@ -199,9 +234,13 @@ rodar() {
   adb logcat -c 2>/dev/null
   adb logcat -v time '*:W' > "$pasta/logcat.txt" 2>/dev/null &
   local logcat=$!
-  maestro "${MAESTRO_APARELHO[@]}" test \
-    -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT" \
-    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" \
+  # maestro-trava-na-atualizacao (Andre, 28/10): etapa que passa do prazo REPROVA
+  # (124), em vez de a bateria ficar parada para sempre. A 00 (versao) tem prazo proprio.
+  local prazo="$ETAPA_PRAZO" verificada=1
+  [ "$nome" = "00_atualizacao" ] && { prazo="$ATUALIZACAO_PRAZO"; verificada=0; }
+  timeout -k 30 "$prazo" maestro "${MAESTRO_APARELHO[@]}" test \
+    -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT_ACEITOS" \
+    -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" -e PERFIL="$PERFIL" -e VERSAO_VERIFICADA="$verificada" \
     --debug-output "$pasta" --flatten-debug-output \
     --test-output-dir "$pasta" \
     "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"
@@ -235,16 +274,39 @@ longe_da_meia_noite() {
   sleep "$espera"
 }
 
+# maestro-atualizacao-por-commit (Andre, 28/10): o commit ja verificado fica em
+# versao-verificada.txt (no .gitignore), junto da hora da instalacao do APK no
+# aparelho — reinstalar o APK volta ao bundle de fabrica e invalida a marca. Mesmo
+# commit, mesmo aparelho: a 00 nao roda; commit novo: roda e grava o novo valor.
+VERIFICADA="$DIR/versao-verificada.txt"
+INSTALACAO=$(adb shell dumpsys package "$APP_ID" 2>/dev/null | grep -m1 lastUpdateTime | tr -d '[:space:]')
+MARCA="${APARELHO:-celular} $COMMIT $INSTALACAO"
+if [ "$MODO" != "--completa" ] && [ -n "$INSTALACAO" ] && [ "$(cat "$VERIFICADA" 2>/dev/null)" = "$MARCA" ]; then
+  VERSAO_OK=1
+  echo "⏭ 00 · versão $COMMIT já verificada neste aparelho"
+else
+  VERSAO_OK=0
+  rm -f "$VERIFICADA"
+fi
+
 STATUS=0
 : > "$RODADA/relatorio.txt"
-if ! rodar 00_atualizacao; then
+VOLTA_00=0
+[ "$VERSAO_OK" = 0 ] && { rodar 00_atualizacao; VOLTA_00=$?; }
+if [ "$VOLTA_00" -ne 0 ]; then
+  [ "$VOLTA_00" -eq 124 ] && echo "⏱ 00 · TEMPO ESGOTADO (${ATUALIZACAO_PRAZO}s)" | tee -a "$RODADA/relatorio.txt"
   PASSO=$(falhou_em "$RODADA/00_atualizacao")
   echo "❌ 00 · versão — ${PASSO:-antes do primeiro passo}" | tee -a "$RODADA/relatorio.txt"
   print_da_falha "$RODADA/00_atualizacao" "$PASSO"
   echo "A versão no aparelho não é a $COMMIT: nenhuma etapa rodou."
   STATUS=1
 else
-  echo "✅ 00 · versão" >> "$RODADA/relatorio.txt"
+  if [ "$VERSAO_OK" = 1 ]; then
+    echo "⏭ 00 · versão (commit $COMMIT já verificado)" >> "$RODADA/relatorio.txt"
+  else
+    echo "✅ 00 · versão" >> "$RODADA/relatorio.txt"
+    [ -n "$INSTALACAO" ] && echo "$MARCA" > "$VERIFICADA"
+  fi
   for n in $ETAPAS; do
     arquivo=$(basename "$(ls "$DIR"/avulsas/"$n"_*.yaml 2>/dev/null | head -1)" .yaml)
     if [ -z "$arquivo" ]; then
@@ -304,7 +366,8 @@ else
     else
       STATUS=1
       PASSO=$(falhou_em "$RODADA/$arquivo")
-      echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo} ($DURA)" >> "$RODADA/relatorio.txt"
+      MOTIVO=""; [ "$VOLTA" -eq 124 ] && MOTIVO=" — TEMPO ESGOTADO (${ETAPA_PRAZO}s)"
+      echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo} ($DURA)$MOTIVO" >> "$RODADA/relatorio.txt"
       echo "${PASSO:-}" > "$RODADA/$arquivo/falhou_em"
       print_da_falha "$RODADA/$arquivo" "$PASSO"
     fi

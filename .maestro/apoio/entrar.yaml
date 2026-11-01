@@ -41,7 +41,7 @@ appId: ${APP_ID}
       # o prazo antes de tocar de novo.
       - extendedWaitUntil:
           visible: "ESPERA_DO_429_NUNCA_APARECE"
-          timeout: 47000
+          timeout: ${47000 * LENTO}
           optional: true
       - tapOn:
           id: "primary-login"
@@ -71,6 +71,6 @@ appId: ${APP_ID}
 - scrollUntilVisible:
     element:
       text: "Sair da conta"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
 - runFlow:
     file: fechar_aviso.yaml

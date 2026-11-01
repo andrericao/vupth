@@ -3,6 +3,7 @@ import * as SecureStore from "expo-secure-store";
 import * as Updates from "expo-updates";
 
 import { resolveApiEnv } from "./apiEnv";
+import { esperarServidor } from "./prontidaoDoServidor";
 
 interface RefreshResponse {
 	access_token: string;
@@ -87,7 +88,14 @@ export const api = axios.create({
 	},
 });
 
+const METODOS_QUE_GRAVAM = new Set(["post", "put", "patch", "delete"]);
+
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+	// abrir-com-lista-salva (DEC-148): com o app aberto pelo cache e o servidor ainda acordando, o que GRAVA
+	// espera ele ficar pronto; o que le (a lista salva se atualizando) segue.
+	if (METODOS_QUE_GRAVAM.has((config.method ?? "get").toLowerCase()) && !config.url?.startsWith("/actuator")) {
+		await esperarServidor();
+	}
 	if (!config.headers.Authorization && !isPublicPath(config.url)) {
 		const token = await SecureStore.getItemAsync(TOKEN_KEY);
 		if (token) {

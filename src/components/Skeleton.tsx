@@ -72,3 +72,13 @@ export function SkeletonList({ count = 3 }: { count?: number }) {
     </VStack>
   );
 }
+
+/** O lugar da pilula de status (aberta/fila/espera) enquanto o dado salvo ainda nao foi confirmado (DEC-148). */
+export function SkeletonPilula({ testID = "skeleton-pilula" }: { testID?: string }) {
+  const opacity = usePulse();
+  return (
+    <VStack testID={testID} accessibilityLabel="Carregando">
+      <Block opacity={opacity} w={72} h={28} r={999} />
+    </VStack>
+  );
+}

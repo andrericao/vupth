@@ -69,6 +69,20 @@ describe('Sistema — Verificar atualização', () => {
     expect(alertSpy).toHaveBeenCalledWith('Não foi possível verificar', expect.any(String));
   });
 
+  it('verificação pendurada vira aviso, não "Verificando..." para sempre', async () => {
+    jest.useFakeTimers();
+    up.checkForUpdateAsync.mockReturnValue(new Promise(() => {}));
+    const tela = renderWithProviders(<Sistema />);
+    await act(async () => {
+      fireEvent.press(tela.getByTestId('check-update'));
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(30000);
+    });
+    expect(alertSpy).toHaveBeenCalledWith('Não foi possível verificar', expect.any(String));
+    jest.useRealTimers();
+  });
+
   it('a linha da versão mostra o OTA aplicado', () => {
     const { getByText } = renderWithProviders(<Sistema />);
     expect(getByText(/OTA abcdef12/)).toBeTruthy();

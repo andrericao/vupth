@@ -64,14 +64,17 @@ describe('a regra da multa dita antes de entrar (CDC)', () => {
   });
 });
 
-// aviso-dois-toques-para-sair-da-fila (André, 25/10)
+// sair-da-fila-toque-duplo-vermelho (André, 30/10): duplo toque de verdade, 500 ms
 describe('o segundo toque', () => {
-  it('a janela é o tempo da faixa (8 s): quem lê a faixa ainda dá o segundo toque', () => {
-    expect(JANELA_DO_TOQUE_DUPLO_MS).toBe(8000);
-    expect(ehToqueDuplo(1000, 1000 + 4000)).toBe(true);
+  it('a janela é de 500 ms: dois toques rápidos saem; um toque, uma pausa e outro, não', () => {
+    expect(JANELA_DO_TOQUE_DUPLO_MS).toBe(500);
+    expect(ehToqueDuplo(1000, 1000 + 300)).toBe(true);
+    expect(ehToqueDuplo(1000, 1000 + 500)).toBe(true);
+    expect(ehToqueDuplo(1000, 1000 + 700)).toBe(false);
+    expect(ehToqueDuplo(null, 1000)).toBe(false);
   });
 
   it('o aviso é curto e pede o toque de novo', () => {
-    expect(AVISO_DO_SEGUNDO_TOQUE).toBe('Toque de novo para sair da fila.');
+    expect(AVISO_DO_SEGUNDO_TOQUE).toBe('Toque duas vezes seguidas para sair.');
   });
 });

@@ -16,7 +16,10 @@ describe("Maestro 11 — o aviso da estimativa", () => {
   });
 
   it("a conferência final espera o aviso sumir (fade-out) em vez de um assertNotVisible instantâneo", () => {
-    expect(yaml).toMatch(/extendedWaitUntil:\n\s+notVisible: "Sobre o tempo estimado"\n\s+timeout: \$\{10000 \* LENTO\}/);
-    expect(yaml).not.toMatch(/assertNotVisible:\n\s+text: "Sobre o tempo estimado"/);
+    // O "i" do topo da tela Aguardando tem o rotulo "Sobre o tempo estimado" e fica sempre na tela: o aviso (modal)
+    // se reconhece pelo botao "Entendi" (bateria 155718).
+    expect(yaml).toMatch(/extendedWaitUntil:\n\s+notVisible: "Entendi"\n\s+timeout: \$\{10000 \* LENTO\}/);
+    expect(yaml).not.toMatch(/assertNotVisible:\n\s+text: "Entendi"/);
+    expect(yaml).not.toMatch(/notVisible: "Sobre o tempo estimado"/);
   });
 });

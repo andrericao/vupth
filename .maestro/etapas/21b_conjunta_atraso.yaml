@@ -18,7 +18,7 @@ appId: ${APP_ID}
     commands:
       - extendedWaitUntil:
           visible: "esta-tela-nao-tem-este-texto"
-          timeout: 30000
+          timeout: ${30000 * LENTO}
           optional: true
       - runFlow:
           file: ../apoio/esperar_o_sistema.yaml

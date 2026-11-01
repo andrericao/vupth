@@ -13,7 +13,7 @@ appId: ${APP_ID}
     commands:
       - runFlow:
           when:
-            visible: "Sobre o tempo estimado"
+            visible: "Entendi"
           commands:
             - tapOn: "Entendi"
       # A tela 10 (21.04: veio por baixo da politica) e a caixa do sistema.

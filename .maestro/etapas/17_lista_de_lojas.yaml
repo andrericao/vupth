@@ -10,9 +10,9 @@ appId: ${APP_ID}
 # distancia-no-card (Andre, 09/10): a bateria nega a localizacao, entao o card
 # mostra "Ligue o GPS" no lugar da distancia, com o icone de local.
 - extendedWaitUntil:
-    visible: "Ligue o GPS"
+    visible: "Ligue o GPS|[0-9]+([,.][0-9]+)? ?(m|km)"
     timeout: ${30000 * LENTO}
-    label: "17.0G · o card do Início diz Ligue o GPS no lugar da distância"
+    label: "17.0G · o card do Início diz Ligue o GPS (sem GPS) ou mostra a distância (com GPS, como no celular)"
 # carrossel-de-campanhas-na-home (23/10): o bloco so existe com campanha criada
 # no Painel; se existir, o toque abre os detalhes e o Fechar volta ao Inicio.
 - runFlow:
@@ -50,10 +50,19 @@ appId: ${APP_ID}
       - tapOn:
           id: "sort-toggle"
     label: "17.05 · troca a ordem, se houver distância"
-- scrollUntilVisible:
-    element:
+# O staging tem centenas de lojas abertas (344 em 31/10, bateria 155718): rolar ate a de teste estoura o tempo.
+# Busca pelo nome, que o preparo devolveu em LOJA.
+- tapOn:
+    text: "Buscar pelo nome"
+    label: "17.05b · toca na busca"
+- inputText:
+    text: ${LOJA}
+    label: "17.05c · digita o nome da loja de teste"
+- hideKeyboard
+- extendedWaitUntil:
+    visible:
       id: "establishment-${LOJA_ID}"
-    timeout: 60000
+    timeout: ${60000 * LENTO}
     label: "17.06 · acha a loja de teste na lista"
 - tapOn:
     id: "establishment-${LOJA_ID}"

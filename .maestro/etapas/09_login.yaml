@@ -72,5 +72,5 @@ appId: ${APP_ID}
 - scrollUntilVisible:
     element:
       text: "Sair da conta"
-    timeout: 30000
+    timeout: ${30000 * LENTO}
     label: "09.17 · rola até Sair da conta (logado de novo)"

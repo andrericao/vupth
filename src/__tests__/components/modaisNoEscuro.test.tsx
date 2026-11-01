@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { act, fireEvent } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { TEMAS, conferir, conferirPainelEVeu, estilo, fundoDe, fundosDa, icones, montar, type No } from '../utils/lerTema';
+import { TEMAS, conferir, conferirPainelEVeu, estilo, fundoDe, fundosDa, icones, montar } from '../utils/lerTema';
 import { DialogoVupth } from '@components/DialogoVupth';
 import { AttendanceDetailModal } from '@components/AttendanceDetailModal';
 import { ModalDePagamento } from '@components/ModalDePagamento';
@@ -382,7 +382,7 @@ describe.each(TEMAS)('caixas no tema %s', (tema) => {
       ['Escolha uma.', 'textSecondary', 'painel'],
       ['Pedir corte', 'textPrimary', 'sobrePainel'],
       ['O profissional responde.', 'textSecondary', 'sobrePainel'],
-      ['Fechar', 'textSecondary', 'painel'],
+      ['Fechar', 'textPrimary', 'painel'],
     ]);
     const c = coresDoTema(tema);
     const linha = icones(tela, 'Linha')[0];
@@ -532,26 +532,15 @@ describe.each(TEMAS)('caixas com dados no tema %s', (tema) => {
     act(() => usePendenciaStore.getState().pagar('a1'));
     const pix = montar(tema, <QueryClientProvider client={client}><ModalDePagamento /></QueryClientProvider>);
     await pix.findByText('R$ 40,00', {}, { timeout: 30000 });
-    // pagar-ao-finalizar-corte: o Pix e o QR ficam recolhidos; abre o drop down para conferir o codigo e o Copiar
-    fireEvent.press(pix.getByTestId('pix-dropdown'));
     conferirPainelEVeu(pix, tema);
     conferir(pix, tema, [
-      ['Pagar por Pix', 'textPrimary', 'painel'],
+      ['Pagamento', 'textPrimary', 'painel'],
       ['Serviço', 'textSecondary', 'painel'],
       ['R$ 40,00', 'textPrimary', 'painel'],
       ['Já paguei', 'onGreen', 'green'],
-      ['Copiar', 'textPrimary', 'painel'],
     ]);
-    // o codigo copia-e-cola e um bloco sobre o painel
-    const codigo = pix.getByTestId('pix-codigo');
-    expect(estilo(codigo).color).toBe(c.textPrimary);
-    expect(estilo(codigo).backgroundColor).toBe(c.sobrePainel);
-    expect(contraste(c.textPrimary, c.sobrePainel)).toBeGreaterThanOrEqual(4.5);
-    // o QR segue escuro sobre branco nos dois temas: o leitor do banco nao le o codigo invertido
-    const raiz = pix.UNSAFE_root as unknown as { findAll: (filtro: (n: No) => boolean) => No[] };
-    const qr = raiz.findAll((n) => n.props.value === '000201pix' && n.props.backgroundColor)[0];
-    expect(qr.props.backgroundColor).toBe('#FFFFFF');
-    expect(qr.props.color).toBe('#163300');
+    // DEC-129: sem chave, QR nem copia e cola no modal
+    expect(pix.queryByTestId('pix-codigo')).toBeNull();
     pix.unmount();
     act(() => usePendenciaStore.getState().fechar());
   });

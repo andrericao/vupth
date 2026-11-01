@@ -1,6 +1,8 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { establishmentService } from '../services/establishmentService';
 import { useLocationStore } from '@stores/locationStore';
+import { useTelaEmFoco } from '@hooks/useTelaEmFoco';
+import { dadosFrescos } from '@domain/establishment/frescor';
 import { coordsDaLista, listaPodeBuscar } from '@domain/location/abertura';
 import { comoPagina, juntarPaginas, proximaPagina } from '@domain/establishment/paginacao';
 
@@ -28,7 +30,7 @@ export function useEstablishments(ligado: boolean = true) {
 
   // Com a busca segurada e sem dado, o v5 diz `isLoading: false` — e as telas
   // leriam "nenhuma loja". Sem dado ainda é carregando, seguro ou não.
-  return { ...query, isLoading: query.isPending };
+  return { ...query, isLoading: query.isPending, frescos: dadosFrescos(query.dataUpdatedAt) };
 }
 
 /**
@@ -64,6 +66,7 @@ export function useEstablishment(id: string) {
 }
 
 export function useProfessionalsWithQueue(establishmentId: string) {
+  const emFoco = useTelaEmFoco();
   return useQuery({
     queryKey: ['professionals-with-queue', establishmentId],
     queryFn: () =>
@@ -73,8 +76,8 @@ export function useProfessionalsWithQueue(establishmentId: string) {
     enabled: !!establishmentId,
     staleTime: 30000,
     // Fila do estabelecimento atualiza sozinha (WS fora do ar) enquanto a tela
-    // está aberta — fila/tempos andam sem o usuário puxar.
-    refetchInterval: 20000,
+    // está em foco — fila/tempos andam sem o usuário puxar.
+    refetchInterval: emFoco ? 20000 : false,
   });
 }
 
@@ -134,5 +137,5 @@ export function useVitrinePaginada(ligado: boolean) {
   });
 
   const data = query.data ? juntarPaginas(query.data.pages) : undefined;
-  return { ...query, data, isLoading: query.isPending };
+  return { ...query, data, isLoading: query.isPending, frescos: dadosFrescos(query.dataUpdatedAt) };
 }

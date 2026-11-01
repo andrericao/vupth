@@ -149,6 +149,12 @@ describe('EstablishmentDetail — os profissionais', () => {
     expect(mockNavigate).toHaveBeenCalledWith('serviceSelection', expect.objectContaining({ professionalId: 'b' }));
   });
 
+  it('loja aberta: o Agendar aparece embaixo do botão de entrar e leva ao de menor espera (agendar-some-com-loja-aberta)', () => {
+    const { getByTestId } = renderWithProviders(<EstablishmentDetail />);
+    fireEvent.press(getByTestId('agendar-loja-aberta'));
+    expect(mockNavigate).toHaveBeenCalledWith('serviceSelection', expect.objectContaining({ professionalId: 'b' }));
+  });
+
   it('sem ninguém trabalhando, o botão não leva a lugar nenhum', () => {
     mockProfs = [prof('c', { work_status: 'OFF' })];
     const { queryByText } = renderWithProviders(<EstablishmentDetail />);

@@ -15,6 +15,7 @@ jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
+  useFocusEffect: (efeito: () => void) => jest.requireActual('react').useEffect(efeito, []),
   useNavigation: () => ({ navigate: mockNavigate, reset: jest.fn(), replace: jest.fn(), goBack: jest.fn() }),
   useRoute: () => ({ params: {} }),
 }));

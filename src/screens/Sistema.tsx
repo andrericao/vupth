@@ -6,6 +6,7 @@ import { VStack, Text, Heading, Box, HStack, ScrollView } from "@gluestack-ui/th
 import { RefreshCw } from "lucide-react-native";
 
 import { ehNavegador } from "@utils/ehNavegador";
+import { comPrazo } from "@utils/comPrazo";
 import { ScreenHeader } from "@components/ScreenHeader";
 import { WsDiagnostics } from "@components/WsDiagnostics";
 import { PushDiagnostics } from "@components/PushDiagnostics";
@@ -31,9 +32,9 @@ export function Sistema() {
   async function handleCheckUpdate() {
     setIsChecking(true);
     try {
-      const result = await Updates.checkForUpdateAsync();
+      const result = await comPrazo(Updates.checkForUpdateAsync(), 30000);
       if (result.isAvailable) {
-        await Updates.fetchUpdateAsync();
+        await comPrazo(Updates.fetchUpdateAsync(), 120000);
         Alert.alert(
           "Atualização baixada",
           "O app vai reiniciar para aplicar a nova versão.",
@@ -45,7 +46,7 @@ export function Sistema() {
     } catch {
       Alert.alert(
         "Não foi possível verificar",
-        "Atualizações OTA só funcionam no APK de build (não no Expo Go/modo dev).",
+        "Sem resposta do servidor de atualizações (confira a internet) ou o app não é um build (OTA não funciona no Expo Go/modo dev). Tente de novo.",
       );
     } finally {
       setIsChecking(false);

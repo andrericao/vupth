@@ -19,7 +19,7 @@ appId: ${APP_ID}
       true: ${typeof COMMIT !== 'undefined' && !!COMMIT}
       notVisible:
         id: "versao-entrada"
-        text: ".*${typeof COMMIT !== 'undefined' ? COMMIT : ''}.*"
+        text: ".*(${typeof COMMIT !== 'undefined' ? COMMIT : ''}).*"
     commands:
       - stopApp
       - launchApp
@@ -50,15 +50,16 @@ appId: ${APP_ID}
     label: "01.01c · volta ao Início, sem conta"
 # card-oscila (Andre, 10/10): no bundle do APK o card da loja vinha sem a nota
 # e sem a distancia. No OTA, todo card tem a nota (a distancia depende do GPS,
-# negado na bateria: "Ligue o GPS").
+# negado na bateria: "Ligue o GPS"; no celular do Andre a localizacao esta
+# concedida e o card mostra a distancia, 31/10 — a 01.01e aceita os dois).
 - extendedWaitUntil:
     visible:
       id: "nota-.*"
     timeout: ${30000 * LENTO}
     label: "01.01d · o card da loja mostra a nota (card-oscila)"
 - assertVisible:
-    text: "Ligue o GPS"
-    label: "01.01e · sem GPS, o card pede o GPS no lugar da distância"
+    text: "Ligue o GPS|[0-9]+([,.][0-9]+)? ?(m|km)"
+    label: "01.01e · o card pede o GPS (sem GPS) ou mostra a distância (com GPS)"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "01.02 · roda fechar_aviso"

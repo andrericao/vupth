@@ -36,42 +36,16 @@ appId: ${APP_ID}
       visible:
         id: "pix-do-atendimento"
     commands:
-      # pagar-ao-finalizar-corte (24/10): o Pix e o QR ficam recolhidos num drop down; "Já paguei" e "Fechar" a vista.
+      # pix-do-profissional-ao-concluir (31/10, DEC-129): o modal tem so "Já paguei" e "Fechar"; sem chave, QR nem copia e cola.
       - assertVisible:
           id: "pix-ja-paguei"
-          label: "22.04b2 · o Já paguei e o Fechar a vista, com o Pix recolhido"
-      # pagar-sempre-disponivel (25/10): a opcao de pagar nunca some. Com Pix (gateway ou chave do profissional) o
-      # drop down abre; sem nenhum, o modal diz que o pagamento e combinado e mantem o Ja paguei.
-      # pagar-pix-do-profissional-e-do-gateway (25/10): o Pix do profissional (a chave) em destaque, sempre a vista
-      # quando existe; o do gateway, recolhido no drop down.
-      - runFlow:
-          when:
-            visible:
-              id: "pix-profissional"
-          commands:
-            - assertVisible:
-                id: "pix-copiar-chave"
-                label: "22.04b3a · o Pix do profissional em destaque, com o Copiar chave"
-          label: "22.04b3b · com a chave do profissional"
-      - runFlow:
-          when:
-            visible:
-              id: "pix-dropdown"
-          commands:
-            - tapOn:
-                id: "pix-dropdown"
-                label: "22.04b3 · abre o Pix e QR Code"
-            - assertVisible:
-                id: "pix-copiar"
-                label: "22.04d · e o Copiar (o código ou a chave)"
-          label: "22.04b4 · com Pix: abre o drop down"
-      - runFlow:
-          when:
-            visible:
-              id: "pix-combinado"
-          commands:
-            - assertVisible: "Sem Pix cadastrado. O pagamento é combinado com o profissional (dinheiro)."
-          label: "22.04b5 · sem Pix: o pagamento é combinado"
+          label: "22.04b2 · o Já paguei e o Fechar a vista, sem informação de Pix"
+      - assertNotVisible:
+          id: "pix-dropdown"
+          label: "22.04b3 · sem drop down de Pix"
+      - assertNotVisible:
+          id: "pix-chave"
+          label: "22.04b4 · sem a chave Pix"
       - assertVisible:
           id: "preco-saiba-mais"
           label: "22.04d2 · e o Saiba mais do preço (politica-de-preco-saiba-mais)"

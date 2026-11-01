@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Platform } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import Constants from "expo-constants";
@@ -58,10 +58,13 @@ import { useIndicacao } from "@hooks/useIndicacao";
 import { FaixaAvaliar } from "@components/FaixaAvaliar";
 import { ModalDePagamento } from "@components/ModalDePagamento";
 import { ModalDeFeedback } from "@components/ModalDeFeedback";
+import { ModalDeQuedaBrusca } from "@components/ModalDeQuedaBrusca";
+import { ModalDePagarMulta } from "@components/ModalDePagarMulta";
 import { useFeedbackStore } from "@stores/feedbackStore";
 import { useLembreteDePendencia } from "@hooks/useLembreteDePendencia";
-import { setupOnlineManager } from "@hooks/useNetwork";
+import { setupFocusManager, setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
+import { exigirServidor, marcarServidorPronto } from "@services/prontidaoDoServidor";
 import { aplicarOtaNaAbertura } from "@services/otaNaAbertura";
 
 import { useReconciliarFila } from "@hooks/useReconciliarFila";
@@ -82,6 +85,7 @@ iniciarSentry({
 
 // Pausa/retoma as queries conforme a conexao real (netinfo). 1x no boot.
 setupOnlineManager();
+setupFocusManager();
 
 // O React Native Web nao implementa `Alert`: a chamada nao falha, nao loga e
 // nao pinta NADA. Eram 60 avisos mudos no navegador — inclusive o motivo de uma
@@ -148,7 +152,12 @@ export default function App() {
   // A abertura continua montada por cima da Home até o V terminar de sair: a
   // troca seca de <PreparingServer /> por <Routes /> cortava a saída no meio.
   const [aberturaFechada, setAberturaFechada] = useState(false);
-  const pronto = fontGateOpen && backendReady;
+  // abrir-com-lista-salva (DEC-148): com a lista de lojas salva em disco, a Home abre sem esperar o portao de
+  // readiness (so dados publicos); login, cadastro e tudo que grava seguem esperando o servidor (api.ts).
+  // Sem cache (instalacao nova, ou depois de sair da conta), o portao segura a abertura como sempre.
+  const [listaSalva, setListaSalva] = useState(false);
+  const backendProntoRef = useRef(false);
+  const pronto = fontGateOpen && (backendReady || listaSalva);
 
   useEffect(() => {
     restoreSession();
@@ -170,6 +179,8 @@ export default function App() {
     // estourar o teto (chamadas seguintes ja pegam a instancia quente). CLAUDE.md 18c.
     let active = true;
     waitForBackend().finally(() => {
+      backendProntoRef.current = true;
+      marcarServidorPronto();
       if (active) setBackendReady(true);
     });
     return () => {
@@ -189,6 +200,15 @@ export default function App() {
     restoreFirstRun,
     restoreFeedback,
   ]);
+
+  // Aberto pela lista salva: quando o servidor responde, a lista se atualiza na hora (a busca feita enquanto
+  // ele acordava pode ter falhado, e o proximo ciclo so viria em 60 s).
+  useEffect(() => {
+    if (backendReady && listaSalva) {
+      queryClient.invalidateQueries({ queryKey: ["establishments"] });
+      queryClient.invalidateQueries({ queryKey: ["establishments-paginas"] });
+    }
+  }, [backendReady, listaSalva]);
 
   // Notificacao pessoal "é a sua vez" (WebSocket) app-wide: vale em qualquer
   // tela enquanto houver fila ativa, nao so na QueueStatus (item #5, fatia 2).
@@ -233,6 +253,17 @@ export default function App() {
         buster: Constants.expoConfig?.version ?? "",
         dehydrateOptions: { shouldDehydrateQuery: devePersistir },
       }}
+      onSuccess={() => {
+        // O cache voltou do disco: com a lista de lojas nele e o servidor ainda sem responder, abre ja.
+        const temLista = queryClient
+          .getQueryCache()
+          .findAll({ predicate: (q) => ["establishments", "establishments-paginas"].includes(String(q.queryKey[0])) && q.state.data != null })
+          .length > 0;
+        if (temLista && !backendProntoRef.current) {
+          exigirServidor();
+          setListaSalva(true);
+        }
+      }}
     >
       <GluestackUIProvider config={configDoTema} key={passoDaFonte}>
         <TemaDoApp>
@@ -264,6 +295,10 @@ export default function App() {
         <ModalDePagamento />
         {/* pedido-de-feedback (CLI-34): depois de avaliar, uma vez a cada 30 dias. */}
         <ModalDeFeedback />
+        {/* queda-brusca-aviso-popup-e-opcoes (CLI-33, DEC-128): o popup do horário e as 4 opções. */}
+        <ModalDeQuedaBrusca />
+        {/* pagar-multa-avulso (DEC-83): o Pix das multas, a qualquer momento. */}
+        <ModalDePagarMulta />
         {/* notificacao-avaliar (CLI-33): uma vez, no topo, depois do corte. */}
         {pronto ? (
           <ErrorBoundary>

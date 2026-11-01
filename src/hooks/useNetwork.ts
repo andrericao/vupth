@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import NetInfo from "@react-native-community/netinfo";
-import { onlineManager } from "@tanstack/react-query";
+import { AppState } from "react-native";
+import { focusManager, onlineManager } from "@tanstack/react-query";
 
 // `isConnected` pode ser null (desconhecido) — tratamos como ONLINE (otimista)
 // para nao mostrar "offline" indevidamente.
@@ -26,6 +27,23 @@ export function setupOnlineManager() {
   } catch {
     // sem netinfo nativo -> mantem o comportamento padrao (sempre online)
   }
+}
+
+let focusConfigured = false;
+
+/**
+ * estudo-desempenho (DEC-145/146): no React Native o React Query nao sabe quando o app vai ao segundo plano
+ * nem quando volta (o "foco da janela" e do navegador). Ligado ao AppState: em segundo plano o polling
+ * (refetchInterval) para de gastar rede e bateria, e ao voltar as queries velhas (alem do staleTime)
+ * refazem sozinhas — a fila e as ofertas aparecem frescas, sem esperar o proximo ciclo. Chamar 1x no boot.
+ */
+export function setupFocusManager() {
+  if (focusConfigured) return;
+  focusConfigured = true;
+  focusManager.setEventListener((handleFocus) => {
+    const sub = AppState.addEventListener("change", (estado) => handleFocus(estado === "active"));
+    return () => sub.remove();
+  });
 }
 
 /** true quando ha conexao (otimista quando o estado e desconhecido/sem netinfo). */

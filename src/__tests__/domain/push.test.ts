@@ -1,4 +1,5 @@
 import {
+  avisaQuaseASuaVez,
   atendimentoParaAvaliar,
   pagamentoDoPush,
   agendaAbertaDoPush,
@@ -278,5 +279,23 @@ describe('agendaAbertaDoPush', () => {
     expect(agendaAbertaDoPush({ type: 'AGENDA_OPENED', establishmentId: 'e1' })).toBeNull();
     expect(agendaAbertaDoPush({ type: 'CUT_ACCEPTED', establishmentId: 'e1', professionalId: 'p1' })).toBeNull();
     expect(agendaAbertaDoPush(null)).toBeNull();
+  });
+});
+
+// quase-a-sua-vez-so-em-1h-e-30min (André, 30/10): só com 1 hora ou 30 minutos faltando, ±15 min.
+describe('avisaQuaseASuaVez', () => {
+  it('avisa de 15 a 75 minutos; abaixo disso (sozinho, perto da vez) ou acima, não', () => {
+    expect(avisaQuaseASuaVez(60)).toBe(true);
+    expect(avisaQuaseASuaVez(30)).toBe(true);
+    expect(avisaQuaseASuaVez(15)).toBe(true);
+    expect(avisaQuaseASuaVez(75)).toBe(true);
+    expect(avisaQuaseASuaVez(5)).toBe(false);
+    expect(avisaQuaseASuaVez(0)).toBe(false);
+    expect(avisaQuaseASuaVez(120)).toBe(false);
+  });
+
+  it('espera ainda desconhecida: o aviso passa', () => {
+    expect(avisaQuaseASuaVez(null)).toBe(true);
+    expect(avisaQuaseASuaVez(undefined)).toBe(true);
   });
 });

@@ -1,0 +1,2 @@
+--------- beginning of system
+10-31 23:47:47.383 W/ActivityManager( 1863): Stopping service due to app idle: u0a354 -38m35s157ms com.whatsapp/.messageservice.messaging.MessageService

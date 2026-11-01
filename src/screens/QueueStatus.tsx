@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Alert, Linking, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
+import { Alert, TouchableOpacity, ActivityIndicator, ScrollView, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { VStack, Box, Text, Heading, Center, HStack } from "@gluestack-ui/themed";
-import { Info, Repeat2, Check, ChevronRight } from "lucide-react-native";
+import { Info, Repeat2, Check, ChevronRight, ChevronsDown, LogOut } from "lucide-react-native";
 import * as SecureStore from "expo-secure-store";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
@@ -15,7 +15,12 @@ import {
 } from "@components/QueueDisclaimerModal";
 import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
-import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor, AVISO_DO_SEGUNDO_TOQUE, JANELA_DO_TOQUE_DUPLO_MS } from "@domain/queue/saidaDaFila";
+import { MoreOptionsModal } from "@components/MoreOptionsModal";
+import { avisarLimiteDeMultas } from "@utils/limiteDeMultas";
+import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
+import { useCampanhasAtivas } from "@hooks/useCampanhasAtivas";
+import { useTema } from "@hooks/useTema";
+import { saidaDaFila, ehToqueDuplo, avisoDaMultaDoServidor, AVISO_DO_SEGUNDO_TOQUE } from "@domain/queue/saidaDaFila";
 import { FaixaDaTolerancia } from "@components/FaixaDaTolerancia";
 import { pedidoDaResposta, avisoDoPedidoEnviado } from "@domain/queue/pedidoDeCorte";
 import { usePedidoDeCorteStore } from "@stores/pedidoDeCorteStore";
@@ -45,7 +50,6 @@ import {
   filaEncerrada,
 } from "@domain/queue/types";
 import { jaSaiuDaFila, mensagemDeFalhaAoSair, multaSemCiencia } from "@domain/queue/leave";
-import { SUPORTE_SAIR_DA_FILA_URL } from "@utils/suporte";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useRatedStore } from "@stores/ratedStore";
@@ -142,6 +146,10 @@ export function QueueStatus() {
   const [tailEtaMs, setTailEtaMs] = useState<number | null>(null);
   const [rescheduleBaseMs, setRescheduleBaseMs] = useState(0);
   const [showChangeTurn, setShowChangeTurn] = useState(false);
+  // fila-aguardando-do-mockup (CLI-32): o menu Opções da tela Aguardando.
+  const [showOpcoes, setShowOpcoes] = useState(false);
+  const campanhasAtivas = useCampanhasAtivas();
+  const { cores } = useTema();
   const [isLastInQueue, setIsLastInQueue] = useState(false);
   const [isPublishingSwap, setIsPublishingSwap] = useState(false);
   const [showSwapOffers, setShowSwapOffers] = useState(false);
@@ -274,6 +282,11 @@ export function QueueStatus() {
             navigation.goBack();
             return;
           }
+          // multa-bloqueia-entrada (DEC-83): com duas multas pendentes, o aviso com o "Pagar multa".
+          if (avisarLimiteDeMultas(error)) {
+            navigation.goBack();
+            return;
+          }
 
           // Cupom que nao vale mais (422 COUPON_NOT_ACTIVE): nada foi criado; o
           // aviso diz o que fazer e a pessoa volta a escolha, sem o cupom.
@@ -397,7 +410,6 @@ export function QueueStatus() {
   const penalty = remaining != null && incursLatePenalty(remaining);
   // A faixa da saida (D15): so depois do primeiro toque em "Sair da fila", e
   // some sozinha. O texto e sempre o da regra de AGORA — nao o do momento do toque.
-  const [mostrarFaixaDeSaida, setMostrarFaixaDeSaida] = useState(false);
   const ultimoToqueEmSair = useRef<number | null>(null);
   // Quanto sair custa AGORA. Com o valor do servidor (D4: R$ 3 / R$ 5, zero na
   // tolerancia), ele manda — inclusive para dizer que nao ha multa. Sem ele, a
@@ -415,16 +427,9 @@ export function QueueStatus() {
     }
     return { multa: penalty && !naTolerancia, semPrevisao: semPrevisao && !naTolerancia, minutos };
   }
-  const saidaAtual = saidaDaFila(regraDaSaida());
-  useEffect(() => {
-    if (!mostrarFaixaDeSaida) return;
-    const t = setTimeout(() => setMostrarFaixaDeSaida(false), JANELA_DO_TOQUE_DUPLO_MS);
-    return () => clearTimeout(t);
-  }, [mostrarFaixaDeSaida]);
 
   // Tira da fila. `valorConfirmado` e a ciencia da multa (null = sem multa).
   const sair = async (valorConfirmado: number | null) => {
-    setMostrarFaixaDeSaida(false);
     // A ORDEM AQUI IMPORTA, e os dois motivos vieram do teste de device
     // de 2026-09-07 ("sai da fila e o app fecha sozinho").
     //
@@ -509,7 +514,6 @@ export function QueueStatus() {
     const agora = Date.now();
     if (!ehToqueDuplo(ultimoToqueEmSair.current, agora)) {
       ultimoToqueEmSair.current = agora;
-      setMostrarFaixaDeSaida(true);
       return;
     }
     ultimoToqueEmSair.current = null;
@@ -870,6 +874,9 @@ export function QueueStatus() {
     );
   }
 
+  // "Aguardando" (sem espera calculada) e uma PALAVRA, nao um tempo: numa fonte de numero ela quebra no meio ao lado do
+  // contador (prints do André, 31/10). O adjustsFontSizeToFit nao existe na web, entao a palavra ja nasce menor.
+  const textoDoTempo = !/\d/.test(String(timeLabel));
   if (waitingInQueue) {
     return (
       <VStack flex={1} bg="$brandGreen">
@@ -893,109 +900,81 @@ export function QueueStatus() {
         </Box>
 
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 20 }}
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#163300" colors={["#163300"]} />
           }
         >
-          <Text
-            fontFamily="$body"
-            fontSize={fs(13)}
-            fontWeight="$bold"
-            letterSpacing={1}
-            color="$forest"
-          >
-            PARA A SUA VEZ
-          </Text>
+          {/* fila-aguardando-do-mockup (André, 29/10, mockup 2): o carrossel em cima, no card padrão; o aviso
+              "clique em Opções" é um slide dele. */}
+          <CarrosselDeCampanhas
+            campanhas={campanhasAtivas}
+            avisos={[{ id: "opcoes", valor: "Opções", nome: "Clique em Opções caso não consiga chegar no horário" }]}
+          />
 
-          {/* O numero grande e a POSICAO, nao o relogio: "quantas pessoas na
-              minha frente" e concreto e nao oscila como a estimativa. Sem a
-              posicao (backend nao respondeu ainda), o tempo assume o lugar. */}
-          {peopleAhead != null ? (
-            <>
-              <NumeroComSalto valor={peopleAhead}>
-                <Text
-                  fontFamily="$display"
-                  fontSize={fs(110)}
-                  lineHeight={fs(112)}
-                  letterSpacing={-6}
-                  color="$forest"
-                  testID="queue-position"
-                >
-                  {peopleAhead}
-                </Text>
-              </NumeroComSalto>
-              <Text
-                fontFamily="$display"
-                fontSize={fs(26)}
-                letterSpacing={-0.8}
-                color="$forest"
-                textAlign="center"
-              >
-                {peopleAhead === 0
-                  ? "você é o próximo"
-                  : peopleAhead === 1
-                    ? "pessoa na frente"
-                    : "pessoas na frente"}
+          {/* nome-e-informacoes-sobem-como-no-mockup (André, 30/10): o nome e a loja logo abaixo do carrossel, o vão do mockup (14 px). */}
+          <VStack px={16} pt="$3.5" gap="$3.5">
+            <VStack>
+              <Text fontFamily="$display" fontSize={fs(20)} letterSpacing={-0.5} color={cores.onGreen} testID="queue-professional">
+                {activeQueue?.professionalName ?? paramProfName ?? "Atendimento"}
               </Text>
-            </>
-          ) : (
-            <Text
-              fontFamily="$display"
-              fontSize={fs(72)}
-              lineHeight={fs(78)}
-              letterSpacing={-3}
-              color="$forest"
-              testID="queue-time"
-            >
-              {timeLabel}
-            </Text>
-          )}
+              <Text fontFamily="$body" fontSize={fs(13)} color="#163300CC">
+                {activeQueue?.establishmentName ?? ""}
+                {activeQueue?.serviceMinutes != null ? ` · ${formatWaitTime(activeQueue.serviceMinutes)}` : ""}
+              </Text>
+            </VStack>
 
-          {/* [contraste] Forest TRANSLUCIDO de proposito: sobre o $brandGreen
-              da tela ele hierarquiza sem virar uma segunda cor. So o ALPHA
-              subiu — 0x99 dava 3,40:1 sobre o verde e reprovava no AA; 0xBF da
-              4,99:1 e continua mais leve que o forest chapado do numero. */}
-          <Text fontFamily="$body" fontSize={fs(15)} color="#163300BF" mt="$1">
-            {semPrevisao
-              ? "calculando a espera"
-              : remaining! <= 0
-                ? "a qualquer momento"
-                : `~${formatWaitTime(remaining!)} de espera`}
-          </Text>
-
-          {/* Progresso: pontos cheios pelo que ja andou, apagados pelo que
-              falta. So aparece depois de andar de verdade — mostrar a barra
-              zerada no primeiro segundo nao informa nada. */}
-          {passed > 0 && initial != null && (
-            <>
-              <HStack gap="$2" alignItems="center" mt="$6">
-                {Array.from({ length: Math.min(initial, 8) }).map((_, i) => {
-                  const done = i < Math.min(passed, 8);
-                  return (
-                    <Center
-                      key={i}
-                      width={done ? 12 : 8}
-                      height={done ? 12 : 8}
-                      borderRadius="$full"
-                      // O ponto apagado e TRILHA (decoracao), nao informacao:
-                      // quem informa e o ponto cheio, em $forest e maior. Por
-                      // isso o alpha baixo fica.
-                      bg={done ? "$forest" : "#16330040"}
-                    />
-                  );
-                })}
+            {/* O número de pessoas e o tempo: duas colunas. Com o número oculto pelo profissional, só o tempo, ao
+                centro. O tempo aparece sempre, sem o "~" (André, 29/10). */}
+            {peopleAhead != null ? (
+              <HStack alignItems="center" justifyContent="space-around" gap="$3" py="$1.5">
+                <VStack flex={1} alignItems="center">
+                  <NumeroComSalto valor={peopleAhead}>
+                    <Text fontFamily="$display" fontSize={fs(72)} lineHeight={fs(76)} letterSpacing={-3} color={cores.onGreen} testID="queue-position">
+                      {peopleAhead}
+                    </Text>
+                  </NumeroComSalto>
+                  <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">
+                    {peopleAhead === 0 ? "você é o próximo" : peopleAhead === 1 ? "pessoa à frente" : "pessoas à frente"}
+                  </Text>
+                </VStack>
+                <Box width={1} height={72} bg="#16330040" />
+                <VStack flex={1} alignItems="center">
+                  <Text fontFamily="$display" fontSize={fs(textoDoTempo ? 30 : 48)} lineHeight={fs(textoDoTempo ? 34 : 54)} letterSpacing={-2} color={cores.onGreen} testID="queue-time-coluna" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
+                    {timeLabel}
+                  </Text>
+                  <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">
+                    {semPrevisao ? "calculando a espera" : remaining! <= 0 ? "a qualquer momento" : "de espera"}
+                  </Text>
+                </VStack>
               </HStack>
-              {/* [contraste] Mesma logica do subtitulo acima: alpha 0xB3 dava
-                  4,38:1 sobre o verde, 0xCC da 5,69:1. Fica um degrau ACIMA do
-                  subtitulo, como era antes. */}
-              <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color="#163300CC" mt="$3">
+            ) : (
+              <VStack alignItems="center" py="$1.5">
+                <Text fontFamily="$display" fontSize={fs(textoDoTempo ? 44 : 72)} lineHeight={fs(textoDoTempo ? 50 : 78)} letterSpacing={-3} color={cores.onGreen} testID="queue-time" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
+                  {timeLabel}
+                </Text>
+                <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">
+                  {semPrevisao ? "calculando a espera" : remaining! <= 0 ? "a qualquer momento" : "de espera"}
+                </Text>
+              </VStack>
+            )}
+
+            {passed > 0 && initial != null && (
+              <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color="#163300CC" textAlign="center">
                 Você já passou {passed} {passed === 1 ? "pessoa" : "pessoas"}
               </Text>
-            </>
-          )}
-          <Box mt="$5">
+            )}
+
+            {/* O valor do serviço fica sempre à vista (André, 29/10). */}
+            {activeQueue?.totalValue != null && (
+              <HStack justifyContent="space-between" alignItems="baseline" testID="valor-do-servico">
+                <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen}>Valor do serviço</Text>
+                <Text fontFamily="$display" fontSize={fs(18)} color={cores.onGreen}>{formatarReais(activeQueue.totalValue)}</Text>
+              </HStack>
+            )}
+          </VStack>
+          <Box mt="$3.5" alignItems="center">
             <AtualizarNoNavegador atualizando={refreshing} onPress={handleRefresh} />
           </Box>
         </ScrollView>
@@ -1021,86 +1000,78 @@ export function QueueStatus() {
           </Box>
         )}
 
-        {mostrarFaixaDeSaida && (
-          <Box px={16} pb="$2">
-            <Box
-              // Com multa, ambar: e o estado que pede atencao. Sem multa, branco:
-              // o forest translucido sumia sobre a tela verde (mesma cor do fundo).
-              bg={saidaAtual.confirmacao ? "$brandWarning" : "$brandBackground"}
-              borderRadius="$card"
-              px="$3.5"
-              py="$2.5"
-              testID="faixa-de-saida"
-            >
-              {/* aviso-dois-toques-para-sair-da-fila (André, 25/10): o pedido do segundo toque, a vista. */}
-              <Text size="xs" fontWeight="$bold" color="$brandTextPrimary" mb="$1" testID="aviso-segundo-toque">
-                {AVISO_DO_SEGUNDO_TOQUE}
-              </Text>
-              <HStack alignItems="center" gap="$2">
-                <Info size={16} color="#163300" />
-                <Text size="xs" color="$brandTextPrimary" flex={1}>
-                  {saidaAtual.faixa}
-                </Text>
-                {/* sair-da-fila-texto (Andre, 15/10): o artigo do suporte. */}
-                <TouchableOpacity
-                  onPress={() => Linking.openURL(SUPORTE_SAIR_DA_FILA_URL)}
-                  testID="saida-saiba-mais"
-                >
-                  <Text size="xs" fontWeight="$semibold" color="$forest" underline>
-                    Saiba mais
-                  </Text>
-                </TouchableOpacity>
-              </HStack>
-            </Box>
-          </Box>
-        )}
-
         <VStack px={16} style={{ paddingBottom: Math.max(28, insets.bottom + 16) }} gap="$3.5" alignItems="center">
-          {canReshuffle && (
-            <TouchableOpacity
-              onPress={handleOpenChangeTurn}
-              disabled={isRemanejando}
-              style={{ width: "100%" }}
-              testID="change-turn"
-            >
-              <HStack
-                bg="$forest"
-                borderRadius="$full"
-                gap="$2"
-                px={24}
-                py={15}
-                justifyContent="center"
-                alignItems="center"
-                opacity={isRemanejando ? 0.6 : 1}
-              >
-                <Repeat2 size={17} color="#9FE870" />
+          {/* fila-aguardando-do-mockup (CLI-32): um botão só; trocar de lugar, ir para o final e sair moram em Opções. */}
+          {(canReshuffle || canCancel) && (
+            <TouchableOpacity onPress={() => setShowOpcoes(true)} disabled={isRemanejando} style={{ width: "100%" }} testID="queue-options">
+              <HStack bg={cores.forest} borderRadius="$full" px={24} py={15} justifyContent="center" alignItems="center" opacity={isRemanejando ? 0.6 : 1}>
                 <Text fontFamily="$heading" fontSize={fs(15)} color="$brandGreen">
-                  {isRemanejando ? "Um instante..." : "Mudar minha vez"}
+                  {isRemanejando ? "Um instante..." : "Opções"}
                 </Text>
               </HStack>
-            </TouchableOpacity>
-          )}
-          {/* Os pedidos de troca — os que eu posso aceitar, com o lugar e o
-              horario, e os meus (Andre, 26/09: "nao consegui achar essa
-              solicitacao depois"). A tela verde nao tinha como chegar neles. */}
-          {canReshuffle && (
-            <TouchableOpacity onPress={() => setShowSwapOffers(true)} testID="ver-trocas">
-              <Text fontFamily="$heading" fontSize={fs(14)} color="$forest">
-                {acceptableCount > 0 ? `Pedidos de troca (${acceptableCount})` : "Pedidos de troca"}
-              </Text>
-            </TouchableOpacity>
-          )}
-          {/* "Sair da fila" NAO e botao vermelho aqui (era, antes): sair e uma
-              saida legitima, nao um erro. Fica como link discreto — presente
-              para quem procura, sem gritar para quem nao esta procurando. */}
-          {canCancel && (
-            <TouchableOpacity onPress={handleCancel} disabled={isRemanejando} testID="leave-queue">
-              <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color="#163300CC">
-                Sair da fila
-              </Text>
             </TouchableOpacity>
           )}
         </VStack>
+
+        <MoreOptionsModal
+          visible={showOpcoes}
+          title="Opções"
+          subtitle={activeQueue?.professionalName}
+          options={[
+            ...(canReshuffle
+              ? [
+                  {
+                    key: "change-turn",
+                    title: "Trocar de lugar",
+                    description: "Escolha outro horário na fila",
+                    icon: Repeat2,
+                    onPress: () => {
+                      setShowOpcoes(false);
+                      handleOpenChangeTurn();
+                    },
+                  },
+                  {
+                    key: "ver-trocas",
+                    title: acceptableCount > 0 ? `Pedidos de troca (${acceptableCount})` : "Pedidos de troca",
+                    description: "Os que você pode aceitar e os seus",
+                    icon: Repeat2,
+                    onPress: () => {
+                      setShowOpcoes(false);
+                      setShowSwapOffers(true);
+                    },
+                  },
+                  {
+                    key: "move-to-end",
+                    title: "Ir para o final da fila",
+                    description: "Você entra de novo, no último lugar",
+                    icon: ChevronsDown,
+                    onPress: () => {
+                      setShowOpcoes(false);
+                      handleMoveToEnd();
+                    },
+                  },
+                ]
+              : []),
+            ...(canCancel
+              ? [
+                  {
+                    key: "leave-queue",
+                    title: "Sair da fila",
+                    // sair-da-fila-toque-duplo-vermelho (30/10): o pedido do duplo toque mora só aqui, em vermelho;
+                    // o 1º toque não mostra nada e o menu fica aberto até o 2º, que precisa vir em 500 ms.
+                    description: AVISO_DO_SEGUNDO_TOQUE,
+                    perigo: true,
+                    icon: LogOut,
+                    onPress: () => {
+                      if (ehToqueDuplo(ultimoToqueEmSair.current, Date.now())) setShowOpcoes(false);
+                      handleCancel();
+                    },
+                  },
+                ]
+              : []),
+          ]}
+          onClose={() => setShowOpcoes(false)}
+        />
 
         <RescheduleModal
           visible={showReschedule}

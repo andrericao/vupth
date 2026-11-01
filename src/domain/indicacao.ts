@@ -8,6 +8,8 @@ export const INDICACAO_KEY = 'vupth_indicacao';
 
 /** Onde a campanha do link (`?c=<campanha>`) fica guardada junto do codigo. */
 export const INDICACAO_CAMPANHA_KEY = 'vupth_indicacao_campanha';
+/** desconto-no-link-cliente: o code da campanha que a previa publica devolveu (so com o ref do link valido), para o redeem depois do cadastro. */
+export const INDICACAO_CUPOM_KEY = 'vupth_indicacao_cupom';
 
 /** A campanha de `?c=<campanha>` no endereco aberto, ou null. */
 export function campanhaDoCaminho(endereco: string): string | null {

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { TouchableOpacity } from "react-native";
 import { VStack, Box, Text, HStack } from "@gluestack-ui/themed";
 
@@ -18,7 +19,9 @@ import { BadgeAgendar } from "@components/BadgeAgendar";
 // por dia da semana. Inventar um horario seria pior do que omitir: mostramos so
 // o badge. Quando o backend entregar a grade (S27), e esta linha que ganha o
 // "abre <dia> as <hora>".
-export function LinhaDaLojaFechada({
+// estudo-desempenho (DEC-145): `memo` — a lista passa um `onPress` novo a cada render, mas ele so depende da
+// loja; sem a loja nova, a linha nao desenha de novo.
+export const LinhaDaLojaFechada = memo(function LinhaDaLojaFechada({
   establishment,
   onPress,
 }: {
@@ -46,4 +49,4 @@ export function LinhaDaLojaFechada({
       </Box>
     </TouchableOpacity>
   );
-}
+}, (a, b) => a.establishment === b.establishment);

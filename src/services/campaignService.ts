@@ -24,7 +24,24 @@ export interface Campanha {
   benefit_base?: 'WITH_FEE' | 'WITHOUT_FEE' | null;
 }
 
+/** Previa publica do desconto (Backend 492e705): o que a campanha abate de UM servico, sem login. */
+export interface PreviaDoDesconto {
+  full_price: number;
+  discount: number;
+  price_with_coupon: number;
+  benefit_base?: 'WITH_FEE' | 'WITHOUT_FEE' | null;
+  /** So com o ref do link valido (Backend, DEC-131): o codigo da campanha para o POST /campaigns/redeem. */
+  code?: string | null;
+}
+
 export const campaignService = {
+  // desconto-para-novo-cliente-no-link: sem login. 404 = campanha fora do ar, sem vaga ou privada sem o ref.
+  preview(id: string, serviceItemId: string, ref?: string | null) {
+    return api.get<PreviaDoDesconto>(`/campaigns/${id}/preview`, {
+      params: { service_item_id: serviceItemId, ...(ref ? { ref } : {}) },
+    });
+  },
+
   // Logado: 201 com a campanha. Recusas: 404 CAMPAIGN_NOT_FOUND, 409
   // CAMPAIGN_NOT_AVAILABLE / CAMPAIGN_ALREADY_REDEEMED, 403 CAMPAIGN_NOT_FOR_YOU.
   redeem(code: string, accessToken: string) {

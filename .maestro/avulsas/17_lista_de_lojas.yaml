@@ -18,5 +18,6 @@ env:
     file: ../etapas/17_lista_de_lojas.yaml
     env:
       LOJA_ID: ${output.LOJA_ID}
+      LOJA: ${output.LOJA}
       PROF_ID: ${output.PROF_ID}
     label: "17.E1 · roda 17_lista_de_lojas"

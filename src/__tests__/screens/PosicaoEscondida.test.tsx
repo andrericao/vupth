@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
 import { useQueueCountdown } from '@hooks/useQueueCountdown';
@@ -83,5 +84,35 @@ describe('QueueStatus — o interruptor da posição', () => {
     expect(queryByText(/já passou/)).toBeNull();
     expect(getByTestId('queue-time')).toBeTruthy();
     expect(mockMostra).toHaveBeenCalledWith('e1', 'p1');
+  });
+
+  // aguardando-palavra-quebrada (prints do André, 31/10): sem espera calculada o estado "Aguardando" quebrava no
+  // meio da palavra ao lado do contador; agora fica numa linha só e encolhe para caber.
+  it('o estado ao lado do contador fica numa linha so e encolhe para caber (nao quebra "Aguardando" no meio)', () => {
+    mockMostra.mockReturnValue(true);
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    const coluna = getByTestId('queue-time-coluna');
+    expect(coluna.props.numberOfLines).toBe(1);
+    expect(coluna.props.adjustsFontSizeToFit).toBe(true);
+  });
+
+  it('sem o contador, o estado tambem fica numa linha so e encolhe para caber', () => {
+    mockMostra.mockReturnValue(false);
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    const sozinho = getByTestId('queue-time');
+    expect(sozinho.props.numberOfLines).toBe(1);
+    expect(sozinho.props.adjustsFontSizeToFit).toBe(true);
+  });
+
+  it('a palavra "Aguardando" (espera zerada) usa fonte menor que a de um tempo, para caber na coluna (e na web)', () => {
+    mockMostra.mockReturnValue(true);
+    const tamanho = (no: { props: { style?: unknown } }) => (StyleSheet.flatten(no.props.style as never) as { fontSize: number }).fontSize;
+    mockCountdown.mockReturnValue({ ...fila(), remaining: 0 });
+    const palavra = renderWithProviders(<QueueStatus />);
+    const daPalavra = tamanho(palavra.getByTestId('queue-time-coluna'));
+    palavra.unmount();
+    mockCountdown.mockReturnValue(fila());
+    const tempo = renderWithProviders(<QueueStatus />);
+    expect(daPalavra).toBeLessThan(tamanho(tempo.getByTestId('queue-time-coluna')));
   });
 });
