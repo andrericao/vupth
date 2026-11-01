@@ -28,18 +28,7 @@ Running on vupth_aosp
   00b.P6b · fecha a cortina, se o app abriu por baixo dela... COMPLETED
   ${ETAPA}.P7 · espera onboarding-start (negando a caixa do sistema)...
     Repeat while id: ${ALVO} is not visible (up to 40 times)...
-      Run esperar_o_sistema.yaml...
-        Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
-        Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
-        Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
-      Run esperar_o_sistema.yaml... COMPLETED
-      Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible...
-      Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... SKIPPED
-      Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible...
-      Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible... SKIPPED
-      Assert that (Optional) id: ${ALVO} is visible... WARNED
-    Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
+    Repeat while id: ${ALVO} is not visible (up to 40 times)... SKIPPED
     Assert that id: ${ALVO} is visible... COMPLETED
   00b.P7 · espera onboarding-start (negando a caixa do sistema)... COMPLETED
   ${ETAPA}.P8 · nega a caixa do sistema, se vier...
@@ -245,7 +234,7 @@ Running on vupth_aosp
         Input text ${SENHA}... COMPLETED
         Hide Keyboard... COMPLETED
         Tap on id: login-submit... COMPLETED
-      PJ1.01 · entra como prop_c57167000b@teste.com... COMPLETED
+      PJ1.01 · entra como prop_c57489500b@teste.com... COMPLETED
       PJ1.02 · espera a Fila ou o Menu do dono... COMPLETED
       PJ1.02a · fecha o aviso, se houver...
         Wait for animation to end within 3000 ms... COMPLETED
@@ -285,15 +274,47 @@ Running on vupth_aosp
     PJ6.05a · pix · responde o pagamento (Recebi ou Não recebi)...
       Assert that (Optional) "Recebeu o pagamento?" is visible... COMPLETED
       Run flow when "Recebeu o pagamento?" is visible...
-        Tap on "${RESPOSTA == 'Confirmar' ? 'Recebi' : RESPOSTA}"... FAILED
-      Run flow when "Recebeu o pagamento?" is visible... FAILED
-    PJ6.05a · pix · responde o pagamento (Recebi ou Não recebi)... FAILED
-  00b.05 · no Partner, atende e finaliza Cliente57167000b sem receber... FAILED
+        Tap on "${RESPOSTA == 'Confirmar' ? 'Recebi' : RESPOSTA}"... COMPLETED
+        Run pular_forma.yaml...
+          Assert that (Optional) "Como recebeu?" is visible... WARNED
+          Run flow when "Como recebeu?" is visible...
+          Run flow when "Como recebeu?" is visible... SKIPPED
+        Run pular_forma.yaml... COMPLETED
+        Assert that "Recebeu o pagamento?" is not visible... COMPLETED
+      Run flow when "Recebeu o pagamento?" is visible... COMPLETED
+      Assert that (Optional) "Ajude a melhorar o app" is visible... COMPLETED
+      Run flow when "Ajude a melhorar o app" is visible...
+        Tap on "Agora não"... COMPLETED
+      Run flow when "Ajude a melhorar o app" is visible... COMPLETED
+    PJ6.05a · pix · responde o pagamento (Recebi ou Não recebi)... COMPLETED
+    PJ6.06 · espera ${CLIENTE} sair da fila... COMPLETED
+  00b.05 · no Partner, atende e finaliza Cliente57489500b sem receber... COMPLETED
+  00b.06 · volta ao Client (sem limpar)... COMPLETED
+  00b.07 · fecha as caixas...
+    Run esperar_o_sistema.yaml...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
+      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
+    Run esperar_o_sistema.yaml... COMPLETED
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+    Run flow when id: push-skip is visible...
+    Run flow when id: push-skip is visible... SKIPPED
+  00b.07 · fecha as caixas... COMPLETED
+  00b.08 · o Pix abre na tela da fila, se ela ainda estiver aberta... WARNED
+  00b.09 · fecha (a conta segue em Atendimentos)...
+  00b.09 · fecha (a conta segue em Atendimentos)... SKIPPED
+  00b.10 · fecha a faixa de avaliar, se apareceu... WARNED
+  00b.11 · toca em Atendimentos... FAILED
 00b.E1 · roda 00b_fumaca... FAILED
 
-Element not found: Text matching regex: Ainda não
+Element not found: Text matching regex: Atendimentos
 
-Element with Text matching regex: Ainda não not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
+Element with Text matching regex: Atendimentos not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
 
 Possible causes:
 - Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
@@ -302,4 +323,4 @@ Possible causes:
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-01_191309/00b_fumaca
+/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-01_200521/00b_fumaca
