@@ -1,0 +1,1268 @@
+--------- beginning of system
+10-31 23:47:14.391 W/MagnificationConnectionManager( 1863): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+--------- beginning of main
+10-31 23:47:14.409 E/RoleControllerServiceImpl( 1863): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms.supervision, role: android.app.role.SYSTEM_SUPERVISION, user: 0
+10-31 23:47:14.417 E/RoleControllerServiceImpl( 1863): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms, role: android.app.role.SYSTEM_CALL_STREAMING, user: 0
+10-31 23:47:14.419 W/SignedPackage( 1863): Package doesn't have required signing certificate: com.google.android.apps.work.clouddpc
+10-31 23:47:14.426 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:14.426 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:14.427 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:14.427 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:14.427 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:14.427 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:14.427 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:14.427 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:14.427 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:14.427 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:14.428 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:14.428 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:14.428 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:14.428 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:14.428 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:14.428 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:14.428 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:14.428 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:14.440 W/PackageManager( 1863): Missing required system package: notion.id, but found with extended search.
+10-31 23:47:14.440 W/PackageManager( 1863): Missing required system package: livio.pack.lang.pt_BR, but found with extended search.
+10-31 23:47:14.440 W/PackageManager( 1863): Missing required system package: livio.pack.lang.en_US, but found with extended search.
+10-31 23:47:14.440 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:14.440 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:14.440 W/PackageManager( 1863): Missing required system package: com.waze, but found with extended search.
+10-31 23:47:14.440 W/PackageManager( 1863): Missing required system package: com.vupth.partner.preview, but found with extended search.
+10-31 23:47:14.440 W/PackageManager( 1863): Missing required system package: com.vupth.partner.dev, but found with extended search.
+10-31 23:47:14.440 W/PackageManager( 1863): Missing required system package: com.vupth.partner, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.vupth.client.preview, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.vupth.client.dev, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.vupth.client, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.taxis99, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.sympla.tickets, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.stremio.one, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.positivo.casainteligente, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.netflix.mediaclient, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:14.441 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.mercadolibre, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.linkedin.android, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.itau, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.inmobi.weather, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.imdb.mobile, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.huami.watch.hmwatchmanager, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.gympass, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.google.android.apps.translate, but found with extended search.
+10-31 23:47:14.442 W/PackageManager( 1863): Missing required system package: com.google.android.apps.fitness, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.glassdoor.app, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.fandom.app, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.cerveceriamodelo.modelonow, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.anthropic.claude, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.amazon.kindle, but found with extended search.
+10-31 23:47:14.443 W/PackageManager( 1863): Missing required system package: com.amazon.clouddrive.photos, but found with extended search.
+10-31 23:47:14.444 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:14.444 W/PackageManager( 1863): Missing required system package: com.FDGEntertainment.BananaKong2.gp, but found with extended search.
+10-31 23:47:14.444 W/PackageManager( 1863): Missing required system package: br.mil.mar.sim.iddigitalmarinha, but found with extended search.
+10-31 23:47:14.444 W/PackageManager( 1863): Missing required system package: br.jus.tse.eleitoral.etitulo, but found with extended search.
+10-31 23:47:14.444 W/PackageManager( 1863): Missing required system package: br.gov.serpro.cnhe, but found with extended search.
+10-31 23:47:14.444 W/PackageManager( 1863): Missing required system package: br.gov.meugovbr, but found with extended search.
+10-31 23:47:14.444 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:14.444 W/PackageManager( 1863): Missing required system package: br.com.starapp.appbarbercli, but found with extended search.
+10-31 23:47:14.444 W/PackageManager( 1863): Missing required system package: br.com.reclameaqui.app, but found with extended search.
+10-31 23:47:14.444 W/PackageManager( 1863): Missing required system package: br.com.poupex.m, but found with extended search.
+10-31 23:47:14.461 W/PackageManager( 1863): Missing required system package: br.com.intermedium, but found with extended search.
+10-31 23:47:14.461 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:14.461 W/PackageManager( 1863): Missing required system package: br.com.billingpay.app.pf, but found with extended search.
+10-31 23:47:14.461 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:14.462 W/PackageManager( 1863): Missing required system package: com.wbd.stream, but found with extended search.
+10-31 23:47:14.462 W/PackageManager( 1863): Missing required system package: com.ubercab, but found with extended search.
+10-31 23:47:14.462 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:14.462 W/PackageManager( 1863): Missing required system package: com.santander.app, but found with extended search.
+10-31 23:47:14.462 W/PackageManager( 1863): Missing required system package: com.roblox.client, but found with extended search.
+10-31 23:47:14.462 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:14.462 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:14.462 W/PackageManager( 1863): Missing required system package: com.google.android.apps.walletnfcrel, but found with extended search.
+10-31 23:47:14.462 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:14.462 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:14.463 W/PackageManager( 1863): Missing required system package: com.brave.browser, but found with extended search.
+10-31 23:47:14.463 W/PackageManager( 1863): Missing required system package: ch.protonmail.android, but found with extended search.
+10-31 23:47:14.466 W/AppOpService( 1863): Ignored setUidMode call for runtime permission app op: uid = 10173, code = FINE_LOCATION, mode = allow, callingUid = 1000, oldMode = allow
+10-31 23:47:14.480 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:14.480 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:14.482 W/AppOpService( 1863): Ignored setUidMode call for runtime permission app op: uid = 10173, code = FINE_LOCATION, mode = allow, callingUid = 1000, oldMode = allow
+10-31 23:47:14.516 E/RoleControllerServiceImpl( 1863): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.googlequicksearchbox, role: android.app.role.ASSISTANT, user: 0
+10-31 23:47:14.518 E/RoleControllerServiceImpl( 1863): Default/fallback role holder package doesn't qualify for the role, package: com.motorola.paks, role: android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER, user: 0
+10-31 23:47:14.529 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:14.539 W/PackageManager( 1863): Missing required system package: notion.id, but found with extended search.
+10-31 23:47:14.539 W/PackageManager( 1863): Missing required system package: livio.pack.lang.pt_BR, but found with extended search.
+10-31 23:47:14.539 W/PackageManager( 1863): Missing required system package: livio.pack.lang.en_US, but found with extended search.
+10-31 23:47:14.539 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:14.539 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:14.540 W/PackageManager( 1863): Missing required system package: com.waze, but found with extended search.
+10-31 23:47:14.540 W/PackageManager( 1863): Missing required system package: com.vupth.partner.preview, but found with extended search.
+10-31 23:47:14.540 W/PackageManager( 1863): Missing required system package: com.vupth.partner.dev, but found with extended search.
+10-31 23:47:14.540 W/PackageManager( 1863): Missing required system package: com.vupth.partner, but found with extended search.
+10-31 23:47:14.540 W/PackageManager( 1863): Missing required system package: com.vupth.client.preview, but found with extended search.
+10-31 23:47:14.540 W/PackageManager( 1863): Missing required system package: com.vupth.client.dev, but found with extended search.
+10-31 23:47:14.540 W/PackageManager( 1863): Missing required system package: com.vupth.client, but found with extended search.
+10-31 23:47:14.540 W/PackageManager( 1863): Missing required system package: com.taxis99, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.sympla.tickets, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.stremio.one, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.positivo.casainteligente, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.netflix.mediaclient, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:14.541 W/PackageManager( 1863): Missing required system package: com.mercadolibre, but found with extended search.
+10-31 23:47:14.542 W/PackageManager( 1863): Missing required system package: com.linkedin.android, but found with extended search.
+10-31 23:47:14.542 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:14.542 W/PackageManager( 1863): Missing required system package: com.itau, but found with extended search.
+10-31 23:47:14.542 W/PackageManager( 1863): Missing required system package: com.inmobi.weather, but found with extended search.
+10-31 23:47:14.542 W/PackageManager( 1863): Missing required system package: com.imdb.mobile, but found with extended search.
+10-31 23:47:14.543 W/PackageManager( 1863): Missing required system package: com.huami.watch.hmwatchmanager, but found with extended search.
+10-31 23:47:14.543 W/PackageManager( 1863): Missing required system package: com.gympass, but found with extended search.
+10-31 23:47:14.543 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:14.543 W/PackageManager( 1863): Missing required system package: com.google.android.apps.translate, but found with extended search.
+10-31 23:47:14.544 W/PackageManager( 1863): Missing required system package: com.google.android.apps.fitness, but found with extended search.
+10-31 23:47:14.544 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:14.544 W/PackageManager( 1863): Missing required system package: com.glassdoor.app, but found with extended search.
+10-31 23:47:14.544 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:14.544 W/PackageManager( 1863): Missing required system package: com.fandom.app, but found with extended search.
+10-31 23:47:14.544 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:14.544 W/PackageManager( 1863): Missing required system package: com.cerveceriamodelo.modelonow, but found with extended search.
+10-31 23:47:14.544 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: com.anthropic.claude, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: com.amazon.kindle, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: com.amazon.clouddrive.photos, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: com.FDGEntertainment.BananaKong2.gp, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: br.mil.mar.sim.iddigitalmarinha, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: br.jus.tse.eleitoral.etitulo, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: br.gov.serpro.cnhe, but found with extended search.
+10-31 23:47:14.545 W/PackageManager( 1863): Missing required system package: br.gov.meugovbr, but found with extended search.
+10-31 23:47:14.546 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:14.546 W/PackageManager( 1863): Missing required system package: br.com.starapp.appbarbercli, but found with extended search.
+10-31 23:47:14.546 W/PackageManager( 1863): Missing required system package: br.com.reclameaqui.app, but found with extended search.
+10-31 23:47:14.546 W/PackageManager( 1863): Missing required system package: br.com.poupex.m, but found with extended search.
+10-31 23:47:14.546 W/PackageManager( 1863): Missing required system package: br.com.intermedium, but found with extended search.
+10-31 23:47:14.546 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:14.546 W/PackageManager( 1863): Missing required system package: br.com.billingpay.app.pf, but found with extended search.
+10-31 23:47:14.546 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:14.547 W/PackageManager( 1863): Missing required system package: com.wbd.stream, but found with extended search.
+10-31 23:47:14.547 W/PackageManager( 1863): Missing required system package: com.ubercab, but found with extended search.
+10-31 23:47:14.547 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:14.547 W/PackageManager( 1863): Missing required system package: com.santander.app, but found with extended search.
+10-31 23:47:14.547 W/PackageManager( 1863): Missing required system package: com.roblox.client, but found with extended search.
+10-31 23:47:14.547 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:14.547 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:14.547 W/PackageManager( 1863): Missing required system package: com.google.android.apps.walletnfcrel, but found with extended search.
+10-31 23:47:14.548 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:14.548 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:14.548 W/PackageManager( 1863): Missing required system package: com.brave.browser, but found with extended search.
+10-31 23:47:14.548 W/PackageManager( 1863): Missing required system package: ch.protonmail.android, but found with extended search.
+10-31 23:47:14.627 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:14.628 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:14.628 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:14.628 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:14.628 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:14.628 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:14.629 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:14.719 W/ActivityManager( 1863): Slow operation: 447ms so far, now at startProcess: returned from zygote!
+10-31 23:47:14.721 W/IPCThreadState(20958): Transaction failed because process frozen.
+10-31 23:47:14.721 E/JavaBinder(20958): !!! FAILED BINDER TRANSACTION !!!  (parcel size = 348)
+10-31 23:47:14.722 W/ActivityManager( 1863): Slow operation: 450ms so far, now at startProcess: done updating battery stats
+10-31 23:47:14.723 W/ActivityManager( 1863): Slow operation: 451ms so far, now at startProcess: building log message
+10-31 23:47:14.723 W/ActivityManager( 1863): Slow operation: 451ms so far, now at startProcess: starting to update pids map
+10-31 23:47:14.723 W/ActivityManager( 1863): Slow operation: 451ms so far, now at startProcess: done updating pids map
+10-31 23:47:14.727 E/WifiDataStall( 1863): Ignore this poll. newStats: null txLinkSpeedMbps: 433 rxLinkSpeedMbps: 433 rssi: -31 connectionCapabilities: com.android.server.wifi.WifiNative$ConnectionCapabilities@78dab00
+10-31 23:47:14.739 W/ActivityManager( 1863): pid 20958 com.google.android.documentsui sent binder code 1 with flags 2 to frozen apps and got error -2147483646
+10-31 23:47:14.739 W/IPCThreadState( 1863): Transaction failed because process frozen.
+10-31 23:47:14.744 W/ProvidersCache(20958): Failed to load some roots from com.microsoft.skydrive.content.StorageAccessProvider
+10-31 23:47:14.744 W/ProvidersCache(20958): android.os.DeadObjectException: Transaction failed on small parcel; remote process probably died, but this could also be caused by running out of binder buffer space
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at android.os.BinderProxy.transactNative(Native Method)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at android.os.BinderProxy.transact(BinderProxy.java:588)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at android.content.ContentProviderProxy.query(ContentProviderNative.java:493)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at android.content.ContentProviderClient.query(ContentProviderClient.java:196)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at android.content.ContentProviderClient.query(ContentProviderClient.java:178)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at android.content.ContentProviderClient.query(ContentProviderClient.java:168)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at com.android.documentsui.roots.ProvidersCache.loadRootsForAuthority(ProvidersCache.java:533)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at com.android.documentsui.roots.ProvidersCache.-$$Nest$mloadRootsForAuthority(ProvidersCache.java:0)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at com.android.documentsui.roots.ProvidersCache$MultiProviderUpdateTask.handleDocumentsProvider(ProvidersCache.java:887)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at com.android.documentsui.roots.ProvidersCache$MultiProviderUpdateTask.startSingleProviderUpdateTask(ProvidersCache.java:863)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at com.android.documentsui.roots.ProvidersCache$MultiProviderUpdateTask.lambda$doInBackground$0(ProvidersCache.java:809)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at com.android.documentsui.roots.ProvidersCache$MultiProviderUpdateTask.$r8$lambda$mnJpmgdZARm40VapREkQeOExLF8(ProvidersCache.java:0)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at com.android.documentsui.roots.ProvidersCache$MultiProviderUpdateTask$$ExternalSyntheticLambda0.run(R8$$SyntheticClass:0)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at java.util.concurrent.FutureTask.run(FutureTask.java:328)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+10-31 23:47:14.744 W/ProvidersCache(20958): 	at java.lang.Thread.run(Thread.java:1571)
+10-31 23:47:14.751 W/Binder  (32742): reply too large data on java level: InterfaceDescriptor = null, code = 1
+10-31 23:47:14.751 W/gle.android.gms(32742): Large reply transaction of 1056768 bytes, interface descriptor , code 1
+10-31 23:47:14.779 W/system_server( 1863): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~cKFTGZFi8-MFx3HuBltmGg==/com.microsoft.office.outlook-S-clIQz2qlZWqhKckmFlqA==/split_config.en.apk' with 1 weak references
+10-31 23:47:14.805 W/system_server( 1863): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~cKFTGZFi8-MFx3HuBltmGg==/com.microsoft.office.outlook-S-clIQz2qlZWqhKckmFlqA==/split_config.pt.apk' with 1 weak references
+10-31 23:47:14.805 W/system_server( 1863): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~cKFTGZFi8-MFx3HuBltmGg==/com.microsoft.office.outlook-S-clIQz2qlZWqhKckmFlqA==/split_config.xxhdpi.apk' with 1 weak references
+10-31 23:47:14.808 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:14.822 W/JobInfo ( 4947): Job 'com.motorola.bach.modemstats/.nrcheckin.NRCheckinJobService#0' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:14.825 W/JobInfo ( 1863): Job 'com.motorola.bach.modemstats/.nrcheckin.NRCheckinJobService#0' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:14.857 W/SmartWrapManagerImpl(21300): <DWB> Smart Wrap regenerate nano summary: no latest report found
+10-31 23:47:14.868 W/UsageStatsService( 1863): Failed to query usage stats for locked user 10
+10-31 23:47:14.870 W/BpBinder( 1863): Large outgoing transaction of 377192 bytes, interface descriptor , code 1
+10-31 23:47:14.882 W/JobScheduler( 1863): Job didn't exist in JobStore: 62a1c25 #u0a288/0 com.motorola.bach.modemstats/.nrcheckin.NRCheckinJobService
+10-31 23:47:14.887 W/WifiService( 1863): Couldn't get PackageInfo for package:dev.mobile.maestro.test
+10-31 23:47:14.889 W/libc    ( 1863): Access denied finding property "ro.bootimage.build.fingerprint"
+10-31 23:47:14.898 E/DeviceIdleController( 1863): Tried to add unknown package to power save whitelist: com.motorola.oemconfig.demo
+10-31 23:47:14.898 E/DeviceIdleController( 1863): Tried to add unknown package to power save whitelist: com.motorola.oemconfig.rel
+10-31 23:47:14.899 E/DeviceIdleController( 1863): Tried to add unknown package to power save whitelist: com.motorola.oemconfig.demo
+10-31 23:47:14.899 E/DeviceIdleController( 1863): Tried to add unknown package to power save whitelist: com.motorola.oemconfig.rel
+10-31 23:47:14.902 W/libprocessgroup( 1863): RemoveCgroup: /dev/memcg/apps/uid_10454/pid_8703 does not exist.
+10-31 23:47:14.903 W/MediaProvider( 4836): WorkProfileOwnerApps cache is empty
+10-31 23:47:14.911 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:14.912 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:14.914 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:14.928 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:14.936 E/Finsky  (12211): [572] [Counters] attempted to use a non-positive increment for: 4752
+10-31 23:47:14.937 W/PackageManager( 1863): Missing required system package: notion.id, but found with extended search.
+10-31 23:47:14.937 W/PackageManager( 1863): Missing required system package: livio.pack.lang.pt_BR, but found with extended search.
+10-31 23:47:14.938 W/PackageManager( 1863): Missing required system package: livio.pack.lang.en_US, but found with extended search.
+10-31 23:47:14.938 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:14.938 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:14.938 W/PackageManager( 1863): Missing required system package: com.waze, but found with extended search.
+10-31 23:47:14.938 W/PackageManager( 1863): Missing required system package: com.vupth.partner.preview, but found with extended search.
+10-31 23:47:14.938 W/PackageManager( 1863): Missing required system package: com.vupth.partner.dev, but found with extended search.
+10-31 23:47:14.938 W/PackageManager( 1863): Missing required system package: com.vupth.partner, but found with extended search.
+10-31 23:47:14.938 W/PackageManager( 1863): Missing required system package: com.vupth.client.preview, but found with extended search.
+10-31 23:47:14.938 W/PackageManager( 1863): Missing required system package: com.vupth.client.dev, but found with extended search.
+10-31 23:47:14.943 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:14.948 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:14.956 W/AppInstallOperation(32742): FDL Migration::InstallIntentOperation by FDL Module [CONTEXT service_id=77 ]
+10-31 23:47:14.959 W/PackageManager( 1863): Missing required system package: notion.id, but found with extended search.
+10-31 23:47:14.960 W/PackageManager( 1863): Missing required system package: livio.pack.lang.pt_BR, but found with extended search.
+10-31 23:47:14.960 W/PackageManager( 1863): Missing required system package: livio.pack.lang.en_US, but found with extended search.
+10-31 23:47:14.960 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:14.960 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:14.960 W/PackageManager( 1863): Missing required system package: com.waze, but found with extended search.
+10-31 23:47:14.960 W/PackageManager( 1863): Missing required system package: com.vupth.partner.preview, but found with extended search.
+10-31 23:47:14.961 W/PackageManager( 1863): Missing required system package: com.vupth.partner.dev, but found with extended search.
+10-31 23:47:14.961 W/PackageManager( 1863): Missing required system package: com.vupth.partner, but found with extended search.
+10-31 23:47:14.961 W/PackageManager( 1863): Missing required system package: com.vupth.client.preview, but found with extended search.
+10-31 23:47:14.961 W/PackageManager( 1863): Missing required system package: com.vupth.client.dev, but found with extended search.
+10-31 23:47:14.962 W/PackageManager( 1863): Missing required system package: com.vupth.client, but found with extended search.
+10-31 23:47:14.962 W/PackageManager( 1863): Missing required system package: com.taxis99, but found with extended search.
+10-31 23:47:14.962 W/PackageManager( 1863): Missing required system package: com.sympla.tickets, but found with extended search.
+10-31 23:47:14.962 W/PackageManager( 1863): Missing required system package: com.stremio.one, but found with extended search.
+10-31 23:47:14.962 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:14.962 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:14.963 W/PackageManager( 1863): Missing required system package: com.positivo.casainteligente, but found with extended search.
+10-31 23:47:14.963 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:14.963 W/PackageManager( 1863): Missing required system package: com.netflix.mediaclient, but found with extended search.
+10-31 23:47:14.963 W/m.bradesco.next(10099): Failed to find entry 'classes.dex': Entry not found
+10-31 23:47:14.938 W/PackageManager( 1863): Missing required system package: com.vupth.client, but found with extended search.
+10-31 23:47:14.963 W/PackageManager( 1863): Missing required system package: com.taxis99, but found with extended search.
+10-31 23:47:14.963 W/PackageManager( 1863): Missing required system package: com.sympla.tickets, but found with extended search.
+10-31 23:47:14.963 W/PackageManager( 1863): Missing required system package: com.stremio.one, but found with extended search.
+10-31 23:47:14.963 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:14.963 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.positivo.casainteligente, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.netflix.mediaclient, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.mercadolibre, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.linkedin.android, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.itau, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.inmobi.weather, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.imdb.mobile, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.huami.watch.hmwatchmanager, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.gympass, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.google.android.apps.translate, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.google.android.apps.fitness, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.glassdoor.app, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.fandom.app, but found with extended search.
+10-31 23:47:14.964 W/m.bradesco.next(10099): Failed to find entry 'classes.dex': Entry not found
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.cerveceriamodelo.modelonow, but found with extended search.
+10-31 23:47:14.964 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.anthropic.claude, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.amazon.kindle, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.amazon.clouddrive.photos, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.FDGEntertainment.BananaKong2.gp, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.mil.mar.sim.iddigitalmarinha, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.jus.tse.eleitoral.etitulo, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.gov.serpro.cnhe, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.gov.meugovbr, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.com.starapp.appbarbercli, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.com.reclameaqui.app, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.com.poupex.m, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.com.intermedium, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.com.billingpay.app.pf, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.mercadolibre, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.wbd.stream, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.ubercab, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.linkedin.android, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.santander.app, but found with extended search.
+10-31 23:47:14.965 W/PackageManager( 1863): Missing required system package: com.roblox.client, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:14.966 W/m.bradesco.next(10099): Failed to find entry 'classes.dex': Entry not found
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.google.android.apps.walletnfcrel, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.itau, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.inmobi.weather, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.brave.browser, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: ch.protonmail.android, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.imdb.mobile, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.huami.watch.hmwatchmanager, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.gympass, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.google.android.apps.translate, but found with extended search.
+10-31 23:47:14.966 W/PackageManager( 1863): Missing required system package: com.google.android.apps.fitness, but found with extended search.
+10-31 23:47:14.967 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:14.967 W/PackageManager( 1863): Missing required system package: com.glassdoor.app, but found with extended search.
+10-31 23:47:14.967 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:14.967 W/PackageManager( 1863): Missing required system package: com.fandom.app, but found with extended search.
+10-31 23:47:14.967 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:14.967 W/PackageManager( 1863): Missing required system package: com.cerveceriamodelo.modelonow, but found with extended search.
+10-31 23:47:14.967 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:14.967 W/m.bradesco.next(10099): Failed to find entry 'classes.dex': Entry not found
+10-31 23:47:14.967 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:14.968 W/PackageManager( 1863): Missing required system package: com.anthropic.claude, but found with extended search.
+10-31 23:47:14.980 E/Finsky  (12211): [573] [Counters] attempted to use a non-positive increment for: 4752
+10-31 23:47:14.980 E/Finsky  (12211): [573] [Counters] attempted to use a non-positive increment for: 4753
+10-31 23:47:14.982 W/Blockstore(32742): [DataStoreImpl] The data was not a restore credential [CONTEXT service_id=258 ]
+10-31 23:47:14.982 W/Blockstore(32742): jlkt: Protocol message contained an invalid tag (zero).
+10-31 23:47:14.982 W/Blockstore(32742): 	at jlhw.j(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):39)
+10-31 23:47:14.982 W/Blockstore(32742): 	at jllj.c(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):376)
+10-31 23:47:14.982 W/Blockstore(32742): 	at jllj.j(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):8)
+10-31 23:47:14.982 W/Blockstore(32742): 	at jlju.S(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):22)
+10-31 23:47:14.982 W/Blockstore(32742): 	at jlju.O(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):3)
+10-31 23:47:14.982 W/Blockstore(32742): 	at aswq.p(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):70)
+10-31 23:47:14.982 W/Blockstore(32742): 	at asvq.apply(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):39)
+10-31 23:47:14.982 W/Blockstore(32742): 	at hlxh.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):3)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ibwq.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):17)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikqi.d(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):3)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikqk.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):45)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikry.execute(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):1)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikpy.f(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):1)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikpy.ht(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):37)
+10-31 23:47:14.982 W/Blockstore(32742): 	at hlwz.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):39)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ibwp.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):17)
+10-31 23:47:14.982 W/Blockstore(32742): 	at iksf.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):20)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikuj.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):3)
+10-31 23:47:14.982 W/Blockstore(32742): 	at iktk.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):18)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikul.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):5)
+10-31 23:47:14.982 W/Blockstore(32742): 	at iksh.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):44)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikry.execute(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):1)
+10-31 23:47:14.982 W/Blockstore(32742): 	at iksh.execute(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):69)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikpy.f(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):1)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikpy.ht(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):37)
+10-31 23:47:14.982 W/Blockstore(32742): 	at iksj.b(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):33)
+10-31 23:47:14.982 W/Blockstore(32742): 	at hlxd.i(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):26)
+10-31 23:47:14.982 W/Blockstore(32742): 	at hlxl.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):10)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ibwq.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):17)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikqi.d(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):3)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikqk.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):45)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikry.execute(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):1)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikpy.f(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):1)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikpy.ht(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):37)
+10-31 23:47:14.982 W/Blockstore(32742): 	at hlxj.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):39)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ibwp.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):17)
+10-31 23:47:14.982 W/Blockstore(32742): 	at iksf.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):20)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikuj.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):3)
+10-31 23:47:14.982 W/Blockstore(32742): 	at iktk.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):18)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikul.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):5)
+10-31 23:47:14.982 W/Blockstore(32742): 	at iksh.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):44)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikry.execute(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):1)
+10-31 23:47:14.982 W/Blockstore(32742): 	at iksh.execute(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):69)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikpy.f(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):1)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ikpy.ht(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):37)
+10-31 23:47:14.982 W/Blockstore(32742): 	at iksj.b(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):33)
+10-31 23:47:14.982 W/Blockstore(32742): 	at hlxr.b(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):62)
+10-31 23:47:14.982 W/Blockstore(32742): 	at hlxr.a(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):18)
+10-31 23:47:14.982 W/Blockstore(32742): 	at com.google.android.gms.auth.blockstore.service.PackageIntentOperation.onHandleIntent(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):356)
+10-31 23:47:14.982 W/Blockstore(32742): 	at com.google.android.chimera.IntentOperation.onHandleIntent(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):1)
+10-31 23:47:14.982 W/Blockstore(32742): 	at blih.onHandleIntent(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):88)
+10-31 23:47:14.982 W/Blockstore(32742): 	at afpp.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):58)
+10-31 23:47:14.982 W/Blockstore(32742): 	at afpo.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):138)
+10-31 23:47:14.982 W/Blockstore(32742): 	at ibwu.run(:com.google.android.gms@264231035@26.42.31 (260400-1005867181):23)
+10-31 23:47:14.982 W/Blockstore(32742): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)
+10-31 23:47:14.982 W/Blockstore(32742): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+10-31 23:47:14.982 W/Blockstore(32742): 	at java.lang.Thread.run(Thread.java:1571)
+10-31 23:47:14.997 W/PackageManager( 1863): Missing required system package: notion.id, but found with extended search.
+10-31 23:47:14.997 W/PackageManager( 1863): Missing required system package: livio.pack.lang.pt_BR, but found with extended search.
+10-31 23:47:14.997 W/PackageManager( 1863): Missing required system package: livio.pack.lang.en_US, but found with extended search.
+10-31 23:47:14.997 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:14.997 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:14.997 W/PackageManager( 1863): Missing required system package: com.waze, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.vupth.partner.preview, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.vupth.partner.dev, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.vupth.partner, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.vupth.client.preview, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.vupth.client.dev, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.vupth.client, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.taxis99, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.sympla.tickets, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.stremio.one, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.positivo.casainteligente, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:14.998 W/PackageManager( 1863): Missing required system package: com.netflix.mediaclient, but found with extended search.
+10-31 23:47:14.999 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:14.999 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:14.999 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:14.999 W/PackageManager( 1863): Missing required system package: com.mercadolibre, but found with extended search.
+10-31 23:47:14.999 W/PackageManager( 1863): Missing required system package: com.linkedin.android, but found with extended search.
+10-31 23:47:14.999 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:14.999 W/PackageManager( 1863): Missing required system package: com.itau, but found with extended search.
+10-31 23:47:14.999 W/PackageManager( 1863): Missing required system package: com.inmobi.weather, but found with extended search.
+10-31 23:47:14.999 W/PackageManager( 1863): Missing required system package: com.imdb.mobile, but found with extended search.
+10-31 23:47:14.999 W/Finsky  (12211): [2] STU: Failed to get storage stats for package 'dev.mobile.maestro.test' (1601: Error getting stats: android.content.pm.PackageManager.NameNotFoundException)
+10-31 23:47:14.999 W/PackageManager( 1863): Missing required system package: com.huami.watch.hmwatchmanager, but found with extended search.
+10-31 23:47:15.008 W/PackageManager( 1863): Missing required system package: com.gympass, but found with extended search.
+10-31 23:47:15.008 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:15.008 W/PackageManager( 1863): Missing required system package: com.google.android.apps.translate, but found with extended search.
+10-31 23:47:15.008 W/PackageManager( 1863): Missing required system package: com.google.android.apps.fitness, but found with extended search.
+10-31 23:47:15.008 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:15.008 W/PackageManager( 1863): Missing required system package: com.glassdoor.app, but found with extended search.
+10-31 23:47:15.008 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.fandom.app, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.cerveceriamodelo.modelonow, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.anthropic.claude, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.amazon.kindle, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.amazon.clouddrive.photos, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: com.FDGEntertainment.BananaKong2.gp, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: br.mil.mar.sim.iddigitalmarinha, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: br.jus.tse.eleitoral.etitulo, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: br.gov.serpro.cnhe, but found with extended search.
+10-31 23:47:15.009 W/PackageManager( 1863): Missing required system package: br.gov.meugovbr, but found with extended search.
+10-31 23:47:15.010 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:15.010 W/PackageManager( 1863): Missing required system package: br.com.starapp.appbarbercli, but found with extended search.
+10-31 23:47:15.010 W/PackageManager( 1863): Missing required system package: br.com.reclameaqui.app, but found with extended search.
+10-31 23:47:15.010 W/PackageManager( 1863): Missing required system package: br.com.poupex.m, but found with extended search.
+10-31 23:47:15.010 W/PackageManager( 1863): Missing required system package: br.com.intermedium, but found with extended search.
+10-31 23:47:15.010 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:15.012 W/RWIPackageIntentOps(32742): Registries cleared for package: dev.mobile.maestro.test
+10-31 23:47:15.012 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: com.amazon.kindle, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: com.amazon.clouddrive.photos, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: com.FDGEntertainment.BananaKong2.gp, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.mil.mar.sim.iddigitalmarinha, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.jus.tse.eleitoral.etitulo, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.gov.serpro.cnhe, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.gov.meugovbr, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.com.starapp.appbarbercli, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.com.reclameaqui.app, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.com.poupex.m, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.com.intermedium, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:15.013 W/PackageManager( 1863): Missing required system package: br.com.billingpay.app.pf, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.wbd.stream, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.ubercab, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.santander.app, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.roblox.client, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.google.android.apps.walletnfcrel, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: com.brave.browser, but found with extended search.
+10-31 23:47:15.014 W/PackageManager( 1863): Missing required system package: ch.protonmail.android, but found with extended search.
+10-31 23:47:15.015 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:15.030 W/PackageManager( 1863): Missing required system package: br.com.billingpay.app.pf, but found with extended search.
+10-31 23:47:15.030 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:15.030 W/PackageManager( 1863): Missing required system package: com.wbd.stream, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: com.ubercab, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: com.santander.app, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: com.roblox.client, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: com.google.android.apps.walletnfcrel, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: com.brave.browser, but found with extended search.
+10-31 23:47:15.031 W/PackageManager( 1863): Missing required system package: ch.protonmail.android, but found with extended search.
+10-31 23:47:15.041 W/PackageManager( 1863): Missing required system package: notion.id, but found with extended search.
+10-31 23:47:15.041 W/PackageManager( 1863): Missing required system package: livio.pack.lang.pt_BR, but found with extended search.
+10-31 23:47:15.042 W/PackageManager( 1863): Missing required system package: livio.pack.lang.en_US, but found with extended search.
+10-31 23:47:15.042 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:15.042 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:15.042 W/PackageManager( 1863): Missing required system package: com.waze, but found with extended search.
+10-31 23:47:15.043 W/PackageManager( 1863): Missing required system package: com.vupth.partner.preview, but found with extended search.
+10-31 23:47:15.044 W/PackageManager( 1863): Missing required system package: com.vupth.partner.dev, but found with extended search.
+10-31 23:47:15.044 W/PackageManager( 1863): Missing required system package: com.vupth.partner, but found with extended search.
+10-31 23:47:15.044 W/PackageManager( 1863): Missing required system package: com.vupth.client.preview, but found with extended search.
+10-31 23:47:15.045 W/PackageManager( 1863): Missing required system package: com.vupth.client.dev, but found with extended search.
+10-31 23:47:15.045 W/PackageManager( 1863): Missing required system package: com.vupth.client, but found with extended search.
+10-31 23:47:15.045 W/PackageManager( 1863): Missing required system package: com.taxis99, but found with extended search.
+10-31 23:47:15.045 W/PackageManager( 1863): Missing required system package: com.sympla.tickets, but found with extended search.
+10-31 23:47:15.045 W/PackageManager( 1863): Missing required system package: com.stremio.one, but found with extended search.
+10-31 23:47:15.045 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:15.057 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:15.057 W/PackageManager( 1863): Missing required system package: com.positivo.casainteligente, but found with extended search.
+10-31 23:47:15.057 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:15.057 W/PackageManager( 1863): Missing required system package: com.netflix.mediaclient, but found with extended search.
+10-31 23:47:15.058 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:15.058 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:15.058 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:15.058 W/PackageManager( 1863): Missing required system package: com.mercadolibre, but found with extended search.
+10-31 23:47:15.058 W/PackageManager( 1863): Missing required system package: com.linkedin.android, but found with extended search.
+10-31 23:47:15.058 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:15.059 W/PackageManager( 1863): Missing required system package: com.itau, but found with extended search.
+10-31 23:47:15.059 W/PackageManager( 1863): Missing required system package: com.inmobi.weather, but found with extended search.
+10-31 23:47:15.059 W/PackageManager( 1863): Missing required system package: com.imdb.mobile, but found with extended search.
+10-31 23:47:15.059 W/PackageManager( 1863): Missing required system package: com.huami.watch.hmwatchmanager, but found with extended search.
+10-31 23:47:15.059 W/PackageManager( 1863): Missing required system package: com.gympass, but found with extended search.
+10-31 23:47:15.059 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:15.060 W/PackageManager( 1863): Missing required system package: com.google.android.apps.translate, but found with extended search.
+10-31 23:47:15.060 W/PackageManager( 1863): Missing required system package: com.google.android.apps.fitness, but found with extended search.
+10-31 23:47:15.060 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:15.060 W/PackageManager( 1863): Missing required system package: com.glassdoor.app, but found with extended search.
+10-31 23:47:15.060 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:15.060 W/PackageManager( 1863): Missing required system package: com.fandom.app, but found with extended search.
+10-31 23:47:15.060 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:15.060 W/PackageManager( 1863): Missing required system package: com.cerveceriamodelo.modelonow, but found with extended search.
+10-31 23:47:15.061 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:15.061 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:15.061 W/PackageManager( 1863): Missing required system package: com.anthropic.claude, but found with extended search.
+10-31 23:47:15.061 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:15.061 W/PackageManager( 1863): Missing required system package: com.amazon.kindle, but found with extended search.
+10-31 23:47:15.061 W/PackageManager( 1863): Missing required system package: com.amazon.clouddrive.photos, but found with extended search.
+10-31 23:47:15.061 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:15.062 W/PackageManager( 1863): Missing required system package: com.FDGEntertainment.BananaKong2.gp, but found with extended search.
+10-31 23:47:15.062 W/PackageManager( 1863): Missing required system package: br.mil.mar.sim.iddigitalmarinha, but found with extended search.
+10-31 23:47:15.062 W/PackageManager( 1863): Missing required system package: br.jus.tse.eleitoral.etitulo, but found with extended search.
+10-31 23:47:15.062 W/PackageManager( 1863): Missing required system package: br.gov.serpro.cnhe, but found with extended search.
+10-31 23:47:15.065 W/PackageManager( 1863): Missing required system package: br.gov.meugovbr, but found with extended search.
+10-31 23:47:15.065 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:15.066 W/PackageManager( 1863): Missing required system package: br.com.starapp.appbarbercli, but found with extended search.
+10-31 23:47:15.066 W/PackageManager( 1863): Missing required system package: br.com.reclameaqui.app, but found with extended search.
+10-31 23:47:15.066 W/PackageManager( 1863): Missing required system package: br.com.poupex.m, but found with extended search.
+10-31 23:47:15.066 W/PackageManager( 1863): Missing required system package: br.com.intermedium, but found with extended search.
+10-31 23:47:15.066 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:15.066 W/PackageManager( 1863): Missing required system package: br.com.billingpay.app.pf, but found with extended search.
+10-31 23:47:15.067 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:15.067 W/PackageManager( 1863): Missing required system package: com.wbd.stream, but found with extended search.
+10-31 23:47:15.074 W/PackageManager( 1863): Missing required system package: notion.id, but found with extended search.
+10-31 23:47:15.082 W/PackageManager( 1863): Missing required system package: livio.pack.lang.pt_BR, but found with extended search.
+10-31 23:47:15.082 W/PackageManager( 1863): Missing required system package: livio.pack.lang.en_US, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.ubercab, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.santander.app, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.roblox.client, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.google.android.apps.walletnfcrel, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: com.brave.browser, but found with extended search.
+10-31 23:47:15.089 W/PackageManager( 1863): Missing required system package: ch.protonmail.android, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: notion.id, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: livio.pack.lang.pt_BR, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: livio.pack.lang.en_US, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.waze, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.vupth.partner.preview, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.vupth.partner.dev, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.vupth.partner, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.vupth.client.preview, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.vupth.client.dev, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.vupth.client, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.taxis99, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.sympla.tickets, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.stremio.one, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:15.093 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:15.094 W/PackageManager( 1863): Missing required system package: com.positivo.casainteligente, but found with extended search.
+10-31 23:47:15.094 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:15.094 W/PackageManager( 1863): Missing required system package: com.netflix.mediaclient, but found with extended search.
+10-31 23:47:15.094 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:15.094 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:15.094 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:15.094 W/PackageManager( 1863): Missing required system package: com.mercadolibre, but found with extended search.
+10-31 23:47:15.094 W/PackageManager( 1863): Missing required system package: com.linkedin.android, but found with extended search.
+10-31 23:47:15.095 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:15.097 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:15.097 W/PackageManager( 1863): Missing required system package: com.itau, but found with extended search.
+10-31 23:47:15.097 W/PackageManager( 1863): Missing required system package: com.inmobi.weather, but found with extended search.
+10-31 23:47:15.097 W/PackageManager( 1863): Missing required system package: com.imdb.mobile, but found with extended search.
+10-31 23:47:15.097 W/PackageManager( 1863): Missing required system package: com.huami.watch.hmwatchmanager, but found with extended search.
+10-31 23:47:15.097 W/PackageManager( 1863): Missing required system package: com.gympass, but found with extended search.
+10-31 23:47:15.097 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:15.097 W/PackageManager( 1863): Missing required system package: com.google.android.apps.translate, but found with extended search.
+10-31 23:47:15.097 W/PackageManager( 1863): Missing required system package: com.google.android.apps.fitness, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.glassdoor.app, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.fandom.app, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.cerveceriamodelo.modelonow, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.anthropic.claude, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.amazon.kindle, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.amazon.clouddrive.photos, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.FDGEntertainment.BananaKong2.gp, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: br.mil.mar.sim.iddigitalmarinha, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: br.jus.tse.eleitoral.etitulo, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.waze, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: br.gov.serpro.cnhe, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: br.gov.meugovbr, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: br.com.starapp.appbarbercli, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.vupth.partner.preview, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: br.com.reclameaqui.app, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: br.com.poupex.m, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: br.com.intermedium, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:15.098 W/PackageManager( 1863): Missing required system package: com.vupth.partner.dev, but found with extended search.
+10-31 23:47:15.099 W/PackageManager( 1863): Missing required system package: br.com.billingpay.app.pf, but found with extended search.
+10-31 23:47:15.099 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:15.099 W/PackageManager( 1863): Missing required system package: com.vupth.partner, but found with extended search.
+10-31 23:47:15.099 W/PackageManager( 1863): Missing required system package: com.vupth.client.preview, but found with extended search.
+10-31 23:47:15.099 W/PackageManager( 1863): Missing required system package: com.vupth.client.dev, but found with extended search.
+10-31 23:47:15.099 W/PackageManager( 1863): Missing required system package: com.vupth.client, but found with extended search.
+10-31 23:47:15.099 W/PackageManager( 1863): Missing required system package: com.taxis99, but found with extended search.
+10-31 23:47:15.104 E/TlcKM   (  950): lookup_operation: op 0x3675e7631a51657e not found
+10-31 23:47:15.104 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.105 W/LightPackageInfoLiveData( 2051): Package "dev.mobile.maestro.test" not found for user UserHandle{0}
+10-31 23:47:15.105 W/LightPackageInfoLiveData( 2051): Package "dev.mobile.maestro.test" not found for user UserHandle{0}
+10-31 23:47:15.106 W/PackageManager( 1863): Missing required system package: com.sympla.tickets, but found with extended search.
+10-31 23:47:15.108 W/PackageManager( 1863): Missing required system package: com.stremio.one, but found with extended search.
+10-31 23:47:15.108 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:15.108 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:15.108 W/PackageManager( 1863): Missing required system package: com.positivo.casainteligente, but found with extended search.
+10-31 23:47:15.110 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:15.112 W/PackageManager( 1863): Missing required system package: com.wbd.stream, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: com.ubercab, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: com.santander.app, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: com.roblox.client, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: com.google.android.apps.walletnfcrel, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: com.brave.browser, but found with extended search.
+10-31 23:47:15.113 W/PackageManager( 1863): Missing required system package: ch.protonmail.android, but found with extended search.
+10-31 23:47:15.115 W/PackageManager( 1863): Missing required system package: com.netflix.mediaclient, but found with extended search.
+10-31 23:47:15.117 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:15.117 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:15.117 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:15.118 W/PackageManager( 1863): Missing required system package: com.mercadolibre, but found with extended search.
+10-31 23:47:15.118 W/PackageManager( 1863): Missing required system package: com.linkedin.android, but found with extended search.
+10-31 23:47:15.118 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:15.118 W/PackageManager( 1863): Missing required system package: com.itau, but found with extended search.
+10-31 23:47:15.118 W/PackageManager( 1863): Missing required system package: com.inmobi.weather, but found with extended search.
+10-31 23:47:15.119 W/PackageManager( 1863): Missing required system package: com.imdb.mobile, but found with extended search.
+10-31 23:47:15.119 W/PackageManager( 1863): Missing required system package: com.huami.watch.hmwatchmanager, but found with extended search.
+10-31 23:47:15.164 W/PackageManager( 1863): Missing required system package: com.gympass, but found with extended search.
+10-31 23:47:15.164 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:15.164 W/PackageManager( 1863): Missing required system package: com.google.android.apps.translate, but found with extended search.
+10-31 23:47:15.164 W/PackageManager( 1863): Missing required system package: com.google.android.apps.fitness, but found with extended search.
+10-31 23:47:15.164 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:15.164 W/PackageManager( 1863): Missing required system package: com.glassdoor.app, but found with extended search.
+10-31 23:47:15.164 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:15.164 W/PackageManager( 1863): Missing required system package: com.fandom.app, but found with extended search.
+10-31 23:47:15.164 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:15.164 W/PackageManager( 1863): Missing required system package: com.cerveceriamodelo.modelonow, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: com.anthropic.claude, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: com.amazon.kindle, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: com.amazon.clouddrive.photos, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: com.FDGEntertainment.BananaKong2.gp, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: br.mil.mar.sim.iddigitalmarinha, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: br.jus.tse.eleitoral.etitulo, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: br.gov.serpro.cnhe, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: br.gov.meugovbr, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: br.com.starapp.appbarbercli, but found with extended search.
+10-31 23:47:15.165 W/PackageManager( 1863): Missing required system package: br.com.reclameaqui.app, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: br.com.poupex.m, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: br.com.intermedium, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: br.com.billingpay.app.pf, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: com.wbd.stream, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: com.ubercab, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: com.santander.app, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: com.roblox.client, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: com.google.android.apps.walletnfcrel, but found with extended search.
+10-31 23:47:15.166 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:15.167 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:15.167 W/PackageManager( 1863): Missing required system package: com.brave.browser, but found with extended search.
+10-31 23:47:15.167 W/PackageManager( 1863): Missing required system package: ch.protonmail.android, but found with extended search.
+10-31 23:47:15.178 E/TlcKM   (  950): lookup_operation: op 0x6a4b101d112be004 not found
+10-31 23:47:15.178 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.192 E/TlcKM   (  950): lookup_operation: op 0x9d70f5f21e92bdd0 not found
+10-31 23:47:15.192 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.193 W/SQLiteLog(32742): (28) double-quoted string literal: "dev.mobile.maestro.test"
+10-31 23:47:15.204 E/TlcKM   (  950): lookup_operation: op 0xacb7b62bf281d805 not found
+10-31 23:47:15.205 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.208 W/SmartWrapManagerImpl(21300): <DWB> Smart Wrap regenerate nano summary: no latest report found
+10-31 23:47:15.217 E/TlcKM   (  950): lookup_operation: op 0xd1c3f4d1cc9ac390 not found
+10-31 23:47:15.217 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.230 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:15.241 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:15.243 W/ParceledListSlice( 1863): Element #24 is 22548 bytes.
+10-31 23:47:15.261 W/ParceledListSlice( 1863): Element #115 is 16520 bytes.
+10-31 23:47:15.262 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:15.264 E/adservices(28410): Measurement Delete Packages Receiver is disabled
+10-31 23:47:15.264 E/adservices(28410): Topics API is disabled
+10-31 23:47:15.265 W/ParceledListSlice( 1863): Element #136 is 145812 bytes.
+10-31 23:47:15.265 W/ParceledListSlice( 1863): Overly large reply size: 198772
+10-31 23:47:15.271 E/adservices(28410): Measurement Delete Packages Receiver is disabled
+10-31 23:47:15.271 E/adservices(28410): Topics API is disabled
+10-31 23:47:15.273 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:15.308 W/ParceledListSlice( 1863): Element #261 is 73456 bytes.
+10-31 23:47:15.308 W/ParceledListSlice( 1863): Overly large reply size: 113644
+10-31 23:47:15.310 E/TlcKM   (  950): lookup_operation: op 0x44831dc8b5ba5da5 not found
+10-31 23:47:15.310 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.312 W/ParceledListSlice( 1863): Element #262 is 17224 bytes.
+10-31 23:47:15.309 W/ReferenceQueueD(10099): type=1400 audit(0.0:687767): avc:  denied  { read } for  name="drivers" dev="proc" ino=4026531852 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_tty_drivers:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:15.309 W/ReferenceQueueD(10099): type=1400 audit(0.0:687768): avc:  denied  { read } for  name="modules" dev="proc" ino=4026532054 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_modules:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:15.309 W/ReferenceQueueD(10099): type=1400 audit(0.0:687769): avc:  denied  { read } for  name="devices" dev="proc" ino=4026531982 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_bus_input:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:15.317 W/ReferenceQueueD(10099): type=1400 audit(0.0:687770): avc:  denied  { getattr } for  path="/proc/kallsyms" dev="proc" ino=4026532055 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_kallsyms:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:15.317 W/ReferenceQueueD(10099): type=1400 audit(0.0:687771): avc:  denied  { getattr } for  path="/proc/keys" dev="proc" ino=4026532064 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_keys:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:15.324 W/ParceledListSlice( 1863): Element #351 is 77024 bytes.
+10-31 23:47:15.324 W/ParceledListSlice( 1863): Overly large reply size: 136612
+10-31 23:47:15.324 E/TlcKM   (  950): lookup_operation: op 0xf0f00c96fae1c4e0 not found
+10-31 23:47:15.324 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.327 W/ParceledListSlice( 1863): Element #399 is 29436 bytes.
+10-31 23:47:15.328 W/ParceledListSlice( 1863): Element #421 is 18812 bytes.
+10-31 23:47:15.338 E/TlcKM   (  950): lookup_operation: op 0x3b903999303a4111 not found
+10-31 23:47:15.338 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.358 E/TlcKM   (  950): lookup_operation: op 0x8f876c111aed655f not found
+10-31 23:47:15.358 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.382 W/JobInfo (10071): Job 'com.aura.oobe.motorola/com.ironsource.aura.sdk.feature.delivery.apk.ApkDeliveryJobService#1452287285' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:15.387 W/JobInfo ( 1863): Job 'com.aura.oobe.motorola/com.ironsource.aura.sdk.feature.delivery.apk.ApkDeliveryJobService#1452287285' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:15.413 W/UsageStatsService( 1863): Failed to query usage stats for locked user 10
+10-31 23:47:15.413 W/JobInfo (12211): Job 'com.android.vending/com.google.android.finsky.scheduler.process.mainimpl.PhoneskyJobServiceMain#9263' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:15.414 W/JobInfo ( 1863): Job 'com.android.vending/com.google.android.finsky.scheduler.process.mainimpl.PhoneskyJobServiceMain#9263' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:15.437 W/BpBinder( 1863): Large outgoing transaction of 377192 bytes, interface descriptor , code 1
+10-31 23:47:15.578 W/System  (10099): ClassLoader referenced unknown path: 
+10-31 23:47:15.644 W/JobInfo (10071): Job 'com.aura.oobe.motorola/com.ironsource.appmanager.services.PrepareAppJobService#-1219982550' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:15.645 W/JobInfo ( 1863): Job 'com.aura.oobe.motorola/com.ironsource.appmanager.services.PrepareAppJobService#-1219982550' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:15.855 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:15.871 W/OneAuthLog(10145): [OneAuth:0002:Warning::00000000] [Common] [2026-11-01 02:47:15 - thread_id: 710, correlation_id: UNSET - Android 35] parentSpanContext is INVALID. Creating span without parent.   
+10-31 23:47:15.904 E/TlcKM   (  950): lookup_operation: op 0x1f25f30dc89d1d50 not found
+10-31 23:47:15.904 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.906 E/m.bradesco.next(10099): No package ID 6b found for resource ID 0x6b0b0013.
+10-31 23:47:15.912 W/OneAuthLog(10145): [OneAuth:0002:Warning::00000000] [Common] [2026-11-01 02:47:15 - thread_id: 715, correlation_id: UNSET - Android 35] parentSpanContext is INVALID. Creating span without parent.   
+10-31 23:47:15.924 E/TlcKM   (  950): lookup_operation: op 0x645f07761470ae02 not found
+10-31 23:47:15.924 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.940 E/TlcKM   (  950): lookup_operation: op 0x4ac9aa7150ce80da not found
+10-31 23:47:15.940 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.951 E/TlcKM   (  950): lookup_operation: op 0xb3b62a1fd71ebc6 not found
+10-31 23:47:15.951 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.956 W/System  (10145): ClassLoader referenced unknown path: 
+10-31 23:47:15.973 E/TlcKM   (  950): lookup_operation: op 0x738878dafc3e8036 not found
+10-31 23:47:15.973 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:15.990 E/TlcKM   (  950): lookup_operation: op 0x5fa9065c8eb6e80f not found
+10-31 23:47:15.990 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.006 E/TlcKM   (  950): lookup_operation: op 0xa1622dc8f3c5420 not found
+10-31 23:47:16.006 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.019 E/TlcKM   (  950): lookup_operation: op 0x92fb1db3e77216db not found
+10-31 23:47:16.019 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.032 E/TlcKM   (  950): lookup_operation: op 0x518b9cd0f3622f91 not found
+10-31 23:47:16.032 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.045 E/TlcKM   (  950): lookup_operation: op 0x38ba989880c08293 not found
+10-31 23:47:16.045 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.062 E/TlcKM   (  950): lookup_operation: op 0xc2c4a30e35136e59 not found
+10-31 23:47:16.062 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.068 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:16.069 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:16.071 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:16.071 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:16.074 E/TlcKM   (  950): lookup_operation: op 0x10535d59bb8b52c8 not found
+10-31 23:47:16.074 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.080 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:16.080 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:16.084 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:16.084 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:16.087 W/OneAuthLog(10145): [OneAuth:0002:Warning::00000000] [Common] [2026-11-01 02:47:16 - thread_id: 715, correlation_id: UNSET - Android 35] Telemetry is disabled because the Telemetry context or configuration is null   
+10-31 23:47:16.088 E/TlcKM   (  950): lookup_operation: op 0x7d77a52c2447018 not found
+10-31 23:47:16.088 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.090 W/IPCThreadState(10145): Transaction failed because process frozen.
+10-31 23:47:16.090 E/JavaBinder(10145): !!! FAILED BINDER TRANSACTION !!!  (parcel size = 736)
+10-31 23:47:16.090 W/ActivityManager( 1863): pid 10145 com.microsoft.skydrive sent binder code 1 with flags 2 to frozen apps and got error -2147483646
+10-31 23:47:16.091 W/IPCThreadState( 1863): Transaction failed because process frozen.
+10-31 23:47:16.103 E/TlcKM   (  950): lookup_operation: op 0x30f0ebea27b3f200 not found
+10-31 23:47:16.103 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.103 W/ActivityManager( 1863): ProcessRecord{97c5599 0:com.azure.authenticator:auth/u0a390} is attached to a previous process 8794
+10-31 23:47:16.115 E/TlcKM   (  950): lookup_operation: op 0x26bad8c930d5f083 not found
+10-31 23:47:16.115 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.125 E/TlcKM   (  950): lookup_operation: op 0x15537a59e8da51a0 not found
+10-31 23:47:16.125 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.136 E/TlcKM   (  950): lookup_operation: op 0xb0d2c55fb0d1de59 not found
+10-31 23:47:16.136 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.147 E/TlcKM   (  950): lookup_operation: op 0x1929e2d6afb4599e not found
+10-31 23:47:16.147 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.156 E/TlcKM   (  950): lookup_operation: op 0x458570e59d469237 not found
+10-31 23:47:16.156 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.167 E/TlcKM   (  950): lookup_operation: op 0x288fa410d1a54f4f not found
+10-31 23:47:16.167 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.170 W/ActivityManager( 1863): Slow operation: 66ms so far, now at startProcess: asking zygote to start proc
+10-31 23:47:16.171 W/libprocessgroup( 1863): RemoveCgroup: /dev/memcg/apps/uid_10390/pid_8794 does not exist.
+10-31 23:47:16.181 E/TlcKM   (  950): lookup_operation: op 0x70360f5013dbbdd7 not found
+10-31 23:47:16.181 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.182 W/ActivityManager( 1863): Slow operation: 78ms so far, now at startProcess: returned from zygote!
+10-31 23:47:16.182 W/ActivityManager( 1863): Slow operation: 78ms so far, now at startProcess: done updating battery stats
+10-31 23:47:16.182 W/ActivityManager( 1863): Slow operation: 78ms so far, now at startProcess: building log message
+10-31 23:47:16.182 W/ActivityManager( 1863): Slow operation: 78ms so far, now at startProcess: starting to update pids map
+10-31 23:47:16.182 W/ActivityManager( 1863): Slow operation: 78ms so far, now at startProcess: done updating pids map
+10-31 23:47:16.197 E/TlcKM   (  950): lookup_operation: op 0xa412498893dc92e0 not found
+10-31 23:47:16.197 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.207 E/TlcKM   (  950): lookup_operation: op 0xa6a1cf7ef6db11df not found
+10-31 23:47:16.207 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.215 E/TlcKM   (  950): lookup_operation: op 0xf9d30afaa1038928 not found
+10-31 23:47:16.215 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.224 E/TlcKM   (  950): lookup_operation: op 0x61e1e457e326c7ce not found
+10-31 23:47:16.224 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.232 E/TlcKM   (  950): lookup_operation: op 0xff876e6b9d55c259 not found
+10-31 23:47:16.232 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.241 E/TlcKM   (  950): lookup_operation: op 0x1acc11e428097635 not found
+10-31 23:47:16.241 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.257 E/TlcKM   (  950): lookup_operation: op 0xa2229e72150d1470 not found
+10-31 23:47:16.257 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.269 E/TlcKM   (  950): lookup_operation: op 0xcb0dfa57290b64ee not found
+10-31 23:47:16.269 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.280 E/TlcKM   (  950): lookup_operation: op 0xa0619ede3a9f3263 not found
+10-31 23:47:16.280 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.287 E/TlcKM   (  950): lookup_operation: op 0xda7c59d79dbf09df not found
+10-31 23:47:16.287 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.295 E/TlcKM   (  950): lookup_operation: op 0x479776cd0111f961 not found
+10-31 23:47:16.295 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.302 E/TlcKM   (  950): lookup_operation: op 0xc7a3f9ac8698f77e not found
+10-31 23:47:16.302 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.311 E/TlcKM   (  950): lookup_operation: op 0xf026af8adee5be97 not found
+10-31 23:47:16.311 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.320 E/TlcKM   (  950): lookup_operation: op 0xf74a329fb95950e7 not found
+10-31 23:47:16.320 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.325 W/JobInfo ( 7274): Job 'com.android.chrome/org.chromium.components.background_task_scheduler.internal.BackgroundTaskJobService#116' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:16.327 W/JobInfo ( 1863): Job 'com.android.chrome/org.chromium.components.background_task_scheduler.internal.BackgroundTaskJobService#116' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:16.332 E/TlcKM   (  950): lookup_operation: op 0xfb5ecad52fc91528 not found
+10-31 23:47:16.332 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.344 E/TlcKM   (  950): lookup_operation: op 0x5fd20a2ef5b14ff4 not found
+10-31 23:47:16.344 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.346 W/cr_BkgrdTaskJS( 7274): Starting background task (jobId=116)
+10-31 23:47:16.357 E/FeatureFlagsImplExport(10099): android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package com.android.libcore cannot be found on the device
+10-31 23:47:16.359 E/TlcKM   (  950): lookup_operation: op 0xe5dc5664de8c41e6 not found
+10-31 23:47:16.359 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.376 E/TlcKM   (  950): lookup_operation: op 0xe62a9399ed105e49 not found
+10-31 23:47:16.376 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.387 E/TlcKM   (  950): lookup_operation: op 0xf50faf6ad21617b not found
+10-31 23:47:16.387 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.402 E/TlcKM   (  950): lookup_operation: op 0x5b4241cec797c40f not found
+10-31 23:47:16.402 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.423 E/TlcKM   (  950): lookup_operation: op 0xf68f2d70fdc04562 not found
+10-31 23:47:16.423 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.423 E/TlcKM   (  950): lookup_operation: op 0x2eeb53b0c17a5e27 not found
+10-31 23:47:16.423 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.426 E/TlcKM   (  950): lookup_operation: op 0x7b10ea6d606560d7 not found
+10-31 23:47:16.426 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.469 W/JobInfo (10071): Job 'com.aura.oobe.motorola/com.ironsource.aura.sdk.feature.delivery.HandlePackageFullyRemovedIntentService#-1170263834' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:16.469 W/JobInfo ( 1863): Job 'com.aura.oobe.motorola/com.ironsource.aura.sdk.feature.delivery.HandlePackageFullyRemovedIntentService#-1170263834' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:16.499 W/JobInfo ( 1863): Job 'com.aura.oobe.motorola/com.ironsource.aura.sdk.feature.delivery.HandlePackageFullyRemovedIntentService#-1170263834' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+10-31 23:47:16.503 E/TlcKM   (  950): lookup_operation: op 0x28e8356d5abb1d80 not found
+10-31 23:47:16.503 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.520 E/TlcKM   (  950): lookup_operation: op 0xa849dfc648e5176b not found
+10-31 23:47:16.520 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.533 E/TlcKM   (  950): lookup_operation: op 0x63c36666c8c4cad6 not found
+10-31 23:47:16.533 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.537 W/DefaultDispatch(10099): type=1400 audit(0.0:688173): avc:  denied  { search } for  name="net" dev="sysfs" ino=26280 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:sysfs_net:s0 tclass=dir permissive=0 app=br.com.bradesco.next
+10-31 23:47:16.554 E/TlcKM   (  950): lookup_operation: op 0x19887be607125173 not found
+10-31 23:47:16.554 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.579 W/TelephonyPermissions( 2563): reportAccessDeniedToReadIdentifiers:br.com.bradesco.next:getImeiForSlot:-1
+10-31 23:47:16.636 W/VideoCapabilities(10099): Unsupported mime image/vnd.android.heic
+10-31 23:47:16.636 W/VideoCapabilities(10099): Unsupported mime image/vnd.android.heic
+10-31 23:47:16.636 W/VideoCapabilities(10099): Unsupported mime image/vnd.android.heic
+10-31 23:47:16.639 E/henticator:auth(10319): No implementation found for int com.wolfssl.wolfcrypt.WolfSSLX509StoreCtx.isCertPathBuilderSupported() (tried Java_com_wolfssl_wolfcrypt_WolfSSLX509StoreCtx_isCertPathBuilderSupported and Java_com_wolfssl_wolfcrypt_WolfSSLX509StoreCtx_isCertPathBuilderSupported__) - is the library loaded, e.g. System.loadLibrary?
+10-31 23:47:16.639 W/VideoCapabilities(10099): Unrecognized profile/level 32768/256 for video/mp4v-es
+10-31 23:47:16.639 W/VideoCapabilities(10099): Unrecognized profile/level 32768/256 for video/mp4v-es
+10-31 23:47:16.642 W/System  (10071): A resource failed to call AbstractCursor.close. 
+10-31 23:47:16.642 W/System  (10071): A resource failed to call CursorWrapperInner.close. 
+10-31 23:47:16.715 W/WifiService( 1863): Permission violation - startScan not allowed for uid=10402, packageName=br.com.bradesco.next, reason=java.lang.SecurityException: UID 10402 has no location permission
+10-31 23:47:16.718 W/ParceledListSlice( 1863): Element #24 is 20424 bytes.
+10-31 23:47:16.732 E/TlcKM   (  950): lookup_operation: op 0x3d2f217c16400abe not found
+10-31 23:47:16.732 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:16.733 W/Thread-14(10099): type=1400 audit(0.0:688174): avc:  denied  { read } for  name="filesystems" dev="proc" ino=4026532060 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_filesystems:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:16.733 W/Thread-14(10099): type=1400 audit(0.0:688175): avc:  denied  { read } for  name="filesystems" dev="proc" ino=4026532060 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_filesystems:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:16.733 W/Thread-14(10099): type=1400 audit(0.0:688176): avc:  denied  { read } for  name="modules" dev="proc" ino=4026532054 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_modules:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:16.753 W/Bundle  ( 4836): Key android:query-arg-sort-columns expected String[] but value was a java.lang.String.  The default value <null> was returned.
+10-31 23:47:16.753 W/Bundle  ( 4836): Attempt to cast generated internal exception:
+10-31 23:47:16.753 W/Bundle  ( 4836): java.lang.ClassCastException: java.lang.String cannot be cast to java.lang.String[]
+10-31 23:47:16.753 W/Bundle  ( 4836): 	at android.os.BaseBundle.getStringArray(BaseBundle.java:1771)
+10-31 23:47:16.753 W/Bundle  ( 4836): 	at com.android.providers.media.util.DatabaseUtils.resolveSortOrder(DatabaseUtils.java:305)
+10-31 23:47:16.753 W/Bundle  ( 4836): 	at com.android.providers.media.util.DatabaseUtils.resolveQueryArgs(DatabaseUtils.java:285)
+10-31 23:47:16.753 W/Bundle  ( 4836): 	at com.android.providers.media.MediaProvider.queryInternal(MediaProvider.java:4367)
+10-31 23:47:16.753 W/Bundle  ( 4836): 	at com.android.providers.media.MediaProvider.query(MediaProvider.java:4347)
+10-31 23:47:16.753 W/Bundle  ( 4836): 	at com.android.providers.media.MediaProvider.query(MediaProvider.java:4340)
+10-31 23:47:16.753 W/Bundle  ( 4836): 	at android.content.ContentProvider$Transport.query(ContentProvider.java:305)
+10-31 23:47:16.753 W/Bundle  ( 4836): 	at android.content.ContentProviderNative.onTransact(ContentProviderNative.java:107)
+10-31 23:47:16.753 W/Bundle  ( 4836): 	at android.os.Binder.execTransactInternal(Binder.java:1515)
+10-31 23:47:16.753 W/Bundle  ( 4836): 	at android.os.Binder.execTransact(Binder.java:1453)
+10-31 23:47:16.857 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:16.860 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:16.860 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:16.862 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:16.863 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:16.864 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:16.864 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:16.864 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:16.865 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:16.865 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:16.865 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:16.865 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:16.866 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:16.870 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:16.872 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:16.872 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:16.876 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:16.877 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:16.877 W/Thread-14(10099): type=1400 audit(0.0:688177): avc:  denied  { getattr } for  path="/sys/kernel/tracing/trace_marker" dev="tracefs" ino=8653 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:debugfs_trace_marker:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:16.883 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:16.884 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:16.884 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:16.884 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:16.884 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:16.884 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:16.891 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:16.895 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:16.900 E/SmsApplication( 2563): isSystemPackage NameNotFoundException:com.motorola.cn.devicemigration
+10-31 23:47:16.902 W/ParceledListSlice( 1863): Element #24 is 20424 bytes.
+10-31 23:47:16.902 W/AppOpService( 1863): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_SMS, mode = allow, callingUid = 1001, oldMode = allow
+10-31 23:47:16.903 W/AppOpService( 1863): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_SMS, mode = allow, callingUid = 1001, oldMode = allow
+10-31 23:47:16.904 W/AppOpService( 1863): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+10-31 23:47:16.905 E/RoleControllerServiceImpl( 1863): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms.supervision, role: android.app.role.SYSTEM_SUPERVISION, user: 0
+10-31 23:47:16.905 W/AppOpService( 1863): Ignored setUidMode call for runtime permission app op: uid = 1001, code = SEND_SMS, mode = allow, callingUid = 1001, oldMode = allow
+10-31 23:47:16.905 W/AppOpService( 1863): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+10-31 23:47:16.905 E/RoleControllerServiceImpl( 1863): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms, role: android.app.role.SYSTEM_CALL_STREAMING, user: 0
+10-31 23:47:16.906 W/SignedPackage( 1863): Package doesn't have required signing certificate: com.google.android.apps.work.clouddpc
+10-31 23:47:16.906 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:16.908 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:16.912 E/system_server( 1863): No package ID 7f found for resource ID 0x7f080748.
+10-31 23:47:16.912 E/system_server( 1863): No package ID 7f found for resource ID 0x7f14588a.
+10-31 23:47:16.912 E/system_server( 1863): No package ID 7f found for resource ID 0x7f14588a.
+10-31 23:47:16.912 E/system_server( 1863): No package ID 7f found for resource ID 0x7f14588a.
+10-31 23:47:16.912 E/system_server( 1863): No package ID 7f found for resource ID 0x7f0804a0.
+10-31 23:47:16.912 E/system_server( 1863): No package ID 7f found for resource ID 0x7f145b82.
+10-31 23:47:16.912 E/system_server( 1863): No package ID 7f found for resource ID 0x7f145b82.
+10-31 23:47:16.912 E/system_server( 1863): No package ID 7f found for resource ID 0x7f145b82.
+10-31 23:47:16.918 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:16.924 W/AppOpService( 1863): Ignored setUidMode call for runtime permission app op: uid = 10173, code = FINE_LOCATION, mode = allow, callingUid = 1000, oldMode = allow
+10-31 23:47:16.931 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:16.932 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:16.932 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:16.933 W/MagnificationConnectionManager( 1863): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+10-31 23:47:16.935 W/AppOpService( 1863): Ignored setUidMode call for runtime permission app op: uid = 10173, code = FINE_LOCATION, mode = allow, callingUid = 1000, oldMode = allow
+10-31 23:47:16.937 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:16.937 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:16.937 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:16.938 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:16.938 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:16.938 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:16.940 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:16.940 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:16.940 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:16.940 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:16.940 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:16.941 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:16.941 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:16.942 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:16.942 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:16.942 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:16.942 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:16.942 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:16.943 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:16.943 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:16.944 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:16.944 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:16.944 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:16.945 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:16.945 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:16.945 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:16.945 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:16.965 W/libnfc_nci( 4908): Reducing the number of considered missed Gc histogram windows from 139 to 100
+10-31 23:47:16.967 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:16.968 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/base.apk' with 1 weak references
+10-31 23:47:16.968 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_AdsDynamite_installtime.apk' with 1 weak references
+10-31 23:47:16.968 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_CronetDynamite_installtime.apk' with 1 weak references
+10-31 23:47:16.968 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_DynamiteLoader_installtime.apk' with 1 weak references
+10-31 23:47:16.968 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_DynamiteModulesA_installtime.apk' with 1 weak references
+10-31 23:47:16.969 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_DynamiteModulesC_installtime.apk' with 1 weak references
+10-31 23:47:16.969 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_GoogleCertificates_installtime.apk' with 1 weak references
+10-31 23:47:16.969 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_MapsDynamite_installtime.apk' with 1 weak references
+10-31 23:47:16.969 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_MeasurementDynamite_installtime.apk' with 1 weak references
+10-31 23:47:16.969 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_config.en.apk' with 1 weak references
+10-31 23:47:16.969 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_config.pt.apk' with 1 weak references
+10-31 23:47:16.969 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_config.xxhdpi.apk' with 1 weak references
+10-31 23:47:16.969 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~77k0lkCIvrj9rKifBswXDg==/com.google.android.gms-cKvk8Oi9KFw4Aut9MFDE_A==/split_maps_core_dynamite_ondemand.apk' with 1 weak references
+10-31 23:47:16.970 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~DaP0opBmJtNN88OezH3HUQ==/br.com.bradesco.next-W2wrVQz8dkOZ1b9xsTQTBA==/base.apk' with 1 weak references
+10-31 23:47:16.970 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~DaP0opBmJtNN88OezH3HUQ==/br.com.bradesco.next-W2wrVQz8dkOZ1b9xsTQTBA==/split_config.arm64_v8a.apk' with 1 weak references
+10-31 23:47:16.970 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~DaP0opBmJtNN88OezH3HUQ==/br.com.bradesco.next-W2wrVQz8dkOZ1b9xsTQTBA==/split_config.en.apk' with 1 weak references
+10-31 23:47:16.971 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~DaP0opBmJtNN88OezH3HUQ==/br.com.bradesco.next-W2wrVQz8dkOZ1b9xsTQTBA==/split_config.pt.apk' with 1 weak references
+10-31 23:47:16.971 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~DaP0opBmJtNN88OezH3HUQ==/br.com.bradesco.next-W2wrVQz8dkOZ1b9xsTQTBA==/split_config.xxhdpi.apk' with 1 weak references
+10-31 23:47:16.972 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~96roxGtSnuORmXJnPEeW_Q==/com.bradesco-iitpn62bItcjevnTlb8Qpg==/base.apk' with 1 weak references
+10-31 23:47:16.972 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~96roxGtSnuORmXJnPEeW_Q==/com.bradesco-iitpn62bItcjevnTlb8Qpg==/split_config.arm64_v8a.apk' with 1 weak references
+10-31 23:47:16.972 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~96roxGtSnuORmXJnPEeW_Q==/com.bradesco-iitpn62bItcjevnTlb8Qpg==/split_config.xxhdpi.apk' with 1 weak references
+10-31 23:47:16.972 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~sXqX8g3zwfwnMbVHZJWa6w==/com.picpay-xJ3SESM6leOJTOShRvnPyg==/base.apk' with 1 weak references
+10-31 23:47:16.973 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~sXqX8g3zwfwnMbVHZJWa6w==/com.picpay-xJ3SESM6leOJTOShRvnPyg==/split_animations.apk' with 1 weak references
+10-31 23:47:16.973 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~sXqX8g3zwfwnMbVHZJWa6w==/com.picpay-xJ3SESM6leOJTOShRvnPyg==/split_config.arm64_v8a.apk' with 1 weak references
+10-31 23:47:16.973 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~sXqX8g3zwfwnMbVHZJWa6w==/com.picpay-xJ3SESM6leOJTOShRvnPyg==/split_config.pt.apk' with 1 weak references
+10-31 23:47:16.973 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~sXqX8g3zwfwnMbVHZJWa6w==/com.picpay-xJ3SESM6leOJTOShRvnPyg==/split_config.xxhdpi.apk' with 1 weak references
+10-31 23:47:16.973 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~uRCT5XYazuEZSB9Aq6xguQ==/br.com.bb.android-3urKrkGmdmXF6hlaRYSyzA==/base.apk' with 1 weak references
+10-31 23:47:16.973 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~uRCT5XYazuEZSB9Aq6xguQ==/br.com.bb.android-3urKrkGmdmXF6hlaRYSyzA==/split_config.arm64_v8a.apk' with 1 weak references
+10-31 23:47:16.973 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~uRCT5XYazuEZSB9Aq6xguQ==/br.com.bb.android-3urKrkGmdmXF6hlaRYSyzA==/split_config.en.apk' with 1 weak references
+10-31 23:47:16.973 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~uRCT5XYazuEZSB9Aq6xguQ==/br.com.bb.android-3urKrkGmdmXF6hlaRYSyzA==/split_config.pt.apk' with 1 weak references
+10-31 23:47:16.974 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~uRCT5XYazuEZSB9Aq6xguQ==/br.com.bb.android-3urKrkGmdmXF6hlaRYSyzA==/split_config.xxhdpi.apk' with 1 weak references
+10-31 23:47:16.974 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~CVRsyFG5gmRnDeRFdxm-CQ==/com.riocardmais.autoatendimento-W4ewd1diZdHJY291YYsEKQ==/base.apk' with 1 weak references
+10-31 23:47:16.974 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~CVRsyFG5gmRnDeRFdxm-CQ==/com.riocardmais.autoatendimento-W4ewd1diZdHJY291YYsEKQ==/split_config.arm64_v8a.apk' with 1 weak references
+10-31 23:47:16.974 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~CVRsyFG5gmRnDeRFdxm-CQ==/com.riocardmais.autoatendimento-W4ewd1diZdHJY291YYsEKQ==/split_config.en.apk' with 1 weak references
+10-31 23:47:16.974 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~CVRsyFG5gmRnDeRFdxm-CQ==/com.riocardmais.autoatendimento-W4ewd1diZdHJY291YYsEKQ==/split_config.es.apk' with 1 weak references
+10-31 23:47:16.974 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~CVRsyFG5gmRnDeRFdxm-CQ==/com.riocardmais.autoatendimento-W4ewd1diZdHJY291YYsEKQ==/split_config.pt.apk' with 1 weak references
+10-31 23:47:16.974 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~CVRsyFG5gmRnDeRFdxm-CQ==/com.riocardmais.autoatendimento-W4ewd1diZdHJY291YYsEKQ==/split_config.xxhdpi.apk' with 1 weak references
+10-31 23:47:16.974 W/libnfc_nci( 4908): ApkAssets: Deleting an ApkAssets object '<empty> and /system/priv-app/TagGoogle/TagGoogle.apk' with 1 weak references
+10-31 23:47:16.975 E/PersistenceController( 1863): SettingNotFoundException: sv_custom_ai_icon_enabled
+10-31 23:47:16.985 E/RoleControllerServiceImpl( 1863): Default/fallback role holder package doesn't qualify for the role, package: com.google.android.googlequicksearchbox, role: android.app.role.ASSISTANT, user: 0
+10-31 23:47:16.985 E/RoleControllerServiceImpl( 1863): Default/fallback role holder package doesn't qualify for the role, package: com.motorola.paks, role: android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER, user: 0
+10-31 23:47:16.988 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:17.000 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:17.005 E/PersistenceController( 1863): SettingNotFoundException: sv_custom_ai_icon_enabled
+10-31 23:47:17.018 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:17.026 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:17.026 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:17.026 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:17.026 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:17.026 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:17.026 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:17.027 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:17.360 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:17.364 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:17.406 W/ParceledListSlice( 1863): Element #24 is 22548 bytes.
+10-31 23:47:17.414 W/ParceledListSlice( 1863): Element #115 is 16520 bytes.
+10-31 23:47:17.417 W/ParceledListSlice( 1863): Element #136 is 145812 bytes.
+10-31 23:47:17.417 W/ParceledListSlice( 1863): Overly large reply size: 198772
+10-31 23:47:17.435 W/ParceledListSlice( 1863): Element #261 is 73456 bytes.
+10-31 23:47:17.435 W/ParceledListSlice( 1863): Overly large reply size: 113644
+10-31 23:47:17.437 W/ParceledListSlice( 1863): Element #262 is 17224 bytes.
+10-31 23:47:17.444 W/ParceledListSlice( 1863): Element #351 is 77024 bytes.
+10-31 23:47:17.444 W/ParceledListSlice( 1863): Overly large reply size: 136612
+10-31 23:47:17.448 W/ParceledListSlice( 1863): Element #399 is 29436 bytes.
+10-31 23:47:17.449 W/ParceledListSlice( 1863): Element #421 is 18812 bytes.
+10-31 23:47:17.479 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:17.521 W/PackageManager( 1863): Missing required system package: com.amazon.clouddrive.photos, but found with extended search.
+10-31 23:47:17.535 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:17.609 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:17.661 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:17.664 W/PackageManager( 1863): Missing required system package: com.positivo.casainteligente, but found with extended search.
+10-31 23:47:17.683 W/m.bradesco.next(10099): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~4RiUMOY_atx1syaWqN3mxw==/com.google.android.inputmethod.latin-Vf7spcL1m6Vras_PXjopzw==/base.apk' with 1 weak references
+10-31 23:47:17.684 W/m.bradesco.next(10099): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~4RiUMOY_atx1syaWqN3mxw==/com.google.android.inputmethod.latin-Vf7spcL1m6Vras_PXjopzw==/split_brella_feature_split.apk' with 1 weak references
+10-31 23:47:17.684 W/m.bradesco.next(10099): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~4RiUMOY_atx1syaWqN3mxw==/com.google.android.inputmethod.latin-Vf7spcL1m6Vras_PXjopzw==/split_config.xxhdpi.apk' with 1 weak references
+10-31 23:47:17.684 W/m.bradesco.next(10099): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~4RiUMOY_atx1syaWqN3mxw==/com.google.android.inputmethod.latin-Vf7spcL1m6Vras_PXjopzw==/split_tenoranimation_feature_split.apk' with 1 weak references
+10-31 23:47:17.690 W/PackageManager( 1863): Missing required system package: com.roblox.client, but found with extended search.
+10-31 23:47:17.698 W/PackageManager( 1863): Missing required system package: com.vupth.partner.dev, but found with extended search.
+10-31 23:47:17.720 W/PackageManager( 1863): Missing required system package: br.gov.meugovbr, but found with extended search.
+10-31 23:47:17.732 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:17.739 E/WifiDataStall( 1863): Ignore this poll. newStats: null txLinkSpeedMbps: 433 rxLinkSpeedMbps: 433 rssi: -31 connectionCapabilities: com.android.server.wifi.WifiNative$ConnectionCapabilities@78dab00
+10-31 23:47:17.742 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:17.752 W/PackageManager( 1863): Missing required system package: com.imdb.mobile, but found with extended search.
+10-31 23:47:17.767 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:17.825 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:17.836 W/PackageManager( 1863): Missing required system package: ch.protonmail.android, but found with extended search.
+10-31 23:47:17.894 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:17.924 W/PackageManager( 1863): Missing required system package: com.vupth.partner.preview, but found with extended search.
+10-31 23:47:17.946 W/PackageManager( 1863): Missing required system package: com.santander.app, but found with extended search.
+10-31 23:47:18.001 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:18.036 W/PackageManager( 1863): Missing required system package: com.brave.browser, but found with extended search.
+10-31 23:47:18.089 W/PackageManager( 1863): Missing required system package: br.com.intermedium, but found with extended search.
+10-31 23:47:18.111 W/PackageManager( 1863): Missing required system package: livio.pack.lang.en_US, but found with extended search.
+10-31 23:47:18.117 W/PackageManager( 1863): Missing required system package: livio.pack.lang.pt_BR, but found with extended search.
+10-31 23:47:18.123 W/PackageManager( 1863): Missing required system package: br.com.billingpay.app.pf, but found with extended search.
+10-31 23:47:18.135 W/PackageManager( 1863): Missing required system package: com.itau, but found with extended search.
+10-31 23:47:18.142 W/PackageManager( 1863): Missing required system package: com.waze, but found with extended search.
+10-31 23:47:18.148 W/PackageManager( 1863): Missing required system package: com.vupth.partner, but found with extended search.
+10-31 23:47:18.204 W/PackageManager( 1863): Missing required system package: com.vupth.client.preview, but found with extended search.
+10-31 23:47:18.237 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:18.249 W/hwuiTask0( 8038): type=1400 audit(0.0:688187): avc:  denied  { getattr } for  path="/proc/kallsyms" dev="proc" ino=4026532055 scontext=u:r:untrusted_app:s0:c159,c257,c512,c768 tcontext=u:object_r:proc_kallsyms:s0 tclass=file permissive=0 app=com.bradesco
+10-31 23:47:18.249 W/hwuiTask0( 8038): type=1400 audit(0.0:688188): avc:  denied  { getattr } for  path="/proc/keys" dev="proc" ino=4026532064 scontext=u:r:untrusted_app:s0:c159,c257,c512,c768 tcontext=u:object_r:proc_keys:s0 tclass=file permissive=0 app=com.bradesco
+10-31 23:47:18.249 W/hwuiTask0( 8038): type=1400 audit(0.0:688189): avc:  denied  { getattr } for  path="/proc/bootconfig" dev="proc" ino=4026532014 scontext=u:r:untrusted_app:s0:c159,c257,c512,c768 tcontext=u:object_r:proc_bootconfig:s0 tclass=file permissive=0 app=com.bradesco
+10-31 23:47:18.249 W/hwuiTask0( 8038): type=1400 audit(0.0:688190): avc:  denied  { getattr } for  path="/proc/modules" dev="proc" ino=4026532054 scontext=u:r:untrusted_app:s0:c159,c257,c512,c768 tcontext=u:object_r:proc_modules:s0 tclass=file permissive=0 app=com.bradesco
+10-31 23:47:18.249 W/hwuiTask0( 8038): type=1400 audit(0.0:688191): avc:  denied  { read } for  name="enforce" dev="selinuxfs" ino=4 scontext=u:r:untrusted_app:s0:c159,c257,c512,c768 tcontext=u:object_r:selinuxfs:s0 tclass=file permissive=0 app=com.bradesco
+10-31 23:47:18.256 W/PackageManager( 1863): Missing required system package: br.jus.tse.eleitoral.etitulo, but found with extended search.
+10-31 23:47:18.311 W/PackageManager( 1863): Missing required system package: com.taxis99, but found with extended search.
+10-31 23:47:18.352 W/PackageManager( 1863): Missing required system package: com.cerveceriamodelo.modelonow, but found with extended search.
+10-31 23:47:18.389 W/PackageManager( 1863): Missing required system package: com.wbd.stream, but found with extended search.
+10-31 23:47:18.411 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:18.430 W/PackageManager( 1863): Missing required system package: com.vupth.client.dev, but found with extended search.
+10-31 23:47:18.493 W/PackageManager( 1863): Missing required system package: com.google.android.apps.fitness, but found with extended search.
+10-31 23:47:18.555 W/PackageManager( 1863): Missing required system package: com.huami.watch.hmwatchmanager, but found with extended search.
+10-31 23:47:18.562 W/PackageManager( 1863): Missing required system package: br.com.starapp.appbarbercli, but found with extended search.
+10-31 23:47:18.612 W/PackageManager( 1863): Missing required system package: com.google.android.apps.walletnfcrel, but found with extended search.
+10-31 23:47:18.654 W/PackageManager( 1863): Missing required system package: com.glassdoor.app, but found with extended search.
+10-31 23:47:18.724 W/PackageManager( 1863): Missing required system package: com.netflix.mediaclient, but found with extended search.
+10-31 23:47:18.785 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:18.791 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:18.814 W/PackageManager( 1863): Missing required system package: com.ubercab, but found with extended search.
+10-31 23:47:18.824 W/PackageManager( 1863): Missing required system package: com.mercadolibre, but found with extended search.
+10-31 23:47:18.856 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:18.866 W/PackageManager( 1863): Missing required system package: br.gov.serpro.cnhe, but found with extended search.
+10-31 23:47:18.928 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:18.979 W/PackageManager( 1863): Missing required system package: br.com.poupex.m, but found with extended search.
+10-31 23:47:18.987 W/PackageManager( 1863): Missing required system package: br.mil.mar.sim.iddigitalmarinha, but found with extended search.
+10-31 23:47:18.994 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:19.022 W/PackageManager( 1863): Missing required system package: com.google.android.apps.translate, but found with extended search.
+10-31 23:47:19.032 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:19.047 W/PackageManager( 1863): Missing required system package: com.vupth.client, but found with extended search.
+10-31 23:47:19.069 W/PackageManager( 1863): Missing required system package: com.linkedin.android, but found with extended search.
+10-31 23:47:19.111 W/ParceledListSlice( 1863): Element #24 is 20424 bytes.
+10-31 23:47:19.125 W/PackageManager( 1863): Missing required system package: com.anthropic.claude, but found with extended search.
+10-31 23:47:19.181 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:19.221 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:19.230 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:19.235 E/TlcKM   (  950): lookup_operation: op 0xbcacfd1197477060 not found
+10-31 23:47:19.235 E/TlcKM   (  950): lookup_operation(session, operation_handle, &op) == -28
+10-31 23:47:19.252 W/PackageManager( 1863): Missing required system package: com.fandom.app, but found with extended search.
+10-31 23:47:19.270 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:19.292 W/PackageManager( 1863): Missing required system package: com.sympla.tickets, but found with extended search.
+10-31 23:47:19.317 W/ReferenceQueueD(10099): type=1400 audit(0.0:688192): avc:  denied  { getattr } for  path="/proc/kallsyms" dev="proc" ino=4026532055 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_kallsyms:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:19.317 W/ReferenceQueueD(10099): type=1400 audit(0.0:688193): avc:  denied  { getattr } for  path="/proc/keys" dev="proc" ino=4026532064 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_keys:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:19.317 W/ReferenceQueueD(10099): type=1400 audit(0.0:688194): avc:  denied  { getattr } for  path="/proc/bootconfig" dev="proc" ino=4026532014 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_bootconfig:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:19.317 W/ReferenceQueueD(10099): type=1400 audit(0.0:688195): avc:  denied  { getattr } for  path="/proc/modules" dev="proc" ino=4026532054 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:proc_modules:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:19.317 W/ReferenceQueueD(10099): type=1400 audit(0.0:688196): avc:  denied  { read } for  name="enforce" dev="selinuxfs" ino=4 scontext=u:r:untrusted_app:s0:c146,c257,c512,c768 tcontext=u:object_r:selinuxfs:s0 tclass=file permissive=0 app=br.com.bradesco.next
+10-31 23:47:19.339 W/PackageManager( 1863): Missing required system package: com.gympass, but found with extended search.
+10-31 23:47:19.348 W/PackageManager( 1863): Missing required system package: br.com.reclameaqui.app, but found with extended search.
+10-31 23:47:19.357 W/PackageManager( 1863): Missing required system package: com.inmobi.weather, but found with extended search.
+10-31 23:47:19.398 W/PackageManager( 1863): Missing required system package: notion.id, but found with extended search.
+10-31 23:47:19.405 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:19.419 W/PackageManager( 1863): Missing required system package: com.stremio.one, but found with extended search.
+10-31 23:47:19.424 W/PackageManager( 1863): Missing required system package: com.FDGEntertainment.BananaKong2.gp, but found with extended search.
+10-31 23:47:19.436 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:19.470 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:19.480 W/PackageManager( 1863): Missing required system package: com.amazon.kindle, but found with extended search.
+10-31 23:47:19.587 W/PackageManager( 1863): Missing required system package: com.amazon.mShop.android.shopping, but found with extended search.
+10-31 23:47:19.596 W/PackageManager( 1863): Missing required system package: com.amazon.clouddrive.photos, but found with extended search.
+10-31 23:47:19.600 W/PackageManager( 1863): Missing required system package: br.com.timbrasil.meutim, but found with extended search.
+10-31 23:47:19.619 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.docs, but found with extended search.
+10-31 23:47:19.631 W/PackageManager( 1863): Missing required system package: com.mercadopago.wallet, but found with extended search.
+10-31 23:47:19.632 W/PackageManager( 1863): Missing required system package: com.positivo.casainteligente, but found with extended search.
+10-31 23:47:19.637 W/PackageManager( 1863): Missing required system package: com.roblox.client, but found with extended search.
+10-31 23:47:19.641 W/PackageManager( 1863): Missing required system package: com.vupth.partner.dev, but found with extended search.
+10-31 23:47:19.645 W/PackageManager( 1863): Missing required system package: br.gov.meugovbr, but found with extended search.
+10-31 23:47:19.646 W/PackageManager( 1863): Missing required system package: com.lgeha.nuts, but found with extended search.
+10-31 23:47:19.648 W/PackageManager( 1863): Missing required system package: com.whatsapp, but found with extended search.
+10-31 23:47:19.651 W/PackageManager( 1863): Missing required system package: com.imdb.mobile, but found with extended search.
+10-31 23:47:19.654 W/PackageManager( 1863): Missing required system package: com.google.android.apps.docs.editors.sheets, but found with extended search.
+10-31 23:47:19.666 W/PackageManager( 1863): Missing required system package: com.openai.chatgpt, but found with extended search.
+10-31 23:47:19.669 W/PackageManager( 1863): Missing required system package: ch.protonmail.android, but found with extended search.
+10-31 23:47:19.685 W/PackageManager( 1863): Missing required system package: com.github.android, but found with extended search.
+10-31 23:47:19.692 W/PackageManager( 1863): Missing required system package: com.vupth.partner.preview, but found with extended search.
+10-31 23:47:19.696 W/PackageManager( 1863): Missing required system package: com.santander.app, but found with extended search.
+10-31 23:47:19.708 W/PackageManager( 1863): Missing required system package: com.microsoft.skydrive, but found with extended search.
+10-31 23:47:19.715 W/PackageManager( 1863): Missing required system package: com.brave.browser, but found with extended search.
+10-31 23:47:19.729 W/PackageManager( 1863): Missing required system package: br.com.intermedium, but found with extended search.
+10-31 23:47:19.735 W/PackageManager( 1863): Missing required system package: livio.pack.lang.en_US, but found with extended search.
+10-31 23:47:19.736 W/PackageManager( 1863): Missing required system package: livio.pack.lang.pt_BR, but found with extended search.
+10-31 23:47:19.737 W/PackageManager( 1863): Missing required system package: br.com.billingpay.app.pf, but found with extended search.
+10-31 23:47:19.739 W/PackageManager( 1863): Missing required system package: com.itau, but found with extended search.
+10-31 23:47:19.740 W/PackageManager( 1863): Missing required system package: com.waze, but found with extended search.
+10-31 23:47:19.741 W/PackageManager( 1863): Missing required system package: com.vupth.partner, but found with extended search.
+10-31 23:47:19.753 W/PackageManager( 1863): Missing required system package: com.vupth.client.preview, but found with extended search.
+10-31 23:47:19.762 W/PackageManager( 1863): Missing required system package: com.microsoft.office.outlook, but found with extended search.
+10-31 23:47:19.766 W/PackageManager( 1863): Missing required system package: br.jus.tse.eleitoral.etitulo, but found with extended search.
+10-31 23:47:19.781 W/PackageManager( 1863): Missing required system package: com.taxis99, but found with extended search.
+10-31 23:47:19.802 W/PackageManager( 1863): Missing required system package: com.cerveceriamodelo.modelonow, but found with extended search.
+10-31 23:47:19.814 W/PackageManager( 1863): Missing required system package: com.wbd.stream, but found with extended search.
+10-31 23:47:19.821 W/PackageManager( 1863): Missing required system package: br.com.bb.android, but found with extended search.
+10-31 23:47:19.825 W/PackageManager( 1863): Missing required system package: com.vupth.client.dev, but found with extended search.
+10-31 23:47:19.845 W/PackageManager( 1863): Missing required system package: com.google.android.apps.fitness, but found with extended search.
+10-31 23:47:19.856 W/PackageManager( 1863): Missing required system package: com.huami.watch.hmwatchmanager, but found with extended search.
+10-31 23:47:19.857 W/PackageManager( 1863): Missing required system package: br.com.starapp.appbarbercli, but found with extended search.
+10-31 23:47:19.869 W/PackageManager( 1863): Missing required system package: com.google.android.apps.walletnfcrel, but found with extended search.
+10-31 23:47:19.878 W/PackageManager( 1863): Missing required system package: com.glassdoor.app, but found with extended search.
+10-31 23:47:19.896 W/PackageManager( 1863): Missing required system package: com.netflix.mediaclient, but found with extended search.
+10-31 23:47:19.913 W/PackageManager( 1863): Missing required system package: com.spotify.music, but found with extended search.
+10-31 23:47:19.914 W/PackageManager( 1863): Missing required system package: com.x8bit.bitwarden, but found with extended search.
+10-31 23:47:19.918 W/PackageManager( 1863): Missing required system package: com.ubercab, but found with extended search.
+10-31 23:47:19.921 W/PackageManager( 1863): Missing required system package: com.mercadolibre, but found with extended search.
+10-31 23:47:19.926 W/PackageManager( 1863): Missing required system package: com.microsoft.office.officehubrow, but found with extended search.
+10-31 23:47:19.929 W/PackageManager( 1863): Missing required system package: br.gov.serpro.cnhe, but found with extended search.
+10-31 23:47:19.943 W/PackageManager( 1863): Missing required system package: com.bradesco, but found with extended search.
+10-31 23:47:19.957 W/PackageManager( 1863): Missing required system package: br.com.poupex.m, but found with extended search.
+10-31 23:47:19.959 W/PackageManager( 1863): Missing required system package: br.mil.mar.sim.iddigitalmarinha, but found with extended search.
+10-31 23:47:19.961 W/PackageManager( 1863): Missing required system package: com.adidas.app, but found with extended search.
+10-31 23:47:19.973 W/PackageManager( 1863): Missing required system package: com.google.android.apps.translate, but found with extended search.
+10-31 23:47:19.978 W/PackageManager( 1863): Missing required system package: com.picpay, but found with extended search.
+10-31 23:47:19.979 W/PackageManager( 1863): Missing required system package: com.vupth.client, but found with extended search.
+10-31 23:47:19.983 W/PackageManager( 1863): Missing required system package: com.linkedin.android, but found with extended search.
+10-31 23:47:20.009 W/PackageManager( 1863): Missing required system package: com.anthropic.claude, but found with extended search.
+10-31 23:47:20.028 W/PackageManager( 1863): Missing required system package: com.google.android.keep, but found with extended search.
+10-31 23:47:20.036 W/PackageManager( 1863): Missing required system package: br.com.bradesco.next, but found with extended search.
+10-31 23:47:20.038 W/PackageManager( 1863): Missing required system package: com.duckduckgo.mobile.android, but found with extended search.
+10-31 23:47:20.044 W/PackageManager( 1863): Missing required system package: com.fandom.app, but found with extended search.
+10-31 23:47:20.052 W/PackageManager( 1863): Missing required system package: com.azure.authenticator, but found with extended search.
+10-31 23:47:20.060 W/PackageManager( 1863): Missing required system package: com.sympla.tickets, but found with extended search.
+10-31 23:47:20.071 W/PackageManager( 1863): Missing required system package: com.gympass, but found with extended search.
+10-31 23:47:20.074 W/PackageManager( 1863): Missing required system package: br.com.reclameaqui.app, but found with extended search.
+10-31 23:47:20.077 W/PackageManager( 1863): Missing required system package: com.inmobi.weather, but found with extended search.
+10-31 23:47:20.084 W/PackageManager( 1863): Missing required system package: notion.id, but found with extended search.
+10-31 23:47:20.085 W/PackageManager( 1863): Missing required system package: com.google.android.apps.adm, but found with extended search.
+10-31 23:47:20.088 W/PackageManager( 1863): Missing required system package: com.stremio.one, but found with extended search.
+10-31 23:47:20.089 W/PackageManager( 1863): Missing required system package: com.FDGEntertainment.BananaKong2.gp, but found with extended search.
+10-31 23:47:20.093 W/PackageManager( 1863): Missing required system package: com.runtastic.android, but found with extended search.
+10-31 23:47:20.104 W/PackageManager( 1863): Missing required system package: com.riocardmais.autoatendimento, but found with extended search.
+10-31 23:47:20.106 W/PackageManager( 1863): Missing required system package: com.amazon.kindle, but found with extended search.
