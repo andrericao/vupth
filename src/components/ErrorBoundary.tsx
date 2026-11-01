@@ -2,6 +2,8 @@ import { Component, ErrorInfo, ReactNode } from "react";
 import { VStack, Text, Heading, Box, ScrollView } from "@gluestack-ui/themed";
 
 import { Button } from "@components/Button";
+import { forcarModoSeguro } from "../boot/aberturas";
+import { capturarErro } from "@utils/sentry";
 
 // Rede de seguranca contra erro de RENDER. Ate 2026-09-07 o app nao tinha
 // nenhuma: qualquer excecao ao renderizar derrubava o processo, e o usuario via
@@ -40,9 +42,23 @@ export class ErrorBoundary extends Component<Props, State> {
     // Vai pro Metro quando ligado, e pro logcat quando nao. E o unico rastro
     // que existe hoje — nao ha coletor de crash no projeto.
     console.error("[ErrorBoundary]", error, info.componentStack);
+    // log-de-falha-na-abertura: tambem vai ao Sentry (ja limpo de dado pessoal), com a versao e o OTA nas tags.
+    capturarErro(error);
   }
 
   reset = () => this.setState({ error: null });
+
+  // "Abrir em modo seguro": grava que a proxima abertura sobe sem o opcional (cache salvo, push em segundo plano) e
+  // recarrega o app. Sem como recarregar (binario sem expo-updates), so tenta de novo.
+  abrirEmModoSeguro = async () => {
+    await forcarModoSeguro();
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      await require("expo-updates").reloadAsync();
+    } catch {
+      this.reset();
+    }
+  };
 
   render() {
     const { error } = this.state;
@@ -72,6 +88,7 @@ export class ErrorBoundary extends Component<Props, State> {
           </Box>
 
           <Button title="Tentar de novo" onPress={this.reset} />
+          <Button title="Abrir em modo seguro" variant="outline" onPress={this.abrirEmModoSeguro} testID="abrir-em-modo-seguro" />
         </VStack>
       </ScrollView>
     );

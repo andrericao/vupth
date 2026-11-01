@@ -1,9 +1,14 @@
 import { Text } from "react-native";
-import { render, fireEvent, screen } from "@testing-library/react-native";
+import { render, fireEvent, screen, waitFor } from "@testing-library/react-native";
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 
 import { config } from "../../../config/gluestack-ui.config";
 import { ErrorBoundary } from "@components/ErrorBoundary";
+import * as SecureStore from "expo-secure-store";
+import * as Updates from "expo-updates";
+
+jest.mock("expo-updates", () => ({ reloadAsync: jest.fn() }));
+jest.mock("expo-secure-store", () => ({ getItemAsync: jest.fn(), setItemAsync: jest.fn().mockResolvedValue(undefined) }));
 
 // O app nao tinha rede nenhuma contra erro de render: a excecao derrubava o
 // processo e o usuario via o app FECHAR SOZINHO, sem mensagem e sem log. Foi o
@@ -74,5 +79,35 @@ describe("erro de render nao fecha mais o app", () => {
     );
     fireEvent.press(screen.getByText("Tentar de novo"));
     expect(screen.getByText("conteudo")).toBeTruthy();
+  });
+
+  // log-de-falha-na-abertura (DEC-152): a tela de recuperacao oferece o modo seguro.
+  it('"Abrir em modo seguro" grava as duas quedas e, sem como recarregar, tenta de novo', async () => {
+    let quebrar = true;
+    function Q(): React.ReactElement {
+      if (quebrar) throw new Error("boom");
+      return <Text>conteudo</Text>;
+    }
+    renderComTema(
+      <ErrorBoundary>
+        <Q />
+      </ErrorBoundary>,
+    );
+    quebrar = false;
+    (Updates.reloadAsync as jest.Mock).mockRejectedValueOnce(new Error("sem como recarregar"));
+    fireEvent.press(screen.getByTestId("abrir-em-modo-seguro"));
+    await screen.findByText("conteudo");
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith("vupth_aberturas", '{"pendentes":2}');
+  });
+
+  it('"Abrir em modo seguro" recarrega o app quando da', async () => {
+    (Updates.reloadAsync as jest.Mock).mockResolvedValueOnce(undefined);
+    renderComTema(
+      <ErrorBoundary>
+        <Quebra quebrar />
+      </ErrorBoundary>,
+    );
+    fireEvent.press(screen.getByTestId("abrir-em-modo-seguro"));
+    await waitFor(() => expect(Updates.reloadAsync).toHaveBeenCalled());
   });
 });

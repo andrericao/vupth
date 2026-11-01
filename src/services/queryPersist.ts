@@ -1,4 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { iniciarAbertura } from "../boot/aberturas";
+import type { Persister } from "@tanstack/react-query-persist-client";
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import type { Query } from "@tanstack/react-query";
 
@@ -42,6 +45,19 @@ export const persister = createAsyncStoragePersister({
   storage: AsyncStorage,
   key: "vupth_query_cache",
 });
+
+/**
+ * log-de-falha-na-abertura: o cache salvo e opcional. Em modo seguro (o app caiu duas vezes seguidas na abertura) ele
+ * nao e lido nem gravado: se o cache era o que derrubava, a abertura passa sem ele. A decisao e async (le o aparelho),
+ * entao o proprio persister espera por ela.
+ */
+export const persisterDaAbertura: Persister = {
+  persistClient: async (cliente) => {
+    if (!(await iniciarAbertura()).seguro) await persister.persistClient(cliente);
+  },
+  restoreClient: async () => ((await iniciarAbertura()).seguro ? undefined : persister.restoreClient()),
+  removeClient: () => persister.removeClient(),
+};
 
 /** Sair da conta apaga o cache salvo (estudo-desempenho, proposta 6): o proximo login parte limpo. */
 export async function limparCacheSalvo(): Promise<void> {

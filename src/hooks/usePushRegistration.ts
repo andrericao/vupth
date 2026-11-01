@@ -42,6 +42,7 @@ import { usePendenciaStore } from "@stores/pendenciaStore";
 import { useQueueStore } from "@stores/queueStore";
 import { useQuedaBruscaStore } from "@stores/quedaBruscaStore";
 import { quedaBruscaDoPush } from "@domain/queda/quedaBrusca";
+import { useModoSeguroStore } from "@stores/modoSeguroStore";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { PUSH_PERGUNTADO_KEY } from "@hooks/ofertaDePush";
 import { usePushDiagnosticsStore } from "@stores/pushDiagnosticsStore";
@@ -88,9 +89,14 @@ export function usePushRegistration() {
   // dela, quem nunca respondeu fica sem token — o efeito roda de novo quando a
   // tela e respondida.
   const pushAsked = useFirstRunStore((s) => s.pushAsked);
+  // log-de-falha-na-abertura: em modo seguro (duas quedas seguidas na abertura) o push em segundo plano fica desligado
+  // nesta abertura; antes de o aparelho responder se e seguro, tambem espera (`lido`).
+  const modoSeguroLido = useModoSeguroStore((s) => s.lido);
+  const modoSeguro = useModoSeguroStore((s) => s.seguro);
 
   // Android exige um canal para exibir notificações.
   useEffect(() => {
+    if (!modoSeguroLido || modoSeguro) return;
     if (Platform.OS === "android") {
       try {
         // HIGH (Andre, 02/10): aparece no topo na hora, sem esperar. O Backend
@@ -110,11 +116,12 @@ export function usePushRegistration() {
         // binário sem o módulo nativo de push.
       }
     }
-  }, []);
+  }, [modoSeguroLido, modoSeguro]);
 
   // O botao "OK" na propria notificacao (app fechado): so fecha, nao abre o app.
   // Aparece quando o push vem com categoryId "CIENCIA" (Backend).
   useEffect(() => {
+    if (!modoSeguroLido || modoSeguro) return;
     try {
       Notifications.setNotificationCategoryAsync(CATEGORIA_CIENCIA, [
         { identifier: ACAO_OK, buttonTitle: "OK", options: { opensAppToForeground: false } },
@@ -145,11 +152,12 @@ export function usePushRegistration() {
     } catch {
       // binário sem o módulo nativo de push.
     }
-  }, []);
+  }, [modoSeguroLido, modoSeguro]);
 
   // Aquisição de token + POST /devices (uma vez por sessão autenticada).
   useEffect(() => {
     if (!isAuthenticated || !accessToken || didRegister.current) return;
+    if (!modoSeguroLido || modoSeguro) return;
     let cancelled = false;
     // A espera entre tentativas precisa morrer junto com a sessão: um timer de
     // 25s solto depois do logout seguraria o processo e dispararia um POST com
@@ -215,7 +223,7 @@ export function usePushRegistration() {
       clearTimeout(timer);
       acordar?.();
     };
-  }, [isAuthenticated, accessToken, pushAsked, registrarTentativa, registrarEnvio]);
+  }, [isAuthenticated, accessToken, pushAsked, registrarTentativa, registrarEnvio, modoSeguroLido, modoSeguro]);
 
   // Ao deslogar, permitir novo registro na próxima sessão.
   useEffect(() => {
