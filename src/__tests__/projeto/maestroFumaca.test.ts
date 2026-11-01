@@ -32,7 +32,8 @@ describe("Maestro 00b — teste de fumaça", () => {
   it("tem fases: versão, fumaça com teto de 5 min, e só depois a regressão", () => {
     expect(bateria).toMatch(/--fumaca\) FASE="fumaca"/);
     expect(bateria).toMatch(/--regressao\) FASE="regressao"/);
-    expect(bateria).toMatch(/FUMACA_PRAZO="\$\{FUMACA_PRAZO:-300\}"/);
+    expect(bateria).toMatch(/emulador\) FUMACA_PRAZO="\$\{FUMACA_PRAZO:-600\}"/);
+    expect(bateria).toMatch(/\*\) FUMACA_PRAZO="\$\{FUMACA_PRAZO:-300\}"/);
     expect(bateria).toMatch(/case "\$nome" in 00b_\*\) prazo="\$FUMACA_PRAZO"/);
     expect(bateria).toMatch(/A regressao so roda depois da fumaca verde neste commit/);
     expect(ler(".maestro/avulsas/00b_fumaca.yaml")).toMatch(/tags:\s*\n\s*- smoke/);

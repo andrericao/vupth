@@ -163,7 +163,8 @@ ETAPAS_PADRAO="00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 2
 # Fases (André, 01/11): 1) a versao (00) so confere a atualizacao; 2) a fumaca (00b) tem teto de 5 min contados do
 # inicio dela; 3) passou, a vez vai para as outras equipes; 4) so depois a regressao completa. A regressao nao
 # repete a fumaca, mas recusa rodar se a fumaca nao passou NESTE commit (aprovados.txt).
-FUMACA_PRAZO="${FUMACA_PRAZO:-300}"
+# Teto por perfil (aprovado 01/11): celular 300 s; emulador 600 s (a abertura limpa sozinha leva ~40 s la).
+case "$PERFIL" in emulador) FUMACA_PRAZO="${FUMACA_PRAZO:-600}" ;; *) FUMACA_PRAZO="${FUMACA_PRAZO:-300}" ;; esac
 case "$FASE" in
   fumaca) ETAPAS=${ETAPAS:-"00b"} ;;
   regressao) ETAPAS=${ETAPAS:-"${ETAPAS_PADRAO#00b }"} ;;
