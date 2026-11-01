@@ -919,7 +919,7 @@ export function QueueStatus() {
           />
 
           {/* nome-e-informacoes-sobem-como-no-mockup (André, 30/10): o nome e a loja logo abaixo do carrossel, o vão do mockup (14 px). */}
-          <VStack px={16} pt="$3.5" gap="$3.5">
+          <VStack flex={1} px={16} pt="$3.5" gap="$3.5" testID="aguardando-faixas">
             <VStack>
               <Text fontFamily="$display" fontSize={fs(20)} letterSpacing={-0.5} color={cores.onGreen} testID="queue-professional">
                 {activeQueue?.professionalName ?? paramProfName ?? "Atendimento"}
@@ -930,40 +930,45 @@ export function QueueStatus() {
               </Text>
             </VStack>
 
-            {/* Faixa do meio: o cronômetro mm:ss com "tempo estimado" (DEC-149, mockup 2). Conta os segundos também com o
-                número de pessoas oculto. No 0:00, "Sua vez chegou!" ocupa o lugar do rótulo. */}
-            <VStack alignItems="center" py="$1.5" testID="cronometro-da-vez">
-              <Text
-                fontFamily="$display"
-                fontSize={fs(segundosAteAVez == null ? 30 : 84)}
-                lineHeight={fs(segundosAteAVez == null ? 34 : 88)}
-                letterSpacing={-3}
-                color={cores.onGreen}
-                testID="queue-time"
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.5}
-              >
-                {segundosAteAVez == null ? "Calculando..." : formatElapsed(segundosAteAVez)}
-              </Text>
-              {segundosAteAVez === 0 ? (
-                <SuaVezChegou cor={cores.onGreen} />
-              ) : (
-                <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">
-                  {semPrevisao ? "calculando a espera" : "tempo estimado"}
+            {/* aguardando-distribuir-faixas (print do André, 01/11): o espaço livre se divide acima e abaixo do
+                cronômetro (margin-top:auto do mockup); carrossel e nome ficam no topo e as informações descem. */}
+            <VStack flex={1} justifyContent="center" gap="$3.5" testID="faixa-do-cronometro">
+              {/* Faixa do meio: o cronômetro mm:ss com "tempo estimado" (DEC-149, mockup 2). Conta os segundos também com o
+                  número de pessoas oculto. No 0:00, "Sua vez chegou!" ocupa o lugar do rótulo. */}
+              <VStack alignItems="center" py="$1.5" testID="cronometro-da-vez">
+                <Text
+                  fontFamily="$display"
+                  fontSize={fs(segundosAteAVez == null ? 30 : 84)}
+                  lineHeight={fs(segundosAteAVez == null ? 34 : 88)}
+                  letterSpacing={-3}
+                  color={cores.onGreen}
+                  testID="queue-time"
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.5}
+                >
+                  {segundosAteAVez == null ? "Calculando..." : formatElapsed(segundosAteAVez)}
+                </Text>
+                {segundosAteAVez === 0 ? (
+                  <SuaVezChegou cor={cores.onGreen} />
+                ) : (
+                  <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">
+                    {semPrevisao ? "calculando a espera" : "tempo estimado"}
+                  </Text>
+                )}
+              </VStack>
+
+              {passed > 0 && initial != null && (
+                <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color="#163300CC" textAlign="center">
+                  Você já passou {passed} {passed === 1 ? "pessoa" : "pessoas"}
                 </Text>
               )}
-            </VStack>
 
-            {passed > 0 && initial != null && (
-              <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color="#163300CC" textAlign="center">
-                Você já passou {passed} {passed === 1 ? "pessoa" : "pessoas"}
-              </Text>
-            )}
+            </VStack>
 
             {/* Informações embaixo, nesta ordem: pessoas à frente (some se o profissional ocultar), início estimado
                 (hora do cálculo, sem segundos) e valor do serviço. A ~44 px do botão Opções. */}
-            <VStack gap="$2.5" style={{ marginBottom: 44 }}>
+            <VStack gap="$2.5" style={{ marginBottom: 44 }} testID="faixa-das-informacoes">
               {peopleAhead != null && (
                 <HStack justifyContent="space-between" alignItems="baseline">
                   <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen}>Pessoas à frente</Text>

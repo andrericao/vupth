@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
 import { useQueueCountdown } from '@hooks/useQueueCountdown';
@@ -121,5 +122,23 @@ describe('QueueStatus — o interruptor da posição', () => {
     expect(getByTestId('queue-time')).toHaveTextContent('0:00');
     expect(getByText('Sua vez chegou!')).toBeTruthy();
     expect(queryByText('tempo estimado')).toBeNull();
+  });
+
+  // aguardando-distribuir-faixas (print do André, 01/11): o espaço livre se divide acima e abaixo do cronômetro e as
+  // informações descem (margin-top:auto do mockup). Sem isso a tela inteira ficava colada no topo.
+  it.each([true, false])('as faixas ocupam a altura: o cronometro centraliza no espaco livre (posicao liberada: %s)', (liberada) => {
+    mockMostra.mockReturnValue(liberada);
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    const estilo = (id: string) => StyleSheet.flatten(getByTestId(id).props.style as never) as Record<string, unknown>;
+    expect(estilo('aguardando-faixas').flex).toBe(1);
+    expect(estilo('faixa-do-cronometro').flex).toBe(1);
+    expect(estilo('faixa-do-cronometro').justifyContent).toBe('center');
+  });
+
+  it('as informacoes ficam numa faixa propria, a 44 px do rodape', () => {
+    mockMostra.mockReturnValue(true);
+    const { getByTestId } = renderWithProviders(<QueueStatus />);
+    const info = StyleSheet.flatten(getByTestId('faixa-das-informacoes').props.style as never) as Record<string, unknown>;
+    expect(info.marginBottom).toBe(44);
   });
 });
