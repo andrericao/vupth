@@ -166,6 +166,14 @@ appId: ${APP_ID}
       - tapOn:
           text: "Agora não"
     label: "05.1C2 · fecha o 'Pode fechar o app', se subiu depois da tolerância"
+# bateria 230153: as 30 voltas acabaram com a faixa "ate 23:23" e o relogio em 23:23 (o relogio do aparelho e o do
+# servidor diferem por ~1 min). Espera ate 3 min a faixa sumir de fato antes de conferir.
+- extendedWaitUntil:
+    notVisible:
+      text: ".*(sem|em).*custo.*"
+    timeout: ${180000 * LENTO}
+    optional: true
+    label: "05.1C3 · espera a faixa sair (ate 3 min de folga)"
 - assertNotVisible:
     text: ".*(sem|em).*custo.*"
     label: "05.1D · confere que a faixa saiu"
