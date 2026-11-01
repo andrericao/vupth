@@ -7,3 +7,5 @@ A bateria completa (`bateria.sh`) é o teste de regressão; a etapa 00b é o tes
 | Bug (apelido) | Caminho que quebrou | Etapa/passo que o guarda | Commit |
 |---|---|---|---|
 | (nenhum registrado ainda) | | | |
+
+**Em aberto (01/11):** a etapa 22 ainda paga por Atendimentos → "pagar-*"; hoje o app abre o aviso "Pagamento pendente" (Pagar / Agora não) sozinho ao voltar ao Client. Ajustar a 22 para o mesmo caminho da fumaça (00b) quando a fumaça estiver verde.
