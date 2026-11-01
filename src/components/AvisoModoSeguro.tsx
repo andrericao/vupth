@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Pressable, Text } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 
 import { useTema } from "@hooks/useTema";
 import { fs } from "@stores/fonteStore";
@@ -11,7 +11,9 @@ import { useModoSeguroStore } from "@stores/modoSeguroStore";
 export function AvisoModoSeguro() {
   const seguro = useModoSeguroStore((s) => s.lido && s.seguro);
   const [fechado, setFechado] = useState(false);
-  const insets = useSafeAreaInsets();
+  // Sem o provider (ex.: o aviso fora da arvore de insets) o contexto vem nulo: usa 0 em vez de lancar. Um aviso de
+  // seguranca nao pode ser, ele mesmo, o que derruba a abertura.
+  const insets = useContext(SafeAreaInsetsContext) ?? { bottom: 0 };
   const { cores } = useTema();
   if (!seguro || fechado) return null;
   return (
