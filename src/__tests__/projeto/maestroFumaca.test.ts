@@ -23,10 +23,19 @@ describe("Maestro 00b — teste de fumaça", () => {
   });
 
   it("roda primeiro, sempre, e a falha para a bateria", () => {
-    expect(bateria).toMatch(/ETAPAS=\$\{ETAPAS:-"00b 01 /);
+    expect(bateria).toMatch(/ETAPAS_PADRAO="00b 01 /);
     expect(bateria).toMatch(/\[ "\$n" != "00b" \] && aprovada/);
     expect(bateria).toMatch(/if \[ "\$n" = "00b" \]; then[\s\S]*?break/);
     expect(bateria).toMatch(/CONJUNTAS="00b /);
+  });
+
+  it("tem fases: versão, fumaça com teto de 5 min, e só depois a regressão", () => {
+    expect(bateria).toMatch(/--fumaca\) FASE="fumaca"/);
+    expect(bateria).toMatch(/--regressao\) FASE="regressao"/);
+    expect(bateria).toMatch(/FUMACA_PRAZO="\$\{FUMACA_PRAZO:-300\}"/);
+    expect(bateria).toMatch(/case "\$nome" in 00b_\*\) prazo="\$FUMACA_PRAZO"/);
+    expect(bateria).toMatch(/A regressao so roda depois da fumaca verde neste commit/);
+    expect(ler(".maestro/avulsas/00b_fumaca.yaml")).toMatch(/tags:\s*\n\s*- smoke/);
   });
 
   it("diz que não prova o dinheiro nem o Pix do gateway", () => {

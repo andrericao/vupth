@@ -2,6 +2,8 @@
 # A bateria do Client com UM comando (Andre, 03/10 — commit-sem-flag):
 #
 #   bash .maestro/bateria.sh              # pergunta: completa ou so as que nao passaram
+#   bash .maestro/bateria.sh --fumaca     # SO a versao (00) e a fumaca (00b, teto de 5 min); a 1a fase
+#   bash .maestro/bateria.sh --regressao  # a regressao completa; recusa se a fumaca nao passou neste commit
 #   bash .maestro/bateria.sh --completa   # roda todas, sem perguntar
 #   bash .maestro/bateria.sh --falhas     # so as que nao passaram, sem perguntar
 #   bash .maestro/bateria.sh --completa --publicar-ota  # publica o OTA da dev antes (publicar-ota.sh)
@@ -40,12 +42,15 @@ fi
 # Os argumentos: o modo (--completa/--falhas) e o aparelho (--device <serial>).
 # Antes so o $1 era lido, e o "--device emulator-5554" virava o modo (10/10).
 MODO=""
+FASE=""
 APARELHO=""
 PERFIL=""
 PUBLICAR_OTA=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --completa|--falhas) MODO="$1" ;;
+    --fumaca) FASE="fumaca" ;;
+    --regressao) FASE="regressao" ;;
     --publicar-ota) PUBLICAR_OTA="--publicar-ota" ;;
     --device) APARELHO="$2"; shift ;;
     --perfil) PERFIL="$2"; shift ;;
@@ -150,7 +155,16 @@ echo ""
 # commit errado no aparelho, nenhuma etapa diz nada.
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
-ETAPAS=${ETAPAS:-"00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27"}
+ETAPAS_PADRAO="00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27"
+# Fases (André, 01/11): 1) a versao (00) so confere a atualizacao; 2) a fumaca (00b) tem teto de 5 min contados do
+# inicio dela; 3) passou, a vez vai para as outras equipes; 4) so depois a regressao completa. A regressao nao
+# repete a fumaca, mas recusa rodar se a fumaca nao passou NESTE commit (aprovados.txt).
+FUMACA_PRAZO="${FUMACA_PRAZO:-300}"
+case "$FASE" in
+  fumaca) ETAPAS=${ETAPAS:-"00b"} ;;
+  regressao) ETAPAS=${ETAPAS:-"${ETAPAS_PADRAO#00b }"} ;;
+  *) ETAPAS=${ETAPAS:-"$ETAPAS_PADRAO"} ;;
+esac
 
 # bateria-conjunta: as etapas que abrem o Partner no mesmo celular. Precisam do
 # APK do Partner instalado e do vupth-partner clonado ao lado do vupth (os
@@ -186,14 +200,22 @@ if [ "$MODO" != "--completa" ] && [ "$MODO" != "--falhas" ]; then
   echo ""
   if [ "$RESP" = "c" ] || [ "$RESP" = "C" ]; then MODO="--completa"; else MODO="--falhas"; fi
 fi
+FUMACA_MARCA=$(grep "^00b " "$APROVADOS" 2>/dev/null)
 if [ "$MODO" = "--completa" ]; then
   rm -f "$APROVADOS"
+  # A marca da fumaca nao some com a regressao completa: ela vale por commit.
+  [ -n "$FUMACA_MARCA" ] && echo "$FUMACA_MARCA" > "$APROVADOS"
   echo "Completa: todas as etapas rodam."
 else
   echo "Só as que não passaram: as etapas já verdes em aprovados.txt ficam como ⏭."
 fi
 touch "$APROVADOS"
 aprovada() { grep -q "^$1 " "$APROVADOS"; }
+fumaca_neste_commit() { grep -q "^00b $COMMIT\$" "$APROVADOS"; }
+if [ "$FASE" = "regressao" ] && ! fumaca_neste_commit; then
+  echo "⛔ A regressao so roda depois da fumaca verde neste commit ($COMMIT). Rode: bash .maestro/bateria.sh --fumaca"
+  exit 3
+fi
 aprovar() { grep -vE "^$1 " "$APROVADOS" > "$APROVADOS.tmp"; echo "$1 $COMMIT" >> "$APROVADOS.tmp"; mv "$APROVADOS.tmp" "$APROVADOS"; }
 
 # Os prints "para o Andre" (apoio/para_o_andre.yaml) e a linha do que olhar.
@@ -238,6 +260,7 @@ rodar() {
   # (124), em vez de a bateria ficar parada para sempre. A 00 (versao) tem prazo proprio.
   local prazo="$ETAPA_PRAZO" verificada=1
   [ "$nome" = "00_atualizacao" ] && { prazo="$ATUALIZACAO_PRAZO"; verificada=0; }
+  case "$nome" in 00b_*) prazo="$FUMACA_PRAZO" ;; esac
   timeout -k 30 "$prazo" maestro "${MAESTRO_APARELHO[@]}" test \
     -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT_ACEITOS" \
     -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" -e PERFIL="$PERFIL" -e VERSAO_VERIFICADA="$verificada" \
@@ -325,7 +348,11 @@ else
       echo "⏭  $arquivo (só no celular: $por)" >> "$RODADA/relatorio.txt"
       continue
     fi
-    # A fumaça (00b) roda SEMPRE, mesmo no commit ja aprovado: e o portao da bateria.
+    # A fumaça (00b) e o portao: --fumaca sempre roda; fora dela so e pulada se ja passou NESTE commit.
+    if [ "$n" = "00b" ] && [ "$FASE" != "fumaca" ] && fumaca_neste_commit; then
+      echo "⏭  $arquivo (fumaça já verde neste commit $COMMIT)" >> "$RODADA/relatorio.txt"
+      continue
+    fi
     if [ "$n" != "00b" ] && aprovada "$n"; then
       echo "⏭  $arquivo (já passou no $(grep "^$n " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RODADA/relatorio.txt"
       continue
@@ -383,6 +410,9 @@ fi
 echo ""
 echo "=== Relatorio da rodada ==="
 cat "$RODADA/relatorio.txt"
+if [ "$FASE" = "fumaca" ]; then
+  if [ "$STATUS" -eq 0 ]; then echo "✅ FUMAÇA VERDE no $COMMIT: a vez passa para as outras equipes; a regressao so depois das fumacas de todas."; else echo "❌ FUMAÇA FALHOU no $COMMIT: nada mais roda."; fi
+fi
 
 # Rodadas antigas (limpar-logs, a regra do Partner): ja foram lidas — a
 # rodada desta vez e o estado atual. Verde ou vermelha, so ela pode ficar.

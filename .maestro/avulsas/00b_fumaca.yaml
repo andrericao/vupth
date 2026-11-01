@@ -1,6 +1,8 @@
 # Etapa avulsa 00b (teste de fumaça, DEC-157): logar, marcar um servico e pagar. Roda PRIMEIRO na bateria;
 # se falhar, a bateria para. Conjunta: usa o Partner para finalizar (precisa do APK e do ../vupth-partner).
 appId: ${APP_ID}
+tags:
+  - smoke
 env:
   APP_ID: com.vupth.client.preview
   API: https://vupth-backend-ia.onrender.com
