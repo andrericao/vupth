@@ -1,2 +1,0 @@
-
-Device ZF524LC5HC was requested, but it is not connected.

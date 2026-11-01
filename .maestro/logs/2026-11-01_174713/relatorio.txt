@@ -1,0 +1,3 @@
+✅ 00 · versão
+❌ 00b_fumaca — parou em antes do primeiro passo (10min21s) — TEMPO ESGOTADO (1500s)
+⛔ A fumaça (00b) falhou: a bateria para. Nada mais rodou.
