@@ -325,7 +325,7 @@ else
       echo "⏭  $arquivo (só no celular: $por)" >> "$RODADA/relatorio.txt"
       continue
     fi
-    # O essencial (28) roda SEMPRE, mesmo no commit ja aprovado: e o portao da bateria.
+    # A fumaça (28) roda SEMPRE, mesmo no commit ja aprovado: e o portao da bateria.
     if [ "$n" != "28" ] && aprovada "$n"; then
       echo "⏭  $arquivo (já passou no $(grep "^$n " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RODADA/relatorio.txt"
       continue
@@ -371,9 +371,9 @@ else
       echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo} ($DURA)$MOTIVO" >> "$RODADA/relatorio.txt"
       echo "${PASSO:-}" > "$RODADA/$arquivo/falhou_em"
       print_da_falha "$RODADA/$arquivo" "$PASSO"
-      # teste-do-essencial (DEC-157): se o essencial falha, o app instalado nao presta; as outras etapas nao dizem nada.
+      # teste de fumaça (DEC-157): se a fumaça falha, o app instalado nao presta; as outras etapas nao dizem nada.
       if [ "$n" = "28" ]; then
-        echo "⛔ O essencial (28) falhou: a bateria para. Nada mais rodou." >> "$RODADA/relatorio.txt"
+        echo "⛔ A fumaça (28) falhou: a bateria para. Nada mais rodou." >> "$RODADA/relatorio.txt"
         break
       fi
     fi

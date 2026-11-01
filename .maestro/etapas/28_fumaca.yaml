@@ -1,4 +1,4 @@
-# TESTE DO ESSENCIAL (teste-do-essencial, DEC-157): logar, marcar um serviço (entrar na fila) e pagar.
+# TESTE DE FUMACA (smoke test; teste-do-essencial, DEC-157): logar, marcar um serviço (entrar na fila) e pagar.
 # O que o Maestro prova aqui: o app instalado abre, entra com e-mail e senha, põe o cliente na fila e, quando o
 # profissional finaliza sem receber, abre o Pix do atendimento e aceita o "Já paguei".
 # O que NÃO prova: dinheiro real nem o Pix do Asaas (isso é do Backend: sandbox e a pasta "essencial" do Newman).

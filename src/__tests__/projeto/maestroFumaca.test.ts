@@ -10,16 +10,16 @@ const fontes = (dir: string): string =>
     .map((e) => (e.name === "__tests__" ? "" : e.isDirectory() ? fontes(`${dir}/${e.name}`) : /\.tsx?$/.test(e.name) ? ler(`${dir}/${e.name}`) : ""))
     .join("\n");
 
-describe("Maestro 28 — o essencial", () => {
-  const etapa = ler(".maestro/etapas/28_essencial.yaml");
+describe("Maestro 28 — teste de fumaça", () => {
+  const etapa = ler(".maestro/etapas/28_fumaca.yaml");
   const bateria = ler(".maestro/bateria.sh");
 
   it("a avulsa loga, abre a loja, escolhe o serviço e roda a etapa", () => {
-    const avulsa = ler(".maestro/avulsas/28_essencial.yaml");
+    const avulsa = ler(".maestro/avulsas/28_fumaca.yaml");
     expect(avulsa).toMatch(/etapas\/09_login\.yaml/);
     expect(avulsa).toMatch(/apoio\/abrir_a_loja\.yaml/);
     expect(avulsa).toMatch(/apoio\/escolher_servico\.yaml/);
-    expect(avulsa).toMatch(/etapas\/28_essencial\.yaml/);
+    expect(avulsa).toMatch(/etapas\/28_fumaca\.yaml/);
   });
 
   it("roda primeiro, sempre, e a falha para a bateria", () => {

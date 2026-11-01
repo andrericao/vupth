@@ -1,4 +1,4 @@
-# Etapa avulsa 28 (teste-do-essencial, DEC-157): logar, marcar um servico e pagar. Roda PRIMEIRO na bateria;
+# Etapa avulsa 28 (teste de fumaça, DEC-157): logar, marcar um servico e pagar. Roda PRIMEIRO na bateria;
 # se falhar, a bateria para. Conjunta: usa o Partner para finalizar (precisa do APK e do ../vupth-partner).
 appId: ${APP_ID}
 env:
@@ -41,8 +41,8 @@ env:
       EMAIL_PROF: ${output.EMAIL_PROF}
     label: "28.L2 · escolhe o serviço"
 - runFlow:
-    file: ../etapas/28_essencial.yaml
+    file: ../etapas/28_fumaca.yaml
     env:
       EMAIL_PROF: ${output.EMAIL_PROF}
       NOME_CLIENTE: ${output.NOME_CLIENTE}
-    label: "28.E1 · roda 28_essencial"
+    label: "28.E1 · roda 28_fumaca"
