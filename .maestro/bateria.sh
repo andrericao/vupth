@@ -150,12 +150,12 @@ echo ""
 # commit errado no aparelho, nenhuma etapa diz nada.
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
-ETAPAS=${ETAPAS:-"28 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27"}
+ETAPAS=${ETAPAS:-"00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27"}
 
 # bateria-conjunta: as etapas que abrem o Partner no mesmo celular. Precisam do
 # APK do Partner instalado e do vupth-partner clonado ao lado do vupth (os
 # subfluxos sao lidos de la). Sem um dos dois, elas ficam como ⏭.
-CONJUNTAS="18 19 21b 22 28"
+CONJUNTAS="00b 18 19 21b 22"
 
 # A 13 (push da vez) depende do push do sistema; no emulador o app nao oferece
 # a tela 10 nem pede token (Device.isDevice, bateria 11/10 06:06, 13.A7). Fica
@@ -325,8 +325,8 @@ else
       echo "⏭  $arquivo (só no celular: $por)" >> "$RODADA/relatorio.txt"
       continue
     fi
-    # A fumaça (28) roda SEMPRE, mesmo no commit ja aprovado: e o portao da bateria.
-    if [ "$n" != "28" ] && aprovada "$n"; then
+    # A fumaça (00b) roda SEMPRE, mesmo no commit ja aprovado: e o portao da bateria.
+    if [ "$n" != "00b" ] && aprovada "$n"; then
       echo "⏭  $arquivo (já passou no $(grep "^$n " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RODADA/relatorio.txt"
       continue
     fi
@@ -372,8 +372,8 @@ else
       echo "${PASSO:-}" > "$RODADA/$arquivo/falhou_em"
       print_da_falha "$RODADA/$arquivo" "$PASSO"
       # teste de fumaça (DEC-157): se a fumaça falha, o app instalado nao presta; as outras etapas nao dizem nada.
-      if [ "$n" = "28" ]; then
-        echo "⛔ A fumaça (28) falhou: a bateria para. Nada mais rodou." >> "$RODADA/relatorio.txt"
+      if [ "$n" = "00b" ]; then
+        echo "⛔ A fumaça (00b) falhou: a bateria para. Nada mais rodou." >> "$RODADA/relatorio.txt"
         break
       fi
     fi

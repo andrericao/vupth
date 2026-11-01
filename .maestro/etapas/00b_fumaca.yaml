@@ -9,45 +9,45 @@ appId: ${APP_ID}
 ---
 - tapOn:
     id: "primary-queue"
-    label: "28.01 · marcar: entra na fila"
+    label: "00b.01 · marcar: entra na fila"
 - runFlow:
     file: ../apoio/confirmar_chegada.yaml
-    label: "28.02 · confirma o aviso 'Esteja na loja', se vier"
+    label: "00b.02 · confirma o aviso 'Esteja na loja', se vier"
 - extendedWaitUntil:
     visible: "(Entendi|É quase a sua vez!|Avisar|Agora não)"
     timeout: ${60000 * LENTO}
     optional: true
-    label: "28.03 · espera as caixas de confirmação"
+    label: "00b.03 · espera as caixas de confirmação"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
-    label: "28.04 · fecha as caixas"
+    label: "00b.04 · fecha as caixas"
 - extendedWaitUntil:
     visible:
       id: "queue-position"
     timeout: ${60000 * LENTO}
-    label: "28.05 · a fila abre e mostra a posição"
+    label: "00b.05 · a fila abre e mostra a posição"
 - runFlow:
     file: ../apoio/abrir_partner.yaml
-    label: "28.06 · abre o Partner como o profissional"
+    label: "00b.06 · abre o Partner como o profissional"
 - runFlow:
     file: ../../../vupth-partner/.maestro/conjunta/prof_finalizar.yaml
     env:
       APP_ID: com.vupth.partner.preview
       CLIENTE: ${NOME_CLIENTE}
       PAGAMENTO: "Ainda não"
-    label: "28.07 · no Partner, atende e finaliza ${NOME_CLIENTE} sem receber"
+    label: "00b.07 · no Partner, atende e finaliza ${NOME_CLIENTE} sem receber"
 - launchApp:
     appId: ${APP_ID}
-    label: "28.08 · volta ao Client (sem limpar)"
+    label: "00b.08 · volta ao Client (sem limpar)"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
-    label: "28.09 · fecha as caixas"
+    label: "00b.09 · fecha as caixas"
 - extendedWaitUntil:
     visible:
       id: "pix-do-atendimento"
     timeout: ${30000 * LENTO}
     optional: true
-    label: "28.10 · o Pix abre na tela da fila, se ela ainda estiver aberta"
+    label: "00b.10 · o Pix abre na tela da fila, se ela ainda estiver aberta"
 - runFlow:
     when:
       visible:
@@ -55,34 +55,34 @@ appId: ${APP_ID}
     commands:
       - tapOn:
           id: "pagamento-fechar"
-    label: "28.11 · fecha (a conta segue em Atendimentos)"
+    label: "00b.11 · fecha (a conta segue em Atendimentos)"
 - tapOn:
     id: "faixa-avaliar-fechar"
     optional: true
-    label: "28.12 · fecha a faixa de avaliar, se apareceu"
+    label: "00b.12 · fecha a faixa de avaliar, se apareceu"
 - tapOn:
     text: "Atendimentos"
-    label: "28.13 · toca em Atendimentos"
+    label: "00b.13 · toca em Atendimentos"
 - extendedWaitUntil:
     visible:
       id: "pagamentos-pendentes"
     timeout: ${60000 * LENTO}
-    label: "28.14 · pagar: o que falta pagar aparece no topo"
+    label: "00b.14 · pagar: o que falta pagar aparece no topo"
 - tapOn:
     id: "pagar-.*"
-    label: "28.15 · abre o Pix"
+    label: "00b.15 · abre o Pix"
 - extendedWaitUntil:
     visible:
       id: "pix-ja-paguei"
     timeout: ${20000 * LENTO}
-    label: "28.16 · o Pix mostra o Já paguei"
+    label: "00b.16 · o Pix mostra o Já paguei"
 - tapOn:
     id: "pix-ja-paguei"
-    label: "28.17 · toca em Já paguei"
+    label: "00b.17 · toca em Já paguei"
 - extendedWaitUntil:
     visible: "Aguardando o profissional confirmar"
     timeout: ${20000 * LENTO}
-    label: "28.18 · o pagamento fica aguardando o profissional"
+    label: "00b.18 · o pagamento fica aguardando o profissional"
 - tapOn:
     id: "pix-ok"
-    label: "28.19 · fecha o Pix"
+    label: "00b.19 · fecha o Pix"

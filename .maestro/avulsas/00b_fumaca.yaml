@@ -1,4 +1,4 @@
-# Etapa avulsa 28 (teste de fumaça, DEC-157): logar, marcar um servico e pagar. Roda PRIMEIRO na bateria;
+# Etapa avulsa 00b (teste de fumaça, DEC-157): logar, marcar um servico e pagar. Roda PRIMEIRO na bateria;
 # se falhar, a bateria para. Conjunta: usa o Partner para finalizar (precisa do APK e do ../vupth-partner).
 appId: ${APP_ID}
 env:
@@ -9,17 +9,17 @@ env:
 - runFlow:
     file: ../apoio/preparo.yaml
     env:
-      ETAPA: "28"
+      ETAPA: "00b"
       LOJA: "1"
       CONTA: "1"
       ABERTURA: "1"
       FILA_FECHADA: "0"
-    label: "28.P0 · prepara a etapa"
+    label: "00b.P0 · prepara a etapa"
 - runFlow:
     file: ../etapas/09_login.yaml
     env:
       EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
-    label: "28.L0 · logar: sai da conta e entra de novo com e-mail e senha"
+    label: "00b.L0 · logar: sai da conta e entra de novo com e-mail e senha"
 - runFlow:
     file: ../apoio/abrir_a_loja.yaml
     env:
@@ -29,7 +29,7 @@ env:
       PROF_ID: ${output.PROF_ID}
       SERVICO_ID: ${output.SERVICO_ID}
       EMAIL_PROF: ${output.EMAIL_PROF}
-    label: "28.L1 · abre a loja de teste"
+    label: "00b.L1 · abre a loja de teste"
 - runFlow:
     file: ../apoio/escolher_servico.yaml
     env:
@@ -39,10 +39,10 @@ env:
       PROF_ID: ${output.PROF_ID}
       SERVICO_ID: ${output.SERVICO_ID}
       EMAIL_PROF: ${output.EMAIL_PROF}
-    label: "28.L2 · escolhe o serviço"
+    label: "00b.L2 · escolhe o serviço"
 - runFlow:
-    file: ../etapas/28_fumaca.yaml
+    file: ../etapas/00b_fumaca.yaml
     env:
       EMAIL_PROF: ${output.EMAIL_PROF}
       NOME_CLIENTE: ${output.NOME_CLIENTE}
-    label: "28.E1 · roda 28_fumaca"
+    label: "00b.E1 · roda 00b_fumaca"
