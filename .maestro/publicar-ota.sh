@@ -40,7 +40,11 @@ if ! (cd "$RAIZ" && "$EAS" whoami >/dev/null 2>&1) && [ -z "$EXPO_TOKEN" ]; then
 fi
 
 # ota-so-compativel (DEC-152): nao publica OTA para um app sem os modulos nativos dele.
-if ! (cd "$RAIZ" && node tools/guardaOta.js); then
+NODE="$(command -v node)"
+if [ -z "$NODE" ]; then
+  NODE="$(ls -1 "$HOME"/.nvm/versions/node/*/bin/node 2>/dev/null | tail -1)"
+fi
+if [ -z "$NODE" ] || ! (cd "$RAIZ" && "$NODE" tools/guardaOta.js); then
   echo "ERRO: o guarda do OTA bloqueou (o projeto nativo mudou, ou nao deu para comparar). Falta um build novo: nao publique o OTA."
   exit 5
 fi
