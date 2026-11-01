@@ -17,6 +17,7 @@ import { RatingModal } from "@components/RatingModal";
 import { RescheduleModal } from "@components/RescheduleModal";
 import { MoreOptionsModal } from "@components/MoreOptionsModal";
 import { avisarLimiteDeMultas } from "@utils/limiteDeMultas";
+import { SuaVezChegou } from "@components/SuaVezChegou";
 import { CarrosselDeCampanhas } from "@components/CarrosselDeCampanhas";
 import { useCampanhasAtivas } from "@hooks/useCampanhasAtivas";
 import { useTema } from "@hooks/useTema";
@@ -30,7 +31,8 @@ import { avisoDepoisDoIntervalo, avisoDoReagendamento } from "@domain/queue/hora
 import { AtualizarNoNavegador } from "@components/AtualizarNoNavegador";
 import { ehNavegador } from "@utils/ehNavegador";
 import { formatarReais } from "@utils/formatarReais";
-import { podeOferecerPush } from "@hooks/ofertaDePush";
+import { podeOferecerPush, TELA_DO_PUSH_VISIVEL } from "@hooks/ofertaDePush";
+import { useCronometroDaVez } from "@hooks/useCronometroDaVez";
 import { useFirstRunStore } from "@stores/firstRunStore";
 import { ChangeTurnModal } from "@components/ChangeTurnModal";
 import { SwapOffersModal } from "@components/SwapOffersModal";
@@ -99,18 +101,22 @@ export function QueueStatus() {
   const route = useRoute();
   const navigation = useNavigation<AppNavigatorRoutesProps>();
   const oferecerPush = useFirstRunStore((s) => s.oferecerPush);
+  const markPushAsked = useFirstRunStore((s) => s.markPushAsked);
 
   // ligar-push-permission (Andre, 05/10): a primeira vez na fila e quando o
   // aviso faz sentido — a tela 10 explica antes da caixa do sistema.
   useEffect(() => {
     let vivo = true;
     podeOferecerPush().then((pode) => {
-      if (pode && vivo) oferecerPush();
+      if (!pode || !vivo) return;
+      // Tela 10 oculta (DEC-149): marca como perguntado e a caixa do sistema vem direto.
+      if (TELA_DO_PUSH_VISIVEL) oferecerPush();
+      else markPushAsked();
     });
     return () => {
       vivo = false;
     };
-  }, [oferecerPush]);
+  }, [oferecerPush, markPushAsked]);
 
   const {
     professionalId,
@@ -130,6 +136,8 @@ export function QueueStatus() {
   const leaveQueue = useQueueStore((s) => s.leaveQueue);
   const updateQueue = useQueueStore((s) => s.updateQueue);
   const { remaining, semPrevisao, elapsedSeconds, color, isInQueue, isBeingAttended, isPaused, isFinished, activeQueue, refresh } = useQueueCountdown();
+  // O cronômetro da tela Aguardando conta os segundos (DEC-149); `null` enquanto o servidor não deu a previsão.
+  const segundosAteAVez = useCronometroDaVez(activeQueue, isInQueue);
   const mostraPosicao = useMostraPosicao(activeQueue?.establishmentId, activeQueue?.professionalId);
 
   const [isCreating, setIsCreating] = useState(false);
@@ -874,9 +882,6 @@ export function QueueStatus() {
     );
   }
 
-  // "Aguardando" (sem espera calculada) e uma PALAVRA, nao um tempo: numa fonte de numero ela quebra no meio ao lado do
-  // contador (prints do André, 31/10). O adjustsFontSizeToFit nao existe na web, entao a palavra ja nasce menor.
-  const textoDoTempo = !/\d/.test(String(timeLabel));
   if (waitingInQueue) {
     return (
       <VStack flex={1} bg="$brandGreen">
@@ -925,40 +930,30 @@ export function QueueStatus() {
               </Text>
             </VStack>
 
-            {/* O número de pessoas e o tempo: duas colunas. Com o número oculto pelo profissional, só o tempo, ao
-                centro. O tempo aparece sempre, sem o "~" (André, 29/10). */}
-            {peopleAhead != null ? (
-              <HStack alignItems="center" justifyContent="space-around" gap="$3" py="$1.5">
-                <VStack flex={1} alignItems="center">
-                  <NumeroComSalto valor={peopleAhead}>
-                    <Text fontFamily="$display" fontSize={fs(72)} lineHeight={fs(76)} letterSpacing={-3} color={cores.onGreen} testID="queue-position">
-                      {peopleAhead}
-                    </Text>
-                  </NumeroComSalto>
-                  <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">
-                    {peopleAhead === 0 ? "você é o próximo" : peopleAhead === 1 ? "pessoa à frente" : "pessoas à frente"}
-                  </Text>
-                </VStack>
-                <Box width={1} height={72} bg="#16330040" />
-                <VStack flex={1} alignItems="center">
-                  <Text fontFamily="$display" fontSize={fs(textoDoTempo ? 30 : 48)} lineHeight={fs(textoDoTempo ? 34 : 54)} letterSpacing={-2} color={cores.onGreen} testID="queue-time-coluna" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
-                    {timeLabel}
-                  </Text>
-                  <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">
-                    {semPrevisao ? "calculando a espera" : remaining! <= 0 ? "a qualquer momento" : "de espera"}
-                  </Text>
-                </VStack>
-              </HStack>
-            ) : (
-              <VStack alignItems="center" py="$1.5">
-                <Text fontFamily="$display" fontSize={fs(textoDoTempo ? 44 : 72)} lineHeight={fs(textoDoTempo ? 50 : 78)} letterSpacing={-3} color={cores.onGreen} testID="queue-time" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
-                  {timeLabel}
-                </Text>
+            {/* Faixa do meio: o cronômetro mm:ss com "tempo estimado" (DEC-149, mockup 2). Conta os segundos também com o
+                número de pessoas oculto. No 0:00, "Sua vez chegou!" ocupa o lugar do rótulo. */}
+            <VStack alignItems="center" py="$1.5" testID="cronometro-da-vez">
+              <Text
+                fontFamily="$display"
+                fontSize={fs(segundosAteAVez == null ? 30 : 84)}
+                lineHeight={fs(segundosAteAVez == null ? 34 : 88)}
+                letterSpacing={-3}
+                color={cores.onGreen}
+                testID="queue-time"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.5}
+              >
+                {segundosAteAVez == null ? "Calculando..." : formatElapsed(segundosAteAVez)}
+              </Text>
+              {segundosAteAVez === 0 ? (
+                <SuaVezChegou cor={cores.onGreen} />
+              ) : (
                 <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen} textAlign="center">
-                  {semPrevisao ? "calculando a espera" : remaining! <= 0 ? "a qualquer momento" : "de espera"}
+                  {semPrevisao ? "calculando a espera" : "tempo estimado"}
                 </Text>
-              </VStack>
-            )}
+              )}
+            </VStack>
 
             {passed > 0 && initial != null && (
               <Text fontFamily="$body" fontSize={fs(13)} fontWeight="$semibold" color="#163300CC" textAlign="center">
@@ -966,13 +961,30 @@ export function QueueStatus() {
               </Text>
             )}
 
-            {/* O valor do serviço fica sempre à vista (André, 29/10). */}
-            {activeQueue?.totalValue != null && (
-              <HStack justifyContent="space-between" alignItems="baseline" testID="valor-do-servico">
-                <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen}>Valor do serviço</Text>
-                <Text fontFamily="$display" fontSize={fs(18)} color={cores.onGreen}>{formatarReais(activeQueue.totalValue)}</Text>
+            {/* Informações embaixo, nesta ordem: pessoas à frente (some se o profissional ocultar), início estimado
+                (hora do cálculo, sem segundos) e valor do serviço. A ~44 px do botão Opções. */}
+            <VStack gap="$2.5" style={{ marginBottom: 44 }}>
+              {peopleAhead != null && (
+                <HStack justifyContent="space-between" alignItems="baseline">
+                  <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen}>Pessoas à frente</Text>
+                  <NumeroComSalto valor={peopleAhead}>
+                    <Text fontFamily="$display" fontSize={fs(18)} color={cores.onGreen} testID="queue-position">{peopleAhead}</Text>
+                  </NumeroComSalto>
+                </HStack>
+              )}
+              <HStack justifyContent="space-between" alignItems="baseline" testID="inicio-estimado">
+                <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen}>Início estimado</Text>
+                <Text fontFamily="$display" fontSize={fs(18)} color={cores.onGreen}>
+                  {semPrevisao ? "Calculando..." : startTimeLabel}
+                </Text>
               </HStack>
-            )}
+              {activeQueue?.totalValue != null && (
+                <HStack justifyContent="space-between" alignItems="baseline" testID="valor-do-servico">
+                  <Text fontFamily="$body" fontSize={fs(13)} color={cores.onGreen}>Valor do serviço</Text>
+                  <Text fontFamily="$display" fontSize={fs(18)} color={cores.onGreen}>{formatarReais(activeQueue.totalValue)}</Text>
+                </HStack>
+              )}
+            </VStack>
           </VStack>
           <Box mt="$3.5" alignItems="center">
             <AtualizarNoNavegador atualizando={refreshing} onPress={handleRefresh} />

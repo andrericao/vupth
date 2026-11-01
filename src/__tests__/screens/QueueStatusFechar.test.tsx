@@ -140,10 +140,11 @@ describe('QueueStatus — puxar para atualizar e a faixa da saída (cobertura-98
     expect(espera.queryByTestId('em-atendimento-valor')).toBeNull();
   });
 
-  it('na fila com a previsão vencida: "Aguardando"', () => {
-    estado({ remaining: 0 });
+  it('na fila com a previsão vencida: 0:00 e "Sua vez chegou!" (DEC-149)', () => {
+    estado({ remaining: 0, activeQueue: { ...FILA, enteredAt: Date.now() - 3600_000, estimatedMinutes: 1, status: 'SCHEDULED' } });
     const tela = renderWithProviders(<QueueStatus />);
-    expect(tela.getAllByText(/Aguardando/).length).toBeGreaterThan(0);
+    expect(tela.getByTestId('queue-time')).toHaveTextContent('0:00');
+    expect(tela.getByText('Sua vez chegou!')).toBeTruthy();
   });
 });
 

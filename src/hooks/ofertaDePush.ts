@@ -37,3 +37,10 @@ export async function podeOferecerPush(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * A tela 10 ("Pode fechar o app, nós te avisamos") fica OCULTA (aguardando-cronometro-e-vez, DEC-149, André 01/11):
+ * o código e o teste dela seguem, é só ligar de novo. Oculta, o app não a mostra e passa direto à caixa do sistema
+ * (quem pede é o `usePushRegistration` quando `pushAsked` vira true) — senão a notificação nunca seria pedida.
+ */
+export const TELA_DO_PUSH_VISIVEL = false;

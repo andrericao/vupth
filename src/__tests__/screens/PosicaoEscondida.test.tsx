@@ -1,4 +1,3 @@
-import { StyleSheet } from 'react-native';
 import { renderWithProviders } from '../utils/renderWithProviders';
 import { QueueStatus } from '@screens/QueueStatus';
 import { useQueueCountdown } from '@hooks/useQueueCountdown';
@@ -70,10 +69,10 @@ describe('QueueStatus — o interruptor da posição', () => {
 
   it('liberada: mostra quantas pessoas na frente e quantas já passaram', () => {
     mockMostra.mockReturnValue(true);
-    const { getByTestId, getByText, queryByTestId } = renderWithProviders(<QueueStatus />);
+    const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
     expect(getByTestId('queue-position')).toHaveTextContent('3');
     expect(getByText(/Você já passou 2 pessoas/)).toBeTruthy();
-    expect(queryByTestId('queue-time')).toBeNull();
+    expect(getByTestId('queue-time')).toBeTruthy();
   });
 
   it('escondida: nem número, nem bolinhas — o tempo assume o lugar', () => {
@@ -86,33 +85,41 @@ describe('QueueStatus — o interruptor da posição', () => {
     expect(mockMostra).toHaveBeenCalledWith('e1', 'p1');
   });
 
-  // aguardando-palavra-quebrada (prints do André, 31/10): sem espera calculada o estado "Aguardando" quebrava no
-  // meio da palavra ao lado do contador; agora fica numa linha só e encolhe para caber.
-  it('o estado ao lado do contador fica numa linha so e encolhe para caber (nao quebra "Aguardando" no meio)', () => {
-    mockMostra.mockReturnValue(true);
+  // aguardando-cronometro-e-vez (DEC-149): o cronometro fica numa linha so e encolhe para caber, com ou sem o numero.
+  it.each([true, false])('o cronometro fica numa linha so e encolhe para caber (posicao liberada: %s)', (liberada) => {
+    mockMostra.mockReturnValue(liberada);
     const { getByTestId } = renderWithProviders(<QueueStatus />);
-    const coluna = getByTestId('queue-time-coluna');
-    expect(coluna.props.numberOfLines).toBe(1);
-    expect(coluna.props.adjustsFontSizeToFit).toBe(true);
+    const tempo = getByTestId('queue-time');
+    expect(tempo.props.numberOfLines).toBe(1);
+    expect(tempo.props.adjustsFontSizeToFit).toBe(true);
   });
 
-  it('sem o contador, o estado tambem fica numa linha so e encolhe para caber', () => {
+  it('o cronometro mostra mm:ss com o rotulo "tempo estimado", e as linhas vem na ordem do mockup', () => {
+    mockMostra.mockReturnValue(true);
+    const base = fila();
+    mockCountdown.mockReturnValue({ ...base, activeQueue: { ...base.activeQueue, totalValue: 53.9 } });
+    const { getByTestId, getByText } = renderWithProviders(<QueueStatus />);
+    expect(getByTestId('queue-time')).toHaveTextContent(/^(39:5\d|40:00)$/);
+    expect(getByText('tempo estimado')).toBeTruthy();
+    expect(getByText('Pessoas à frente')).toBeTruthy();
+    expect(getByText('Início estimado')).toBeTruthy();
+    expect(getByText('Valor do serviço')).toBeTruthy();
+  });
+
+  it('com a posicao oculta, "Pessoas a frente" some e o cronometro segue', () => {
     mockMostra.mockReturnValue(false);
-    const { getByTestId } = renderWithProviders(<QueueStatus />);
-    const sozinho = getByTestId('queue-time');
-    expect(sozinho.props.numberOfLines).toBe(1);
-    expect(sozinho.props.adjustsFontSizeToFit).toBe(true);
+    const { queryByText, getByText } = renderWithProviders(<QueueStatus />);
+    expect(queryByText('Pessoas à frente')).toBeNull();
+    expect(getByText('Início estimado')).toBeTruthy();
   });
 
-  it('a palavra "Aguardando" (espera zerada) usa fonte menor que a de um tempo, para caber na coluna (e na web)', () => {
+  it('em 0:00 mostra "Sua vez chegou!" no lugar de "tempo estimado"', () => {
     mockMostra.mockReturnValue(true);
-    const tamanho = (no: { props: { style?: unknown } }) => (StyleSheet.flatten(no.props.style as never) as { fontSize: number }).fontSize;
-    mockCountdown.mockReturnValue({ ...fila(), remaining: 0 });
-    const palavra = renderWithProviders(<QueueStatus />);
-    const daPalavra = tamanho(palavra.getByTestId('queue-time-coluna'));
-    palavra.unmount();
-    mockCountdown.mockReturnValue(fila());
-    const tempo = renderWithProviders(<QueueStatus />);
-    expect(daPalavra).toBeLessThan(tamanho(tempo.getByTestId('queue-time-coluna')));
+    const base = fila();
+    mockCountdown.mockReturnValue({ ...base, remaining: 0, activeQueue: { ...base.activeQueue, enteredAt: Date.now() - 41 * 60000 } });
+    const { getByText, queryByText, getByTestId } = renderWithProviders(<QueueStatus />);
+    expect(getByTestId('queue-time')).toHaveTextContent('0:00');
+    expect(getByText('Sua vez chegou!')).toBeTruthy();
+    expect(queryByText('tempo estimado')).toBeNull();
   });
 });

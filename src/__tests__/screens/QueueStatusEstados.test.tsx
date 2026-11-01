@@ -21,7 +21,13 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 47, bottom: 34, left: 0, right: 0 }),
 }));
 let mockPodeOferecer = false;
-jest.mock('@hooks/ofertaDePush', () => ({ podeOferecerPush: () => Promise.resolve(mockPodeOferecer) }));
+let mockTelaDoPush = true;
+jest.mock('@hooks/ofertaDePush', () => ({
+  podeOferecerPush: () => Promise.resolve(mockPodeOferecer),
+  get TELA_DO_PUSH_VISIVEL() {
+    return mockTelaDoPush;
+  },
+}));
 jest.mock('@hooks/useMostraPosicao', () => ({ useMostraPosicao: () => true }));
 jest.mock('@hooks/useQueueCountdown', () => ({ useQueueCountdown: () => mockEstado }));
 const mockPagamento = jest.fn();
@@ -81,6 +87,7 @@ function estado(over: Record<string, unknown>) {
 beforeEach(() => {
   jest.clearAllMocks();
   mockPodeOferecer = false;
+  mockTelaDoPush = true;
   mockPagamento.mockResolvedValue({ data: { status: 'PAID', amount: 30 } });
 });
 
@@ -173,6 +180,20 @@ describe('QueueStatus — a tela 10 na primeira fila', () => {
     useFirstRunStore.setState({ restored: true, pushAsked: false, pushOferta: false });
     renderWithProviders(<QueueStatus />);
     await waitFor(() => expect(useFirstRunStore.getState().pushOferta).toBe(true));
+  });
+
+  // aguardando-cronometro-e-vez (DEC-149): com a tela 10 oculta, nao ha oferta; marca como perguntado e a caixa do
+  // sistema vem direto (senao a notificacao nunca seria pedida).
+  it('com a tela oculta, nao oferece e deixa a caixa do sistema vir', async () => {
+    mockPodeOferecer = true;
+    mockTelaDoPush = false;
+    estado({ isInQueue: true, activeQueue: { ...FILA, status: 'SCHEDULED' } });
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { useFirstRunStore } = require('@stores/firstRunStore');
+    useFirstRunStore.setState({ restored: true, pushAsked: false, pushOferta: false });
+    renderWithProviders(<QueueStatus />);
+    await waitFor(() => expect(useFirstRunStore.getState().pushAsked).toBe(true));
+    expect(useFirstRunStore.getState().pushOferta).toBe(false);
   });
 });
 
