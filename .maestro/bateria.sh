@@ -260,6 +260,10 @@ rodar() {
   adb logcat -c 2>/dev/null
   adb logcat -v time '*:W' > "$pasta/logcat.txt" 2>/dev/null &
   local logcat=$!
+  # So o app (JS, queda e OTA), sem o ruido do Maestro e sem o corte nas ultimas linhas: a fumaca reprovou com tela
+  # branca (01/11) e o logcat de 3000 linhas so tinha o Maestro.
+  adb logcat -v time ReactNativeJS:V ReactNative:V AndroidRuntime:V ExpoUpdates:V Expo:V Sentry:V DEBUG:V '*:S' > "$pasta/logcat-app.txt" 2>/dev/null &
+  local logcat_app=$!
   # maestro-trava-na-atualizacao (Andre, 28/10): etapa que passa do prazo REPROVA
   # (124), em vez de a bateria ficar parada para sempre. A 00 (versao) tem prazo proprio.
   local prazo="$ETAPA_PRAZO" verificada=1
@@ -273,7 +277,7 @@ rodar() {
     --test-output-dir "$pasta" \
     "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"
   local volta="${PIPESTATUS[0]}"
-  kill "$logcat" 2>/dev/null
+  kill "$logcat" "$logcat_app" 2>/dev/null
   tail -n 3000 "$pasta/logcat.txt" > "$pasta/logcat.tmp" 2>/dev/null && mv "$pasta/logcat.tmp" "$pasta/logcat.txt"
   return "$volta"
 }
