@@ -49,9 +49,14 @@ describe("Maestro 00b — teste de fumaça", () => {
     expect(etapa).toMatch(/NÃO prova: dinheiro real nem o Pix do Asaas/);
   });
 
+  it("espera a fila pelo helper que fecha o aviso da estimativa", () => {
+    expect(etapa).toMatch(/apoio\/esperar_a_fila\.yaml/);
+    expect(ler(".maestro/apoio/esperar_a_fila.yaml")).toContain("queue-position");
+  });
+
   it("usa só ids que o app tem", () => {
     const app = fontes("src");
-    for (const id of ["primary-queue", "queue-position", "pix-do-atendimento", "pagamento-fechar", "pagamentos-pendentes", "pix-ja-paguei", "pix-ok"]) {
+    for (const id of ["primary-queue", "pix-do-atendimento", "pagamento-fechar", "pagamentos-pendentes", "pix-ja-paguei", "pix-ok"]) {
       expect(etapa).toContain(`"${id}"`);
       expect(app).toContain(id);
     }
