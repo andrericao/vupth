@@ -50,11 +50,11 @@
     "forest": 1
   },
   "src/screens/QueueStatus.tsx": {
-    "hex": 15,
+    "hex": 14,
     "forest": 3
   },
   "src/screens/ServiceSelection.tsx": {
-    "hex": 8,
+    "hex": 9,
     "forest": 8,
     "branco": 1
   },
