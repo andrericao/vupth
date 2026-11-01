@@ -39,6 +39,12 @@ if ! (cd "$RAIZ" && "$EAS" whoami >/dev/null 2>&1) && [ -z "$EXPO_TOKEN" ]; then
   exit 4
 fi
 
+# ota-so-compativel (DEC-152): nao publica OTA para um app sem os modulos nativos dele.
+if ! (cd "$RAIZ" && node tools/guardaOta.js); then
+  echo "ERRO: o guarda do OTA bloqueou (o projeto nativo mudou, ou nao deu para comparar). Falta um build novo: nao publique o OTA."
+  exit 5
+fi
+
 MSG="bateria Maestro · $(git -C "$RAIZ" log -1 --format=%h%x20%s origin/dev)"
 echo "Publicando o OTA da dev (canal preview): $MSG"
 if ! (cd "$RAIZ" && EXPO_PUBLIC_API_ENV=staging "$EAS" update --branch preview --message "$MSG" --non-interactive); then
