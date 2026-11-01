@@ -25,13 +25,13 @@ describe('AvisoModoSeguro', () => {
   it('usa a margem do sistema quando ha provider e 0 quando nao ha (nunca lanca)', () => {
     useModoSeguroStore.setState({ lido: true, seguro: true, quedas: 2 });
     const sem = render(<AvisoModoSeguro />); // sem nenhum provider
-    expect(StyleSheet.flatten(sem.getByTestId('aviso-modo-seguro').props.style as never).paddingBottom).toBe(8);
+    expect((StyleSheet.flatten(sem.getByTestId('aviso-modo-seguro').props.style as never) as { paddingBottom: number }).paddingBottom).toBe(8);
     sem.unmount();
     const com = renderWithProviders(
       <SafeAreaInsetsContext.Provider value={{ top: 0, left: 0, right: 0, bottom: 30 }}>
         <AvisoModoSeguro />
       </SafeAreaInsetsContext.Provider>,
     );
-    expect(StyleSheet.flatten(com.getByTestId('aviso-modo-seguro').props.style as never).paddingBottom).toBe(38);
+    expect((StyleSheet.flatten(com.getByTestId('aviso-modo-seguro').props.style as never) as { paddingBottom: number }).paddingBottom).toBe(38);
   });
 });
