@@ -45,6 +45,11 @@ describe("Maestro 00b — teste de fumaça", () => {
     expect(bateria).toMatch(/ATUALIZAR" = "n" \]; then\s+VERSAO_OK=2/);
   });
 
+  it("responde ao Partner com um botão que existe (Não recebi), não \"Ainda não\"", () => {
+    expect(etapa).toMatch(/PAGAMENTO: "Não recebi"/);
+    expect(ler(".maestro/etapas/22_conjunta_finalizar_e_avaliar.yaml")).toMatch(/PAGAMENTO: "Não recebi"/);
+  });
+
   it("diz que não prova o dinheiro nem o Pix do gateway", () => {
     expect(etapa).toMatch(/NÃO prova: dinheiro real nem o Pix do Asaas/);
   });
