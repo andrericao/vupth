@@ -1,0 +1,939 @@
+--------- beginning of main
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): No service published for: persistent_data_block
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): android.os.ServiceManager$ServiceNotFoundException: No service published for: persistent_data_block
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.os.ServiceManager.getServiceOrThrow(ServiceManager.java:203)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.app.SystemServiceRegistry$82.createService(SystemServiceRegistry.java:1110)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.app.SystemServiceRegistry$82.createService(SystemServiceRegistry.java:1107)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.app.SystemServiceRegistry$StaticServiceFetcher.getService(SystemServiceRegistry.java:2405)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.app.SystemServiceRegistry.getSystemService(SystemServiceRegistry.java:1918)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.app.ContextImpl.getSystemService(ContextImpl.java:2315)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.content.Context.getSystemService(Context.java:4630)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageInstallerSession.markAsSealed(PackageInstallerSession.java:2449)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageInstallerSession.commit(PackageInstallerSession.java:2198)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.content.pm.PackageInstaller$Session.commit(PackageInstaller.java:1988)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerShellCommand.doCommitSession(PackageManagerShellCommand.java:4316)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerShellCommand.doRunInstall(PackageManagerShellCommand.java:1641)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerShellCommand.runInstall(PackageManagerShellCommand.java:1562)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerShellCommand.onCommand(PackageManagerShellCommand.java:246)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.os.ShellCommand.exec(ShellCommand.java:38)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerService$IPackageManagerImpl.onShellCommand(PackageManagerService.java:6684)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.os.Binder.shellCommand(Binder.java:1151)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.os.Binder.onTransact(Binder.java:953)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.content.pm.IPackageManager$Stub.onTransact(IPackageManager.java:4729)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerService$IPackageManagerImpl.onTransact(PackageManagerService.java:6668)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.os.Binder.execTransactInternal(Binder.java:1426)
+11-01 18:13:35.211 E/SystemServiceRegistry(  645): 	at android.os.Binder.execTransact(Binder.java:1365)
+--------- beginning of system
+11-01 18:13:35.213 E/SystemServiceRegistry(  645): Manager wrapper not available: persistent_data_block
+11-01 18:13:35.783 E/AppOps  (  645): attributionTag VCN not declared in manifest of android
+11-01 18:13:35.807 E/SmsApplication( 1705): com.android.messaging lost android:receive_wap_push:  (fixing)
+11-01 18:13:35.818 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:35.820 E/SmsApplication( 1705): com.android.messaging lost android:read_cell_broadcasts:  (fixing)
+11-01 18:13:35.822 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.009 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.017 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.039 E/AtomicFile(  645): Failed to rename /data/system/install_sessions.xml.new to /data/system/install_sessions.xml
+11-01 18:13:36.050 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.051 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = SEND_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.061 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.084 W/Looper  (  645): Slow dispatch took 273ms main app=system_server main=true group=FOREGROUND h=android.app.ActivityThread$H c=android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0@b4b590f m=0
+11-01 18:13:36.084 W/Looper  (  645): Slow delivery took 290ms main app=system_server main=true group=FOREGROUND h=android.os.Handler c=com.android.server.telecom.DefaultDialerCache$1$$ExternalSyntheticLambda0@4d1ad9c m=0
+11-01 18:13:36.091 W/Looper  (  645): Drained
+11-01 18:13:36.212 W/VvmPkgInstalledRcvr( 1705): carrierVvmPkgAdded: carrier vvm packages doesn't contain dev.mobile.maestro
+11-01 18:13:36.277 E/SmsApplication( 1705): com.android.messaging lost android:receive_wap_push:  (fixing)
+11-01 18:13:36.277 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.282 E/SmsApplication( 1705): com.android.messaging lost android:read_cell_broadcasts:  (fixing)
+11-01 18:13:36.286 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.298 W/VoiceInteractionManager(  645): no available voice recognition services found for user 0
+11-01 18:13:36.299 W/PackageManager(  645): Failed registering loading progress callback. Package is fully loaded.
+11-01 18:13:36.300 W/VoiceInteractionManager(  645): no available voice recognition services found for user 0
+11-01 18:13:36.332 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.335 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.343 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.345 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = SEND_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.345 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.365 W/HWUI    ( 1260): Image decoding logging dropped!
+11-01 18:13:36.371 W/MagnificationConnectionManager(  645): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-01 18:13:36.376 W/MagnificationConnectionManager(  645): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-01 18:13:36.581 E/SmsApplication( 1705): com.android.messaging lost android:receive_wap_push:  (fixing)
+11-01 18:13:36.583 W/system_server(  645): Long monitor contention with owner AccessibilityManagerService PackageMonitor (784) at java.util.ArrayList com.android.server.accessibility.AccessibilityManagerService$AccessibilityDisplayListener.getValidDisplayList()(AccessibilityManagerService.java:5525) waiters=0 in void com.android.server.accessibility.AccessibilityManagerService.updateFingerprintGestureHandling(com.android.server.accessibility.AccessibilityUserState) for 208ms
+11-01 18:13:36.583 W/Looper  (  645): Slow dispatch took 208ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AccessibilityManagerService$MainHandler c=<recycled PooledLambda@4c940db> m=0
+11-01 18:13:36.584 W/Looper  (  645): Slow delivery took 213ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AccessibilityManagerService$MainHandler c=<recycled PooledLambda@9dcb1f1> m=0
+11-01 18:13:36.678 E/RoleControllerServiceImpl(  645): Default/fallback role holder package doesn't qualify for the role, package: com.android.devicelockcontroller, role: android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER
+11-01 18:13:36.686 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.687 E/SmsApplication( 1705): com.android.messaging lost android:read_cell_broadcasts:  (fixing)
+11-01 18:13:36.687 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.722 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): No service published for: persistent_data_block
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): android.os.ServiceManager$ServiceNotFoundException: No service published for: persistent_data_block
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.os.ServiceManager.getServiceOrThrow(ServiceManager.java:203)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.app.SystemServiceRegistry$82.createService(SystemServiceRegistry.java:1110)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.app.SystemServiceRegistry$82.createService(SystemServiceRegistry.java:1107)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.app.SystemServiceRegistry$StaticServiceFetcher.getService(SystemServiceRegistry.java:2405)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.app.SystemServiceRegistry.getSystemService(SystemServiceRegistry.java:1918)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.app.ContextImpl.getSystemService(ContextImpl.java:2315)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.content.Context.getSystemService(Context.java:4630)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageInstallerSession.markAsSealed(PackageInstallerSession.java:2449)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageInstallerSession.commit(PackageInstallerSession.java:2198)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.content.pm.PackageInstaller$Session.commit(PackageInstaller.java:1988)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerShellCommand.doCommitSession(PackageManagerShellCommand.java:4316)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerShellCommand.doRunInstall(PackageManagerShellCommand.java:1641)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerShellCommand.runInstall(PackageManagerShellCommand.java:1562)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerShellCommand.onCommand(PackageManagerShellCommand.java:246)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.os.ShellCommand.exec(ShellCommand.java:38)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerService$IPackageManagerImpl.onShellCommand(PackageManagerService.java:6684)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.os.Binder.shellCommand(Binder.java:1151)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.os.Binder.onTransact(Binder.java:953)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.content.pm.IPackageManager$Stub.onTransact(IPackageManager.java:4729)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at com.android.server.pm.PackageManagerService$IPackageManagerImpl.onTransact(PackageManagerService.java:6668)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.os.Binder.execTransactInternal(Binder.java:1426)
+11-01 18:13:36.726 E/SystemServiceRegistry(  645): 	at android.os.Binder.execTransact(Binder.java:1365)
+11-01 18:13:36.730 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.730 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.734 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = SEND_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.738 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:36.741 E/SystemServiceRegistry(  645): Manager wrapper not available: persistent_data_block
+11-01 18:13:36.815 W/AllAppsList( 1260): updatePackage: no Activities matched updated package, removing any AppInfo with package=dev.mobile.maestro, user=UserHandle{0}
+11-01 18:13:36.837 W/Looper  (  645): Drained
+11-01 18:13:36.841 W/PackageParsing(  645): No actions in intent-filter at /data/app/vmdl2026020748.tmp/base.apk Binary XML file line #42
+11-01 18:13:36.844 W/PackageParsing(  645): No actions in intent-filter at /data/app/vmdl2026020748.tmp/base.apk Binary XML file line #50
+11-01 18:13:36.845 W/PackageParsing(  645): No actions in intent-filter at /data/app/vmdl2026020748.tmp/base.apk Binary XML file line #58
+11-01 18:13:37.262 W/system_server(  645): Long monitor contention with owner RoleControllerService (2176) at com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean)(PackageManagerService.java:1228) waiters=0 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 240ms
+11-01 18:13:37.332 E/RoleControllerServiceImpl(  645): Default/fallback role holder package doesn't qualify for the role, package: com.android.devicelockcontroller, role: android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER
+11-01 18:13:37.679 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean)(PackageManagerService.java:1228) waiters=0 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 251ms
+11-01 18:13:37.741 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean)(PackageManagerService.java:1228) waiters=2 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 298ms
+11-01 18:13:37.758 W/Looper  (  645): Slow dispatch took 315ms main app=system_server main=true group=FOREGROUND h=android.app.ActivityThread$H c=android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0@d549fe m=0
+11-01 18:13:37.791 W/Looper  (  645): Slow delivery took 347ms main app=system_server main=true group=FOREGROUND h=android.app.ActivityThread$H c=android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0@aa87b m=0
+11-01 18:13:37.821 W/Looper  (  645): Drained
+11-01 18:13:37.830 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean)(PackageManagerService.java:1228) waiters=1 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 366ms
+11-01 18:13:37.858 E/SmsApplication( 1705): com.android.messaging lost android:receive_wap_push:  (fixing)
+11-01 18:13:37.858 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:37.858 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean)(PackageManagerService.java:1228) waiters=4 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 411ms
+11-01 18:13:37.860 E/SmsApplication( 1705): com.android.messaging lost android:read_cell_broadcasts:  (fixing)
+11-01 18:13:37.865 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.039 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean)(PackageManagerService.java:1228) waiters=5 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 437ms
+11-01 18:13:38.100 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean)(PackageManagerService.java:1228) waiters=3 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 610ms
+11-01 18:13:38.102 W/VoiceInteractionManager(  645): no available voice recognition services found for user 0
+11-01 18:13:38.105 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.108 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.113 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.114 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = SEND_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.116 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.139 W/Looper  (  645): Slow dispatch took 695ms android.fg app=system_server main=false group=FOREGROUND h=android.os.Handler c=com.android.internal.content.PackageMonitor$$ExternalSyntheticLambda0@dce005b m=0
+11-01 18:13:38.140 W/Looper  (  645): Slow delivery took 773ms android.fg app=system_server main=false group=FOREGROUND h=android.os.Handler c=com.android.server.am.SameProcessApplicationThread$$ExternalSyntheticLambda1@63410f8 m=0
+11-01 18:13:38.182 W/Looper  (  645): Drained
+11-01 18:13:38.191 W/MagnificationConnectionManager(  645): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-01 18:13:38.218 W/libprocessgroup( 2853): A JoinCgroup action in the SystemMemoryProcess profile is used for controller memory in the cgroup v2 hierarchy and will be ignored
+11-01 18:13:38.220 W/libprocessgroup( 2853): SetCgroup::ExecuteForTask: failed to open /dev/cpuctl/top-app/tasks: Permission denied
+11-01 18:13:38.222 W/libprocessgroup( 2853): SetCgroup::ExecuteForTask: failed to open /dev/blkio/tasks: Permission denied
+11-01 18:13:38.222 E/libprocessgroup( 2853): set_timerslack_ns write failed: Operation not permitted
+11-01 18:13:38.258 W/PackageManager(  645): Failed registering loading progress callback. Package is fully loaded.
+11-01 18:13:38.308 E/AppOps  (  645): attributionTag VCN not declared in manifest of android
+11-01 18:13:38.530 W/HWUI    ( 1260): Image decoding logging dropped!
+11-01 18:13:38.574 W/VvmPkgInstalledRcvr( 1705): carrierVvmPkgAdded: carrier vvm packages doesn't contain dev.mobile.maestro.test
+11-01 18:13:38.651 E/SmsApplication( 1705): com.android.messaging lost android:receive_wap_push:  (fixing)
+11-01 18:13:38.671 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.674 E/SmsApplication( 1705): com.android.messaging lost android:read_cell_broadcasts:  (fixing)
+11-01 18:13:38.675 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.717 W/VoiceInteractionManager(  645): no available voice recognition services found for user 0
+11-01 18:13:38.721 W/MagnificationConnectionManager(  645): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-01 18:13:38.749 E/RoleControllerServiceImpl(  645): Default/fallback role holder package doesn't qualify for the role, package: com.android.devicelockcontroller, role: android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER
+11-01 18:13:38.779 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.781 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.783 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.784 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = SEND_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.798 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.813 W/AllAppsList( 1260): updatePackage: no Activities matched updated package, removing any AppInfo with package=dev.mobile.maestro.test, user=UserHandle{0}
+11-01 18:13:38.858 E/SmsApplication( 1705): com.android.messaging lost android:receive_wap_push:  (fixing)
+11-01 18:13:38.860 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.862 E/SmsApplication( 1705): com.android.messaging lost android:read_cell_broadcasts:  (fixing)
+11-01 18:13:38.866 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.867 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.874 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.875 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.875 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = SEND_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:38.881 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:13:39.299 E/RoleControllerServiceImpl(  645): Default/fallback role holder package doesn't qualify for the role, package: com.android.devicelockcontroller, role: android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER
+11-01 18:13:39.487 W/app_process( 2852): Unexpected CPU variant for x86: x86_64.
+11-01 18:13:39.487 W/app_process( 2852): Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, default
+11-01 18:13:39.595 E/FeatureFlagsImplExport( 2852): android.os.flagging.AconfigStorageReadException: ERROR_PACKAGE_NOT_FOUND: package android.xr cannot be found on the device
+11-01 18:13:39.701 W/.mobile.maestro( 2863): Unexpected CPU variant for x86: x86_64.
+11-01 18:13:39.701 W/.mobile.maestro( 2863): Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, default
+11-01 18:13:39.775 W/.mobile.maestro( 2863): ClassLoaderContext shared library size mismatch. Expected=2, found=0 (PCL[]{PCL[/system/framework/android.test.base.jar*2789897741]#PCL[/system/framework/android.test.mock.jar*3361312393]} | PCL[])
+11-01 18:13:39.779 W/.mobile.maestro( 2863): ClassLoaderContext classpath size mismatch. expected=0, found=1 (PCL[] | PCL[/system/framework/android.test.runner.jar*895143020])
+11-01 18:13:39.782 W/.mobile.maestro( 2863): ClassLoaderContext classpath size mismatch. expected=0, found=2 (PCL[] | PCL[/system/framework/android.test.runner.jar*895143020:/system/framework/android.test.mock.jar*3361312393])
+11-01 18:13:40.567 W/.mobile.maestro( 2863): ClassLoaderContext shared library size mismatch. Expected=2, found=3 (PCL[]{PCL[/system/framework/android.test.base.jar*2789897741]#PCL[/system/framework/android.test.mock.jar*3361312393]} | PCL[]{PCL[/system/framework/android.test.base.jar*2789897741]#PCL[/system/framework/android.test.mock.jar*3361312393]#PCL[/system/framework/android.test.runner.jar*895143020]{PCL[/system/framework/android.test.base.jar*2789897741]#PCL[/system/framework/android.test.mock.jar*3361312393]}};PCL[/system/framework/android.test.runner.jar*895143020:/system/framework/android.test.mock.jar*3361312393:/system/framework/android.test.base.jar*2789897741:/data/app/~~AD6ttdpZ6arGZXgM0S9nNQ==/dev.mobile.maestro.test-7Dnu-7GoufhXeTYtykjFvw==/base.apk*4081655166:/data/app/~~1wmyPkpA5spkpBwib_iu9Q==/dev.mobile.maestro-202MzCcAznsxa-hHygjldQ==/base.apk*4252469341])
+11-01 18:13:40.569 W/.mobile.maestro( 2863): ClassLoaderContext classpath size mismatch. expected=0, found=1 (PCL[] | PCL[/system/framework/android.test.runner.jar*895143020]{PCL[/system/framework/android.test.base.jar*2789897741]#PCL[/system/framework/android.test.mock.jar*3361312393]#PCL[/system/framework/android.test.runner.jar*895143020]{PCL[/system/framework/android.test.base.jar*2789897741]#PCL[/system/framework/android.test.mock.jar*3361312393]}};PCL[/system/framework/android.test.runner.jar*895143020:/system/framework/android.test.mock.jar*3361312393:/system/framework/android.test.base.jar*2789897741:/data/app/~~AD6ttdpZ6arGZXgM0S9nNQ==/dev.mobile.maestro.test-7Dnu-7GoufhXeTYtykjFvw==/base.apk*4081655166:/data/app/~~1wmyPkpA5spkpBwib_iu9Q==/dev.mobile.maestro-202MzCcAznsxa-hHygjldQ==/base.apk*4252469341])
+11-01 18:13:40.578 W/.mobile.maestro( 2863): ClassLoaderContext classpath size mismatch. expected=0, found=2 (PCL[] | PCL[/system/framework/android.test.runner.jar*895143020:/system/framework/android.test.mock.jar*3361312393]{PCL[/system/framework/android.test.base.jar*2789897741]#PCL[/system/framework/android.test.mock.jar*3361312393]#PCL[/system/framework/android.test.runner.jar*895143020]{PCL[/system/framework/android.test.base.jar*2789897741]#PCL[/system/framework/android.test.mock.jar*3361312393]}};PCL[/system/framework/android.test.runner.jar*895143020:/system/framework/android.test.mock.jar*3361312393:/system/framework/android.test.base.jar*2789897741:/data/app/~~AD6ttdpZ6arGZXgM0S9nNQ==/dev.mobile.maestro.test-7Dnu-7GoufhXeTYtykjFvw==/base.apk*4081655166:/data/app/~~1wmyPkpA5spkpBwib_iu9Q==/dev.mobile.maestro-202MzCcAznsxa-hHygjldQ==/base.apk*4252469341])
+11-01 18:13:41.267 E/adbd    (  517): failed to connect to socket 'tcp:7001': Connection refused
+11-01 18:13:41.283 W/MagnificationConnectionManager(  645): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-01 18:13:41.428 E/adbd    (  517): failed to connect to socket 'tcp:7001': Connection refused
+11-01 18:13:41.438 W/Looper  (  645): Slow dispatch took 117ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AccessibilityManagerService$MainHandler c=com.android.server.accessibility.AccessibilityManagerService$$ExternalSyntheticLambda4@da17a10 m=0
+11-01 18:13:41.593 E/adbd    (  517): failed to connect to socket 'tcp:7001': Connection refused
+11-01 18:13:41.606 W/MagnificationConnectionManager(  645): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-01 18:13:41.609 W/system_server(  645): Long monitor contention with owner binder:645_5 (886) at void com.android.server.wm.AccessibilityController$WindowsForAccessibilityObserver.computeChangedWindows(boolean)(AccessibilityController.java:1216) waiters=0 in void com.android.server.wm.AccessibilityController.performComputeChangedWindowsNot(int, boolean) for 164ms
+11-01 18:13:41.625 W/Looper  (  645): Slow dispatch took 183ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AbstractAccessibilityServiceConnection$1 c=null m=32
+11-01 18:13:41.768 E/adbd    (  517): failed to connect to socket 'tcp:7001': Connection refused
+11-01 18:13:41.773 W/system_server(  645): Long monitor contention with owner binder:645_5 (886) at void com.android.server.accessibility.AccessibilityWindowManager$DisplayWindowsObserver.onAccessibilityWindowsChanged(boolean, int, android.os.IBinder, android.graphics.Point, java.util.List)(AccessibilityWindowManager.java:491) waiters=1 in void com.android.server.accessibility.AccessibilityWindowManager.setAccessibilityWindowAttributes(int, int, int, android.view.accessibility.AccessibilityWindowAttributes) for 189ms
+11-01 18:13:41.777 W/Looper  (  645): Slow delivery took 328ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AbstractAccessibilityServiceConnection$1 c=null m=8
+11-01 18:13:41.861 W/System.err( 2863): SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+11-01 18:13:41.864 W/System.err( 2863): SLF4J: Defaulting to no-operation (NOP) logger implementation
+11-01 18:13:41.864 W/System.err( 2863): SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+11-01 18:13:41.876 E/adbd    (  517): failed to connect to socket 'tcp:7001': Connection refused
+11-01 18:13:41.987 E/adbd    (  517): failed to connect to socket 'tcp:7001': Connection refused
+11-01 18:13:42.092 E/.mobile.maestro( 2863): No implementation found for int io.grpc.netty.shaded.io.netty.channel.epoll.Native.offsetofEpollData() (tried Java_io_grpc_netty_shaded_io_netty_channel_epoll_Native_offsetofEpollData and Java_io_grpc_netty_shaded_io_netty_channel_epoll_Native_offsetofEpollData__) - is the library loaded, e.g. System.loadLibrary?
+11-01 18:13:42.102 E/adbd    (  517): failed to connect to socket 'tcp:7001': Connection refused
+11-01 18:13:42.213 E/adbd    (  517): failed to connect to socket 'tcp:7001': Connection refused
+11-01 18:13:42.284 W/grpc-nio-boss-E( 2863): type=1400 audit(0.0:7): avc:  denied  { read } for  name="somaxconn" dev="proc" ino=19755 scontext=u:r:untrusted_app:s0:c154,c256,c512,c768 tcontext=u:object_r:proc_net:s0 tclass=file permissive=0 app=dev.mobile.maestro
+11-01 18:13:42.308 W/MacAddressUtil( 2863): Failed to find a usable hardware address from the network interfaces; using random bytes: 7b:36:ea:46:24:f7:04:39
+11-01 18:13:42.319 E/adbd    (  517): failed to connect to socket 'tcp:7001': Connection refused
+11-01 18:13:42.599 W/.mobile.maestro( 2863): Verification of void io.grpc.netty.shaded.io.grpc.netty.NettyServerHandler.onRstStreamRead(int, long) took 109.233ms (778.15 bytecodes/s) (0B arena alloc)
+--------- beginning of kernel
+11-01 18:13:48.494 W/healthd (    0): battery l=100 v=5000 t=25.0 h=2 st=2 c=900000 fc=3000000 cc=10 chg=a
+11-01 18:13:48.493 W/Looper  (  645): Drained
+11-01 18:13:48.591 W/Looper  (  645): Slow dispatch took 101ms android.perm app=system_server main=false group=FOREGROUND h=android.os.Handler c=com.android.internal.infra.ServiceConnector$Impl$$ExternalSyntheticLambda0@a54d041 m=0
+11-01 18:13:48.631 W/ssioncontroller( 1126): Cleared Reference was only reachable from finalizer (only reported once)
+11-01 18:13:59.315 W/QueryController( 2863): Could not detect idle state.
+11-01 18:13:59.316 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:00.126 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:00.128 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:00.710 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:00.713 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:00.971 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:00.973 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:01.326 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:01.329 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:01.776 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:01.779 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:02.164 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:02.168 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:02.663 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:02.669 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:03.146 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:03.150 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:03.678 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:03.686 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:04.440 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:04.442 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:05.023 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:05.043 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:05.759 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:05.761 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:05.974 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:05.976 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:06.314 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:06.316 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:06.576 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:06.579 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:06.838 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:06.839 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:07.401 W/ActivityTaskManager(  645): Force removing ActivityRecord{57009335 u0 com.vupth.client.preview/.MainActivity t151 f}}: app died, no saved state
+11-01 18:14:07.446 W/Looper  (  913): Slow dispatch took 35ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.transition.Transitions$ShellTransitionImpl$$ExternalSyntheticLambda0@32f9f28 m=0
+11-01 18:14:07.504 E/IPCThreadState( 1247): Binder transaction failure. id: 258181, BR_*: 29189, error: -22 (Invalid argument)
+11-01 18:14:07.516 W/Looper  (  913): Slow dispatch took 56ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=null m=17
+11-01 18:14:07.526 W/ActivityManager(  645): pid 1247 com.android.inputmethod.latin sent binder code 9 with flags 1 to frozen apps and got error -32
+11-01 18:14:07.560 W/Looper  (  645): Slow dispatch took 104ms android.ui app=system_server main=false group=TOP_APP h=com.android.server.am.ActivityManagerService$UiHandler c=null m=31
+11-01 18:14:07.524 E/IPCThreadState( 1247): Binder transaction failure. id: 258186, BR_*: 29189, error: -22 (Invalid argument)
+11-01 18:14:07.781 W/system_server(  645): Long monitor contention with owner binder:645_5 (886) at void com.android.server.am.ProcessRecord.setPendingUiClean(boolean)(ProcessRecord.java:1612) waiters=0 in boolean com.android.server.am.ActivityManagerService.isUidActive(int, java.lang.String) for 398ms
+11-01 18:14:07.782 W/system_server(  645): Long monitor contention with owner binder:645_5 (886) at void com.android.server.am.ProcessRecord.setPendingUiClean(boolean)(ProcessRecord.java:1612) waiters=1 in void com.android.server.am.ActivityManagerService$LocalService.notifyNetworkPolicyRulesUpdated(int, long) for 360ms
+11-01 18:14:07.785 W/Looper  (  913): Slow delivery took 134ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.pip.phone.PipController$$ExternalSyntheticLambda3@57e6415 m=0
+11-01 18:14:07.961 W/Looper  (  645): Slow delivery took 370ms android.ui app=system_server main=false group=TOP_APP h=com.android.server.wm.DisplayPolicy$PolicyHandler c=com.android.server.wm.DisplayPolicy$$ExternalSyntheticLambda14@c246822 m=0
+11-01 18:14:07.970 W/Looper  (  913): Drained
+11-01 18:14:08.206 W/Looper  (  913): Slow delivery took 46ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.pip.phone.PipController$$ExternalSyntheticLambda3@57e6415 m=0
+11-01 18:14:08.236 W/system_server(  645): Long monitor contention with owner binder:645_14 (1529) at void com.android.server.accessibility.AccessibilityWindowManager$RemoteAccessibilityConnection.binderDied()(AccessibilityWindowManager.java:1142) waiters=0 in void com.android.server.accessibility.AccessibilityManagerService.sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent, int) for 740ms
+11-01 18:14:08.274 W/system_server(  645): Long monitor contention with owner binder:645_C (1163) at void com.android.server.wm.Session.binderDied()(Session.java:233) waiters=5 in void com.android.server.wm.WindowAnimator.lambda$new$1(long) for 287ms
+11-01 18:14:08.490 W/ActivityTaskManager(  645): Unable to send transaction to client proc com.vupth.client.preview: no app thread
+11-01 18:14:08.726 W/Looper  (  645): Slow dispatch took 525ms android.ui app=system_server main=false group=TOP_APP h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@dc77194 m=0
+11-01 18:14:08.940 W/Looper  (  913): Drained
+11-01 18:14:09.126 W/Looper  (  913): Slow delivery took 181ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.common.DisplayController$DisplayWindowListenerImpl$$ExternalSyntheticLambda3@eb52441 m=0
+11-01 18:14:09.139 E/AppOps  (  645): package pm not found, can't check for attributionTag null
+11-01 18:14:09.456 E/AppOps  (  645): Bad call made by uid 1000. Package "pm" does not belong to uid 1000.
+11-01 18:14:09.457 E/AppOps  (  645): Cannot noteOperation: non-application UID 1000
+11-01 18:14:09.465 W/system_server(  645): Long monitor contention with owner binder:645_5 (886) at boolean com.android.server.am.ActivityManagerService.clearApplicationUserData(java.lang.String, boolean, boolean, android.content.pm.IPackageDataObserver, int)(ActivityManagerService.java:3586) waiters=0 in void com.android.server.am.BroadcastQueueImpl.updateRunningList() for 1.896s
+11-01 18:14:09.467 W/system_server(  645): Long monitor contention with owner binder:645_5 (886) at boolean com.android.server.am.ActivityManagerService.clearApplicationUserData(java.lang.String, boolean, boolean, android.content.pm.IPackageDataObserver, int)(ActivityManagerService.java:3586) waiters=2 in void com.android.server.am.ProcessRecord.updateProcessInfo(boolean, boolean, boolean) for 2.013s
+11-01 18:14:09.467 W/system_server(  645): Long monitor contention with owner binder:645_5 (886) at boolean com.android.server.am.ActivityManagerService.clearApplicationUserData(java.lang.String, boolean, boolean, android.content.pm.IPackageDataObserver, int)(ActivityManagerService.java:3586) waiters=3 in void com.android.server.am.ActivityManagerService$AppDeathRecipient.binderDied() for 1.981s
+11-01 18:14:09.470 W/system_server(  645): Long monitor contention with owner binder:645_5 (886) at boolean com.android.server.am.ActivityManagerService.clearApplicationUserData(java.lang.String, boolean, boolean, android.content.pm.IPackageDataObserver, int)(ActivityManagerService.java:3586) waiters=4 in boolean com.android.server.am.ActivityManagerService.unbindService(android.app.IServiceConnection) for 1.685s
+11-01 18:14:09.481 W/Looper  (  645): Drained
+11-01 18:14:09.503 W/system_server(  645): Long monitor contention with owner binder:645_7 (973) at int com.android.server.wm.WindowManagerService.relayoutWindow(com.android.server.wm.Session, android.view.IWindow, android.view.WindowManager$LayoutParams, int, int, int, int, int, int, android.view.WindowRelayoutResult)(WindowManagerService.java:2771) waiters=3 in void com.android.server.wm.WindowManagerService.finishDrawingWindow(com.android.server.wm.Session, android.view.IWindow, android.view.SurfaceControl$Transaction, int) for 571ms
+11-01 18:14:09.509 W/system_server(  645): Long monitor contention with owner binder:645_6 (890) at void com.android.server.inputmethod.ClientController.lambda$addClient$0(com.android.server.inputmethod.IInputMethodClientInvoker)(ClientController.java:67) waiters=0 in void com.android.server.inputmethod.InputMethodManagerService$InputMethodPrivilegedOperationsImpl.setImeWindowStatusAsync(int, int) for 1.986s
+11-01 18:14:09.529 W/system_server(  645): Long monitor contention with owner binder:645_2 (679) at int com.android.server.accessibility.AccessibilityWindowManager.findFocusedWindowId(int)(AccessibilityWindowManager.java:2052) waiters=0 in void com.android.server.accessibility.AccessibilityManagerService.sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent, int) for 392ms
+11-01 18:14:09.536 W/Looper  (  645): Slow dispatch took 399ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AccessibilityManagerService$MainHandler c=<recycled PooledLambda@9dcb1f1> m=0
+11-01 18:14:09.536 W/Looper  (  645): Slow delivery took 402ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AccessibilityManagerService$MainHandler c=<recycled PooledLambda@fdb8321> m=0
+11-01 18:14:09.557 W/ActivityTaskManager(  645): Unable to send transaction to client proc com.vupth.client.preview: no app thread
+11-01 18:14:09.680 W/Looper  (  913): Drained
+11-01 18:14:09.814 W/Looper  (  645): Slow dispatch took 277ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AbstractAccessibilityServiceConnection$1 c=null m=32
+11-01 18:14:09.850 W/WindowManager(  645): removeAppToken: Attempted to remove non-existing token: Token{e0afb8d ActivityRecord{57009335 u0 com.vupth.client.preview/.MainActivity t151 f} isExiting}}
+11-01 18:14:10.013 W/system_server(  645): Long monitor contention with owner android.anim (691) at void com.android.server.wm.WindowSurfacePlacer$Traverser.run()(WindowSurfacePlacer.java:55) waiters=4 in android.app.ActivityTaskManager$RootTaskInfo com.android.server.wm.ActivityTaskManagerService.getFocusedRootTaskInfo() for 202ms
+11-01 18:14:10.018 W/Looper  (  645): Slow dispatch took 168ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AbstractAccessibilityServiceConnection$1 c=null m=2048
+11-01 18:14:10.464 W/Looper  (  645): Slow dispatch took 622ms android.fg app=system_server main=false group=FOREGROUND h=android.os.Handler c=com.android.server.wm.TransitionController$Logger@acc305d m=0
+11-01 18:14:10.476 W/Looper  (  645): Drained
+11-01 18:14:10.486 W/Looper  (  913): Slow dispatch took 633ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.transition.Transitions$TransitionPlayerImpl$$ExternalSyntheticLambda0@a7d76c3 m=0
+11-01 18:14:10.486 W/Looper  (  913): Slow delivery took 476ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=android.window.TaskOrganizer$1$$ExternalSyntheticLambda4@f6d2b40 m=0
+11-01 18:14:10.640 W/system_server(  645): Long monitor contention with owner PackageManager (723) at void android.app.PropertyInvalidatedCache$NonceHandler.setNonce(long)(PropertyInvalidatedCache.java:723) waiters=0 in long android.app.PropertyInvalidatedCache$NonceHandler.getNonce() for 154ms
+11-01 18:14:10.641 W/system_server(  645): Long monitor contention with owner PackageManager (723) at void com.android.server.am.ActivityManagerService$LocalService.killApplicationSync(java.lang.String, int, int, java.lang.String, int)(ActivityManagerService.java:18116) waiters=1 in void com.android.server.am.ActivityManagerService$LocalService.setHasOverlayUi(int, boolean) for 955ms
+11-01 18:14:10.642 W/ActivityManager(  645): setHasOverlayUi called on unknown pid: 2512
+11-01 18:14:10.648 W/system_server(  645): Long monitor contention with owner PackageManager (723) at void com.android.server.am.ActivityManagerService$LocalService.killApplicationSync(java.lang.String, int, int, java.lang.String, int)(ActivityManagerService.java:18116) waiters=2 in void com.android.server.am.BroadcastQueueImpl.updateRunningList() for 1s
+11-01 18:14:10.668 W/Looper  (  645): Slow dispatch took 175ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AbstractAccessibilityServiceConnection$1 c=null m=4194304
+11-01 18:14:11.000 E/IPCThreadState(  645): Binder transaction failure. id: 258693, BR_*: 29189, error: -22 (Invalid argument)
+11-01 18:14:11.098 W/ActivityManager(  645): pid 645 system sent binder code 7 with flags 1 to frozen apps and got error -32
+11-01 18:14:11.098 W/WindowManager(  645): Exception thrown during dispatchAppVisibility Window{9aa0fd9 u0 com.vupth.client.preview/com.vupth.client.preview.MainActivity EXITING}
+11-01 18:14:11.098 W/WindowManager(  645): android.os.DeadObjectException
+11-01 18:14:11.098 W/WindowManager(  645): 	at android.os.BinderProxy.transactNative(Native Method)
+11-01 18:14:11.098 W/WindowManager(  645): 	at android.os.BinderProxy.transact(BinderProxy.java:592)
+11-01 18:14:11.098 W/WindowManager(  645): 	at android.view.IWindow$Stub$Proxy.dispatchAppVisibility(IWindow.java:557)
+11-01 18:14:11.098 W/WindowManager(  645): 	at com.android.server.wm.WindowState.sendAppVisibilityToClients(WindowState.java:3151)
+11-01 18:14:11.098 W/WindowManager(  645): 	at com.android.server.wm.WindowContainer.sendAppVisibilityToClients(WindowContainer.java:1311)
+11-01 18:14:11.098 W/WindowManager(  645): 	at com.android.server.wm.WindowToken.setClientVisible(WindowToken.java:389)
+11-01 18:14:11.098 W/WindowManager(  645): 	at com.android.server.wm.ActivityRecord.setClientVisible(ActivityRecord.java:6650)
+11-01 18:14:11.098 W/WindowManager(  645): 	at com.android.server.wm.ActivityRecord.commitVisibility(ActivityRecord.java:5561)
+11-01 18:14:11.098 W/WindowManager(  645): 	at com.android.server.wm.Transition.finishTransition(Transition.java:1391)
+11-01 18:14:11.098 W/WindowManager(  645): 	at com.android.server.wm.TransitionController.finishTransition(TransitionController.java:1029)
+11-01 18:14:11.098 W/WindowManager(  645): 	at com.android.server.wm.WindowOrganizerController.finishTransition(WindowOrganizerController.java:496)
+11-01 18:14:11.098 W/WindowManager(  645): 	at android.window.IWindowOrganizerController$Stub.onTransact(IWindowOrganizerController.java:261)
+11-01 18:14:11.098 W/WindowManager(  645): 	at com.android.server.wm.WindowOrganizerController.onTransact(WindowOrganizerController.java:223)
+11-01 18:14:11.098 W/WindowManager(  645): 	at android.os.Binder.execTransactInternal(Binder.java:1426)
+11-01 18:14:11.098 W/WindowManager(  645): 	at android.os.Binder.execTransact(Binder.java:1365)
+11-01 18:14:11.099 W/Process (  645): Unable to open /proc/2512/status
+11-01 18:14:11.137 W/Looper  (  645): Slow dispatch took 347ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AbstractAccessibilityServiceConnection$1 c=null m=4194304
+11-01 18:14:11.140 W/Looper  (  645): Slow delivery took 648ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AbstractAccessibilityServiceConnection$1 c=null m=2048
+11-01 18:14:11.142 W/Looper  (  645): Slow delivery took 471ms android.fg app=system_server main=false group=FOREGROUND h=android.os.Handler c=com.android.server.wm.Transition$$ExternalSyntheticLambda5@769451e m=0
+11-01 18:14:11.516 W/Looper  (  645): Slow delivery took 386ms android.perm app=system_server main=false group=FOREGROUND h=android.os.Handler c=<recycled PooledLambda@29561d6> m=0
+11-01 18:14:11.856 W/Looper  (  913): Drained
+11-01 18:14:11.856 W/Looper  (  913): Slow dispatch took 1196ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.transition.RemoteTransitionHandler$1$$ExternalSyntheticLambda0@22753be m=0
+11-01 18:14:11.857 W/Looper  (  913): Slow delivery took 821ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.pip.PinnedStackListenerForwarder$PinnedTaskListenerImpl$$ExternalSyntheticLambda0@936bc1f m=0
+11-01 18:14:11.874 W/system_server(  645): Long monitor contention with owner binder:645_6 (890) at void com.android.server.wm.WindowManagerService.notifyWindowRemovedListeners(android.os.IBinder)(WindowManagerService.java:5391) waiters=0 in void com.android.server.wm.InsetsPolicy$ControlTarget.run() for 868ms
+11-01 18:14:11.878 W/Looper  (  645): Slow dispatch took 724ms main app=system_server main=true group=FOREGROUND h=android.os.Handler c=null m=1
+11-01 18:14:11.898 W/system_server(  645): Long monitor contention with owner binder:645_6 (890) at void com.android.server.wm.WindowManagerService.notifyWindowRemovedListeners(android.os.IBinder)(WindowManagerService.java:5391) waiters=2 in void com.android.server.wm.InputMonitor$UpdateInputWindows.run() for 887ms
+11-01 18:14:11.902 W/system_server(  645): Long monitor contention with owner binder:645_6 (890) at void com.android.server.wm.WindowManagerService.notifyWindowRemovedListeners(android.os.IBinder)(WindowManagerService.java:5391) waiters=3 in int com.android.server.wm.WindowManagerService$LocalService.hasInputMethodClientFocus(android.os.IBinder, int, int, int) for 883ms
+11-01 18:14:12.198 W/Looper  (  913): Slow dispatch took 155ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=android.window.TaskOrganizer$1$$ExternalSyntheticLambda0@800edca m=0
+11-01 18:14:12.206 E/TaskPersister(  645): File error accessing recents directory (directory doesn't exist?).
+11-01 18:14:12.207 W/Looper  (  645): Slow dispatch took 191ms android.fg app=system_server main=false group=FOREGROUND h=android.os.Handler c=<recycled PooledLambda@1e7b6d0> m=0
+11-01 18:14:12.211 E/BpTransactionCompletedListener(  508): Failed to transact (-32)
+11-01 18:14:12.398 W/keystore2(  239): system/security/keystore2/watchdog/src/lib.rs:143 - ### Keystore Watchdog report - BEGIN ###
+11-01 18:14:12.398 W/keystore2(  239): system/security/keystore2/watchdog/src/lib.rs:152 - When extracting from a bug report, please include this header and all 2 records below (to footer)
+11-01 18:14:12.398 W/keystore2(  239): system/security/keystore2/watchdog/src/lib.rs:199 - ThreadId(21) IKeystoreMaintenance::clearNamespace Started: 11-01 21:14:11.895 UTC Pending: 502.664429ms Overdue 2.665476ms
+11-01 18:14:12.398 W/keystore2(  239): system/security/keystore2/watchdog/src/lib.rs:199 - ThreadId(21) KeystoreDB::unbind_keys_for_namespace Started: 11-01 21:14:11.896 UTC Pending: 501.940727ms Overdue 1.940862ms
+11-01 18:14:12.398 W/keystore2(  239): system/security/keystore2/watchdog/src/lib.rs:211 - ### Keystore Watchdog report - END ###
+11-01 18:14:12.559 W/Looper  (  645): Slow dispatch took 161ms main app=system_server main=true group=FOREGROUND h=android.os.Handler c=null m=1
+11-01 18:14:12.560 W/Looper  (  645): Drained
+11-01 18:14:12.577 W/system_server(  645): Long monitor contention with owner binder:645_15 (1531) at void com.android.server.wm.WindowManagerService$LocalService.updateInputMethodTargetWindow(android.os.IBinder)(WindowManagerService.java:8120) waiters=2 in void com.android.server.wm.WindowSurfacePlacer$Traverser.run() for 542ms
+11-01 18:14:12.592 W/Looper  (  645): Drained
+11-01 18:14:12.599 W/system_server(  645): Long monitor contention with owner binder:645_15 (1531) at void com.android.server.wm.WindowManagerService$LocalService.updateInputMethodTargetWindow(android.os.IBinder)(WindowManagerService.java:8120) waiters=3 in android.app.ActivityTaskManager$RootTaskInfo com.android.server.wm.ActivityTaskManagerService.getRootTaskInfo(int, int) for 548ms
+11-01 18:14:12.601 W/system_server(  645): Long monitor contention with owner binder:645_15 (1531) at void com.android.server.wm.WindowManagerService$LocalService.updateInputMethodTargetWindow(android.os.IBinder)(WindowManagerService.java:8120) waiters=4 in void com.android.server.wm.RecentTasks.loadRecentTasksIfNeeded(int) for 401ms
+11-01 18:14:12.612 W/system_server(  645): Long monitor contention with owner binder:645_15 (1531) at void com.android.server.wm.WindowManagerService$LocalService.updateInputMethodTargetWindow(android.os.IBinder)(WindowManagerService.java:8120) waiters=5 in java.util.HashMap com.android.server.wm.AccessibilityWindowsPopulator.getWindowsTransformMatrix(java.util.List) for 226ms
+11-01 18:14:12.723 W/Looper  (  913): Slow dispatch took 524ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.common.ShellExecutor$$ExternalSyntheticLambda0@91d2258 m=0
+11-01 18:14:12.920 E/TaskPersister(  645): File error accessing recents directory (directory doesn't exist?).
+11-01 18:14:12.996 W/InteractionJankMonitor( 1260): CUJ cancelled due to timeout, CUJ=LAUNCHER_APP_CLOSE_TO_HOME_FALLBACK
+11-01 18:14:13.039 W/JobInfo (  645): Job 'com.android.providers.media.module/com.android.providers.media.MediaService#-300' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+11-01 18:14:13.102 W/Looper  (  645): Drained
+11-01 18:14:13.213 W/HWUI    (  645): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+11-01 18:14:13.273 W/HWUI    (  645): Image decoding logging dropped!
+11-01 18:14:13.478 W/HWUI    (  645): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+11-01 18:14:13.799 W/OptProp (  645): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES
+11-01 18:14:13.800 W/OptProp (  645): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE
+11-01 18:14:13.827 W/OptProp (  645): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE
+11-01 18:14:13.874 W/Looper  (  913): Drained
+11-01 18:14:13.904 W/SplitSelectStateCtor( 1260): Missing session instanceIds
+11-01 18:14:14.062 W/Looper  (  913): Slow delivery took 158ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=null m=10
+11-01 18:14:14.167 W/ActivityManager(  645): Slow operation: 124ms so far, now at startProcess: done starting proc!
+11-01 18:14:14.303 W/system_server(  645): Long monitor contention with owner binder:645_2 (679) at int com.android.server.wm.WindowManagerService.addWindow(com.android.server.wm.Session, android.view.IWindow, android.view.WindowManager$LayoutParams, int, int, int, int, android.view.InputChannel, android.view.InsetsState, android.view.InsetsSourceControl$Array, android.graphics.Rect, float[])(WindowManagerService.java:1875) waiters=1 in void com.android.server.wm.AccessibilityController$WindowsForAccessibilityObserver.computeChangedWindows(boolean) for 132ms
+11-01 18:14:14.325 W/Looper  (  913): Drained
+11-01 18:14:14.438 W/ActivityManager(  645): Slow operation: 351ms so far, now at startProcess: asking zygote to start proc
+11-01 18:14:14.457 W/Looper  (  913): Slow delivery took 117ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.common.ShellExecutor$$ExternalSyntheticLambda0@ebed746 m=0
+11-01 18:14:14.646 W/ContentProviderHelper(  645): Slow operation: 331ms so far, now at getContentProviderImpl: after updateOomAdj
+11-01 18:14:14.681 W/ContentProviderHelper(  645): Slow operation: 367ms so far, now at getContentProviderImpl: done!
+11-01 18:14:14.691 W/system_server(  645): Long monitor contention with owner binder:645_A (1004) at android.app.ContentProviderHolder com.android.server.am.ContentProviderHelper.getContentProviderImpl(android.app.IApplicationThread, java.lang.String, android.os.IBinder, int, java.lang.String, java.lang.String, boolean, int)(ContentProviderHelper.java:648) waiters=0 in void com.android.server.am.ActivityManagerService.trimApplications(boolean, int) for 369ms
+11-01 18:14:14.821 W/system_server(  645): Long monitor contention with owner android.display (690) at void com.android.server.accessibility.AccessibilityWindowManager$DisplayWindowsObserver.onAccessibilityWindowsChanged(boolean, int, android.os.IBinder, android.graphics.Point, java.util.List)(AccessibilityWindowManager.java:491) waiters=0 in void com.android.server.accessibility.AccessibilityManagerService.sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent, int) for 114ms
+11-01 18:14:14.828 W/ActivityManager(  645): Slow operation: 563ms so far, now at startProcess: returned from zygote!
+11-01 18:14:14.844 W/HWUI    (  913): Image decoding logging dropped!
+11-01 18:14:14.851 W/ActivityManager(  645): Slow operation: 764ms so far, now at startProcess: done updating battery stats
+11-01 18:14:14.857 W/ActivityManager(  645): Slow operation: 770ms so far, now at startProcess: building log message
+11-01 18:14:14.857 W/ActivityManager(  645): Slow operation: 770ms so far, now at startProcess: starting to update pids map
+11-01 18:14:14.897 W/.client.preview( 2936): Unexpected CPU variant for x86: x86_64.
+11-01 18:14:14.897 W/.client.preview( 2936): Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, default
+11-01 18:14:14.917 E/.client.preview( 2936): Not starting debugger since process cannot load the jdwp agent.
+11-01 18:14:15.036 W/ActivityManager(  645): Slow operation: 840ms so far, now at startProcess: done updating pids map
+11-01 18:14:15.043 W/Looper  (  645): Slow dispatch took 116ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AccessibilityManagerService$MainHandler c=<recycled PooledLambda@ec47bdd> m=0
+11-01 18:14:15.194 W/Looper  (  645): Slow delivery took 336ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AccessibilityManagerService$MainHandler c=<recycled PooledLambda@9dcb1f1> m=0
+11-01 18:14:15.198 W/Looper  (  645): Slow dispatch took 121ms android.ui app=system_server main=false group=TOP_APP h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@dc77194 m=0
+11-01 18:14:15.401 W/ActivityManager(  645): Slow operation: 94ms so far, now at attachApplicationLocked: immediately after bindApplication
+11-01 18:14:15.405 W/ActivityManager(  645): Slow operation: 98ms so far, now at attachApplicationLocked: after updateLruProcessLocked
+11-01 18:14:16.119 W/Looper  (  645): Slow delivery took 318ms android.fg app=system_server main=false group=FOREGROUND h=android.os.Handler c=com.android.server.wm.TransitionController$Logger@b126195 m=0
+11-01 18:14:16.121 W/AccessibilityManagerService(  645):  wait for adding window timeout: 22
+11-01 18:14:16.123 W/ActivityManager(  645): Slow operation: 816ms so far, now at attachApplicationLocked: after updateOomAdjLocked
+11-01 18:14:16.441 W/Looper  (  645): Drained
+11-01 18:14:16.443 W/Looper  (  645): Slow dispatch took 321ms main app=system_server main=true group=FOREGROUND h=com.android.server.accessibility.AbstractAccessibilityServiceConnection$1 c=null m=32
+11-01 18:14:16.616 W/Looper  (  913): Slow dispatch took 353ms wmshell.main app=com.android.systemui main=false group=TOP_APP h=android.os.Handler c=com.android.wm.shell.transition.Transitions$TransitionPlayerImpl$$ExternalSyntheticLambda0@53d1cef m=0
+11-01 18:14:16.616 W/system_server(  645): Long monitor contention with owner android.anim (691) at void com.android.server.wm.WindowSurfacePlacer$Traverser.run()(WindowSurfacePlacer.java:55) waiters=0 in java.util.HashMap com.android.server.wm.AccessibilityWindowsPopulator.getWindowsTransformMatrix(java.util.List) for 343ms
+11-01 18:14:16.625 W/Looper  (  645): Slow delivery took 705ms android.ui app=system_server main=false group=TOP_APP h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@dc77194 m=0
+11-01 18:14:16.625 W/Looper  (  645): Slow dispatch took 316ms android.ui app=system_server main=false group=TOP_APP h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@dc77194 m=0
+11-01 18:14:16.755 W/Looper  (  645): Slow dispatch took 131ms android.ui app=system_server main=false group=TOP_APP h=com.android.server.wm.DisplayPolicy$PolicyHandler c=com.android.server.wm.DisplayPolicy$$ExternalSyntheticLambda14@ecd22aa m=0
+11-01 18:14:16.766 W/Looper  (  913): Drained
+11-01 18:14:16.766 W/Looper  (  913): Slow delivery took 136ms wmshell.anim app=com.android.systemui main=false group=TOP_APP h=android.view.Choreographer$FrameHandler c=android.view.Choreographer$FrameDisplayEventReceiver@3b39375 m=0
+11-01 18:14:17.328 W/system_server(  645): Long monitor contention with owner binder:645_9 (1003) at void com.android.server.wm.WindowManagerService.onAnimationFinished()(WindowManagerService.java:9025) waiters=0 in void com.android.server.wm.TaskPersister$TaskWriteQueueItem.process() for 435ms
+11-01 18:14:17.334 W/system_server(  645): Long monitor contention with owner binder:645_9 (1003) at void com.android.server.wm.WindowManagerService.onAnimationFinished()(WindowManagerService.java:9025) waiters=1 in void com.android.server.wm.WindowAnimator.lambda$animate$2(java.util.ArrayList) for 343ms
+11-01 18:14:17.336 W/Looper  (  645): Drained
+11-01 18:14:17.336 W/Looper  (  645): Slow dispatch took 559ms android.fg app=system_server main=false group=FOREGROUND h=android.os.Handler c=com.android.server.wm.Transition$$ExternalSyntheticLambda5@6d9238 m=0
+11-01 18:14:17.351 W/Looper  (  913): Slow dispatch took 586ms wmshell.main app=com.android.systemui main=false group=TOP_APP h=android.os.Handler c=com.android.wm.shell.transition.DefaultSurfaceAnimator$$ExternalSyntheticLambda1@d2c20da m=0
+11-01 18:14:17.353 W/system_server(  645): Long monitor contention with owner binder:645_A (1004) at void com.android.server.am.ActivityManagerService.attachApplication(android.app.IApplicationThread, long)(ActivityManagerService.java:4862) waiters=0 in void com.android.server.am.ProcessRecord.setRunningRemoteAnimation(boolean) for 660ms
+11-01 18:14:17.354 W/system_server(  645): Long monitor contention with owner binder:645_A (1004) at void com.android.server.am.ActivityManagerService.attachApplication(android.app.IApplicationThread, long)(ActivityManagerService.java:4862) waiters=1 in boolean com.android.server.am.BroadcastQueueImpl.lambda$new$0(android.os.Message) for 737ms
+11-01 18:14:17.371 W/AccessibilityWindowsPopulator(  645): Windows change within in 2 frames continuously over 500 ms and notify windows changed immediately
+11-01 18:14:17.412 W/Looper  (  645): Drained
+11-01 18:14:17.671 W/system_server(  645): Long monitor contention with owner android.anim (691) at void com.android.server.wm.WindowAnimator.lambda$animate$2(java.util.ArrayList)(WindowAnimator.java:212) waiters=2 in void com.android.server.wm.AccessibilityController.performComputeChangedWindowsNot(int, boolean) for 284ms
+11-01 18:14:17.787 E/TaskPersister(  645): File error accessing recents directory (directory doesn't exist?).
+11-01 18:14:17.814 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:17.815 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:17.822 W/UiDevice( 2863): Active window root not found.
+11-01 18:14:17.966 W/SoLoader( 2936): Initializing SoLoader: 0
+11-01 18:14:17.969 W/SoLoader( 2936): Recording new base apk path: /data/app/~~43SUX6d7w2NYatB33W2nBQ==/com.vupth.client.preview-2IWTqtWAYeFSoKEp5CPKQw==/base.apk
+11-01 18:14:17.969 W/SoLoader( 2936): Previously recorded 0 base apk paths.
+11-01 18:14:17.983 W/SoLoader( 2936): SoLoader initialized: 8
+11-01 18:14:18.092 W/Metadata( 2936): Failed to find package android.content.pm.PackageManager$NameNotFoundException: com.google.android.gms
+11-01 18:14:18.123 E/FirebaseMessaging( 2936): Google Play services missing or without correct permission.
+11-01 18:14:18.174 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:18.177 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:18.183 W/UiDevice( 2863): Active window root not found.
+11-01 18:14:18.350 E/ashmem  ( 2936): Pinning is deprecated since Android Q. Please use trim or other methods.
+11-01 18:14:18.446 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:18.454 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:18.454 W/UiDevice( 2863): Active window root not found.
+11-01 18:14:18.547 W/WindowOnBackDispatcher( 2936): OnBackInvokedCallback is not enabled for the application.
+11-01 18:14:18.547 W/WindowOnBackDispatcher( 2936): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+11-01 18:14:18.632 W/HWUI    ( 2936): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+11-01 18:14:18.659 W/HWUI    ( 2936): Unknown dataspace 0
+11-01 18:14:18.959 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:19.067 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:19.092 W/droid.launcher3( 1260): Long monitor contention with owner binder:1260_7 (2947) at boolean android.os.MessageQueue.enqueueMessageLegacy(android.os.Message, long)(MessageQueue.java:1388) waiters=0 in android.os.Message android.os.MessageQueue.nextLegacy() for 254ms
+11-01 18:14:19.251 W/system_server(  645): Long monitor contention with owner android.anim (691) at void com.android.server.wm.WindowAnimator.lambda$animate$2(java.util.ArrayList)(WindowAnimator.java:212) waiters=0 in void com.android.server.wm.AccessibilityController.sendCallbackToUninitializedObserversIfNeeded() for 110ms
+11-01 18:14:19.286 W/AccessibilityWindowsPopulator(  645): Windows change within in 2 frames continuously over 500 ms and notify windows changed immediately
+11-01 18:14:19.570 W/AccessibilityManagerService(  645):  wait for adding window timeout: 23
+11-01 18:14:19.636 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:19.644 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:19.746 W/unknown:BridgelessReact( 2936): ReactHost{0}.startSurface(surfaceId = 0): Schedule
+11-01 18:14:19.747 W/unknown:BridgelessReact( 2936): ReactHost{0}.attachSurface(surfaceId = 0)
+11-01 18:14:19.752 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask()
+11-01 18:14:19.756 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask(): Start
+11-01 18:14:19.757 W/unknown:BridgelessReact( 2936): ReactHost{0}.getJSBundleLoader()
+11-01 18:14:19.758 W/unknown:BridgelessReact( 2936): ReactHost{0}.onHostResume(activity)
+11-01 18:14:19.769 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactContext(): Creating BridgelessReactContext
+11-01 18:14:19.771 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask(): Creating ReactInstance
+11-01 18:14:20.361 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:20.363 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:20.366 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:20.371 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask(): Loading JS Bundle
+11-01 18:14:20.376 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask(): Calling DevSupportManagerBase.onNewReactContextCreated(reactContext)
+11-01 18:14:20.385 W/unknown:BridgelessReact( 2936): ReactHost{0}.startSurface(surfaceId = 0): Execute
+11-01 18:14:20.395 W/unknown:BridgelessReact( 2936): ReactContext.onHostResume()
+11-01 18:14:20.397 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask(): Executing ReactInstanceEventListeners
+11-01 18:14:20.540 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.th3rdwave.safeareacontext.SafeAreaProviderManager
+11-01 18:14:20.555 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:20.560 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:20.565 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.uimanager.LayoutShadowNode
+11-01 18:14:20.575 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.SearchBarManager
+11-01 18:14:20.591 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenFooterManager
+11-01 18:14:20.605 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.gamma.tabs.TabScreenViewManager
+11-01 18:14:20.607 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class expo.modules.kotlin.views.GroupViewManagerWrapper
+11-01 18:14:20.611 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenContainerViewManager
+11-01 18:14:20.616 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.gamma.tabs.TabsHostViewManager
+11-01 18:14:20.619 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class io.sentry.react.replay.RNSentryReplayUnmaskManager
+11-01 18:14:20.621 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ModalScreenViewManager
+11-01 18:14:20.624 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenStackHeaderConfigViewManager
+11-01 18:14:20.631 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenContentWrapperManager
+11-01 18:14:20.632 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.th3rdwave.safeareacontext.SafeAreaViewManager
+11-01 18:14:20.636 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.th3rdwave.safeareacontext.SafeAreaViewShadowNode
+11-01 18:14:20.638 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenViewManager
+11-01 18:14:20.644 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenStackHeaderSubviewManager
+11-01 18:14:20.648 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class io.sentry.react.replay.RNSentryReplayMaskManager
+11-01 18:14:20.650 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenStackViewManager
+11-01 18:14:20.652 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class io.sentry.react.RNSentryOnDrawReporterManager
+11-01 18:14:20.716 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$DefsViewManager
+11-01 18:14:20.728 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:20.728 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:20.732 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.VirtualViewManager$RenderableShadowNode
+11-01 18:14:20.739 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeMergeManager
+11-01 18:14:20.749 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.safeareaview.ReactSafeAreaViewManager
+11-01 18:14:20.751 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.safeareaview.ReactSafeAreaViewShadowNode
+11-01 18:14:20.758 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$LinearGradientManager
+11-01 18:14:20.764 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeGaussianBlurManager
+11-01 18:14:20.787 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.progressbar.ReactProgressBarViewManager
+11-01 18:14:20.795 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.progressbar.ProgressBarShadowNode
+11-01 18:14:20.803 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.scroll.ReactHorizontalScrollViewManager
+11-01 18:14:20.813 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactTextViewManager
+11-01 18:14:20.819 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactTextShadowNode
+11-01 18:14:20.824 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeColorMatrixManager
+11-01 18:14:20.834 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.scroll.ReactHorizontalScrollContainerViewManager
+11-01 18:14:20.837 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$ClipPathViewManager
+11-01 18:14:20.855 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$SymbolManager
+11-01 18:14:20.870 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$PatternManager
+11-01 18:14:20.879 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeBlendManager
+11-01 18:14:20.880 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:20.881 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:20.888 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.view.ReactViewManager
+11-01 18:14:20.892 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.SvgViewManager
+11-01 18:14:20.908 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.switchview.ReactSwitchManager
+11-01 18:14:20.917 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.switchview.ReactSwitchShadowNode
+11-01 18:14:20.920 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$UseViewManager
+11-01 18:14:20.940 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$CircleViewManager
+11-01 18:14:20.968 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$TSpanViewManager
+11-01 18:14:20.988 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FilterManager
+11-01 18:14:21.000 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$MarkerManager
+11-01 18:14:21.033 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.modal.ReactModalHostManager
+11-01 18:14:21.037 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$ForeignObjectManager
+11-01 18:14:21.046 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$EllipseViewManager
+11-01 18:14:21.052 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$LineViewManager
+11-01 18:14:21.056 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageViewManager
+11-01 18:14:21.065 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageShadowNode
+11-01 18:14:21.073 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeFloodManager
+11-01 18:14:21.083 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$GroupViewManager
+11-01 18:14:21.101 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$TextViewManager
+11-01 18:14:21.105 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$ImageViewManager
+11-01 18:14:21.122 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeCompositeManager
+11-01 18:14:21.124 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.image.ReactImageManager
+11-01 18:14:21.140 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$RadialGradientManager
+11-01 18:14:21.147 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$MaskManager
+11-01 18:14:21.150 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:21.152 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:21.170 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.unimplementedview.ReactUnimplementedViewManager
+11-01 18:14:21.179 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$RectViewManager
+11-01 18:14:21.189 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$TextPathViewManager
+11-01 18:14:21.201 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.scroll.ReactScrollViewManager
+11-01 18:14:21.220 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeOffsetManager
+11-01 18:14:21.232 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$PathViewManager
+11-01 18:14:21.248 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.drawer.ReactDrawerLayoutManager
+11-01 18:14:21.258 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactVirtualTextViewManager
+11-01 18:14:21.259 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactVirtualTextShadowNode
+11-01 18:14:21.269 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.swiperefresh.SwipeRefreshLayoutManager
+11-01 18:14:21.272 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactRawTextManager
+11-01 18:14:21.276 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactRawTextShadowNode
+11-01 18:14:21.280 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.textinput.ReactTextInputManager
+11-01 18:14:21.283 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.textinput.ReactTextInputShadowNode
+11-01 18:14:21.317 W/BridgelessReactContext( 2936): [WARNING] Bridgeless doesn't support CatalystInstance. Accessing an API that's not part of the new architecture is not encouraged usage.
+11-01 18:14:21.373 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:21.373 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:21.449 W/GooglePlayServicesUtil( 2936): com.vupth.client.preview requires the Google Play Store, but it is missing.
+11-01 18:14:21.454 W/GoogleApiManager( 2936): The service for com.google.android.gms.internal.location.zzda is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null}
+11-01 18:14:21.544 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:21.546 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:21.718 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:21.719 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:22.010 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:22.013 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:22.305 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:22.306 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:22.442 W/ReactNativeJS( 2936): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-01 18:14:22.626 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:22.632 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:22.901 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:22.906 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:23.044 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:23.048 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:23.226 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:23.229 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:23.378 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:23.382 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:23.677 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:23.680 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:23.780 E/ReactNativeJS( 2936): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-01 18:14:23.884 W/ActivityTaskManager(  645): Launch timeout has expired, giving up wake lock!
+11-01 18:14:24.040 W/pool-15-thread-( 2936): type=1400 audit(0.0:8): avc:  denied  { read } for  name="version" dev="proc" ino=4026532032 scontext=u:r:untrusted_app:s0:c150,c256,c512,c768 tcontext=u:object_r:proc_version:s0 tclass=file permissive=0 app=com.vupth.client.preview
+11-01 18:14:24.585 W/.mobile.maestro( 2863): Long monitor contention with owner UiAutomation (2880) at boolean android.os.MessageQueue.enqueueMessageLegacy(android.os.Message, long)(MessageQueue.java:1388) waiters=0 in android.os.Message android.os.MessageQueue.nextLegacy() for 191ms
+11-01 18:14:24.746 W/Looper  (  645): Slow dispatch took 134ms android.ui app=system_server main=false group=TOP_APP h=com.android.server.am.ActivityManagerService$UiHandler c=com.android.server.am.UidObserverController$$ExternalSyntheticLambda0@dc77194 m=0
+11-01 18:14:25.078 W/Looper  (  645): Slow dispatch took 320ms android.ui app=system_server main=false group=TOP_APP h=com.android.server.am.ActivityManagerService$UiHandler c=null m=31
+11-01 18:14:25.464 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:25.486 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:25.517 W/WindowOnBackDispatcher(  913): sendCancelIfRunning: isInProgress=false callback=android.view.ViewRootImpl$$ExternalSyntheticLambda13@daf5fcc
+11-01 18:14:25.811 W/system_server(  645): Long monitor contention with owner binder:645_9 (1003) at void com.android.server.wm.WindowManagerService.notifyWindowRemovedListeners(android.os.IBinder)(WindowManagerService.java:5391) waiters=1 in void com.android.server.wm.InputMonitor$UpdateInputWindows.run() for 235ms
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): console.error: The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details., stack:
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): _construct@1:226719
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): Wrapper@1:226372
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): _callSuper@1:224749
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): SyntheticError@1:366437
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): reactConsoleErrorHandler@1:366003
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): anonymous@1:3540132
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): anonymous@1:3025262
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): marcar@1:4316458
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): anonymous@1:4316393
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): commitHookEffectListMount@1:459609
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:466127
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:465232
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:466157
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:465232
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:466099
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:465232
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:466157
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:465232
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:466099
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:465232
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:466157
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:465232
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:465924
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): flushPassiveEffects@1:475433
+11-01 18:14:25.983 E/unknown:ReactNative( 2936): anonymous@1:474099
+11-01 18:14:26.098 W/Looper  (  913): Slow delivery took 1719ms SysUiBg app=com.android.systemui main=false group=TOP_APP h=com.android.systemui.appops.AppOpsControllerImpl$H c=com.android.systemui.appops.AppOpsControllerImpl$$ExternalSyntheticLambda0@de878b5 m=0
+11-01 18:14:26.170 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:26.170 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:26.519 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:26.847 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:26.857 W/OptProp (  645): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE
+11-01 18:14:26.860 W/OptProp (  645): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE
+11-01 18:14:26.861 W/OptProp (  645): Cannot read opt property android.window.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES
+11-01 18:14:26.915 W/unknown:BridgelessReact( 2936): ReactHost{0}.onUserLeaveHint(activity)
+11-01 18:14:26.934 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:26.942 W/unknown:BridgelessReact( 2936): ReactHost{0}.onHostPause(activity)
+11-01 18:14:26.942 W/unknown:BridgelessReact( 2936): ReactContext.onHostPause()
+11-01 18:14:26.948 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:26.951 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:27.057 W/HWUI    ( 1126): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+11-01 18:14:27.232 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:27.234 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:27.399 W/Looper  (  913): Slow delivery took 40ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.pip.phone.PipController$PipImpl$$ExternalSyntheticLambda0@d74216 m=0
+11-01 18:14:27.410 W/system_server(  645): Long monitor contention with owner android.anim (691) at void com.android.server.wm.WindowSurfacePlacer$Traverser.run()(WindowSurfacePlacer.java:55) waiters=2 in java.util.HashMap com.android.server.wm.AccessibilityWindowsPopulator.getWindowsTransformMatrix(java.util.List) for 104ms
+11-01 18:14:27.506 W/Looper  (  913): Drained
+11-01 18:14:27.589 W/Looper  (  913): Drained
+11-01 18:14:27.590 W/Looper  (  913): Slow dispatch took 176ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.transition.Transitions$TransitionPlayerImpl$$ExternalSyntheticLambda0@87c096d m=0
+11-01 18:14:27.773 W/Looper  (  645): Slow dispatch took 347ms android.fg app=system_server main=false group=FOREGROUND h=android.os.Handler c=com.android.server.wm.ActivityMetricsLogger$$ExternalSyntheticLambda0@e6660f7 m=0
+11-01 18:14:27.880 W/Looper  (  645): Slow delivery took 366ms android.fg app=system_server main=false group=FOREGROUND h=android.os.Handler c=com.android.server.wm.TransitionController$Logger@c7c71cd m=0
+11-01 18:14:28.007 W/Looper  (  645): Slow dispatch took 108ms android.fg app=system_server main=false group=FOREGROUND h=android.os.Handler c=com.android.server.wm.TransitionController$Logger@c7c71cd m=0
+11-01 18:14:28.091 W/AccessibilityManagerService(  645):  wait for adding window timeout: 24
+11-01 18:14:28.162 W/system_server(  645): Long monitor contention with owner binder:645_1A (1826) at void com.android.server.wm.ActivityClientController.activityPaused(android.os.IBinder)(ActivityClientController.java:236) waiters=1 in void com.android.server.wm.AccessibilityController.onWindowFocusChangedNot(int) for 111ms
+11-01 18:14:28.349 W/AccessibilityManagerService(  645):  wait for adding window timeout: 24
+11-01 18:14:28.445 W/Looper  (  913): Slow delivery took 85ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=null m=1
+11-01 18:14:28.530 W/Looper  (  913): Slow delivery took 70ms wmshell.anim app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.transition.DefaultTransitionHandler$$ExternalSyntheticLambda3@aa4528f m=0
+11-01 18:14:28.554 W/Looper  (  913): Slow dispatch took 108ms wmshell.main app=com.android.systemui main=false group=FOREGROUND h=android.os.Handler c=com.android.wm.shell.transition.Transitions$TransitionPlayerImpl$$ExternalSyntheticLambda0@2b8e91c m=0
+11-01 18:14:28.615 W/Looper  (  913): Drained
+11-01 18:14:28.830 W/WindowOnBackDispatcher( 1126): sendCancelIfRunning: isInProgress=false callback=android.app.Activity$$ExternalSyntheticLambda0@7cc1bb7
+11-01 18:14:28.845 W/unknown:BridgelessReact( 2936): ReactHost{0}.onHostResume(activity)
+11-01 18:14:28.845 W/unknown:BridgelessReact( 2936): ReactContext.onHostResume()
+11-01 18:14:29.154 W/Looper  (  913): Drained
+11-01 18:14:29.262 W/system_server(  645): Long monitor contention with owner appscheduling.default (756) at android.content.pm.UserInfo com.android.server.pm.UserManagerService.getUserInfoNoChecks(int)(UserManagerService.java:3178) waiters=1 in android.content.pm.UserInfo com.android.server.pm.UserManagerService.getUserInfoNoChecks(int) for 159ms
+11-01 18:14:29.282 W/system_server(  645): Long monitor contention with owner binder:645_17 (1538) at void com.android.server.accessibility.AbstractAccessibilityServiceConnection.notifyAccessibilityEvent(android.view.accessibility.AccessibilityEvent)(AbstractAccessibilityServiceConnection.java:1837) waiters=1 in void com.android.server.accessibility.AccessibilityWindowManager$DisplayWindowsObserver.onAccessibilityWindowsChanged(boolean, int, android.os.IBinder, android.graphics.Point, java.util.List) for 174ms
+11-01 18:14:30.082 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:30.084 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:30.122 W/GooglePlayServicesUtil( 2936): com.vupth.client.preview requires the Google Play Store, but it is missing.
+11-01 18:14:30.122 W/GoogleApiManager( 2936): The service for com.google.android.gms.internal.location.zzda is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null}
+11-01 18:14:30.122 W/GooglePlayServicesUtil( 2936): com.vupth.client.preview requires the Google Play Store, but it is missing.
+11-01 18:14:30.122 W/GoogleApiManager( 2936): The service for com.google.android.gms.internal.location.zzda is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null}
+11-01 18:14:30.263 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:30.265 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:30.299 W/HWUI    ( 2936): Image decoding logging dropped!
+11-01 18:14:30.453 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:30.461 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:30.889 W/Looper  (  645): Drained
+11-01 18:14:30.983 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:30.998 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:31.210 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:31.210 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:31.392 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:31.395 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:31.847 W/HWUI    ( 2863): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+11-01 18:14:31.998 W/.mobile.maestro( 2863): Suspending all threads took: 27.146ms
+11-01 18:14:32.283 W/[RNScreens]( 2936): backTitleVisible prop is not available on Android
+11-01 18:14:32.283 W/[RNScreens]( 2936): backTitleFontFamily prop is not available on Android
+11-01 18:14:32.284 W/[RNScreens]( 2936): disableBackButtonMenu prop is not available on Android
+11-01 18:14:32.284 W/[RNScreens]( 2936): largeTitleFontFamily prop is not available on Android
+11-01 18:14:32.284 W/[RNScreens]( 2936): largeTitleFontWeight prop is not available on Android
+11-01 18:14:32.284 W/[RNScreens]( 2936): largeTitleHideShadow prop is not available on Android
+11-01 18:14:32.342 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:33.750 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:34.349 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:34.350 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:34.691 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask()
+11-01 18:14:34.692 W/unknown:BridgelessReact( 2936): ReactHost{0}.raiseSoftException(getOrCreateReloadTask()): Restart from RelaunchProcedure
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): Unhandled SoftException
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): com.facebook.react.bridge.ReactNoCrashSoftException: raiseSoftException(getOrCreateReloadTask()): Restart from RelaunchProcedure
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.raiseSoftException(ReactHostImpl.kt:787)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.raiseSoftException$default(ReactHostImpl.kt:779)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.getOrCreateReloadTask(ReactHostImpl.kt:1169)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.reload$lambda$7(ReactHostImpl.kt:374)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.$r8$lambda$GojbfAZ9Zd8e_RImDRCRdgNgynE(Unknown Source:0)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl$$ExternalSyntheticLambda0.call(D8$$SyntheticClass:0)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.call$lambda$2(Task.kt:315)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.$r8$lambda$MFqd_-X5KhHmu0hvNE2Bec_4mJM(Unknown Source:0)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion$$ExternalSyntheticLambda1.run(D8$$SyntheticClass:0)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1156)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:651)
+11-01 18:14:34.731 E/unknown:ReactHost( 2936): 	at java.lang.Thread.run(Thread.java:1119)
+11-01 18:14:34.741 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Resetting createReactInstance task ref
+11-01 18:14:35.116 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Starting React Native reload
+11-01 18:14:35.118 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Calling ReactContext.onHostPause()
+11-01 18:14:35.133 W/unknown:BridgelessReact( 2936): ReactHost{0}.raiseSoftException(callWithExistingReactInstance(callFunctionOnModule("RCTDeviceEventEmitter", "emit"))): Execute: reactInstance is null. Dropping work.
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): Unhandled SoftException
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): com.facebook.react.bridge.ReactNoCrashSoftException: raiseSoftException(callWithExistingReactInstance(callFunctionOnModule("RCTDeviceEventEmitter", "emit"))): Execute: reactInstance is null. Dropping work.
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.raiseSoftException(ReactHostImpl.kt:787)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.raiseSoftException$default(ReactHostImpl.kt:779)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.callWithExistingReactInstance$lambda$28(ReactHostImpl.kt:802)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.$r8$lambda$6NreFt2BcPly8g6qrNV9Z1C-YmU(Unknown Source:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl$$ExternalSyntheticLambda29.then(D8$$SyntheticClass:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.completeImmediately$lambda$3(Task.kt:356)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.$r8$lambda$b7MTC0ufkn_2TjF4BGcNqGR9qK0(Unknown Source:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion$$ExternalSyntheticLambda3.run(D8$$SyntheticClass:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Executors$ImmediateExecutor.execute(Executors.kt:41)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.completeImmediately(Task.kt:354)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.access$completeImmediately(Task.kt:250)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task.continueWith(Task.kt:132)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task.continueWith$default(Task.kt:117)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task.onSuccess$lambda$12(Task.kt:174)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task.$r8$lambda$l0wwo5AvbHxlwfI1R7CH_codxoo(Unknown Source:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$$ExternalSyntheticLambda2.then(D8$$SyntheticClass:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.completeAfterTask$lambda$5(Task.kt:390)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.$r8$lambda$IPpysnehFwANEiW061YzapkMdoE(Unknown Source:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion$$ExternalSyntheticLambda4.run(D8$$SyntheticClass:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Executors$ImmediateExecutor.execute(Executors.kt:41)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.completeAfterTask(Task.kt:388)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.access$completeAfterTask(Task.kt:250)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task.continueWithTask(Task.kt:156)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task.onSuccess(Task.kt:169)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.callWithExistingReactInstance(ReactHostImpl.kt:798)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.callWithExistingReactInstance$default(ReactHostImpl.kt:791)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.callFunctionOnModule$ReactAndroid_release(ReactHostImpl.kt:687)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.BridgelessReactContext.emitDeviceEvent(BridgelessReactContext.kt:134)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.modules.appstate.AppStateModule.sendEvent(AppStateModule.kt:71)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.modules.appstate.AppStateModule.sendAppStateChangeEvent(AppStateModule.kt:75)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.modules.appstate.AppStateModule.onHostPause(AppStateModule.kt:48)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.bridge.ReactContext.onHostPause(ReactContext.java:302)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.getOrCreateReloadTask$lambda$48(ReactHostImpl.kt:1196)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl.$r8$lambda$n_Y6aPKLobKy995EhenWeF-aRv4(Unknown Source:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.ReactHostImpl$$ExternalSyntheticLambda6.then(D8$$SyntheticClass:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.completeAfterTask$lambda$5(Task.kt:390)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion.$r8$lambda$IPpysnehFwANEiW061YzapkMdoE(Unknown Source:0)
+11-01 18:14:35.136 E/unknown:ReactHost( 2936): 	at com.facebook.react.runtime.internal.bolts.Task$Companion$$ExternalSyntheticLambda4.run(D8$$SyntheticClass:0)
+11-01 18:14:35.140 E/unknown:ReactHost( 2936): 	at android.os.Handler.handleCallback(Handler.java:995)
+11-01 18:14:35.140 E/unknown:ReactHost( 2936): 	at android.os.Handler.dispatchMessage(Handler.java:103)
+11-01 18:14:35.140 E/unknown:ReactHost( 2936): 	at android.os.Looper.loopOnce(Looper.java:248)
+11-01 18:14:35.140 E/unknown:ReactHost( 2936): 	at android.os.Looper.loop(Looper.java:338)
+11-01 18:14:35.140 E/unknown:ReactHost( 2936): 	at android.app.ActivityThread.main(ActivityThread.java:9067)
+11-01 18:14:35.140 E/unknown:ReactHost( 2936): 	at java.lang.reflect.Method.invoke(Native Method)
+11-01 18:14:35.140 E/unknown:ReactHost( 2936): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:593)
+11-01 18:14:35.140 E/unknown:ReactHost( 2936): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:932)
+11-01 18:14:35.155 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Stopping all React Native surfaces
+11-01 18:14:35.155 E/unknown:SurfaceMountingManager( 2936): Stopping surface [1]
+11-01 18:14:35.167 E/unknown:SurfaceMountingManager( 2936): Surface [1] was stopped on SurfaceMountingManager.
+11-01 18:14:35.174 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:35.227 W/GooglePlayServicesUtil( 2936): com.vupth.client.preview requires the Google Play Store, but it is missing.
+11-01 18:14:35.251 W/GoogleApiManager( 2936): The service for com.google.android.gms.common.internal.service.zap is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null}
+11-01 18:14:35.251 W/GooglePlayServicesUtil( 2936): com.vupth.client.preview requires the Google Play Store, but it is missing.
+11-01 18:14:35.251 W/GoogleApiManager( 2936): The service for com.google.android.gms.common.internal.service.zap is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null}
+11-01 18:14:35.251 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Removing memory pressure listener
+11-01 18:14:35.251 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Resetting ReactContext ref
+11-01 18:14:35.251 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Destroying ReactContext
+11-01 18:14:35.376 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Resetting ReactInstance ptr
+11-01 18:14:35.383 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Destroying ReactInstance
+11-01 18:14:35.405 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_js... dropping Runnable.
+11-01 18:14:35.424 E/unknown:ReactNative( 2936): Tried to remove non-existent frame callback
+11-01 18:14:35.427 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.437 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.438 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.438 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.439 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.440 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.440 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.441 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.441 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.441 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.446 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.455 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.459 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.462 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.462 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.462 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.462 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.462 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.462 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.463 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.463 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.463 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.464 W/unknown:ReactNative( 2936): Tried to enqueue runnable on already finished thread: 'v_native... dropping Runnable.
+11-01 18:14:35.480 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Resetting start task ref
+11-01 18:14:35.482 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask()
+11-01 18:14:35.483 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask(): Start
+11-01 18:14:35.484 W/unknown:BridgelessReact( 2936): ReactHost{0}.getJSBundleLoader()
+11-01 18:14:35.486 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactContext(): Creating BridgelessReactContext
+11-01 18:14:35.493 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask(): Creating ReactInstance
+11-01 18:14:35.602 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask(): Loading JS Bundle
+11-01 18:14:35.614 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask(): Calling DevSupportManagerBase.onNewReactContextCreated(reactContext)
+11-01 18:14:35.616 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Restarting previously running React Native Surfaces
+11-01 18:14:35.618 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReloadTask(): Resetting reload task ref
+11-01 18:14:35.619 W/unknown:BridgelessReact( 2936): ReactContext.onHostResume()
+11-01 18:14:35.627 W/unknown:BridgelessReact( 2936): ReactHost{0}.getOrCreateReactInstanceTask(): Executing ReactInstanceEventListeners
+11-01 18:14:35.672 W/[RNScreens]( 2936): InsetObserverProxy registers on new context while it has not been invalidated on the old one. Please report this as issue at https://github.com/software-mansion/react-native-screens/issues
+11-01 18:14:35.674 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.th3rdwave.safeareacontext.SafeAreaProviderManager
+11-01 18:14:35.677 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.uimanager.LayoutShadowNode
+11-01 18:14:35.680 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.SearchBarManager
+11-01 18:14:35.681 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenFooterManager
+11-01 18:14:35.682 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.gamma.tabs.TabScreenViewManager
+11-01 18:14:35.683 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class expo.modules.kotlin.views.GroupViewManagerWrapper
+11-01 18:14:35.685 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenContainerViewManager
+11-01 18:14:35.687 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.gamma.tabs.TabsHostViewManager
+11-01 18:14:35.690 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class io.sentry.react.replay.RNSentryReplayUnmaskManager
+11-01 18:14:35.691 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ModalScreenViewManager
+11-01 18:14:35.692 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenStackHeaderConfigViewManager
+11-01 18:14:35.695 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenContentWrapperManager
+11-01 18:14:35.696 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.th3rdwave.safeareacontext.SafeAreaViewManager
+11-01 18:14:35.698 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.th3rdwave.safeareacontext.SafeAreaViewShadowNode
+11-01 18:14:35.700 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenViewManager
+11-01 18:14:35.701 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenStackHeaderSubviewManager
+11-01 18:14:35.702 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class io.sentry.react.replay.RNSentryReplayMaskManager
+11-01 18:14:35.702 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.swmansion.rnscreens.ScreenStackViewManager
+11-01 18:14:35.703 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class io.sentry.react.RNSentryOnDrawReporterManager
+11-01 18:14:35.725 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$DefsViewManager
+11-01 18:14:35.733 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.VirtualViewManager$RenderableShadowNode
+11-01 18:14:35.737 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeMergeManager
+11-01 18:14:35.743 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:35.747 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.safeareaview.ReactSafeAreaViewManager
+11-01 18:14:35.751 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.safeareaview.ReactSafeAreaViewShadowNode
+11-01 18:14:35.753 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:35.754 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:35.756 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$LinearGradientManager
+11-01 18:14:35.764 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeGaussianBlurManager
+11-01 18:14:35.766 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.progressbar.ReactProgressBarViewManager
+11-01 18:14:35.770 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.progressbar.ProgressBarShadowNode
+11-01 18:14:35.771 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.scroll.ReactHorizontalScrollViewManager
+11-01 18:14:35.779 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactTextViewManager
+11-01 18:14:35.781 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactTextShadowNode
+11-01 18:14:35.787 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeColorMatrixManager
+11-01 18:14:35.792 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.scroll.ReactHorizontalScrollContainerViewManager
+11-01 18:14:35.799 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$ClipPathViewManager
+11-01 18:14:35.812 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$SymbolManager
+11-01 18:14:35.817 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$PatternManager
+11-01 18:14:35.830 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeBlendManager
+11-01 18:14:35.840 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.view.ReactViewManager
+11-01 18:14:35.847 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.SvgViewManager
+11-01 18:14:35.882 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.switchview.ReactSwitchManager
+11-01 18:14:35.884 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.switchview.ReactSwitchShadowNode
+11-01 18:14:35.889 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$UseViewManager
+11-01 18:14:35.901 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$CircleViewManager
+11-01 18:14:35.903 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$TSpanViewManager
+11-01 18:14:35.957 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FilterManager
+11-01 18:14:36.003 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$MarkerManager
+11-01 18:14:36.019 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.modal.ReactModalHostManager
+11-01 18:14:36.023 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$ForeignObjectManager
+11-01 18:14:36.033 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$EllipseViewManager
+11-01 18:14:36.040 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$LineViewManager
+11-01 18:14:36.048 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageViewManager
+11-01 18:14:36.053 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageShadowNode
+11-01 18:14:36.055 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeFloodManager
+11-01 18:14:36.071 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$GroupViewManager
+11-01 18:14:36.079 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$TextViewManager
+11-01 18:14:36.089 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$ImageViewManager
+11-01 18:14:36.101 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeCompositeManager
+11-01 18:14:36.104 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.image.ReactImageManager
+11-01 18:14:36.106 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:36.106 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:36.117 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$RadialGradientManager
+11-01 18:14:36.124 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$MaskManager
+11-01 18:14:36.132 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.unimplementedview.ReactUnimplementedViewManager
+11-01 18:14:36.142 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$RectViewManager
+11-01 18:14:36.149 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$TextPathViewManager
+11-01 18:14:36.171 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.scroll.ReactScrollViewManager
+11-01 18:14:36.191 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$FeOffsetManager
+11-01 18:14:36.200 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.horcrux.svg.RenderableViewManager$PathViewManager
+11-01 18:14:36.207 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.drawer.ReactDrawerLayoutManager
+11-01 18:14:36.212 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactVirtualTextViewManager
+11-01 18:14:36.216 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactVirtualTextShadowNode
+11-01 18:14:36.217 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.swiperefresh.SwipeRefreshLayoutManager
+11-01 18:14:36.232 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactRawTextManager
+11-01 18:14:36.235 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.text.ReactRawTextShadowNode
+11-01 18:14:36.236 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.textinput.ReactTextInputManager
+11-01 18:14:36.239 W/unknown:ViewManagerPropertyUpdater( 2936): Could not find generated setter for class com.facebook.react.views.textinput.ReactTextInputShadowNode
+11-01 18:14:36.257 W/BridgelessReactContext( 2936): [WARNING] Bridgeless doesn't support CatalystInstance. Accessing an API that's not part of the new architecture is not encouraged usage.
+11-01 18:14:36.330 W/GooglePlayServicesUtil( 2936): com.vupth.client.preview requires the Google Play Store, but it is missing.
+11-01 18:14:36.330 W/GoogleApiManager( 2936): The service for com.google.android.gms.internal.location.zzda is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null}
+11-01 18:14:36.434 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:36.435 W/QueryController( 2863): Could not detect idle state.
+11-01 18:14:36.578 W/ReactNativeJS( 2936): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-01 18:14:36.786 W/HWUI    ( 2936): Image decoding logging dropped!
+11-01 18:14:37.993 E/ReactNativeJS( 2936): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): console.error: The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details., stack:
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): _construct@1:296347
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): Wrapper@1:296000
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): _callSuper@1:263532
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): SyntheticError@1:295487
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): reactConsoleErrorHandler@1:295053
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): anonymous@1:3632388
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): marcar@1:4346767
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): anonymous@1:4346702
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): commitHookEffectListMount@1:389772
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:396290
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:395395
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:396320
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:395395
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:396262
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:395395
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:396320
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:395395
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:396262
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:395395
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:396320
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): recursivelyTraversePassiveMountEffects@1:395395
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): commitPassiveMountOnFiber@1:396087
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): flushPassiveEffects@1:405596
+11-01 18:14:38.181 E/unknown:ReactNative( 2936): anonymous@1:404262
+11-01 18:14:38.264 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:38.265 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:38.523 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:38.649 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:38.665 W/GooglePlayServicesUtil( 2936): com.vupth.client.preview requires the Google Play Store, but it is missing.
+11-01 18:14:38.666 W/GoogleApiManager( 2936): The service for com.google.android.gms.internal.location.zzda is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null}
+11-01 18:14:38.669 W/GooglePlayServicesUtil( 2936): com.vupth.client.preview requires the Google Play Store, but it is missing.
+11-01 18:14:38.670 W/GoogleApiManager( 2936): The service for com.google.android.gms.internal.location.zzda is not available: ConnectionResult{statusCode=SERVICE_INVALID, resolution=null, message=null}
+11-01 18:14:40.203 W/[RNScreens]( 2936): backTitleVisible prop is not available on Android
+11-01 18:14:40.204 W/[RNScreens]( 2936): backTitleFontFamily prop is not available on Android
+11-01 18:14:40.205 W/[RNScreens]( 2936): disableBackButtonMenu prop is not available on Android
+11-01 18:14:40.205 W/[RNScreens]( 2936): largeTitleFontFamily prop is not available on Android
+11-01 18:14:40.205 W/[RNScreens]( 2936): largeTitleFontWeight prop is not available on Android
+11-01 18:14:40.205 W/[RNScreens]( 2936): largeTitleHideShadow prop is not available on Android
+11-01 18:14:40.257 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:40.753 W/unknown:ReactNative( 2936): StatusBarModule: Ignored status bar change, current activity is edge-to-edge.
+11-01 18:14:43.526 W/ActivityManager(  645): Crash of app dev.mobile.maestro running instrumentation ComponentInfo{dev.mobile.maestro.test/androidx.test.runner.AndroidJUnitRunner}
+11-01 18:14:43.645 W/ActivityManager(  645): pid 645 system sent binder code 1 with flags 1 to frozen apps and got error -32
+11-01 18:14:43.790 W/system_server(  645): Long monitor contention with owner PackageManager (723) at void com.android.server.pm.RemovePackageHelper.removePackageDataLIF(com.android.server.pm.PackageSetting, int, int[], com.android.server.pm.PackageRemovedInfo, int, boolean)(RemovePackageHelper.java:485) waiters=0 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 231ms
+11-01 18:14:43.861 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean)(PackageManagerService.java:1228) waiters=0 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 283ms
+11-01 18:14:43.949 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at void com.android.server.am.ActivityManagerService$MainHandler.handleMessage(android.os.Message)(ActivityManagerService.java:1837) waiters=1 in void com.android.server.am.ActivityManagerService$AppDeathRecipient.binderDied() for 305ms
+11-01 18:14:43.981 E/IPCThreadState(  645): Binder transaction failure. id: 268608, BR_*: 29189, error: -22 (Invalid argument)
+11-01 18:14:43.986 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean)(PackageManagerService.java:1228) waiters=1 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 335ms
+11-01 18:14:43.987 W/ActivityManager(  645): pid 645 system sent binder code 18 with flags 1 to frozen apps and got error -32
+11-01 18:14:43.988 W/ActivityManager(  645): Error shutting down UiAutomationConnection
+11-01 18:14:43.990 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean)(PackageManagerService.java:1228) waiters=2 in com.android.server.pm.Computer com.android.server.pm.PackageManagerService.snapshotComputer(boolean) for 236ms
+11-01 18:14:43.993 W/MagnificationConnectionManager(  645): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-01 18:14:44.016 W/MagnificationConnectionManager(  645): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-01 18:14:44.093 E/TaskPersister(  645): File error accessing recents directory (directory doesn't exist?).
+11-01 18:14:44.274 W/WifiService(  645): Couldn't get PackageInfo for package:dev.mobile.maestro
+11-01 18:14:44.278 E/AppOps  (  645): attributionTag VCN not declared in manifest of android
+11-01 18:14:44.330 E/AppOps  (  645): attributionTag VCN not declared in manifest of android
+11-01 18:14:44.340 E/SmsApplication( 1705): com.android.messaging lost android:receive_wap_push:  (fixing)
+11-01 18:14:44.343 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:44.360 E/SmsApplication( 1705): com.android.messaging lost android:read_cell_broadcasts:  (fixing)
+11-01 18:14:44.371 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:44.486 W/Looper  (  645): Slow dispatch took 265ms main app=system_server main=true group=FOREGROUND h=android.app.ActivityThread$H c=android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0@68de881 m=0
+11-01 18:14:44.503 W/Looper  (  645): Slow delivery took 281ms main app=system_server main=true group=FOREGROUND h=android.app.ActivityThread$H c=android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0@d2f8bbd m=0
+11-01 18:14:44.528 W/WifiService(  645): Couldn't get PackageInfo for package:dev.mobile.maestro
+11-01 18:14:44.531 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:44.533 W/MediaProvider( 1361): WorkProfileOwnerApps cache is empty
+11-01 18:14:44.534 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:44.558 W/JobInfo (  645): Job 'com.android.providers.media.module/com.android.providers.media.MediaService#-300' has a deadline with no functional constraints. The deadline won't improve job execution latency. Consider removing the deadline.
+11-01 18:14:44.614 W/CredentialManager(  645): settings key is null
+11-01 18:14:44.698 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:44.706 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = SEND_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:44.711 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:44.748 W/MagnificationConnectionManager(  645): requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED
+11-01 18:14:44.759 W/system_server(  645): Long monitor contention with owner ActivityManager (697) at void com.android.server.am.ActivityManagerService$MainHandler.handleMessage(android.os.Message)(ActivityManagerService.java:1837) waiters=1 in boolean com.android.server.am.ActivityManagerService.stopServiceToken(android.content.ComponentName, android.os.IBinder, int) for 265ms
+11-01 18:14:44.767 E/TaskPersister(  645): File error accessing recents directory (directory doesn't exist?).
+11-01 18:14:44.852 W/system_server(  645): Long monitor contention with owner appscheduling.default (756) at void com.android.server.job.controllers.QuotaController$QcHandler.handleMessage(android.os.Message)(QuotaController.java:3010) waiters=0 in void com.android.server.job.controllers.DeviceIdleJobsController$1.onReceive(android.content.Context, android.content.Intent) for 302ms
+11-01 18:14:44.854 W/Looper  (  645): Slow dispatch took 304ms main app=system_server main=true group=FOREGROUND h=android.app.ActivityThread$H c=android.app.LoadedApk$ReceiverDispatcher$Args$$ExternalSyntheticLambda0@841f35 m=0
+11-01 18:14:44.858 W/system_server(  645): Long monitor contention with owner appscheduling.default (756) at void com.android.server.job.controllers.QuotaController$QcHandler.handleMessage(android.os.Message)(QuotaController.java:3010) waiters=1 in int com.android.server.job.JobSchedulerService.scheduleAsPackage(android.app.job.JobInfo, android.app.job.JobWorkItem, int, java.lang.String, int, java.lang.String, java.lang.String) for 292ms
+11-01 18:14:44.992 W/WifiService(  645): Couldn't get PackageInfo for package:dev.mobile.maestro.test
+11-01 18:14:45.059 E/SmsApplication( 1705): com.android.messaging lost android:receive_wap_push:  (fixing)
+11-01 18:14:45.063 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:45.066 E/SmsApplication( 1705): com.android.messaging lost android:read_cell_broadcasts:  (fixing)
+11-01 18:14:45.073 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 10110, code = READ_CELL_BROADCASTS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:45.075 E/AppOps  (  645): attributionTag VCN not declared in manifest of android
+11-01 18:14:45.079 W/Looper  (  645): Slow dispatch took 204ms main app=system_server main=true group=FOREGROUND h=com.android.server.notification.NotificationManagerService$WorkerHandler c=null m=8
+11-01 18:14:45.083 W/system_server(  645): Long monitor contention with owner binder:645_B (1161) at int com.android.server.job.JobSchedulerService.getUidProcState(int)(JobSchedulerService.java:2513) waiters=0 in void com.android.server.job.JobSchedulerService$JobHandler.handleMessage(android.os.Message) for 222ms
+11-01 18:14:45.098 W/WifiService(  645): Couldn't get PackageInfo for package:dev.mobile.maestro.test
+11-01 18:14:45.137 W/MediaProvider( 1361): WorkProfileOwnerApps cache is empty
+11-01 18:14:45.167 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = READ_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:45.174 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_SMS, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:45.184 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = RECEIVE_WAP_PUSH, mode = allow, callingUid = 1001, oldMode = allow
+11-01 18:14:45.192 W/AppOpService(  645): Ignored setUidMode call for runtime permission app op: uid = 1001, code = SEND_SMS, mode = allow, callingUid = 1001, oldMode = allow

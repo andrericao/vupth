@@ -1,4 +1,4 @@
-Running on vupth_android11
+Running on vupth_aosp
  > Flow 00b_fumaca
 00b.P0 · prepara a etapa...
   ${ETAPA}.P1 · calcula TAG... COMPLETED
@@ -30,13 +30,15 @@ Running on vupth_android11
     Repeat while id: ${ALVO} is not visible (up to 40 times)...
       Run esperar_o_sistema.yaml...
         Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+          Tap on id: android:id/aerr_wait... COMPLETED
+          Wait for animation to end within 2000 ms... COMPLETED
+        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... COMPLETED
       Run esperar_o_sistema.yaml... COMPLETED
       Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible...
       Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... SKIPPED
       Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible...
       Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible... SKIPPED
-      Assert that (Optional) id: ${ALVO} is visible... WARNED
+      Assert that (Optional) id: ${ALVO} is visible... COMPLETED
     Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
     Assert that id: ${ALVO} is visible... COMPLETED
   00b.P7 · espera onboarding-start (negando a caixa do sistema)... COMPLETED
@@ -147,37 +149,7 @@ Running on vupth_android11
   09.08a · rola até o rodapé da tela de entrada... COMPLETED
   09.08b · vê Termos de uso... COMPLETED
   09.08c · vê Política de privacidade... COMPLETED
-  09.09 · toca em E-mail... COMPLETED
-  09.10 · digita ${EMAIL_CLIENTE}... COMPLETED
-  09.11 · toca em Senha... COMPLETED
-  09.12 · digita ${SENHA}... COMPLETED
-  09.13 · fecha o teclado... COMPLETED
-  09.14 · toca em primary-login... COMPLETED
-  09.15 · roda fechar_aviso...
-    Run esperar_o_sistema.yaml...
-      Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-      Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
-    Run esperar_o_sistema.yaml... COMPLETED
-    Wait for animation to end within 3000 ms... COMPLETED
-    Run flow when id: dialogo-botao-0 is visible...
-    Run flow when id: dialogo-botao-0 is visible... SKIPPED
-    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
-    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
-    Run flow when id: push-skip is visible...
-    Run flow when id: push-skip is visible... SKIPPED
-  09.15 · roda fechar_aviso... COMPLETED
-  09.16 · toca em Perfil... COMPLETED
-  09.17 · rola até Sair da conta (logado de novo)... COMPLETED
-00b.L0 · logar: sai da conta e entra de novo com e-mail e senha... COMPLETED
-00b.L1 · abre a loja de teste...
-  Tap on "Início"... COMPLETED
-  Tap on id: busca-home... COMPLETED
-  Erase 30 characters... COMPLETED
-  Input text C${TAG}... COMPLETED
-  Hide Keyboard... COMPLETED
-  Assert that "${LOJA}" is visible... COMPLETED
-  Tap on "${LOJA}"... COMPLETED
-  Assert that id: professional-${PROF_ID} is visible...io.grpc.StatusRuntimeException: UNAVAILABLE
+  09.09 · toca em E-mail...io.grpc.StatusRuntimeException: UNAVAILABLE
 	at io.grpc.stub.ClientCalls.toStatusRuntimeException(ClientCalls.java:275)
 	at io.grpc.stub.ClientCalls.getUnchecked(ClientCalls.java:256)
 	at io.grpc.stub.ClientCalls.blockingUnaryCall(ClientCalls.java:169)
@@ -189,8 +161,14 @@ Running on vupth_android11
 	at maestro.utils.Metrics.measured(Metrics.kt:48)
 	at maestro.drivers.AndroidDriver.contentDescriptor(AndroidDriver.kt:325)
 	at maestro.ViewHierarchy$Companion.from-8JJjmZI(ViewHierarchy.kt:29)
-	at maestro.Maestro$findElementWithTimeout$found$1$1.invoke-prqvCes(Maestro.kt:441)
-	at maestro.Maestro$findElementWithTimeout$found$1$1.invoke(Maestro.kt:440)
+	at maestro.utils.ScreenshotUtils$Companion.viewHierarchy-c1iYVAs(ScreenshotUtils.kt:99)
+	at maestro.utils.ScreenshotUtils$Companion.waitForAppToSettle-OpTFbEc(ScreenshotUtils.kt:60)
+	at maestro.drivers.AndroidDriver$waitForAppToSettle$1.invoke-prqvCes(AndroidDriver.kt:741)
+	at maestro.drivers.AndroidDriver$waitForAppToSettle$1.invoke(AndroidDriver.kt:737)
+	at maestro.utils.Metrics.measured(Metrics.kt:48)
+	at maestro.drivers.AndroidDriver.waitForAppToSettle-5RpGHs4(AndroidDriver.kt:737)
+	at maestro.Maestro$waitForAppToSettle$2.invoke-F9mIFpk(Maestro.kt:477)
+	at maestro.Maestro$waitForAppToSettle$2.invoke(Maestro.kt:476)
 	at kotlinx.coroutines.InterruptibleKt.runInterruptibleInExpectedContext(Interruptible.kt:48)
 	at kotlinx.coroutines.InterruptibleKt.access$runInterruptibleInExpectedContext(Interruptible.kt:1)
 	at kotlinx.coroutines.InterruptibleKt$runInterruptible$2.invokeSuspend(Interruptible.kt:40)
@@ -219,4 +197,4 @@ Caused by: java.io.IOException: Command failed (tcp:7001): closed
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-01_174713/00b_fumaca
+/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-01_180801/00b_fumaca
