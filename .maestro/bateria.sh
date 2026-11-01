@@ -265,6 +265,7 @@ rodar() {
   local prazo="$ETAPA_PRAZO" verificada=1
   [ "$nome" = "00_atualizacao" ] && { prazo="$ATUALIZACAO_PRAZO"; verificada=0; }
   case "$nome" in 00b_*) prazo="$FUMACA_PRAZO" ;; esac
+  PRAZO_USADO="$prazo"
   timeout -k 30 "$prazo" maestro "${MAESTRO_APARELHO[@]}" test \
     -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT_ACEITOS" \
     -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" -e PERFIL="$PERFIL" -e VERSAO_VERIFICADA="$verificada" \
@@ -412,7 +413,7 @@ else
     else
       STATUS=1
       PASSO=$(falhou_em "$RODADA/$arquivo")
-      MOTIVO=""; [ "$VOLTA" -eq 124 ] && MOTIVO=" — TEMPO ESGOTADO (${ETAPA_PRAZO}s)"
+      MOTIVO=""; [ "$VOLTA" -eq 124 ] && MOTIVO=" — TEMPO ESGOTADO (${PRAZO_USADO:-$ETAPA_PRAZO}s)"
       echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo} ($DURA)$MOTIVO" >> "$RODADA/relatorio.txt"
       echo "${PASSO:-}" > "$RODADA/$arquivo/falhou_em"
       print_da_falha "$RODADA/$arquivo" "$PASSO"
