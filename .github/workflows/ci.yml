@@ -84,14 +84,22 @@ jobs:
       # ota-so-compativel (DEC-152): o OTA so sai se o projeto nativo for o do build instalado
       # (fingerprint-do-build.json). Mudou pacote nativo / plugin / permissao? Falha aqui, antes do
       # `eas update`, e diz o que mudou: falta um build novo. Falha fechado (sem base ou sem comparar = nao publica).
+      # Bloqueio NAO deixa o CI vermelho: vermelho num push de dev/main aciona o auto-rollback, que tentaria
+      # reverter o merge so porque falta um build. O bloqueio vira aviso; os passos de publicar so rodam se o guarda passou.
       - name: Guarda do OTA (so publica se o nativo nao mudou)
+        id: guarda
+        continue-on-error: true
         run: node tools/guardaOta.js
+
+      - name: OTA NAO publicado (falta build novo)
+        if: steps.guarda.outcome == 'failure'
+        run: echo "::warning title=OTA nao publicado::O projeto nativo mudou desde o build instalado (veja o passo do guarda). Falta um build novo; o app instalado segue como esta."
 
       # A mensagem do commit vai por ENV (nunca interpolada direto no shell):
       # aspas/quebras de linha no corpo do commit quebravam o comando
       # (`Unexpected arguments: ...`). Usamos so a 1a linha (subject), citada.
       - name: Publish OTA (dev -> preview)
-        if: github.ref == 'refs/heads/dev'
+        if: github.ref == 'refs/heads/dev' && steps.guarda.outcome == 'success'
         env:
           EXPO_PUBLIC_API_ENV: staging
           COMMIT_MSG: ${{ github.event.head_commit.message }}
@@ -100,7 +108,7 @@ jobs:
           eas update --branch preview --message "$SUBJECT" --non-interactive
 
       - name: Publish OTA (main -> production)
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && steps.guarda.outcome == 'success'
         env:
           EXPO_PUBLIC_API_ENV: prod
           COMMIT_MSG: ${{ github.event.head_commit.message }}
