@@ -9,6 +9,14 @@ describe('segundosAteAVez', () => {
   it('nunca fica negativo', () => {
     expect(segundosAteAVez({ enteredAt: 0, estimatedMinutes: 1 }, 10 * 60000)).toBe(0);
   });
+  it('recalcula com o valor novo do Backend e segue sem rede (so o relogio do aparelho)', () => {
+    const agora = 1_000_000;
+    expect(segundosAteAVez({ enteredAt: agora, estimatedMinutes: 20 }, agora + 60_000)).toBe(19 * 60);
+    // o poll traz 10 min: o alvo passa a ser (agora do poll) + 10 min
+    expect(segundosAteAVez({ enteredAt: agora + 60_000, estimatedMinutes: 10 }, agora + 60_000)).toBe(600);
+    // sem novo contato, o cronometro continua so com o relogio
+    expect(segundosAteAVez({ enteredAt: agora + 60_000, estimatedMinutes: 10 }, agora + 120_000)).toBe(540);
+  });
   it('sem previsao devolve null (nao e zero)', () => {
     expect(segundosAteAVez({ enteredAt: 0, estimatedMinutes: null }, 0)).toBeNull();
     expect(segundosAteAVez(undefined, 0)).toBeNull();
