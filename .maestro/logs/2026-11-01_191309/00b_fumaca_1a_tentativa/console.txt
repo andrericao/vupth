@@ -30,7 +30,9 @@ Running on vupth_aosp
     Repeat while id: ${ALVO} is not visible (up to 40 times)...
       Run esperar_o_sistema.yaml...
         Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+          Tap on id: android:id/aerr_wait... COMPLETED
+          Wait for animation to end within 2000 ms... COMPLETED
+        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... COMPLETED
         Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
         Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
       Run esperar_o_sistema.yaml... COMPLETED
@@ -38,7 +40,7 @@ Running on vupth_aosp
       Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... SKIPPED
       Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible...
       Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible... SKIPPED
-      Assert that (Optional) id: ${ALVO} is visible... WARNED
+      Assert that (Optional) id: ${ALVO} is visible... COMPLETED
     Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
     Assert that id: ${ALVO} is visible... COMPLETED
   00b.P7 · espera onboarding-start (negando a caixa do sistema)... COMPLETED
@@ -205,34 +207,101 @@ Running on vupth_aosp
       Tap on "Confirmar"... COMPLETED
     Run flow when "Esteja na loja" is visible... COMPLETED
   00b.02 · confirma o aviso 'Esteja na loja', se vier... COMPLETED
-  00b.03 · espera as caixas de confirmação... COMPLETED
-  00b.04 · fecha as caixas...
-    Run esperar_o_sistema.yaml...
-      Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-      Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
-      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
-      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
-    Run esperar_o_sistema.yaml... COMPLETED
-    Wait for animation to end within 3000 ms... COMPLETED
-    Run flow when id: dialogo-botao-0 is visible...
-    Run flow when id: dialogo-botao-0 is visible... SKIPPED
-    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
-    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
-    Run flow when id: push-skip is visible...
-    Run flow when id: push-skip is visible... SKIPPED
-  00b.04 · fecha as caixas... COMPLETED
-  00b.05 · a fila abre e mostra a posição... FAILED
+  00b.03 · a fila abre e mostra a posição (fecha o aviso da estimativa e as caixas)...
+    Repeat while id: queue-position is not visible (up to 20 times)...
+      Run flow when "Entendi" is visible...
+        Tap on "Entendi"... COMPLETED
+      Run flow when "Entendi" is visible... COMPLETED
+      Run fechar_aviso.yaml...
+        Run esperar_o_sistema.yaml...
+          Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+          Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+          Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
+          Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
+        Run esperar_o_sistema.yaml... COMPLETED
+        Wait for animation to end within 3000 ms... COMPLETED
+        Run flow when id: dialogo-botao-0 is visible...
+        Run flow when id: dialogo-botao-0 is visible... SKIPPED
+        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+        Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+        Run flow when id: push-skip is visible...
+        Run flow when id: push-skip is visible... SKIPPED
+      Run fechar_aviso.yaml... COMPLETED
+      Assert that (Optional) id: queue-position is visible... COMPLETED
+    Repeat while id: queue-position is not visible (up to 20 times)... COMPLETED
+    Assert that id: queue-position is visible... COMPLETED
+  00b.03 · a fila abre e mostra a posição (fecha o aviso da estimativa e as caixas)... COMPLETED
+  00b.04 · abre o Partner como o profissional...
+    Launch app "com.vupth.partner.preview" with clear state... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+    Assert that (Optional) id: app-commit is visible... COMPLETED
+    Stop com.vupth.partner.preview... COMPLETED
+    Launch app "com.vupth.partner.preview"... COMPLETED
+    Assert that "Como você vai usar o Vupth?" is visible... COMPLETED
+    Run ../../../vupth-partner/.maestro/conjunta/prof_entrar.yaml...
+      PJ1.01 · entra como ${EMAIL}...
+        Tap on id: go-login... COMPLETED
+        Tap on id: login-email... COMPLETED
+        Input text ${EMAIL}... COMPLETED
+        Tap on id: login-password... COMPLETED
+        Input text ${SENHA}... COMPLETED
+        Hide Keyboard... COMPLETED
+        Tap on id: login-submit... COMPLETED
+      PJ1.01 · entra como prop_c57118900b@teste.com... COMPLETED
+      PJ1.02 · espera a Fila ou o Menu do dono... COMPLETED
+      PJ1.02a · fecha o aviso, se houver...
+        Wait for animation to end within 3000 ms... COMPLETED
+        Run fechar_anr.yaml...
+          Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+          Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+        Run fechar_anr.yaml... COMPLETED
+        Run flow when id: dialogo-botao-0 is visible...
+        Run flow when id: dialogo-botao-0 is visible... SKIPPED
+        Run flow when id: android:id/button1 is visible...
+        Run flow when id: android:id/button1 is visible... SKIPPED
+      PJ1.02a · fecha o aviso, se houver... COMPLETED
+      PJ1.02b · na visao de dono, troca para a de profissional...
+        Tap on id: aba-menu... COMPLETED
+        Tap on "Atender como profissional"... COMPLETED
+      PJ1.02b · na visao de dono, troca para a de profissional... COMPLETED
+      PJ1.02c · espera aba-fila... COMPLETED
+      PJ1.03 · fecha o aviso, se houver...
+        Wait for animation to end within 3000 ms... COMPLETED
+        Run fechar_anr.yaml...
+          Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
+          Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible... SKIPPED
+        Run fechar_anr.yaml... COMPLETED
+        Run flow when id: dialogo-botao-0 is visible...
+        Run flow when id: dialogo-botao-0 is visible... SKIPPED
+        Run flow when id: android:id/button1 is visible...
+        Run flow when id: android:id/button1 is visible... SKIPPED
+      PJ1.03 · fecha o aviso, se houver... COMPLETED
+    Run ../../../vupth-partner/.maestro/conjunta/prof_entrar.yaml... COMPLETED
+  00b.04 · abre o Partner como o profissional... COMPLETED
+  00b.05 · no Partner, atende e finaliza ${NOME_CLIENTE} sem receber...
+    PJ6.01 · toca em aba-fila... COMPLETED
+    PJ6.02 · espera ${CLIENTE} na fila... COMPLETED
+    PJ6.03 · toca em Iniciar proximo... COMPLETED
+    PJ6.04 · espera Finalizar... COMPLETED
+    PJ6.05 · toca em Finalizar... COMPLETED
+    PJ6.05a · pix · responde o pagamento (Recebi ou Não recebi)...
+      Assert that (Optional) "Recebeu o pagamento?" is visible... COMPLETED
+      Run flow when "Recebeu o pagamento?" is visible...
+        Tap on "${RESPOSTA == 'Confirmar' ? 'Recebi' : RESPOSTA}"... FAILED
+      Run flow when "Recebeu o pagamento?" is visible... FAILED
+    PJ6.05a · pix · responde o pagamento (Recebi ou Não recebi)... FAILED
+  00b.05 · no Partner, atende e finaliza Cliente57118900b sem receber... FAILED
 00b.E1 · roda 00b_fumaca... FAILED
 
-Assertion is false: id: queue-position is visible
+Element not found: Text matching regex: Ainda não
 
-Assertion 'id: queue-position is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+Element with Text matching regex: Ainda não not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
 
 Possible causes:
 - Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
-- Element may be temporarily unavailable due to loading state
-- This could be a real regression that needs to be addressed
+- Element may be temporarily unavailable due to loading state.
+- This could be a real regression that needs to be addressed.
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-01_184331/00b_fumaca
+/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-01_191309/00b_fumaca
