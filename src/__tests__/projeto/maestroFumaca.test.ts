@@ -61,7 +61,7 @@ describe("Maestro 00b — teste de fumaça", () => {
 
   it("usa só ids que o app tem", () => {
     const app = fontes("src");
-    for (const id of ["primary-queue", "pix-do-atendimento", "pagamento-fechar", "pagamentos-pendentes", "pix-ja-paguei", "pix-ok"]) {
+    for (const id of ["primary-queue", "pendencia-pagar", "pix-ja-paguei", "pix-ok"]) {
       expect(etapa).toContain(`"${id}"`);
       expect(app).toContain(id);
     }

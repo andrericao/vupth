@@ -31,50 +31,34 @@ appId: ${APP_ID}
 - launchApp:
     appId: ${APP_ID}
     label: "00b.06 · volta ao Client (sem limpar)"
-- runFlow:
-    file: ../apoio/fechar_aviso.yaml
-    label: "00b.07 · fecha as caixas"
+# Sem fechar_aviso aqui: ele tocaria em "Agora nao" do aviso de pagamento pendente, que e o que esta fumaca precisa.
+# Pagar (rodada 200521): ao voltar ao Client, o aviso "Pagamento pendente" (Pagar / Agora nao) abre sozinho, ou o Pix
+# direto. O fluxo segue o que o app mostra: Pagar -> Pix -> "Ja paguei" -> aguardando o profissional.
 - extendedWaitUntil:
     visible:
-      id: "pix-do-atendimento"
-    timeout: ${30000 * LENTO}
-    optional: true
-    label: "00b.08 · o Pix abre na tela da fila, se ela ainda estiver aberta"
+      id: "(aviso-de-pendencia|pix-do-atendimento)"
+    timeout: ${60000 * LENTO}
+    label: "00b.07 · pagar: o aviso de pagamento pendente (ou o Pix) abre"
 - runFlow:
     when:
       visible:
-        id: "pix-do-atendimento"
+        id: "pendencia-pagar"
     commands:
       - tapOn:
-          id: "pagamento-fechar"
-    label: "00b.09 · fecha (a conta segue em Atendimentos)"
-- tapOn:
-    id: "faixa-avaliar-fechar"
-    optional: true
-    label: "00b.10 · fecha a faixa de avaliar, se apareceu"
-- tapOn:
-    text: "Atendimentos"
-    label: "00b.11 · toca em Atendimentos"
-- extendedWaitUntil:
-    visible:
-      id: "pagamentos-pendentes"
-    timeout: ${60000 * LENTO}
-    label: "00b.12 · pagar: o que falta pagar aparece no topo"
-- tapOn:
-    id: "pagar-.*"
-    label: "00b.13 · abre o Pix"
+          id: "pendencia-pagar"
+    label: "00b.08 · toca em Pagar"
 - extendedWaitUntil:
     visible:
       id: "pix-ja-paguei"
     timeout: ${20000 * LENTO}
-    label: "00b.14 · o Pix mostra o Já paguei"
+    label: "00b.09 · o Pix mostra o Já paguei"
 - tapOn:
     id: "pix-ja-paguei"
-    label: "00b.15 · toca em Já paguei"
+    label: "00b.10 · toca em Já paguei"
 - extendedWaitUntil:
     visible: "Aguardando o profissional confirmar"
     timeout: ${20000 * LENTO}
-    label: "00b.16 · o pagamento fica aguardando o profissional"
+    label: "00b.11 · o pagamento fica aguardando o profissional"
 - tapOn:
     id: "pix-ok"
-    label: "00b.17 · fecha o Pix"
+    label: "00b.12 · fecha o Pix"
