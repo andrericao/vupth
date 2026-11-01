@@ -13,7 +13,7 @@ const SCRIPT = path.join(ROOT, ".maestro/publicar-ota.sh");
 const git = (cwd: string, ...args: string[]) =>
   execFileSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", ...args], { cwd, stdio: "pipe" }).toString().trim();
 
-function preparar({ comEas = true, easFalha = false, atrasado = false } = {}) {
+function preparar({ comEas = true, easFalha = false, atrasado = false, guarda = 0 as number | null } = {}) {
   const base = fs.mkdtempSync(path.join(os.tmpdir(), "ota-"));
   const origin = path.join(base, "origin.git");
   const repo = path.join(base, "repo");
@@ -41,6 +41,12 @@ function preparar({ comEas = true, easFalha = false, atrasado = false } = {}) {
     );
     fs.chmodSync(path.join(bin, "eas"), 0o755);
   }
+  // ota-so-compativel (DEC-152): o guarda roda antes do eas update. Aqui o `node` e falso e sai com o codigo pedido
+  // (null = sem node no PATH: falha fechado).
+  if (guarda !== null) {
+    fs.writeFileSync(path.join(bin, "node"), `#!/bin/sh\necho "guarda $@" >> "${chamadas}"\nexit ${guarda}\n`);
+    fs.chmodSync(path.join(bin, "node"), 0o755);
+  }
   return { repo, bin, chamadas };
 }
 
@@ -61,6 +67,21 @@ describe("publicar-ota.sh", () => {
     expect(r.saida).toMatch(/OTA publicado/);
     const chamadas = fs.readFileSync(p.chamadas, "utf8");
     expect(chamadas).toMatch(/^staging update --branch preview --message bateria Maestro · [0-9a-f]+ feat: primeiro --non-interactive$/m);
+  });
+
+  it("o guarda do OTA bloqueia (o nativo mudou): nao publica e manda fazer build", () => {
+    const p = preparar({ guarda: 1 });
+    const r = rodar(p);
+    expect(r.codigo).toBe(5);
+    expect(r.saida).toMatch(/guarda do OTA bloqueou/);
+    expect(fs.readFileSync(p.chamadas, "utf8")).not.toMatch(/update/);
+  });
+
+  it("sem como rodar o guarda (sem node): falha fechado, nao publica", () => {
+    const p = preparar({ guarda: null });
+    const r = rodar(p);
+    expect(r.codigo).toBe(5);
+    expect(fs.readFileSync(p.chamadas, "utf8")).not.toMatch(/update/);
   });
 
   it("sem o eas-cli: para e manda publicar à mão (nunca instala)", () => {

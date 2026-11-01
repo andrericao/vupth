@@ -15,6 +15,8 @@ export type ConfigDoSentry = {
   commit?: string | null;
   /** Rodando no jest: nunca liga. */
   emTeste?: boolean;
+  /** Versao, runtime e OTA em execucao: liga a queda ao OTA que estava rodando (sem dado pessoal). */
+  tags?: Record<string, string | null | undefined>;
   carregar?: () => Sentry | null;
 };
 
@@ -138,7 +140,7 @@ export function marcarContexto(contexto: ContextoDoSentry, sdk: Sentry | null = 
 }
 
 /** Liga o Sentry se houver DSN. Devolve se ligou. */
-export function iniciarSentry({ dsn, ambiente, commit, emTeste, carregar = carregarSentry }: ConfigDoSentry): boolean {
+export function iniciarSentry({ dsn, ambiente, commit, emTeste, tags, carregar = carregarSentry }: ConfigDoSentry): boolean {
   const chave = dsn?.trim();
   if (!chave || emTeste) return false;
   const sentry = carregar();
@@ -155,6 +157,15 @@ export function iniciarSentry({ dsn, ambiente, commit, emTeste, carregar = carre
       beforeBreadcrumb: (rastro: any) => limparRastro(rastro),
     });
     sdkLigado = sentry;
+    for (const [nome, valor] of Object.entries(tags ?? {})) {
+      if (valor) {
+        try {
+          sentry.setTag(nome, limparTexto(String(valor)));
+        } catch {
+          // tag e enfeite: nunca derruba a abertura
+        }
+      }
+    }
     return true;
   } catch {
     return false;
@@ -183,6 +194,28 @@ export function reportarProblema(
       ...(nome?.trim() ? { name: nome.trim() } : {}),
       associatedEventId: sdk.lastEventId?.(),
     });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Manda um erro capturado pela raiz (ErrorBoundary) ao Sentry, ja limpo pelo beforeSend. Nunca lanca. */
+export function capturarErro(erro: unknown, sdk: Sentry | null = sdkLigado): boolean {
+  if (!sdk) return false;
+  try {
+    sdk.captureException(erro);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Registra o MOTIVO de uma decisao do app (ex.: abriu em modo seguro). Texto sem dado pessoal. */
+export function registrarMotivo(mensagem: string, sdk: Sentry | null = sdkLigado): boolean {
+  if (!sdk) return false;
+  try {
+    sdk.captureMessage(limparTexto(mensagem), "warning");
     return true;
   } catch {
     return false;

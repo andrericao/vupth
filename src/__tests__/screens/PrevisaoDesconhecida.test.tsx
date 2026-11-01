@@ -81,6 +81,6 @@ describe('QueueStatus — enquanto a previsão não chega', () => {
     );
     const { queryByText, getAllByText } = renderWithProviders(<QueueStatus />);
     expect(queryByText(/Calculando/)).toBeNull();
-    expect(getAllByText(/40/).length).toBeGreaterThan(0);
+    expect(getAllByText(/(39:5\d|40:00)/).length).toBeGreaterThan(0);
   });
 });

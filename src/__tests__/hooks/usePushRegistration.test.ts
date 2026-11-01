@@ -6,6 +6,7 @@ import * as SecureStore from 'expo-secure-store';
 import { usePushRegistration } from '@hooks/usePushRegistration';
 import { useAuthStore } from '@stores/authStore';
 import { useFirstRunStore } from '@stores/firstRunStore';
+import { useModoSeguroStore } from '@stores/modoSeguroStore';
 import { usePushDiagnosticsStore } from '@stores/pushDiagnosticsStore';
 import { PUSH_PERGUNTADO_KEY } from '@hooks/ofertaDePush';
 
@@ -65,6 +66,8 @@ function resposta(id: string, action = 'expo.modules.notifications.actions.DEFAU
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // log-de-falha-na-abertura: o push espera o aparelho dizer se a abertura e segura; aqui ja disse que nao.
+  useModoSeguroStore.setState({ lido: true, seguro: false, quedas: 0 });
   recebido = undefined;
   tocou = undefined;
   n.setNotificationChannelAsync.mockResolvedValue(undefined);
@@ -450,5 +453,35 @@ describe('usePushRegistration — o que sobra (cobertura-98)', () => {
     renderHook(() => usePushRegistration());
     recebido?.({ request: { content: { title: 'Oi', body: 'b' } } });
     expect(alerta).toHaveBeenCalledWith('Oi', 'b', [{ text: 'OK' }]);
+  });
+});
+
+// log-de-falha-na-abertura (DEC-152): em modo seguro, ou antes de o aparelho responder, o push em segundo plano fica parado.
+describe('usePushRegistration — modo seguro', () => {
+  const entrar = () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tk', user: { id: 'u1' } } as never);
+    useFirstRunStore.setState({ pushAsked: true } as never);
+  };
+
+  it('em modo seguro: nao cria canal nem categoria e nao pede o token', async () => {
+    useModoSeguroStore.setState({ lido: true, seguro: true, quedas: 2 });
+    entrar();
+    renderHook(() => usePushRegistration());
+    await act(async () => {});
+    expect(n.setNotificationChannelAsync).not.toHaveBeenCalled();
+    expect(n.setNotificationCategoryAsync).not.toHaveBeenCalled();
+    expect(n.getExpoPushTokenAsync).not.toHaveBeenCalled();
+  });
+
+  it('antes de o aparelho responder (lido=false): espera, e registra quando chega a resposta normal', async () => {
+    useModoSeguroStore.setState({ lido: false, seguro: false, quedas: 0 });
+    entrar();
+    renderHook(() => usePushRegistration());
+    await act(async () => {});
+    expect(n.getExpoPushTokenAsync).not.toHaveBeenCalled();
+    await act(async () => {
+      useModoSeguroStore.getState().definir(false, 0);
+    });
+    await waitFor(() => expect(n.getExpoPushTokenAsync).toHaveBeenCalled());
   });
 });

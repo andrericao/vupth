@@ -10,6 +10,8 @@ import {
   marcarContexto,
   reportarProblema,
   sentryLigado,
+  capturarErro,
+  registrarMotivo,
 } from "@utils/sentry";
 
 // sentry (Andre, 09/10): inerte sem DSN e nos testes; com DSN, liga com o
@@ -186,5 +188,41 @@ describe("reportarProblema", () => {
     expect(sdk.captureFeedback).not.toHaveBeenCalled();
     const quebra = { captureFeedback: () => { throw new Error("x"); } } as any;
     expect(reportarProblema({ mensagem: "oi" }, quebra)).toBe(false);
+  });
+});
+
+// log-de-falha-na-abertura (DEC-152): as tags ligam a queda ao OTA; o erro da raiz e o motivo do modo seguro vao ao
+// Sentry, sem dado pessoal.
+describe("tags, erro da raiz e motivo", () => {
+  it("as tags (updateId, runtime, versao, commit) entram; vazias nao; e-mail e limpo", () => {
+    const s = { init: jest.fn(), setTag: jest.fn() } as any;
+    iniciarSentry({
+      dsn: "d",
+      ambiente: "staging",
+      carregar: () => s,
+      tags: { updateId: "u-1", runtimeVersion: "1.1.0", versao: null, commit: "joao@x.com" },
+    });
+    expect(s.setTag).toHaveBeenCalledWith("updateId", "u-1");
+    expect(s.setTag).toHaveBeenCalledWith("runtimeVersion", "1.1.0");
+    expect(s.setTag).toHaveBeenCalledWith("commit", "[e-mail]");
+    expect(s.setTag).not.toHaveBeenCalledWith("versao", expect.anything());
+  });
+
+  it("uma tag que falha nao derruba a abertura", () => {
+    const s = { init: jest.fn(), setTag: jest.fn(() => { throw new Error("x"); }) } as any;
+    expect(iniciarSentry({ dsn: "d", ambiente: "prod", carregar: () => s, tags: { updateId: "u" } })).toBe(true);
+  });
+
+  it("capturarErro e registrarMotivo: sem SDK devolvem false; com SDK enviam; SDK que lanca nao propaga", () => {
+    expect(capturarErro(new Error("x"), null)).toBe(false);
+    expect(registrarMotivo("motivo", null)).toBe(false);
+    const s = { captureException: jest.fn(), captureMessage: jest.fn() } as any;
+    expect(capturarErro(new Error("x"), s)).toBe(true);
+    expect(s.captureException).toHaveBeenCalled();
+    expect(registrarMotivo("caiu com maria@x.com", s)).toBe(true);
+    expect(s.captureMessage).toHaveBeenCalledWith("caiu com [e-mail]", "warning");
+    const ruim = { captureException: () => { throw new Error("y"); }, captureMessage: () => { throw new Error("y"); } } as any;
+    expect(capturarErro(new Error("x"), ruim)).toBe(false);
+    expect(registrarMotivo("m", ruim)).toBe(false);
   });
 });

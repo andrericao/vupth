@@ -36,8 +36,6 @@ import { Routes } from "@routes/index";
 
 import { PreparingServer } from "@components/PreparingServer";
 import { EntradaDaHome } from "@components/EntradaDaHome";
-import { iniciarSentry } from "@utils/sentry";
-import { API_ENV } from "@services/api";
 import { useContextoDoSentry } from "@hooks/useContextoDoSentry";
 import { useAuthStore } from "@stores/authStore";
 import { useQueueStore } from "@stores/queueStore";
@@ -69,18 +67,18 @@ import { aplicarOtaNaAbertura } from "@services/otaNaAbertura";
 
 import { useReconciliarFila } from "@hooks/useReconciliarFila";
 import { useAvisoDeAtraso } from "@hooks/useAvisoDeAtraso";
-import { devePersistir, persister, VALIDADE_MS } from "@services/queryPersist";
+import { devePersistir, persisterDaAbertura, VALIDADE_MS } from "@services/queryPersist";
+import { confirmarAbertura, CONFIRMA_POR_TEMPO_MS, iniciarAbertura } from "./src/boot/aberturas";
+import { AvisoModoSeguro } from "@components/AvisoModoSeguro";
+import { registrarMotivo } from "@utils/sentry";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 
 import { instalarAlertWeb } from "./web-shims/alert";
 
-// sentry (Andre, 24/10), no desenho do Partner: erros e crash, so com o DSN do ambiente; sem ele, inerte.
-const commitDoBundle = (Constants.expoConfig?.extra as { commit?: unknown } | undefined)?.commit;
-iniciarSentry({
-  dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-  ambiente: API_ENV,
-  commit: typeof commitDoBundle === "string" ? commitDoBundle : null,
-  emTeste: !!process.env.JEST_WORKER_ID,
+// sentry (Andre, 24/10): agora sobe no index.js, ANTES do App (log-de-falha-na-abertura, DEC-152).
+// Laco de queda: le a marca das aberturas anteriores e decide o modo seguro (nunca derruba a abertura).
+iniciarAbertura().then((d) => {
+  if (d.seguro) registrarMotivo(`modo seguro: o app caiu ${d.quedas} vezes seguidas na abertura`);
 });
 
 // Pausa/retoma as queries conforme a conexao real (netinfo). 1x no boot.
@@ -158,6 +156,17 @@ export default function App() {
   const [listaSalva, setListaSalva] = useState(false);
   const backendProntoRef = useRef(false);
   const pronto = fontGateOpen && (backendReady || listaSalva);
+
+  // A abertura deu certo quando a primeira tela esta de pe — ou passados 10 s, o que vier primeiro. So entao a
+  // marca de "abrindo" sai; se o app cair antes, ela fica e conta uma queda.
+  useEffect(() => {
+    const porTempo = setTimeout(() => void confirmarAbertura(), CONFIRMA_POR_TEMPO_MS);
+    if (pronto) {
+      clearTimeout(porTempo);
+      void confirmarAbertura();
+    }
+    return () => clearTimeout(porTempo);
+  }, [pronto]);
 
   useEffect(() => {
     restoreSession();
@@ -245,7 +254,7 @@ export default function App() {
     <PersistQueryClientProvider
       client={queryClient}
       persistOptions={{
-        persister,
+        persister: persisterDaAbertura,
         maxAge: VALIDADE_MS,
         // Versao nova do app invalida o cache salvo: se o formato de uma
         // resposta mudar entre versoes, o app nao abre lendo um objeto que nao
@@ -290,6 +299,7 @@ export default function App() {
         {/* Um so na arvore, FORA do portao de fonte: um aviso disparado antes
             de a fonte carregar precisa aparecer do mesmo jeito. */}
         <DialogoVupth />
+        <AvisoModoSeguro />
         <ConviteDeTroca />
         {/* pendencia-de-pagamento (CLI-30): o aviso do 409 e o Pix. */}
         <ModalDePagamento />
