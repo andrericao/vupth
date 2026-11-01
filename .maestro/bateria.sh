@@ -2,6 +2,7 @@
 # A bateria do Client com UM comando (Andre, 03/10 — commit-sem-flag):
 #
 #   bash .maestro/bateria.sh              # pergunta: completa ou so as que nao passaram
+#   bash .maestro/bateria.sh --sem-atualizacao   # pula a 00 (ou --com-atualizacao); sem a flag, pergunta
 #   bash .maestro/bateria.sh --fumaca     # SO a versao (00) e a fumaca (00b, teto de 5 min); a 1a fase
 #   bash .maestro/bateria.sh --regressao  # a regressao completa; recusa se a fumaca nao passou neste commit
 #   bash .maestro/bateria.sh --completa   # roda todas, sem perguntar
@@ -42,6 +43,7 @@ fi
 # Os argumentos: o modo (--completa/--falhas) e o aparelho (--device <serial>).
 # Antes so o $1 era lido, e o "--device emulator-5554" virava o modo (10/10).
 MODO=""
+ATUALIZAR=""
 FASE=""
 APARELHO=""
 PERFIL=""
@@ -50,6 +52,8 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --completa|--falhas) MODO="$1" ;;
     --fumaca) FASE="fumaca" ;;
+    --sem-atualizacao) ATUALIZAR="n" ;;
+    --com-atualizacao) ATUALIZAR="s" ;;
     --regressao) FASE="regressao" ;;
     --publicar-ota) PUBLICAR_OTA="--publicar-ota" ;;
     --device) APARELHO="$2"; shift ;;
@@ -308,8 +312,20 @@ if [ "$MODO" != "--completa" ] && [ -n "$INSTALACAO" ] && [ "$(cat "$VERIFICADA"
   VERSAO_OK=1
   echo "⏭ 00 · versão $COMMIT já verificada neste aparelho"
 else
-  VERSAO_OK=0
-  rm -f "$VERIFICADA"
+  # Verificar a atualizacao atrasa muito (Andre, 01/11): pergunta. "n" segue direto para os testes, sem a 00
+  # (o app que ja passou da conferencia nao precisa dela de novo). Sem resposta em 1 min, verifica (o seguro).
+  if [ -z "$ATUALIZAR" ]; then
+    read -r -t 60 -p "Verificar a atualização do app antes dos testes? (s = verificar / n = ir direto aos testes) [s] " RESP_ATU
+    echo ""
+    case "$RESP_ATU" in n|N) ATUALIZAR="n" ;; *) ATUALIZAR="s" ;; esac
+  fi
+  if [ "$ATUALIZAR" = "n" ]; then
+    VERSAO_OK=2
+    echo "⏭ 00 · versão: sem verificar a atualização, a pedido (os testes seguem direto)"
+  else
+    VERSAO_OK=0
+    rm -f "$VERIFICADA"
+  fi
 fi
 
 STATUS=0
@@ -324,7 +340,9 @@ if [ "$VOLTA_00" -ne 0 ]; then
   echo "A versão no aparelho não é a $COMMIT: nenhuma etapa rodou."
   STATUS=1
 else
-  if [ "$VERSAO_OK" = 1 ]; then
+  if [ "$VERSAO_OK" = 2 ]; then
+    echo "⏭ 00 · versão (atualização não verificada, a pedido)" >> "$RODADA/relatorio.txt"
+  elif [ "$VERSAO_OK" = 1 ]; then
     echo "⏭ 00 · versão (commit $COMMIT já verificado)" >> "$RODADA/relatorio.txt"
   else
     echo "✅ 00 · versão" >> "$RODADA/relatorio.txt"

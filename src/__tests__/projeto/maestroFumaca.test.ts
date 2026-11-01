@@ -38,6 +38,12 @@ describe("Maestro 00b — teste de fumaça", () => {
     expect(ler(".maestro/avulsas/00b_fumaca.yaml")).toMatch(/tags:\s*\n\s*- smoke/);
   });
 
+  it("pergunta se verifica a atualização; não, segue direto aos testes", () => {
+    expect(bateria).toMatch(/Verificar a atualização do app antes dos testes\?/);
+    expect(bateria).toMatch(/--sem-atualizacao\) ATUALIZAR="n"/);
+    expect(bateria).toMatch(/ATUALIZAR" = "n" \]; then\s+VERSAO_OK=2/);
+  });
+
   it("diz que não prova o dinheiro nem o Pix do gateway", () => {
     expect(etapa).toMatch(/NÃO prova: dinheiro real nem o Pix do Asaas/);
   });
