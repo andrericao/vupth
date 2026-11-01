@@ -33,6 +33,8 @@ Running on vupth_aosp
           Tap on id: android:id/aerr_wait... COMPLETED
           Wait for animation to end within 2000 ms... COMPLETED
         Repeat while id: android:id/aerr_wait is visible (up to 3 times)... COMPLETED
+        Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
+        Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
       Run esperar_o_sistema.yaml... COMPLETED
       Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible...
       Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... SKIPPED
@@ -46,6 +48,8 @@ Running on vupth_aosp
     Run esperar_o_sistema.yaml...
       Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
       Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
+      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
     Run esperar_o_sistema.yaml... COMPLETED
     Wait for animation to end within 3000 ms... COMPLETED
     Run flow when id: dialogo-botao-0 is visible...
@@ -61,6 +65,8 @@ Running on vupth_aosp
       Run esperar_o_sistema.yaml...
         Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
         Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+        Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
+        Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
       Run esperar_o_sistema.yaml... COMPLETED
       Wait for animation to end within 3000 ms... COMPLETED
       Run flow when id: dialogo-botao-0 is visible...
@@ -88,6 +94,8 @@ Running on vupth_aosp
         Run esperar_o_sistema.yaml...
           Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
           Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+          Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
+          Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
         Run esperar_o_sistema.yaml... COMPLETED
         Wait for animation to end within 3000 ms... COMPLETED
         Run flow when id: dialogo-botao-0 is visible...
@@ -108,6 +116,8 @@ Running on vupth_aosp
         Run esperar_o_sistema.yaml...
           Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
           Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+          Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
+          Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
         Run esperar_o_sistema.yaml... COMPLETED
         Wait for animation to end within 3000 ms... COMPLETED
         Run flow when id: dialogo-botao-0 is visible...
@@ -135,6 +145,8 @@ Running on vupth_aosp
     Run esperar_o_sistema.yaml...
       Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
       Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
+      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
     Run esperar_o_sistema.yaml... COMPLETED
     Wait for animation to end within 3000 ms... COMPLETED
     Run flow when id: dialogo-botao-0 is visible...
@@ -149,52 +161,80 @@ Running on vupth_aosp
   09.08a · rola até o rodapé da tela de entrada... COMPLETED
   09.08b · vê Termos de uso... COMPLETED
   09.08c · vê Política de privacidade... COMPLETED
-  09.09 · toca em E-mail...io.grpc.StatusRuntimeException: UNAVAILABLE
-	at io.grpc.stub.ClientCalls.toStatusRuntimeException(ClientCalls.java:275)
-	at io.grpc.stub.ClientCalls.getUnchecked(ClientCalls.java:256)
-	at io.grpc.stub.ClientCalls.blockingUnaryCall(ClientCalls.java:169)
-	at maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub.viewHierarchy(MaestroDriverGrpc.java:747)
-	at maestro.drivers.AndroidDriver.callViewHierarchy(AndroidDriver.kt:366)
-	at maestro.drivers.AndroidDriver.callViewHierarchy(AndroidDriver.kt:392)
-	at maestro.drivers.AndroidDriver.callViewHierarchy$default(AndroidDriver.kt:364)
-	at maestro.drivers.AndroidDriver.contentDescriptor$lambda$17(AndroidDriver.kt:326)
-	at maestro.utils.Metrics.measured(Metrics.kt:48)
-	at maestro.drivers.AndroidDriver.contentDescriptor(AndroidDriver.kt:325)
-	at maestro.ViewHierarchy$Companion.from-8JJjmZI(ViewHierarchy.kt:29)
-	at maestro.utils.ScreenshotUtils$Companion.viewHierarchy-c1iYVAs(ScreenshotUtils.kt:99)
-	at maestro.utils.ScreenshotUtils$Companion.waitForAppToSettle-OpTFbEc(ScreenshotUtils.kt:60)
-	at maestro.drivers.AndroidDriver$waitForAppToSettle$1.invoke-prqvCes(AndroidDriver.kt:741)
-	at maestro.drivers.AndroidDriver$waitForAppToSettle$1.invoke(AndroidDriver.kt:737)
-	at maestro.utils.Metrics.measured(Metrics.kt:48)
-	at maestro.drivers.AndroidDriver.waitForAppToSettle-5RpGHs4(AndroidDriver.kt:737)
-	at maestro.Maestro$waitForAppToSettle$2.invoke-F9mIFpk(Maestro.kt:477)
-	at maestro.Maestro$waitForAppToSettle$2.invoke(Maestro.kt:476)
-	at kotlinx.coroutines.InterruptibleKt.runInterruptibleInExpectedContext(Interruptible.kt:48)
-	at kotlinx.coroutines.InterruptibleKt.access$runInterruptibleInExpectedContext(Interruptible.kt:1)
-	at kotlinx.coroutines.InterruptibleKt$runInterruptible$2.invokeSuspend(Interruptible.kt:40)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
-Caused by: java.io.IOException: Command failed (tcp:7001): closed
-	at dadb.adbserver.AdbServer.send$dadb(AdbServer.kt:103)
-	at dadb.adbserver.AdbServerDadb.open(AdbServer.kt:149)
-	at maestro.drivers.AndroidDriver.channel$lambda$0(AndroidDriver.kt:81)
-	at maestro.android.AdbSocket.connect(AdbSocketFactory.kt:40)
-	at maestro.android.AdbSocket.connect(AdbSocketFactory.kt:44)
-	at maestro.android.AdbSocketFactory.createSocket(AdbSocketFactory.kt:19)
-	at maestro.android.AdbSocketFactory.createSocket(AdbSocketFactory.kt:25)
-	at io.grpc.okhttp.OkHttpClientTransport$3.run(OkHttpClientTransport.java:535)
-	at io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:133)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
-	at java.base/java.lang.Thread.run(Thread.java:1583)
+  09.09 · toca em E-mail... COMPLETED
+  09.10 · digita ${EMAIL_CLIENTE}... COMPLETED
+  09.11 · toca em Senha... COMPLETED
+  09.12 · digita ${SENHA}... COMPLETED
+  09.13 · fecha o teclado... COMPLETED
+  09.14 · toca em primary-login... COMPLETED
+  09.15 · roda fechar_aviso...
+    Run esperar_o_sistema.yaml...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
+      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
+    Run esperar_o_sistema.yaml... COMPLETED
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+    Run flow when id: push-skip is visible...
+    Run flow when id: push-skip is visible... SKIPPED
+  09.15 · roda fechar_aviso... COMPLETED
+  09.16 · toca em Perfil... COMPLETED
+  09.17 · rola até Sair da conta (logado de novo)... COMPLETED
+00b.L0 · logar: sai da conta e entra de novo com e-mail e senha... COMPLETED
+00b.L1 · abre a loja de teste...
+  Tap on "Início"... COMPLETED
+  Tap on id: busca-home... COMPLETED
+  Erase 30 characters... COMPLETED
+  Input text C${TAG}... COMPLETED
+  Hide Keyboard... COMPLETED
+  Assert that "${LOJA}" is visible... COMPLETED
+  Tap on "${LOJA}"... COMPLETED
+  Assert that id: professional-${PROF_ID} is visible... COMPLETED
+00b.L1 · abre a loja de teste... COMPLETED
+00b.L2 · escolhe o serviço...
+  Tap on id: professional-${PROF_ID}... COMPLETED
+  Assert that id: service-${SERVICO_ID} is visible... COMPLETED
+  Tap on id: service-${SERVICO_ID}... COMPLETED
+00b.L2 · escolhe o serviço... COMPLETED
+00b.E1 · roda 00b_fumaca...
+  00b.01 · marcar: entra na fila... COMPLETED
+  00b.02 · confirma o aviso 'Esteja na loja', se vier...
+    Run flow when "Esteja na loja" is visible...
+      Tap on "Confirmar"... COMPLETED
+    Run flow when "Esteja na loja" is visible... COMPLETED
+  00b.02 · confirma o aviso 'Esteja na loja', se vier... COMPLETED
+  00b.03 · espera as caixas de confirmação... COMPLETED
+  00b.04 · fecha as caixas...
+    Run esperar_o_sistema.yaml...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
+      Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
+      Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
+    Run esperar_o_sistema.yaml... COMPLETED
+    Wait for animation to end within 3000 ms... COMPLETED
+    Run flow when id: dialogo-botao-0 is visible...
+    Run flow when id: dialogo-botao-0 is visible... SKIPPED
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)...
+    Repeat while id: com.android.permissioncontroller:id/permission_deny_button is visible (up to 3 times)... SKIPPED
+    Run flow when id: push-skip is visible...
+    Run flow when id: push-skip is visible... SKIPPED
+  00b.04 · fecha as caixas... COMPLETED
+  00b.05 · a fila abre e mostra a posição... FAILED
+00b.E1 · roda 00b_fumaca... FAILED
 
+Assertion is false: id: queue-position is visible
+
+Assertion 'id: queue-position is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-01_180801/00b_fumaca
+/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-01_184331/00b_fumaca
