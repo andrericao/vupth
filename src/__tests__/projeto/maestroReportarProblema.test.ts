@@ -15,7 +15,7 @@ describe("Maestro 27 — Reportar problema", () => {
   });
 
   it("a bateria roda a 27 por padrão", () => {
-    expect(ler(".maestro/bateria.sh")).toMatch(/ETAPAS=\$\{ETAPAS:-"[^"]*\b26 27"\}/);
+    expect(ler(".maestro/bateria.sh")).toMatch(/ETAPAS_PADRAO="[^"]*\b26 27"/);
   });
 
   it("os ids do fluxo existem no componente; sem Sentry, o fluxo pula (⏭) em vez de falhar", () => {

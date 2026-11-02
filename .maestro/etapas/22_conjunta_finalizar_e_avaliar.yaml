@@ -3,7 +3,7 @@
 # (usar-campos-do-historico); o convite de avaliar aparece, a avaliacao vai, e
 # o atendimento avaliado nao oferece mais "Avaliar" (avaliar-so-sem-nota); o
 # card sem avaliar tem o ponto, que some depois de avaliar (notificacao-avaliar);
-# o profissional finaliza com "Ainda não" no pagamento e o Client ve o que falta
+# o profissional finaliza com "Não recebi" no pagamento e o Client ve o que falta
 # pagar no topo, abre o Pix e toca em "Já paguei" (pendencia-de-pagamento).
 # Comeca logado, ja na fila (entrou pela API).
 # env: EMAIL_PROF, NOME_CLIENTE, LOJA, PROF
@@ -17,7 +17,7 @@ appId: ${APP_ID}
     env:
       APP_ID: com.vupth.partner.preview
       CLIENTE: ${NOME_CLIENTE}
-      PAGAMENTO: "Ainda não"
+      PAGAMENTO: "Não recebi"
     label: "22.02 · no Partner, atende e finaliza ${NOME_CLIENTE} sem receber"
 - launchApp:
     appId: ${APP_ID}

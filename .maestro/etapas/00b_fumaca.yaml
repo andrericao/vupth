@@ -1,0 +1,64 @@
+# TESTE DE FUMACA (smoke test; teste-do-essencial, DEC-157): logar, marcar um serviço (entrar na fila) e pagar.
+# O que o Maestro prova aqui: o app instalado abre, entra com e-mail e senha, põe o cliente na fila e, quando o
+# profissional finaliza sem receber, abre o Pix do atendimento e aceita o "Já paguei".
+# O que NÃO prova: dinheiro real nem o Pix do Asaas (isso é do Backend: sandbox e a pasta "essencial" do Newman).
+# Comeca na escolha do servico, com o servico marcado e o cliente ja logado de novo (a avulsa faz o login).
+# Conta e loja proprias da etapa (TAG), criadas pela API: nada do que muda no dado de producao entra aqui.
+# env: EMAIL_PROF, NOME_CLIENTE
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "primary-queue"
+    label: "00b.01 · marcar: entra na fila"
+- runFlow:
+    file: ../apoio/confirmar_chegada.yaml
+    label: "00b.02 · confirma o aviso 'Esteja na loja', se vier"
+# O aviso "Sobre o tempo estimado" abre depois, por leitura assincrona, e como Modal esconde o queue-position
+# (rodada 184331: a fumaca parou aqui com o aviso na tela). O helper fecha o aviso e as caixas no meio da espera.
+- runFlow:
+    file: ../apoio/esperar_a_fila.yaml
+    label: "00b.03 · a fila abre e mostra a posição (fecha o aviso da estimativa e as caixas)"
+- runFlow:
+    file: ../apoio/abrir_partner.yaml
+    label: "00b.04 · abre o Partner como o profissional"
+- runFlow:
+    file: ../../../vupth-partner/.maestro/conjunta/prof_finalizar.yaml
+    env:
+      APP_ID: com.vupth.partner.preview
+      CLIENTE: ${NOME_CLIENTE}
+      PAGAMENTO: "Não recebi"
+    label: "00b.05 · no Partner, atende e finaliza ${NOME_CLIENTE} sem receber"
+- launchApp:
+    appId: ${APP_ID}
+    label: "00b.06 · volta ao Client (sem limpar)"
+# Sem fechar_aviso aqui: ele tocaria em "Agora nao" do aviso de pagamento pendente, que e o que esta fumaca precisa.
+# Pagar (rodada 200521): ao voltar ao Client, o aviso "Pagamento pendente" (Pagar / Agora nao) abre sozinho, ou o Pix
+# direto. O fluxo segue o que o app mostra: Pagar -> Pix -> "Ja paguei" -> aguardando o profissional.
+- extendedWaitUntil:
+    visible:
+      id: "(aviso-de-pendencia|pix-do-atendimento)"
+    timeout: ${60000 * LENTO}
+    label: "00b.07 · pagar: o aviso de pagamento pendente (ou o Pix) abre"
+- runFlow:
+    when:
+      visible:
+        id: "pendencia-pagar"
+    commands:
+      - tapOn:
+          id: "pendencia-pagar"
+    label: "00b.08 · toca em Pagar"
+- extendedWaitUntil:
+    visible:
+      id: "pix-ja-paguei"
+    timeout: ${20000 * LENTO}
+    label: "00b.09 · o Pix mostra o Já paguei"
+- tapOn:
+    id: "pix-ja-paguei"
+    label: "00b.10 · toca em Já paguei"
+- extendedWaitUntil:
+    visible: "Aguardando o profissional confirmar"
+    timeout: ${20000 * LENTO}
+    label: "00b.11 · o pagamento fica aguardando o profissional"
+- tapOn:
+    id: "pix-ok"
+    label: "00b.12 · fecha o Pix"

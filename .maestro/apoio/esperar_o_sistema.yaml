@@ -16,3 +16,16 @@ appId: ${APP_ID}
           id: "android:id/aerr_wait"
       - waitForAnimationToEnd:
           timeout: 2000
+# AOSP 16 sem janela (01/11): o "System UI isn't responding" nem sempre expoe o id do botao ao Maestro; a caixa
+# cobre o app e a fumaca nao via o "Ver filas" por baixo dela. Mesmo toque em "Wait", agora pelo texto do titulo.
+# Os dois textos juntos (titulo + botao) para nunca tocar num "Wait" de tela do app.
+- repeat:
+    times: 3
+    while:
+      visible: "(.*isn.t responding|.*não está respondendo)"
+    commands:
+      - tapOn:
+          text: "(Wait|Aguardar)"
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 2000

@@ -1,0 +1,22 @@
+--------- beginning of main
+11-01 20:15:07.838 D/AndroidRuntime( 3763): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-01 20:15:07.860 I/AndroidRuntime( 3763): Using default boot image
+11-01 20:15:07.866 I/AndroidRuntime( 3763): Leaving lock profiling enabled
+11-01 20:15:08.277 D/AndroidRuntime( 3763): Calling main entry com.android.commands.am.Am
+11-01 20:15:48.389 D/Sentry  ( 3865): io.sentry.auto-init read: false
+11-01 20:15:52.523 W/ReactNativeJS( 3865): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-01 20:15:53.469 I/ReactNativeJS( 3865): Running "main"
+11-01 20:15:53.573 E/ReactNativeJS( 3865): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-01 20:15:59.888 W/ReactNativeJS( 3865): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-01 20:16:00.273 I/ReactNativeJS( 3865): Running "main"
+11-01 20:16:00.382 E/ReactNativeJS( 3865): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-01 20:20:25.094 D/Sentry  ( 4320): io.sentry.auto-init read: false
+11-01 20:20:28.515 I/ReactNativeJS( 4320): Running "main"
+11-01 20:20:42.000 D/Sentry  ( 4634): io.sentry.auto-init read: false
+11-01 20:20:44.605 I/ReactNativeJS( 4634): Running "main"
+11-01 20:21:23.279 W/ReactNativeJS( 4634): Passing an object as the argument to 'navigate' is deprecated. Use 'navigate(name, params, options)' instead.
+11-01 20:22:17.183 D/Sentry  ( 4953): io.sentry.auto-init read: false
+11-01 20:22:19.730 W/ReactNativeJS( 4953): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-01 20:22:20.168 I/ReactNativeJS( 4953): Running "main"
+11-01 20:22:20.292 E/ReactNativeJS( 4953): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-01 20:23:45.071 I/AndroidRuntime( 3763): VM exiting with result code 0.
