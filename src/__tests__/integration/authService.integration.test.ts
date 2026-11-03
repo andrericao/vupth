@@ -25,7 +25,7 @@ describe('AuthService', () => {
     const response = await authService.login({ email: 'test@test.com', password: '123456' });
 
     expect(response.data.user.email).toBe('test@test.com');
-    expect(response.data.tokens.access_token).toBe('jwt');
+    expect(response.data.tokens?.access_token).toBe('jwt');
   });
 
   it('refresh deve enviar refresh_token no body', async () => {

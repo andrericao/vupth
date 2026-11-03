@@ -4,6 +4,7 @@ import * as Updates from "expo-updates";
 
 import { resolveApiEnv } from "./apiEnv";
 import { esperarServidor } from "./prontidaoDoServidor";
+import { modoCookieWeb, prepararPedidoPorCookie, SESSAO_POR_COOKIE } from "./modoCookieWeb";
 
 interface RefreshResponse {
 	access_token: string;
@@ -96,6 +97,8 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 	if (METODOS_QUE_GRAVAM.has((config.method ?? "get").toLowerCase()) && !config.url?.startsWith("/actuator")) {
 		await esperarServidor();
 	}
+	// token-web-httponly (DEC-179): na web com a chave ligada, a sessao vai no cookie; nada de Authorization.
+	if (modoCookieWeb()) return prepararPedidoPorCookie(config);
 	if (!config.headers.Authorization && !isPublicPath(config.url)) {
 		const token = await SecureStore.getItemAsync(TOKEN_KEY);
 		if (token) {
@@ -113,6 +116,11 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 let refreshEmVoo: Promise<string> | null = null;
 
 async function trocarTokens(): Promise<string> {
+	// Modo cookie (DEC-179): o servidor troca os cookies; 204 sem corpo, e o app nao guarda nada.
+	if (modoCookieWeb()) {
+		await api.post("/auth/web/refresh");
+		return SESSAO_POR_COOKIE;
+	}
 	const refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);
 	if (!refreshToken) throw new Error("No refresh token");
 
