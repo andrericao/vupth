@@ -1,4 +1,4 @@
-import { origemDaMulta, contaComMultas, lembreteDaMulta, reais } from '@domain/queue/multasPendentes';
+import { origemDaMulta, contaComMultas, lembreteDaMulta, partesDasMultas, reais } from '@domain/queue/multasPendentes';
 import type { PendingPenalty } from '@services/penaltyService';
 
 // Andre, 25/09: as multas pendentes entram na conta, separadas do serviço, e
@@ -58,5 +58,19 @@ describe('o lembrete da multa ao entrar na fila', () => {
     expect(l.titulo).toBe('Multa pendente');
     expect(l.mensagem).toBe('Você tem R$ 10,00 em multa. Ela entra no valor deste corte.');
     expect([l.cancelar, l.continuar]).toEqual(['Cancelar', 'Continuar']);
+  });
+});
+
+// multas-teste-x-app (DEC-175): teste × app só quando as duas partes existem.
+describe('as duas partes das multas', () => {
+  it('teste e app maiores que zero: as duas partes', () => {
+    expect(partesDasMultas({ testTotal: 5, appTotal: 10 })).toBe('Do período de teste R$ 5,00 · Cobradas pelo app R$ 10,00');
+  });
+  it('uma parte zero, ausente ou resposta antiga: nada', () => {
+    expect(partesDasMultas({ testTotal: 5, appTotal: 0 })).toBeNull();
+    expect(partesDasMultas({ testTotal: 0, appTotal: 5 })).toBeNull();
+    expect(partesDasMultas({})).toBeNull();
+    expect(partesDasMultas(null)).toBeNull();
+    expect(partesDasMultas(undefined)).toBeNull();
   });
 });

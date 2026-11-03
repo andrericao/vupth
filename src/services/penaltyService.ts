@@ -11,11 +11,16 @@ export interface PendingPenalty {
   originDate?: string | null;
   originProfessionalName?: string | null;
   originEstablishmentName?: string | null;
+  /** DEC-175 (Backend e6c78d5): nasceu no periodo de teste (vai ao profissional); false = cobrada pelo app. */
+  testPeriod?: boolean;
 }
 
 export interface PendingPenaltiesResponse {
   total: number;
   penalties: PendingPenalty[];
+  /** DEC-175: parte do periodo de teste e parte cobrada pelo app; total = soma das duas. */
+  testTotal?: number;
+  appTotal?: number;
 }
 
 // Faltas (Backend 5d04760, tres-faltas-pagar-adiantado, DEC-105/115): o "nao

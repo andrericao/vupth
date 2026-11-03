@@ -1,5 +1,5 @@
 import { formatarReais } from '@utils/formatarReais';
-import type { PendingPenalty } from '@services/penaltyService';
+import type { PendingPenalty, PendingPenaltiesResponse } from '@services/penaltyService';
 
 // A conta da escolha de servicos (Andre, 25/09): as multas pendentes entram
 // SEPARADAS do servico — cobrancas do servico de um lado, do app do outro — e
@@ -50,4 +50,15 @@ export function lembreteDaMulta(multas: PendingPenalty[]): { titulo: string; men
     continuar: 'Continuar',
     cancelar: 'Cancelar',
   };
+}
+
+/**
+ * multas-teste-x-app (DEC-175): na virada do gateway as multas pendentes carregam. O bloco "Multas
+ * pendentes" mostra as duas partes so quando ambas sao maiores que zero; com uma so, o total ja diz tudo.
+ */
+export function partesDasMultas(r?: Pick<PendingPenaltiesResponse, 'testTotal' | 'appTotal'> | null): string | null {
+  const teste = Number(r?.testTotal) || 0;
+  const app = Number(r?.appTotal) || 0;
+  if (teste <= 0 || app <= 0) return null;
+  return `Do período de teste ${reais(teste)} · Cobradas pelo app ${reais(app)}`;
 }

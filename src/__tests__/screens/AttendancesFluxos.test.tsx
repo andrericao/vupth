@@ -202,6 +202,25 @@ describe('Atendimentos — multas pendentes', () => {
     expect(getByText('detalhe-fechar')).toBeTruthy();
   });
 
+  // multas-teste-x-app (DEC-175): as duas partes só quando ambas são maiores que zero.
+  it('com multa do teste e do app, mostra as duas partes; com uma só, não', () => {
+    mockMultas = {
+      total: 10, testTotal: 5, appTotal: 5,
+      penalties: [
+        { penaltyId: 'm1', type: 'LATE_CANCEL', amount: 5, testPeriod: true },
+        { penaltyId: 'm2', type: 'NO_SHOW', amount: 5, testPeriod: false },
+      ],
+    };
+    const primeira = renderWithProviders(<Attendances />);
+    expect(primeira.getByTestId('multas-teste-x-app').props.children).toBe(
+      'Do período de teste R$ 5,00 · Cobradas pelo app R$ 5,00',
+    );
+    primeira.unmount();
+    mockMultas = { total: 5, testTotal: 5, appTotal: 0, penalties: [{ penaltyId: 'm1', type: 'LATE_CANCEL', amount: 5, testPeriod: true }] };
+    const segunda = renderWithProviders(<Attendances />);
+    expect(segunda.queryByTestId('multas-teste-x-app')).toBeNull();
+  });
+
   it('sem multa, o bloco não aparece', () => {
     const { queryByTestId } = renderWithProviders(<Attendances />);
     expect(queryByTestId('multas-em-atendimentos')).toBeNull();
