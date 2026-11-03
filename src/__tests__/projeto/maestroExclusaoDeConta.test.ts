@@ -34,3 +34,14 @@ describe("Maestro 28 — Exclusão de conta", () => {
     expect(ler(".maestro/scripts/login_recusado.js")).toMatch(/\/auth\/login/);
   });
 });
+
+describe("Maestro 16 — Enviar feedback (feedback-no-app)", () => {
+  it("a conta abre a caixa do feedback e cancela, com ids que o app tem", () => {
+    const etapa = ler(".maestro/etapas/16_conta.yaml");
+    const telas = ler("src/screens/Settings.tsx") + ler("src/components/EnviarFeedback.tsx");
+    for (const id of ["enviar-feedback", "feedback-texto", "feedback-cancelar"]) {
+      expect(etapa).toContain(`id: "${id}"`);
+      expect(telas).toContain(`testID="${id}"`);
+    }
+  });
+});
