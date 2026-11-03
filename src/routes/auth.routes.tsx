@@ -78,6 +78,9 @@ export type AppRoutes = {
     // e pedir corte, e o profissional decide (Andre, 07/09 e 24/09).
     profissionalFora?: boolean;
     soAgenda?: boolean;
+    // fluxo-sem-tela-duplicada (André, 03/11): o botão tocado na loja ("Entrar com menor espera" ou
+    // "Agendar um horário"). A escolha de serviços só confirma essa intenção. Ausente = as duas portas.
+    intencao?: "fila" | "agendar";
     // Seleção de serviços restaurada ao voltar do portão de auth.
     serviceItemIds?: string[];
     // Quantos já esperam na fila deste profissional — a posição do cliente é

@@ -13,7 +13,14 @@ export function ehSoAgenda(p?: { operation_mode?: string | null } | null): boole
 export type AcaoPrincipal = 'fila' | 'agendar';
 export type OpcaoDoMenu = 'schedule' | 'cut' | 'swap';
 
-type Situacao = { soAgenda: boolean; fora: boolean; lojaAberta: boolean };
+/**
+ * fluxo-sem-tela-duplicada (André, 03/11): na tela da loja o cliente ja escolheu, em "Entrar com menor
+ * espera" ou "Agendar um horario". A escolha vale uma vez so: a escolha de servicos so confirma essa
+ * intencao. Ausente (tocou no profissional, link) = a tela de sempre, com as duas portas.
+ */
+export type Intencao = 'fila' | 'agendar';
+
+type Situacao = { soAgenda: boolean; fora: boolean; lojaAberta: boolean; intencao?: Intencao };
 
 /**
  * O botao principal da escolha de servicos.
@@ -23,8 +30,9 @@ type Situacao = { soAgenda: boolean; fora: boolean; lojaAberta: boolean };
  * "Agendar" e "Mais opcoes", onde fica o pedido de corte. Ate 02/10 o corte era
  * a acao principal.
  */
-export function acaoPrincipal({ soAgenda, fora, lojaAberta }: Situacao): AcaoPrincipal {
-  if (soAgenda || fora) return 'agendar';
+export function acaoPrincipal({ soAgenda, fora, lojaAberta, intencao }: Situacao): AcaoPrincipal {
+  // Agendar vale em qualquer caso; entrar na fila so onde a regra deixa (DEC-6): a intencao nao fura a fila fechada.
+  if (soAgenda || fora || intencao === 'agendar') return 'agendar';
   return lojaAberta ? 'fila' : 'agendar';
 }
 
@@ -34,7 +42,8 @@ export function acaoPrincipal({ soAgenda, fora, lojaAberta }: Situacao): AcaoPri
  * principal; nos outros casos nao ha segunda porta.
  */
 export function temSegundaPorta(situacao: Situacao): boolean {
-  return acaoPrincipal(situacao) === 'fila';
+  // Com a intencao escolhida na loja, nao ha outra porta: a escolha ja foi feita.
+  return !situacao.intencao && acaoPrincipal(situacao) === 'fila';
 }
 
 /**
@@ -43,8 +52,10 @@ export function temSegundaPorta(situacao: Situacao): boolean {
  * na fila.
  */
 export function opcoesDoMenu(situacao: Situacao): OpcaoDoMenu[] {
-  const { soAgenda, fora, lojaAberta } = situacao;
-  if (soAgenda) return [];
+  const { soAgenda, fora, lojaAberta, intencao } = situacao;
+  // Veio de "Agendar um horario": so o agendar. Veio de "Entrar": o menu fica so com a troca (tambem e entrar).
+  if (soAgenda || intencao === 'agendar') return [];
+  if (intencao === 'fila' && acaoPrincipal(situacao) === 'fila') return ['swap'];
   if (temSegundaPorta(situacao)) return ['swap'];
   // Fila fechada (DEC-6): so o pedido de corte — a troca tambem poe na fila.
   if (fora) return ['cut'];

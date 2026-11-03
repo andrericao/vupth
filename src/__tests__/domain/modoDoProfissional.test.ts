@@ -55,6 +55,29 @@ describe('o fim de fila híbrido (C20)', () => {
   });
 });
 
+// fluxo-sem-tela-duplicada (André, 03/11): a intenção escolhida na loja vale uma vez só.
+describe('a intenção que veio da loja', () => {
+  const aberta = { soAgenda: false, fora: false, lojaAberta: true };
+  it('agendar: a principal é agendar, sem segunda porta e sem menu', () => {
+    const s = { ...aberta, intencao: 'agendar' as const };
+    expect(acaoPrincipal(s)).toBe('agendar');
+    expect(temSegundaPorta(s)).toBe(false);
+    expect(opcoesDoMenu(s)).toEqual([]);
+  });
+  it('fila: entrar na fila, sem segunda porta; o menu só com a troca', () => {
+    const s = { ...aberta, intencao: 'fila' as const };
+    expect(acaoPrincipal(s)).toBe('fila');
+    expect(temSegundaPorta(s)).toBe(false);
+    expect(opcoesDoMenu(s)).toEqual(['swap']);
+  });
+  it('fila com a fila fechada (DEC-6): a intenção não fura a regra — agendar, e o menu com o corte', () => {
+    const s = { ...aberta, fora: true, intencao: 'fila' as const };
+    expect(acaoPrincipal(s)).toBe('agendar');
+    expect(temSegundaPorta(s)).toBe(false);
+    expect(opcoesDoMenu(s)).toEqual(['cut']);
+  });
+});
+
 describe('a recusa do servidor', () => {
   it('409 PROFESSIONAL_AGENDA_ONLY volta para agendar, com a mensagem de só agenda', () => {
     const r = recusaAoEntrar({ response: { status: 409, data: { code: 'PROFESSIONAL_AGENDA_ONLY' } } });

@@ -48,7 +48,7 @@ import { EscolhaDeCupom } from "@components/EscolhaDeCupom";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { usePendenciasAoEscolher } from "@hooks/usePendenciasAoEscolher";
-import { acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
+import { acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA, OpcaoDoMenu, type Intencao } from "@domain/professional/modo";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
@@ -78,6 +78,8 @@ type RouteParams = {
   serviceItemIds?: string[];
   // Tamanho da fila do profissional: a posição do cliente é este número + 1.
   queueCount?: number;
+  // fluxo-sem-tela-duplicada (André, 03/11): o botão tocado na loja; a tela só confirma essa intenção.
+  intencao?: Intencao;
 };
 
 // Fora do corpo do componente: o relogio so e lido no toque, nunca no render.
@@ -104,10 +106,11 @@ export function ServiceSelection() {
     queueCount,
     profissionalFora,
     soAgenda = false,
+    intencao,
   } = route.params as RouteParams;
   // Ausente = aberta (fluxos legados). false = fila fechada agora.
   const storeOpen = establishmentOpen ?? true;
-  const situacao = { soAgenda, fora: !!profissionalFora, lojaAberta: storeOpen };
+  const situacao = { soAgenda, fora: !!profissionalFora, lojaAberta: storeOpen, intencao };
   const principal = acaoPrincipal(situacao);
   // A estimativa da fila (posicao, horario, multa) so vale quando a acao e entrar nela.
   const vaiPraFila = principal === "fila";

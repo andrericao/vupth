@@ -3,6 +3,51 @@
 # env: PROF_ID, SERVICO_ID
 appId: ${APP_ID}
 ---
+# fluxo-sem-tela-duplicada (André, 03/11): o botão tocado na loja define a intenção; a escolha de
+# serviços só a confirma. Começa na tela da loja (a etapa 03 termina nela) e volta para ela.
+- tapOn:
+    id: "agendar-loja-aberta"
+    label: "04.00a · toca em Agendar um horário, na loja"
+- extendedWaitUntil:
+    visible:
+      id: "service-.*"
+    timeout: ${30000 * LENTO}
+    label: "04.00b · espera os serviços"
+- tapOn:
+    id: "service-.*"
+    index: 0
+    label: "04.00c · marca um serviço"
+- assertVisible:
+    id: "primary-schedule"
+    label: "04.00d · vê só o Agendar"
+- assertNotVisible:
+    id: "primary-queue"
+    label: "04.00e · não vê Entrar na fila"
+- assertNotVisible:
+    id: "more-options"
+    label: "04.00f · não vê Mais opções"
+- back:
+    label: "04.00g · volta para a loja"
+- tapOn:
+    id: "entrar-loja-aberta"
+    label: "04.00h · toca em Entrar com menor espera, na loja"
+- extendedWaitUntil:
+    visible:
+      id: "service-.*"
+    timeout: ${30000 * LENTO}
+    label: "04.00i · espera os serviços"
+- tapOn:
+    id: "service-.*"
+    index: 0
+    label: "04.00j · marca um serviço"
+- assertVisible:
+    id: "primary-queue"
+    label: "04.00k · vê Entrar na fila"
+- assertNotVisible:
+    id: "second-door-schedule"
+    label: "04.00l · não vê a segunda porta"
+- back:
+    label: "04.00m · volta para a loja"
 - runFlow:
     file: ../apoio/escolher_servico.yaml
     label: "04.01 · roda escolher_servico"

@@ -30,7 +30,7 @@ import { resolveRating } from "@domain/establishment/rating";
 import { NotaDaLoja } from "@components/NotaDaLoja";
 import { BadgeAgendar } from "@components/BadgeAgendar";
 import { formatSpecialty } from "@domain/establishment/serviceType";
-import { ehSoAgenda } from "@domain/professional/modo";
+import { ehSoAgenda, type Intencao } from "@domain/professional/modo";
 import { isEffectivelyOpen } from "@domain/establishment/types";
 import { enderecoEmUmaLinha, linkDoMapa } from "@domain/establishment/endereco";
 import { formatWaitTime } from "@domain/queue/types";
@@ -201,7 +201,7 @@ export function EstablishmentDetail() {
   const isFavorite = favoriteIds.includes(establishmentId);
   const handleToggleFavorite = () => toggleFavorite(establishmentId);
 
-  function handleSelectProfessional(professionalId: string) {
+  function handleSelectProfessional(professionalId: string, intencao?: Intencao) {
     const prof = professionals.find((p) => p.id === professionalId);
     // "Fora" = fila fechada (ir para Fora fecha a fila, regra de 09/09). A tela
     // de servicos nao oferece a entrada — so o pedido de corte (24/09).
@@ -224,6 +224,7 @@ export function EstablishmentDetail() {
       profissionalFora: fora,
       soAgenda: ehSoAgenda(prof),
       queueCount: prof?.queue_count ?? 0,
+      ...(intencao ? { intencao } : {}),
     });
   }
 
@@ -250,7 +251,8 @@ export function EstablishmentDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profissionalDoLink, establishment, professionals]);
 
-  function handleSelectShortestQueue() {
+  // fluxo-sem-tela-duplicada (André, 03/11): o botão tocado define a intenção; a tela de serviços só a confirma.
+  function handleSelectShortestQueue(intencao: Intencao = "fila") {
     if (recebem.length === 0) return;
 
     // ⚠️ So entre quem esta no expediente E recebe. Antes o botao podia mandar o
@@ -260,7 +262,7 @@ export function EstablishmentDetail() {
       (curr.estimated_wait_minutes ?? 0) < (prev.estimated_wait_minutes ?? 0) ? curr : prev
     );
 
-    handleSelectProfessional(shortest.id);
+    handleSelectProfessional(shortest.id, intencao);
   }
 
   if (isLoading) {
@@ -580,7 +582,7 @@ export function EstablishmentDetail() {
       <VStack px={16} pb={32}>
         {isOpen && recebem.length > 0 && (
           <VStack gap="$2">
-            <Button title="Entrar com menor espera" onPress={handleSelectShortestQueue} />
+            <Button title="Entrar com menor espera" testID="entrar-loja-aberta" onPress={() => handleSelectShortestQueue("fila")} />
             {/* agendar-some-com-loja-aberta (CLI-31): com a loja aberta o Agendar
                 também aparece, embaixo do botão de entrar. Leva ao mesmo
                 profissional; a tela de serviços abre o agendar. */}
@@ -588,7 +590,7 @@ export function EstablishmentDetail() {
               title="Agendar um horário"
               variant="outline"
               testID="agendar-loja-aberta"
-              onPress={handleSelectShortestQueue}
+              onPress={() => handleSelectShortestQueue("agendar")}
             />
           </VStack>
         )}
