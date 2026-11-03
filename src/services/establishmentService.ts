@@ -95,8 +95,12 @@ export const establishmentService = {
     });
   },
 
-  getById(id: string) {
-    return api.get<Establishment>(`/establishment/id/${id}`);
+  /** listPosition (DEC-176): a posicao na lista de onde a loja foi aberta; so metrica, opcional. */
+  getById(id: string, listPosition?: number) {
+    return api.get<Establishment>(
+      `/establishment/id/${id}`,
+      listPosition ? { params: { list_position: listPosition } } : undefined,
+    );
   },
 
   getProfessionalsWithQueue(establishmentId: string) {

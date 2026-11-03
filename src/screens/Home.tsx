@@ -38,6 +38,7 @@ import { usePilulaDeTopo } from "@hooks/usePilulaDeTopo";
 import { formatWaitTime, formatClockTime } from "@domain/queue/types";
 import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 import { fs } from "@stores/fonteStore";
+import { marcarPosicaoNaLista } from "@domain/establishment/posicaoNaLista";
 
 // [marca-vupth] Saudacao por horario do dia (Pencil CLIENT · 06 Home).
 function greetingForHour(hour: number): string {
@@ -214,9 +215,16 @@ export function Home() {
   }, [refetch]);
 
   // Estavel entre renders: e o que deixa a linha memorizada nao redesenhar.
+  const lojasRef = useRef<Establishment[]>([]);
+  useEffect(() => {
+    lojasRef.current = filteredEstablishments;
+  }, [filteredEstablishments]);
   const handleEstablishmentPress = useCallback(
-    (establishment: Establishment) =>
-      navigation.navigate("establishmentDetail", { establishmentId: establishment.id }),
+    (establishment: Establishment) => {
+      // posicao-na-lista (DEC-176): a posicao da loja na lista vai na busca dela, so como metrica.
+      marcarPosicaoNaLista(establishment.id, lojasRef.current.findIndex((e) => e.id === establishment.id));
+      navigation.navigate("establishmentDetail", { establishmentId: establishment.id });
+    },
     [navigation],
   );
   const renderLoja = useCallback(

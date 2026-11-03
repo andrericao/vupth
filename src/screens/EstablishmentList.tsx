@@ -20,6 +20,7 @@ import { LinhaDaLojaFechada } from "@components/LinhaDaLojaFechada";
 import { formatWaitTime } from "@domain/queue/types";
 import { COR_DO_PLACEHOLDER } from "@utils/corDoPlaceholder";
 import { fs } from "@stores/fonteStore";
+import { marcarPosicaoNaLista } from "@domain/establishment/posicaoNaLista";
 
 type SortBy = "wait" | "distance";
 
@@ -122,7 +123,9 @@ export function EstablishmentList() {
       )
     : null;
 
-  function goToDetail(id: string) {
+  // posicao-na-lista (DEC-176): com o indice (veio da lista), a posicao vai na busca da loja; o atalho nao manda.
+  function goToDetail(id: string, indice?: number) {
+    if (indice !== undefined) marcarPosicaoNaLista(id, indice);
     navigation.navigate("establishmentDetail", { establishmentId: id });
   }
 
@@ -237,13 +240,13 @@ export function EstablishmentList() {
                 tintColor="#163300"
               />
             }
-            renderItem={({ item }) =>
+            renderItem={({ item, index }) =>
               // DEC-148: com a lista do disco, aberta/fechada e dado velho: todas entram como linha neutra, com
               // a tag em skeleton, ate o Backend confirmar.
               !frescos || isEffectivelyOpen(item) ? (
-                <OpenRow establishment={item} onPress={() => goToDetail(item.id)} volatilPendente={!frescos} />
+                <OpenRow establishment={item} onPress={() => goToDetail(item.id, index)} volatilPendente={!frescos} />
               ) : (
-                <LinhaDaLojaFechada establishment={item} onPress={() => goToDetail(item.id)} />
+                <LinhaDaLojaFechada establishment={item} onPress={() => goToDetail(item.id, index)} />
               )
             }
             ListEmptyComponent={
