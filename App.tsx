@@ -70,6 +70,7 @@ import { useAvisoDeAtraso } from "@hooks/useAvisoDeAtraso";
 import { devePersistir, persisterDaAbertura, VALIDADE_MS } from "@services/queryPersist";
 import { confirmarAbertura, CONFIRMA_POR_TEMPO_MS, iniciarAbertura } from "./src/boot/aberturas";
 import { AvisoModoSeguro } from "@components/AvisoModoSeguro";
+import { FaixaDeAmbiente } from "@components/FaixaDeAmbiente";
 import { registrarMotivo } from "@utils/sentry";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 
@@ -300,6 +301,8 @@ export default function App() {
             de a fonte carregar precisa aparecer do mesmo jeito. */}
         <DialogoVupth />
         <AvisoModoSeguro />
+        {/* faixa-de-ambiente (F20): so nos builds de teste. */}
+        <FaixaDeAmbiente />
         <ConviteDeTroca />
         {/* pendencia-de-pagamento (CLI-30): o aviso do 409 e o Pix. */}
         <ModalDePagamento />

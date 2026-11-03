@@ -7,6 +7,10 @@
 # env: EMAIL_PROF, NOME_CLIENTE
 appId: ${APP_ID}
 ---
+# faixa-de-ambiente (F20): o build de teste (canal preview) mostra a faixa; a fumaca nunca roda na producao.
+- assertVisible:
+    id: "faixa-de-ambiente"
+    label: "00b.00 · vê a faixa AMBIENTE DE TESTE"
 - tapOn:
     id: "primary-queue"
     label: "00b.01 · marcar: entra na fila"
