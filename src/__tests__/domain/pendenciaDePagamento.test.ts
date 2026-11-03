@@ -2,6 +2,7 @@ import {
   avisoDaPendencia,
   pendenciasDoErro,
   podeAvisarQuePagou,
+  precisaConfirmarRecebi,
   pixDoPagamento,
   reais,
   textoDoStatus,
@@ -71,5 +72,14 @@ describe('pixDoPagamento', () => {
 
   it('sem pagamento: vazio', () => {
     expect(pixDoPagamento(null)).toEqual({ codigo: null, qrImagem: null, viaAsaas: false, teste: false });
+  });
+});
+
+describe('precisaConfirmarRecebi (F4)', () => {
+  it('só o pago declarado pelo profissional espera o cliente', () => {
+    expect(precisaConfirmarRecebi({ status: 'PAID', amount: 1, declared: true })).toBe(true);
+    expect(precisaConfirmarRecebi({ status: 'PAID', amount: 1, declared: false })).toBe(false);
+    expect(precisaConfirmarRecebi({ status: 'PENDING', amount: 1, declared: true })).toBe(false);
+    expect(precisaConfirmarRecebi(null)).toBe(false);
   });
 });

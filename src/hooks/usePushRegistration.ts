@@ -10,6 +10,7 @@ import {
   atendimentoParaAvaliar,
   agendaAbertaDoPush,
   pagamentoDoPush,
+  recebiDoPush,
   avisoDoPush,
   avisaQuaseASuaVez,
   ACAO_OK,
@@ -316,6 +317,13 @@ export function usePushRegistration() {
       if (pagamento) {
         Notifications.dismissNotificationAsync(id).catch(() => {});
         usePendenciaStore.getState().pagar(pagamento.attendanceId, pagamento.recusado);
+        return;
+      }
+      // PAYMENT_CONFIRMED ("Recebi"): o toque abre o pagamento, onde o cliente confirma ou contesta (F4).
+      const recebi = recebiDoPush(data);
+      if (recebi) {
+        Notifications.dismissNotificationAsync(id).catch(() => {});
+        usePendenciaStore.getState().pagar(recebi.attendanceId);
         return;
       }
       // Concluido (notificacao-avaliar): o toque abre a avaliacao dele.

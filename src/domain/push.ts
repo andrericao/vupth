@@ -252,6 +252,17 @@ export function pagamentoDoPush(data: unknown): { attendanceId: string; recusado
 }
 
 /**
+ * confirmar-ou-contestar-recebi (F4, BAK-16): o toque no aviso "Recebi" (PAYMENT_CONFIRMED) abre o pagamento, onde
+ * o cliente confirma ou contesta. So no TOQUE: com o app aberto o aviso segue normal (o pagamento quitado pelo
+ * Asaas manda o mesmo aviso e nao tem o que confirmar).
+ */
+export function recebiDoPush(data: unknown): { attendanceId: string } | null {
+  const d = (data ?? {}) as { type?: unknown; attendanceId?: unknown };
+  if (d.type !== 'PAYMENT_CONFIRMED' || typeof d.attendanceId !== 'string' || !d.attendanceId) return null;
+  return { attendanceId: d.attendanceId };
+}
+
+/**
  * AGENDA_OPENED (agenda-da-semana-nao-liberada, 24/10, Backend 651514f): o profissional abriu o dia
  * pedido; o pedido venceu e o toque leva ao agendamento dele (a loja, no profissional).
  */

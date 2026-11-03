@@ -45,6 +45,10 @@ export type Pagamento = {
   /** Presente quando o pagamento sai pelo Asaas (o webhook confirma sozinho). */
   gateway?: GatewayDoPagamento | null;
   claimed_at?: string | null;
+  /** F4: o profissional marcou "Recebi" e o cliente ainda nao confirmou. */
+  declared?: boolean;
+  /** F4: o cliente contestou o "Recebi". */
+  contested?: boolean;
   confirmed_at?: string | null;
 };
 
@@ -78,6 +82,11 @@ export function textoDoStatus(status: StatusDoPagamento | null | undefined): str
   if (status === 'PAID') return 'Pago';
   if (status === 'AWAITING_CONFIRMATION') return 'Aguardando o profissional confirmar';
   return 'Pagamento pendente';
+}
+
+/** F4: o "Recebi" do profissional espera o cliente confirmar ou contestar (pago por pessoa, nao pelo Asaas). */
+export function precisaConfirmarRecebi(p: Pagamento | null | undefined): boolean {
+  return p?.status === 'PAID' && p.declared === true;
 }
 
 /** O cliente ainda pode tocar em "Já paguei" (so do PENDING). */
