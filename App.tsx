@@ -301,8 +301,6 @@ export default function App() {
             de a fonte carregar precisa aparecer do mesmo jeito. */}
         <DialogoVupth />
         <AvisoModoSeguro />
-        {/* faixa-de-ambiente (F20): so nos builds de teste. */}
-        <FaixaDeAmbiente />
         <ConviteDeTroca />
         {/* pendencia-de-pagamento (CLI-30): o aviso do 409 e o Pix. */}
         <ModalDePagamento />
@@ -316,6 +314,12 @@ export default function App() {
         {pronto ? (
           <ErrorBoundary>
             <FaixaAvaliar />
+          </ErrorBoundary>
+        ) : null}
+        {/* faixa-de-ambiente (F20): so nos builds de teste; usa a area segura, como a FaixaAvaliar. */}
+        {pronto ? (
+          <ErrorBoundary>
+            <FaixaDeAmbiente />
           </ErrorBoundary>
         ) : null}
         </SafeAreaProvider>
