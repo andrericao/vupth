@@ -142,12 +142,14 @@ describe('ServiceSelection — escolher', () => {
     expect(mockNavigate).toHaveBeenCalledWith('queueStatus', expect.objectContaining({ serviceItemIds: ['s1'] }));
   });
 
-  it('a segunda porta abre o agendar, e o Cancelar fecha', async () => {
+  // DEC-178: o agendar mora no "Mais opções".
+  it('o Agendar do menu abre o agendar, e o Cancelar fecha', async () => {
     const tela = await escolher();
-    fireEvent.press(tela.getByTestId('second-door-schedule'));
+    fireEvent.press(tela.getByTestId('more-options'));
+    fireEvent.press(tela.getByTestId('more-option-schedule'));
     const cancelar = await tela.findAllByText('Cancelar');
     fireEvent.press(cancelar[cancelar.length - 1]);
-    expect(tela.getByTestId('second-door-schedule')).toBeTruthy();
+    expect(tela.getByTestId('more-options')).toBeTruthy();
   });
 
   it('o menu fecha pelo X', async () => {
@@ -233,11 +235,12 @@ describe('ServiceSelection — lembrete-de-pendencia (CLI-35)', () => {
     expect(mockNavigate).not.toHaveBeenCalledWith('queueStatus', expect.anything());
   });
 
-  it('com pendência, agendar, a segunda porta, o corte e a troca também avisam', async () => {
+  it('com pendência, agendar pelo menu, o corte e a troca também avisam', async () => {
     mockPagamentos = DEVE;
     const tela = await escolher();
     await act(async () => {});
-    fireEvent.press(tela.getByTestId('second-door-schedule'));
+    fireEvent.press(tela.getByTestId('more-options'));
+    fireEvent.press(tela.getByTestId('more-option-schedule'));
     expect(usePendenciaStore.getState().aviso).toEqual(DEVE);
     usePendenciaStore.getState().fechar();
     fireEvent.press(tela.getByTestId('more-options'));

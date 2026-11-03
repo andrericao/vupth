@@ -54,9 +54,10 @@ appId: ${APP_ID}
 - assertVisible:
     id: "primary-queue"
     label: "04.02 · vê primary-queue"
-- assertVisible:
+# DEC-178 (André, 03/11): na tela só Entrar na fila e Mais opções; o agendar mora no menu.
+- assertNotVisible:
     id: "second-door-schedule"
-    label: "04.03 · vê second-door-schedule"
+    label: "04.03 · não vê a segunda porta (DEC-178)"
 # Na escolha do servico, nenhum aviso de multa (DEC-1; Andre, 05/10).
 - assertNotVisible:
     id: "regra-da-multa"
@@ -67,16 +68,16 @@ appId: ${APP_ID}
 - assertVisible:
     id: "preco-saiba-mais"
     label: "04.04a · vê o Saiba mais do preço"
-# O agendar saiu do "Mais opcoes": la sobra so a troca.
+# DEC-178: o "Mais opcoes" tem o agendar e a troca.
 - tapOn:
     id: "more-options"
     label: "04.05 · toca em more-options"
 - assertVisible:
     id: "more-option-swap"
     label: "04.06 · vê more-option-swap"
-- assertNotVisible:
+- assertVisible:
     id: "more-option-schedule"
-    label: "04.07 · não vê more-option-schedule"
+    label: "04.07 · vê o Agendar no menu (DEC-178)"
 - tapOn:
     id: "more-options-close"
     label: "04.08 · toca em more-options-close"

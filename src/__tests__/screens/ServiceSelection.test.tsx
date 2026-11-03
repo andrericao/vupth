@@ -380,12 +380,12 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     mockCupons = [];
   });
 
-  it('fila aberta: as duas portas na tela — entrar agora e agendar; o menu fica só com a troca (C20)', async () => {
+  it('fila aberta (DEC-178): na tela só Entrar na fila e o menu; o agendar e a troca ficam no menu', async () => {
     const { getByTestId, queryByTestId } = await selectServiceAndOpenMenu();
 
     expect(getByTestId('primary-queue')).toBeTruthy();
-    expect(getByTestId('second-door-schedule')).toBeTruthy();
-    expect(queryByTestId('more-option-schedule')).toBeNull();
+    expect(queryByTestId('second-door-schedule')).toBeNull();
+    expect(getByTestId('more-option-schedule')).toBeTruthy();
     expect(getByTestId('more-option-swap')).toBeTruthy();
   });
 
@@ -561,7 +561,7 @@ describe('ServiceSelection — tempo do serviço (tempo-do-servico)', () => {
 describe('ServiceSelection — a intenção que veio da loja', () => {
   afterEach(() => setRouteParams(OPEN_PARAMS));
 
-  it('veio de "Entrar com menor espera": só o Entrar na fila (sem a outra porta); o menu fica com a troca', async () => {
+  it('veio de "Entrar com menor espera": só o Entrar na fila e o menu (DEC-178)', async () => {
     setRouteParams({ ...OPEN_PARAMS, intencao: 'fila' });
     const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
     await findByTestId('service-s1', {}, { timeout: 15000 });
