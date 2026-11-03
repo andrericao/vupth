@@ -114,4 +114,6 @@ jobs:
           COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           SUBJECT="$(printf '%s\n' "$COMMIT_MSG" | head -n1)"
-          eas update --branch production --message "$SUBJECT" --non-interactive
+          # ota-gradual (DEC-174): a producao sobe para 10% dos aparelhos; os outros 90% seguem no update anterior.
+          # Olhe o Sentry e o painel do Expo; ok? `tools/ota-gradual.sh promover` leva a 100%, `reverter` desfaz.
+          eas update --branch production --rollout-percentage 10 --message "$SUBJECT" --non-interactive
