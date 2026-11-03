@@ -146,3 +146,24 @@ export function proximaAbertura(
   const quando = proximo.date === amanha ? "amanhã" : NOME_DO_DIA[proximo.day].toLowerCase();
   return `Reabre ${quando}, ${proximo.opens}`;
 }
+
+/**
+ * horario-na-listagem (CLI-24): o texto do card da loja fechada, a partir do `next_open` da listagem.
+ * "Abre hoje, 09:00" / "Abre amanhã, 09:00" / "Abre quinta, 09:00". Sem horario publicado (ou valor
+ * estragado), nada: inventar um horario seria pior do que omitir.
+ */
+export function textoDaProximaAbertura(
+  proxima: { date: string; opens: string } | null | undefined,
+  hoje: Date,
+): string | null {
+  if (!proxima || typeof proxima.date !== "string" || typeof proxima.opens !== "string") return null;
+  const partes = /^(\d{4})-(\d{2})-(\d{2})$/.exec(proxima.date);
+  const hora = /^(\d{2}):(\d{2})/.exec(proxima.opens);
+  if (!partes || !hora) return null;
+  const dia = new Date(Number(partes[1]), Number(partes[2]) - 1, Number(partes[3]), 12);
+  const iso = dataISO(hoje);
+  const amanha = dataISO(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1, 12));
+  const quando =
+    proxima.date === iso ? "hoje" : proxima.date === amanha ? "amanhã" : NOME_DO_DIA[diaDaData(dia)].toLowerCase();
+  return `Abre ${quando}, ${hora[1]}:${hora[2]}`;
+}

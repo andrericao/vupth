@@ -156,4 +156,16 @@ describe('o card da loja na Home', () => {
     expect(await findByText('Barbearia do Zé', {}, { timeout: 15000 })).toBeTruthy();
     expect(queryByTestId('skeleton-status-e1')).toBeNull();
   });
+
+  it('fechada, o card diz quando abre; aberta, não (horario-de-funcionamento-visivel)', async () => {
+    const fechada = loja({ open_status: 'CLOSED', is_open: false, next_open: { date: '2099-01-02', opens: '09:00:00' } });
+    const com = renderWithProviders(<CardDaLoja establishment={fechada} distanceKm={null} onPress={jest.fn()} />);
+    expect(await com.findByText(/^Abre \w+, 09:00$/, {}, { timeout: 15000 })).toBeTruthy();
+    com.unmount();
+    const aberta = renderWithProviders(
+      <CardDaLoja establishment={{ ...fechada, open_status: 'OPEN', is_open: true }} distanceKm={null} onPress={jest.fn()} />,
+    );
+    await aberta.findByText('Barbearia do Zé', {}, { timeout: 15000 });
+    expect(aberta.queryByText(/^Abre /)).toBeNull();
+  });
 });
