@@ -2,6 +2,9 @@
 # A bateria do Client com UM comando (Andre, 03/10 — commit-sem-flag):
 #
 #   bash .maestro/bateria.sh              # pergunta: completa ou so as que nao passaram
+#   bash .maestro/bateria.sh --sem-atualizacao   # pula a 00 (ou --com-atualizacao); sem a flag, pergunta
+#   bash .maestro/bateria.sh --fumaca     # SO a versao (00) e a fumaca (00b, teto de 5 min); a 1a fase
+#   bash .maestro/bateria.sh --regressao  # a regressao completa; recusa se a fumaca nao passou neste commit
 #   bash .maestro/bateria.sh --completa   # roda todas, sem perguntar
 #   bash .maestro/bateria.sh --falhas     # so as que nao passaram, sem perguntar
 #   bash .maestro/bateria.sh --completa --publicar-ota  # publica o OTA da dev antes (publicar-ota.sh)
@@ -40,12 +43,18 @@ fi
 # Os argumentos: o modo (--completa/--falhas) e o aparelho (--device <serial>).
 # Antes so o $1 era lido, e o "--device emulator-5554" virava o modo (10/10).
 MODO=""
+ATUALIZAR=""
+FASE=""
 APARELHO=""
 PERFIL=""
 PUBLICAR_OTA=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --completa|--falhas) MODO="$1" ;;
+    --fumaca) FASE="fumaca" ;;
+    --sem-atualizacao) ATUALIZAR="n" ;;
+    --com-atualizacao) ATUALIZAR="s" ;;
+    --regressao) FASE="regressao" ;;
     --publicar-ota) PUBLICAR_OTA="--publicar-ota" ;;
     --device) APARELHO="$2"; shift ;;
     --perfil) PERFIL="$2"; shift ;;
@@ -150,12 +159,22 @@ echo ""
 # commit errado no aparelho, nenhuma etapa diz nada.
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
-ETAPAS=${ETAPAS:-"01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27"}
+ETAPAS_PADRAO="00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27"
+# Fases (André, 01/11): 1) a versao (00) so confere a atualizacao; 2) a fumaca (00b) tem teto de 5 min contados do
+# inicio dela; 3) passou, a vez vai para as outras equipes; 4) so depois a regressao completa. A regressao nao
+# repete a fumaca, mas recusa rodar se a fumaca nao passou NESTE commit (aprovados.txt).
+# Teto por perfil (aprovado 01/11): celular 300 s; emulador 600 s (a abertura limpa sozinha leva ~40 s la).
+case "$PERFIL" in emulador) FUMACA_PRAZO="${FUMACA_PRAZO:-600}" ;; *) FUMACA_PRAZO="${FUMACA_PRAZO:-300}" ;; esac
+case "$FASE" in
+  fumaca) ETAPAS=${ETAPAS:-"00b"} ;;
+  regressao) ETAPAS=${ETAPAS:-"${ETAPAS_PADRAO#00b }"} ;;
+  *) ETAPAS=${ETAPAS:-"$ETAPAS_PADRAO"} ;;
+esac
 
 # bateria-conjunta: as etapas que abrem o Partner no mesmo celular. Precisam do
 # APK do Partner instalado e do vupth-partner clonado ao lado do vupth (os
 # subfluxos sao lidos de la). Sem um dos dois, elas ficam como ⏭.
-CONJUNTAS="18 19 21b 22"
+CONJUNTAS="00b 18 19 21b 22"
 
 # A 13 (push da vez) depende do push do sistema; no emulador o app nao oferece
 # a tela 10 nem pede token (Device.isDevice, bateria 11/10 06:06, 13.A7). Fica
@@ -186,14 +205,22 @@ if [ "$MODO" != "--completa" ] && [ "$MODO" != "--falhas" ]; then
   echo ""
   if [ "$RESP" = "c" ] || [ "$RESP" = "C" ]; then MODO="--completa"; else MODO="--falhas"; fi
 fi
+FUMACA_MARCA=$(grep "^00b " "$APROVADOS" 2>/dev/null)
 if [ "$MODO" = "--completa" ]; then
   rm -f "$APROVADOS"
+  # A marca da fumaca nao some com a regressao completa: ela vale por commit.
+  [ -n "$FUMACA_MARCA" ] && echo "$FUMACA_MARCA" > "$APROVADOS"
   echo "Completa: todas as etapas rodam."
 else
   echo "Só as que não passaram: as etapas já verdes em aprovados.txt ficam como ⏭."
 fi
 touch "$APROVADOS"
 aprovada() { grep -q "^$1 " "$APROVADOS"; }
+fumaca_neste_commit() { grep -q "^00b $COMMIT\$" "$APROVADOS"; }
+if [ "$FASE" = "regressao" ] && ! fumaca_neste_commit; then
+  echo "⛔ A regressao so roda depois da fumaca verde neste commit ($COMMIT). Rode: bash .maestro/bateria.sh --fumaca"
+  exit 3
+fi
 aprovar() { grep -vE "^$1 " "$APROVADOS" > "$APROVADOS.tmp"; echo "$1 $COMMIT" >> "$APROVADOS.tmp"; mv "$APROVADOS.tmp" "$APROVADOS"; }
 
 # Os prints "para o Andre" (apoio/para_o_andre.yaml) e a linha do que olhar.
@@ -234,10 +261,16 @@ rodar() {
   adb logcat -c 2>/dev/null
   adb logcat -v time '*:W' > "$pasta/logcat.txt" 2>/dev/null &
   local logcat=$!
+  # So o app (JS, queda e OTA), sem o ruido do Maestro e sem o corte nas ultimas linhas: a fumaca reprovou com tela
+  # branca (01/11) e o logcat de 3000 linhas so tinha o Maestro.
+  adb logcat -v time ReactNativeJS:V ReactNative:V AndroidRuntime:V ExpoUpdates:V Expo:V Sentry:V DEBUG:V '*:S' > "$pasta/logcat-app.txt" 2>/dev/null &
+  local logcat_app=$!
   # maestro-trava-na-atualizacao (Andre, 28/10): etapa que passa do prazo REPROVA
   # (124), em vez de a bateria ficar parada para sempre. A 00 (versao) tem prazo proprio.
   local prazo="$ETAPA_PRAZO" verificada=1
   [ "$nome" = "00_atualizacao" ] && { prazo="$ATUALIZACAO_PRAZO"; verificada=0; }
+  case "$nome" in 00b_*) prazo="$FUMACA_PRAZO" ;; esac
+  PRAZO_USADO="$prazo"
   timeout -k 30 "$prazo" maestro "${MAESTRO_APARELHO[@]}" test \
     -e APP_ID="$APP_ID" -e API="$API" -e SENHA=Teste@123 -e COMMIT="$COMMIT_ACEITOS" \
     -e TAG="$TAG" -e SUPERVISAO="$SUPERVISAO" -e LENTO="$LENTO" -e PERFIL="$PERFIL" -e VERSAO_VERIFICADA="$verificada" \
@@ -245,7 +278,7 @@ rodar() {
     --test-output-dir "$pasta" \
     "$DIR/avulsas/$nome.yaml" 2>&1 | tee "$pasta/console.txt"
   local volta="${PIPESTATUS[0]}"
-  kill "$logcat" 2>/dev/null
+  kill "$logcat" "$logcat_app" 2>/dev/null
   tail -n 3000 "$pasta/logcat.txt" > "$pasta/logcat.tmp" 2>/dev/null && mv "$pasta/logcat.tmp" "$pasta/logcat.txt"
   return "$volta"
 }
@@ -285,8 +318,20 @@ if [ "$MODO" != "--completa" ] && [ -n "$INSTALACAO" ] && [ "$(cat "$VERIFICADA"
   VERSAO_OK=1
   echo "⏭ 00 · versão $COMMIT já verificada neste aparelho"
 else
-  VERSAO_OK=0
-  rm -f "$VERIFICADA"
+  # Verificar a atualizacao atrasa muito (Andre, 01/11): pergunta. "n" segue direto para os testes, sem a 00
+  # (o app que ja passou da conferencia nao precisa dela de novo). Sem resposta em 1 min, verifica (o seguro).
+  if [ -z "$ATUALIZAR" ]; then
+    read -r -t 60 -p "Verificar a atualização do app antes dos testes? (s = verificar / n = ir direto aos testes) [s] " RESP_ATU
+    echo ""
+    case "$RESP_ATU" in n|N) ATUALIZAR="n" ;; *) ATUALIZAR="s" ;; esac
+  fi
+  if [ "$ATUALIZAR" = "n" ]; then
+    VERSAO_OK=2
+    echo "⏭ 00 · versão: sem verificar a atualização, a pedido (os testes seguem direto)"
+  else
+    VERSAO_OK=0
+    rm -f "$VERIFICADA"
+  fi
 fi
 
 STATUS=0
@@ -301,7 +346,9 @@ if [ "$VOLTA_00" -ne 0 ]; then
   echo "A versão no aparelho não é a $COMMIT: nenhuma etapa rodou."
   STATUS=1
 else
-  if [ "$VERSAO_OK" = 1 ]; then
+  if [ "$VERSAO_OK" = 2 ]; then
+    echo "⏭ 00 · versão (atualização não verificada, a pedido)" >> "$RODADA/relatorio.txt"
+  elif [ "$VERSAO_OK" = 1 ]; then
     echo "⏭ 00 · versão (commit $COMMIT já verificado)" >> "$RODADA/relatorio.txt"
   else
     echo "✅ 00 · versão" >> "$RODADA/relatorio.txt"
@@ -325,7 +372,12 @@ else
       echo "⏭  $arquivo (só no celular: $por)" >> "$RODADA/relatorio.txt"
       continue
     fi
-    if aprovada "$n"; then
+    # A fumaça (00b) e o portao: --fumaca sempre roda; fora dela so e pulada se ja passou NESTE commit.
+    if [ "$n" = "00b" ] && [ "$FASE" != "fumaca" ] && fumaca_neste_commit; then
+      echo "⏭  $arquivo (fumaça já verde neste commit $COMMIT)" >> "$RODADA/relatorio.txt"
+      continue
+    fi
+    if [ "$n" != "00b" ] && aprovada "$n"; then
       echo "⏭  $arquivo (já passou no $(grep "^$n " "$APROVADOS" | cut -d' ' -f2) — a completa roda de novo)" >> "$RODADA/relatorio.txt"
       continue
     fi
@@ -366,10 +418,15 @@ else
     else
       STATUS=1
       PASSO=$(falhou_em "$RODADA/$arquivo")
-      MOTIVO=""; [ "$VOLTA" -eq 124 ] && MOTIVO=" — TEMPO ESGOTADO (${ETAPA_PRAZO}s)"
+      MOTIVO=""; [ "$VOLTA" -eq 124 ] && MOTIVO=" — TEMPO ESGOTADO (${PRAZO_USADO:-$ETAPA_PRAZO}s)"
       echo "❌ $arquivo — parou em ${PASSO:-antes do primeiro passo} ($DURA)$MOTIVO" >> "$RODADA/relatorio.txt"
       echo "${PASSO:-}" > "$RODADA/$arquivo/falhou_em"
       print_da_falha "$RODADA/$arquivo" "$PASSO"
+      # teste de fumaça (DEC-157): se a fumaça falha, o app instalado nao presta; as outras etapas nao dizem nada.
+      if [ "$n" = "00b" ]; then
+        echo "⛔ A fumaça (00b) falhou: a bateria para. Nada mais rodou." >> "$RODADA/relatorio.txt"
+        break
+      fi
     fi
   done
 fi
@@ -377,6 +434,9 @@ fi
 echo ""
 echo "=== Relatorio da rodada ==="
 cat "$RODADA/relatorio.txt"
+if [ "$FASE" = "fumaca" ]; then
+  if [ "$STATUS" -eq 0 ]; then echo "✅ FUMAÇA VERDE no $COMMIT: a vez passa para as outras equipes; a regressao so depois das fumacas de todas."; else echo "❌ FUMAÇA FALHOU no $COMMIT: nada mais roda."; fi
+fi
 
 # Rodadas antigas (limpar-logs, a regra do Partner): ja foram lidas — a
 # rodada desta vez e o estado atual. Verde ou vermelha, so ela pode ficar.
