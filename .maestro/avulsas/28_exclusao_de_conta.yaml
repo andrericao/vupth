@@ -1,0 +1,21 @@
+# Etapa avulsa 28 (maestro-exclusao-de-conta, CLI-29, DEC-166): roda num maestro test proprio.
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "28"
+      LOJA: "0"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "28.P0 · prepara a etapa"
+- runFlow:
+    file: ../etapas/28_exclusao_de_conta.yaml
+    env:
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+    label: "28.E1 · roda 28_exclusao_de_conta"

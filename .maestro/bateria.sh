@@ -159,7 +159,7 @@ echo ""
 # commit errado no aparelho, nenhuma etapa diz nada.
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
-ETAPAS_PADRAO="00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27"
+ETAPAS_PADRAO="00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27 28"
 # Fases (André, 01/11): 1) a versao (00) so confere a atualizacao; 2) a fumaca (00b) tem teto de 5 min contados do
 # inicio dela; 3) passou, a vez vai para as outras equipes; 4) so depois a regressao completa. A regressao nao
 # repete a fumaca, mas recusa rodar se a fumaca nao passou NESTE commit (aprovados.txt).

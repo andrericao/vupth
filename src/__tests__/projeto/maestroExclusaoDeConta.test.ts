@@ -1,0 +1,36 @@
+import fs from "fs";
+import path from "path";
+
+// maestro-exclusao-de-conta (CLI-29, DEC-166): o fluxo 28 cria a conta, exclui pelo app e confere que o login
+// deixa de existir. Aqui: o fluxo existe, esta na bateria e usa os ids que as telas de fato tem.
+const ROOT = path.resolve(__dirname, "../../..");
+const ler = (f: string) => fs.readFileSync(path.join(ROOT, f), "utf8");
+
+describe("Maestro 28 — Exclusão de conta", () => {
+  const etapa = ler(".maestro/etapas/28_exclusao_de_conta.yaml");
+
+  it("a etapa avulsa existe, usa conta própria e roda a etapa", () => {
+    const avulsa = ler(".maestro/avulsas/28_exclusao_de_conta.yaml");
+    expect(avulsa).toMatch(/CONTA: "1"/);
+    expect(avulsa).toMatch(/etapas\/28_exclusao_de_conta\.yaml/);
+  });
+
+  it("a bateria roda a 28 por padrão", () => {
+    expect(ler(".maestro/bateria.sh")).toMatch(/ETAPAS_PADRAO="[^"]*\b27 28"/);
+  });
+
+  it("os ids do fluxo existem nas telas", () => {
+    const telas = ler("src/screens/DadosCadastrais.tsx") + ler("src/components/DeleteAccountModal.tsx");
+    for (const id of ["delete-account", "delete-account-password", "delete-account-confirm"]) {
+      expect(etapa).toContain(`id: "${id}"`);
+      expect(telas).toContain(`testID="${id}"`);
+    }
+  });
+
+  it("depois de excluir, confere o app sem sessão e o login recusado pela API", () => {
+    const confirmou = etapa.indexOf('id: "delete-account-confirm"');
+    expect(etapa.indexOf("Criar conta grátis", confirmou)).toBeGreaterThan(confirmou);
+    expect(etapa.indexOf("login_recusado.js", confirmou)).toBeGreaterThan(confirmou);
+    expect(ler(".maestro/scripts/login_recusado.js")).toMatch(/\/auth\/login/);
+  });
+});

@@ -1,0 +1,54 @@
+# maestro-exclusao-de-conta (CLI-29, DEC-166): o cliente usa a conta e a exclui pelo app; depois o login com
+# ela deixa de existir. Conta propria da etapa (preparo CONTA=1): excluir nao afeta as outras.
+# env: EMAIL_CLIENTE
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Perfil"
+    label: "28.01 · toca em Perfil"
+- assertVisible:
+    text: "CONTA"
+    label: "28.02 · logado: vê CONTA"
+- tapOn:
+    text: "Dados cadastrais"
+    label: "28.03 · toca em Dados cadastrais"
+- scrollUntilVisible:
+    element:
+      id: "delete-account"
+    label: "28.04 · rola até Excluir conta"
+- tapOn:
+    id: "delete-account"
+    label: "28.05 · toca em Excluir conta"
+- tapOn:
+    id: "delete-account-password"
+    label: "28.06 · toca na senha"
+- inputText:
+    text: ${SENHA}
+    label: "28.07 · digita a senha"
+- hideKeyboard:
+    label: "28.08 · fecha o teclado"
+- tapOn:
+    id: "delete-account-confirm"
+    label: "28.09 · confirma a exclusão"
+# Excluida, a sessao acaba: o app volta ao Inicio, e o Perfil volta a oferecer o cadastro.
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "28.10 · roda fechar_aviso"
+- tapOn:
+    text: "Perfil"
+    label: "28.11 · toca em Perfil"
+- extendedWaitUntil:
+    visible: "Criar conta grátis"
+    timeout: ${15000 * LENTO}
+    label: "28.12 · vê Criar conta grátis (sem sessão)"
+- assertNotVisible:
+    text: "Sair da conta"
+    label: "28.13 · não vê Sair da conta"
+# E a conta nao existe mais no servidor.
+- runScript:
+    file: ../scripts/login_recusado.js
+    env:
+      API: ${API}
+      SENHA: ${SENHA}
+      EMAIL_CLIENTE: ${EMAIL_CLIENTE}
+    label: "28.14 · o login com a conta excluída é recusado"
