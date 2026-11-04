@@ -6,7 +6,8 @@ import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-c
 
 import { AuthRoutes } from "./auth.routes";
 import { navigationRef, guardarEstadoDaNavegacao, estadoDaNavegacao } from "./navigationRef";
-import { linkingWeb } from "./linking";
+import { linkingDoApp } from "./linking";
+import { API_ENV } from "@services/api";
 import { Onboarding } from "@screens/Onboarding";
 import { PushPermission } from "@screens/PushPermission";
 import { useFirstRunStore } from "@stores/firstRunStore";
@@ -56,11 +57,12 @@ export function Routes(){
 		{/* Na web: "Baixar o app" ou "Continuar na web" (link-de-divulgacao). */}
 		<FaixaBaixarApp />
 		{/* Na web a navegacao entra no historico do navegador — sem isto o voltar
-		    do celular saia do site (ver linking.ts). No aparelho, nada muda. */}
+		    do celular saia do site (ver linking.ts). No aparelho, so a producao abre
+		    os links de app.vupth.com (abrir-no-app-se-instalado). */}
 		<NavigationContainer
 			ref={navigationRef}
 			theme={theme}
-			linking={Platform.OS === "web" ? linkingWeb : undefined}
+			linking={linkingDoApp(Platform.OS, API_ENV)}
 			// No aparelho, remontar (tamanho da fonte) volta a tela em que estava.
 			// Na web quem manda e o endereco (linking).
 			initialState={Platform.OS === "web" ? undefined : (estadoDaNavegacao() as never)}

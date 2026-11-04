@@ -41,8 +41,31 @@ function commitAtual() {
   }
 }
 
+// abrir-no-app-se-instalado (DEC-161/180): um link https://app.vupth.com/...
+// abre o app de PRODUCAO, se instalado; sem o app, o navegador abre o site
+// (que ja mostra "Baixar o app"). `autoVerify` faz o Android conferir o
+// /.well-known/assetlinks.json do dominio (tools/gerar-assetlinks.js). So nos
+// perfis de producao: o preview e o dev nao mudam.
+const DOMINIO_DO_APP = "app.vupth.com";
+const PERFIS_DE_PRODUCAO = ["production", "prod-apk"];
+const APP_LINK = {
+  action: "VIEW",
+  autoVerify: true,
+  data: [{ scheme: "https", host: DOMINIO_DO_APP }],
+  category: ["BROWSABLE", "DEFAULT"],
+};
+
 module.exports = ({ config: base }) => {
   const config = { ...base, extra: { ...base.extra, commit: commitAtual() } };
+  if (PERFIS_DE_PRODUCAO.includes(process.env.EAS_BUILD_PROFILE)) {
+    return {
+      ...config,
+      android: {
+        ...config.android,
+        intentFilters: [...(config.android.intentFilters ?? []), APP_LINK],
+      },
+    };
+  }
   const variante = VARIANTES[process.env.EAS_BUILD_PROFILE];
   if (!variante) return config;
 

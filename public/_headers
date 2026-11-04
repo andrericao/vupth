@@ -49,3 +49,8 @@
 
 /index.html
   Cache-Control: no-cache
+
+# abrir-no-app-se-instalado (DEC-161/180): o Android so aceita o assetlinks.json
+# como JSON. Gerado no build web de producao (tools/gerar-assetlinks.js).
+/.well-known/assetlinks.json
+  Content-Type: application/json
