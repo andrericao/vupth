@@ -50,11 +50,14 @@ export const establishmentService = {
    * geocodificada vai para o fim com `distance_km: null`. Com raio, ela SAIRIA,
    * e o cliente leria "não há lojas" onde na verdade há.
    */
-  getAll(coords?: Coords | null) {
+  getAll(coords?: Coords | null, name?: string) {
     // A listagem ja traz as FECHADAS por padrao (Backend, em producao desde
     // 17/09) — o cliente pode agendar para a reabertura. O `includeAll` saiu.
     return api.get<Establishment[]>('/establishment', {
       params: {
+        // busca-alem-do-teto (04/11): a vitrine tem teto de 200 lojas; o nome vai ao servidor (sem acento,
+        // parcial, casa tambem o profissional) para achar a loja que ficou fora das 200.
+        ...(name ? { name } : {}),
         // Tem de ir o PAR: coordenada pela metade é 422 no backend.
         ...(coords ? { lat: coords.latitude, lng: coords.longitude } : {}),
       },

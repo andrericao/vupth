@@ -57,3 +57,22 @@ export function filterEstablishments(
     return matchesSearch && matchesFilter && visibleByAvailability;
   });
 }
+
+/**
+ * busca-alem-do-teto (04/11): a vitrine do servidor tem teto de 200 lojas, e a busca local so via essas 200.
+ * Com a busca, o servidor tambem procura pelo nome (`?name=`, sem acento, que casa ainda o nome do
+ * profissional); aqui as duas se juntam: primeiro as da lista que casam, depois as que so o servidor achou,
+ * sem repetir. Categoria e disponibilidade valem para as duas.
+ */
+export function filtrarComBusca(
+  lista: Establishment[],
+  daBusca: Establishment[] | undefined,
+  search: string,
+  selectedFilter: ServiceType | 'ALL',
+): Establishment[] {
+  const locais = filterEstablishments(lista, search, selectedFilter);
+  if (!search.trim() || !daBusca?.length) return locais;
+  const vistos = new Set(locais.map((e) => e.id));
+  const doServidor = filterEstablishments(daBusca, '', selectedFilter).filter((e) => !vistos.has(e.id));
+  return [...locais, ...doServidor];
+}
