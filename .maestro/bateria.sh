@@ -236,8 +236,9 @@ juntar_para_o_andre() {
 }
 
 # O passo NN.MM que falhou: o ULTIMO "NN.MM · ..." que comecou e nao terminou
-# no maestro.log da etapa (o mais de dentro).
-passos() { grep -oP 'runCommands\$lambda\$\d+: \K\d\d\.[\dA-Z]{2} · .*(?= ('"$2"')$)' "$1/maestro.log" 2>/dev/null; }
+# no maestro.log da etapa (o mais de dentro). Tambem os rotulos com letra (00b.L1, 22.0Aa) e os do Partner
+# (PJ1.01): sem eles a fumaca 2026-11-04_113213 dizia "antes do primeiro passo" com 18 min de etapa.
+passos() { grep -oP 'runCommands\$lambda\$\d+: \K[0-9A-Z]{2}[0-9A-Za-z]*\.[0-9A-Za-z]+ · .*(?= ('"$2"')$)' "$1/maestro.log" 2>/dev/null; }
 falhou_em() { passos "$1" RUNNING | grep -vxFf <(passos "$1" 'COMPLETED|SKIPPED') | tail -1; }
 
 # Prazo por etapa, em segundos (maestro-trava-na-atualizacao): passou, a etapa reprova
