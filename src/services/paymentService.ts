@@ -12,6 +12,17 @@ export const paymentService = {
   claim(attendanceId: string, accessToken: string) {
     return api.post<Pagamento>(`/attendances/${attendanceId}/payment/claim`, undefined, auth(accessToken));
   },
+  // confirmar-ou-contestar-recebi (F4, BAK-16): so o cliente do atendimento; 409 PAYMENT_INVALID_STATUS no resto.
+  acknowledge(attendanceId: string, accessToken: string) {
+    return api.post<Pagamento>(`/attendances/${attendanceId}/payment/acknowledge`, undefined, auth(accessToken));
+  },
+  contest(attendanceId: string, accessToken: string, reason?: string) {
+    return api.post<Pagamento>(
+      `/attendances/${attendanceId}/payment/contest`,
+      reason?.trim() ? { reason: reason.trim().slice(0, 300) } : undefined,
+      auth(accessToken),
+    );
+  },
   pendentes(accessToken: string) {
     return api.get<{ count: number; total: number | string; items: PagamentoPendente[] }>(
       '/clients/me/pending-payments',

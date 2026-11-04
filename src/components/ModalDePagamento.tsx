@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, Text, TextInput, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react-native";
 
@@ -8,6 +8,7 @@ import {
   avisoDaPendencia,
   pixDoPagamento,
   podeAvisarQuePagou,
+  precisaConfirmarRecebi,
   reais,
   textoDoStatus,
 } from "@domain/pagamento/pendencia";
@@ -84,6 +85,10 @@ export function ModalDePagamento() {
   // pagamento-ja-paguei: o profissional recusou (AWAITING_CONFIRMATION voltou a PENDING).
   const [recusadoAoVivo, setRecusadoAoVivo] = useState(false);
   const statusAnterior = useRef<string | null>(null);
+  // confirmar-ou-contestar-recebi (F4): o motivo e opcional; "contestando" abre o campo.
+  const [contestando, setContestando] = useState(false);
+  const [motivo, setMotivo] = useState("");
+  const [erroRecebi, setErroRecebi] = useState(false);
   const recusado = recusadoPeloPush || recusadoAoVivo;
 
   useEffect(() => {
@@ -98,6 +103,9 @@ export function ModalDePagamento() {
       setPagamento(null);
       setErro(false);
       setRecusadoAoVivo(false);
+      setContestando(false);
+      setMotivo("");
+      setErroRecebi(false);
       statusAnterior.current = null;
     };
   }, [pagando, accessToken]);
@@ -139,6 +147,26 @@ export function ModalDePagamento() {
       queryClient.invalidateQueries({ queryKey: CHAVE_PENDENTES });
     } catch {
       setErro(true);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  // O "Recebi" do profissional vale como declarado ate o cliente responder; o atendimento nao reabre (BAK-16).
+  async function responderRecebi(acao: "confirmar" | "contestar") {
+    if (!pagando || !accessToken || enviando) return;
+    setEnviando(true);
+    setErroRecebi(false);
+    try {
+      const { data } =
+        acao === "confirmar"
+          ? await paymentService.acknowledge(pagando, accessToken)
+          : await paymentService.contest(pagando, accessToken, motivo);
+      setPagamento((p) => ({ ...(p as Pagamento), ...data }));
+      setContestando(false);
+      setMotivo("");
+    } catch {
+      setErroRecebi(true);
     } finally {
       setEnviando(false);
     }
@@ -212,6 +240,46 @@ export function ModalDePagamento() {
                 <Text testID="pix-automatico" style={{ color: cores.textSecondary, fontSize: fs(13) }}>
                   A confirmação é automática.
                 </Text>
+              ) : null}
+              {/* confirmar-ou-contestar-recebi (F4): o profissional marcou "Recebi"; so o cliente confirma ou contesta. */}
+              {precisaConfirmarRecebi(pagamento) || pagamento.contested ? (
+                <View testID="pix-recebi" style={{ gap: 10 }}>
+                  <Text style={{ color: cores.textPrimary, fontSize: fs(14), lineHeight: fs(20) }}>
+                    {pagamento.contested
+                      ? "Você contestou: o profissional marcou como recebido, mas você disse que não. Vamos olhar."
+                      : "O profissional marcou este pagamento como recebido. Foi isso mesmo?"}
+                  </Text>
+                  {contestando ? (
+                    <TextInput
+                      testID="pix-contestar-motivo"
+                      value={motivo}
+                      onChangeText={setMotivo}
+                      maxLength={300}
+                      multiline
+                      placeholder="O que aconteceu? (opcional)"
+                      placeholderTextColor={cores.textPlaceholder}
+                      style={{ minHeight: 64, textAlignVertical: "top", color: cores.textPrimary, borderWidth: 1, borderColor: cores.textSecondary, borderRadius: 12, padding: 10 }}
+                    />
+                  ) : null}
+                  {erroRecebi ? (
+                    <Text testID="pix-recebi-erro" style={{ color: cores.danger, fontSize: fs(13) }}>
+                      Não foi possível enviar agora. Tente de novo.
+                    </Text>
+                  ) : null}
+                  {contestando ? (
+                    <>
+                      <Botao titulo="Enviar contestação" testID="pix-contestar-enviar" desligado={enviando} onPress={() => responderRecebi("contestar")} />
+                      <Botao titulo="Voltar" claro testID="pix-contestar-voltar" onPress={() => setContestando(false)} />
+                    </>
+                  ) : (
+                    <>
+                      <Botao titulo="Confirmar" testID="pix-confirmar-recebi" desligado={enviando} onPress={() => responderRecebi("confirmar")} />
+                      {pagamento.contested ? null : (
+                        <Botao titulo="Contestar" claro testID="pix-contestar" desligado={enviando} onPress={() => setContestando(true)} />
+                      )}
+                    </>
+                  )}
+                </View>
               ) : null}
               {/* as duas vias quitam o mesmo atendimento: com o Asaas, o "Já paguei" segue valendo e some no PAID */}
               {podeAvisarQuePagou(pagamento.status) ? (

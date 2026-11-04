@@ -1,4 +1,4 @@
-import { ehSoAgenda, acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA } from '@domain/professional/modo';
+import { ehSoAgenda, acaoPrincipal, opcoesDoMenu, MENSAGEM_SO_AGENDA } from '@domain/professional/modo';
 import { recusaAoEntrar } from '@domain/queue/entrarNaFila';
 
 // Modo por profissional (Backend 8e6c00f, em produção desde 26/09): fila ou só agenda.
@@ -35,8 +35,8 @@ describe('o menu "Mais opções"', () => {
     expect(opcoesDoMenu({ soAgenda: true, fora: false, lojaAberta: true })).toEqual([]);
   });
 
-  it('fila aberta: só a troca — o agendar já está na tela, como segunda porta', () => {
-    expect(opcoesDoMenu({ soAgenda: false, fora: false, lojaAberta: true })).toEqual(['swap']);
+  it('fila aberta (DEC-178): o agendar e a troca — a tela só tem Entrar na fila e o menu', () => {
+    expect(opcoesDoMenu({ soAgenda: false, fora: false, lojaAberta: true })).toEqual(['schedule', 'swap']);
   });
 
   it('fila fechada (DEC-6): só o pedido de corte — a troca também põe na fila; loja fechada: corte e troca', () => {
@@ -46,12 +46,24 @@ describe('o menu "Mais opções"', () => {
   });
 });
 
-describe('o fim de fila híbrido (C20)', () => {
-  it('só com a fila aberta há a segunda porta — agendar ao lado de entrar agora', () => {
-    expect(temSegundaPorta({ soAgenda: false, fora: false, lojaAberta: true })).toBe(true);
-    expect(temSegundaPorta({ soAgenda: false, fora: true, lojaAberta: true })).toBe(false);
-    expect(temSegundaPorta({ soAgenda: false, fora: false, lojaAberta: false })).toBe(false);
-    expect(temSegundaPorta({ soAgenda: true, fora: false, lojaAberta: true })).toBe(false);
+
+// fluxo-sem-tela-duplicada (André, 03/11): a intenção escolhida na loja vale uma vez só.
+describe('a intenção que veio da loja', () => {
+  const aberta = { soAgenda: false, fora: false, lojaAberta: true };
+  it('agendar: a principal é agendar, sem menu', () => {
+    const s = { ...aberta, intencao: 'agendar' as const };
+    expect(acaoPrincipal(s)).toBe('agendar');
+    expect(opcoesDoMenu(s)).toEqual([]);
+  });
+  it('fila: entrar na fila; o menu com o agendar e a troca (DEC-178)', () => {
+    const s = { ...aberta, intencao: 'fila' as const };
+    expect(acaoPrincipal(s)).toBe('fila');
+    expect(opcoesDoMenu(s)).toEqual(['schedule', 'swap']);
+  });
+  it('fila com a fila fechada (DEC-6): a intenção não fura a regra — agendar, e o menu com o corte', () => {
+    const s = { ...aberta, fora: true, intencao: 'fila' as const };
+    expect(acaoPrincipal(s)).toBe('agendar');
+    expect(opcoesDoMenu(s)).toEqual(['cut']);
   });
 });
 

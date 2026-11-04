@@ -2,6 +2,7 @@ import {
   avisaQuaseASuaVez,
   atendimentoParaAvaliar,
   pagamentoDoPush,
+  recebiDoPush,
   agendaAbertaDoPush,
   avisoDoPush,
   tocouNoOk,
@@ -297,5 +298,19 @@ describe('avisaQuaseASuaVez', () => {
   it('espera ainda desconhecida: o aviso passa', () => {
     expect(avisaQuaseASuaVez(null)).toBe(true);
     expect(avisaQuaseASuaVez(undefined)).toBe(true);
+  });
+});
+
+// confirmar-ou-contestar-recebi (F4): o toque no aviso "Recebi" abre o pagamento; o pagamento do Asaas não passa por aqui.
+describe('recebiDoPush', () => {
+  it('só o PAYMENT_CONFIRMED com atendimento', () => {
+    expect(recebiDoPush({ type: 'PAYMENT_CONFIRMED', attendanceId: 'a1' })).toEqual({ attendanceId: 'a1' });
+    expect(recebiDoPush({ type: 'PAYMENT_CONFIRMED' })).toBeNull();
+    expect(recebiDoPush({ type: 'PAYMENT_PENDING', attendanceId: 'a1' })).toBeNull();
+    expect(recebiDoPush(null)).toBeNull();
+  });
+
+  it('não é um pagamento que abre sozinho com o app aberto', () => {
+    expect(pagamentoDoPush({ type: 'PAYMENT_CONFIRMED', attendanceId: 'a1' })).toBeNull();
   });
 });

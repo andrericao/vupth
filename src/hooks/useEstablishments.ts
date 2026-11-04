@@ -5,6 +5,7 @@ import { useTelaEmFoco } from '@hooks/useTelaEmFoco';
 import { dadosFrescos } from '@domain/establishment/frescor';
 import { coordsDaLista, listaPodeBuscar } from '@domain/location/abertura';
 import { comoPagina, juntarPaginas, proximaPagina } from '@domain/establishment/paginacao';
+import { tirarPosicaoNaLista } from '@domain/establishment/posicaoNaLista';
 
 /** `ligado: false` segura a busca — a Home so a usa com busca ou categoria. */
 export function useEstablishments(ligado: boolean = true) {
@@ -59,7 +60,7 @@ export function usePraOntem(ligado: boolean) {
 export function useEstablishment(id: string) {
   return useQuery({
     queryKey: ['establishment', id],
-    queryFn: () => establishmentService.getById(id).then((res) => res.data),
+    queryFn: () => establishmentService.getById(id, tirarPosicaoNaLista(id)).then((res) => res.data),
     enabled: !!id,
     staleTime: 60000,
   });

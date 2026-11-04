@@ -7,6 +7,8 @@
 # env: EMAIL_PROF, NOME_CLIENTE
 appId: ${APP_ID}
 ---
+# tirar-faixa-de-ambiente (André, 03/11): a faixa AMBIENTE DE TESTE saiu do topo; o aviso de teste fica nas
+# frases da abertura e a trava (producao nunca aponta para o staging) segue no teste do apiEnv.
 - tapOn:
     id: "primary-queue"
     label: "00b.01 · marcar: entra na fila"
@@ -52,6 +54,15 @@ appId: ${APP_ID}
       id: "pix-ja-paguei"
     timeout: ${20000 * LENTO}
     label: "00b.09 · o Pix mostra o Já paguei"
+# fumaca-pagamento-modo-teste (CLI-30, DEC-168): o profissional da fumaca nao tem chave Pix. O modal nao
+# inventa Pix: mostra so o estado do pagamento, sem chave, QR nem copia e cola; o cliente avisa ("Ja paguei") e
+# vale a palavra do atendente (o Partner responde "Recebi" na 00b.06a dele).
+- assertVisible:
+    id: "pix-status"
+    label: "00b.09a · o modal mostra o estado do pagamento"
+- assertNotVisible:
+    text: "(?i).*(chave pix|copia e cola|copiar código).*"
+    label: "00b.09b · sem chave Pix, QR nem copia e cola"
 - tapOn:
     id: "pix-ja-paguei"
     label: "00b.10 · toca em Já paguei"

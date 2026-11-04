@@ -3,7 +3,8 @@ import { TouchableOpacity } from "react-native";
 import { VStack, Text, HStack, Center } from "@gluestack-ui/themed";
 import { MapPin } from "lucide-react-native";
 
-import { Establishment } from "@domain/establishment/types";
+import { Establishment, isEffectivelyOpen } from "@domain/establishment/types";
+import { textoDaProximaAbertura } from "@domain/establishment/horarios";
 import { formatDistanceKm } from "@domain/establishment/proximity";
 import { statusTag } from "@domain/establishment/statusTag";
 import { serviceTypeLabel } from "@domain/establishment/serviceType";
@@ -106,6 +107,9 @@ export const CardDaLoja = memo(function CardDaLoja({
 
   const meta: string[] = destaque && !volatilPendente ? [destaque] : [];
   if (establishment.serviceType) meta.push(serviceTypeLabel(establishment.serviceType));
+  // horario-de-funcionamento-visivel (CLI-24, DEC-159): fechada, o card diz quando abre (next_open da listagem).
+  const abre = isEffectivelyOpen(establishment) ? null : textoDaProximaAbertura(establishment.next_open, new Date());
+  if (abre) meta.push(abre);
   // A distancia sai da meta: tem icone proprio (distancia-no-card, Andre 09/10:
   // "quero o icone de distancia tambem").
   const distancia = distanceKm != null ? formatDistanceKm(distanceKm) : semGps ? "Ligue o GPS" : null;

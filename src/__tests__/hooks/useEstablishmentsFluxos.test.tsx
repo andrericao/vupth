@@ -13,6 +13,7 @@ import {
 } from '@hooks/useEstablishments';
 import { useLocationStore } from '@stores/locationStore';
 import { establishmentService } from '@services/establishmentService';
+import { marcarPosicaoNaLista } from '@domain/establishment/posicaoNaLista';
 
 // cobertura-98 (08/10): cada consulta das lojas chama o servico certo e so sai
 // com a localizacao decidida.
@@ -72,6 +73,14 @@ describe('a loja', () => {
   it('a loja pelo id', async () => {
     const { result } = renderHook(() => useEstablishment('e1'), { wrapper });
     await waitFor(() => expect(result.current.data).toEqual({ id: 'e1' }));
+  });
+
+  // posicao-na-lista (DEC-176): aberta da lista, a busca leva a posição; sem lista, nada.
+  it('vinda da lista, a busca leva a posição', async () => {
+    marcarPosicaoNaLista('e1', 2);
+    const { result } = renderHook(() => useEstablishment('e1'), { wrapper });
+    await waitFor(() => expect(result.current.data).toEqual({ id: 'e1' }));
+    expect(svc.getById).toHaveBeenLastCalledWith('e1', 3);
   });
 
   it('os profissionais com a fila', async () => {

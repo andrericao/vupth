@@ -50,6 +50,20 @@ describe("Maestro 00b — teste de fumaça", () => {
     expect(ler(".maestro/etapas/22_conjunta_finalizar_e_avaliar.yaml")).toMatch(/PAGAMENTO: "Não recebi"/);
   });
 
+  it("sem chave Pix: o modal não mostra Pix e o cliente só avisa que pagou (fumaca-pagamento-modo-teste)", () => {
+    const modal = ler("src/components/ModalDePagamento.tsx");
+    expect(etapa).toContain('id: "pix-status"');
+    expect(modal).toContain('testID="pix-status"');
+    expect(etapa).toMatch(/chave pix\|copia e cola/);
+    expect(etapa.indexOf("00b.09b")).toBeLessThan(etapa.indexOf("00b.10"));
+  });
+
+  // tirar-faixa-de-ambiente (André, 03/11): a faixa saiu do topo; a fumaça não a procura mais.
+  it("não confere a faixa de ambiente, que saiu do topo", () => {
+    expect(etapa).not.toContain('id: "faixa-de-ambiente"');
+    expect(ler("App.tsx")).not.toContain("FaixaDeAmbiente");
+  });
+
   it("diz que não prova o dinheiro nem o Pix do gateway", () => {
     expect(etapa).toMatch(/NÃO prova: dinheiro real nem o Pix do Asaas/);
   });

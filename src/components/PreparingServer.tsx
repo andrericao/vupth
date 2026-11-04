@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Easing, StyleSheet, useWindowDimensions } from "react-native";
+import { sortearFraseDaAbertura } from "@domain/frasesDaAbertura";
 import { EASE, MS, movimentoReduzido } from "@utils/motion";
 
 // Abertura do app enquanto o portão de readiness (PRD_BACKEND 18c) espera o
@@ -19,6 +20,8 @@ import { EASE, MS, movimentoReduzido } from "@utils/motion";
 
 // tema-fixo: o fundo e o do splash nativo (assets/splash.png), que nao conhece o tema; trocar aqui faria a abertura piscar na passagem do splash para esta tela
 const VERDE_DA_MARCA = "#2E432F";
+// tema-fixo: o texto da frase fica sobre o verde do splash, que nao muda com o tema; branco da 11:1 sobre ele
+const TEXTO_SOBRE_VERDE = "#FFFFFF";
 const LOGO_V = require("../../assets/logo-v-branco.png");
 const PROPORCAO_DO_LOGO = 256 / 306;
 
@@ -48,12 +51,27 @@ export function PreparingServer({ pronto = false, onSaiu }: Props) {
   const laco = useRef<Animated.CompositeAnimation | null>(null);
   const vivo = useRef(true);
   const aoSair = useRef(onSaiu);
+  const [frase, setFrase] = useState<string | null>(null);
+  const [aparecer] = useState(() => new Animated.Value(0));
 
   // O callback é lido na hora de sair, não na de montar: quem passa uma função
   // nova a cada render não pode fazer a saída avisar a antiga.
   useEffect(() => {
     aoSair.current = onSaiu;
   }, [onSaiu]);
+
+  // A frase chega quando o armazenamento responder e entra num fade: nunca atrasa o V nem a saida (DEC-145).
+  useEffect(() => {
+    let ativo = true;
+    sortearFraseDaAbertura().then((f) => {
+      if (!ativo) return;
+      setFrase(f);
+      Animated.timing(aparecer, { toValue: 1, duration: MS.saida, useNativeDriver: true }).start();
+    });
+    return () => {
+      ativo = false;
+    };
+  }, [aparecer]);
 
   useEffect(() => {
     vivo.current = true;
@@ -131,6 +149,23 @@ export function PreparingServer({ pronto = false, onSaiu }: Props) {
           <Animated.Image source={LOGO_V} resizeMode="contain" style={v} />
         </Animated.View>
       </Animated.View>
+      {frase ? (
+        <Animated.Text
+          testID="abertura-frase"
+          style={{
+            position: "absolute",
+            left: 32,
+            right: 32,
+            bottom: Math.round(height * 0.18),
+            textAlign: "center",
+            color: TEXTO_SOBRE_VERDE,
+            fontSize: 15,
+            opacity: Animated.multiply(aparecer, saida.interpolate({ inputRange: [0, 0.6], outputRange: [1, 0], extrapolate: "clamp" })),
+          }}
+        >
+          {frase}
+        </Animated.Text>
+      ) : null}
     </Animated.View>
   );
 }

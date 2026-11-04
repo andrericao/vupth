@@ -13,7 +13,14 @@ export function ehSoAgenda(p?: { operation_mode?: string | null } | null): boole
 export type AcaoPrincipal = 'fila' | 'agendar';
 export type OpcaoDoMenu = 'schedule' | 'cut' | 'swap';
 
-type Situacao = { soAgenda: boolean; fora: boolean; lojaAberta: boolean };
+/**
+ * fluxo-sem-tela-duplicada (André, 03/11): na tela da loja o cliente ja escolheu, em "Entrar com menor
+ * espera" ou "Agendar um horario". A escolha vale uma vez so: a escolha de servicos so confirma essa
+ * intencao. Ausente (tocou no profissional, link) = a tela de sempre, com as duas portas.
+ */
+export type Intencao = 'fila' | 'agendar';
+
+type Situacao = { soAgenda: boolean; fora: boolean; lojaAberta: boolean; intencao?: Intencao };
 
 /**
  * O botao principal da escolha de servicos.
@@ -23,29 +30,24 @@ type Situacao = { soAgenda: boolean; fora: boolean; lojaAberta: boolean };
  * "Agendar" e "Mais opcoes", onde fica o pedido de corte. Ate 02/10 o corte era
  * a acao principal.
  */
-export function acaoPrincipal({ soAgenda, fora, lojaAberta }: Situacao): AcaoPrincipal {
-  if (soAgenda || fora) return 'agendar';
+export function acaoPrincipal({ soAgenda, fora, lojaAberta, intencao }: Situacao): AcaoPrincipal {
+  // Agendar vale em qualquer caso; entrar na fila so onde a regra deixa (DEC-6): a intencao nao fura a fila fechada.
+  if (soAgenda || fora || intencao === 'agendar') return 'agendar';
   return lojaAberta ? 'fila' : 'agendar';
 }
 
 /**
- * Fim de fila hibrido (C20, Andre 05/08): com a fila aberta o cliente escolhe —
- * entrar agora ou agendar. O agendar e a segunda porta, visivel ao lado da
- * principal; nos outros casos nao ha segunda porta.
- */
-export function temSegundaPorta(situacao: Situacao): boolean {
-  return acaoPrincipal(situacao) === 'fila';
-}
-
-/**
- * O menu "Mais opcoes": tudo que nao e a acao principal nem a segunda porta.
+ * O menu "Mais opcoes": tudo que nao e a acao principal.
  * "So agenda" nao tem nada alem de agendar — entrar por troca tambem e entrar
  * na fila.
+ *
+ * DEC-178 (André, 03/11): a tela "O que voce quer?" fica so com a principal e o "Mais opcoes"; a segunda
+ * porta (C20, "Agendar um horario" na tela) saiu e o agendar voltou para o menu, com a troca.
  */
 export function opcoesDoMenu(situacao: Situacao): OpcaoDoMenu[] {
-  const { soAgenda, fora, lojaAberta } = situacao;
-  if (soAgenda) return [];
-  if (temSegundaPorta(situacao)) return ['swap'];
+  const { soAgenda, fora, lojaAberta, intencao } = situacao;
+  // Veio de "Agendar um horario" na loja: so o agendar, sem o menu.
+  if (soAgenda || intencao === 'agendar') return [];
   // Fila fechada (DEC-6): so o pedido de corte — a troca tambem poe na fila.
   if (fora) return ['cut'];
   return lojaAberta ? ['schedule', 'swap'] : ['cut', 'swap'];

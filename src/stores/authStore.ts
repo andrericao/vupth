@@ -5,6 +5,7 @@ import { pushService } from '../services/pushService';
 import { registerAuthStore, renovarSessao } from '../services/api';
 import { useQueueStore } from './queueStore';
 import { limparCacheSalvo } from '../services/queryPersist';
+import { modoCookieWeb, SESSAO_POR_COOKIE } from '../services/modoCookieWeb';
 
 interface AuthUser {
   id: string;
@@ -50,6 +51,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (email, password) => {
     const { data } = await authService.login({ email, password });
+
+    // token-web-httponly (DEC-179): no modo cookie da web nao ha token para guardar; so o user.
+    if (modoCookieWeb() || !data.tokens) {
+      // E apaga o que o modo antigo tenha deixado no navegador.
+      await SecureStore.deleteItemAsync(TOKEN_KEY);
+      await SecureStore.deleteItemAsync(REFRESH_KEY);
+      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(data.user));
+      set({ user: data.user, accessToken: SESSAO_POR_COOKIE, refreshToken: SESSAO_POR_COOKIE, isAuthenticated: true });
+      return;
+    }
 
     await SecureStore.setItemAsync(TOKEN_KEY, data.tokens.access_token);
     await SecureStore.setItemAsync(REFRESH_KEY, data.tokens.refresh_token);
@@ -117,6 +128,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { user } = get();
     if (!user) return;
     const updated = { ...user, ...userPartial };
+    // Modo cookie (DEC-179): os cookies novos ja vieram na resposta; so o user muda.
+    if (modoCookieWeb()) {
+      await SecureStore.setItemAsync(USER_KEY, JSON.stringify(updated));
+      set({ user: updated });
+      return;
+    }
     await SecureStore.setItemAsync(TOKEN_KEY, tokens.access_token);
     await SecureStore.setItemAsync(REFRESH_KEY, tokens.refresh_token);
     await SecureStore.setItemAsync(USER_KEY, JSON.stringify(updated));
@@ -129,6 +146,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   restoreSession: async () => {
     try {
+      // Modo cookie (DEC-179): com o user salvo, ha sessao; o primeiro 401 renova e, vencida, volta ao login.
+      if (modoCookieWeb()) {
+        const salvo = await SecureStore.getItemAsync(USER_KEY);
+        set(
+          salvo
+            ? { user: JSON.parse(salvo), accessToken: SESSAO_POR_COOKIE, refreshToken: SESSAO_POR_COOKIE, isAuthenticated: true, isLoading: false }
+            : { isLoading: false },
+        );
+        return;
+      }
       const accessToken = await SecureStore.getItemAsync(TOKEN_KEY);
       const refreshToken = await SecureStore.getItemAsync(REFRESH_KEY);
       const userJson = await SecureStore.getItemAsync(USER_KEY);

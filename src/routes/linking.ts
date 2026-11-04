@@ -82,6 +82,28 @@ export const linkingWeb: LinkingOptions<any> = {
 };
 
 /**
+ * abrir-no-app-se-instalado (DEC-161/180): no app de PRODUCAO, um link
+ * https://app.vupth.com/... aberto pelo Android (intent filter do
+ * app.config.js) cai na tela do caminho, com as mesmas regras da web. Fora da
+ * producao o aparelho segue sem linking: o build nao recebe esses links, e o
+ * linking no nativo atrasaria a primeira tela esperando a URL inicial.
+ */
+export const DOMINIO_DO_APP = "https://app.vupth.com";
+
+export const linkingNativo: LinkingOptions<any> = {
+  prefixes: [DOMINIO_DO_APP],
+  config: { screens: TELAS },
+  getPathFromState: caminhoDaTela,
+  getStateFromPath: telaDoCaminho,
+};
+
+/** Qual linking o NavigationContainer usa: a web sempre; o aparelho só na produção. */
+export function linkingDoApp(plataforma: string, env: string): LinkingOptions<any> | undefined {
+  if (plataforma === "web") return linkingWeb;
+  return env === "prod" ? linkingNativo : undefined;
+}
+
+/**
  * O link que se compartilha (pedido do Andre de 24/09, botao no Partner): a
  * loja, ou a loja ja abrindo um profissional. O profissional vai como
  * `?profissional=` — o unico parametro que atravessa a barra de endereco, de

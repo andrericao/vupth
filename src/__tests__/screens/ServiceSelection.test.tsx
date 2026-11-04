@@ -380,12 +380,12 @@ describe('ServiceSelection — menu "Mais opções" + entrar por troca (F8 fatia
     mockCupons = [];
   });
 
-  it('fila aberta: as duas portas na tela — entrar agora e agendar; o menu fica só com a troca (C20)', async () => {
+  it('fila aberta (DEC-178): na tela só Entrar na fila e o menu; o agendar e a troca ficam no menu', async () => {
     const { getByTestId, queryByTestId } = await selectServiceAndOpenMenu();
 
     expect(getByTestId('primary-queue')).toBeTruthy();
-    expect(getByTestId('second-door-schedule')).toBeTruthy();
-    expect(queryByTestId('more-option-schedule')).toBeNull();
+    expect(queryByTestId('second-door-schedule')).toBeNull();
+    expect(getByTestId('more-option-schedule')).toBeTruthy();
     expect(getByTestId('more-option-swap')).toBeTruthy();
   });
 
@@ -557,6 +557,34 @@ describe('ServiceSelection — tempo do serviço (tempo-do-servico)', () => {
 
 // Informacoes do profissional (Andre, 05/10): o contato saiu da escolha do
 // servico — sem Ligar e sem WhatsApp. O nome no topo leva a tela dele.
+// fluxo-sem-tela-duplicada (André, 03/11): o botão tocado na loja define a intenção; a escolha vale uma vez só.
+describe('ServiceSelection — a intenção que veio da loja', () => {
+  afterEach(() => setRouteParams(OPEN_PARAMS));
+
+  it('veio de "Entrar com menor espera": só o Entrar na fila e o menu (DEC-178)', async () => {
+    setRouteParams({ ...OPEN_PARAMS, intencao: 'fila' });
+    const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    await findByTestId('service-s1', {}, { timeout: 15000 });
+    fireEvent.press(getByTestId('service-s1'));
+    expect(getByTestId('primary-queue')).toBeTruthy();
+    expect(queryByTestId('second-door-schedule')).toBeNull();
+    expect(queryByTestId('primary-schedule')).toBeNull();
+    expect(getByTestId('more-options')).toBeTruthy();
+  });
+
+  it('veio de "Agendar um horário": só o Agendar, que abre o seletor de dia e hora; sem fila nem menu', async () => {
+    setRouteParams({ ...OPEN_PARAMS, intencao: 'agendar' });
+    const { getByTestId, queryByTestId, findByTestId } = renderWithProviders(<ServiceSelection />);
+    await findByTestId('service-s1', {}, { timeout: 15000 });
+    fireEvent.press(getByTestId('service-s1'));
+    expect(queryByTestId('primary-queue')).toBeNull();
+    expect(queryByTestId('second-door-schedule')).toBeNull();
+    expect(queryByTestId('more-options')).toBeNull();
+    fireEvent.press(getByTestId('primary-schedule'));
+    expect(await findByTestId('agenda-caixa')).toBeTruthy();
+  });
+});
+
 describe('ServiceSelection — o profissional no topo', () => {
   beforeEach(() => {
     jest.clearAllMocks();

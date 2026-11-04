@@ -31,7 +31,7 @@ import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
 import { useCardFechado } from "@hooks/useCardFechado";
 import { useTema } from "@hooks/useTema";
-import { origemDaMulta } from "@domain/queue/multasPendentes";
+import { origemDaMulta, partesDasMultas } from "@domain/queue/multasPendentes";
 import { reais, textoDoStatus } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { AttendanceDetailModal } from "@components/AttendanceDetailModal";
@@ -286,6 +286,11 @@ export function Attendances() {
             <Text fontFamily="$heading" size="sm">
               Multas pendentes · {reais(multasPendentes?.total ?? 0)}
             </Text>
+            {partesDasMultas(multasPendentes) ? (
+              <Text size="xs" color="$brandTextSecondary" testID="multas-teste-x-app">
+                {partesDasMultas(multasPendentes)}
+              </Text>
+            ) : null}
             {/* faixa-de-multa-clicavel (André, 22/10): faixa com o âmbar da multa (o mesmo da
                 faixa de saída), e o toque abre o atendimento que gerou a multa. */}
             {multas.map((m) => {

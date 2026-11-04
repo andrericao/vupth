@@ -73,10 +73,10 @@ dono e profissional na mesma conta, trabalhando, com um serviço, aberta das
 | 01 | `visitante` | Sem conta, o Perfil mostra só Criar conta, Entrar, os Termos e a versão — nenhum grupo de menu (Andre, 02/10). Na 01.07 a versão tem de mostrar o `COMMIT` esperado; se não, a bateria para ali (03/10) |
 | 02 | `cadastro` | Cadastro pelo convite do Perfil, nome na tela seguinte; logado, o Perfil mostra Conta e Aparência |
 | 03 | `loja` | A loja aparece na busca do Início, com o profissional trabalhando e a fila aberta; o "Pra ontem" a mostra entre as livres |
-| 04 | `fim_de_fila_hibrido` | As duas portas (Entrar na fila e Agendar um horário), a regra da multa antes de entrar e o "Mais opções" só com a troca (C20) |
+| 04 | `fim_de_fila_hibrido` | Os dois botões da loja (Agendar vai direto ao Agendar; Entrar, ao Entrar na fila), a tela só com Entrar na fila e "Mais opções" (agendar e troca, DEC-178) |
 | 05 | `entra_e_sai_com_multa` | Entra na fila, aceita o aviso, sai com os dois toques e a confirmação — primeiro da fila, a saída gera multa |
 | 06 | `multa_no_total` | A multa da 05 aparece só no total, com a explicação (DEC-1) |
-| 07 | `agendar_pela_barra` | A segunda porta abre a barra de encaixe, agenda o primeiro horário livre e o agendamento aparece em Atendimentos (DEC-3) |
+| 07 | `agendar_pela_barra` | O Agendar do "Mais opções" abre a barra de encaixe, agenda o primeiro horário livre e o agendamento aparece em Atendimentos (DEC-3) |
 | 08 | `fila_fechada` | O profissional fecha a fila (pela API): a loja mostra "Fila fechada" no card dele, e a escolha de serviços só oferece Agendar e, no menu, o pedido de corte (DEC-6) |
 | 09 | `login` | Sai da conta e entra de novo com o e-mail e a senha do cadastro (DEC-7) |
 | 10 | `pedido_de_corte` | Com a fila fechada, pede o corte pelo "Mais opções"; o profissional aceita pela API e o app põe o cliente na fila (DEC-7) |

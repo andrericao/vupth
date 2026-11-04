@@ -4,6 +4,7 @@ import {
   horarioDeHoje,
   resumoDeHoje,
   proximaAbertura,
+  textoDaProximaAbertura,
   diaDaData,
   dataISO,
   HorariosDaLoja,
@@ -125,5 +126,28 @@ describe('quando reabre — o que quem chega fora do horário quer saber', () =>
       ],
     };
     expect(proximaAbertura(sabadoFechadoPorExcecao, QUINTA)).toBeNull();
+  });
+});
+
+// horario-na-listagem (CLI-24, DEC-159): o card da loja fechada diz quando abre, pelo next_open da listagem.
+describe('textoDaProximaAbertura', () => {
+  const hoje = new Date(2026, 10, 3, 22, 0); // terça, 03/11/2026
+
+  it('hoje, amanhã e um dia da semana', () => {
+    expect(textoDaProximaAbertura({ date: '2026-11-03', opens: '09:00:00' }, hoje)).toBe('Abre hoje, 09:00');
+    expect(textoDaProximaAbertura({ date: '2026-11-04', opens: '09:00' }, hoje)).toBe('Abre amanhã, 09:00');
+    expect(textoDaProximaAbertura({ date: '2026-11-07', opens: '08:30' }, hoje)).toBe('Abre sábado, 08:30');
+  });
+
+  it('virada de mês: amanhã de 30/11 é 01/12', () => {
+    expect(textoDaProximaAbertura({ date: '2026-12-01', opens: '10:00' }, new Date(2026, 10, 30, 20))).toBe('Abre amanhã, 10:00');
+  });
+
+  it('sem horário publicado ou valor estragado: nada, nunca inventa', () => {
+    expect(textoDaProximaAbertura(null, hoje)).toBeNull();
+    expect(textoDaProximaAbertura(undefined, hoje)).toBeNull();
+    expect(textoDaProximaAbertura({ date: 'ontem', opens: '09:00' }, hoje)).toBeNull();
+    expect(textoDaProximaAbertura({ date: '2026-11-04', opens: 'cedo' }, hoje)).toBeNull();
+    expect(textoDaProximaAbertura({ date: '2026-11-04', opens: [9, 0] as never }, hoje)).toBeNull();
   });
 });

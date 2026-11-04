@@ -1,4 +1,5 @@
 import { api } from './api';
+import { CABECALHO_DO_MODO, modoCookieWeb } from './modoCookieWeb';
 
 export interface RegisterRequest {
   email: string;
@@ -23,7 +24,8 @@ export interface LoginResponse {
     email: string;
     roles: string[];
   };
-  tokens: {
+  /** Ausente no modo cookie da web (DEC-179): o token vai no cookie HttpOnly. */
+  tokens?: {
     access_token: string;
     refresh_token: string;
     expires_in: number;
@@ -42,7 +44,8 @@ export const authService = {
   },
 
   login(data: LoginRequest) {
-    return api.post<LoginResponse>('/auth/login', data);
+    // token-web-httponly (DEC-179): na web com a chave ligada, pede o modo cookie.
+    return api.post<LoginResponse>('/auth/login', data, modoCookieWeb() ? { headers: { ...CABECALHO_DO_MODO } } : undefined);
   },
 
   refresh(refreshToken: string) {
@@ -50,6 +53,8 @@ export const authService = {
   },
 
   logout(accessToken: string) {
+    // Modo cookie (DEC-179): o servidor apaga os cookies (204).
+    if (modoCookieWeb()) return api.post('/auth/web/logout');
     return api.post('/auth/logout', null, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });

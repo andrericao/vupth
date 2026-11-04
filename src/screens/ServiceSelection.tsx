@@ -48,7 +48,7 @@ import { EscolhaDeCupom } from "@components/EscolhaDeCupom";
 import { pendenciasDoErro } from "@domain/pagamento/pendencia";
 import { usePendenciaStore } from "@stores/pendenciaStore";
 import { usePendenciasAoEscolher } from "@hooks/usePendenciasAoEscolher";
-import { acaoPrincipal, opcoesDoMenu, temSegundaPorta, MENSAGEM_SO_AGENDA, OpcaoDoMenu } from "@domain/professional/modo";
+import { acaoPrincipal, opcoesDoMenu, MENSAGEM_SO_AGENDA, OpcaoDoMenu, type Intencao } from "@domain/professional/modo";
 import { mensagemDoErro } from "@domain/erros/mensagemDoErro";
 
 // Sombra do card de resumo (verde escuro sobre fundo claro). Este e um dos
@@ -78,6 +78,8 @@ type RouteParams = {
   serviceItemIds?: string[];
   // Tamanho da fila do profissional: a posição do cliente é este número + 1.
   queueCount?: number;
+  // fluxo-sem-tela-duplicada (André, 03/11): o botão tocado na loja; a tela só confirma essa intenção.
+  intencao?: Intencao;
 };
 
 // Fora do corpo do componente: o relogio so e lido no toque, nunca no render.
@@ -104,10 +106,11 @@ export function ServiceSelection() {
     queueCount,
     profissionalFora,
     soAgenda = false,
+    intencao,
   } = route.params as RouteParams;
   // Ausente = aberta (fluxos legados). false = fila fechada agora.
   const storeOpen = establishmentOpen ?? true;
-  const situacao = { soAgenda, fora: !!profissionalFora, lojaAberta: storeOpen };
+  const situacao = { soAgenda, fora: !!profissionalFora, lojaAberta: storeOpen, intencao };
   const principal = acaoPrincipal(situacao);
   // A estimativa da fila (posicao, horario, multa) so vale quando a acao e entrar nela.
   const vaiPraFila = principal === "fila";
@@ -386,7 +389,7 @@ export function ServiceSelection() {
 
   // Menu "Mais opções": tudo que não é a ação primária da tela. Com a loja
   // fechada a primária é agendar, então o corte entra aqui; com a fila aberta o
-  // agendar é a segunda porta, na tela (C20). A troca vale nos dois.
+  // agendar mora aqui (DEC-178). A troca vale nos dois.
   const todasAsOpcoes: Record<OpcaoDoMenu, MoreOption> = {
     schedule: {
       key: "schedule",
@@ -641,8 +644,8 @@ export function ServiceSelection() {
           {selectedIds.length > 0 && (
             <VStack position="absolute" style={{ bottom: rodape }} left={20} right={20} gap="$2" testID="rodape-da-escolha">
               {/* Uma ação primária só (Andre 2026-08-01): loja aberta = entrar na
-                  fila; fechada = agendar (badge AGENDAR). Com a fila aberta o
-                  agendar vem logo abaixo, como segunda porta (C20). O resto —
+                  fila; fechada = agendar (badge AGENDAR). DEC-178 (André, 03/11):
+                  sem segunda porta, o agendar também vai ao menu. O resto —
                   solicitar corte, entrar por troca — vive no menu "Mais opções". */}
               {/* Fila fechada (DEC-6, 02/10): a principal e agendar e o pedido de
                   corte fica no menu — nunca "Entrar na fila". */}
@@ -659,16 +662,7 @@ export function ServiceSelection() {
                   onPress={abrirAgendar}
                 />
               )}
-              {/* Fim de fila hibrido (C20): com a fila aberta, a outra porta —
-                  agendar um horario que a fila ainda nao alcancou. */}
-              {temSegundaPorta(situacao) && (
-                <Button
-                  title="Agendar um horário"
-                  variant="outline"
-                  testID="second-door-schedule"
-                  onPress={abrirAgendar}
-                />
-              )}
+              {/* DEC-178 (André, 03/11): sem a segunda porta; o agendar mora no "Mais opções". */}
               {soAgenda && (
                 <Text size="xs" color="$brandTextSecondary" textAlign="center" testID="so-agenda">
                   {MENSAGEM_SO_AGENDA}

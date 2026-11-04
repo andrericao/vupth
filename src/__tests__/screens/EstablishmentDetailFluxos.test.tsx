@@ -146,13 +146,14 @@ describe('EstablishmentDetail — os profissionais', () => {
   it('"Entrar com menor espera" leva ao de menor espera', () => {
     const { getByText } = renderWithProviders(<EstablishmentDetail />);
     fireEvent.press(getByText('Entrar com menor espera'));
-    expect(mockNavigate).toHaveBeenCalledWith('serviceSelection', expect.objectContaining({ professionalId: 'b' }));
+    expect(mockNavigate).toHaveBeenCalledWith('serviceSelection', expect.objectContaining({ professionalId: 'b', intencao: 'fila' }));
   });
 
   it('loja aberta: o Agendar aparece embaixo do botão de entrar e leva ao de menor espera (agendar-some-com-loja-aberta)', () => {
     const { getByTestId } = renderWithProviders(<EstablishmentDetail />);
     fireEvent.press(getByTestId('agendar-loja-aberta'));
-    expect(mockNavigate).toHaveBeenCalledWith('serviceSelection', expect.objectContaining({ professionalId: 'b' }));
+    // fluxo-sem-tela-duplicada (André, 03/11): o Agendar leva a intenção; a tela de serviços não pergunta de novo.
+    expect(mockNavigate).toHaveBeenCalledWith('serviceSelection', expect.objectContaining({ professionalId: 'b', intencao: 'agendar' }));
   });
 
   it('sem ninguém trabalhando, o botão não leva a lugar nenhum', () => {

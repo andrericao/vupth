@@ -65,6 +65,10 @@ export interface Establishment {
   // do horario vem is_open=false — exibir como FECHADA (feedback Andre
   // 2026-07-22: loja que fecha 20:00 aparecia aberta de noite).
   is_open?: boolean;
+  // horario-na-listagem (BAK-19, CLI-24, DEC-159): a proxima abertura do horario publicado ({date: "YYYY-MM-DD",
+  // opens: "HH:mm[:ss]"}), ate 14 dias; null sem horario. So informacao: quem diz se esta aberta e is_open.
+  // O horario de hoje vem em opening_time/closing_time (null se hoje fecha).
+  next_open?: { date: string; opens: string } | null;
   status: EstablishmentStatus;
   services: string[];
   address?: Address;

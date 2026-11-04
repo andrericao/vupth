@@ -7,6 +7,20 @@ appId: ${APP_ID}
 - tapOn:
     text: "Perfil"
     label: "16.01 · toca em Perfil"
+# feedback-no-app (DEC-167): o Perfil oferece "Enviar feedback"; abre a caixa e cancela (nao manda e-mail de verdade).
+- scrollUntilVisible:
+    element:
+      id: "enviar-feedback"
+    label: "16.00a · rola até Enviar feedback"
+- tapOn:
+    id: "enviar-feedback"
+    label: "16.00b · toca em Enviar feedback"
+- assertVisible:
+    id: "feedback-texto"
+    label: "16.00c · vê a caixa do feedback"
+- tapOn:
+    id: "feedback-cancelar"
+    label: "16.00d · cancela"
 - tapOn:
     text: "Dados cadastrais"
     label: "16.01a · toca em Dados cadastrais (o submenu do Perfil)"

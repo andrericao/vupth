@@ -56,4 +56,18 @@ describe('a linha da loja fechada na lista da categoria', () => {
       timeout: 15000,
     });
   });
+
+  it('diz quando a loja abre, pelo next_open da listagem (horario-de-funcionamento-visivel)', async () => {
+    const amanha = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const iso = `${amanha.getFullYear()}-${`${amanha.getMonth() + 1}`.padStart(2, '0')}-${`${amanha.getDate()}`.padStart(2, '0')}`;
+    const com = renderWithProviders(
+      <LinhaDaLojaFechada establishment={{ ...fechada, next_open: { date: iso, opens: '09:00:00' } }} onPress={jest.fn()} />,
+    );
+    expect((await com.findByTestId('abre-e2')).props.children).toBe('Abre amanhã, 09:00');
+    com.unmount();
+    // Sem horario publicado, a linha omite (nao inventa).
+    const sem = renderWithProviders(<LinhaDaLojaFechada establishment={{ ...fechada, next_open: null }} onPress={jest.fn()} />);
+    await sem.findByText('Studio Ana');
+    expect(sem.queryByTestId('abre-e2')).toBeNull();
+  });
 });

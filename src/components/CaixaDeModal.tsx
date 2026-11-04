@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Keyboard, ScrollView } from "react-native";
 import { VStack, Box } from "@gluestack-ui/themed";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { floatingShadow } from "@utils/styles";
 import { useTema } from "@hooks/useTema";
@@ -33,6 +34,11 @@ const PADDING = 24;
  * metade da tela e o rodape (Enviar e Cancelar) tomava o lugar do campo. Com o teclado aberto o layout
  * fica compacto: a caixa sobe para o topo, o padding encolhe (24 para 16 no miolo, 12 no rodape) e o
  * toque no campo nao fecha o teclado nem os botoes. O campo de texto tem a propria altura minima.
+ *
+ * cancelar-cortado-no-agendar (André, 03/11, reprovou 20253c1d): no SDK 54 (RN 0.81) o Android e
+ * edge-to-edge e o Modal desenha por baixo das barras do sistema. Num modal alto (Agendar), o pe da caixa
+ * caia embaixo da barra de navegacao: a borda sumia e o Cancelar encostava no fim do cartao. O veu soma a
+ * area segura (topo e baixo) aos 24 px; com o teclado aberto, so o topo (o teclado ja cobre a barra).
  */
 function useTecladoAberto(): boolean {
   const [aberto, setAberto] = useState(false);
@@ -50,9 +56,19 @@ function useTecladoAberto(): boolean {
 export function CaixaDeModal({ children, rodape, raio = "card", gap = 0, testID = "caixa-de-modal", rolagemTestID, rodapeTestID }: Props) {
   const { veu } = useTema();
   const teclado = useTecladoAberto();
+  const insets = useSafeAreaInsets();
   const miolo = teclado ? 16 : PADDING;
+  const margem = teclado ? 12 : PADDING;
   return (
-    <Box flex={1} bg={veu} justifyContent={teclado ? "flex-start" : "center"} px={PADDING} py={teclado ? 12 : PADDING} testID={`${testID}-veu`}>
+    <Box
+      flex={1}
+      bg={veu}
+      justifyContent={teclado ? "flex-start" : "center"}
+      px={PADDING}
+      pt={margem + insets.top}
+      pb={margem + (teclado ? 0 : insets.bottom)}
+      testID={`${testID}-veu`}
+    >
       <VStack bg="$painel" borderRadius={raio === "hero" ? "$hero" : "$card"} style={[floatingShadow, { maxHeight: "100%" }]} testID={testID}>
         <ScrollView
           style={{ flexShrink: 1 }}

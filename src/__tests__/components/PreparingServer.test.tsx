@@ -79,4 +79,15 @@ describe('PreparingServer', () => {
     await esvaziarPromessas();
     expect(onSaiu).not.toHaveBeenCalled();
   });
+
+  it('mostra uma frase curta sob o V, sem atrasar a saída (frases-na-abertura)', async () => {
+    const onSaiu = jest.fn();
+    const { getByTestId, rerender, unmount } = render(<PreparingServer />);
+    await esvaziarPromessas();
+    expect(getByTestId('abertura-frase')).toBeTruthy();
+    expect(getByTestId('abertura-v-pulsando')).toBeTruthy();
+    rerender(<PreparingServer pronto onSaiu={onSaiu} />);
+    expect(getByTestId('abertura')).toBeTruthy();
+    unmount();
+  });
 });

@@ -22,15 +22,19 @@ appId: ${APP_ID}
 - launchApp:
     appId: ${APP_ID}
     label: "22.03 · volta ao Client (sem limpar)"
-- runFlow:
-    file: ../apoio/fechar_aviso.yaml
-    label: "22.04 · fecha as caixas"
 - extendedWaitUntil:
     visible:
-      id: "pix-do-atendimento"
-    timeout: ${30000 * LENTO}
-    optional: true
-    label: "22.04b · corte concluído e não pago: o Pix abre na tela da fila (pagamento-no-concluido)"
+      id: "(aviso-de-pendencia|pix-do-atendimento)"
+    timeout: ${60000 * LENTO}
+    label: "22.04 · ao voltar, o aviso 'Pagamento pendente' (ou o Pix) abre"
+- runFlow:
+    when:
+      visible:
+        id: "pendencia-pagar"
+    commands:
+      - tapOn:
+          id: "pendencia-pagar"
+          label: "22.04b · Pagar abre o Pix (caminho da fumaça 00b)"
 - runFlow:
     when:
       visible:

@@ -15,10 +15,14 @@ import { usePendenciaStore } from '@stores/pendenciaStore';
 
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
-jest.mock('@services/paymentService', () => ({ paymentService: { get: jest.fn(), claim: jest.fn() } }));
+jest.mock('@services/paymentService', () => ({
+  paymentService: { get: jest.fn(), claim: jest.fn(), acknowledge: jest.fn(), contest: jest.fn() },
+}));
 
 const get = paymentService.get as jest.Mock;
 const claim = paymentService.claim as jest.Mock;
+const acknowledge = paymentService.acknowledge as jest.Mock;
+const contest = paymentService.contest as jest.Mock;
 
 const PIX = {
   status: 'PENDING',
@@ -284,5 +288,58 @@ describe('ModalDePagamento — pelo Asaas', () => {
     expect(tela.queryByTestId('pix-dropdown')).toBeNull();
     expect(tela.queryByTestId('pix-chave')).toBeNull();
     expect(tela.queryByTestId('pagamento-de-teste')).toBeNull();
+  });
+
+  // confirmar-ou-contestar-recebi (F4, BAK-16): o "Recebi" do profissional espera o cliente.
+  describe('o Recebi do profissional (declarado)', () => {
+    const DECLARADO = { ...PIX, status: 'PAID', declared: true, contested: false };
+
+    it('pergunta se foi isso mesmo e "Confirmar" manda o acknowledge', async () => {
+      get.mockResolvedValue({ data: DECLARADO });
+      acknowledge.mockResolvedValue({ data: { ...DECLARADO, declared: false } });
+      act(() => usePendenciaStore.getState().pagar('a1'));
+      const tela = montar();
+      expect(await tela.findByText(/Foi isso mesmo/, {}, { timeout: 15000 })).toBeTruthy();
+      expect(tela.queryByTestId('pix-ja-paguei')).toBeNull();
+      fireEvent.press(tela.getByTestId('pix-confirmar-recebi'));
+      await waitFor(() => expect(acknowledge).toHaveBeenCalledWith('a1', 'tk'));
+      await waitFor(() => expect(tela.queryByTestId('pix-recebi')).toBeNull());
+    });
+
+    it('"Contestar" abre o motivo opcional e manda o contest; depois mostra que foi contestado', async () => {
+      get.mockResolvedValue({ data: DECLARADO });
+      contest.mockResolvedValue({ data: { ...DECLARADO, contested: true } });
+      act(() => usePendenciaStore.getState().pagar('a1'));
+      const tela = montar();
+      fireEvent.press(await tela.findByTestId('pix-contestar', {}, { timeout: 15000 }));
+      expect(tela.queryByTestId('pix-confirmar-recebi')).toBeNull();
+      fireEvent.changeText(tela.getByTestId('pix-contestar-motivo'), 'não recebi nada');
+      fireEvent.press(tela.getByTestId('pix-contestar-enviar'));
+      await waitFor(() => expect(contest).toHaveBeenCalledWith('a1', 'tk', 'não recebi nada'));
+      expect(await tela.findByText(/Você contestou/)).toBeTruthy();
+      expect(tela.queryByTestId('pix-contestar')).toBeNull();
+      expect(tela.getByTestId('pix-confirmar-recebi')).toBeTruthy();
+    });
+
+    it('"Voltar" desfaz a contestação sem mandar nada; falha avisa e deixa tentar de novo', async () => {
+      get.mockResolvedValue({ data: DECLARADO });
+      acknowledge.mockRejectedValue(new Error('x'));
+      act(() => usePendenciaStore.getState().pagar('a1'));
+      const tela = montar();
+      fireEvent.press(await tela.findByTestId('pix-contestar', {}, { timeout: 15000 }));
+      fireEvent.press(tela.getByTestId('pix-contestar-voltar'));
+      expect(contest).not.toHaveBeenCalled();
+      fireEvent.press(tela.getByTestId('pix-confirmar-recebi'));
+      expect(await tela.findByTestId('pix-recebi-erro')).toBeTruthy();
+      expect(tela.getByTestId('pix-confirmar-recebi')).toBeTruthy();
+    });
+
+    it('pago pelo Asaas (sem declared): não pergunta nada', async () => {
+      get.mockResolvedValue({ data: { ...PIX, status: 'PAID', declared: false } });
+      act(() => usePendenciaStore.getState().pagar('a1'));
+      const tela = montar();
+      expect(await tela.findByText('Pago', {}, { timeout: 15000 })).toBeTruthy();
+      expect(tela.queryByTestId('pix-recebi')).toBeNull();
+    });
   });
 });

@@ -1,10 +1,13 @@
-# A segunda porta: agendar um horario pela barra de encaixe (DEC-3). Continua
-# na escolha de servicos da etapa 06, com o servico marcado.
+# Agendar um horario pela barra de encaixe (DEC-3), pelo "Mais opcoes" (DEC-178: a
+# segunda porta saiu da tela). Continua na escolha de servicos da etapa 06, com o servico marcado.
 appId: ${APP_ID}
 ---
 - tapOn:
-    id: "second-door-schedule"
-    label: "07.01 · toca em second-door-schedule"
+    id: "more-options"
+    label: "07.00 · toca em Mais opções"
+- tapOn:
+    id: "more-option-schedule"
+    label: "07.01 · toca em Agendar, no menu"
 # A barra so aparece depois de escolher o dia (o modal abre sem dia marcado;
 # era o "barra-de-encaixe is visible" que falhou em 05/10). Hoje: a loja da
 # bateria esta aberta agora (loja_aberta).

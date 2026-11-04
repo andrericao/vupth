@@ -10,7 +10,7 @@ import {
   ScrollView,
   Center,
 } from "@gluestack-ui/themed";
-import { User, Smartphone, Palette, LifeBuoy, Ticket, Bug } from "lucide-react-native";
+import { User, Smartphone, Palette, LifeBuoy, Ticket, Bug, MessageSquare } from "lucide-react-native";
 
 import { AppNavigatorRoutesProps } from "@routes/auth.routes";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -19,6 +19,7 @@ import { Button } from "@components/Button";
 import { MenuItem, Grupo } from "@components/MenuDoPerfil";
 import { VersaoDoApp } from "@components/VersaoDoApp";
 import { ReportarProblema } from "@components/ReportarProblema";
+import { EnviarFeedback } from "@components/EnviarFeedback";
 import { sentryLigado } from "@utils/sentry";
 import { LinksLegais } from "@components/LinksLegais";
 import { useAuthStore } from "@stores/authStore";
@@ -33,6 +34,7 @@ export function Settings() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const logout = useAuthStore((s) => s.logout);
   const [reportando, setReportando] = useState(false);
+  const [feedback, setFeedback] = useState(false);
   const { cores } = useTema();
 
   // Mesma regra da Home, numa funcao so — eram duas copias que ja divergiam
@@ -188,6 +190,13 @@ export function Settings() {
               icon={<LifeBuoy size={20} color="#163300" />}
               label="Suporte"
               onPress={() => Linking.openURL(SUPORTE_URL)}
+            />
+            {/* feedback-no-app (DEC-167): sem sair do app, so de quem tem conta. */}
+            <MenuItem
+              icon={<MessageSquare size={20} color={cores.textPrimary} />}
+              label="Enviar feedback"
+              onPress={() => setFeedback(true)}
+              testID="enviar-feedback"
               last
             />
           </Grupo>
@@ -250,6 +259,7 @@ export function Settings() {
         </VStack>
       </VStack>
       <ReportarProblema visivel={reportando} onFechar={() => setReportando(false)} />
+      <EnviarFeedback visivel={feedback} onFechar={() => setFeedback(false)} />
     </ScrollView>
   );
 }
