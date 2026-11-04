@@ -101,8 +101,10 @@ describe('o assetlinks.json (SHA-256 por variável, nunca fixo)', () => {
     expect(() => gerador.digitais('AB:CD')).toThrow('ASSETLINKS_SHA256 invalido');
   });
 
-  it('o build web gera o arquivo e o serve como JSON', () => {
-    expect(pacote).toContain('node tools/gerar-assetlinks.js dist');
+  // O gerador NAO entra nos scripts do package.json: mexer neles muda o fingerprint e o guarda
+  // bloqueia o OTA (guardaOta, 03/11). Ele roda como passo a parte no build web de producao.
+  it('o build web serve o arquivo como JSON, sem mexer nos scripts do package.json', () => {
+    expect(pacote).not.toContain('gerar-assetlinks');
     expect(headers).toMatch(/\/\.well-known\/assetlinks\.json\s+Content-Type: application\/json/);
   });
 

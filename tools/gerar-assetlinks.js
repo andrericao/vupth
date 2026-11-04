@@ -8,6 +8,9 @@
 // variavel, nao gera nada: o preview e o dev seguem sem o arquivo.
 //
 // Uso: node tools/gerar-assetlinks.js [pasta-de-saida]   (padrao: dist)
+// No build web de producao: npm run build:web && node tools/gerar-assetlinks.js dist
+// (fora dos scripts do package.json de proposito: eles entram no fingerprint, e
+// muda-los bloqueia o OTA ate um build nativo novo).
 const fs = require("fs");
 const path = require("path");
 
