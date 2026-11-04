@@ -114,7 +114,7 @@ describe('DadosCadastrais — desativar e excluir conta', () => {
     return tela;
   }
 
-  it('Excluir: apaga com a senha, sai e volta ao Início', async () => {
+  it('Excluir: apaga com a senha, sai e vai ao Entrar (DEC-183)', async () => {
     mockDelete.mockResolvedValue({});
     const { getByText } = await abrir('delete-account');
     expect(getByText('modo:excluir')).toBeTruthy();
@@ -123,10 +123,10 @@ describe('DadosCadastrais — desativar e excluir conta', () => {
     });
     await waitFor(() => expect(mockLogout).toHaveBeenCalled());
     expect(mockDelete).toHaveBeenCalledWith('tk', 'senha');
-    expect(mockParentNavigate).toHaveBeenCalledWith('homeTab', { screen: 'home', pop: true });
+    expect(mockParentNavigate).toHaveBeenCalledWith('homeTab', { screen: 'login', params: {}, pop: true });
   });
 
-  it('Desativar: desativa com a senha, sai e volta ao Início', async () => {
+  it('Desativar: desativa com a senha, sai e vai ao Entrar (DEC-183)', async () => {
     mockDeactivate.mockResolvedValue({});
     const { getByText } = await abrir('deactivate-account');
     expect(getByText('modo:desativar')).toBeTruthy();
@@ -136,7 +136,7 @@ describe('DadosCadastrais — desativar e excluir conta', () => {
     await waitFor(() => expect(mockLogout).toHaveBeenCalled());
     expect(mockDeactivate).toHaveBeenCalledWith('tk', 'senha');
     expect(mockDelete).not.toHaveBeenCalled();
-    expect(mockParentNavigate).toHaveBeenCalledWith('homeTab', { screen: 'home', pop: true });
+    expect(mockParentNavigate).toHaveBeenCalledWith('homeTab', { screen: 'login', params: {}, pop: true });
   });
 
   it('senha errada: erro de campo, sem sair', async () => {

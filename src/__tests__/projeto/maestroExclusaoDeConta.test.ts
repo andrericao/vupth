@@ -27,6 +27,16 @@ describe("Maestro 28 — Exclusão de conta", () => {
     }
   });
 
+  it("depois de excluir, cai no Entrar com o Criar conta (DEC-183)", () => {
+    const confirmou = etapa.indexOf('id: "delete-account-confirm"');
+    const entrar = etapa.indexOf('id: "primary-login"', confirmou);
+    expect(entrar).toBeGreaterThan(confirmou);
+    expect(etapa.indexOf('id: "go-signup"', entrar)).toBeGreaterThan(entrar);
+    const login = ler("src/screens/Login.tsx");
+    expect(login).toContain('testID="primary-login"');
+    expect(login).toContain('testID="go-signup"');
+  });
+
   it("depois de excluir, confere o app sem sessão e o login recusado pela API", () => {
     const confirmou = etapa.indexOf('id: "delete-account-confirm"');
     expect(etapa.indexOf("Criar conta grátis", confirmou)).toBeGreaterThan(confirmou);

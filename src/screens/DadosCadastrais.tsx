@@ -55,8 +55,10 @@ export function DadosCadastrais() {
       else await profileService.deactivateAccount(accessToken, senha);
       setEncerrando(null);
       await logout();
-      // Esta tela vive na aba Config.; volta para a aba Home (pai = tabs).
-      navigation.getParent()?.navigate("homeTab", { screen: "home", pop: true });
+      // Sessao acabou: vai sempre ao Entrar, que oferece o Criar conta (DEC-183,
+      // destino-ao-excluir-conta; igual ao Partner). Vale no app e na web, que
+      // usam esta mesma tela. Esta tela vive na aba Config. (pai = tabs).
+      navigation.getParent()?.navigate("homeTab", { screen: "login", params: {}, pop: true });
     } catch (error: any) {
       const code = error.response?.data?.code;
       if (code === "CURRENT_PASSWORD_INVALID") {
