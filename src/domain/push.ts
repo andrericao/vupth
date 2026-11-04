@@ -274,6 +274,19 @@ export function agendaAbertaDoPush(data: unknown): { establishmentId: string; pr
     : null;
 }
 
+/**
+ * OPEN_WATCH_OPENED e OPEN_WATCH_QUEUE_MOVING (avisar-quando-abrir, BAK-8, Backend 5cca738): o aviso pedido
+ * para hoje disparou ("<Profissional> começou a atender" ou "A fila começou a andar"). O toque leva a loja,
+ * no profissional. As chaves vem em snake_case neste push.
+ */
+export function avisoDeAberturaDoPush(data: unknown): { establishmentId: string; professionalId: string } | null {
+  const d = (data ?? {}) as { type?: unknown; establishment_id?: unknown; professional_id?: unknown };
+  if (d.type !== 'OPEN_WATCH_OPENED' && d.type !== 'OPEN_WATCH_QUEUE_MOVING') return null;
+  return typeof d.establishment_id === 'string' && d.establishment_id && typeof d.professional_id === 'string' && d.professional_id
+    ? { establishmentId: d.establishment_id, professionalId: d.professional_id }
+    : null;
+}
+
 /** Canal Android HIGH novo, id "alertas" combinado com o Backend e o Partner (o "default" antigo nao sobe de importancia). */
 export const CANAL_ALERTAS = 'alertas';
 

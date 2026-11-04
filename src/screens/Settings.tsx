@@ -20,6 +20,7 @@ import { MenuItem, Grupo } from "@components/MenuDoPerfil";
 import { VersaoDoApp } from "@components/VersaoDoApp";
 import { ReportarProblema } from "@components/ReportarProblema";
 import { EnviarFeedback } from "@components/EnviarFeedback";
+import { AvisosDeHoje } from "@components/AvisosDeHoje";
 import { sentryLigado } from "@utils/sentry";
 import { LinksLegais } from "@components/LinksLegais";
 import { useAuthStore } from "@stores/authStore";
@@ -149,6 +150,9 @@ export function Settings() {
             </VStack>
           </Box>
         )}
+
+        {/* avisar-quando-abrir-tela (CLI-26, DEC-160): o que esta pedido para hoje, com o Cancelar. */}
+        {isAuthenticated && <AvisosDeHoje />}
 
         {/* Aparencia (Andre, 26/09): tema e tamanho da fonte num submenu. So de
             quem tem conta (Andre, 02/10): o visitante ve o convite — Entrar e

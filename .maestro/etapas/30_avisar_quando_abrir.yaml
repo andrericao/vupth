@@ -1,0 +1,42 @@
+# avisar-quando-abrir-tela, fatia 1 (CLI-26, DEC-160, BAK-8): na loja fechada (profissional em Fora pela API),
+# o cliente logado pede "Avisar quando abrir", ve o pedido, acha na lista "Avisos de hoje" do Perfil e cancela.
+# O push "<Profissional> começou a atender" fica com o Newman do Backend (pasta 29): aqui, so a tela.
+# A loja de teste ja esta aberta na tela (abrir_a_loja, na avulsa).
+appId: ${APP_ID}
+---
+- assertVisible:
+    text: "Fechada agora"
+    label: "30.01 · a loja está fechada"
+- scrollUntilVisible:
+    element:
+      id: "aviso-abrir-pedir"
+    label: "30.02 · rola até o Avisar quando abrir"
+- tapOn:
+    id: "aviso-abrir-pedir"
+    label: "30.03 · toca em Avisar quando abrir"
+- extendedWaitUntil:
+    visible:
+      id: "aviso-abrir-pedido"
+    timeout: ${15000 * LENTO}
+    label: "30.04 · vê o pedido (só hoje)"
+- assertVisible:
+    id: "aviso-abrir-cancelar"
+    label: "30.05 · o pedido tem o Cancelar"
+- tapOn:
+    text: "Perfil"
+    label: "30.06 · toca em Perfil"
+- scrollUntilVisible:
+    element:
+      id: "avisos-de-hoje"
+    label: "30.07 · vê Avisos de hoje no Perfil"
+- assertVisible:
+    text: "Avisar quando abrir · só hoje"
+    label: "30.08 · o aviso está na lista"
+- tapOn:
+    id: "aviso-de-hoje-cancelar-.*"
+    label: "30.09 · cancela pelo Perfil"
+- extendedWaitUntil:
+    notVisible:
+      id: "avisos-de-hoje"
+    timeout: ${15000 * LENTO}
+    label: "30.10 · a lista some (nada pedido)"

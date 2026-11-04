@@ -9,6 +9,7 @@ import {
   acquireExpoPushToken,
   atendimentoParaAvaliar,
   agendaAbertaDoPush,
+  avisoDeAberturaDoPush,
   pagamentoDoPush,
   recebiDoPush,
   avisoDoPush,
@@ -303,6 +304,13 @@ export function usePushRegistration() {
       if (agendaAberta) {
         Notifications.dismissNotificationAsync(id).catch(() => {});
         abrirLoja(agendaAberta.establishmentId, agendaAberta.professionalId);
+        return;
+      }
+      // OPEN_WATCH_* (avisar-quando-abrir, DEC-160): o aviso pedido disparou; o toque leva a loja, no profissional.
+      const avisoDeAbertura = avisoDeAberturaDoPush(data);
+      if (avisoDeAbertura) {
+        Notifications.dismissNotificationAsync(id).catch(() => {});
+        abrirLoja(avisoDeAbertura.establishmentId, avisoDeAbertura.professionalId);
         return;
       }
       // SUDDEN_DROP (categoria OK_MAIS_TEMPO): o toque no corpo abre o popup do horário (DEC-128).

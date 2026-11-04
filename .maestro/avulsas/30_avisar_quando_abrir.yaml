@@ -1,0 +1,31 @@
+# Etapa avulsa 30 (avisar-quando-abrir-tela, CLI-26, DEC-160): roda num maestro test proprio.
+# A loja fecha com o profissional em Fora pela API (profissional_fora.js).
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "30"
+      LOJA: "1"
+      CONTA: "1"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+      PROF_FORA: "1"
+    label: "30.P0 · prepara a etapa"
+- runFlow:
+    file: ../apoio/abrir_a_loja.yaml
+    env:
+      TAG: ${output.TAG}
+      LOJA: ${output.LOJA}
+      PROF: ${output.PROF}
+      PROF_ID: ${output.PROF_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+    label: "30.L1 · abre a loja de teste"
+- runFlow:
+    file: ../etapas/30_avisar_quando_abrir.yaml
+    label: "30.E1 · roda 30_avisar_quando_abrir"

@@ -4,6 +4,7 @@ import {
   pagamentoDoPush,
   recebiDoPush,
   agendaAbertaDoPush,
+  avisoDeAberturaDoPush,
   avisoDoPush,
   tocouNoOk,
   ACAO_OK,
@@ -280,6 +281,22 @@ describe('agendaAbertaDoPush', () => {
     expect(agendaAbertaDoPush({ type: 'AGENDA_OPENED', establishmentId: 'e1' })).toBeNull();
     expect(agendaAbertaDoPush({ type: 'CUT_ACCEPTED', establishmentId: 'e1', professionalId: 'p1' })).toBeNull();
     expect(agendaAbertaDoPush(null)).toBeNull();
+  });
+});
+
+// avisar-quando-abrir (BAK-8, DEC-160): o aviso pedido disparou; as chaves vêm em snake_case.
+describe('avisoDeAberturaDoPush', () => {
+  it('OPEN_WATCH_OPENED e OPEN_WATCH_QUEUE_MOVING levam à loja, no profissional', () => {
+    const dados = { establishment_id: 'e1', professional_id: 'p1' };
+    expect(avisoDeAberturaDoPush({ type: 'OPEN_WATCH_OPENED', ...dados })).toEqual({ establishmentId: 'e1', professionalId: 'p1' });
+    expect(avisoDeAberturaDoPush({ type: 'OPEN_WATCH_QUEUE_MOVING', ...dados })).toEqual({ establishmentId: 'e1', professionalId: 'p1' });
+  });
+
+  it('sem a loja ou o profissional, ou de outro tipo, não é dele', () => {
+    expect(avisoDeAberturaDoPush({ type: 'OPEN_WATCH_OPENED', establishment_id: 'e1' })).toBeNull();
+    expect(avisoDeAberturaDoPush({ type: 'OPEN_WATCH_OPENED', establishmentId: 'e1', professionalId: 'p1' })).toBeNull();
+    expect(avisoDeAberturaDoPush({ type: 'AGENDA_OPENED', establishment_id: 'e1', professional_id: 'p1' })).toBeNull();
+    expect(avisoDeAberturaDoPush(undefined)).toBeNull();
   });
 });
 
