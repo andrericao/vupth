@@ -21,3 +21,23 @@ describe("Maestro 22 — o modal de pagar", () => {
     }
   });
 });
+
+// avaliar-agora-nao-encostado-na-borda (CLI-21, DEC-184): o print do modal de avaliar vem do Maestro.
+describe("Maestro 22 — print do Agora não no modal de avaliar", () => {
+  it("depois de abrir o Avaliar, espera o Agora não e tira o print para o André", () => {
+    const abriu = yaml.indexOf('label: "22.0A · toca em Avaliar atendimento"');
+    const agora = yaml.indexOf('visible: "Agora não"', abriu);
+    const print = yaml.indexOf("../apoio/para_o_andre.yaml", agora);
+    expect(abriu).toBeGreaterThan(-1);
+    expect(agora).toBeGreaterThan(abriu);
+    expect(print).toBeGreaterThan(agora);
+    expect(yaml.indexOf('NOME: "22_avaliar_agora_nao"', print)).toBeGreaterThan(print);
+    // e o print sai antes de dar as estrelas, com o modal ainda inteiro
+    expect(yaml.indexOf('id: "star-5"', abriu)).toBeGreaterThan(print);
+  });
+
+  it("o Agora não existe no modal de avaliar", () => {
+    const modal = fs.readFileSync(path.resolve(__dirname, "../../../src/components/RatingModal.tsx"), "utf8");
+    expect(modal).toContain('title="Agora não"');
+  });
+});
