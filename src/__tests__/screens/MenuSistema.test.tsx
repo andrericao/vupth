@@ -15,6 +15,8 @@ let mockNoNavegador = false;
 jest.mock('@utils/ehNavegador', () => ({ ehNavegador: () => mockNoNavegador }));
 
 jest.mock('expo-secure-store');
+// avisar-quando-abrir (CLI-26): o componente usa React Query e tem teste proprio (AvisarQuandoAbrir.test.tsx).
+jest.mock('@components/AvisosDeHoje', () => ({ AvisosDeHoje: () => null }));
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('expo-updates', () => ({
   checkForUpdateAsync: jest.fn(),

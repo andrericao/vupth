@@ -1,7 +1,9 @@
 import { Alert } from 'react-native';
+import type { ReactElement } from 'react';
 import { fireEvent, waitFor } from '@testing-library/react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { renderWithProviders } from '../utils/renderWithProviders';
+import { renderWithProviders as renderBase } from '../utils/renderWithProviders';
 import { AvisarQuandoAbrir } from '@components/AvisarQuandoAbrir';
 import { AvisosDeHoje } from '@components/AvisosDeHoje';
 import { openWatchService } from '@services/openWatchService';
@@ -17,6 +19,17 @@ jest.mock('@services/establishmentService', () => ({
   establishmentService: { getById: jest.fn() },
 }));
 jest.setTimeout(30000);
+
+// Os componentes do aviso usam React Query: um cliente novo por teste, sem retentativa e sem cache que segure timer.
+const clientes: QueryClient[] = [];
+function renderWithProviders(ui: ReactElement) {
+  const cliente = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 }, mutations: { retry: false } } });
+  clientes.push(cliente);
+  return renderBase(<QueryClientProvider client={cliente}>{ui}</QueryClientProvider>);
+}
+afterEach(() => {
+  clientes.splice(0).forEach((c) => c.clear());
+});
 
 const servico = openWatchService as jest.Mocked<typeof openWatchService>;
 
