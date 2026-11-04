@@ -30,7 +30,8 @@ describe('App.tsx: a abertura e continua', () => {
   it('a espera da fonte mostra o mesmo V pulsando, sem Loading/spinner', () => {
     // "pronto" so abre com fonte E (backend OU a lista salva, DEC-148): ate la a unica tela e o V.
     expect(app).toMatch(/const pronto = fontGateOpen && \(backendReady \|\| listaSalva\)/);
-    expect(app).toMatch(/<PreparingServer pronto=\{pronto\}/);
+    // checar-ambiente-da-api (F20): com a API de outro ambiente o V tambem sai, para a tela do aviso aparecer.
+    expect(app).toMatch(/<PreparingServer pronto=\{pronto \|\| \(fontGateOpen && ambienteErrado\)\}/);
     expect(app).not.toMatch(/<Loading/);
   });
 
@@ -38,7 +39,7 @@ describe('App.tsx: a abertura e continua', () => {
   // uma vez cortava a saida do V no meio. A Home monta por baixo e a abertura
   // so sai da arvore quando termina de sair.
   it('a Home monta por baixo e a abertura so sai da arvore quando o V terminou de sair', () => {
-    expect(app).toMatch(/\{pronto \? \(\s*<EntradaDaHome>\s*<Routes \/>\s*<\/EntradaDaHome>/);
+    expect(app).toMatch(/\{ambienteErrado \? \(\s*<AmbienteErrado \/>\s*\) : pronto \? \(\s*<EntradaDaHome>\s*<Routes \/>\s*<\/EntradaDaHome>/);
     expect(app).toMatch(/aberturaFechada \? null : <PreparingServer/);
     expect(app).toMatch(/onSaiu=\{\(\) => setAberturaFechada\(true\)\}/);
   });
