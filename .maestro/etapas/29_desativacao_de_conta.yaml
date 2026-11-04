@@ -1,0 +1,63 @@
+# maestro-excluir-conta (DEC-184): o cliente DESATIVA a conta pelo app; a sessao acaba e o app vai ao
+# Entrar, com o Criar conta (DEC-183), como na exclusao (etapa 28). Conta propria da etapa (preparo
+# CONTA=1): desativar nao afeta as outras. Na API a conta segue existindo, marcada como desativada.
+# env: EMAIL_CLIENTE
+appId: ${APP_ID}
+---
+- tapOn:
+    text: "Perfil"
+    label: "29.01 · toca em Perfil"
+- assertVisible:
+    text: "CONTA"
+    label: "29.02 · logado: vê CONTA"
+- tapOn:
+    text: "Dados cadastrais"
+    label: "29.03 · toca em Dados cadastrais"
+- scrollUntilVisible:
+    element:
+      id: "deactivate-account"
+    label: "29.04 · rola até Desativar conta"
+- tapOn:
+    id: "deactivate-account"
+    label: "29.05 · toca em Desativar conta"
+- tapOn:
+    id: "delete-account-password"
+    label: "29.06 · toca na senha"
+- inputText:
+    text: ${SENHA}
+    label: "29.07 · digita a senha"
+- hideKeyboard:
+    label: "29.08 · fecha o teclado"
+- tapOn:
+    id: "delete-account-confirm"
+    label: "29.09 · confirma a desativação"
+# Desativada, a sessao acaba: o app vai ao Entrar, com o Criar conta (DEC-183).
+- runFlow:
+    file: ../apoio/fechar_aviso.yaml
+    label: "29.10 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible:
+      id: "primary-login"
+    timeout: ${15000 * LENTO}
+    label: "29.11 · cai no Entrar (DEC-183)"
+- assertVisible:
+    id: "go-signup"
+    label: "29.12 · vê o Criar conta"
+- tapOn:
+    text: "Perfil"
+    label: "29.13 · toca em Perfil"
+- extendedWaitUntil:
+    visible: "Criar conta grátis"
+    timeout: ${15000 * LENTO}
+    label: "29.14 · vê Criar conta grátis (sem sessão)"
+- assertNotVisible:
+    text: "Sair da conta"
+    label: "29.15 · não vê Sair da conta"
+# E, no servidor, a conta ficou desativada (o login ainda entra, com deactivated=true).
+- runScript:
+    file: ../scripts/login_desativada.js
+    env:
+      API: ${API}
+      SENHA: ${SENHA}
+      EMAIL_CLIENTE: ${EMAIL_CLIENTE}
+    label: "29.16 · a API diz que a conta está desativada"
