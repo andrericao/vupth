@@ -15,6 +15,8 @@ let mockUser: Record<string, unknown> | null = { first_name: 'Alexia', last_name
 let mockToken: string | null = 'tk';
 
 jest.mock('expo-secure-store');
+// avisar-quando-abrir (CLI-26): o componente usa React Query e tem teste proprio (AvisarQuandoAbrir.test.tsx).
+jest.mock('@components/AvisosDeHoje', () => ({ AvisosDeHoje: () => null }));
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('expo-updates', () => ({ runtimeVersion: '1.0.0', channel: 'preview', updateId: null, createdAt: null }));
 jest.mock('@react-navigation/native', () => ({
