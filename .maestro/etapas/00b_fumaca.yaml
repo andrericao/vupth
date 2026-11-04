@@ -7,10 +7,8 @@
 # env: EMAIL_PROF, NOME_CLIENTE
 appId: ${APP_ID}
 ---
-# faixa-de-ambiente (F20): o build de teste (canal preview) mostra a faixa; a fumaca nunca roda na producao.
-- assertVisible:
-    id: "faixa-de-ambiente"
-    label: "00b.00 · vê a faixa AMBIENTE DE TESTE"
+# tirar-faixa-de-ambiente (André, 03/11): a faixa AMBIENTE DE TESTE saiu do topo; o aviso de teste fica nas
+# frases da abertura e a trava (producao nunca aponta para o staging) segue no teste do apiEnv.
 - tapOn:
     id: "primary-queue"
     label: "00b.01 · marcar: entra na fila"

@@ -70,7 +70,6 @@ import { useAvisoDeAtraso } from "@hooks/useAvisoDeAtraso";
 import { devePersistir, persisterDaAbertura, VALIDADE_MS } from "@services/queryPersist";
 import { confirmarAbertura, CONFIRMA_POR_TEMPO_MS, iniciarAbertura } from "./src/boot/aberturas";
 import { AvisoModoSeguro } from "@components/AvisoModoSeguro";
-import { FaixaDeAmbiente } from "@components/FaixaDeAmbiente";
 import { registrarMotivo } from "@utils/sentry";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 
@@ -314,12 +313,6 @@ export default function App() {
         {pronto ? (
           <ErrorBoundary>
             <FaixaAvaliar />
-          </ErrorBoundary>
-        ) : null}
-        {/* faixa-de-ambiente (F20): so nos builds de teste; usa a area segura, como a FaixaAvaliar. */}
-        {pronto ? (
-          <ErrorBoundary>
-            <FaixaDeAmbiente />
           </ErrorBoundary>
         ) : null}
         </SafeAreaProvider>

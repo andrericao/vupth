@@ -58,9 +58,10 @@ describe("Maestro 00b — teste de fumaça", () => {
     expect(etapa.indexOf("00b.09b")).toBeLessThan(etapa.indexOf("00b.10"));
   });
 
-  it("confere a faixa de ambiente do build de teste (faixa-de-ambiente, F20)", () => {
-    expect(etapa).toContain('id: "faixa-de-ambiente"');
-    expect(ler("src/components/FaixaDeAmbiente.tsx")).toContain('testID="faixa-de-ambiente"');
+  // tirar-faixa-de-ambiente (André, 03/11): a faixa saiu do topo; a fumaça não a procura mais.
+  it("não confere a faixa de ambiente, que saiu do topo", () => {
+    expect(etapa).not.toContain('id: "faixa-de-ambiente"');
+    expect(ler("App.tsx")).not.toContain("FaixaDeAmbiente");
   });
 
   it("diz que não prova o dinheiro nem o Pix do gateway", () => {
