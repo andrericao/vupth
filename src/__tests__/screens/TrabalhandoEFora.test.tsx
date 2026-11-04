@@ -8,6 +8,8 @@ import { useProfessionalsWithQueue } from '@hooks/useEstablishments';
 // uma fila que ninguém vai atender (defeito reportado pelo Partner em 07/09).
 
 jest.mock('expo-secure-store');
+// avisar-quando-abrir (CLI-26): o componente usa React Query e tem teste proprio (AvisarQuandoAbrir.test.tsx).
+jest.mock('@components/AvisarQuandoAbrir', () => ({ AvisarQuandoAbrir: () => null }));
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),

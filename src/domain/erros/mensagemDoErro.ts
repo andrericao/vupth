@@ -27,6 +27,10 @@ export const MENSAGEM_POR_CODIGO: Record<string, string> = {
   USER_NOT_FOUND: 'Não encontramos esta conta.',
   CLIENT_NOT_FOUND: 'Não encontramos o seu cadastro.',
   ESTABLISHMENT_NOT_FOUND: 'Não encontramos esta loja.',
+  // avisar-quando-abrir (BAK-8, DEC-160).
+  OPEN_WATCH_LIMIT: 'Você chegou ao limite de avisos de hoje.',
+  OPEN_WATCH_PROFESSIONAL_INVALID: 'Este profissional não é desta loja.',
+  OPEN_WATCH_NOT_FOUND: 'Este aviso já não existe.',
   ESTABLISHMENT_UNAVAILABLE: 'Esta loja não está disponível agora.',
   ESTABLISHMENT_NOT_OPEN: 'A loja está fechada agora.',
   ESTABLISHMENT_NOBODY_WORKING: 'Nenhum profissional está atendendo agora.',

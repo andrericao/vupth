@@ -30,20 +30,29 @@ appId: ${APP_ID}
 - tapOn:
     id: "delete-account-confirm"
     label: "28.09 · confirma a exclusão"
-# Excluida, a sessao acaba: o app volta ao Inicio, e o Perfil volta a oferecer o cadastro.
+# Excluida, a sessao acaba: o app vai ao Entrar, com o Criar conta (DEC-183),
+# e o Perfil volta a oferecer o cadastro.
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "28.10 · roda fechar_aviso"
+- extendedWaitUntil:
+    visible:
+      id: "primary-login"
+    timeout: ${15000 * LENTO}
+    label: "28.11 · cai no Entrar (DEC-183)"
+- assertVisible:
+    id: "go-signup"
+    label: "28.12 · vê o Criar conta"
 - tapOn:
     text: "Perfil"
-    label: "28.11 · toca em Perfil"
+    label: "28.13 · toca em Perfil"
 - extendedWaitUntil:
     visible: "Criar conta grátis"
     timeout: ${15000 * LENTO}
-    label: "28.12 · vê Criar conta grátis (sem sessão)"
+    label: "28.14 · vê Criar conta grátis (sem sessão)"
 - assertNotVisible:
     text: "Sair da conta"
-    label: "28.13 · não vê Sair da conta"
+    label: "28.15 · não vê Sair da conta"
 # E a conta nao existe mais no servidor.
 - runScript:
     file: ../scripts/login_recusado.js
@@ -51,4 +60,4 @@ appId: ${APP_ID}
       API: ${API}
       SENHA: ${SENHA}
       EMAIL_CLIENTE: ${EMAIL_CLIENTE}
-    label: "28.14 · o login com a conta excluída é recusado"
+    label: "28.16 · o login com a conta excluída é recusado"

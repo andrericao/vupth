@@ -10,6 +10,9 @@ import { contraste } from '@domain/contrast';
 import { AuthRoutes } from '../../routes/auth.routes';
 
 jest.mock('expo-secure-store');
+// avisar-quando-abrir (CLI-26): o componente usa React Query e tem teste proprio (AvisarQuandoAbrir.test.tsx).
+jest.mock('@components/AvisarQuandoAbrir', () => ({ AvisarQuandoAbrir: () => null }));
+jest.mock('@components/AvisosDeHoje', () => ({ AvisosDeHoje: () => null }));
 jest.mock('lucide-react-native', () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const React = require('react');

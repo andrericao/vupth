@@ -29,6 +29,7 @@ import { agruparPorExpediente, emIntervalo, estaNoExpediente, filaFechada } from
 import { resolveRating } from "@domain/establishment/rating";
 import { NotaDaLoja } from "@components/NotaDaLoja";
 import { BadgeAgendar } from "@components/BadgeAgendar";
+import { AvisarQuandoAbrir } from "@components/AvisarQuandoAbrir";
 import { formatSpecialty } from "@domain/establishment/serviceType";
 import { ehSoAgenda, type Intencao } from "@domain/professional/modo";
 import { isEffectivelyOpen } from "@domain/establishment/types";
@@ -622,6 +623,12 @@ export function EstablishmentDetail() {
               </HStack>
             </Box>
           </TouchableOpacity>
+        )}
+        {/* avisar-quando-abrir-tela (CLI-26, DEC-160): logado, o aviso de hoje "começou a atender". */}
+        {!isOpen && (
+          <Box mt="$3">
+            <AvisarQuandoAbrir establishmentId={establishmentId} />
+          </Box>
         )}
       </VStack>
       <FotoAmpliada uri={fotoAmpliada} onClose={() => setFotoAmpliada(null)} />

@@ -62,6 +62,8 @@ import { useFeedbackStore } from "@stores/feedbackStore";
 import { useLembreteDePendencia } from "@hooks/useLembreteDePendencia";
 import { setupFocusManager, setupOnlineManager } from "@hooks/useNetwork";
 import { waitForBackend } from "@services/healthService";
+import { conferirAmbienteDaApi } from "@services/ambienteDaApi";
+import { AmbienteErrado } from "@components/AmbienteErrado";
 import { exigirServidor, marcarServidorPronto } from "@services/prontidaoDoServidor";
 import { aplicarOtaNaAbertura } from "@services/otaNaAbertura";
 
@@ -70,7 +72,7 @@ import { useAvisoDeAtraso } from "@hooks/useAvisoDeAtraso";
 import { devePersistir, persisterDaAbertura, VALIDADE_MS } from "@services/queryPersist";
 import { confirmarAbertura, CONFIRMA_POR_TEMPO_MS, iniciarAbertura } from "./src/boot/aberturas";
 import { AvisoModoSeguro } from "@components/AvisoModoSeguro";
-import { registrarMotivo } from "@utils/sentry";
+import { capturarErro, registrarMotivo } from "@utils/sentry";
 import { ErrorBoundary } from "@components/ErrorBoundary";
 
 import { instalarAlertWeb } from "./web-shims/alert";
@@ -147,6 +149,8 @@ export default function App() {
   const estiloDaBarra = useBarraDeStatus();
   const activeQueue = useQueueStore((s) => s.activeQueue);
   const [backendReady, setBackendReady] = useState(false);
+  // checar-ambiente-da-api (F20, DEC-184): a API disse ser de outro ambiente; o app para na tela propria.
+  const [ambienteErrado, setAmbienteErrado] = useState(false);
   // A abertura continua montada por cima da Home até o V terminar de sair: a
   // troca seca de <PreparingServer /> por <Routes /> cortava a saída no meio.
   const [aberturaFechada, setAberturaFechada] = useState(false);
@@ -186,12 +190,23 @@ export default function App() {
     // Portao de readiness (cold start do Render): acorda o backend ANTES de liberar
     // login/cadastro/listagem. A 1a cutucada acorda a instancia; segue mesmo se
     // estourar o teto (chamadas seguintes ja pegam a instancia quente). CLAUDE.md 18c.
+    // Depois do UP, a API diz em que ambiente roda (GET /actuator/info): build de producao com API de staging
+    // (ou o inverso) nao segue (checar-ambiente-da-api, F20). As gravacoes so saem depois desta conferencia.
     let active = true;
-    waitForBackend().finally(() => {
-      backendProntoRef.current = true;
-      marcarServidorPronto();
-      if (active) setBackendReady(true);
-    });
+    waitForBackend()
+      .then(() => conferirAmbienteDaApi())
+      .catch(() => "ok" as const)
+      .then((ambiente) => {
+        if (ambiente === "errado") {
+          // As gravacoes que esperavam o servidor ficam presas: nao saem para o banco errado.
+          capturarErro(new Error("checar-ambiente-da-api: a API respondeu um ambiente diferente do deste build"));
+          if (active) setAmbienteErrado(true);
+          return;
+        }
+        backendProntoRef.current = true;
+        marcarServidorPronto();
+        if (active) setBackendReady(true);
+      });
     return () => {
       active = false;
     };
@@ -289,12 +304,14 @@ export default function App() {
         <ErrorBoundary>
           {/* abertura-sem-retangulo-e-sem-tela-verde (17/10): o V pulsando ja na espera da fonte —
               sem o spinner/tela vazia entre o splash nativo e a abertura. A tela do V nao usa fonte. */}
-          {pronto ? (
+          {ambienteErrado ? (
+            <AmbienteErrado />
+          ) : pronto ? (
             <EntradaDaHome>
               <Routes />
             </EntradaDaHome>
           ) : null}
-          {aberturaFechada ? null : <PreparingServer pronto={pronto} onSaiu={() => setAberturaFechada(true)} />}
+          {aberturaFechada ? null : <PreparingServer pronto={pronto || (fontGateOpen && ambienteErrado)} onSaiu={() => setAberturaFechada(true)} />}
         </ErrorBoundary>
         {/* Um so na arvore, FORA do portao de fonte: um aviso disparado antes
             de a fonte carregar precisa aparecer do mesmo jeito. */}

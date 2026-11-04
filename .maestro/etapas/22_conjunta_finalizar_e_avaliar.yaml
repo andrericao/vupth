@@ -111,6 +111,17 @@ appId: ${APP_ID}
 - tapOn:
     text: "Avaliar atendimento"
     label: "22.0A · toca em Avaliar atendimento"
+# avaliar-agora-nao-encostado-na-borda (CLI-21, DEC-184): o print vem do Maestro, nao do Andre.
+- extendedWaitUntil:
+    visible: "Agora não"
+    timeout: ${15000 * LENTO}
+    label: "22.0Aa · o modal de avaliar abriu, com o Agora não"
+- runFlow:
+    file: ../apoio/para_o_andre.yaml
+    env:
+      NOME: "22_avaliar_agora_nao"
+      O_QUE: "Avaliar o atendimento: o botão Agora não tem folga da borda de baixo do card (não encosta)."
+    label: "22.0Ab · print para o André"
 - tapOn:
     id: "star-5"
     label: "22.0B · dá 5 estrelas"

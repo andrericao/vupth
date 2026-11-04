@@ -5,6 +5,7 @@ import Constants from 'expo-constants';
 import App, { queryClient } from '../../../App';
 import { waitForBackend } from '@services/healthService';
 import { useProntidaoStore, marcarServidorPronto } from '@services/prontidaoDoServidor';
+import { conferirAmbienteDaApi } from '@services/ambienteDaApi';
 
 // Regressão real (2026-08-01): `useOutOfQueueSwap` (React Query) era chamado no
 // corpo do App, ACIMA do QueryClientProvider — o `useQuery` estourava "No
@@ -29,6 +30,10 @@ jest.mock('expo-location', () => ({
 }));
 jest.mock('@services/healthService', () => ({
   waitForBackend: jest.fn(),
+}));
+// checar-ambiente-da-api (F20): a conferência do /actuator/info; por padrão a API bate com o build.
+jest.mock('@services/ambienteDaApi', () => ({
+  conferirAmbienteDaApi: jest.fn().mockResolvedValue('ok'),
 }));
 // expo-notifications também é nativo e, só de ser importado, registra listeners
 // de push e avisa que Expo Go não suporta mais push (poluía o log e podia
@@ -93,6 +98,7 @@ function cacheComLista() {
 }
 
 const espera = waitForBackend as jest.Mock;
+const ambiente = conferirAmbienteDaApi as jest.Mock;
 
 describe('App — abrir com a lista salva', () => {
   beforeEach(async () => {
@@ -127,6 +133,19 @@ describe('App — abrir com a lista salva', () => {
 
     acordou();
     expect(await findByTestId('rotas', {}, { timeout: 30000 })).toBeTruthy();
+    unmount();
+  });
+
+  it('a API diz ser de outro ambiente (checar-ambiente-da-api): o app para na tela própria e as gravações ficam presas', async () => {
+    await AsyncStorage.setItem('vupth_query_cache', cacheComLista());
+    espera.mockResolvedValue(true);
+    ambiente.mockResolvedValueOnce('errado');
+
+    const { findByTestId, queryByTestId, unmount } = render(<App />);
+    expect(await findByTestId('ambiente-errado', {}, { timeout: 30000 })).toBeTruthy();
+    expect(queryByTestId('rotas')).toBeNull();
+    // Abriu pela lista salva (gravações esperando) e a conferência recusou: nada é liberado ao banco errado.
+    expect(useProntidaoStore.getState().pronto).toBe(false);
     unmount();
   });
 });
