@@ -12,6 +12,7 @@ import {
   sentryLigado,
   capturarErro,
   registrarMotivo,
+  tagsDoUpdate,
 } from "@utils/sentry";
 
 // sentry (Andre, 09/10): inerte sem DSN e nos testes; com DSN, liga com o
@@ -206,6 +207,31 @@ describe("tags, erro da raiz e motivo", () => {
     expect(s.setTag).toHaveBeenCalledWith("runtimeVersion", "1.1.0");
     expect(s.setTag).toHaveBeenCalledWith("commit", "[e-mail]");
     expect(s.setTag).not.toHaveBeenCalledWith("versao", expect.anything());
+  });
+
+  // sentry-tag-do-update (CLI-2): saber se o OTA passou nos 10% pelo expo-update-id de cada evento.
+  it("tagsDoUpdate: id, canal e runtime do expo-updates; sem id e o bundle de fabrica (embedded)", () => {
+    const id = "1b4e28ba-2fa1-11d2-883f-0016d3cca427";
+    expect(tagsDoUpdate({ updateId: id, channel: "production", runtimeVersion: "1.1.0" })).toEqual({
+      "expo-update-id": id,
+      "expo-channel": "production",
+      "expo-runtime-version": "1.1.0",
+    });
+    expect(tagsDoUpdate({})).toEqual({ "expo-update-id": "embedded", "expo-channel": null, "expo-runtime-version": null });
+  });
+
+  it("as tags do update passam inteiras (o uuid do update nao vira [id]), no setTag e no beforeSend", () => {
+    const id = "1b4e28ba-2fa1-11d2-883f-0016d3cca427";
+    const s = { init: jest.fn(), setTag: jest.fn() } as any;
+    iniciarSentry({ dsn: "d", ambiente: "prod", carregar: () => s, tags: { ...tagsDoUpdate({ updateId: id, channel: "preview" }), tela: id } });
+    expect(s.setTag).toHaveBeenCalledWith("expo-update-id", id);
+    expect(s.setTag).toHaveBeenCalledWith("expo-channel", "preview");
+    expect(s.setTag).toHaveBeenCalledWith("tela", "[id]");
+    expect(s.setTag).not.toHaveBeenCalledWith("expo-runtime-version", expect.anything());
+
+    const evento = limparEvento({ tags: { "expo-update-id": id, "expo-channel": "preview", tela: id, "expo-runtime-version": 1 } });
+    expect(evento?.tags).toEqual({ "expo-update-id": id, "expo-channel": "preview", tela: "[id]", "expo-runtime-version": 1 });
+    expect(limparEvento({ message: "sem tags" })).toEqual({ message: "sem tags" });
   });
 
   it("uma tag que falha nao derruba a abertura", () => {

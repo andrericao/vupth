@@ -84,12 +84,38 @@ export function ehErroDeConexao(erro: unknown): boolean {
   return /network (request failed|error)|timeout of \d+ms exceeded|sem conex/i.test(String(e.message ?? ""));
 }
 
+// sentry-tag-do-update (CLI-2, Andre 05/11): cada evento diz qual OTA o gerou, para saber se o update passou nos
+// 10% do rollout. Sao ids tecnicos do expo-updates (nao da pessoa): passam inteiros pela limpeza, senao o uuid do
+// update viraria "[id]".
+const TAGS_DO_UPDATE = ["expo-update-id", "expo-channel", "expo-runtime-version"] as const;
+
+export type InfoDoUpdate = { updateId?: string | null; channel?: string | null; runtimeVersion?: string | null };
+
+/** As tags do update em execucao. Sem updateId o aparelho roda o bundle de fabrica: "embedded". */
+export function tagsDoUpdate(u: InfoDoUpdate): Record<(typeof TAGS_DO_UPDATE)[number], string | null> {
+  return {
+    "expo-update-id": u.updateId || "embedded",
+    "expo-channel": u.channel || null,
+    "expo-runtime-version": u.runtimeVersion || null,
+  };
+}
+
+function ehTagDoUpdate(nome: string): boolean {
+  return (TAGS_DO_UPDATE as readonly string[]).includes(nome);
+}
+
 /** O beforeSend: limpa o evento ou o descarta (null) quando e so falta de conexao. */
 export function limparEvento<T extends Record<string, any>>(evento: T, dica?: { originalException?: unknown }): T | null {
   if (ehErroDeConexao(dica?.originalException)) return null;
   const valores = evento.exception?.values as { type?: string; value?: string }[] | undefined;
   if (valores?.some((v) => ehErroDeConexao({ message: v.value }))) return null;
   const limpo = limparValor(evento) as Record<string, any>;
+  const tags = evento.tags as Record<string, unknown> | undefined;
+  if (tags && limpo.tags) {
+    for (const nome of TAGS_DO_UPDATE) {
+      if (typeof tags[nome] === "string") limpo.tags[nome] = tags[nome];
+    }
+  }
   // so o necessario para achar o erro: nenhum dado da pessoa
   delete limpo.user;
   if (limpo.request) {
@@ -160,7 +186,7 @@ export function iniciarSentry({ dsn, ambiente, commit, emTeste, tags, carregar =
     for (const [nome, valor] of Object.entries(tags ?? {})) {
       if (valor) {
         try {
-          sentry.setTag(nome, limparTexto(String(valor)));
+          sentry.setTag(nome, ehTagDoUpdate(nome) ? String(valor) : limparTexto(String(valor)));
         } catch {
           // tag e enfeite: nunca derruba a abertura
         }
