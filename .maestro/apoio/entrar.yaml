@@ -3,8 +3,26 @@
 # Entrada: EMAIL_CLIENTE
 appId: ${APP_ID}
 ---
+# fumaça 2026-11-05_161416 (00b.PA): no emulador lento o toque em Perfil passou sem trocar de aba (a Home seguiu
+# na tela) e o "Já tenho conta" nunca apareceu. Confere a troca e, se não veio, toca de novo.
 - tapOn:
     text: "Perfil"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible: "Já tenho conta"
+    timeout: ${10000 * LENTO}
+    optional: true
+- runFlow:
+    when:
+      notVisible: "Já tenho conta"
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - tapOn:
+          text: "Perfil"
+      - extendedWaitUntil:
+          visible: "Já tenho conta"
+          timeout: ${20000 * LENTO}
 - tapOn:
     text: "Já tenho conta"
 # No emulador (1 nucleo, 2 GB, swap) o inputText digita tecla a tecla e
