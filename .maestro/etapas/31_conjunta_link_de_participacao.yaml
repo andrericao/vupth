@@ -1,0 +1,106 @@
+# teste-link-de-participacao (CLI-3, André 05/11): o profissional participa da campanha de link "Teste de
+# Lançamento" (staging, R$ 5 por corte), o cliente novo abre o link dele no Client, entra na conta e o corte e
+# concluido no Partner. O par do Partner (PAR-3) confere o R$ 5 no relatorio dele; aqui conferimos que o
+# cliente ficou ligado ao profissional nesta campanha (GET /referrals/me do profissional: +1 indicado).
+# O link chega pelo esquema do app (vupth://i/<codigo>?c=<campanha>): e o mesmo caminho do
+# https://app.vupth.com/i/... da producao (useIndicacao, caminhoDoLink).
+# Comeca na Home como visitante, com a conta do cliente criada pela API (ainda sem login).
+# Sem a campanha no ar, a etapa pula (⏭ no relatorio), nao falha.
+# env: EMAIL_PROF, EMAIL_CLIENTE, NOME_CLIENTE, PROF_ID, LOJA_ID, SERVICO_ID, NOME_CAMPANHA
+appId: ${APP_ID}
+---
+- runScript:
+    file: ../scripts/link_do_profissional.js
+    env:
+      ACAO: "participar"
+      API: ${API}
+      SENHA: ${SENHA}
+      EMAIL_PROF: ${EMAIL_PROF}
+      NOME_CAMPANHA: ${NOME_CAMPANHA}
+    label: "31.01 · o profissional participa de ${NOME_CAMPANHA} e pega o link dele (API)"
+- runFlow:
+    when:
+      true: ${output.EXISTE != '1'}
+    commands:
+      - evalScript: "${console.log('PULADO-CAMPANHA: não há campanha ativa com o nome ' + NOME_CAMPANHA)}"
+    label: "31.02 · sem a campanha no ar, pula"
+- runFlow:
+    when:
+      true: ${output.EXISTE == '1'}
+    commands:
+      - openLink:
+          link: ${output.LINK}
+          label: "31.03 · o cliente abre o link do profissional no Client"
+      - extendedWaitUntil:
+          visible:
+            id: "busca-home"
+          timeout: ${30000 * LENTO}
+          label: "31.04 · o app abre na Home"
+      - runFlow:
+          file: ../apoio/entrar.yaml
+          env:
+            EMAIL_CLIENTE: ${EMAIL_CLIENTE}
+          label: "31.05 · entra na conta nova"
+      - runScript:
+          file: ../scripts/link_do_profissional.js
+          env:
+            ACAO: "conferir"
+            API: ${API}
+            SENHA: ${SENHA}
+            EMAIL_PROF: ${EMAIL_PROF}
+            CAMPANHA_ID: ${output.CAMPANHA_ID}
+            INDICADOS_ANTES: ${output.INDICADOS_ANTES}
+          label: "31.06 · o profissional ganhou o indicado nesta campanha (API)"
+      - assertTrue:
+          condition: ${parseInt(output.INDICADOS, 10) > parseInt(output.INDICADOS_ANTES, 10)}
+          label: "31.07 · indicados subiu (o claim saiu do app com a campanha do link)"
+      - runScript:
+          file: ../scripts/fila_pela_api.js
+          env:
+            ACAO: "entrar"
+            API: ${API}
+            SENHA: ${SENHA}
+            EMAIL_CLIENTE: ${EMAIL_CLIENTE}
+            PROF_ID: ${PROF_ID}
+            LOJA_ID: ${LOJA_ID}
+            SERVICO_ID: ${SERVICO_ID}
+          label: "31.08 · o cliente entra na fila do profissional (API)"
+      - runFlow:
+          file: ../apoio/abrir_partner.yaml
+          env:
+            EMAIL_PROF: ${EMAIL_PROF}
+          label: "31.09 · abre o Partner como o profissional"
+      - runFlow:
+          file: ../../../vupth-partner/.maestro/conjunta/prof_finalizar.yaml
+          env:
+            APP_ID: com.vupth.partner.preview
+            CLIENTE: ${NOME_CLIENTE}
+            PAGAMENTO: "Recebi"
+          label: "31.10 · no Partner, atende e finaliza ${NOME_CLIENTE} (pago)"
+      - launchApp:
+          appId: ${APP_ID}
+          label: "31.11 · volta ao Client (sem limpar)"
+      - tapOn:
+          text: "Atendimentos"
+          label: "31.12 · toca em Atendimentos"
+      - extendedWaitUntil:
+          visible:
+            id: "convite-avaliar"
+          timeout: ${60000 * LENTO}
+          label: "31.13 · o corte concluido aparece (convite de avaliar)"
+      - runScript:
+          file: ../scripts/link_do_profissional.js
+          env:
+            ACAO: "conferir"
+            API: ${API}
+            SENHA: ${SENHA}
+            EMAIL_PROF: ${EMAIL_PROF}
+            CAMPANHA_ID: ${output.CAMPANHA_ID}
+            INDICADOS_ANTES: ${output.INDICADOS_ANTES}
+          label: "31.14 · registra os indicados e os com ganho depois do corte (o R$ 5 o Partner confere)"
+      - runFlow:
+          file: ../apoio/para_o_andre.yaml
+          env:
+            NOME: "31_link_de_participacao"
+            O_QUE: "Atendimentos do cliente que chegou pelo link do profissional, depois do corte concluído."
+          label: "31.15 · print para o André"

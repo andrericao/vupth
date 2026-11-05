@@ -18,6 +18,21 @@ export function campanhaDoCaminho(endereco: string): string | null {
   return achado ? achado[1] : null;
 }
 
+/**
+ * teste-link-de-participacao (CLI-3, 05/11): no APARELHO o link chega inteiro, pelo Android, e nao como o
+ * caminho do navegador. `https://app.vupth.com/i/<codigo>?c=..` (producao, intent filter do app.config.js) ou
+ * `vupth://i/<codigo>?c=..` (o esquema do app, que vale em todo build) viram `/i/<codigo>?c=..`, o mesmo caminho
+ * que a web le. Qualquer outro endereco vira "" (nada a guardar).
+ */
+export function caminhoDoLink(url: string | null | undefined): string {
+  if (!url) return '';
+  const esquema = /^vupth:\/\/(.*)$/i.exec(url);
+  if (esquema) return `/${esquema[1].replace(/^\/+/, '')}`;
+  const dominio = /^https:\/\/app\.vupth\.com(\/.*)?$/i.exec(url);
+  if (dominio) return dominio[1] ?? '/';
+  return '';
+}
+
 /** O codigo de `/i/<codigo>` (sem query nem barra no fim), ou null. */
 export function codigoDoCaminho(caminho: string): string | null {
   const semQuery = caminho.split(/[?#]/)[0];

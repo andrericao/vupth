@@ -1,4 +1,4 @@
-import { campanhaDoCaminho, codigoDoCaminho, descartarDepoisDaRecusa } from '@domain/indicacao';
+import { caminhoDoLink, campanhaDoCaminho, codigoDoCaminho, descartarDepoisDaRecusa } from '@domain/indicacao';
 
 // entrada-por-link (CLI-34, Backend 3fdcec1).
 
@@ -42,5 +42,29 @@ describe('campanhaDoCaminho', () => {
     expect(campanhaDoCaminho('/i/K7M2QX')).toBeNull();
     expect(campanhaDoCaminho('/i/K7M2QX?c=')).toBeNull();
     expect(campanhaDoCaminho('/i/K7M2QX?cc=1')).toBeNull();
+  });
+});
+
+// teste-link-de-participacao (CLI-3): no aparelho o link chega inteiro; vira o caminho que a web le.
+describe('caminhoDoLink', () => {
+  it('o esquema do app e o dominio viram o caminho, com a query', () => {
+    expect(caminhoDoLink('vupth://i/K7M2QX?c=camp-1')).toBe('/i/K7M2QX?c=camp-1');
+    expect(caminhoDoLink('vupth:///i/K7M2QX')).toBe('/i/K7M2QX');
+    expect(caminhoDoLink('https://app.vupth.com/i/K7M2QX?c=camp-1')).toBe('/i/K7M2QX?c=camp-1');
+    expect(caminhoDoLink('https://app.vupth.com')).toBe('/');
+  });
+
+  it('outro endereco, vazio ou nulo: nada', () => {
+    expect(caminhoDoLink('https://outro.com/i/K7M2QX')).toBe('');
+    expect(caminhoDoLink('exp://192.168.0.16:8081')).toBe('');
+    expect(caminhoDoLink('')).toBe('');
+    expect(caminhoDoLink(null)).toBe('');
+    expect(caminhoDoLink(undefined)).toBe('');
+  });
+
+  it('com o caminho, o codigo e a campanha saem como na web', () => {
+    const caminho = caminhoDoLink('vupth://i/PROF77?c=camp-9');
+    expect(codigoDoCaminho(caminho)).toBe('PROF77');
+    expect(campanhaDoCaminho(caminho)).toBe('camp-9');
   });
 });
