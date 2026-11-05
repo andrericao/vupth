@@ -15,7 +15,7 @@ interface RefreshResponse {
 const localIp = process.env.EXPO_PUBLIC_API_LOCAL_IP || "localhost";
 
 // Tres nomes, os mesmos do backend: `dev` e a MAQUINA, `staging` e o Render,
-// `prod` e o Railway.
+// `prod` e o Railway, pelo dominio api.vupth.com (api-no-dominio-nos-perfis, DEC-180).
 //
 // Ate 06/09 eram quatro, e duas chaves apontavam pro mesmo host: `dev` e
 // `staging` eram ambas o Render, porque este app batizou de `dev` o que o
@@ -25,7 +25,7 @@ const localIp = process.env.EXPO_PUBLIC_API_LOCAL_IP || "localhost";
 const BASE_URLS: Record<string, string> = {
 	dev: `http://${localIp}:8080`,
 	staging: "https://vupth-backend-ia.onrender.com",
-	prod: "https://vupth-backend-ia-production.up.railway.app",
+	prod: "https://api.vupth.com",
 };
 
 // O CANAL manda quando existe (bundle publicado); o `.env` so vale rodando

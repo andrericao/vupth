@@ -3,7 +3,7 @@ import { api } from '../../services/api';
 const VALID_URLS = [
   'http://localhost:8080',
   'https://vupth-backend-ia.onrender.com',
-  'https://vupth-backend-ia-production.up.railway.app',
+  'https://api.vupth.com',
 ];
 
 describe('API Config', () => {

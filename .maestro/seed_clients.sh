@@ -7,7 +7,7 @@ ENV=${1:-dev}
 case $ENV in
   local) URL="http://localhost:8080" ;;
   dev)   URL="https://vupth-backend-ia.onrender.com" ;;
-  prod)  URL="https://vupth-backend-ia-production.up.railway.app" ;;
+  prod)  URL="https://api.vupth.com" ;;
   *)     echo "Uso: $0 [local|dev|prod]"; exit 1 ;;
 esac
 

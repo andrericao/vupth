@@ -6,7 +6,7 @@ const url = require('url');
 // fala, porque o backend nao publica CORS e a chamada direta seria bloqueada.
 // Porta 8080 pra casar com EXPO_PUBLIC_API_ENV=local (ver src/services/api.ts).
 //   API_TARGET=https://vupth-backend-ia.onrender.com node proxy.js
-const TARGET = process.env.API_TARGET || 'https://vupth-backend-ia-production.up.railway.app';
+const TARGET = process.env.API_TARGET || 'https://api.vupth.com';
 const PORT = 8080;
 
 const server = http.createServer((req, res) => {
