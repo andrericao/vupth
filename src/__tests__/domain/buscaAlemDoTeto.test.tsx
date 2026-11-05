@@ -18,7 +18,14 @@ jest.mock('@services/establishmentService', () => ({
   establishmentService: { getAll: jest.fn() },
 }));
 
-const base = MOCK_ESTABLISHMENTS.find((e) => (e.available_professionals ?? 0) > 0 && e.estimated_wait_minutes !== null)!;
+// Loja aberta, com espera e profissional: visivel no filtro de disponibilidade (o mock nao traz esses campos).
+const base: Establishment = {
+  ...MOCK_ESTABLISHMENTS[0],
+  open_status: 'OPEN',
+  is_open: true,
+  estimated_wait_minutes: 10,
+  available_professionals: 1,
+};
 const loja = (id: string, name: string, extra: Partial<Establishment> = {}): Establishment => ({ ...base, id, name, ...extra });
 
 describe('filtrarComBusca', () => {

@@ -23,7 +23,7 @@ describe('API no dominio (CLI-3)', () => {
   });
 
   it('a web pode falar com o dominio (https e wss no connect-src)', () => {
-    const csp = headers.split('\n').find((l) => l.includes('connect-src')) ?? '';
+    const csp = headers.split('\n').find((l) => l.includes('Content-Security-Policy:')) ?? '';
     expect(csp).toContain('https://api.vupth.com');
     expect(csp).toContain('wss://api.vupth.com');
   });
