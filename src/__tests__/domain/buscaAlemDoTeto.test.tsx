@@ -36,8 +36,9 @@ describe('filtrarComBusca', () => {
   });
 
   it('junta a loja que só o servidor achou (fora das 200), depois das locais e sem repetir', () => {
-    const doServidor = [loja('a', 'Barbearia Alfa'), loja('z', 'Loja C80273300b')];
-    expect(filtrarComBusca(lista, doServidor, 'C80273300b', 'ALL').map((e) => e.id)).toEqual(['z']);
+    // o servidor devolve so o que casa com o termo; a local repetida nao duplica
+    expect(filtrarComBusca(lista, [loja('z', 'Loja C80273300b')], 'C80273300b', 'ALL').map((e) => e.id)).toEqual(['z']);
+    const doServidor = [loja('a', 'Barbearia Alfa'), loja('z', 'Loja Alfaiate')];
     expect(filtrarComBusca(lista, doServidor, 'alfa', 'ALL').map((e) => e.id)).toEqual(['a', 'z']);
   });
 
