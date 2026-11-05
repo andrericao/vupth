@@ -20,4 +20,18 @@ describe("Maestro — o toque na aba confere a troca", () => {
     expect(deNovo).toBeGreaterThan(espera);
     expect(f.slice(deNovo)).toMatch(new RegExp(`tapOn:\\s*(text: )?"${aba}"`));
   });
+
+  // fumaça 2026-11-05_173239 (09.17): o login da 09 cola (nada de inputText tecla a tecla) e espera o desfecho.
+  it("a 09 cola o e-mail e a senha e espera o login antes de ir ao Perfil", () => {
+    const f = ler(".maestro/etapas/09_login.yaml");
+    expect(f).not.toMatch(/inputText:/);
+    expect(f).toContain("setClipboard: ${EMAIL_CLIENTE}");
+    expect(f).toContain("setClipboard: ${SENHA}");
+    const entrar = f.indexOf('label: "09.14 · toca em primary-login"');
+    const espera = f.indexOf('id: "(dialogo-botao-0|busca-home)"', entrar);
+    const perfil = f.indexOf('label: "09.16 · toca em Perfil"');
+    expect(entrar).toBeGreaterThan(-1);
+    expect(espera).toBeGreaterThan(entrar);
+    expect(perfil).toBeGreaterThan(espera);
+  });
 });
