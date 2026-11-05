@@ -54,7 +54,11 @@ afterEach(() => alerta.mockRestore());
 
 describe('Promoções', () => {
   it('usa o cupom digitado e mostra a lista de novo', async () => {
-    mockListMine.mockResolvedValueOnce({ data: [] }).mockResolvedValueOnce({ data: [{ id: 'c1', name: 'Lançamento' }] });
+    // a lista (da tela e de Disponíveis) passa a ter o cupom depois de ativar
+    mockRedeem.mockImplementation(async () => {
+      mockListMine.mockResolvedValue({ data: [{ id: 'c1', name: 'Lançamento' }] });
+      return { data: { id: 'c1', name: 'Lançamento' } };
+    });
     const { getByTestId, getByText, findByText } = renderWithProviders(<Promocoes />);
     // promocoes-ativar-e-codigo (24/10): o botão é "Ativar", não "Usar"
     expect(getByText('Ativar')).toBeTruthy();
@@ -159,14 +163,17 @@ describe('Promoções', () => {
   });
 
   it('a lista falhando, ou vindo fora do formato, a tela segue', async () => {
-    mockListMine.mockRejectedValueOnce(new Error('x'));
+    mockListMine.mockRejectedValue(new Error('x'));
     const { queryByTestId, unmount } = renderWithProviders(<Promocoes />);
     await waitFor(() => expect(mockListMine).toHaveBeenCalled());
+    await act(async () => {});
     expect(queryByTestId('cupons-meus')).toBeNull();
     unmount();
-    mockListMine.mockResolvedValueOnce({ data: null });
+    mockListMine.mockClear();
+    mockListMine.mockResolvedValue({ data: null });
     const outra = renderWithProviders(<Promocoes />);
-    await waitFor(() => expect(mockListMine).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(mockListMine).toHaveBeenCalled());
+    await act(async () => {});
     expect(outra.queryByTestId('cupons-meus')).toBeNull();
   });
 
