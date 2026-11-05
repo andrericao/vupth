@@ -9,12 +9,18 @@ import { useAuthStore } from '@stores/authStore';
 
 const mockRedeem = jest.fn();
 const mockListMine = jest.fn();
+const mockListActive = jest.fn();
+const mockJoin = jest.fn();
 jest.mock('@services/campaignService', () => ({
   campaignService: {
     redeem: (...a: unknown[]) => mockRedeem(...a),
     listMine: (...a: unknown[]) => mockListMine(...a),
+    listActive: (...a: unknown[]) => mockListActive(...a),
+    join: (...a: unknown[]) => mockJoin(...a),
   },
 }));
+const mockMe = jest.fn();
+jest.mock('@services/referralService', () => ({ referralService: { me: (...a: unknown[]) => mockMe(...a) } }));
 jest.mock('@components/SeuLinkDeIndicacao', () => ({ SeuLinkDeIndicacao: () => null }));
 jest.mock('expo-secure-store');
 jest.mock('lucide-react-native', () => new Proxy({}, { get: () => () => null }));
@@ -38,6 +44,9 @@ beforeEach(() => {
   alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   useAuthStore.setState({ accessToken: 'tk' } as never);
   mockListMine.mockResolvedValue({ data: [] });
+  mockListActive.mockResolvedValue({ data: [] });
+  mockMe.mockResolvedValue({ data: { campaigns: [] } });
+  mockJoin.mockResolvedValue({ data: {} });
   mockRedeem.mockResolvedValue({ data: { id: 'c1', name: 'Lançamento' } });
 });
 
@@ -94,11 +103,12 @@ describe('Promoções', () => {
     expect(getByText('Válido até 05/11 às 12:00')).toBeTruthy();
     expect(getByTestId('cupom-a-picote-esquerdo')).toBeTruthy();
     expect(queryByTestId('cupom-a-picote-direito')).toBeNull();
-    // cupom-usado-some-da-selecao: o usado e o vencido em seções próprias, sem contagem
-    expect(getByText('Cupons usados')).toBeTruthy();
-    expect(getByText('Cupons vencidos')).toBeTruthy();
-    expect(within(getByTestId('cupons-usados')).getByText('Usado')).toBeTruthy();
-    expect(within(getByTestId('cupons-vencidos')).getByText('Vencido')).toBeTruthy();
+    // promocoes-em-secoes (05/11): o usado e o vencido juntos em Passadas, cada um com o estado, sem contagem
+    expect(getByText('Ativas')).toBeTruthy();
+    expect(getByText('Passadas')).toBeTruthy();
+    expect(within(getByTestId('promocoes-passadas')).getByText('Usado')).toBeTruthy();
+    expect(within(getByTestId('promocoes-passadas')).getByText('Vencido')).toBeTruthy();
+    expect(within(getByTestId('cupons-meus')).queryByText('Antigo')).toBeNull();
     expect(queryByText(/\d+ (ativ|dispon)/i)).toBeNull();
     expect(queryByText('Velho')).toBeTruthy();
   });
@@ -114,7 +124,7 @@ describe('Promoções', () => {
     const alerta = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { findByTestId, getByTestId, getByText } = renderWithProviders(<Promocoes />);
     await findByTestId('cupons-meus');
-    expect(getByText('Promoções ativas')).toBeTruthy();
+    expect(getByText('Ativas')).toBeTruthy();
     // promocoes-ativar-e-codigo: cada ticket mostra o código do cupom
     expect(getByTestId('cupom-a-codigo')).toHaveTextContent('Código: VUPTH10');
     fireEvent.press(getByTestId('cupom-a'));
@@ -172,5 +182,37 @@ describe('Promoções', () => {
       fireEvent.press(getByTestId('cupom-usar'));
     });
     expect(alerta).toHaveBeenLastCalledWith(titulo, expect.any(String), expect.any(Array), expect.anything());
+  });
+  // promocoes-em-secoes (André, 05/11): Disponíveis = no ar e sem a pessoa; quem participa sai dela.
+  it('Disponíveis mostra só as campanhas em que ainda não está; Participar tira a campanha de lá', async () => {
+    mockListMine.mockResolvedValue({ data: [{ id: 'a', name: 'Lançamento', code: 'VUPTH10', status: 'ACTIVE' }] });
+    mockListActive.mockResolvedValue({
+      data: [
+        { id: 'a', name: 'Lançamento', code: 'VUPTH10' },
+        { id: 'l', name: 'Indique', type: 'REFERRAL_BONUS' },
+        { id: 'j', name: 'Já estou', type: 'REFERRAL_BONUS' },
+      ],
+    });
+    mockMe.mockResolvedValue({ data: { campaigns: [{ campaign_id: 'j', link: 'x' }] } });
+    const { findByTestId, getByTestId, queryByTestId } = renderWithProviders(<Promocoes />);
+    const secao = await findByTestId('promocoes-disponiveis');
+    expect(within(secao).getByText('Disponíveis')).toBeTruthy();
+    expect(within(secao).getByText('Indique')).toBeTruthy();
+    expect(within(secao).queryByText('Lançamento')).toBeNull();
+    expect(within(secao).queryByText('Já estou')).toBeNull();
+
+    mockMe.mockResolvedValue({ data: { campaigns: [{ campaign_id: 'j', link: 'x' }, { campaign_id: 'l', link: 'y' }] } });
+    await act(async () => {
+      fireEvent.press(getByTestId('participar-l'));
+    });
+    expect(mockJoin).toHaveBeenCalledWith('l', 'tk');
+    await waitFor(() => expect(queryByTestId('promocoes-disponiveis')).toBeNull());
+  });
+
+  it('sem nada no ar, Disponíveis não aparece', async () => {
+    const { queryByTestId } = renderWithProviders(<Promocoes />);
+    await waitFor(() => expect(mockListActive).toHaveBeenCalled());
+    expect(queryByTestId('promocoes-disponiveis')).toBeNull();
+    expect(queryByTestId('promocoes-passadas')).toBeNull();
   });
 });

@@ -58,6 +58,15 @@ appId: ${APP_ID}
           element:
             text: "Indique e ganhe"
           label: "26.10 · vê Indique e ganhe"
+      # promocoes-em-secoes (André, 05/11): o link em que participa está em Ativas, não em Disponíveis.
+      - assertVisible:
+          text: "Ativas"
+          label: "26.10a · vê a seção Ativas"
+      - assertNotVisible:
+          text: "MAESTRO CLIENT LINK"
+          childOf:
+            id: "promocoes-disponiveis"
+          label: "26.10b · a campanha em que participa não está em Disponíveis"
       - scrollUntilVisible:
           element:
             text: ".* indicados? · \\d+ com ganho"

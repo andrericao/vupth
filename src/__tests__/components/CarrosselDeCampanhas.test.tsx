@@ -84,6 +84,8 @@ describe('CarrosselDeCampanhas', () => {
     const t = wrap(<CarrosselDeCampanhas campanhas={[{ id: 'l', name: 'Indique', type: 'REFERRAL_BONUS' }]} />);
     await act(async () => { fireEvent.press(t.getByTestId('participar-l')); });
     expect(mockJoin).toHaveBeenCalledWith('l', 'tk');
+    // promocoes-em-secoes (05/11): quem entrou ja participa; a campanha sai do carrossel na hora.
+    expect(t.queryByTestId('campanha-l')).toBeNull();
     spy.mockRestore();
   });
 

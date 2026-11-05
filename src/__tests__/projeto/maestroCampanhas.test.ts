@@ -26,4 +26,21 @@ describe("Maestro 25 e 26 — campanhas de teste", () => {
     expect(cupom).toContain('"MAESTRO CLIENT CUPOM"');
     expect(link).toContain('"MAESTRO CLIENT LINK"');
   });
+
+  // promocoes-em-secoes (André, 05/11): a campanha em que a pessoa está fica em Ativas e fora de Disponíveis.
+  it("cupom e link conferem as seções: em Ativas, não em Disponíveis (ids das seções na tela)", () => {
+    const tela = ler("src/screens/Promocoes.tsx");
+    expect(tela).toContain('testID="cupons-meus"');
+    expect(tela).toContain('testID="promocoes-disponiveis"');
+    expect(tela).toContain('testID="promocoes-passadas"');
+    for (const [f, nome] of [
+      [cupom, "MAESTRO CLIENT CUPOM"],
+      [link, "MAESTRO CLIENT LINK"],
+    ]) {
+      const naoDisponivel = new RegExp(`assertNotVisible:\\s*\\n\\s*text: "${nome}"\\s*\\n\\s*childOf:\\s*\\n\\s*id: "promocoes-disponiveis"`);
+      expect(f).toMatch(naoDisponivel);
+      expect(f).toContain('text: "Ativas"');
+    }
+    expect(cupom).toMatch(/text: "MAESTRO CLIENT CUPOM"\s*\n\s*childOf:\s*\n\s*id: "cupons-meus"/);
+  });
 });
