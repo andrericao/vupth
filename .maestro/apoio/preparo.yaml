@@ -106,8 +106,20 @@ appId: ${APP_ID}
     when:
       true: ${ABERTURA == '1'}
     commands:
+      # fumaça 2026-11-05_222402 (00b.PA): no celular lento o toque em "Ver filas" passou sem sair da abertura
+      # e o "Perfil" nunca apareceu. Confere a saída e, se a abertura seguiu na tela, toca de novo.
       - tapOn:
           id: "onboarding-start"
+          retryTapIfNoChange: true
+      - runFlow:
+          when:
+            visible:
+              id: "onboarding-start"
+          commands:
+            - waitForAnimationToEnd:
+                timeout: 3000
+            - tapOn:
+                id: "onboarding-start"
       - runFlow:
           file: fechar_aviso.yaml
     label: "${ETAPA}.P9 · passa a abertura"
