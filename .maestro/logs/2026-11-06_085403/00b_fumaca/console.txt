@@ -60,7 +60,9 @@ Running on vupth_android11
   ${ETAPA}.P9 · passa a abertura...
     Tap on id: onboarding-start... COMPLETED
     Run flow when id: onboarding-start is visible...
-    Run flow when id: onboarding-start is visible... SKIPPED
+      Wait for animation to end within 3000 ms... COMPLETED
+      Tap on (Optional) id: onboarding-start... WARNED
+    Run flow when id: onboarding-start is visible... COMPLETED
     Run fechar_aviso.yaml...
       Run esperar_o_sistema.yaml...
         Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
@@ -221,8 +223,7 @@ Running on vupth_android11
   00b.03 · a fila abre e mostra a posição (fecha o aviso da estimativa e as caixas)...
     Repeat while id: queue-position is not visible (up to 20 times)...
       Run flow when "Entendi" is visible...
-        Tap on "Entendi"... COMPLETED
-      Run flow when "Entendi" is visible... COMPLETED
+      Run flow when "Entendi" is visible... SKIPPED
       Run fechar_aviso.yaml...
         Run esperar_o_sistema.yaml...
           Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
@@ -238,7 +239,8 @@ Running on vupth_android11
         Run flow when id: push-skip is visible...
         Run flow when id: push-skip is visible... SKIPPED
       Run fechar_aviso.yaml... COMPLETED
-      Assert that (Optional) id: queue-position is visible... COMPLETED
+      Assert that (Optional) id: queue-position is visible... WARNED
+        Tap on "Entendi"... COMPLETED
     Repeat while id: queue-position is not visible (up to 20 times)... COMPLETED
     Assert that id: queue-position is visible... COMPLETED
   00b.03 · a fila abre e mostra a posição (fecha o aviso da estimativa e as caixas)... COMPLETED
@@ -254,27 +256,26 @@ Running on vupth_android11
         Tap on id: go-login... COMPLETED
         Tap on id: login-email... COMPLETED
         Input text ${EMAIL}... COMPLETED
-        Tap on id: login-password... COMPLETED
-        Input text ${SENHA}... COMPLETED
-        Hide Keyboard... COMPLETED
-        Tap on id: login-submit... COMPLETED
-      PJ1.01 · entra como prop_c96131900b@teste.com... COMPLETED
-      PJ1.02 · espera a Fila ou o Menu do dono... COMPLETED
-      PJ1.02a · fecha o aviso, se houver...
-        Wait for animation to end within 3000 ms... COMPLETED
-        Run fechar_anr.yaml...
-          Run flow when ".*(isn't responding|não está respondendo|nao esta respondendo).*" is visible...
-io.grpc.StatusRuntimeException: UNAVAILABLE
+        Tap on id: login-password...io.grpc.StatusRuntimeException: UNAVAILABLE
 	at io.grpc.stub.ClientCalls.toStatusRuntimeException(ClientCalls.java:275)
 	at io.grpc.stub.ClientCalls.getUnchecked(ClientCalls.java:256)
 	at io.grpc.stub.ClientCalls.blockingUnaryCall(ClientCalls.java:169)
-	at maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub.deviceInfo(MaestroDriverGrpc.java:740)
-	at maestro.drivers.AndroidDriver.deviceInfo$lambda$5(AndroidDriver.kt:201)
-	at maestro.drivers.AndroidDriver.runDeviceCall(AndroidDriver.kt:1273)
-	at maestro.drivers.AndroidDriver.deviceInfo(AndroidDriver.kt:200)
-	at maestro.ViewHierarchy$Companion.from-8JJjmZI(ViewHierarchy.kt:28)
-	at maestro.Maestro$findElementWithTimeout$found$1$1.invoke-prqvCes(Maestro.kt:441)
-	at maestro.Maestro$findElementWithTimeout$found$1$1.invoke(Maestro.kt:440)
+	at maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub.viewHierarchy(MaestroDriverGrpc.java:747)
+	at maestro.drivers.AndroidDriver.callViewHierarchy(AndroidDriver.kt:366)
+	at maestro.drivers.AndroidDriver.callViewHierarchy(AndroidDriver.kt:392)
+	at maestro.drivers.AndroidDriver.callViewHierarchy$default(AndroidDriver.kt:364)
+	at maestro.drivers.AndroidDriver.contentDescriptor$lambda$17(AndroidDriver.kt:326)
+	at maestro.utils.Metrics.measured(Metrics.kt:48)
+	at maestro.drivers.AndroidDriver.contentDescriptor(AndroidDriver.kt:325)
+	at maestro.ViewHierarchy$Companion.from-8JJjmZI(ViewHierarchy.kt:29)
+	at maestro.utils.ScreenshotUtils$Companion.viewHierarchy-c1iYVAs(ScreenshotUtils.kt:99)
+	at maestro.utils.ScreenshotUtils$Companion.waitForAppToSettle-OpTFbEc(ScreenshotUtils.kt:58)
+	at maestro.drivers.AndroidDriver$waitForAppToSettle$1.invoke-prqvCes(AndroidDriver.kt:741)
+	at maestro.drivers.AndroidDriver$waitForAppToSettle$1.invoke(AndroidDriver.kt:737)
+	at maestro.utils.Metrics.measured(Metrics.kt:48)
+	at maestro.drivers.AndroidDriver.waitForAppToSettle-5RpGHs4(AndroidDriver.kt:737)
+	at maestro.Maestro$waitForAppToSettle$2.invoke-F9mIFpk(Maestro.kt:477)
+	at maestro.Maestro$waitForAppToSettle$2.invoke(Maestro.kt:476)
 	at kotlinx.coroutines.InterruptibleKt.runInterruptibleInExpectedContext(Interruptible.kt:48)
 	at kotlinx.coroutines.InterruptibleKt.access$runInterruptibleInExpectedContext(Interruptible.kt:1)
 	at kotlinx.coroutines.InterruptibleKt$runInterruptible$2.invokeSuspend(Interruptible.kt:40)
@@ -286,9 +287,9 @@ io.grpc.StatusRuntimeException: UNAVAILABLE
 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
-Caused by: java.io.IOException: Command failed (tcp:7001): closed
+Caused by: java.io.IOException: Command failed (host:transport:emulator-5554): device 'emulator-5554' not found
 	at dadb.adbserver.AdbServer.send$dadb(AdbServer.kt:103)
-	at dadb.adbserver.AdbServerDadb.open(AdbServer.kt:149)
+	at dadb.adbserver.AdbServerDadb.open(AdbServer.kt:148)
 	at maestro.drivers.AndroidDriver.channel$lambda$0(AndroidDriver.kt:81)
 	at maestro.android.AdbSocket.connect(AdbSocketFactory.kt:40)
 	at maestro.android.AdbSocket.connect(AdbSocketFactory.kt:44)
@@ -303,4 +304,4 @@ Caused by: java.io.IOException: Command failed (tcp:7001): closed
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-06_073519/00b_fumaca
+/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-06_085403/00b_fumaca

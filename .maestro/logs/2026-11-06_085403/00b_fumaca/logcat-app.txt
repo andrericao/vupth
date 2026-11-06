@@ -1,0 +1,45 @@
+--------- beginning of kernel
+--------- beginning of main
+--------- beginning of system
+11-06 08:54:29.683 D/AndroidRuntime( 2418): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 08:54:29.720 I/AndroidRuntime( 2418): Using default boot image
+11-06 08:54:29.720 I/AndroidRuntime( 2418): Leaving lock profiling enabled
+11-06 08:54:30.579 D/AndroidRuntime( 2418): Calling main entry com.android.commands.am.Am
+11-06 08:54:59.591 D/Sentry  ( 3450): io.sentry.auto-init read: false
+11-06 08:55:03.051 D/Sentry  ( 3568): io.sentry.auto-init read: false
+11-06 08:55:08.172 D/Sentry  ( 3678): io.sentry.auto-init read: false
+11-06 08:55:20.128 W/ReactNativeJS( 3678): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-06 08:55:21.166 I/ReactNativeJS( 3678): Running "main"
+11-06 08:55:21.380 E/ReactNativeJS( 3678): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-06 08:55:32.779 W/ReactNativeJS( 3678): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-06 08:55:34.349 I/ReactNativeJS( 3678): Running "main"
+11-06 08:55:34.981 E/ReactNativeJS( 3678): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-06 08:57:51.246 D/AndroidRuntime( 4352): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 08:57:51.279 I/AndroidRuntime( 4352): Using default boot image
+11-06 08:57:51.280 I/AndroidRuntime( 4352): Leaving lock profiling enabled
+11-06 08:57:52.261 D/AndroidRuntime( 4352): Calling main entry com.android.commands.input.Input
+11-06 08:57:52.557 D/AndroidRuntime( 4352): Shutting down VM
+11-06 08:58:38.296 D/AndroidRuntime( 4398): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 08:58:38.310 I/AndroidRuntime( 4398): Using default boot image
+11-06 08:58:38.311 I/AndroidRuntime( 4398): Leaving lock profiling enabled
+11-06 08:58:38.467 D/AndroidRuntime( 4398): Calling main entry com.android.commands.input.Input
+11-06 08:58:39.513 D/AndroidRuntime( 4398): Shutting down VM
+11-06 09:00:27.464 D/AndroidRuntime( 4452): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 09:00:27.477 I/AndroidRuntime( 4452): Using default boot image
+11-06 09:00:27.479 I/AndroidRuntime( 4452): Leaving lock profiling enabled
+11-06 09:00:27.640 D/AndroidRuntime( 4452): Calling main entry com.android.commands.input.Input
+11-06 09:00:28.380 D/AndroidRuntime( 4452): Shutting down VM
+11-06 09:01:03.851 D/AndroidRuntime( 4483): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 09:01:03.865 I/AndroidRuntime( 4483): Using default boot image
+11-06 09:01:03.866 I/AndroidRuntime( 4483): Leaving lock profiling enabled
+11-06 09:01:04.019 D/AndroidRuntime( 4483): Calling main entry com.android.commands.input.Input
+11-06 09:01:05.035 D/AndroidRuntime( 4483): Shutting down VM
+11-06 09:02:04.249 D/AndroidRuntime( 4502): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 09:02:04.264 I/AndroidRuntime( 4502): Using default boot image
+11-06 09:02:04.265 I/AndroidRuntime( 4502): Leaving lock profiling enabled
+11-06 09:02:04.746 D/AndroidRuntime( 4502): Calling main entry com.android.commands.input.Input
+11-06 09:02:05.600 D/AndroidRuntime( 4502): Shutting down VM
+11-06 09:03:39.642 D/Sentry  ( 4775): io.sentry.auto-init read: false
+11-06 09:03:49.260 I/ReactNativeJS( 4775): Running "main"
+11-06 09:04:07.507 D/Sentry  ( 5114): io.sentry.auto-init read: false
+11-06 09:04:12.720 I/ReactNativeJS( 5114): Running "main"
