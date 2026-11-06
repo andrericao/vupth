@@ -17,14 +17,18 @@ Running on ZF524LC5HC
     Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)...
     Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)... SKIPPED
     Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)...
-    Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)... SKIPPED
+      Press Back key... COMPLETED
+      Wait for animation to end within 2000 ms... COMPLETED
+    Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)... COMPLETED
   00b.P5c · confere que a cortina de notificações está fechada... COMPLETED
   ${ETAPA}.P6 · abre o app limpo... COMPLETED
   ${ETAPA}.P6b · fecha a cortina, se o app abriu por baixo dela...
     Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)...
     Repeat while "(Clear all|Manage|No notifications|Limpar tudo|Gerenciar|Nenhuma notificação|Sem notificações)" is visible (up to 3 times)... SKIPPED
     Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)...
-    Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)... SKIPPED
+      Press Back key... COMPLETED
+      Wait for animation to end within 2000 ms... COMPLETED
+    Repeat while id: com.android.systemui:id/(notification_stack_scroller|quick_settings_panel|qs_frame|expanded_qs_scroll_view) is visible (up to 3 times)... COMPLETED
   00b.P6b · fecha a cortina, se o app abriu por baixo dela... COMPLETED
   ${ETAPA}.P7 · espera onboarding-start (negando a caixa do sistema)...
     Repeat while id: ${ALVO} is not visible (up to 40 times)...
@@ -39,3 +43,7 @@ Running on ZF524LC5HC
       Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible...
       Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible... SKIPPED
       Assert that (Optional) id: ${ALVO} is visible... WARNED
+    Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
+    Assert that id: ${ALVO} is visible... FAILED
+  00b.P7 · espera onboarding-start (negando a caixa do sistema)... FAILED
+00b.P0 · prepara a etapa... FAILED
