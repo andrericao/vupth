@@ -327,7 +327,7 @@ export function Attendances() {
                   testID={`contestar-${m.penaltyId}`}
                   style={{ alignSelf: "flex-end", paddingVertical: 4 }}
                 >
-                  <Text size="xs" fontFamily="$heading" color="$forest">
+                  <Text size="xs" fontFamily="$heading" color="$brandTextPrimary">
                     Contestar
                   </Text>
                 </TouchableOpacity>
