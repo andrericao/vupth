@@ -42,7 +42,26 @@ export interface PagamentoDaMulta {
   paid_at?: string | null;
 }
 
+// contestar-multa (André, 05/11; Backend ec0c2f3): 200 com a contestação; a multa sai de pending-penalties até o ADMIN decidir.
+export interface MultaContestada {
+  penalty_id: string;
+  contested_at: string;
+  reason: string;
+}
+
+/** O motivo da contestação: até 300 caracteres, não vazio (vazio responde 422). */
+export const MOTIVO_MAX = 300;
+
 export const penaltyService = {
+  /** 404 PENALTY_NOT_FOUND; 409 PENALTY_ALREADY_CONTESTED, PENALTY_CONTEST_EXPIRED (7 dias), PENALTY_NOT_CONTESTABLE; 422 sem motivo. */
+  contest(penaltyId: string, reason: string, accessToken: string) {
+    return api.post<MultaContestada>(
+      `/clients/me/penalties/${penaltyId}/contest`,
+      { reason },
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+  },
+
   /** 201 com o pagamento (o vigente, se ja houver um); 409 PENALTY_NOTHING_TO_PAY; 503 PENALTY_PIX_NOT_CONFIGURED. */
   pay(accessToken: string) {
     return api.post<PagamentoDaMulta>('/clients/me/penalties/pay', undefined, {

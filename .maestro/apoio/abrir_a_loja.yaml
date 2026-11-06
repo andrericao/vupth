@@ -3,7 +3,28 @@
 # texto diferente do nome inteiro, e o toque cai no card, nao no campo.
 appId: ${APP_ID}
 ---
-- tapOn: "Início"
+# fumaça 2026-11-05_164830 (00b.L1): no emulador lento o toque em Início passou sem trocar de aba (o Perfil
+# seguiu na tela). Confere a troca pela busca e, se não veio, toca de novo.
+- tapOn:
+    text: "Início"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible:
+      id: "busca-home"
+    timeout: ${10000 * LENTO}
+    optional: true
+- runFlow:
+    when:
+      notVisible:
+        id: "busca-home"
+    commands:
+      - waitForAnimationToEnd:
+          timeout: 3000
+      - tapOn: "Início"
+      - extendedWaitUntil:
+          visible:
+            id: "busca-home"
+          timeout: ${20000 * LENTO}
 - tapOn:
     id: "busca-home"
 - eraseText: 30

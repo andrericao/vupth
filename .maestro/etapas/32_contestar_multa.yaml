@@ -1,0 +1,60 @@
+# Contestar multa (CLI-23, André 05/11; Backend 68455a1): a conta de teste ganha uma multa pendente pela API do
+# staging (POST /test/penalties); o cliente toca em Contestar em Atendimentos, escreve o motivo, envia, e a
+# multa sai da lista. Sem a rota no ar (404), pula (PULADO-MULTA).
+# env: API, SENHA, EMAIL_CLIENTE
+appId: ${APP_ID}
+---
+- runScript:
+    file: ../scripts/multa_de_teste.js
+    env:
+      API: ${API}
+      SENHA: ${SENHA}
+      EMAIL_CLIENTE: ${EMAIL_CLIENTE}
+    label: "32.01 · semeia a multa de teste"
+- runFlow:
+    when:
+      true: ${output.MULTA_OK != '1'}
+    commands:
+      - evalScript: "${console.log('PULADO-MULTA: a rota /test/penalties não está no ar')}"
+    label: "32.02 · sem a rota: pula"
+- runFlow:
+    when:
+      true: ${output.MULTA_OK == '1'}
+    commands:
+      - tapOn:
+          text: "Atendimentos"
+          retryTapIfNoChange: true
+          label: "32.03 · toca em Atendimentos"
+      - extendedWaitUntil:
+          visible:
+            id: "multas-em-atendimentos"
+          timeout: ${30000 * LENTO}
+          label: "32.04 · vê a multa pendente"
+      - tapOn:
+          id: "contestar-${output.MULTA_ID}"
+          label: "32.05 · toca em Contestar"
+      - assertVisible:
+          id: "contestar-multa"
+          label: "32.06 · vê o modal"
+      - tapOn:
+          id: "contestar-multa-motivo"
+      - setClipboard: "Cheguei no horário e o atendimento não aconteceu."
+      - pasteText
+      - hideKeyboard
+      - tapOn:
+          id: "contestar-multa-enviar"
+          label: "32.07 · envia a contestação"
+      - extendedWaitUntil:
+          visible:
+            id: "contestar-multa-enviada"
+          timeout: ${30000 * LENTO}
+          label: "32.08 · vê a confirmação"
+      - tapOn:
+          id: "contestar-multa-fechar"
+          label: "32.09 · fecha"
+      - extendedWaitUntil:
+          notVisible:
+            id: "multas-em-atendimentos"
+          timeout: ${20000 * LENTO}
+          label: "32.10 · a multa saiu da lista"
+    label: "32.03a · contesta a multa"

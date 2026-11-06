@@ -21,7 +21,7 @@
   # sem isso a pagina sobe sem CSS nenhum.
   # connect-src precisa listar o backend E o WebSocket (wss:), senao a fila
   # para de atualizar sem erro visivel.
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://vupth-backend-ia.onrender.com https://vupth-backend-ia-production.up.railway.app wss://vupth-backend-ia.onrender.com wss://vupth-backend-ia-production.up.railway.app; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://vupth-backend-ia.onrender.com https://api.vupth.com https://vupth-backend-ia-production.up.railway.app wss://vupth-backend-ia.onrender.com wss://api.vupth.com wss://vupth-backend-ia-production.up.railway.app; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
   # Impede que o app seja embutido em iframe de terceiro (clickjacking).
   X-Frame-Options: DENY
   # Nao deixa o navegador "adivinhar" o tipo de um arquivo servido.

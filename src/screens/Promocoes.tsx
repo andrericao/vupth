@@ -8,6 +8,8 @@ import { Input2 } from "@components/Input2";
 import { Button } from "@components/Button";
 import { SeuLinkDeIndicacao } from "@components/SeuLinkDeIndicacao";
 import { CartaoTicket } from "@components/CartaoTicket";
+import { CartaoDeCampanha } from "@components/CartaoDeCampanha";
+import { useCampanhasDisponiveis } from "@hooks/useCampanhasAtivas";
 import { useAuthStore } from "@stores/authStore";
 import { avisoDeFimDaCampanha } from "@utils/avisoDeFimDaCampanha";
 import { campaignService, Campanha } from "@services/campaignService";
@@ -27,16 +29,18 @@ import {
 } from "@domain/campanhas";
 
 // Perfil > Promocoes (cupom-no-app, cupom-em-configuracoes): adicionar o cupom e
-// ver os ativos e os encerrados (usados ou vencidos), cada um com a regra e a
-// validade. Texto curto (DEC-63). So aparece com CUPOM_LIGADO.
+// ver as promocoes, cada uma com a regra e a validade. Texto curto (DEC-63). So aparece com CUPOM_LIGADO.
+// promocoes-em-secoes (André, 05/11, espelho do Partner): tres secoes. Ativas (o cupom ativado e o link em que
+// participa), Disponiveis (no ar e ainda sem a pessoa, com o Participar da de link) e Passadas (usadas e vencidas).
 export function Promocoes() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const [cupom, setCupom] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [meus, setMeus] = useState<Campanha[]>([]);
   const { ativos, encerrados } = separarCupons(meus);
-  const usados = encerrados.filter((c) => situacaoDoCupom(c) === "Usado");
-  const vencidos = encerrados.filter((c) => situacaoDoCupom(c) !== "Usado");
+  const { campanhas: disponiveis, recarregar: recarregarDisponiveis } = useCampanhasDisponiveis();
+  // Depois de Participar, o link novo aparece em Ativas.
+  const [recarregarLinks, setRecarregarLinks] = useState(0);
 
   const carregar = useCallback(async () => {
     if (!accessToken) return;
@@ -74,6 +78,7 @@ export function Promocoes() {
           : undefined,
       );
       carregar();
+      recarregarDisponiveis();
     } catch (erro) {
       const fim = fimDoErro(erro);
       if (fim) avisoDeFimDaCampanha(fim);
@@ -105,32 +110,39 @@ export function Promocoes() {
             isDisabled={enviando || !cupomDigitado(cupom)}
             testID="cupom-usar"
           />
-          {/* promocoes-ativas-clicaveis (André, 24/10): "Promoções ativas"; o cupom abre o código que o
-              valida, o link abre o QR e o link (SeuLinkDeIndicacao). */}
+          {/* promocoes-ativas-clicaveis (André, 24/10): o cupom abre o código que o valida, o link abre o QR e o
+              link (SeuLinkDeIndicacao). */}
           {ativos.length > 0 && (
             <VStack gap="$3" mt="$4" testID="cupons-meus">
-              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Promoções ativas</Text>
+              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Ativas</Text>
               {ativos.map((c) => (
                 <CartaoDoCupom key={c.id} cupom={c} />
               ))}
-              <SeuLinkDeIndicacao titulo={null} />
+              <SeuLinkDeIndicacao titulo={null} recarregar={recarregarLinks} />
             </VStack>
           )}
-          {ativos.length === 0 && <SeuLinkDeIndicacao />}
-          {/* cupom-usado-some-da-selecao (André, 24/10): o usado sai da escolha do serviço e mora aqui,
-              esmaecido e marcado "Usado"; o vencido, à parte. Sem contagem de ativos. */}
-          {usados.length > 0 && (
-            <VStack gap="$2" mt="$4" testID="cupons-usados">
-              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Cupons usados</Text>
-              {usados.map((c) => (
-                <CartaoDoCupom key={c.id} cupom={c} encerrado />
+          {ativos.length === 0 && <SeuLinkDeIndicacao titulo="Ativas" recarregar={recarregarLinks} />}
+          {disponiveis.length > 0 && (
+            <VStack gap="$3" mt="$4" testID="promocoes-disponiveis">
+              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Disponíveis</Text>
+              {disponiveis.map((c) => (
+                <CartaoDeCampanha
+                  key={c.id}
+                  campanha={c}
+                  aoParticipar={() => {
+                    recarregarDisponiveis();
+                    setRecarregarLinks((n) => n + 1);
+                  }}
+                />
               ))}
             </VStack>
           )}
-          {vencidos.length > 0 && (
-            <VStack gap="$2" mt="$4" testID="cupons-vencidos">
-              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Cupons vencidos</Text>
-              {vencidos.map((c) => (
+          {/* cupom-usado-some-da-selecao (André, 24/10): o usado sai da escolha do serviço e mora aqui,
+              esmaecido e marcado "Usado" ou "Vencido". Sem contagem. */}
+          {encerrados.length > 0 && (
+            <VStack gap="$2" mt="$4" testID="promocoes-passadas">
+              <Text size="sm" fontWeight="$bold" color="$brandTextSecondary">Passadas</Text>
+              {encerrados.map((c) => (
                 <CartaoDoCupom key={c.id} cupom={c} encerrado />
               ))}
             </VStack>

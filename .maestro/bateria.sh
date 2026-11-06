@@ -159,7 +159,7 @@ echo ""
 # commit errado no aparelho, nenhuma etapa diz nada.
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
-ETAPAS_PADRAO="00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27 28 29 30"
+ETAPAS_PADRAO="00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27 28 29 30 31 32"
 # Fases (André, 01/11): 1) a versao (00) so confere a atualizacao; 2) a fumaca (00b) tem teto de 5 min contados do
 # inicio dela; 3) passou, a vez vai para as outras equipes; 4) so depois a regressao completa. A regressao nao
 # repete a fumaca, mas recusa rodar se a fumaca nao passou NESTE commit (aprovados.txt).
@@ -174,7 +174,7 @@ esac
 # bateria-conjunta: as etapas que abrem o Partner no mesmo celular. Precisam do
 # APK do Partner instalado e do vupth-partner clonado ao lado do vupth (os
 # subfluxos sao lidos de la). Sem um dos dois, elas ficam como ⏭.
-CONJUNTAS="00b 18 19 21b 22"
+CONJUNTAS="00b 18 19 21b 22 31"
 
 # A 13 (push da vez) depende do push do sistema; no emulador o app nao oferece
 # a tela 10 nem pede token (Device.isDevice, bateria 11/10 06:06, 13.A7). Fica
@@ -236,8 +236,9 @@ juntar_para_o_andre() {
 }
 
 # O passo NN.MM que falhou: o ULTIMO "NN.MM · ..." que comecou e nao terminou
-# no maestro.log da etapa (o mais de dentro).
-passos() { grep -oP 'runCommands\$lambda\$\d+: \K\d\d\.[\dA-Z]{2} · .*(?= ('"$2"')$)' "$1/maestro.log" 2>/dev/null; }
+# no maestro.log da etapa (o mais de dentro). Tambem os rotulos com letra (00b.L1, 22.0Aa) e os do Partner
+# (PJ1.01): sem eles a fumaca 2026-11-04_113213 dizia "antes do primeiro passo" com 18 min de etapa.
+passos() { grep -oP 'runCommands\$lambda\$\d+: \K[0-9A-Z]{2}[0-9A-Za-z]*\.[0-9A-Za-z]+ · .*(?= ('"$2"')$)' "$1/maestro.log" 2>/dev/null; }
 falhou_em() { passos "$1" RUNNING | grep -vxFf <(passos "$1" 'COMPLETED|SKIPPED') | tail -1; }
 
 # Prazo por etapa, em segundos (maestro-trava-na-atualizacao): passou, a etapa reprova

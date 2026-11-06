@@ -49,23 +49,48 @@ appId: ${APP_ID}
 - tapOn:
     text: "E-mail"
     label: "09.09 · toca em E-mail"
-- inputText:
-    text: ${EMAIL_CLIENTE}
+# fumaça 2026-11-05_173239 (09.17): no emulador lento o inputText tecla a tecla pode perder letra; cola pela
+# área de transferência, como o apoio/entrar.yaml.
+- setClipboard: ${EMAIL_CLIENTE}
+- pasteText:
     label: "09.10 · digita ${EMAIL_CLIENTE}"
 - tapOn:
     text: "Senha"
     label: "09.11 · toca em Senha"
-- inputText:
-    text: ${SENHA}
+- setClipboard: ${SENHA}
+- pasteText:
     label: "09.12 · digita ${SENHA}"
 - hideKeyboard:
     label: "09.13 · fecha o teclado"
 - tapOn:
     id: "primary-login"
     label: "09.14 · toca em primary-login"
+# Espera o desfecho do login (o Render lento) antes de ir ao Perfil; ainda na tela de entrada, tenta mais uma
+# vez (os campos seguem preenchidos), como o apoio/entrar.yaml.
+- extendedWaitUntil:
+    visible:
+      id: "(dialogo-botao-0|busca-home)"
+    timeout: ${90000 * LENTO}
+    optional: true
+    label: "09.14a · espera o login terminar"
 - runFlow:
     file: ../apoio/fechar_aviso.yaml
     label: "09.15 · roda fechar_aviso"
+- runFlow:
+    when:
+      visible:
+        id: "primary-login"
+    commands:
+      - tapOn:
+          id: "primary-login"
+      - extendedWaitUntil:
+          visible:
+            id: "(dialogo-botao-0|busca-home)"
+          timeout: ${90000 * LENTO}
+          optional: true
+      - runFlow:
+          file: ../apoio/fechar_aviso.yaml
+    label: "09.15a · ainda na entrada: toca em Entrar de novo"
 - tapOn:
     text: "Perfil"
     label: "09.16 · toca em Perfil"

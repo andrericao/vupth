@@ -6,11 +6,11 @@ import { Search, SlidersHorizontal, ChevronRight, Zap, X } from "lucide-react-na
 
 import { AppNavigatorRoutesProps, AppRoutes } from "@routes/auth.routes";
 import { Establishment, ServiceType } from "@domain/establishment/types";
-import { filterEstablishments } from "@domain/establishment/filter";
+import { filterEstablishments, filtrarComBusca } from "@domain/establishment/filter";
 import { orderForHome } from "@domain/establishment/proximity";
 import { serviceTypeLabel } from "@domain/establishment/serviceType";
 import { primeiroNome } from "@domain/auth/displayName";
-import { useEstablishments, usePraOntem, useVitrinePaginada } from "@hooks/useEstablishments";
+import { useBuscaDeLojas, useEstablishments, usePraOntem, useVitrinePaginada } from "@hooks/useEstablishments";
 import { vitrinePaginada } from "@domain/establishment/paginacao";
 import { ordenarPraOntem, rotuloPraOntem } from "@domain/establishment/praOntem";
 import { ScreenHeader } from "@components/ScreenHeader";
@@ -135,6 +135,8 @@ export function Home() {
   const paginada = vitrinePaginada({ busca: search, categoria: selectedFilter, praOntem });
   const vitrine = useVitrinePaginada(paginada);
   const todas = useEstablishments(!praOntem && !paginada);
+  // busca-alem-do-teto (04/11): o nome tambem vai ao servidor (a vitrine tem teto de 200 lojas).
+  const daBusca = useBuscaDeLojas(search, !praOntem).data;
   const livres = usePraOntem(praOntem);
   const { data: establishments = [], isLoading, isError, refetch, isRefetching } = praOntem
     ? livres
@@ -204,7 +206,7 @@ export function Home() {
   const filteredEstablishments = praOntem
     ? ordenarPraOntem(filterEstablishments(establishments, search, selectedFilter))
     : orderForHome(
-        filterEstablishments(establishments, search, selectedFilter),
+        filtrarComBusca(establishments, daBusca, search, selectedFilter),
         coords != null,
         location,
         favoriteIds,

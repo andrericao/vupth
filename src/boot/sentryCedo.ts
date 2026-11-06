@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 
 import { resolveApiEnv } from "../services/apiEnv";
-import { iniciarSentry } from "../utils/sentry";
+import { iniciarSentry, tagsDoUpdate } from "../utils/sentry";
 
 // log-de-falha-na-abertura (DEC-152): o Sentry sobe ANTES do App (o index.js importa este arquivo primeiro). Assim o
 // erro ao carregar o bundle e nos primeiros segundos tambem e visto; o crash nativo o SDK nativo ja pega. O erro de
@@ -30,8 +30,8 @@ export const sentryLigadoCedo = iniciarSentry({
   commit,
   emTeste: !!process.env.JEST_WORKER_ID,
   tags: {
-    updateId: u.updateId,
-    runtimeVersion: u.runtimeVersion,
+    // sentry-tag-do-update (CLI-2): expo-update-id, expo-channel e expo-runtime-version (busca has:expo-update-id)
+    ...tagsDoUpdate(u),
     versao: Constants.expoConfig?.version ?? null,
     commit,
   },

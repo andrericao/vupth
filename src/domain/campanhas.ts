@@ -113,6 +113,17 @@ export function separarCupons(lista: Campanha[]): { ativos: Campanha[]; encerrad
   return { ativos: lista.filter((c) => !encerrado(c)), encerrados: lista.filter(encerrado) };
 }
 
+/**
+ * promocoes-em-secoes (André, 05/11, espelho do Partner): das campanhas no ar, as que a pessoa ainda nao tem.
+ * Ja tem = o cupom ativado (ou ja usado) em /campaigns/me, pelo id ou pelo codigo, ou a campanha de link em que
+ * participa (/referrals/me). Estas saem do carrossel e de "Disponiveis".
+ */
+export function semAsQueParticipa(ativas: Campanha[], meus: Campanha[], idsDeLink: string[]): Campanha[] {
+  const ids = new Set([...meus.map((c) => c.id), ...idsDeLink]);
+  const codigos = new Set(meus.map((c) => c.code?.trim().toUpperCase()).filter(Boolean));
+  return ativas.filter((c) => !ids.has(c.id) && !(c.code && codigos.has(c.code.trim().toUpperCase())));
+}
+
 // campanha-encerrada-esgotada-e-validade (DEC-124): os dois modais, no cupom e no link.
 export type FimDaCampanha = 'ENCERRADA' | 'ESGOTADA';
 

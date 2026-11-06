@@ -29,6 +29,7 @@ import { LiveDot } from "@components/LiveDot";
 import { RatingModal } from "@components/RatingModal";
 import { usePagamentosPendentes } from "@hooks/usePagamentosPendentes";
 import { useMultasPendentes } from "@hooks/useMultasPendentes";
+import { ModalDeContestarMulta } from "@components/ModalDeContestarMulta";
 import { useCardFechado } from "@hooks/useCardFechado";
 import { useTema } from "@hooks/useTema";
 import { origemDaMulta, partesDasMultas } from "@domain/queue/multasPendentes";
@@ -91,6 +92,7 @@ export function Attendances() {
   const ratedIds = useRatedStore((s) => s.ids);
   const [ratingFor, setRatingFor] = useState<{ id: string; name: string } | null>(null);
   const [detailFor, setDetailFor] = useState<ClientAttendance | null>(null);
+  const [contestandoId, setContestandoId] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   // Pedidos de troca publicados de FORA da fila (F8 fatia 2): o hook vigia o
   // aceite (poll) e este card deixa acompanhar/cancelar enquanto está aberto.
@@ -296,8 +298,8 @@ export function Attendances() {
             {multas.map((m) => {
               const origem = history.find((a) => a.id === m.originAttendanceId);
               return (
+                <VStack key={m.penaltyId} gap="$1">
                 <TouchableOpacity
-                  key={m.penaltyId}
                   activeOpacity={0.7}
                   disabled={!origem}
                   onPress={() => origem && setDetailFor(origem)}
@@ -319,6 +321,17 @@ export function Attendances() {
                     {origem ? <ChevronRight size={16} color={cores.onAccentPeach} /> : null}
                   </HStack>
                 </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setContestandoId(m.penaltyId)}
+                  accessibilityRole="button"
+                  testID={`contestar-${m.penaltyId}`}
+                  style={{ alignSelf: "flex-end", paddingVertical: 4 }}
+                >
+                  <Text size="xs" fontFamily="$heading" color="$brandTextPrimary">
+                    Contestar
+                  </Text>
+                </TouchableOpacity>
+                </VStack>
               );
             })}
             <Text size="xs" color="$brandTextSecondary">
@@ -646,6 +659,14 @@ export function Attendances() {
           setDetailFor(null);
         }}
       />
+
+      {contestandoId ? (
+        <ModalDeContestarMulta
+          penaltyId={contestandoId}
+          onFechar={() => setContestandoId(null)}
+          onContestada={refetchMultas}
+        />
+      ) : null}
 
       <RatingModal
         visible={!!ratingFor}

@@ -68,11 +68,27 @@ appId: ${APP_ID}
       - tapOn:
           id: "dialogo-botao-0"
           label: "25.17 · fecha o Saiba mais"
+      # promocoes-em-secoes (André, 05/11): o cupom ativado mora em Ativas e sai de Disponíveis.
+      - extendedWaitUntil:
+          visible:
+            text: "Ativas"
+          timeout: ${10000 * LENTO}
+          label: "25.17a · vê a seção Ativas"
+      - assertVisible:
+          text: "MAESTRO CLIENT CUPOM"
+          childOf:
+            id: "cupons-meus"
+          label: "25.17b · o cupom está em Ativas"
+      - assertNotVisible:
+          text: "MAESTRO CLIENT CUPOM"
+          childOf:
+            id: "promocoes-disponiveis"
+          label: "25.17c · e não está em Disponíveis"
       - runFlow:
           file: ../apoio/para_o_andre.yaml
           env:
             NOME: campanha-cupom-ativado
-            O_QUE: "Promoções: o cupom da MAESTRO CLIENT CUPOM em Promoções ativas, com a regra e a validade."
+            O_QUE: "Promoções: o cupom da MAESTRO CLIENT CUPOM em Ativas (e fora de Disponíveis), com a regra e a validade."
 # Campanha que já acabou ou esgotou: o modal certo, em vez do aviso de validade.
 - runFlow:
     when:

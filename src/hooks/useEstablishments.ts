@@ -7,6 +7,27 @@ import { coordsDaLista, listaPodeBuscar } from '@domain/location/abertura';
 import { comoPagina, juntarPaginas, proximaPagina } from '@domain/establishment/paginacao';
 import { tirarPosicaoNaLista } from '@domain/establishment/posicaoNaLista';
 
+/** O minimo de letras para a busca ir ao servidor (busca-alem-do-teto). */
+export const BUSCA_MINIMA = 2;
+
+/**
+ * busca-alem-do-teto (04/11): a busca da Home tambem vai ao servidor pelo nome, porque a vitrine tem teto
+ * de 200 lojas e a loja fora delas nunca aparecia. So com BUSCA_MINIMA letras; a lista de antes fica na
+ * tela enquanto a nova chega.
+ */
+export function useBuscaDeLojas(busca: string, ligado: boolean = true) {
+  const coords = coordsDaLista(useLocationStore((s) => s.coords));
+  const termo = busca.trim();
+  return useQuery({
+    queryKey: ['establishments-busca', termo, coords?.latitude ?? null, coords?.longitude ?? null],
+    queryFn: () => establishmentService.getAll(coords, termo).then((res) => res.data),
+    enabled: ligado && termo.length >= BUSCA_MINIMA,
+    staleTime: 30000,
+    placeholderData: (anterior) => anterior,
+    retry: 1,
+  });
+}
+
 /** `ligado: false` segura a busca — a Home so a usa com busca ou categoria. */
 export function useEstablishments(ligado: boolean = true) {
   const coords = coordsDaLista(useLocationStore((s) => s.coords));

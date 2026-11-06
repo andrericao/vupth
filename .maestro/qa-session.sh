@@ -24,7 +24,7 @@ ENV="${2:-local}"
 case "$ENV" in
   local) URL="http://localhost:8080" ;;
   dev)   URL="https://vupth-backend-ia.onrender.com" ;;
-  prod)  URL="https://vupth-backend-ia-production.up.railway.app"
+  prod)  URL="https://api.vupth.com"
          echo "⚠️  PROD e o Railway — voce vai gravar em PRODUCAO. Ctrl-C pra abortar."
          sleep 4 ;;
   *) echo "ambiente invalido: $ENV (use local|dev|prod)"; exit 1 ;;

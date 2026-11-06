@@ -1,0 +1,38 @@
+# Etapa avulsa 31 (teste-link-de-participacao, CLI-3): Client e Partner no mesmo celular. Precisa do APK do
+# Partner instalado e do vupth-partner clonado ao lado do vupth. A campanha "Teste de Lançamento" (staging) e
+# do André; sem ela no ar, a etapa pula (PULADO-CAMPANHA -> ⏭).
+appId: ${APP_ID}
+env:
+  APP_ID: com.vupth.client.preview
+  API: https://vupth-backend-ia.onrender.com
+  SENHA: "Teste@123"
+  NOME_CAMPANHA: "Teste de Lançamento"
+---
+- runFlow:
+    file: ../apoio/preparo.yaml
+    env:
+      ETAPA: "31"
+      LOJA: "1"
+      CONTA: "0"
+      ABERTURA: "1"
+      FILA_FECHADA: "0"
+    label: "31.P0 · prepara a etapa (loja de teste; o app na Home como visitante)"
+- runScript:
+    file: ../scripts/cliente.js
+    env:
+      API: ${API}
+      SENHA: ${SENHA}
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+      NOME_CLIENTE: ${output.NOME_CLIENTE}
+    label: "31.PC · cria a conta do cliente novo pela API (o login vem depois do link)"
+- runFlow:
+    file: ../etapas/31_conjunta_link_de_participacao.yaml
+    env:
+      TAG: ${output.TAG}
+      EMAIL_PROF: ${output.EMAIL_PROF}
+      EMAIL_CLIENTE: ${output.EMAIL_CLIENTE}
+      NOME_CLIENTE: ${output.NOME_CLIENTE}
+      PROF_ID: ${output.PROF_ID}
+      LOJA_ID: ${output.LOJA_ID}
+      SERVICO_ID: ${output.SERVICO_ID}
+    label: "31.E1 · roda 31_conjunta_link_de_participacao"

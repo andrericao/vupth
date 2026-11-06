@@ -156,6 +156,58 @@ describe('useIndicacao', () => {
     expect(mockClaim).not.toHaveBeenCalled();
   });
 
+  // teste-link-de-participacao (CLI-3): no aparelho o link chega pelo Android (vupth:// ou https://app.vupth.com).
+  it('no aparelho: o link que abriu o app (vupth://i/..?c=..) guarda o código e a campanha', async () => {
+    const links = { inicial: async () => 'vupth://i/K7M2QX?c=camp-1', ouvir: () => ({ remove: jest.fn() }) };
+    renderHook(() => useIndicacao(() => '', links));
+    await waitFor(() => expect(guardado[KEY]).toBe('K7M2QX'));
+    expect(guardado.vupth_indicacao_campanha).toBe('camp-1');
+  });
+
+  it('no aparelho: o link que chega com o app aberto e a pessoa logada faz o claim na hora', async () => {
+    useAuthStore.setState({ isAuthenticated: true, accessToken: 'tk' });
+    let aoChegar: (url: string) => void = () => {};
+    const remove = jest.fn();
+    const links = {
+      inicial: async () => null,
+      ouvir: (f: (url: string) => void) => {
+        aoChegar = f;
+        return { remove };
+      },
+    };
+    const { unmount } = renderHook(() => useIndicacao(() => '', links));
+    await act(async () => {});
+    expect(mockClaim).not.toHaveBeenCalled();
+
+    await act(async () => {
+      aoChegar('https://app.vupth.com/i/PROF77?c=camp-1');
+    });
+    await waitFor(() => expect(mockClaim).toHaveBeenCalledWith('PROF77', 'tk', 'camp-1'));
+
+    // um link que nao e de indicacao nao refaz nada
+    mockClaim.mockClear();
+    await act(async () => {
+      aoChegar('https://app.vupth.com/loja/e1');
+    });
+    expect(mockClaim).not.toHaveBeenCalled();
+    unmount();
+    expect(remove).toHaveBeenCalled();
+  });
+
+  it('no aparelho: o link inicial que falha ou um ouvinte que lança não quebram a abertura', async () => {
+    const links = {
+      inicial: async () => {
+        throw new Error('x');
+      },
+      ouvir: () => {
+        throw new Error('y');
+      },
+    };
+    renderHook(() => useIndicacao(() => '', links));
+    await act(async () => {});
+    expect(guardado[KEY]).toBeUndefined();
+  });
+
   it('o caminho vem do navegador na web; no aparelho, não há', async () => {
     const antes = Platform.OS;
     try {
