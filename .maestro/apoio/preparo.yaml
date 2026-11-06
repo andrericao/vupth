@@ -118,8 +118,10 @@ appId: ${APP_ID}
           commands:
             - waitForAnimationToEnd:
                 timeout: 3000
+            # optional: a abertura pode sair entre a conferencia e este toque (bateria 2026-11-06_070919, 00.P9).
             - tapOn:
                 id: "onboarding-start"
+                optional: true
       - runFlow:
           file: fechar_aviso.yaml
     label: "${ETAPA}.P9 · passa a abertura"

@@ -3,7 +3,7 @@
 #
 #   bash .maestro/bateria.sh              # pergunta: completa ou so as que nao passaram
 #   bash .maestro/bateria.sh --sem-atualizacao   # pula a 00 (ou --com-atualizacao); sem a flag, pergunta
-#   bash .maestro/bateria.sh --fumaca     # SO a versao (00) e a fumaca (00b, teto de 5 min); a 1a fase
+#   bash .maestro/bateria.sh --fumaca     # SO a versao (00) e a fumaca (00b, teto de 10 min); a 1a fase
 #   bash .maestro/bateria.sh --regressao  # a regressao completa; recusa se a fumaca nao passou neste commit
 #   bash .maestro/bateria.sh --completa   # roda todas, sem perguntar
 #   bash .maestro/bateria.sh --falhas     # so as que nao passaram, sem perguntar
@@ -95,8 +95,30 @@ if [ -n "$OUTRA" ]; then
   exit 1
 fi
 
+# Limpeza da programacao em fila (orquestrador, 06/11, bateria 070919): no perfil emulador a bateria desliga o emulador
+# ao sair, passe ou caia, para a maquina voltar livre. Celular nunca desliga. MANTER_EMULADOR=1 deixa ligado (rodar o
+# --falhas logo depois da completa). Fica DEPOIS da checagem de outra bateria: o emulador dela nao e deste processo.
+desligar_emulador() {
+  [ "$PERFIL" = emulador ] || return 0
+  if [ "${MANTER_EMULADOR:-}" = 1 ]; then echo "Emulador mantido ligado (MANTER_EMULADOR=1)."; return 0; fi
+  local s espera
+  for s in ${APARELHO:-$(adb devices 2>/dev/null | awk 'NR>1 && $1 ~ /^emulator-/ {print $1}')}; do
+    case "$s" in emulator-*) echo "Desligando o emulador $s."; adb -s "$s" emu kill >/dev/null 2>&1 ;; esac
+  done
+  # O "emu kill" nao responde com o adb offline: sem o emulador sair em 15 s, corta o processo.
+  for espera in 1 2 3 4 5; do
+    pgrep -f 'qemu-system' >/dev/null 2>&1 || return 0
+    sleep 3
+  done
+  echo "O emulador nao saiu pelo adb: cortando o processo."
+  pkill -f 'qemu-system' 2>/dev/null
+  return 0
+}
+# Antes do setup.sh: a bateria que cai nele tambem desliga.
+trap 'desligar_emulador' EXIT
+
 BATERIA=1 bash "$DIR/setup.sh" $PUBLICAR_OTA || exit 1
-trap 'bash "$DIR/restaurar.sh"' EXIT
+trap 'bash "$DIR/restaurar.sh"; desligar_emulador' EXIT
 
 # A branch da pasta: a dev no vupth, a feat/nativewind na worktree dela.
 BRANCH=$(git -C "$REPO" branch --show-current)
@@ -160,11 +182,12 @@ echo ""
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
 ETAPAS_PADRAO="00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27 28 29 30 31 32"
-# Fases (André, 01/11): 1) a versao (00) so confere a atualizacao; 2) a fumaca (00b) tem teto de 5 min contados do
+# Fases (André, 01/11): 1) a versao (00) so confere a atualizacao; 2) a fumaca (00b) tem teto de 10 min contados do
 # inicio dela; 3) passou, a vez vai para as outras equipes; 4) so depois a regressao completa. A regressao nao
 # repete a fumaca, mas recusa rodar se a fumaca nao passou NESTE commit (aprovados.txt).
-# Teto por perfil (aprovado 01/11): celular 300 s; emulador 600 s (a abertura limpa sozinha leva ~40 s la).
-case "$PERFIL" in emulador) FUMACA_PRAZO="${FUMACA_PRAZO:-600}" ;; *) FUMACA_PRAZO="${FUMACA_PRAZO:-300}" ;; esac
+# Teto por perfil: celular 600 s (André, 06/11: "temos que saber até onde passou"; a de 05/11 passou verde em 8min57s,
+# o preparo com login + o L0 gastam ~4min30s); emulador 600 s (a abertura limpa sozinha leva ~40 s la).
+case "$PERFIL" in emulador) FUMACA_PRAZO="${FUMACA_PRAZO:-600}" ;; *) FUMACA_PRAZO="${FUMACA_PRAZO:-600}" ;; esac
 case "$FASE" in
   fumaca) ETAPAS=${ETAPAS:-"00b"} ;;
   regressao) ETAPAS=${ETAPAS:-"${ETAPAS_PADRAO#00b }"} ;;
