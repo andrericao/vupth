@@ -1,0 +1,49 @@
+--------- beginning of kernel
+--------- beginning of main
+--------- beginning of system
+11-06 10:31:51.028 D/AndroidRuntime( 5613): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 10:31:51.372 I/AndroidRuntime( 5613): Using default boot image
+11-06 10:31:51.374 I/AndroidRuntime( 5613): Leaving lock profiling enabled
+11-06 10:31:51.959 D/AndroidRuntime( 5613): Calling main entry com.android.commands.am.Am
+11-06 10:32:36.488 D/Sentry  ( 5737): io.sentry.auto-init read: false
+11-06 10:32:41.144 W/ReactNativeJS( 5737): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-06 10:32:43.285 I/ReactNativeJS( 5737): Running "main"
+11-06 10:32:43.619 E/ReactNativeJS( 5737): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-06 10:32:59.806 W/ReactNativeJS( 5737): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-06 10:33:01.071 I/ReactNativeJS( 5737): Running "main"
+11-06 10:33:01.541 E/ReactNativeJS( 5737): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-06 10:34:58.660 D/AndroidRuntime( 5959): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 10:34:58.935 I/AndroidRuntime( 5959): Using default boot image
+11-06 10:34:58.936 I/AndroidRuntime( 5959): Leaving lock profiling enabled
+11-06 10:34:59.160 D/AndroidRuntime( 5959): Calling main entry com.android.commands.input.Input
+11-06 10:35:00.081 D/AndroidRuntime( 5959): Shutting down VM
+11-06 10:35:45.539 D/AndroidRuntime( 5993): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 10:35:45.553 I/AndroidRuntime( 5993): Using default boot image
+11-06 10:35:45.554 I/AndroidRuntime( 5993): Leaving lock profiling enabled
+11-06 10:35:45.714 D/AndroidRuntime( 5993): Calling main entry com.android.commands.input.Input
+11-06 10:35:46.627 D/AndroidRuntime( 5993): Shutting down VM
+11-06 10:37:30.987 D/AndroidRuntime( 6044): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 10:37:31.269 I/AndroidRuntime( 6044): Using default boot image
+11-06 10:37:31.270 I/AndroidRuntime( 6044): Leaving lock profiling enabled
+11-06 10:37:31.451 D/AndroidRuntime( 6044): Calling main entry com.android.commands.input.Input
+11-06 10:37:32.378 D/AndroidRuntime( 6044): Shutting down VM
+11-06 10:38:08.878 D/AndroidRuntime( 6072): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 10:38:08.894 I/AndroidRuntime( 6072): Using default boot image
+11-06 10:38:08.895 I/AndroidRuntime( 6072): Leaving lock profiling enabled
+11-06 10:38:09.094 D/AndroidRuntime( 6072): Calling main entry com.android.commands.input.Input
+11-06 10:38:10.146 D/AndroidRuntime( 6072): Shutting down VM
+11-06 10:39:10.699 D/AndroidRuntime( 6090): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 10:39:10.712 I/AndroidRuntime( 6090): Using default boot image
+11-06 10:39:10.713 I/AndroidRuntime( 6090): Leaving lock profiling enabled
+11-06 10:39:11.125 D/AndroidRuntime( 6090): Calling main entry com.android.commands.input.Input
+11-06 10:39:11.838 D/AndroidRuntime( 6090): Shutting down VM
+11-06 10:40:24.615 D/Sentry  ( 6330): io.sentry.auto-init read: false
+11-06 10:40:31.282 I/ReactNativeJS( 6330): Running "main"
+11-06 10:40:47.248 D/Sentry  ( 6644): io.sentry.auto-init read: false
+11-06 10:40:53.145 I/ReactNativeJS( 6644): Running "main"
+11-06 10:42:02.129 D/AndroidRuntime( 6767): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-06 10:42:02.144 I/AndroidRuntime( 6767): Using default boot image
+11-06 10:42:02.145 I/AndroidRuntime( 6767): Leaving lock profiling enabled
+11-06 10:42:02.284 D/AndroidRuntime( 6767): Calling main entry com.android.commands.input.Input
+11-06 10:42:03.220 D/AndroidRuntime( 6767): Shutting down VM
+11-06 10:42:26.041 W/ReactNativeJS( 6644): Passing an object as the argument to 'navigate' is deprecated. Use 'navigate(name, params, options)' instead.
