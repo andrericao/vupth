@@ -1,0 +1,14 @@
+--------- beginning of main
+11-05 21:57:46.549 I/AndroidRuntime( 8433): VM exiting with result code 0, cleanup skipped.
+11-05 21:58:17.461 D/AndroidRuntime(13533): >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+11-05 21:58:17.474 I/AndroidRuntime(13533): Using default boot image
+11-05 21:58:17.474 I/AndroidRuntime(13533): Leaving lock profiling enabled
+11-05 21:58:17.790 D/AndroidRuntime(13533): Calling main entry com.android.commands.am.Am
+11-05 21:59:07.190 D/Sentry  (13755): io.sentry.auto-init read: false
+11-05 21:59:09.608 W/ReactNativeJS(13755): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-05 21:59:10.173 I/ReactNativeJS(13755): Running "main"
+11-05 21:59:10.216 E/ReactNativeJS(13755): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-05 21:59:11.239 W/ReactNativeJS(13755): SafeAreaView has been deprecated and will be removed in a future release. Please use 'react-native-safe-area-context' instead. See https://github.com/th3rdwave/react-native-safe-area-context
+11-05 21:59:11.681 I/ReactNativeJS(13755): Running "main"
+11-05 21:59:11.712 E/ReactNativeJS(13755): The 'navigation' object hasn't been initialized yet. This might happen if you don't have a navigator mounted, or if the navigator hasn't finished mounting. See https://reactnavigation.org/docs/navigating-without-navigation-prop#handling-initialization for more details.
+11-05 22:02:34.471 I/AndroidRuntime(13533): VM exiting with result code 0.

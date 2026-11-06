@@ -1,0 +1,3 @@
+⏭ 00 · versão (commit 472bba60 já verificado)
+❌ 00b_fumaca — parou em 00b.P0 · prepara a etapa (10min13s) — TEMPO ESGOTADO (300s)
+⛔ A fumaça (00b) falhou: a bateria para. Nada mais rodou.
