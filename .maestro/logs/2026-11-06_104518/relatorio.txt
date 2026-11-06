@@ -1,3 +1,3 @@
 ⏭ 00 · versão (commit 232dfa45 já verificado)
-❌ 00b_fumaca — parou em PJ6.05a · pix · responde o pagamento (Recebi ou Não recebi) (23min02s)
+❌ 00b_fumaca — parou em 00b.06 · volta ao Client (sem limpar) (22min52s)
 ⛔ A fumaça (00b) falhou: a bateria para. Nada mais rodou.
