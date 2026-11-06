@@ -18,6 +18,8 @@ var token = json(login.body).tokens.access_token;
 var r = http.request(API + "/test/penalties", {
   method: "POST",
   headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+  // O http do Maestro recusa POST sem corpo ("method POST must have a request body", rodada 2026-11-06_005407).
+  body: "{}",
 });
 if (r.status === 201) {
   output.MULTA_ID = json(r.body).penalty_id;
