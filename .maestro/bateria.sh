@@ -95,8 +95,30 @@ if [ -n "$OUTRA" ]; then
   exit 1
 fi
 
+# Limpeza da programacao em fila (orquestrador, 06/11, bateria 070919): no perfil emulador a bateria desliga o emulador
+# ao sair, passe ou caia, para a maquina voltar livre. Celular nunca desliga. MANTER_EMULADOR=1 deixa ligado (rodar o
+# --falhas logo depois da completa). Fica DEPOIS da checagem de outra bateria: o emulador dela nao e deste processo.
+desligar_emulador() {
+  [ "$PERFIL" = emulador ] || return 0
+  if [ "${MANTER_EMULADOR:-}" = 1 ]; then echo "Emulador mantido ligado (MANTER_EMULADOR=1)."; return 0; fi
+  local s espera
+  for s in ${APARELHO:-$(adb devices 2>/dev/null | awk 'NR>1 && $1 ~ /^emulator-/ {print $1}')}; do
+    case "$s" in emulator-*) echo "Desligando o emulador $s."; adb -s "$s" emu kill >/dev/null 2>&1 ;; esac
+  done
+  # O "emu kill" nao responde com o adb offline: sem o emulador sair em 15 s, corta o processo.
+  for espera in 1 2 3 4 5; do
+    pgrep -f 'qemu-system' >/dev/null 2>&1 || return 0
+    sleep 3
+  done
+  echo "O emulador nao saiu pelo adb: cortando o processo."
+  pkill -f 'qemu-system' 2>/dev/null
+  return 0
+}
+# Antes do setup.sh: a bateria que cai nele tambem desliga.
+trap 'desligar_emulador' EXIT
+
 BATERIA=1 bash "$DIR/setup.sh" $PUBLICAR_OTA || exit 1
-trap 'bash "$DIR/restaurar.sh"' EXIT
+trap 'bash "$DIR/restaurar.sh"; desligar_emulador' EXIT
 
 # A branch da pasta: a dev no vupth, a feat/nativewind na worktree dela.
 BRANCH=$(git -C "$REPO" branch --show-current)
