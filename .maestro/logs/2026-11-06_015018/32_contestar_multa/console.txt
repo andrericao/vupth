@@ -126,98 +126,25 @@ Running on ZF524LC5HC
   32.PC · confere a versão no Perfil do visitante... SKIPPED
 32.P0 · prepara a etapa... COMPLETED
 32.E1 · roda 32_contestar_multa...
-  32.01 · semeia a multa de teste...method POST must have a request body.
-	at okhttp3.Request$Builder.method(Request.kt:254)
-	at maestro.js.GraalJsHttp.executeRequest(GraalJsHttp.kt:83)
-	at maestro.js.GraalJsHttp.request(GraalJsHttp.kt:64)
-	at <js> :program(<eval>:18-21:835-979)
-	at <js> :anonymous(/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/scripts/multa_de_teste.js:1-28:20-1209)
-	at <js> :program(/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/scripts/multa_de_teste.js:1-28:0-1214)
-	at org.graalvm.polyglot.Context.eval(Context.java:416)
-	at maestro.js.GraalJsEngine.evalWithIIFE(GraalJsEngine.kt:134)
-	at maestro.js.GraalJsEngine.evaluateScript(GraalJsEngine.kt:95)
-	at maestro.js.GraalJsEngine.evaluateScript(GraalJsEngine.kt:26)
-	at maestro.orchestra.Orchestra.runScriptCommand(Orchestra.kt:645)
-	at maestro.orchestra.Orchestra.executeCommand(Orchestra.kt:373)
-	at maestro.orchestra.Orchestra.executeSubflowCommands(Orchestra.kt:997)
-	at maestro.orchestra.Orchestra.access$executeSubflowCommands(Orchestra.kt:126)
-	at maestro.orchestra.Orchestra$executeSubflowCommands$1.invokeSuspend(Orchestra.kt)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
-	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:263)
-	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:94)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking(Builders.kt:70)
-	at kotlinx.coroutines.BuildersKt.runBlocking(Unknown Source)
-	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlocking$default(Builders.kt:48)
-	at kotlinx.coroutines.BuildersKt.runBlocking$default(Unknown Source)
-	at maestro.cli.runner.TestRunner.runSingle$lambda$0(TestRunner.kt:75)
-	at maestro.cli.runner.TestRunner.runCatching-ta8aW1Q(TestRunner.kt:204)
-	at maestro.cli.runner.TestRunner.runSingle(TestRunner.kt:66)
-	at maestro.cli.command.TestCommand.runSingleFlow(TestCommand.kt:561)
-	at maestro.cli.command.TestCommand.runShardSuite$lambda$10(TestCommand.kt:529)
-	at maestro.cli.session.MaestroSessionManager.newSession(MaestroSessionManager.kt:132)
-	at maestro.cli.session.MaestroSessionManager.newSession$default(MaestroSessionManager.kt:66)
-	at maestro.cli.command.TestCommand.runShardSuite(TestCommand.kt:476)
-	at maestro.cli.command.TestCommand.access$runShardSuite(TestCommand.kt:80)
-	at maestro.cli.command.TestCommand$handleSessions$1$results$1$1.invokeSuspend(TestCommand.kt:435)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
-Caused by host exception: java.lang.IllegalArgumentException: method POST must have a request body.
+  32.01 · semeia a multa de teste... COMPLETED
+  32.02 · sem a rota: pula...
+  32.02 · sem a rota: pula... SKIPPED
+  32.03a · contesta a multa...
+    32.03 · toca em Atendimentos... COMPLETED
+    32.04 · vê a multa pendente... COMPLETED
+    32.05 · toca em Contestar... FAILED
+  32.03a · contesta a multa... FAILED
+32.E1 · roda 32_contestar_multa... FAILED
 
-Exception in thread "main" com.oracle.truffle.api.CompilerDirectives$ShouldNotReachHere: API object must not be garbage collected when engine implementation is in use.
-	at com.oracle.truffle.api.CompilerDirectives.shouldNotReachHere(CompilerDirectives.java:603)
-	at com.oracle.truffle.api.CompilerDirectives.shouldNotReachHere(CompilerDirectives.java:549)
-	at com.oracle.truffle.polyglot.PolyglotEngineImpl.getEngineAPI(PolyglotEngineImpl.java:374)
-	at com.oracle.truffle.polyglot.PolyglotExceptionFrame.getLanguage(PolyglotExceptionFrame.java:99)
-	at org.graalvm.polyglot.PolyglotException$StackFrame.getLanguage(PolyglotException.java:502)
-	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
-	at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:688)
-	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:770)
-	at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:183)
-	at com.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serializeContentsUsing(IndexedListSerializer.java:142)
-	at com.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serializeContents(IndexedListSerializer.java:88)
-	at com.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serialize(IndexedListSerializer.java:79)
-	at com.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serialize(IndexedListSerializer.java:18)
-	at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:732)
-	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:770)
-	at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:183)
-	at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:732)
-	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:770)
-	at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:183)
-	at com.fasterxml.jackson.databind.ser.BeanPropertyWriter.serializeAsField(BeanPropertyWriter.java:732)
-	at com.fasterxml.jackson.databind.ser.std.BeanSerializerBase.serializeFields(BeanSerializerBase.java:770)
-	at com.fasterxml.jackson.databind.ser.BeanSerializer.serialize(BeanSerializer.java:183)
-	at com.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serializeContents(IndexedListSerializer.java:119)
-	at com.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serialize(IndexedListSerializer.java:79)
-	at com.fasterxml.jackson.databind.ser.impl.IndexedListSerializer.serialize(IndexedListSerializer.java:18)
-	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider._serialize(DefaultSerializerProvider.java:502)
-	at com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.serializeValue(DefaultSerializerProvider.java:341)
-	at com.fasterxml.jackson.databind.ObjectWriter$Prefetch.serialize(ObjectWriter.java:1574)
-	at com.fasterxml.jackson.databind.ObjectWriter._writeValueAndClose(ObjectWriter.java:1275)
-	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1081)
-	at maestro.orchestra.debug.TestOutputWriter.saveCommands(TestOutputWriter.kt:55)
-	at maestro.cli.report.TestDebugReporter.saveFlow(TestDebugReporter.kt:87)
-	at maestro.cli.report.TestDebugReporter.saveFlow$default(TestDebugReporter.kt:82)
-	at maestro.cli.runner.TestRunner.runSingle(TestRunner.kt:91)
-	at maestro.cli.command.TestCommand.runSingleFlow(TestCommand.kt:561)
-	at maestro.cli.command.TestCommand.runShardSuite$lambda$10(TestCommand.kt:529)
-	at maestro.cli.session.MaestroSessionManager.newSession(MaestroSessionManager.kt:132)
-	at maestro.cli.session.MaestroSessionManager.newSession$default(MaestroSessionManager.kt:66)
-	at maestro.cli.command.TestCommand.runShardSuite(TestCommand.kt:476)
-	at maestro.cli.command.TestCommand.access$runShardSuite(TestCommand.kt:80)
-	at maestro.cli.command.TestCommand$handleSessions$1$results$1$1.invokeSuspend(TestCommand.kt:435)
-	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
-	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
-	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:124)
-	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:586)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
-	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
+Element not found: Id matching regex: contestar-4e1fb4b4-a452-4f25-b65e-27283ac96d9c
+
+Element with Id matching regex: contestar-4e1fb4b4-a452-4f25-b65e-27283ac96d9c not found. Check the UI hierarchy in debug artifacts to verify if the element exists.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state.
+- This could be a real regression that needs to be addressed.
+
+==== Debug output (logs & screenshots) ====
+
+/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-06_015018/32_contestar_multa
