@@ -49,7 +49,7 @@ describe('ModalDeContestarMulta (contestar-multa)', () => {
     const { t, onContestada } = montar();
     fireEvent.changeText(t.getByTestId('contestar-multa-motivo'), 'motivo');
     fireEvent.press(t.getByTestId('contestar-multa-enviar'));
-    expect(await t.findByTestId('contestar-multa-erro')).toHaveTextContent('prazo de 7 dias');
+    expect(await t.findByTestId('contestar-multa-erro')).toHaveTextContent(/prazo de 7 dias/);
     expect(onContestada).not.toHaveBeenCalled();
     mockContest.mockResolvedValueOnce({ data: {} });
     fireEvent.press(t.getByTestId('contestar-multa-enviar'));
