@@ -30,7 +30,9 @@ Running on vupth_android11
     Repeat while id: ${ALVO} is not visible (up to 40 times)...
       Run esperar_o_sistema.yaml...
         Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
-        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... SKIPPED
+          Tap on id: android:id/aerr_wait... COMPLETED
+          Wait for animation to end within 2000 ms... COMPLETED
+        Repeat while id: android:id/aerr_wait is visible (up to 3 times)... COMPLETED
         Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)...
         Repeat while "(.*isn.t responding|.*não está respondendo)" is visible (up to 3 times)... SKIPPED
       Run esperar_o_sistema.yaml... COMPLETED
@@ -38,7 +40,7 @@ Running on vupth_android11
       Run flow when id: com.android.permissioncontroller:id/permission_deny_button is visible... SKIPPED
       Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible...
       Run flow when "(DON.T ALLOW|Don.t allow|NÃO PERMITIR|Não permitir)" is visible... SKIPPED
-      Assert that (Optional) id: ${ALVO} is visible... WARNED
+      Assert that (Optional) id: ${ALVO} is visible... COMPLETED
     Repeat while id: ${ALVO} is not visible (up to 40 times)... COMPLETED
     Assert that id: ${ALVO} is visible... COMPLETED
   00b.P7 · espera onboarding-start (negando a caixa do sistema)... COMPLETED
@@ -223,7 +225,8 @@ Running on vupth_android11
   00b.03 · a fila abre e mostra a posição (fecha o aviso da estimativa e as caixas)...
     Repeat while id: queue-position is not visible (up to 20 times)...
       Run flow when "Entendi" is visible...
-      Run flow when "Entendi" is visible... SKIPPED
+        Tap on "Entendi"... COMPLETED
+      Run flow when "Entendi" is visible... COMPLETED
       Run fechar_aviso.yaml...
         Run esperar_o_sistema.yaml...
           Repeat while id: android:id/aerr_wait is visible (up to 3 times)...
@@ -239,8 +242,7 @@ Running on vupth_android11
         Run flow when id: push-skip is visible...
         Run flow when id: push-skip is visible... SKIPPED
       Run fechar_aviso.yaml... COMPLETED
-      Assert that (Optional) id: queue-position is visible... WARNED
-        Tap on "Entendi"... COMPLETED
+      Assert that (Optional) id: queue-position is visible... COMPLETED
     Repeat while id: queue-position is not visible (up to 20 times)... COMPLETED
     Assert that id: queue-position is visible... COMPLETED
   00b.03 · a fila abre e mostra a posição (fecha o aviso da estimativa e as caixas)... COMPLETED
@@ -255,27 +257,17 @@ Running on vupth_android11
       PJ1.01 · entra como ${EMAIL}...
         Tap on id: go-login... COMPLETED
         Tap on id: login-email... COMPLETED
-        Input text ${EMAIL}... COMPLETED
-        Tap on id: login-password...io.grpc.StatusRuntimeException: UNAVAILABLE
+        Input text ${EMAIL}...io.grpc.StatusRuntimeException: UNAVAILABLE
 	at io.grpc.stub.ClientCalls.toStatusRuntimeException(ClientCalls.java:275)
 	at io.grpc.stub.ClientCalls.getUnchecked(ClientCalls.java:256)
 	at io.grpc.stub.ClientCalls.blockingUnaryCall(ClientCalls.java:169)
-	at maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub.viewHierarchy(MaestroDriverGrpc.java:747)
-	at maestro.drivers.AndroidDriver.callViewHierarchy(AndroidDriver.kt:366)
-	at maestro.drivers.AndroidDriver.callViewHierarchy(AndroidDriver.kt:392)
-	at maestro.drivers.AndroidDriver.callViewHierarchy$default(AndroidDriver.kt:364)
-	at maestro.drivers.AndroidDriver.contentDescriptor$lambda$17(AndroidDriver.kt:326)
+	at maestro_android.MaestroDriverGrpc$MaestroDriverBlockingStub.inputText(MaestroDriverGrpc.java:768)
+	at maestro.drivers.AndroidDriver.inputText$lambda$35$lambda$34(AndroidDriver.kt:568)
+	at maestro.drivers.AndroidDriver.runDeviceCall(AndroidDriver.kt:1273)
+	at maestro.drivers.AndroidDriver.inputText$lambda$35(AndroidDriver.kt:567)
 	at maestro.utils.Metrics.measured(Metrics.kt:48)
-	at maestro.drivers.AndroidDriver.contentDescriptor(AndroidDriver.kt:325)
-	at maestro.ViewHierarchy$Companion.from-8JJjmZI(ViewHierarchy.kt:29)
-	at maestro.utils.ScreenshotUtils$Companion.viewHierarchy-c1iYVAs(ScreenshotUtils.kt:99)
-	at maestro.utils.ScreenshotUtils$Companion.waitForAppToSettle-OpTFbEc(ScreenshotUtils.kt:58)
-	at maestro.drivers.AndroidDriver$waitForAppToSettle$1.invoke-prqvCes(AndroidDriver.kt:741)
-	at maestro.drivers.AndroidDriver$waitForAppToSettle$1.invoke(AndroidDriver.kt:737)
-	at maestro.utils.Metrics.measured(Metrics.kt:48)
-	at maestro.drivers.AndroidDriver.waitForAppToSettle-5RpGHs4(AndroidDriver.kt:737)
-	at maestro.Maestro$waitForAppToSettle$2.invoke-F9mIFpk(Maestro.kt:477)
-	at maestro.Maestro$waitForAppToSettle$2.invoke(Maestro.kt:476)
+	at maestro.drivers.AndroidDriver.inputText(AndroidDriver.kt:566)
+	at maestro.Maestro.inputText$lambda$34(Maestro.kt:483)
 	at kotlinx.coroutines.InterruptibleKt.runInterruptibleInExpectedContext(Interruptible.kt:48)
 	at kotlinx.coroutines.InterruptibleKt.access$runInterruptibleInExpectedContext(Interruptible.kt:1)
 	at kotlinx.coroutines.InterruptibleKt$runInterruptible$2.invokeSuspend(Interruptible.kt:40)
@@ -287,7 +279,7 @@ Running on vupth_android11
 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:820)
 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:717)
 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:704)
-Caused by: java.io.IOException: Command failed (host:transport:emulator-5554): device 'emulator-5554' not found
+Caused by: java.io.IOException: Command failed (host:transport:emulator-5554): device offline
 	at dadb.adbserver.AdbServer.send$dadb(AdbServer.kt:103)
 	at dadb.adbserver.AdbServerDadb.open(AdbServer.kt:148)
 	at maestro.drivers.AndroidDriver.channel$lambda$0(AndroidDriver.kt:81)
@@ -304,4 +296,4 @@ Caused by: java.io.IOException: Command failed (host:transport:emulator-5554): d
 
 ==== Debug output (logs & screenshots) ====
 
-/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-06_085403/00b_fumaca
+/home/andre/Documentos/programacao/vupth-project/vupth/.maestro/logs/2026-11-06_094111/00b_fumaca
