@@ -3,7 +3,7 @@
 #
 #   bash .maestro/bateria.sh              # pergunta: completa ou so as que nao passaram
 #   bash .maestro/bateria.sh --sem-atualizacao   # pula a 00 (ou --com-atualizacao); sem a flag, pergunta
-#   bash .maestro/bateria.sh --fumaca     # SO a versao (00) e a fumaca (00b, teto de 5 min); a 1a fase
+#   bash .maestro/bateria.sh --fumaca     # SO a versao (00) e a fumaca (00b, teto de 10 min); a 1a fase
 #   bash .maestro/bateria.sh --regressao  # a regressao completa; recusa se a fumaca nao passou neste commit
 #   bash .maestro/bateria.sh --completa   # roda todas, sem perguntar
 #   bash .maestro/bateria.sh --falhas     # so as que nao passaram, sem perguntar
@@ -160,11 +160,12 @@ echo ""
 #
 # Uma etapa so: ETAPAS="05 06" bash .maestro/bateria.sh
 ETAPAS_PADRAO="00b 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21a 21b 22 23 24 25 26 27 28 29 30 31 32"
-# Fases (André, 01/11): 1) a versao (00) so confere a atualizacao; 2) a fumaca (00b) tem teto de 5 min contados do
+# Fases (André, 01/11): 1) a versao (00) so confere a atualizacao; 2) a fumaca (00b) tem teto de 10 min contados do
 # inicio dela; 3) passou, a vez vai para as outras equipes; 4) so depois a regressao completa. A regressao nao
 # repete a fumaca, mas recusa rodar se a fumaca nao passou NESTE commit (aprovados.txt).
-# Teto por perfil (aprovado 01/11): celular 300 s; emulador 600 s (a abertura limpa sozinha leva ~40 s la).
-case "$PERFIL" in emulador) FUMACA_PRAZO="${FUMACA_PRAZO:-600}" ;; *) FUMACA_PRAZO="${FUMACA_PRAZO:-300}" ;; esac
+# Teto por perfil: celular 600 s (André, 06/11: "temos que saber até onde passou"; a de 05/11 passou verde em 8min57s,
+# o preparo com login + o L0 gastam ~4min30s); emulador 600 s (a abertura limpa sozinha leva ~40 s la).
+case "$PERFIL" in emulador) FUMACA_PRAZO="${FUMACA_PRAZO:-600}" ;; *) FUMACA_PRAZO="${FUMACA_PRAZO:-600}" ;; esac
 case "$FASE" in
   fumaca) ETAPAS=${ETAPAS:-"00b"} ;;
   regressao) ETAPAS=${ETAPAS:-"${ETAPAS_PADRAO#00b }"} ;;
