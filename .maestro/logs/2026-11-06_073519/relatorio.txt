@@ -1,0 +1,3 @@
+✅ 00 · versão
+❌ 00b_fumaca — parou em PJ1.01 · entra como ${EMAIL} (20min25s) — TEMPO ESGOTADO (600s)
+⛔ A fumaça (00b) falhou: a bateria para. Nada mais rodou.
